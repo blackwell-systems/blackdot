@@ -21,6 +21,8 @@ This repository contains my personal dotfiles for **macOS** and **Lima** (Linux)
 - [One-Time: Push Current Files into Bitwarden](#one-time-push-current-files-into-bitwarden-for-future-you)
 - [Rotating / Updating Secrets in Bitwarden](#rotating--updating-secrets-in-bitwarden)
 - [Adding New SSH Keys](#adding-new-ssh-keys)
+- [Syncing Local Changes to Bitwarden](#syncing-local-changes-to-bitwarden)
+- [Maintenance Checklists](#maintenance-checklists)
 - [Using the Dotfiles Day-to-Day](#using-the-dotfiles-day-to-day)
 - [Health Check](#health-check)
 - [Troubleshooting](#troubleshooting)
@@ -74,6 +76,7 @@ The dotfiles are organized as follows:
 ├── vault
 │   ├── bootstrap-vault.sh    # Orchestrates all Bitwarden restores
 │   ├── check-vault-items.sh  # Validates required Bitwarden items exist
+│   ├── sync-to-bitwarden.sh  # Syncs local changes back to Bitwarden
 │   ├── restore-ssh.sh        # Restores SSH keys and config from Bitwarden
 │   ├── restore-aws.sh        # Restores ~/.aws/config & ~/.aws/credentials
 │   ├── restore-env.sh        # Restores environment secrets to ~/.local
@@ -788,6 +791,111 @@ Host newservice.example.com
     IdentityFile ~/.ssh/id_ed25519_newservice
     User git
 ```
+
+### 5. Update SSH config in Bitwarden
+
+After editing `~/.ssh/config`, sync it back:
+
+```bash
+./vault/sync-to-bitwarden.sh SSH-Config
+```
+
+### 6. Update zshrc for auto-add (optional)
+
+If you want the new key auto-loaded into the SSH agent, add to `zsh/zshrc`:
+
+```bash
+_ssh_add_if_missing ~/.ssh/id_ed25519_newservice
+```
+
+---
+
+## Syncing Local Changes to Bitwarden
+
+When you modify local config files (`~/.ssh/config`, `~/.aws/config`, `~/.gitconfig`, etc.), sync them back to Bitwarden so other machines can restore the updates.
+
+### Preview changes (dry run)
+
+```bash
+./vault/sync-to-bitwarden.sh --dry-run --all
+```
+
+### Sync specific items
+
+```bash
+./vault/sync-to-bitwarden.sh SSH-Config           # Just SSH config
+./vault/sync-to-bitwarden.sh AWS-Config Git-Config  # Multiple items
+```
+
+### Sync all items
+
+```bash
+./vault/sync-to-bitwarden.sh --all
+```
+
+### Supported items
+
+| Item | Local File |
+|------|------------|
+| `SSH-Config` | `~/.ssh/config` |
+| `AWS-Config` | `~/.aws/config` |
+| `AWS-Credentials` | `~/.aws/credentials` |
+| `Git-Config` | `~/.gitconfig` |
+| `Environment-Secrets` | `~/.local/env.secrets` |
+
+---
+
+## Maintenance Checklists
+
+### Adding a New SSH Key
+
+Complete checklist when adding a new SSH identity:
+
+- [ ] Generate key pair: `ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey`
+- [ ] Push to Bitwarden (see "Adding New SSH Keys" section above)
+- [ ] Update `vault/restore-ssh.sh` - add `restore_key_note` call
+- [ ] Update `vault/check-vault-items.sh` - add to `REQUIRED_ITEMS` array
+- [ ] Update `~/.ssh/config` with Host entry
+- [ ] Sync SSH config: `./vault/sync-to-bitwarden.sh SSH-Config`
+- [ ] Update `zsh/zshrc` - add `_ssh_add_if_missing` line (optional)
+- [ ] Commit dotfiles changes
+
+### Updating AWS Credentials
+
+When AWS credentials or config change:
+
+- [ ] Edit `~/.aws/config` and/or `~/.aws/credentials`
+- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh AWS-Config AWS-Credentials`
+- [ ] Verify on other machines: `bw-restore`
+
+### Adding a New Environment Variable
+
+- [ ] Edit `~/.local/env.secrets`
+- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh Environment-Secrets`
+- [ ] Source on current shell: `source ~/.local/load-env.sh`
+
+### Modifying SSH Config (add hosts, change options)
+
+- [ ] Edit `~/.ssh/config`
+- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh SSH-Config`
+- [ ] Restore on other machines: `bw-restore`
+
+### Updating Git Config
+
+- [ ] Edit `~/.gitconfig`
+- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh Git-Config`
+
+### New Machine Setup
+
+Complete checklist for a fresh machine:
+
+1. [ ] Clone dotfiles: `git clone ... ~/workspace/dotfiles`
+2. [ ] Run bootstrap: `./bootstrap-mac.sh` or `./bootstrap-lima.sh`
+3. [ ] Login to Bitwarden: `bw login`
+4. [ ] Validate vault items: `./vault/check-vault-items.sh`
+5. [ ] Restore secrets: `bw-restore`
+6. [ ] Run health check: `./check-health.sh`
+7. [ ] Restart shell or `source ~/.zshrc`
 
 ---
 
