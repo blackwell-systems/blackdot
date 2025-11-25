@@ -1,5 +1,7 @@
 # Dotfiles & Vault Setup
 
+**Version:** 1.0.0 | [Changelog](CHANGELOG.md)
+
 This repository contains my personal dotfiles for **macOS** and **Lima** (Linux), used to configure my development environment consistently across both platforms. The dotfiles include configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude helpers**, and a **Bitwarden-based vault bootstrap** for SSH keys, AWS config/credentials, and environment secrets.
 
 ---
@@ -970,6 +972,13 @@ Complete checklist for a fresh machine:
 **Vault:**
 
 - `bw-restore` → Run Bitwarden vault bootstrap
+
+**Dotfiles Management:**
+
+- `dotfiles` → `cd ~/workspace/dotfiles`
+- `dotfiles-doctor` → Run health check + vault item validation
+- `dotfiles-sync` → Sync local configs back to Bitwarden
+- `dotfiles-update` → Pull latest dotfiles and re-source zshrc
 
 **Clipboard (cross-platform):**
 
