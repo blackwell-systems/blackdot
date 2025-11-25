@@ -2,8 +2,15 @@
 # ============================================================
 # FILE: check-health.sh
 # Verifies dotfiles installation health
+# Usage: ./check-health.sh [--fix]
 # ============================================================
 set -uo pipefail
+
+# Parse arguments
+FIX_MODE=false
+if [[ "${1:-}" == "--fix" || "${1:-}" == "-f" ]]; then
+    FIX_MODE=true
+fi
 
 # Colors for output (if terminal supports it)
 if [[ -t 1 ]]; then
@@ -22,6 +29,7 @@ fi
 
 ERRORS=0
 WARNINGS=0
+FIXED=0
 
 pass() {
     echo -e "${GREEN}[OK]${NC} $1"
@@ -41,9 +49,38 @@ info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
 
+fixed() {
+    echo -e "${GREEN}[FIXED]${NC} $1"
+    ((FIXED++))
+}
+
 section() {
     echo ""
     echo -e "${BLUE}=== $1 ===${NC}"
+}
+
+# Helper to get file permissions (cross-platform)
+get_perms() {
+    stat -c '%a' "$1" 2>/dev/null || stat -f '%A' "$1" 2>/dev/null
+}
+
+# Helper to fix file permissions
+fix_perms() {
+    local file="$1"
+    local expected="$2"
+    local current
+    current="$(get_perms "$file")"
+
+    if [[ "$current" != "$expected" ]]; then
+        if $FIX_MODE; then
+            chmod "$expected" "$file"
+            fixed "$file: $current -> $expected"
+            return 0
+        else
+            return 1
+        fi
+    fi
+    return 0
 }
 
 # ============================================================
@@ -143,13 +180,17 @@ check_ssh_key() {
     local pub_path="$HOME/.ssh/${key_name}.pub"
 
     if [[ -f "$priv_path" ]]; then
-        # Check permissions
         local perms
-        perms="$(stat -c '%a' "$priv_path" 2>/dev/null || stat -f '%A' "$priv_path" 2>/dev/null)"
+        perms="$(get_perms "$priv_path")"
         if [[ "$perms" == "600" ]]; then
             pass "$key_name (permissions: $perms)"
         else
-            warn "$key_name exists but has wrong permissions: $perms (should be 600)"
+            if $FIX_MODE; then
+                chmod 600 "$priv_path"
+                fixed "$key_name: $perms -> 600"
+            else
+                warn "$key_name has wrong permissions: $perms (should be 600)"
+            fi
         fi
     else
         info "$key_name not found (run bw-restore to restore from Bitwarden)"
@@ -157,11 +198,16 @@ check_ssh_key() {
 
     if [[ -f "$pub_path" ]]; then
         local perms
-        perms="$(stat -c '%a' "$pub_path" 2>/dev/null || stat -f '%A' "$pub_path" 2>/dev/null)"
+        perms="$(get_perms "$pub_path")"
         if [[ "$perms" == "644" ]]; then
             pass "${key_name}.pub (permissions: $perms)"
         else
-            warn "${key_name}.pub has permissions: $perms (should be 644)"
+            if $FIX_MODE; then
+                chmod 644 "$pub_path"
+                fixed "${key_name}.pub: $perms -> 644"
+            else
+                warn "${key_name}.pub has permissions: $perms (should be 644)"
+            fi
         fi
     fi
 }
@@ -171,11 +217,16 @@ check_ssh_key "id_ed25519_blackwell"
 
 # Check ~/.ssh directory permissions
 if [[ -d "$HOME/.ssh" ]]; then
-    ssh_perms="$(stat -c '%a' "$HOME/.ssh" 2>/dev/null || stat -f '%A' "$HOME/.ssh" 2>/dev/null)"
+    ssh_perms="$(get_perms "$HOME/.ssh")"
     if [[ "$ssh_perms" == "700" ]]; then
         pass "~/.ssh directory (permissions: $ssh_perms)"
     else
-        warn "~/.ssh has permissions: $ssh_perms (should be 700)"
+        if $FIX_MODE; then
+            chmod 700 "$HOME/.ssh"
+            fixed "~/.ssh directory: $ssh_perms -> 700"
+        else
+            warn "~/.ssh has permissions: $ssh_perms (should be 700)"
+        fi
     fi
 fi
 
@@ -185,11 +236,16 @@ fi
 section "AWS Configuration"
 
 if [[ -f "$HOME/.aws/config" ]]; then
-    aws_perms="$(stat -c '%a' "$HOME/.aws/config" 2>/dev/null || stat -f '%A' "$HOME/.aws/config" 2>/dev/null)"
+    aws_perms="$(get_perms "$HOME/.aws/config")"
     if [[ "$aws_perms" == "600" ]]; then
         pass "~/.aws/config (permissions: $aws_perms)"
     else
-        warn "~/.aws/config has permissions: $aws_perms (should be 600)"
+        if $FIX_MODE; then
+            chmod 600 "$HOME/.aws/config"
+            fixed "~/.aws/config: $aws_perms -> 600"
+        else
+            warn "~/.aws/config has permissions: $aws_perms (should be 600)"
+        fi
     fi
 
     # Check for expected profiles
@@ -205,14 +261,34 @@ else
 fi
 
 if [[ -f "$HOME/.aws/credentials" ]]; then
-    creds_perms="$(stat -c '%a' "$HOME/.aws/credentials" 2>/dev/null || stat -f '%A' "$HOME/.aws/credentials" 2>/dev/null)"
+    creds_perms="$(get_perms "$HOME/.aws/credentials")"
     if [[ "$creds_perms" == "600" ]]; then
         pass "~/.aws/credentials (permissions: $creds_perms)"
     else
-        warn "~/.aws/credentials has permissions: $creds_perms (should be 600)"
+        if $FIX_MODE; then
+            chmod 600 "$HOME/.aws/credentials"
+            fixed "~/.aws/credentials: $creds_perms -> 600"
+        else
+            warn "~/.aws/credentials has permissions: $creds_perms (should be 600)"
+        fi
     fi
 else
     info "~/.aws/credentials not found"
+fi
+
+# Check ~/.aws directory permissions
+if [[ -d "$HOME/.aws" ]]; then
+    aws_dir_perms="$(get_perms "$HOME/.aws")"
+    if [[ "$aws_dir_perms" == "700" ]]; then
+        pass "~/.aws directory (permissions: $aws_dir_perms)"
+    else
+        if $FIX_MODE; then
+            chmod 700 "$HOME/.aws"
+            fixed "~/.aws directory: $aws_dir_perms -> 700"
+        else
+            warn "~/.aws directory has permissions: $aws_dir_perms (should be 700)"
+        fi
+    fi
 fi
 
 # ============================================================
@@ -221,11 +297,16 @@ fi
 section "Environment Secrets"
 
 if [[ -f "$HOME/.local/env.secrets" ]]; then
-    env_perms="$(stat -c '%a' "$HOME/.local/env.secrets" 2>/dev/null || stat -f '%A' "$HOME/.local/env.secrets" 2>/dev/null)"
+    env_perms="$(get_perms "$HOME/.local/env.secrets")"
     if [[ "$env_perms" == "600" ]]; then
         pass "~/.local/env.secrets (permissions: $env_perms)"
     else
-        warn "~/.local/env.secrets has permissions: $env_perms (should be 600)"
+        if $FIX_MODE; then
+            chmod 600 "$HOME/.local/env.secrets"
+            fixed "~/.local/env.secrets: $env_perms -> 600"
+        else
+            warn "~/.local/env.secrets has permissions: $env_perms (should be 600)"
+        fi
     fi
 else
     info "~/.local/env.secrets not found (optional)"
@@ -315,10 +396,18 @@ done
 # ============================================================
 echo ""
 echo "========================================"
+if [[ $FIXED -gt 0 ]]; then
+    echo -e "${GREEN}Fixed $FIXED permission issue(s)${NC}"
+fi
 if [[ $ERRORS -eq 0 && $WARNINGS -eq 0 ]]; then
     echo -e "${GREEN}Health check passed!${NC}"
 elif [[ $ERRORS -eq 0 ]]; then
     echo -e "${YELLOW}Health check passed with $WARNINGS warning(s)${NC}"
+    if ! $FIX_MODE && [[ $WARNINGS -gt 0 ]]; then
+        echo ""
+        echo "Run with --fix to automatically fix permission issues:"
+        echo "  ./check-health.sh --fix"
+    fi
 else
     echo -e "${RED}Health check found $ERRORS error(s) and $WARNINGS warning(s)${NC}"
 fi
