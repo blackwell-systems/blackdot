@@ -263,22 +263,239 @@ Same flow on macOS and Lima.
 
 ---
 
-## Pushing Files into Bitwarden (One-Time)
+## Restoring from Bitwarden on Any Machine
 
-Scripts show exactly how to push:
+Once the dotfiles are in place and `bw` is installed:
 
-- `.aws/config`  
-- `.aws/credentials`  
-- SSH keys  
-- environment secrets  
+1. **Ensure you are logged into Bitwarden CLI**
 
-into appropriate Secure Notes:
+```bash
+bw login                     # if not already logged in
+export BW_SESSION="$(bw unlock --raw)"
+bw sync --session "$BW_SESSION"
+```
 
-- `SSH-GitHub-Enterprise`  
-- `SSH-GitHub-Blackwell`  
-- `AWS-Config`  
-- `AWS-Credentials`  
-- `Environment-Secrets`
+2. **Run the vault bootstrap**
+
+```bash
+cd ~/workspace/dotfiles/vault
+./bootstrap-vault.sh
+```
+
+`bootstrap-vault.sh` will:
+
+- Reuse `vault/.bw-session` if valid, or call `bw unlock --raw` and store the session.
+- Call:
+
+  - `restore-ssh.sh "$SESSION"`
+  - `restore-aws.sh "$SESSION"`
+  - `restore-env.sh "$SESSION"`
+
+After this finishes:
+
+- Your **SSH keys** are back under `~/.ssh`.
+- Your **AWS config/credentials** are restored.
+- Your **env secrets** file and loader script are in `~/.local`.
+
+---
+
+## Scripts: What Each Restore Script Expects
+
+### `restore-ssh.sh`
+
+- Reads Bitwarden **Secure Note** items:
+
+  - `"SSH-GitHub-Enterprise"`
+  - `"SSH-GitHub-Blackwell"`
+
+- Each item's **notes** field should contain:
+
+  - The full **OpenSSH private key** block.
+  - Optionally the corresponding `ssh-ed25519 ...` public key line.
+
+The script:
+
+- Reconstructs these files:
+
+  - `~/.ssh/id_ed25519_enterprise_ghub`
+  - `~/.ssh/id_ed25519_enterprise_ghub.pub`
+  - `~/.ssh/id_ed25519_blackwell`
+  - `~/.ssh/id_ed25519_blackwell.pub`
+
+- Sets appropriate permissions (`600` for private, `644` for public).
+
+> **Important:** The exact item names (`SSH-GitHub-Enterprise`, `SSH-GitHub-Blackwell`) need to match.
+
+---
+
+### `restore-aws.sh`
+
+- Expects two **Secure Note** items in Bitwarden:
+
+  - `"AWS-Config"`       → contains your full `~/.aws/config`
+  - `"AWS-Credentials"`  → contains your full `~/.aws/credentials`
+
+- The **notes** field of each item is the raw file content.
+
+The script:
+
+- Writes `~/.aws/config` and `~/.aws/credentials` directly from these notes.
+- Sets safe permissions (`600` where appropriate).
+
+---
+
+### `restore-env.sh`
+
+- Expects a **Secure Note** item named `"Environment-Secrets"`.
+
+- The **notes** field should contain lines like:
+
+  ```text
+  SOME_API_KEY=...
+  ANOTHER_SECRET=...
+  ```
+
+The script:
+
+- Writes this into `~/.local/env.secrets`.
+- Creates `~/.local/load-env.sh` which exports everything when sourced:
+
+  ```bash
+  # Example usage in your shell:
+  source ~/.local/load-env.sh
+  ```
+
+---
+
+## One-Time: Push Current Files into Bitwarden (for Future-You)
+
+The idea: run these **once** on a "known-good" machine (your macOS host), so future machines can restore from Bitwarden with `bootstrap-vault.sh`.
+
+You can also do all of this manually in the Bitwarden GUI, but here's the CLI version for reproducibility.
+
+### 1. Ensure `BW_SESSION` is set
+
+```bash
+export BW_SESSION="$(bw unlock --raw)"
+bw sync --session "$BW_SESSION"
+```
+
+---
+
+### 2. Push `~/.aws/config` into `AWS-Config`
+
+```bash
+cd ~/workspace/dotfiles/vault
+
+CONFIG_JSON=$(jq -Rs --arg name "AWS-Config" \
+  '{ type: 2, name: $name, secureNote: { type: 0 }, notes: . }' \
+  < ~/.aws/config)
+
+CONFIG_ENC=$(printf '%s' "$CONFIG_JSON" | bw encode)
+
+bw create item "$CONFIG_ENC" --session "$BW_SESSION"
+```
+
+To **update** it later instead of creating duplicates:
+
+```bash
+AWS_CONFIG_ID=$(bw list items --search "AWS-Config" --session "$BW_SESSION" | jq -r '.[0].id')
+printf '%s' "$CONFIG_JSON" | bw encode | bw edit item "$AWS_CONFIG_ID" --session "$BW_SESSION"
+```
+
+---
+
+### 3. Push `~/.aws/credentials` into `AWS-Credentials`
+
+```bash
+CREDS_JSON=$(jq -Rs --arg name "AWS-Credentials" \
+  '{ type: 2, name: $name, secureNote: { type: 0 }, notes: . }' \
+  < ~/.aws/credentials)
+
+CREDS_ENC=$(printf '%s' "$CREDS_JSON" | bw encode)
+
+bw create item "$CREDS_ENC" --session "$BW_SESSION"
+```
+
+To **update** later:
+
+```bash
+AWS_CREDS_ID=$(bw list items --search "AWS-Credentials" --session "$BW_SESSION" | jq -r '.[0].id')
+printf '%s' "$CREDS_JSON" | bw encode | bw edit item "$AWS_CREDS_ID" --session "$BW_SESSION"
+```
+
+---
+
+### 4. Push SSH keys into Secure Notes
+
+You'll create one note per SSH identity:
+
+- `SSH-GitHub-Enterprise`    → `id_ed25519_enterprise_ghub`
+- `SSH-GitHub-Blackwell`     → `id_ed25519_blackwell`
+
+Each note will contain the **private key** (already passphrase-protected by OpenSSH) and optionally the **public key**.
+
+#### Enterprise key
+
+```bash
+(
+  cat ~/.ssh/id_ed25519_enterprise_ghub
+  echo
+  cat ~/.ssh/id_ed25519_enterprise_ghub.pub
+) | jq -Rs '{
+  type: 2,
+  name: "SSH-GitHub-Enterprise",
+  secureNote: { type: 0 },
+  notes: .
+}' | bw encode | bw create item --session "$BW_SESSION"
+```
+
+#### Blackwell key
+
+```bash
+(
+  cat ~/.ssh/id_ed25519_blackwell
+  echo
+  cat ~/.ssh/id_ed25519_blackwell.pub
+) | jq -Rs '{
+  type: 2,
+  name: "SSH-GitHub-Blackwell",
+  secureNote: { type: 0 },
+  notes: .
+}' | bw encode | bw create item --session "$BW_SESSION"
+```
+
+> If you prefer, you can also create these as **Secure Notes** in the Bitwarden GUI and paste the contents of the private + public key directly into the Notes field. The restore script just looks at `notes`.
+
+---
+
+### 5. Push environment secrets into `Environment-Secrets` (optional)
+
+1. First, create a local file with the secrets you want portable:
+
+```bash
+mkdir -p ~/.local
+cat > ~/.local/env.secrets <<'EOF'
+# Example
+OPENAI_API_KEY=...
+GITHUB_TOKEN=...
+EOF
+chmod 600 ~/.local/env.secrets
+```
+
+2. Then push it into Bitwarden:
+
+```bash
+ENV_JSON=$(jq -Rs --arg name "Environment-Secrets" \
+  '{ type: 2, name: $name, secureNote: { type: 0 }, notes: . }' \
+  < ~/.local/env.secrets)
+
+ENV_ENC=$(printf '%s' "$ENV_JSON" | bw encode)
+
+bw create item "$ENV_ENC" --session "$BW_SESSION"
+```
+
+Now `restore-env.sh` will bring this back on any new machine and create `~/.local/load-env.sh` to load it.
 
 ---
 
