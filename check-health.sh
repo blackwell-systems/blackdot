@@ -2,15 +2,19 @@
 # ============================================================
 # FILE: check-health.sh
 # Verifies dotfiles installation health
-# Usage: ./check-health.sh [--fix]
+# Usage: ./check-health.sh [--fix] [--drift]
 # ============================================================
 set -uo pipefail
 
 # Parse arguments
 FIX_MODE=false
-if [[ "${1:-}" == "--fix" || "${1:-}" == "-f" ]]; then
-    FIX_MODE=true
-fi
+DRIFT_MODE=false
+for arg in "$@"; do
+    case "$arg" in
+        --fix|-f) FIX_MODE=true ;;
+        --drift|-d) DRIFT_MODE=true ;;
+    esac
+done
 
 # Colors for output (if terminal supports it)
 if [[ -t 1 ]]; then
@@ -407,6 +411,75 @@ for dir in "$HOME/workspace" "$HOME/workspace/code"; do
         info "$dir does not exist"
     fi
 done
+
+# ============================================================
+# DRIFT DETECTION (optional, requires --drift flag)
+# ============================================================
+if $DRIFT_MODE; then
+    section "Drift Detection (Local vs Bitwarden)"
+
+    # Get Bitwarden session
+    VAULT_DIR="$HOME/workspace/dotfiles/vault"
+    SESSION="${BW_SESSION:-}"
+
+    if [[ -z "$SESSION" && -f "$VAULT_DIR/.bw-session" ]]; then
+        SESSION="$(cat "$VAULT_DIR/.bw-session")"
+    fi
+
+    if [[ -z "$SESSION" ]] || ! bw unlock --check --session "$SESSION" >/dev/null 2>&1; then
+        warn "Bitwarden not unlocked - skipping drift detection"
+        info "Run: export BW_SESSION=\"\$(bw unlock --raw)\""
+    else
+        # Sync first
+        bw sync --session "$SESSION" >/dev/null 2>&1
+
+        # Items to check for drift
+        declare -A DRIFT_ITEMS=(
+            ["SSH-Config"]="$HOME/.ssh/config"
+            ["AWS-Config"]="$HOME/.aws/config"
+            ["AWS-Credentials"]="$HOME/.aws/credentials"
+            ["Git-Config"]="$HOME/.gitconfig"
+            ["Environment-Secrets"]="$HOME/.local/env.secrets"
+        )
+
+        DRIFT_COUNT=0
+        for item_name in "${!DRIFT_ITEMS[@]}"; do
+            local_file="${DRIFT_ITEMS[$item_name]}"
+
+            # Skip if local file doesn't exist
+            if [[ ! -f "$local_file" ]]; then
+                info "$item_name: local file not found ($local_file)"
+                continue
+            fi
+
+            # Get Bitwarden content
+            bw_content=$(bw get notes "$item_name" --session "$SESSION" 2>/dev/null || echo "")
+
+            if [[ -z "$bw_content" ]]; then
+                info "$item_name: not found in Bitwarden"
+                continue
+            fi
+
+            # Compare
+            local_content=$(cat "$local_file")
+            if [[ "$bw_content" == "$local_content" ]]; then
+                pass "$item_name: in sync"
+            else
+                warn "$item_name: LOCAL DIFFERS from Bitwarden"
+                ((DRIFT_COUNT++))
+            fi
+        done
+
+        if [[ $DRIFT_COUNT -gt 0 ]]; then
+            echo ""
+            info "To sync local changes to Bitwarden:"
+            echo "  ./vault/sync-to-bitwarden.sh --all"
+            echo ""
+            info "To restore from Bitwarden (overwrite local):"
+            echo "  bw-restore"
+        fi
+    fi
+fi
 
 # ============================================================
 # SUMMARY

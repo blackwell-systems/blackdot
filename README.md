@@ -962,6 +962,22 @@ Complete checklist for a fresh machine:
 - `gl1` → `git log --oneline -n 15`
 - `glg` → `git log --oneline --graph --all`
 
+**Modern CLI (eza - ls replacement):**
+
+- `ls` → `eza --color=auto --group-directories-first`
+- `ll` → `eza -la --icons --group-directories-first --git`
+- `la` → `eza -a --icons --group-directories-first`
+- `lt` → `eza -la --icons --tree --level=2` (tree view)
+- `lm` → `eza -la --icons --sort=modified` (by modified time)
+- `lr` → `eza -la --icons --sort=size --reverse` (by size)
+
+**Fuzzy finder (fzf):**
+
+- `Ctrl+R` → Fuzzy search command history
+- `Ctrl+T` → Fuzzy search files (insert path)
+- `Alt+C` → Fuzzy cd to directory
+- `**<tab>` → Fuzzy completion (e.g., `vim **<tab>`)
+
 **Navigation:**
 
 - `cws` → `cd ~/workspace`
@@ -1030,6 +1046,26 @@ The script verifies:
 
 ```bash
 ./check-health.sh --fix
+```
+
+**Drift detection**: Run with `--drift` to compare local files vs Bitwarden:
+
+```bash
+./check-health.sh --drift
+```
+
+This checks if your local `~/.ssh/config`, `~/.aws/config`, `~/.gitconfig`, etc. differ from what's stored in Bitwarden. Useful for detecting unsync'd changes before switching machines.
+
+Example drift output:
+
+```
+=== Drift Detection (Local vs Bitwarden) ===
+[OK] SSH-Config: in sync
+[OK] AWS-Config: in sync
+[WARN] Git-Config: LOCAL DIFFERS from Bitwarden
+
+To sync local changes to Bitwarden:
+  ./vault/sync-to-bitwarden.sh --all
 ```
 
 Example output:
