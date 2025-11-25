@@ -704,6 +704,18 @@ Host newservice.example.com
 
 - `bw-restore` → Run Bitwarden vault bootstrap
 
+**Clipboard (cross-platform):**
+
+- `copy` / `cb` → Copy stdin to clipboard (works on macOS, Linux X11/Wayland, WSL)
+- `paste` / `cbp` → Paste clipboard to stdout
+
+```bash
+# Examples
+cat file.txt | copy
+echo "hello" | copy
+paste > pasted.txt
+```
+
 ### Claude helpers
 
 - `claude-bedrock "prompt"`  
