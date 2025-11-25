@@ -79,6 +79,43 @@ fi
 [[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
 
 # =========================
+# MODERN CLI TOOLS (eza, fzf, etc.)
+# =========================
+# These override basic coreutils with modern alternatives when available.
+
+# eza - modern ls replacement (cross-platform)
+if command -v eza >/dev/null 2>&1; then
+  alias ls='eza --color=auto --group-directories-first'
+  alias ll='eza -la --icons --group-directories-first --git'
+  alias la='eza -a --icons --group-directories-first'
+  alias lt='eza -la --icons --tree --level=2'
+  alias l='eza -1'
+  alias lm='eza -la --icons --sort=modified'
+  alias lr='eza -la --icons --sort=size --reverse'
+fi
+
+# fzf - fuzzy finder
+if command -v fzf >/dev/null 2>&1; then
+  # Use fd for fzf if available (faster, respects .gitignore)
+  if command -v fd >/dev/null 2>&1; then
+    export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+  fi
+
+  # fzf appearance
+  export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border --info=inline'
+
+  # Load fzf keybindings and completions
+  if [[ -f "$BREW_PREFIX/opt/fzf/shell/key-bindings.zsh" ]]; then
+    source "$BREW_PREFIX/opt/fzf/shell/key-bindings.zsh"
+  fi
+  if [[ -f "$BREW_PREFIX/opt/fzf/shell/completion.zsh" ]]; then
+    source "$BREW_PREFIX/opt/fzf/shell/completion.zsh"
+  fi
+fi
+
+# =========================
 # SHARED ENV / TOOLING
 # =========================
 
@@ -93,6 +130,20 @@ alias cpat='cd "$WORKSPACE/patent-pool"'
 
 # Bitwarden vault bootstrap helper
 alias bw-restore='$HOME/workspace/dotfiles/vault/bootstrap-vault.sh'
+
+# Dotfiles management helpers
+alias dotfiles='cd $HOME/workspace/dotfiles'
+alias dotfiles-doctor='$HOME/workspace/dotfiles/check-health.sh && $HOME/workspace/dotfiles/vault/check-vault-items.sh 2>/dev/null'
+alias dotfiles-sync='$HOME/workspace/dotfiles/vault/sync-to-bitwarden.sh'
+
+dotfiles-update() {
+    local DOTFILES_DIR="$HOME/workspace/dotfiles"
+    echo "Updating dotfiles..."
+    (cd "$DOTFILES_DIR" && git pull --rebase origin main)
+    echo "Re-sourcing zshrc..."
+    source "$HOME/.zshrc"
+    echo "Done! Run 'dotfiles-doctor' to verify."
+}
 
 # Load your custom env block if it exists
 if [ -f "$HOME/.local/bin/env" ]; then
