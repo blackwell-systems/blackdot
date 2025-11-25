@@ -21,6 +21,7 @@ This repository contains my personal dotfiles for **macOS** and **Lima** (Linux)
 - [Rotating / Updating Secrets in Bitwarden](#rotating--updating-secrets-in-bitwarden)
 - [Adding New SSH Keys](#adding-new-ssh-keys)
 - [Using the Dotfiles Day-to-Day](#using-the-dotfiles-day-to-day)
+- [Health Check](#health-check)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
@@ -60,9 +61,10 @@ The dotfiles are organized as follows:
 
 ```text
 ~/workspace/dotfiles
-├── bootstrap-dotfiles.sh     # Shared symlink bootstrap (zshrc, p10k, Ghostty, Claude)
+├── bootstrap-dotfiles.sh     # Shared symlink bootstrap (zshrc, p10k, Ghostty)
 ├── bootstrap-lima.sh         # Lima / Linux-specific bootstrap wrapper
 ├── bootstrap-mac.sh          # macOS-specific bootstrap wrapper
+├── check-health.sh           # Verify installation health
 ├── Brewfile                  # Unified Homebrew bundle (macOS + Lima)
 ├── ghostty
 │   └── config                # Ghostty terminal config
@@ -714,6 +716,49 @@ Host newservice.example.com
 ```bash
 source ~/.local/load-env.sh
 ```
+
+---
+
+## Health Check
+
+Run the health check script to verify your dotfiles installation:
+
+```bash
+./check-health.sh
+```
+
+The script verifies:
+
+- **Symlinks**: `~/.zshrc`, `~/.p10k.zsh`, Ghostty config, Claude workspace
+- **Required commands**: brew, zsh, git, jq, bw, aws
+- **SSH keys**: Existence and correct permissions (600 for private, 644 for public)
+- **AWS configuration**: Config and credentials files with correct permissions
+- **Environment secrets**: `~/.local/env.secrets` and loader script
+- **Bitwarden status**: Login and unlock state
+- **Shell configuration**: Default shell, plugin availability
+- **Workspace layout**: Required directories exist
+
+Example output:
+
+```
+=== Symlinks ===
+[OK] ~/.zshrc -> /Users/you/workspace/dotfiles/zsh/zshrc
+[OK] ~/.p10k.zsh -> /Users/you/workspace/dotfiles/zsh/p10k.zsh
+
+=== Required Commands ===
+[OK] brew (Homebrew 4.x.x)
+[OK] zsh (zsh 5.9)
+[OK] jq (jq-1.7)
+
+=== SSH Keys ===
+[OK] id_ed25519_blackwell (permissions: 600)
+
+========================================
+Health check passed!
+========================================
+```
+
+Use this after initial setup or when debugging issues.
 
 ---
 
