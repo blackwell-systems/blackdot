@@ -10,6 +10,7 @@ This repository contains my personal dotfiles for **macOS** and **Lima** (Linux)
 
 - [Quick Start](#quick-start)
 - [Directory Structure](#directory-structure)
+- [Canonical Workspace](#canonical-workspace-workspace)
 - [Global Prerequisites](#global-prerequisites)
 - [Bootstrap Overview](#bootstrap-overview)
 - [Bootstrapping macOS from Scratch](#bootstrapping-macos-from-scratch)
@@ -100,6 +101,84 @@ Key pieces:
   ```
   ~/.claude → ~/workspace/.claude
   ```
+
+---
+
+## Canonical Workspace (`~/workspace`)
+
+A key architectural decision in this setup is the **canonical workspace directory** at `~/workspace`. This serves multiple purposes:
+
+### 1. Username-Agnostic Paths
+
+Your home directory path varies by platform and username:
+- macOS: `/Users/dayna.blackwell`
+- Lima: `/home/dayna.blackwell.linux` or `/home/ubuntu`
+- Work laptop: `/Users/dblackwell`
+
+By standardizing on `~/workspace`, all your scripts, aliases, and configurations can reference a **predictable location** regardless of the underlying username or OS.
+
+### 2. Cross-Platform Mount Point
+
+Lima mounts your macOS home directory into the VM. With `~/workspace` as the canonical location:
+
+```yaml
+# lima.yaml
+mounts:
+  - location: "~"
+    writable: true
+    sshfs:
+      followSymlinks: true
+```
+
+Both macOS and Lima see the **same files** at `~/workspace`:
+- macOS: `/Users/you/workspace` → actual files
+- Lima: `/home/you.linux/workspace` → mounted from macOS
+
+This means:
+- Edit code on macOS, run tests in Lima
+- Same dotfiles repo accessible from both
+- Claude CLI shares state via `~/.claude → ~/workspace/.claude`
+
+### 3. Organizational Structure
+
+The workspace provides a consistent hierarchy:
+
+```
+~/workspace/
+├── .claude/           # Shared Claude CLI state (symlinked from ~/.claude)
+├── dotfiles/          # This repository
+├── code/              # Active projects
+├── whitepapers/       # Documentation, specs
+└── patent-pool/       # IP work
+```
+
+Navigation aliases make this seamless:
+- `cws` → `cd ~/workspace`
+- `ccode` → `cd ~/workspace/code`
+- `dotfiles` → `cd ~/workspace/dotfiles`
+
+### 4. Decoupled from User Identity
+
+Your secrets (SSH keys, AWS creds) live in `~/.ssh` and `~/.aws` (user-specific), but your **work** lives in `~/workspace` (portable). This separation means:
+
+- Secrets are restored per-machine via Bitwarden
+- Work files are either shared (Lima mount) or synced (git)
+- Dotfiles reference `$WORKSPACE` variable, not hardcoded paths
+
+```bash
+# In zshrc
+export WORKSPACE="$HOME/workspace"
+alias cws='cd "$WORKSPACE"'
+```
+
+### Why This Matters
+
+When you set up a new machine or VM, you don't need to update scripts with new usernames. Everything just works because:
+
+1. `~` expands to the correct home directory
+2. `~/workspace` is always where your work lives
+3. Secrets are restored to standard locations (`~/.ssh`, `~/.aws`)
+4. Symlinks bridge any gaps (`~/.claude → ~/workspace/.claude`)
 
 ---
 
