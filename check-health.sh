@@ -215,6 +215,23 @@ check_ssh_key() {
 check_ssh_key "id_ed25519_enterprise_ghub"
 check_ssh_key "id_ed25519_blackwell"
 
+# Check SSH config file
+if [[ -f "$HOME/.ssh/config" ]]; then
+    config_perms="$(get_perms "$HOME/.ssh/config")"
+    if [[ "$config_perms" == "600" ]]; then
+        pass "~/.ssh/config (permissions: $config_perms)"
+    else
+        if $FIX_MODE; then
+            chmod 600 "$HOME/.ssh/config"
+            fixed "~/.ssh/config: $config_perms -> 600"
+        else
+            warn "~/.ssh/config has permissions: $config_perms (should be 600)"
+        fi
+    fi
+else
+    info "~/.ssh/config not found (run bw-restore to restore from Bitwarden)"
+fi
+
 # Check ~/.ssh directory permissions
 if [[ -d "$HOME/.ssh" ]]; then
     ssh_perms="$(get_perms "$HOME/.ssh")"
