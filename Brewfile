@@ -5,6 +5,7 @@
 # Core CLI tools
 brew "git"
 brew "zsh"
+brew "gh"
 brew "tmux"
 brew "tree"
 brew "zellij"
