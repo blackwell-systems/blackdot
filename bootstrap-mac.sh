@@ -21,19 +21,38 @@ if ! command -v brew >/dev/null 2>&1; then
   echo "Installing Homebrew..."
   /bin/bash -c \
     "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-  # Add brew to PATH for Apple Silicon
-  if [ -d /opt/homebrew/bin ]; then
-    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-  fi
-else
-  echo "Homebrew already installed."
 fi
 
-# Make sure brew is on PATH
+# Ensure brew shellenv is in .zprofile (idempotent)
+# Apple Silicon: /opt/homebrew, Intel: /usr/local
+add_brew_to_zprofile() {
+  local brew_path="$1"
+  local shellenv_line="eval \"\$(${brew_path}/bin/brew shellenv)\""
+
+  if [ -d "$brew_path/bin" ]; then
+    # Only add if not already present
+    if ! grep -qF "$brew_path/bin/brew shellenv" "$HOME/.zprofile" 2>/dev/null; then
+      echo "Adding Homebrew to .zprofile ($brew_path)..."
+      echo "$shellenv_line" >> "$HOME/.zprofile"
+    fi
+    eval "$("$brew_path/bin/brew" shellenv)"
+    return 0
+  fi
+  return 1
+}
+
+# Try Apple Silicon path first, then Intel path
+if [ -d /opt/homebrew ]; then
+  add_brew_to_zprofile "/opt/homebrew"
+elif [ -d /usr/local/Homebrew ]; then
+  add_brew_to_zprofile "/usr/local"
+fi
+
+# Make sure brew is on PATH for this session
 if command -v brew >/dev/null 2>&1; then
   eval "$(brew shellenv)"
+else
+  echo "WARNING: Homebrew not found in PATH after installation."
 fi
 
 # 3. Brew Bundle --------------------------------------------------------

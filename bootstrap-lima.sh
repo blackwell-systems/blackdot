@@ -14,16 +14,27 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
   build-essential curl file git zsh
 
 # 2. Linuxbrew install (if not present) -------------------------------
+BREW_LINUX_PATH="/home/linuxbrew/.linuxbrew"
+
 if ! command -v brew >/dev/null 2>&1; then
   echo "Installing Linuxbrew..."
   /bin/bash -c \
     "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
 
-  echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-else
-  echo "Linuxbrew already installed."
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" || true
+# Ensure brew shellenv is in .zprofile (idempotent)
+if [ -d "$BREW_LINUX_PATH/bin" ]; then
+  # Only add if not already present
+  if ! grep -qF "$BREW_LINUX_PATH/bin/brew shellenv" "$HOME/.zprofile" 2>/dev/null; then
+    echo "Adding Linuxbrew to .zprofile..."
+    echo "eval \"\$($BREW_LINUX_PATH/bin/brew shellenv)\"" >> "$HOME/.zprofile"
+  fi
+  eval "$("$BREW_LINUX_PATH/bin/brew" shellenv)"
+fi
+
+# Verify brew is available
+if ! command -v brew >/dev/null 2>&1; then
+  echo "WARNING: Linuxbrew not found in PATH after installation."
 fi
 
 # 3. Brew Bundle (shared Brewfile with macOS) -------------------------
