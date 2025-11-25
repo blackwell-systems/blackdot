@@ -79,6 +79,7 @@ The dotfiles are organized as follows:
 ├── vault
 │   ├── bootstrap-vault.sh    # Orchestrates all Bitwarden restores
 │   ├── check-vault-items.sh  # Validates required Bitwarden items exist
+│   ├── list-vault-items.sh   # Lists all vault items (debug/inventory)
 │   ├── sync-to-bitwarden.sh  # Syncs local changes back to Bitwarden
 │   ├── restore-ssh.sh        # Restores SSH keys and config from Bitwarden
 │   ├── restore-aws.sh        # Restores ~/.aws/config & ~/.aws/credentials
@@ -169,6 +170,41 @@ Your secrets (SSH keys, AWS creds) live in `~/.ssh` and `~/.aws` (user-specific)
 # In zshrc
 export WORKSPACE="$HOME/workspace"
 alias cws='cd "$WORKSPACE"'
+```
+
+### Visual Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     CANONICAL WORKSPACE ARCHITECTURE                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   macOS                              Lima VM                                 │
+│   ══════                             ════════                                │
+│   /Users/dayna.blackwell/            /home/ubuntu/                           │
+│          │                                  │                                │
+│          ├── .ssh/        ←── secrets ──→   ├── .ssh/                        │
+│          ├── .aws/        (per-machine)     ├── .aws/                        │
+│          ├── .gitconfig                     ├── .gitconfig                   │
+│          │                                  │                                │
+│          └── workspace/ ←────────────────→  └── workspace/ (mounted)         │
+│                 │                                  │                         │
+│                 ├── dotfiles/    ════════════     (same files)               │
+│                 ├── code/                                                    │
+│                 ├── .claude/  ←─── symlinked from ~/.claude                  │
+│                 └── ...                                                      │
+│                                                                              │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │  KEY INSIGHT: ~/workspace is username-agnostic                       │   │
+│   │                                                                      │   │
+│   │  • /Users/dayna.blackwell/workspace  ← macOS                        │   │
+│   │  • /Users/dblackwell/workspace       ← work laptop                  │   │
+│   │  • /home/ubuntu/workspace            ← Lima VM                      │   │
+│   │                                                                      │   │
+│   │  All resolve to ~/workspace - scripts don't need hardcoded paths    │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Why This Matters
