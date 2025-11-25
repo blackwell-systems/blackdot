@@ -74,5 +74,9 @@ echo "--- Restoring environment secrets ---"
 "$VAULT_DIR/restore-env.sh" "$SESSION"
 
 echo ""
+echo "--- Restoring Git config ---"
+"$VAULT_DIR/restore-git.sh" "$SESSION"
+
+echo ""
 echo "=== Bitwarden bootstrap complete ==="
-echo "SSH keys, AWS profiles, and environment secrets are now restored."
+echo "SSH keys, AWS profiles, environment secrets, and Git config are now restored."

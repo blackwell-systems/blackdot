@@ -17,9 +17,12 @@ This repository contains my personal dotfiles for **macOS** and **Lima** (Linux)
 - [Vault / Bitwarden Bootstrap](#vault--bitwarden-bootstrap)
 - [Restoring from Bitwarden on Any Machine](#restoring-from-bitwarden-on-any-machine)
 - [Scripts: What Each Restore Script Expects](#scripts-what-each-restore-script-expects)
+- [Validating Vault Items Before Restore](#validating-vault-items-before-restore)
 - [One-Time: Push Current Files into Bitwarden](#one-time-push-current-files-into-bitwarden-for-future-you)
 - [Rotating / Updating Secrets in Bitwarden](#rotating--updating-secrets-in-bitwarden)
 - [Adding New SSH Keys](#adding-new-ssh-keys)
+- [Syncing Local Changes to Bitwarden](#syncing-local-changes-to-bitwarden)
+- [Maintenance Checklists](#maintenance-checklists)
 - [Using the Dotfiles Day-to-Day](#using-the-dotfiles-day-to-day)
 - [Health Check](#health-check)
 - [Troubleshooting](#troubleshooting)
@@ -72,9 +75,12 @@ The dotfiles are organized as follows:
 │   └── lima.yaml             # Lima VM config (host-side)
 ├── vault
 │   ├── bootstrap-vault.sh    # Orchestrates all Bitwarden restores
-│   ├── restore-ssh.sh        # Restores SSH keys from Bitwarden
+│   ├── check-vault-items.sh  # Validates required Bitwarden items exist
+│   ├── sync-to-bitwarden.sh  # Syncs local changes back to Bitwarden
+│   ├── restore-ssh.sh        # Restores SSH keys and config from Bitwarden
 │   ├── restore-aws.sh        # Restores ~/.aws/config & ~/.aws/credentials
-│   └── restore-env.sh        # Restores environment secrets to ~/.local
+│   ├── restore-env.sh        # Restores environment secrets to ~/.local
+│   └── restore-git.sh        # Restores ~/.gitconfig from Bitwarden
 └── zsh
     ├── p10k.zsh              # Powerlevel10k theme config
     └── zshrc                 # Main Zsh configuration
@@ -357,13 +363,16 @@ After this finishes:
 
 - Reads Bitwarden **Secure Note** items:
 
-  - `"SSH-GitHub-Enterprise"`
-  - `"SSH-GitHub-Blackwell"`
+  - `"SSH-GitHub-Enterprise"` → SSH key for GitHub Enterprise/SSO
+  - `"SSH-GitHub-Blackwell"` → SSH key for Blackwell Systems GitHub
+  - `"SSH-Config"` → SSH config file with host mappings
 
-- Each item's **notes** field should contain:
+- Each SSH key item's **notes** field should contain:
 
   - The full **OpenSSH private key** block.
   - Optionally the corresponding `ssh-ed25519 ...` public key line.
+
+- The `SSH-Config` item's **notes** field should contain your full `~/.ssh/config` file.
 
 The script:
 
@@ -373,10 +382,11 @@ The script:
   - `~/.ssh/id_ed25519_enterprise_ghub.pub`
   - `~/.ssh/id_ed25519_blackwell`
   - `~/.ssh/id_ed25519_blackwell.pub`
+  - `~/.ssh/config`
 
-- Sets appropriate permissions (`600` for private, `644` for public).
+- Sets appropriate permissions (`600` for private keys and config, `644` for public keys).
 
-> **Important:** The exact item names (`SSH-GitHub-Enterprise`, `SSH-GitHub-Blackwell`) need to match.
+> **Important:** The exact item names (`SSH-GitHub-Enterprise`, `SSH-GitHub-Blackwell`, `SSH-Config`) must match.
 
 ---
 
@@ -416,6 +426,50 @@ The script:
   # Example usage in your shell:
   source ~/.local/load-env.sh
   ```
+
+---
+
+### `restore-git.sh`
+
+- Expects a **Secure Note** item named `"Git-Config"`.
+
+- The **notes** field should contain your full `~/.gitconfig` file.
+
+The script:
+
+- Writes this to `~/.gitconfig` (backing up any existing file).
+- Sets permissions to `644`.
+
+---
+
+## Validating Vault Items Before Restore
+
+Before running `bootstrap-vault.sh` on a new machine, you can verify all required Bitwarden items exist:
+
+```bash
+./vault/check-vault-items.sh
+```
+
+Example output:
+
+```
+=== Required Items ===
+[OK] SSH-GitHub-Enterprise
+[OK] SSH-GitHub-Blackwell
+[OK] SSH-Config
+[OK] AWS-Config
+[OK] AWS-Credentials
+[OK] Git-Config
+
+=== Optional Items ===
+[OK] Environment-Secrets
+
+========================================
+All required vault items present!
+You can safely run: ./bootstrap-vault.sh
+```
+
+If items are missing, the script will tell you which ones and exit with an error.
 
 ---
 
@@ -521,7 +575,49 @@ Each note will contain the **private key** (already passphrase-protected by Open
 
 ---
 
-### 5. Push environment secrets into `Environment-Secrets` (optional)
+### 5. Push SSH config into `SSH-Config`
+
+Your SSH config maps hostnames to identity files, which is essential for multi-key setups:
+
+```bash
+SSH_CONFIG_JSON=$(jq -Rs --arg name "SSH-Config" \
+  '{ type: 2, name: $name, secureNote: { type: 0 }, notes: . }' \
+  < ~/.ssh/config)
+
+SSH_CONFIG_ENC=$(printf '%s' "$SSH_CONFIG_JSON" | bw encode)
+
+bw create item "$SSH_CONFIG_ENC" --session "$BW_SESSION"
+```
+
+To **update** it later:
+
+```bash
+SSH_CONFIG_ID=$(bw list items --search "SSH-Config" --session "$BW_SESSION" | jq -r '.[0].id')
+printf '%s' "$SSH_CONFIG_JSON" | bw encode | bw edit item "$SSH_CONFIG_ID" --session "$BW_SESSION"
+```
+
+Example `~/.ssh/config` content:
+
+```text
+# GitHub-Enterprise - BWH (current SSO / enterprise alias)
+Host github-sso
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_enterprise_ghub
+  IdentitiesOnly yes
+  AddKeysToAgent yes
+
+# GitHub - Business (Blackwell Systems)
+Host github-blackwell
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_blackwell
+  IdentitiesOnly yes
+```
+
+---
+
+### 6. Push environment secrets into `Environment-Secrets` (optional)
 
 1. First, create a local file with the secrets you want portable:
 
@@ -548,6 +644,29 @@ bw create item "$ENV_ENC" --session "$BW_SESSION"
 ```
 
 Now `restore-env.sh` will bring this back on any new machine and create `~/.local/load-env.sh` to load it.
+
+---
+
+### 7. Push Git config into `Git-Config`
+
+Your Git configuration contains your identity (name, email) and preferences:
+
+```bash
+GIT_CONFIG_JSON=$(jq -Rs --arg name "Git-Config" \
+  '{ type: 2, name: $name, secureNote: { type: 0 }, notes: . }' \
+  < ~/.gitconfig)
+
+GIT_CONFIG_ENC=$(printf '%s' "$GIT_CONFIG_JSON" | bw encode)
+
+bw create item "$GIT_CONFIG_ENC" --session "$BW_SESSION"
+```
+
+To **update** it later:
+
+```bash
+GIT_CONFIG_ID=$(bw list items --search "Git-Config" --session "$BW_SESSION" | jq -r '.[0].id')
+printf '%s' "$GIT_CONFIG_JSON" | bw encode | bw edit item "$GIT_CONFIG_ID" --session "$BW_SESSION"
+```
 
 ---
 
@@ -673,6 +792,111 @@ Host newservice.example.com
     User git
 ```
 
+### 5. Update SSH config in Bitwarden
+
+After editing `~/.ssh/config`, sync it back:
+
+```bash
+./vault/sync-to-bitwarden.sh SSH-Config
+```
+
+### 6. Update zshrc for auto-add (optional)
+
+If you want the new key auto-loaded into the SSH agent, add to `zsh/zshrc`:
+
+```bash
+_ssh_add_if_missing ~/.ssh/id_ed25519_newservice
+```
+
+---
+
+## Syncing Local Changes to Bitwarden
+
+When you modify local config files (`~/.ssh/config`, `~/.aws/config`, `~/.gitconfig`, etc.), sync them back to Bitwarden so other machines can restore the updates.
+
+### Preview changes (dry run)
+
+```bash
+./vault/sync-to-bitwarden.sh --dry-run --all
+```
+
+### Sync specific items
+
+```bash
+./vault/sync-to-bitwarden.sh SSH-Config           # Just SSH config
+./vault/sync-to-bitwarden.sh AWS-Config Git-Config  # Multiple items
+```
+
+### Sync all items
+
+```bash
+./vault/sync-to-bitwarden.sh --all
+```
+
+### Supported items
+
+| Item | Local File |
+|------|------------|
+| `SSH-Config` | `~/.ssh/config` |
+| `AWS-Config` | `~/.aws/config` |
+| `AWS-Credentials` | `~/.aws/credentials` |
+| `Git-Config` | `~/.gitconfig` |
+| `Environment-Secrets` | `~/.local/env.secrets` |
+
+---
+
+## Maintenance Checklists
+
+### Adding a New SSH Key
+
+Complete checklist when adding a new SSH identity:
+
+- [ ] Generate key pair: `ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey`
+- [ ] Push to Bitwarden (see "Adding New SSH Keys" section above)
+- [ ] Update `vault/restore-ssh.sh` - add `restore_key_note` call
+- [ ] Update `vault/check-vault-items.sh` - add to `REQUIRED_ITEMS` array
+- [ ] Update `~/.ssh/config` with Host entry
+- [ ] Sync SSH config: `./vault/sync-to-bitwarden.sh SSH-Config`
+- [ ] Update `zsh/zshrc` - add `_ssh_add_if_missing` line (optional)
+- [ ] Commit dotfiles changes
+
+### Updating AWS Credentials
+
+When AWS credentials or config change:
+
+- [ ] Edit `~/.aws/config` and/or `~/.aws/credentials`
+- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh AWS-Config AWS-Credentials`
+- [ ] Verify on other machines: `bw-restore`
+
+### Adding a New Environment Variable
+
+- [ ] Edit `~/.local/env.secrets`
+- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh Environment-Secrets`
+- [ ] Source on current shell: `source ~/.local/load-env.sh`
+
+### Modifying SSH Config (add hosts, change options)
+
+- [ ] Edit `~/.ssh/config`
+- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh SSH-Config`
+- [ ] Restore on other machines: `bw-restore`
+
+### Updating Git Config
+
+- [ ] Edit `~/.gitconfig`
+- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh Git-Config`
+
+### New Machine Setup
+
+Complete checklist for a fresh machine:
+
+1. [ ] Clone dotfiles: `git clone ... ~/workspace/dotfiles`
+2. [ ] Run bootstrap: `./bootstrap-mac.sh` or `./bootstrap-lima.sh`
+3. [ ] Login to Bitwarden: `bw login`
+4. [ ] Validate vault items: `./vault/check-vault-items.sh`
+5. [ ] Restore secrets: `bw-restore`
+6. [ ] Run health check: `./check-health.sh`
+7. [ ] Restart shell or `source ~/.zshrc`
+
 ---
 
 ## Using the Dotfiles Day-to-Day
@@ -704,6 +928,18 @@ Host newservice.example.com
 
 - `bw-restore` → Run Bitwarden vault bootstrap
 
+**Clipboard (cross-platform):**
+
+- `copy` / `cb` → Copy stdin to clipboard (works on macOS, Linux X11/Wayland, WSL)
+- `paste` / `cbp` → Paste clipboard to stdout
+
+```bash
+# Examples
+cat file.txt | copy
+echo "hello" | copy
+paste > pasted.txt
+```
+
 ### Claude helpers
 
 - `claude-bedrock "prompt"`  
@@ -731,12 +967,18 @@ The script verifies:
 
 - **Symlinks**: `~/.zshrc`, `~/.p10k.zsh`, Ghostty config, Claude workspace
 - **Required commands**: brew, zsh, git, jq, bw, aws
-- **SSH keys**: Existence and correct permissions (600 for private, 644 for public)
+- **SSH keys and config**: Existence and correct permissions (600 for private keys and config, 644 for public keys)
 - **AWS configuration**: Config and credentials files with correct permissions
 - **Environment secrets**: `~/.local/env.secrets` and loader script
 - **Bitwarden status**: Login and unlock state
 - **Shell configuration**: Default shell, plugin availability
 - **Workspace layout**: Required directories exist
+
+**Auto-fix mode**: Run with `--fix` to automatically correct permission issues:
+
+```bash
+./check-health.sh --fix
+```
 
 Example output:
 
@@ -752,6 +994,8 @@ Example output:
 
 === SSH Keys ===
 [OK] id_ed25519_blackwell (permissions: 600)
+[OK] id_ed25519_blackwell.pub (permissions: 644)
+[OK] ~/.ssh/config (permissions: 600)
 
 ========================================
 Health check passed!
