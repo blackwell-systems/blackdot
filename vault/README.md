@@ -18,6 +18,7 @@ This directory contains scripts for **bidirectional secret management** with Bit
 | `restore-env.sh` | Restores env secrets | Called by bootstrap |
 | `restore-git.sh` | Restores gitconfig | Called by bootstrap |
 | `sync-to-bitwarden.sh` | Syncs local → Bitwarden | `./sync-to-bitwarden.sh --all` |
+| `delete-vault-item.sh` | Deletes items from vault | `./delete-vault-item.sh ITEM` |
 | `check-vault-items.sh` | Pre-flight validation | `./check-vault-items.sh` |
 | `list-vault-items.sh` | Debug/inventory tool | `./list-vault-items.sh [-v]` |
 
@@ -177,6 +178,34 @@ Pushes local config changes back to Bitwarden.
 
 ---
 
+### `delete-vault-item.sh`
+
+Deletes items from Bitwarden vault with safety checks.
+
+```bash
+# Preview deletion (recommended first step)
+./delete-vault-item.sh --dry-run TEST-NOTE
+
+# Delete with confirmation prompt
+./delete-vault-item.sh TEST-NOTE
+
+# Delete multiple items without prompts
+./delete-vault-item.sh --force OLD-KEY OTHER-ITEM
+
+# List all items (to find exact names)
+./delete-vault-item.sh --list
+```
+
+**Safety features:**
+- Protected items (SSH-*, AWS-*, Git-Config, etc.) require typing the item name to confirm
+- Non-protected items prompt for y/N confirmation (bypass with `--force`)
+- `--dry-run` shows what would be deleted without making changes
+- Shows item details (type, size, modified date) before deletion
+
+**When to use:** Cleaning up test items, removing old/unused secrets.
+
+---
+
 ### `check-vault-items.sh`
 
 Pre-flight validation - ensures required Bitwarden items exist.
@@ -277,9 +306,10 @@ Debug tool - lists all Bitwarden items relevant to dotfiles.
 │   ═══════════════════════════════════════════════════════════   │
 │                                                                  │
 │   UTILITIES:                                                     │
-│   • check-vault-items.sh  →  Pre-flight validation               │
-│   • list-vault-items.sh   →  Debug/inventory tool                │
-│   • bootstrap-vault.sh    →  Orchestrates all restore-*.sh       │
+│   • check-vault-items.sh   →  Pre-flight validation              │
+│   • list-vault-items.sh    →  Debug/inventory tool               │
+│   • delete-vault-item.sh   →  Remove items from vault            │
+│   • bootstrap-vault.sh     →  Orchestrates all restore-*.sh      │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
