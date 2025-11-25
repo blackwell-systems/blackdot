@@ -12,6 +12,12 @@ brew "tree"
 brew "zellij"
 brew "node"
 
+# Modern CLI enhancements
+brew "fzf"       # Fuzzy finder (Ctrl+R, file search)
+brew "eza"       # Modern ls replacement
+brew "fd"        # Fast find alternative (pairs with fzf)
+brew "ripgrep"   # Fast grep alternative (rg)
+
 # Containers / dev
 brew "docker"
 brew "docker-completion"

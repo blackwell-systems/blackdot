@@ -29,8 +29,15 @@ All notable changes to this dotfiles repository will be documented in this file.
 
 #### Health & Maintenance
 - `check-health.sh` with `--fix` flag for auto-repairs
+- `check-health.sh` with `--drift` flag for local vs Bitwarden comparison
 - Comprehensive maintenance checklists in README
 - Architecture diagram
+
+#### Modern CLI Tools
+- `fzf` - Fuzzy finder with Ctrl+R history search, Ctrl+T file picker
+- `eza` - Modern ls replacement with icons, git status, tree view
+- `fd` - Fast find alternative (integrates with fzf)
+- `ripgrep` - Fast grep alternative (rg)
 
 #### Documentation
 - Complete README with all workflows documented
