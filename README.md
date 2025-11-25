@@ -142,6 +142,49 @@ There are two big pillars:
 
    Goal: restore **SSH keys**, **AWS config/credentials**, and **env secrets** from Bitwarden.
 
+### Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         DOTFILES ARCHITECTURE                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   NEW MACHINE                                                                │
+│       │                                                                      │
+│       ▼                                                                      │
+│  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐                 │
+│  │  Bootstrap   │────▶│   Restore    │────▶│   Verify     │                 │
+│  │  (packages)  │     │  (secrets)   │     │  (health)    │                 │
+│  │              │     │              │     │              │                 │
+│  │ bootstrap-   │     │ bootstrap-   │     │ check-       │                 │
+│  │ mac/lima.sh  │     │ vault.sh     │     │ health.sh    │                 │
+│  └──────────────┘     └──────────────┘     └──────────────┘                 │
+│         │                    ▲                     │                        │
+│         │                    │                     │                        │
+│         ▼                    │                     ▼                        │
+│  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐                 │
+│  │   Brewfile   │     │  Bitwarden   │◀────│  Sync Back   │                 │
+│  │   (tools)    │     │   (vault)    │     │  (changes)   │                 │
+│  │              │     │              │     │              │
+│  │ brew, zsh,   │     │ SSH keys,    │     │ sync-to-     │                 │
+│  │ plugins...   │     │ AWS, Git,    │     │ bitwarden.sh │                 │
+│  └──────────────┘     │ env secrets  │     └──────────────┘                 │
+│                       └──────────────┘                                      │
+│                              │                                              │
+│                              ▼                                              │
+│                    ┌──────────────────┐                                     │
+│                    │ check-vault-     │                                     │
+│                    │ items.sh         │                                     │
+│                    │ (pre-flight)     │                                     │
+│                    └──────────────────┘                                     │
+│                                                                              │
+│   FLOW: Clone repo → Bootstrap → Validate vault → Restore → Health check   │
+│         ───────────────────────────────────────────────────────────────     │
+│         Edit configs locally → Sync back to Bitwarden → Restore elsewhere  │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
 ---
 
 ## Bootstrapping macOS from Scratch
