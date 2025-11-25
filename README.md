@@ -677,14 +677,30 @@ Host newservice.example.com
 
 ### Aliases (defined in zshrc)
 
-- `gst` → `git status`  
-- `gco` → `git checkout`  
-- `gp`  → `git push`  
-- `gl`  → `git pull`  
-- `cws` → `cd ~/workspace`  
-- `ccode` → `cd ~/workspace/code`  
-- `cwhite` → `cd ~/whitepapers`  
-- `cpat` → `cd ~/patent-pool`
+**Git shortcuts:**
+
+- `gst` → `git status`
+- `gss` → `git status -sb`
+- `ga` / `gaa` → `git add` / `git add --all`
+- `gco` / `gcb` → `git checkout` / `git checkout -b`
+- `gd` / `gds` → `git diff` / `git diff --staged`
+- `gpl` → `git pull`
+- `gp` / `gpf` → `git push` / `git push --force-with-lease`
+- `gcm` → `git commit -m`
+- `gca` → `git commit --amend`
+- `gl1` → `git log --oneline -n 15`
+- `glg` → `git log --oneline --graph --all`
+
+**Navigation:**
+
+- `cws` → `cd ~/workspace`
+- `ccode` → `cd ~/workspace/code`
+- `cwhite` → `cd ~/workspace/whitepapers`
+- `cpat` → `cd ~/workspace/patent-pool`
+
+**Vault:**
+
+- `bw-restore` → Run Bitwarden vault bootstrap
 
 ### Claude helpers
 
