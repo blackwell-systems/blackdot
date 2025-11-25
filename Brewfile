@@ -11,6 +11,7 @@ brew "tmux"
 brew "tree"
 brew "zellij"
 brew "node"
+brew "colordiff"
 
 # Containers / dev
 brew "docker"
