@@ -104,6 +104,9 @@ alias ccode='cd "$WORKSPACE/code"'
 alias cwhite='cd "$WORKSPACE/whitepapers"'
 alias cpat='cd "$WORKSPACE/patent-pool"'
 
+# Bitwarden vault bootstrap helper
+alias bw-restore='$HOME/workspace/dotfiles/vault/bootstrap-vault.sh'
+
 # Load your custom env block if it exists (macOS uses this)
 if [ -f "$HOME/.local/bin/env" ]; then
   . "$HOME/.local/bin/env"
