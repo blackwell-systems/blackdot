@@ -6,12 +6,25 @@ This repository contains my personal dotfiles for **macOS** and **Lima** (Linux)
 
 The dotfiles are organized as follows:
 
-~/workspace/dotfiles/
-├── zsh/
-│   ├── zshrc
-│   └── p10k.zsh
-└── ghostty/
-    └── config
+```text
+~/workspace/dotfiles
+├── bootstrap-dotfiles.sh     # Shared symlink bootstrap (zshrc, p10k, Ghostty)
+├── bootstrap-lima.sh         # Lima / Linux-specific bootstrap wrapper
+├── bootstrap-mac.sh          # macOS-specific bootstrap wrapper
+├── Brewfile                  # Unified Homebrew bundle (macOS + Lima)
+├── ghostty
+│   └── config                # Ghostty terminal config
+├── lima
+│   └── lima.yaml             # Lima VM config (host-side)
+├── vault
+│   ├── bootstrap-vault.sh    # Orchestrates all Bitwarden restores
+│   ├── restore-ssh.sh        # Restores SSH keys from Bitwarden
+│   ├── restore-aws.sh        # Restores ~/.aws/config & ~/.aws/credentials
+│   └── restore-env.sh        # Restores environment secrets to ~/.local
+└── zsh
+    ├── p10k.zsh              # Powerlevel10k theme config
+    └── zshrc                 # Main Zsh configuration
+```
 
 - **zshrc**: Main Zsh configuration file  
 - **p10k.zsh**: Powerlevel10k theme configuration  
