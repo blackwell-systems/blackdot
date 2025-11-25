@@ -1,0 +1,224 @@
+# =========================
+# Powerlevel10k instant prompt (must stay near top)
+# =========================
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Detect OS
+OS="$(uname -s)"
+
+# =========================
+# OS-SPECIFIC SETUP
+# =========================
+case "$OS" in
+  Darwin)
+    # ---------- macOS: Oh My Zsh + brew-based plugins ----------
+    export ZSH="$HOME/.oh-my-zsh"
+    # Let brew-managed Powerlevel10k handle the theme; disable OMZ theme selection
+    ZSH_THEME=""
+    plugins=(git)
+
+    # Load Oh My Zsh framework if installed
+    if [ -d "$ZSH" ]; then
+      source "$ZSH/oh-my-zsh.sh"
+    fi
+
+    # Homebrew-based prompt + plugins
+    if command -v brew >/dev/null 2>&1; then
+      BREW_PREFIX="$(brew --prefix)"
+
+      # zsh-autosuggestions
+      if [ -f "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
+        source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+      fi
+
+      # Powerlevel10k theme
+      if [ -f "$BREW_PREFIX/share/powerlevel10k/powerlevel10k.zsh-theme" ]; then
+        source "$BREW_PREFIX/share/powerlevel10k/powerlevel10k.zsh-theme"
+      fi
+    fi
+    ;;
+
+  Linux)
+    # ---------- Linux (Lima dev-ubuntu) ----------
+
+    # Fix TERM so apps like nano don’t choke on xterm-ghostty
+    export TERM=xterm-256color
+
+    # Lima recommendation: make sure system tools are in PATH
+    PATH="$PATH:/usr/sbin:/sbin"
+    export PATH
+
+    # Homebrew (linuxbrew) bootstrap
+    if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
+      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    fi
+
+    if command -v brew >/dev/null 2>&1; then
+      BREW_PREFIX="$(brew --prefix)"
+
+      # zsh-autosuggestions
+      if [ -f "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
+        source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+      fi
+
+      # Powerlevel10k theme
+      if [ -f "$BREW_PREFIX/share/powerlevel10k/powerlevel10k.zsh-theme" ]; then
+        source "$BREW_PREFIX/share/powerlevel10k/powerlevel10k.zsh-theme"
+      fi
+    fi
+
+    # Enable ls colors on Linux
+    if command -v dircolors >/dev/null 2>&1; then
+      eval "$(dircolors -b)"
+    fi
+    alias ls='ls --color=auto'
+    alias ll='ls -lh --color=auto'
+    alias la='ls -Ah --color=auto'
+    alias l='ls -CF --color=auto'
+
+    # Snap (if present on Linux)
+    if [ -d /snap/bin ]; then
+      export PATH="/snap/bin:$PATH"
+    fi
+    ;;
+esac
+
+# =========================
+# SHARED PROMPT CONFIG
+# =========================
+# To customize prompt, run p10k configure or edit ~/.p10k.zsh.
+[[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
+
+# =========================
+# SHARED ENV / TOOLING
+# =========================
+
+# Shared workspace (macOS + Lima both use ~/workspace now)
+export WORKSPACE="$HOME/workspace"
+
+# Convenience navigation aliases
+alias cws='cd "$WORKSPACE"'
+alias ccode='cd "$WORKSPACE/code"'
+alias cwhite='cd "$WORKSPACE/whitepapers"'
+alias cpat='cd "$WORKSPACE/patent-pool"'
+
+# Load your custom env block if it exists (macOS uses this)
+if [ -f "$HOME/.local/bin/env" ]; then
+  . "$HOME/.local/bin/env"
+fi
+
+# SDKMAN
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+# Best Western config
+export ENV=prod
+export BWH_CONFIG_DIR="$HOME/.config/bwh"
+
+# Node / nvm setup (safe on both OSes)
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+
+# AWS SSO login helper
+awslogin() {
+  local p="${1:-dev-profile}"
+  echo "Logging in to AWS SSO profile: $p"
+  aws sso login --profile "$p"
+}
+
+# =========================
+# Claude routing helpers (shared)
+# =========================
+
+# Centralize Bedrock config here so you only edit in one place.
+_CLAUDE_BEDROCK_PROFILE="dev-profile"            # SSO profile name
+_CLAUDE_BEDROCK_REGION="us-west-2"               # Bedrock region
+_CLAUDE_BEDROCK_MODEL="us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+
+# Optional fast model (leave as-is if you don't have this inference profile)
+_CLAUDE_BEDROCK_FAST_MODEL="us.anthropic.claude-3-5-haiku-20241022-v1:0"
+
+CLAUDE_CODE_MAX_OUTPUT_TOKENS=60000
+
+# --- claude-bedrock ---
+claude-bedrock() {
+    AWS_PROFILE="$_CLAUDE_BEDROCK_PROFILE" \
+    AWS_REGION="$_CLAUDE_BEDROCK_REGION" \
+    CLAUDE_CODE_USE_BEDROCK=1 \
+    ANTHROPIC_MODEL="$_CLAUDE_BEDROCK_MODEL" \
+    ANTHROPIC_SMALL_FAST_MODEL="$_CLAUDE_BEDROCK_FAST_MODEL" \
+    claude "$@"
+}
+
+# --- claude-max ---
+claude-max() {
+    # kill Bedrock routing vars
+    unset CLAUDE_CODE_USE_BEDROCK
+    unset AWS_PROFILE
+    unset AWS_REGION
+    unset AWS_ACCESS_KEY_ID
+    unset AWS_SECRET_ACCESS_KEY
+    unset AWS_SESSION_TOKEN
+
+    # kill direct API overrides so it uses your logged-in Max session
+    unset ANTHROPIC_API_KEY
+    unset ANTHROPIC_BASE_URL
+    unset ANTHROPIC_AUTH_TOKEN
+
+    # don't leak Bedrock model IDs into Max mode
+    unset ANTHROPIC_MODEL
+    unset ANTHROPIC_SMALL_FAST_MODEL
+
+    claude "$@"
+}
+
+# --- claude-run ---
+claude-run() {
+    local MODE="$1"
+    shift
+
+    if [ "$MODE" = "bedrock" ]; then
+        AWS_PROFILE="$_CLAUDE_BEDROCK_PROFILE" \
+        AWS_REGION="$_CLAUDE_BEDROCK_REGION" \
+        CLAUDE_CODE_USE_BEDROCK=1 \
+        ANTHROPIC_MODEL="$_CLAUDE_BEDROCK_MODEL" \
+        ANTHROPIC_SMALL_FAST_MODEL="$_CLAUDE_BEDROCK_FAST_MODEL" \
+        claude "$@"
+    elif [ "$MODE" = "max" ]; then
+        unset CLAUDE_CODE_USE_BEDROCK
+        unset AWS_PROFILE
+        unset AWS_REGION
+        unset AWS_ACCESS_KEY_ID
+        unset AWS_SECRET_ACCESS_KEY
+        unset AWS_SESSION_TOKEN
+
+        unset ANTHROPIC_API_KEY
+        unset ANTHROPIC_BASE_URL
+        unset ANTHROPIC_AUTH_TOKEN
+
+        unset ANTHROPIC_MODEL
+        unset ANTHROPIC_SMALL_FAST_MODEL
+
+        claude "$@"
+    else
+        echo "usage: claude-run {bedrock|max} [args...]"
+        return 1
+    fi
+}
+
+# Convenience aliases
+alias icode-bedrock='claude-bedrock'
+alias icode-max='claude-max'
+
+# =========================
+# zsh-syntax-highlighting (must be at the end)
+# =========================
+if command -v brew >/dev/null 2>&1; then
+  BREW_PREFIX="${BREW_PREFIX:-$(brew --prefix 2>/dev/null)}"
+  if [ -n "$BREW_PREFIX" ] && [ -f "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
+    source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+  fi
+fi
