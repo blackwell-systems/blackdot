@@ -99,6 +99,33 @@ if [ -f "$HOME/.local/bin/env" ]; then
   . "$HOME/.local/bin/env"
 fi
 
+# =========================
+# SSH Agent (lazy start + auto-add keys)
+# =========================
+# Auto-start ssh-agent if not running (common on Lima/Linux)
+# macOS uses Keychain, so SSH_AUTH_SOCK is usually set by launchd
+if [[ -z "$SSH_AUTH_SOCK" ]]; then
+  eval "$(ssh-agent -s)" > /dev/null
+fi
+
+# Add keys if not already added (silent, only if key exists)
+_ssh_add_if_missing() {
+  local key="$1"
+  [[ ! -f "$key" ]] && return 0
+
+  # Get fingerprint of the key file
+  local fp
+  fp="$(ssh-keygen -lf "$key" 2>/dev/null | awk '{print $2}')" || return 0
+
+  # Check if already loaded
+  if ! ssh-add -l 2>/dev/null | grep -qF "$fp"; then
+    ssh-add -q "$key" 2>/dev/null
+  fi
+}
+
+_ssh_add_if_missing ~/.ssh/id_ed25519_enterprise_ghub
+_ssh_add_if_missing ~/.ssh/id_ed25519_blackwell
+
 # SDKMAN
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
