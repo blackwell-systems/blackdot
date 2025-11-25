@@ -6,6 +6,8 @@
 brew "git"
 brew "zsh"
 brew "gh"
+brew "bat"
+brew "eza"
 brew "tmux"
 brew "tree"
 brew "zellij"
