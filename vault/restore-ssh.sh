@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ============================================================
 # FILE: vault/restore-ssh.sh
-# Restores SSH keys from Bitwarden Secure Notes
+# Restores SSH keys and config from Bitwarden Secure Notes
 # ============================================================
 set -euo pipefail
 
@@ -72,6 +72,40 @@ restore_key_note() {
     echo "       - $pub_path"
 }
 
+# Restore SSH config file from Bitwarden Secure Note
+restore_ssh_config() {
+    local item_name="SSH-Config"
+    local config_path="$SSH_DIR/config"
+
+    echo "Restoring SSH config from Bitwarden item: $item_name"
+
+    # Fetch item from Bitwarden (graceful failure if not found)
+    local json notes
+    if ! json="$(bw get item "$item_name" --session "$SESSION" 2>/dev/null)"; then
+        echo "  [SKIP] Item '$item_name' not found in Bitwarden."
+        return 0
+    fi
+
+    # Extract notes field (the entire config is stored as notes)
+    notes="$(printf '%s\n' "$json" | jq -r '.notes // ""')"
+    if [[ -z "$notes" || "$notes" == "null" ]]; then
+        echo "  [SKIP] Item '$item_name' has empty notes."
+        return 0
+    fi
+
+    # Backup existing config if present
+    if [[ -f "$config_path" ]]; then
+        cp "$config_path" "${config_path}.bak-$(date +%Y%m%d%H%M%S)"
+        echo "  [INFO] Backed up existing config."
+    fi
+
+    # Write the config file
+    printf '%s\n' "$notes" > "$config_path"
+    chmod 600 "$config_path"
+
+    echo "  [OK] Restored: $config_path"
+}
+
 # ============================================================
 # Restore configured SSH identities
 # ============================================================
@@ -88,4 +122,9 @@ restore_key_note \
     "$SSH_DIR/id_ed25519_blackwell" \
     "$SSH_DIR/id_ed25519_blackwell.pub"
 
-echo "SSH key restore complete."
+# ============================================================
+# Restore SSH config
+# ============================================================
+restore_ssh_config
+
+echo "SSH restore complete."

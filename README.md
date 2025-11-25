@@ -357,13 +357,16 @@ After this finishes:
 
 - Reads Bitwarden **Secure Note** items:
 
-  - `"SSH-GitHub-Enterprise"`
-  - `"SSH-GitHub-Blackwell"`
+  - `"SSH-GitHub-Enterprise"` → SSH key for GitHub Enterprise/SSO
+  - `"SSH-GitHub-Blackwell"` → SSH key for Blackwell Systems GitHub
+  - `"SSH-Config"` → SSH config file with host mappings
 
-- Each item's **notes** field should contain:
+- Each SSH key item's **notes** field should contain:
 
   - The full **OpenSSH private key** block.
   - Optionally the corresponding `ssh-ed25519 ...` public key line.
+
+- The `SSH-Config` item's **notes** field should contain your full `~/.ssh/config` file.
 
 The script:
 
@@ -373,10 +376,11 @@ The script:
   - `~/.ssh/id_ed25519_enterprise_ghub.pub`
   - `~/.ssh/id_ed25519_blackwell`
   - `~/.ssh/id_ed25519_blackwell.pub`
+  - `~/.ssh/config`
 
-- Sets appropriate permissions (`600` for private, `644` for public).
+- Sets appropriate permissions (`600` for private keys and config, `644` for public keys).
 
-> **Important:** The exact item names (`SSH-GitHub-Enterprise`, `SSH-GitHub-Blackwell`) need to match.
+> **Important:** The exact item names (`SSH-GitHub-Enterprise`, `SSH-GitHub-Blackwell`, `SSH-Config`) must match.
 
 ---
 
@@ -521,7 +525,49 @@ Each note will contain the **private key** (already passphrase-protected by Open
 
 ---
 
-### 5. Push environment secrets into `Environment-Secrets` (optional)
+### 5. Push SSH config into `SSH-Config`
+
+Your SSH config maps hostnames to identity files, which is essential for multi-key setups:
+
+```bash
+SSH_CONFIG_JSON=$(jq -Rs --arg name "SSH-Config" \
+  '{ type: 2, name: $name, secureNote: { type: 0 }, notes: . }' \
+  < ~/.ssh/config)
+
+SSH_CONFIG_ENC=$(printf '%s' "$SSH_CONFIG_JSON" | bw encode)
+
+bw create item "$SSH_CONFIG_ENC" --session "$BW_SESSION"
+```
+
+To **update** it later:
+
+```bash
+SSH_CONFIG_ID=$(bw list items --search "SSH-Config" --session "$BW_SESSION" | jq -r '.[0].id')
+printf '%s' "$SSH_CONFIG_JSON" | bw encode | bw edit item "$SSH_CONFIG_ID" --session "$BW_SESSION"
+```
+
+Example `~/.ssh/config` content:
+
+```text
+# GitHub-Enterprise - BWH (current SSO / enterprise alias)
+Host github-sso
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_enterprise_ghub
+  IdentitiesOnly yes
+  AddKeysToAgent yes
+
+# GitHub - Business (Blackwell Systems)
+Host github-blackwell
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_blackwell
+  IdentitiesOnly yes
+```
+
+---
+
+### 6. Push environment secrets into `Environment-Secrets` (optional)
 
 1. First, create a local file with the secrets you want portable:
 
@@ -743,12 +789,18 @@ The script verifies:
 
 - **Symlinks**: `~/.zshrc`, `~/.p10k.zsh`, Ghostty config, Claude workspace
 - **Required commands**: brew, zsh, git, jq, bw, aws
-- **SSH keys**: Existence and correct permissions (600 for private, 644 for public)
+- **SSH keys and config**: Existence and correct permissions (600 for private keys and config, 644 for public keys)
 - **AWS configuration**: Config and credentials files with correct permissions
 - **Environment secrets**: `~/.local/env.secrets` and loader script
 - **Bitwarden status**: Login and unlock state
 - **Shell configuration**: Default shell, plugin availability
 - **Workspace layout**: Required directories exist
+
+**Auto-fix mode**: Run with `--fix` to automatically correct permission issues:
+
+```bash
+./check-health.sh --fix
+```
 
 Example output:
 
@@ -764,6 +816,8 @@ Example output:
 
 === SSH Keys ===
 [OK] id_ed25519_blackwell (permissions: 600)
+[OK] id_ed25519_blackwell.pub (permissions: 644)
+[OK] ~/.ssh/config (permissions: 600)
 
 ========================================
 Health check passed!
