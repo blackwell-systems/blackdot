@@ -43,6 +43,10 @@ images:
 
 memory: 8GiB
 
+# SSH agent forwarding - use macOS keys inside Lima without copying them
+ssh:
+  forwardAgent: true
+
 mounts:
   - location: "~"
     writable: true

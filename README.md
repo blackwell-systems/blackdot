@@ -17,6 +17,7 @@ This repository contains my personal dotfiles for **macOS** and **Lima** (Linux)
 - [Vault / Bitwarden Bootstrap](#vault--bitwarden-bootstrap)
 - [Restoring from Bitwarden on Any Machine](#restoring-from-bitwarden-on-any-machine)
 - [Scripts: What Each Restore Script Expects](#scripts-what-each-restore-script-expects)
+- [Validating Vault Items Before Restore](#validating-vault-items-before-restore)
 - [One-Time: Push Current Files into Bitwarden](#one-time-push-current-files-into-bitwarden-for-future-you)
 - [Rotating / Updating Secrets in Bitwarden](#rotating--updating-secrets-in-bitwarden)
 - [Adding New SSH Keys](#adding-new-ssh-keys)
@@ -72,9 +73,11 @@ The dotfiles are organized as follows:
 │   └── lima.yaml             # Lima VM config (host-side)
 ├── vault
 │   ├── bootstrap-vault.sh    # Orchestrates all Bitwarden restores
-│   ├── restore-ssh.sh        # Restores SSH keys from Bitwarden
+│   ├── check-vault-items.sh  # Validates required Bitwarden items exist
+│   ├── restore-ssh.sh        # Restores SSH keys and config from Bitwarden
 │   ├── restore-aws.sh        # Restores ~/.aws/config & ~/.aws/credentials
-│   └── restore-env.sh        # Restores environment secrets to ~/.local
+│   ├── restore-env.sh        # Restores environment secrets to ~/.local
+│   └── restore-git.sh        # Restores ~/.gitconfig from Bitwarden
 └── zsh
     ├── p10k.zsh              # Powerlevel10k theme config
     └── zshrc                 # Main Zsh configuration
@@ -423,6 +426,50 @@ The script:
 
 ---
 
+### `restore-git.sh`
+
+- Expects a **Secure Note** item named `"Git-Config"`.
+
+- The **notes** field should contain your full `~/.gitconfig` file.
+
+The script:
+
+- Writes this to `~/.gitconfig` (backing up any existing file).
+- Sets permissions to `644`.
+
+---
+
+## Validating Vault Items Before Restore
+
+Before running `bootstrap-vault.sh` on a new machine, you can verify all required Bitwarden items exist:
+
+```bash
+./vault/check-vault-items.sh
+```
+
+Example output:
+
+```
+=== Required Items ===
+[OK] SSH-GitHub-Enterprise
+[OK] SSH-GitHub-Blackwell
+[OK] SSH-Config
+[OK] AWS-Config
+[OK] AWS-Credentials
+[OK] Git-Config
+
+=== Optional Items ===
+[OK] Environment-Secrets
+
+========================================
+All required vault items present!
+You can safely run: ./bootstrap-vault.sh
+```
+
+If items are missing, the script will tell you which ones and exit with an error.
+
+---
+
 ## One-Time: Push Current Files into Bitwarden (for Future-You)
 
 The idea: run these **once** on a "known-good" machine (your macOS host), so future machines can restore from Bitwarden with `bootstrap-vault.sh`.
@@ -594,6 +641,29 @@ bw create item "$ENV_ENC" --session "$BW_SESSION"
 ```
 
 Now `restore-env.sh` will bring this back on any new machine and create `~/.local/load-env.sh` to load it.
+
+---
+
+### 7. Push Git config into `Git-Config`
+
+Your Git configuration contains your identity (name, email) and preferences:
+
+```bash
+GIT_CONFIG_JSON=$(jq -Rs --arg name "Git-Config" \
+  '{ type: 2, name: $name, secureNote: { type: 0 }, notes: . }' \
+  < ~/.gitconfig)
+
+GIT_CONFIG_ENC=$(printf '%s' "$GIT_CONFIG_JSON" | bw encode)
+
+bw create item "$GIT_CONFIG_ENC" --session "$BW_SESSION"
+```
+
+To **update** it later:
+
+```bash
+GIT_CONFIG_ID=$(bw list items --search "Git-Config" --session "$BW_SESSION" | jq -r '.[0].id')
+printf '%s' "$GIT_CONFIG_JSON" | bw encode | bw edit item "$GIT_CONFIG_ID" --session "$BW_SESSION"
+```
 
 ---
 

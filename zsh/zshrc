@@ -160,8 +160,19 @@ _CLAUDE_BEDROCK_FAST_MODEL="us.anthropic.claude-3-5-haiku-20241022-v1:0"
 
 CLAUDE_CODE_MAX_OUTPUT_TOKENS=60000
 
+# Helper: ensure AWS SSO session is valid
+_ensure_aws_sso() {
+    if ! aws sts get-caller-identity --profile "$_CLAUDE_BEDROCK_PROFILE" >/dev/null 2>&1; then
+        echo "AWS SSO session expired. Logging in..." >&2
+        aws sso login --profile "$_CLAUDE_BEDROCK_PROFILE" || return 1
+    fi
+}
+
 # --- claude-bedrock ---
 claude-bedrock() {
+    # Pre-flight: ensure SSO session is valid
+    _ensure_aws_sso || return 1
+
     AWS_PROFILE="$_CLAUDE_BEDROCK_PROFILE" \
     AWS_REGION="$_CLAUDE_BEDROCK_REGION" \
     CLAUDE_CODE_USE_BEDROCK=1 \
@@ -198,6 +209,8 @@ claude-run() {
     shift
 
     if [ "$MODE" = "bedrock" ]; then
+        _ensure_aws_sso || return 1
+
         AWS_PROFILE="$_CLAUDE_BEDROCK_PROFILE" \
         AWS_REGION="$_CLAUDE_BEDROCK_REGION" \
         CLAUDE_CODE_USE_BEDROCK=1 \
