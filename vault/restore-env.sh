@@ -57,6 +57,12 @@ if [[ $invalid_lines -gt 0 ]]; then
     warn "$invalid_lines malformed line(s) found in Environment-Secrets"
 fi
 
+# Backup existing secrets file if present
+if [[ -f "$ENV_FILE" ]]; then
+    cp "$ENV_FILE" "${ENV_FILE}.bak-$(date +%Y%m%d%H%M%S)"
+    info "Backed up existing secrets file."
+fi
+
 # Write secrets file with secure permissions
 printf '%s\n' "$notes" > "$ENV_FILE"
 chmod 600 "$ENV_FILE"
