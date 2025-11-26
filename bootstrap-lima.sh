@@ -49,31 +49,7 @@ fi
 echo "Linking dotfiles..."
 "$DOTFILES_DIR/bootstrap-dotfiles.sh"
 
-# 5. Shared Claude data symlink ---------------------------------------
-# Lima sees ~/workspace via the host mount. We want ~/.claude inside
-# Lima to also point at the same ~/workspace/.claude.
-CLAUDE_SHARED="$HOME/workspace/.claude"
-
-if [ -e "$CLAUDE_SHARED" ]; then
-  echo "Found shared Claude directory at $CLAUDE_SHARED"
-
-  # If a real ~/.claude exists and is NOT a symlink, back it up once
-  if [ -e "$HOME/.claude" ] && [ ! -L "$HOME/.claude" ]; then
-    BACKUP="$HOME/.claude.bak-$(date +%Y%m%d%H%M%S)"
-    echo "Backing up existing ~/.claude to $BACKUP"
-    mv "$HOME/.claude" "$BACKUP"
-  fi
-
-  ln -sfn "$CLAUDE_SHARED" "$HOME/.claude"
-  echo "Linked ~/.claude -> $CLAUDE_SHARED"
-else
-  echo "Note: $CLAUDE_SHARED does not exist yet; skipping Claude symlink."
-  echo "      Make sure the host has ~/workspace/.claude (your tar restore),"
-  echo "      then rerun this script or run:"
-  echo "        ln -sfn \$HOME/workspace/.claude \$HOME/.claude"
-fi
-
-# 6. Set default shell to zsh -----------------------------------------
+# 5. Set default shell to zsh -----------------------------------------
 if [ "$SHELL" != "$(command -v zsh)" ]; then
   echo "Setting default shell to zsh..."
   if chsh -s "$(command -v zsh)"; then
