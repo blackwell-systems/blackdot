@@ -408,13 +408,7 @@ This file creates all unified symlinks:
 - `~/.zshrc    -> $DOTFILES_DIR/zsh/zshrc`  
 - `~/.p10k.zsh -> $DOTFILES_DIR/zsh/p10k.zsh`  
 - Ghostty config (macOS only)  
-- **Claude workspace symlink**:
-
-  ```
-  if [ ! -L "$HOME/.claude" ]; then
-      ln -s ~/workspace/.claude ~/.claude
-  fi
-  ```
+- **Claude setup**: Creates `~/workspace/.claude`, symlinks `~/.claude` to it, and links config files from `dotfiles/claude/`
 
 This ensures Claude CLI sees a *shared* workspace on both platforms.
 
