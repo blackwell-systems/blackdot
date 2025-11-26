@@ -534,6 +534,49 @@ awsclear() {
   echo "Cleared temporary credentials"
 }
 
+# Show all AWS commands with banner
+awstools() {
+  cat << 'EOF'
+
+   █████╗ ██╗    ██╗███████╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗
+  ██╔══██╗██║    ██║██╔════╝    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝
+  ███████║██║ █╗ ██║███████╗       ██║   ██║   ██║██║   ██║██║     ███████╗
+  ██╔══██║██║███╗██║╚════██║       ██║   ██║   ██║██║   ██║██║     ╚════██║
+  ██║  ██║╚███╔███╔╝███████║       ██║   ╚██████╔╝╚██████╔╝███████╗███████║
+  ╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝       ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
+
+EOF
+
+  echo "  ╭─────────────────────────────────────────────────────────────────╮"
+  echo "  │                    PROFILE MANAGEMENT                          │"
+  echo "  ├─────────────────────────────────────────────────────────────────┤"
+  echo "  │  awsprofiles        List all profiles (* = active)             │"
+  echo "  │  awsswitch          Fuzzy-select profile (fzf) + auto-login    │"
+  echo "  │  awsset <profile>   Set AWS_PROFILE for this shell             │"
+  echo "  │  awsunset           Clear AWS_PROFILE                          │"
+  echo "  ├─────────────────────────────────────────────────────────────────┤"
+  echo "  │                    AUTHENTICATION                              │"
+  echo "  ├─────────────────────────────────────────────────────────────────┤"
+  echo "  │  awslogin [profile] SSO login (defaults to current profile)    │"
+  echo "  │  awswho             Show current identity (account/user/ARN)   │"
+  echo "  ├─────────────────────────────────────────────────────────────────┤"
+  echo "  │                    ROLE ASSUMPTION                             │"
+  echo "  ├─────────────────────────────────────────────────────────────────┤"
+  echo "  │  awsassume <arn>    Assume role for cross-account access       │"
+  echo "  │  awsclear           Clear temporary assumed-role credentials   │"
+  echo "  ╰─────────────────────────────────────────────────────────────────╯"
+  echo ""
+  echo "  Current status:"
+  local profile="${AWS_PROFILE:-<not set>}"
+  echo "    AWS_PROFILE = $profile"
+  if aws sts get-caller-identity &>/dev/null; then
+    echo "    Session     = ✓ authenticated"
+  else
+    echo "    Session     = ✗ not authenticated (run awslogin)"
+  fi
+  echo ""
+}
+
 # =========================
 # Claude workspace wrapper
 # =========================
