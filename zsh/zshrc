@@ -20,6 +20,14 @@ case "$OS" in
     elif [ -x /usr/local/bin/brew ]; then
       eval "$(/usr/local/bin/brew shellenv)"
     fi
+
+    # Lima VM management (if lima is installed)
+    if command -v limactl >/dev/null 2>&1; then
+      alias lima-dev='limactl shell dev-ubuntu'
+      alias lima-start='limactl start dev-ubuntu'
+      alias lima-stop='limactl stop dev-ubuntu'
+      alias lima-status='limactl list'
+    fi
     ;;
 
   Linux)
@@ -202,6 +210,22 @@ awslogin() {
   local p="${1:-dev-profile}"
   echo "Logging in to AWS SSO profile: $p"
   aws sso login --profile "$p"
+}
+
+# =========================
+# Claude workspace wrapper
+# =========================
+# Automatically use /workspace path for portable session history.
+# When in ~/workspace/*, transparently cd to /workspace/* before running claude.
+claude() {
+  if [[ "$PWD" == "$HOME/workspace"* && -d "/workspace" ]]; then
+    local canonical_path="/workspace${PWD#$HOME/workspace}"
+    if [[ -d "$canonical_path" ]]; then
+      ( cd "$canonical_path" && command claude "$@" )
+      return $?
+    fi
+  fi
+  command claude "$@"
 }
 
 # =========================
