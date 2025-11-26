@@ -44,6 +44,12 @@ restore_aws_note() {
         return 0
     fi
 
+    # Backup existing file if present
+    if [[ -f "$target_path" ]]; then
+        cp "$target_path" "${target_path}.bak-$(date +%Y%m%d%H%M%S)"
+        info "Backed up existing file."
+    fi
+
     # Write to target file with secure permissions
     printf '%s\n' "$notes" > "$target_path"
     chmod 600 "$target_path"

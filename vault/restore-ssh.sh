@@ -45,6 +45,16 @@ restore_key_note() {
         return 0
     fi
 
+    # Backup existing keys if present
+    if [[ -f "$priv_path" ]]; then
+        cp "$priv_path" "${priv_path}.bak-$(date +%Y%m%d%H%M%S)"
+        info "Backed up existing private key."
+    fi
+    if [[ -f "$pub_path" ]]; then
+        cp "$pub_path" "${pub_path}.bak-$(date +%Y%m%d%H%M%S)"
+        info "Backed up existing public key."
+    fi
+
     # Extract private key block (BEGIN to END OPENSSH PRIVATE KEY)
     if ! printf '%s\n' "$notes" \
         | awk '/BEGIN OPENSSH PRIVATE KEY/{flag=1} flag{print} /END OPENSSH PRIVATE KEY/{flag=0}' \
