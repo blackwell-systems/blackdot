@@ -94,6 +94,8 @@ The dotfiles are organized as follows:
 │   ├── restore-aws.sh        # Restores ~/.aws/config & ~/.aws/credentials
 │   ├── restore-env.sh        # Restores environment secrets to ~/.local
 │   ├── restore-git.sh        # Restores ~/.gitconfig from Bitwarden
+│   ├── template-aws-config   # Reference template for AWS config
+│   ├── template-aws-credentials # Reference template for AWS credentials
 │   └── README.md             # Vault system documentation
 └── zsh
     ├── p10k.zsh              # Powerlevel10k theme config
