@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 # ============================================================
 # FILE: vault/restore-aws.sh
 # Restores AWS config and credentials from Bitwarden Secure Notes
