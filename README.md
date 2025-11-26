@@ -1134,6 +1134,18 @@ Complete checklist for a fresh machine:
 - `cpat` → `cd ~/workspace/patent-pool`
 - `j` → Fuzzy jump to any git project in `/workspace` (requires fzf)
 
+**Smart directory jumping (zoxide):**
+
+- `z <partial>` → Jump to directory matching pattern (learns your habits)
+- `z dot` → Jumps to ~/workspace/dotfiles (after visiting once)
+- `z code` → Jumps to ~/workspace/code
+- `zi` → Interactive selection with fzf
+
+**Markdown viewing (glow):**
+
+- `md <file>` → Render markdown file beautifully in terminal
+- `readme` → Shortcut for `glow README.md`
+
 **Quick Notes:**
 
 - `note <text>` → Save timestamped note to `~/workspace/.notes.md`

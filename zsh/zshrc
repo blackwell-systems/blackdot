@@ -593,6 +593,20 @@ paste() {
 alias cb='copy'
 alias cbp='paste'
 
+# =========================
+# Zoxide (smarter cd)
+# =========================
+# Initialize zoxide if installed - use 'z' to jump to directories
+# It learns your habits: z dot → ~/workspace/dotfiles
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
+
+# Glow alias for reading markdown
+if command -v glow >/dev/null 2>&1; then
+  alias readme='glow README.md'
+  alias md='glow'
+fi
 
 # =========================
 # zsh-syntax-highlighting (must be at the end)
