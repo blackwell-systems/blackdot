@@ -185,6 +185,31 @@ export WORKSPACE="$HOME/workspace"
 alias cws='cd "$WORKSPACE"'
 ```
 
+### 5. Claude Session Portability (`/workspace`)
+
+Claude Code stores session history in `~/.claude/projects/` using **path-encoded folder names**:
+- Working in `/Users/dayna/workspace/dotfiles` → sessions in `-Users-dayna-workspace-dotfiles/`
+- Working in `/home/ubuntu/workspace/dotfiles` → sessions in `-home-ubuntu-workspace-dotfiles/`
+
+Even with the same files (via Lima mount), different paths = different session folders = lost context.
+
+**Solution**: The bootstrap scripts create a `/workspace` symlink:
+
+```bash
+# Created by bootstrap-mac.sh and bootstrap-lima.sh
+/workspace → ~/workspace
+```
+
+Now you can work from `/workspace/...` on both platforms:
+
+```bash
+cd /workspace/dotfiles
+claude
+# → Sessions stored in -workspace-dotfiles/ on BOTH machines
+```
+
+**Usage habit**: Always `cd /workspace/...` instead of `~/workspace/...` when running Claude.
+
 ### Visual Overview
 
 ```
@@ -208,13 +233,13 @@ alias cws='cd "$WORKSPACE"'
 │                 └── ...                                                      │
 │                                                                              │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │  KEY INSIGHT: ~/workspace is username-agnostic                       │   │
+│   │  KEY INSIGHT: /workspace is the canonical path for Claude            │   │
 │   │                                                                      │   │
-│   │  • /Users/dayna.blackwell/workspace  ← macOS                        │   │
-│   │  • /Users/dblackwell/workspace       ← work laptop                  │   │
-│   │  • /home/ubuntu/workspace            ← Lima VM                      │   │
+│   │  /workspace → ~/workspace (symlink created by bootstrap scripts)    │   │
 │   │                                                                      │   │
-│   │  All resolve to ~/workspace - scripts don't need hardcoded paths    │   │
+│   │  • cd /workspace/dotfiles && claude  → -workspace-dotfiles/         │   │
+│   │  • Same session folder on macOS AND Lima                            │   │
+│   │  • Portable session history across platforms                        │   │
 │   └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -226,8 +251,9 @@ When you set up a new machine or VM, you don't need to update scripts with new u
 
 1. `~` expands to the correct home directory
 2. `~/workspace` is always where your work lives
-3. Secrets are restored to standard locations (`~/.ssh`, `~/.aws`)
-4. Symlinks bridge any gaps (`~/.claude → ~/workspace/.claude`)
+3. `/workspace` symlink enables portable Claude sessions
+4. Secrets are restored to standard locations (`~/.ssh`, `~/.aws`)
+5. Symlinks bridge any gaps (`~/.claude → ~/workspace/.claude`)
 
 ---
 

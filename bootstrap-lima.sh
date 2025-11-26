@@ -45,11 +45,42 @@ else
   echo "No Brewfile found at $DOTFILES_DIR/Brewfile, skipping brew bundle."
 fi
 
-# 4. Dotfiles symlinks (shared with macOS) ----------------------------
+# 4. Workspace layout ---------------------------------------------------
+echo "Ensuring ~/workspace layout..."
+mkdir -p "$HOME/workspace"
+mkdir -p "$HOME/workspace/code"
+
+# 5. Canonical /workspace path ------------------------------------------
+# Creates /workspace -> ~/workspace so Claude sessions use consistent paths
+# across macOS and Linux (encodes to -workspace-... instead of -home-...).
+if [ ! -e /workspace ]; then
+  echo "Creating /workspace symlink (requires sudo)..."
+  if sudo ln -sfn "$HOME/workspace" /workspace; then
+    echo "Created /workspace -> $HOME/workspace"
+  else
+    echo "WARNING: Could not create /workspace symlink."
+    echo "         Claude sessions will use OS-specific paths."
+    echo "         To fix manually: sudo ln -sfn $HOME/workspace /workspace"
+  fi
+elif [ -L /workspace ]; then
+  # Already a symlink - verify it points to the right place
+  current_target=$(readlink /workspace)
+  if [ "$current_target" != "$HOME/workspace" ]; then
+    echo "Updating /workspace symlink..."
+    sudo rm /workspace && sudo ln -sfn "$HOME/workspace" /workspace
+    echo "Updated /workspace -> $HOME/workspace"
+  else
+    echo "/workspace symlink already correct."
+  fi
+else
+  echo "WARNING: /workspace exists but is not a symlink. Skipping."
+fi
+
+# 6. Dotfiles symlinks (shared with macOS) ----------------------------
 echo "Linking dotfiles..."
 "$DOTFILES_DIR/bootstrap-dotfiles.sh"
 
-# 5. Set default shell to zsh -----------------------------------------
+# 7. Set default shell to zsh -----------------------------------------
 if [ "$SHELL" != "$(command -v zsh)" ]; then
   echo "Setting default shell to zsh..."
   if chsh -s "$(command -v zsh)"; then
@@ -61,4 +92,6 @@ if [ "$SHELL" != "$(command -v zsh)" ]; then
 fi
 
 echo "=== Lima bootstrap complete ==="
-echo "Open a new Lima shell to use zsh + Powerlevel10k and shared Claude history."
+echo "Next:"
+echo "  - Open a new shell to use zsh + Powerlevel10k."
+echo "  - Use 'cd /workspace/...' when running Claude for portable session history."
