@@ -42,8 +42,40 @@ dry()   { echo -e "${CYAN}[DRY-RUN]${NC} $1"; }
 debug() { [[ "${DEBUG:-}" == "1" ]] && echo -e "${DIM}[DEBUG] $1${NC}"; }
 
 # ============================================================
+# Single source of truth: SSH Keys
+# Format: "bitwarden_item:private_key_path:public_key_path"
+# To add a new SSH key, add it here and it propagates everywhere
+# ============================================================
+declare -A SSH_KEYS=(
+    ["SSH-GitHub-Enterprise"]="$HOME/.ssh/id_ed25519_enterprise_ghub"
+    ["SSH-GitHub-Blackwell"]="$HOME/.ssh/id_ed25519_blackwell"
+)
+
+# Get list of SSH key file paths (for ssh-agent loading)
+get_ssh_key_paths() {
+    for key_path in "${SSH_KEYS[@]}"; do
+        echo "$key_path"
+    done | sort
+}
+
+# Get list of SSH key Bitwarden item names
+get_ssh_key_items() {
+    for item in "${!SSH_KEYS[@]}"; do
+        echo "$item"
+    done | sort
+}
+
+# ============================================================
+# Single source of truth: AWS Profiles (for health check)
+# Add profiles here that should be validated
+# ============================================================
+AWS_EXPECTED_PROFILES=(
+    "default"
+)
+
+# ============================================================
 # Single source of truth: Dotfiles items and their mappings
-# Format: "local_path:required|optional"
+# Format: "local_path:required|optional:type"
 # ============================================================
 declare -A DOTFILES_ITEMS=(
     ["SSH-GitHub-Enterprise"]="$HOME/.ssh/id_ed25519_enterprise_ghub:required:sshkey"

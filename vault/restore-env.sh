@@ -41,6 +41,22 @@ if [[ -z "$notes" || "$notes" == "null" ]]; then
     exit 0
 fi
 
+# Validate KEY=VALUE format (warn about malformed lines)
+invalid_lines=0
+while IFS= read -r line || [[ -n "$line" ]]; do
+    # Skip empty lines and comments
+    [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+    # Check for KEY=VALUE format (KEY must start with letter/underscore)
+    if ! [[ "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
+        warn "Malformed line (expected KEY=VALUE): $line"
+        ((invalid_lines++))
+    fi
+done <<< "$notes"
+
+if [[ $invalid_lines -gt 0 ]]; then
+    warn "$invalid_lines malformed line(s) found in Environment-Secrets"
+fi
+
 # Write secrets file with secure permissions
 printf '%s\n' "$notes" > "$ENV_FILE"
 chmod 600 "$ENV_FILE"

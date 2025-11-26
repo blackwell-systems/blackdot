@@ -142,8 +142,10 @@ alias dotfiles-doctor='$HOME/workspace/dotfiles/check-health.sh && bw-check 2>/d
 
 dotfiles-update() {
     local DOTFILES_DIR="$HOME/workspace/dotfiles"
-    echo "Updating dotfiles..."
-    (cd "$DOTFILES_DIR" && git pull --rebase origin main)
+    local branch
+    branch="$(cd "$DOTFILES_DIR" && git rev-parse --abbrev-ref HEAD)"
+    echo "Updating dotfiles (branch: $branch)..."
+    (cd "$DOTFILES_DIR" && git pull --rebase origin "$branch")
     echo "Re-sourcing zshrc..."
     source "$HOME/.zshrc"
     echo "Done! Run 'dotfiles-doctor' to verify."
@@ -178,6 +180,7 @@ _ssh_add_if_missing() {
   fi
 }
 
+# SSH keys to auto-add (canonical list in vault/_common.sh SSH_KEYS array)
 _ssh_add_if_missing ~/.ssh/id_ed25519_enterprise_ghub
 _ssh_add_if_missing ~/.ssh/id_ed25519_blackwell
 
