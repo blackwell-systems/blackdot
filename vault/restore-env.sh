@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 # ============================================================
 # FILE: vault/restore-env.sh
 # Restores environment secrets from Bitwarden Secure Notes

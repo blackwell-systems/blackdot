@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 # ============================================================
 # FILE: vault/sync-to-bitwarden.sh
 # Syncs local config files back to Bitwarden (inverse of restore)
@@ -25,7 +25,7 @@ OPTIONS:
 
 ITEMS:
 EOF
-    for item in "${!SYNCABLE_ITEMS[@]}"; do
+    for item in "${(k)SYNCABLE_ITEMS[@]}"; do
         printf "    %-20s %s\n" "$item" "${SYNCABLE_ITEMS[$item]}"
     done | sort
     cat <<EOF
@@ -47,7 +47,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --all|-a)
-            ITEMS_TO_SYNC=("${!SYNCABLE_ITEMS[@]}")
+            ITEMS_TO_SYNC=("${(k)SYNCABLE_ITEMS[@]}")
             shift
             ;;
         --help|-h)
@@ -58,11 +58,11 @@ while [[ $# -gt 0 ]]; do
             usage
             ;;
         *)
-            if [[ -v "SYNCABLE_ITEMS[$1]" ]]; then
+            if (( ${+SYNCABLE_ITEMS[$1]} )); then
                 ITEMS_TO_SYNC+=("$1")
             else
                 fail "Unknown item: $1"
-                echo "Valid items: ${!SYNCABLE_ITEMS[*]}" >&2
+                echo "Valid items: ${(k)SYNCABLE_ITEMS[*]}" >&2
                 exit 1
             fi
             shift

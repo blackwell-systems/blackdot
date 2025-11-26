@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 # ============================================================
 # FILE: vault/list-vault-items.sh
 # Lists all Bitwarden items relevant to dotfiles restoration
@@ -33,7 +33,7 @@ echo -e "${CYAN}=== Expected Dotfiles Items ===${NC}"
 echo ""
 
 # Use DOTFILES_ITEMS from _common.sh
-for item_name in "${!DOTFILES_ITEMS[@]}"; do
+for item_name in "${(k)DOTFILES_ITEMS[@]}"; do
     # Find item
     item_json=$(echo "$ALL_ITEMS" | jq -r ".[] | select(.name == \"$item_name\")")
 
