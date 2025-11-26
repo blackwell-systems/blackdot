@@ -161,6 +161,7 @@ The workspace provides a consistent hierarchy:
 ~/workspace/
 ├── .claude/           # Shared Claude CLI state (symlinked from ~/.claude)
 ├── .zsh_history       # Shared shell history across platforms
+├── .notes.md          # Quick notes captured via note/notes commands
 ├── dotfiles/          # This repository
 ├── code/              # Active projects
 ├── whitepapers/       # Documentation, specs
@@ -1131,6 +1132,15 @@ Complete checklist for a fresh machine:
 - `ccode` → `cd ~/workspace/code`
 - `cwhite` → `cd ~/workspace/whitepapers`
 - `cpat` → `cd ~/workspace/patent-pool`
+- `j` → Fuzzy jump to any git project in `/workspace` (requires fzf)
+
+**Quick Notes:**
+
+- `note <text>` → Save timestamped note to `~/workspace/.notes.md`
+- `notes` → View last 20 notes
+- `notes all` → View all notes
+- `notes edit` → Open notes file in editor
+- `notes search <term>` → Search notes
 
 **Vault:**
 
