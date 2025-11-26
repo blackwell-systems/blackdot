@@ -187,100 +187,89 @@ alias bw-check='$HOME/workspace/dotfiles/vault/check-vault-items.sh'
 alias dotfiles='cd $HOME/workspace/dotfiles'
 alias dotfiles-doctor='$HOME/workspace/dotfiles/check-health.sh && bw-check 2>/dev/null'
 
-# Quick status dashboard - see everything at a glance
+# Quick status dashboard - city skyline theme
 status() {
   local fixes=()
 
-  echo ""
-  echo "═══════════════════════════════════════"
-  echo "           DOTFILES STATUS"
-  echo "═══════════════════════════════════════"
-  echo ""
-
-  # Symlinks
-  printf "Symlinks:   "
+  # Gather detailed status
+  local s_zshrc="◇" s_zshrc_info="not linked"
   if [[ -L ~/.zshrc ]]; then
-    printf "✓ zshrc  "
+    s_zshrc="◆"; s_zshrc_info="→ dotfiles/zsh/zshrc"
   else
-    printf "✗ zshrc  "
-    fixes+=("zshrc not symlinked: ~/workspace/dotfiles/bootstrap-dotfiles.sh")
+    fixes+=("zshrc: bootstrap-dotfiles.sh")
   fi
+
+  local s_claude="◇" s_claude_info="not linked"
   if [[ -L ~/.claude ]]; then
-    printf "✓ claude  "
+    s_claude="◆"; s_claude_info="→ workspace/.claude"
   else
-    printf "✗ claude  "
-    fixes+=("claude not symlinked: ~/workspace/dotfiles/bootstrap-dotfiles.sh")
+    fixes+=("claude: bootstrap-dotfiles.sh")
   fi
+
+  local s_workspace="◇" s_workspace_info="missing"
   if [[ -L /workspace ]]; then
-    printf "✓ /workspace"
+    s_workspace="◆"; s_workspace_info="→ $(readlink /workspace)"
   else
-    printf "✗ /workspace"
-    if [[ "$OS" == "Darwin" ]]; then
-      fixes+=("/workspace missing: sudo ln -sfn \$HOME/workspace /workspace")
-    else
-      fixes+=("/workspace missing: sudo ln -sfn \$HOME/workspace /workspace")
-    fi
-  fi
-  echo ""
-
-  # Workspace target
-  printf "Workspace:  "
-  if [[ -L /workspace ]]; then
-    local target=$(readlink /workspace)
-    if [[ "$target" == "$HOME/workspace" ]]; then
-      echo "/workspace → $target"
-    else
-      echo "/workspace → $target (wrong target!)"
-      fixes+=("/workspace points wrong: sudo ln -sfn \$HOME/workspace /workspace")
-    fi
-  else
-    echo "/workspace missing"
+    fixes+=("/workspace: sudo ln -sfn \$HOME/workspace /workspace")
   fi
 
-  # SSH Agent
-  local ssh_keys=$(ssh-add -l 2>/dev/null | wc -l | tr -d ' ')
-  if [[ "$ssh_keys" -gt 0 ]]; then
-    echo "SSH Agent:  $ssh_keys keys loaded"
+  local ssh_count=$(ssh-add -l 2>/dev/null | wc -l | tr -d ' ')
+  local s_ssh="◇" s_ssh_info="no keys"
+  if [[ "$ssh_count" -gt 0 ]]; then
+    s_ssh="◆"; s_ssh_info="$ssh_count keys loaded"
   else
-    echo "SSH Agent:  ✗ no keys loaded"
-    fixes+=("SSH keys not loaded: bw-restore (or ssh-add ~/.ssh/id_ed25519_*)")
+    fixes+=("ssh: bw-restore")
   fi
 
-  # AWS SSO (quick check, don't block)
-  printf "AWS SSO:    "
+  local s_aws="◇" s_aws_info="not authenticated"
   if aws sts get-caller-identity --profile "${_CLAUDE_BEDROCK_PROFILE:-dev-profile}" &>/dev/null; then
-    echo "✓ authenticated"
+    s_aws="◆"; s_aws_info="authenticated"
   else
-    echo "✗ not authenticated"
-    fixes+=("AWS SSO expired: awslogin")
+    fixes+=("aws: awslogin")
   fi
 
-  # Lima (macOS only)
+  local s_lima="·" s_lima_info=""
   if [[ "$OS" == "Darwin" ]] && command -v limactl &>/dev/null; then
-    printf "Lima VM:    "
     if limactl list 2>/dev/null | grep -q Running; then
-      echo "✓ running"
+      s_lima="◆"; s_lima_info="running"
     else
-      echo "○ stopped"
-      fixes+=("Lima VM stopped: lima-start")
+      s_lima="◇"; s_lima_info="stopped"
+      fixes+=("lima: lima-start")
     fi
   fi
 
+  # City silhouette (inspired by Joan Stark)
+  cat << EOF
+
+                          .│
+                          │$s_aws│            ._____
+              ___         │ │            │$s_workspace    │
+    _    _.-"   "-._      │ │    _.--"│  │     │
+ .-"│  _.│ $s_zshrc│$s_claude│ │   ._-"  │  │  $s_lima  │
+ │  │ │  │  │  │ │   -.__ │    │     │
+ │$s_ssh│ "-"    "    ""    "-"  "-."   "\`     │____
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+EOF
+
+  # Diagnostic details
+  echo "  zshrc      $s_zshrc  $s_zshrc_info"
+  echo "  claude     $s_claude  $s_claude_info"
+  echo "  /workspace $s_workspace  $s_workspace_info"
+  echo "  ssh        $s_ssh  $s_ssh_info"
+  echo "  aws        $s_aws  $s_aws_info"
+  [[ -n "$s_lima_info" ]] && echo "  lima       $s_lima  $s_lima_info"
   echo ""
 
-  # Show fixes if any
+  # Fixes if needed
   if [[ ${#fixes[@]} -gt 0 ]]; then
-    echo "═══════════════════════════════════════"
-    echo "           SUGGESTED FIXES"
-    echo "═══════════════════════════════════════"
-    echo ""
+    echo "  ┌─ fixes ────────────────────────────────"
     for fix in "${fixes[@]}"; do
-      echo "  → $fix"
+      echo "  │ $fix"
     done
+    echo "  └─────────────────────────────────────────"
     echo ""
   fi
-
-  echo "═══════════════════════════════════════"
 }
 
 # =========================
