@@ -257,6 +257,92 @@ status() {
   echo "═══════════════════════════════════════"
 }
 
+# =========================
+# PROJECT NAVIGATION (fzf-powered)
+# =========================
+# Jump to any project by fuzzy search on git repos in /workspace
+j() {
+  if ! command -v fzf >/dev/null 2>&1; then
+    echo "fzf not installed. Install with: brew install fzf" >&2
+    return 1
+  fi
+
+  local base_dir="${1:-/workspace}"
+  local dir
+
+  if command -v fd >/dev/null 2>&1; then
+    # fd is faster and respects .gitignore
+    dir=$(fd -H -t d '^\.git$' "$base_dir" --max-depth 4 2>/dev/null |
+      xargs -I{} dirname {} |
+      fzf --preview 'ls -la {} 2>/dev/null | head -20' \
+          --preview-window=right:40% \
+          --header="Jump to project (ESC to cancel)")
+  else
+    # Fallback to find
+    dir=$(find "$base_dir" -maxdepth 4 -type d -name ".git" 2>/dev/null |
+      xargs -I{} dirname {} |
+      fzf --preview 'ls -la {} 2>/dev/null | head -20' \
+          --preview-window=right:40% \
+          --header="Jump to project (ESC to cancel)")
+  fi
+
+  [[ -n "$dir" ]] && cd "$dir"
+}
+
+# =========================
+# QUICK NOTES (timestamped markdown)
+# =========================
+# Capture thoughts, commands, ideas instantly
+note() {
+  local notes_file="$HOME/workspace/.notes.md"
+
+  # Create file with header if it doesn't exist
+  if [[ ! -f "$notes_file" ]]; then
+    echo "# Quick Notes" > "$notes_file"
+    echo "" >> "$notes_file"
+  fi
+
+  if [[ $# -eq 0 ]]; then
+    echo "Usage: note <your note text>" >&2
+    echo "       notes           # view recent notes" >&2
+    echo "       notes all       # view all notes" >&2
+    echo "       notes edit      # open notes file" >&2
+    return 1
+  fi
+
+  echo "- **$(date +%Y-%m-%d\ %H:%M)** | $*" >> "$notes_file"
+  echo "✓ Note saved"
+}
+
+# View notes
+notes() {
+  local notes_file="$HOME/workspace/.notes.md"
+
+  if [[ ! -f "$notes_file" ]]; then
+    echo "No notes yet. Create one with: note <your note>" >&2
+    return 1
+  fi
+
+  case "${1:-}" in
+    all)
+      cat "$notes_file"
+      ;;
+    edit)
+      ${EDITOR:-nano} "$notes_file"
+      ;;
+    search)
+      shift
+      grep -i "$*" "$notes_file"
+      ;;
+    *)
+      echo "═══ Recent Notes (last 20) ═══"
+      tail -20 "$notes_file"
+      echo ""
+      echo "Tip: notes all | notes edit | notes search <term>"
+      ;;
+  esac
+}
+
 dotfiles-update() {
     local DOTFILES_DIR="$HOME/workspace/dotfiles"
     local branch
