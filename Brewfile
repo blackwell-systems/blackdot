@@ -18,6 +18,11 @@ brew "fzf"       # Fuzzy finder (Ctrl+R, file search)
 brew "eza"       # Modern ls replacement
 brew "fd"        # Fast find alternative (pairs with fzf)
 brew "ripgrep"   # Fast grep alternative (rg)
+brew "zoxide"    # Smarter cd that learns your habits (z command)
+brew "glow"      # Render markdown beautifully in terminal
+brew "dust"      # Intuitive disk usage (du replacement)
+brew "yazi"      # Blazing fast terminal file manager
+brew "yq"        # jq for YAML files
 
 # Containers / dev
 brew "docker"
