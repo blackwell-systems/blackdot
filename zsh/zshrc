@@ -130,6 +130,19 @@ fi
 # Shared workspace (macOS + Lima both use ~/workspace now)
 export WORKSPACE="$HOME/workspace"
 
+# =========================
+# SHARED HISTORY (cross-platform)
+# =========================
+# Store history in workspace so it syncs across macOS and Lima
+HISTFILE="$HOME/workspace/.zsh_history"
+HISTSIZE=50000
+SAVEHIST=50000
+setopt SHARE_HISTORY          # Share history between sessions
+setopt HIST_IGNORE_DUPS       # Don't record duplicates
+setopt HIST_IGNORE_SPACE      # Don't record commands starting with space
+setopt HIST_REDUCE_BLANKS     # Remove extra blanks
+setopt INC_APPEND_HISTORY     # Add commands immediately (not at shell exit)
+
 # Convenience navigation aliases
 alias cws='cd "$WORKSPACE"'
 alias ccode='cd "$WORKSPACE/code"'
@@ -147,6 +160,55 @@ alias bw-check='$HOME/workspace/dotfiles/vault/check-vault-items.sh'
 # Dotfiles management helpers
 alias dotfiles='cd $HOME/workspace/dotfiles'
 alias dotfiles-doctor='$HOME/workspace/dotfiles/check-health.sh && bw-check 2>/dev/null'
+
+# Quick status dashboard - see everything at a glance
+status() {
+  echo ""
+  echo "═══════════════════════════════════════"
+  echo "           DOTFILES STATUS"
+  echo "═══════════════════════════════════════"
+  echo ""
+
+  # Symlinks
+  printf "Symlinks:   "
+  [[ -L ~/.zshrc ]] && printf "✓ zshrc  " || printf "✗ zshrc  "
+  [[ -L ~/.claude ]] && printf "✓ claude  " || printf "✗ claude  "
+  [[ -L /workspace ]] && printf "✓ /workspace" || printf "✗ /workspace"
+  echo ""
+
+  # Workspace target
+  printf "Workspace:  "
+  if [[ -L /workspace ]]; then
+    echo "/workspace → $(readlink /workspace)"
+  else
+    echo "/workspace missing"
+  fi
+
+  # SSH Agent
+  local ssh_keys=$(ssh-add -l 2>/dev/null | wc -l | tr -d ' ')
+  echo "SSH Agent:  $ssh_keys keys loaded"
+
+  # AWS SSO (quick check, don't block)
+  printf "AWS SSO:    "
+  if aws sts get-caller-identity --profile "${_CLAUDE_BEDROCK_PROFILE:-dev-profile}" &>/dev/null; then
+    echo "✓ authenticated"
+  else
+    echo "✗ not authenticated (run: awslogin)"
+  fi
+
+  # Lima (macOS only)
+  if [[ "$OS" == "Darwin" ]] && command -v limactl &>/dev/null; then
+    printf "Lima VM:    "
+    if limactl list 2>/dev/null | grep -q Running; then
+      echo "✓ running"
+    else
+      echo "○ stopped (run: lima-start)"
+    fi
+  fi
+
+  echo ""
+  echo "═══════════════════════════════════════"
+}
 
 dotfiles-update() {
     local DOTFILES_DIR="$HOME/workspace/dotfiles"
