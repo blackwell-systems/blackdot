@@ -1186,6 +1186,27 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 - `dotfiles-update` → Pull latest dotfiles and re-source zshrc
 - `status` → Quick dashboard showing symlinks, SSH, AWS, Lima status
 
+**AWS Profile Management:**
+
+- `awsprofiles` → List all configured profiles (marks active one)
+- `awsswitch` → Interactive profile selector with fzf (auto-login if needed)
+- `awsset <profile>` → Set AWS_PROFILE for current shell
+- `awsunset` → Clear AWS_PROFILE (return to default)
+- `awswho` → Show current AWS identity (account, user, ARN)
+- `awslogin [profile]` → SSO login (defaults to current or dev-profile)
+- `awsassume <role-arn>` → Assume a role for cross-account access
+- `awsclear` → Clear temporary assumed-role credentials
+
+```bash
+# Typical workflow
+awsswitch              # fuzzy-select profile, auto-login
+awswho                 # verify identity
+
+# Or manually
+awsset prod-profile
+awslogin
+```
+
 **Lima VM (macOS only):**
 
 - `lima-dev` → Shell into dev-ubuntu VM
