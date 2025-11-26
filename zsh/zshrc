@@ -191,42 +191,85 @@ alias dotfiles-doctor='$HOME/workspace/dotfiles/check-health.sh && bw-check 2>/d
 status() {
   local fixes=()
 
-  # Gather status
-  local s_zshrc=$([[ -L ~/.zshrc ]] && echo "◆" || { fixes+=("zshrc: bootstrap-dotfiles.sh"); echo "◇"; })
-  local s_claude=$([[ -L ~/.claude ]] && echo "◆" || { fixes+=("claude: bootstrap-dotfiles.sh"); echo "◇"; })
-  local s_workspace=$([[ -L /workspace ]] && echo "◆" || { fixes+=("/workspace: sudo ln -sfn \$HOME/workspace /workspace"); echo "◇"; })
-
-  local ssh_count=$(ssh-add -l 2>/dev/null | wc -l | tr -d ' ')
-  local s_ssh=$([[ "$ssh_count" -gt 0 ]] && echo "◆" || { fixes+=("ssh: bw-restore"); echo "◇"; })
-
-  local s_aws=$(aws sts get-caller-identity --profile "${_CLAUDE_BEDROCK_PROFILE:-dev-profile}" &>/dev/null && echo "◆" || { fixes+=("aws: awslogin"); echo "◇"; })
-
-  local s_lima=" "
-  if [[ "$OS" == "Darwin" ]] && command -v limactl &>/dev/null; then
-    s_lima=$(limactl list 2>/dev/null | grep -q Running && echo "◆" || { fixes+=("lima: lima-start"); echo "◇"; })
+  # Gather detailed status
+  local s_zshrc="◇" s_zshrc_info="not linked"
+  if [[ -L ~/.zshrc ]]; then
+    s_zshrc="◆"; s_zshrc_info="→ dotfiles/zsh/zshrc"
+  else
+    fixes+=("zshrc: bootstrap-dotfiles.sh")
   fi
 
-  # Minimal wireframe city
+  local s_claude="◇" s_claude_info="not linked"
+  if [[ -L ~/.claude ]]; then
+    s_claude="◆"; s_claude_info="→ workspace/.claude"
+  else
+    fixes+=("claude: bootstrap-dotfiles.sh")
+  fi
+
+  local s_workspace="◇" s_workspace_info="missing"
+  if [[ -L /workspace ]]; then
+    s_workspace="◆"; s_workspace_info="→ $(readlink /workspace)"
+  else
+    fixes+=("/workspace: sudo ln -sfn \$HOME/workspace /workspace")
+  fi
+
+  local ssh_count=$(ssh-add -l 2>/dev/null | wc -l | tr -d ' ')
+  local s_ssh="◇" s_ssh_info="no keys"
+  if [[ "$ssh_count" -gt 0 ]]; then
+    s_ssh="◆"; s_ssh_info="$ssh_count keys loaded"
+  else
+    fixes+=("ssh: bw-restore")
+  fi
+
+  local s_aws="◇" s_aws_info="not authenticated"
+  if aws sts get-caller-identity --profile "${_CLAUDE_BEDROCK_PROFILE:-dev-profile}" &>/dev/null; then
+    s_aws="◆"; s_aws_info="authenticated"
+  else
+    fixes+=("aws: awslogin")
+  fi
+
+  local s_lima="·" s_lima_info=""
+  if [[ "$OS" == "Darwin" ]] && command -v limactl &>/dev/null; then
+    if limactl list 2>/dev/null | grep -q Running; then
+      s_lima="◆"; s_lima_info="running"
+    else
+      s_lima="◇"; s_lima_info="stopped"
+      fixes+=("lima: lima-start")
+    fi
+  fi
+
+  # City skyline with status windows
   cat << EOF
 
-            ┌───┐
-    ┌───┐   │$s_aws│   ┌───┐
-    │$s_zshrc│   │ │   │$s_lima│
-┌───┼───┼───┼───┼───┼───┼───┐
-│$s_claude│ │$s_ssh│ │$s_workspace│ │   │ │
-└───┴───┴───┴───┴───┴───┴───┘
+                ▄▄▄▄▄
+               ▐█$s_aws█▌
+       ▄▄▄▄▄   ▐█ █▌  ▄▄▄▄▄▄▄
+      ▐█$s_zshrc█▌  ▐███▌ ▐██$s_lima██▌
+      ▐█ █▌  ▐███▌ ▐██ ██▌
+  ▄▄▄▄████▄▄▄▄████▄▄████████▄▄▄▄
+ ▐██$s_claude██$s_ssh██████$s_workspace██████████████▌
+ ▐██ ██ ██████ ██████████████▌
+▄██████████████████████████████▄
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 EOF
 
-  # Legend
-  echo "  zsh $s_zshrc  claude $s_claude  /ws $s_workspace  ssh $s_ssh  aws $s_aws  lima $s_lima"
+  # Diagnostic details
+  echo "  zshrc     $s_zshrc  $s_zshrc_info"
+  echo "  claude    $s_claude  $s_claude_info"
+  echo "  /workspace$s_workspace  $s_workspace_info"
+  echo "  ssh       $s_ssh  $s_ssh_info"
+  echo "  aws       $s_aws  $s_aws_info"
+  [[ -n "$s_lima_info" ]] && echo "  lima      $s_lima  $s_lima_info"
   echo ""
 
   # Fixes if needed
   if [[ ${#fixes[@]} -gt 0 ]]; then
+    echo "  ┌─ fixes ────────────────────────────────"
     for fix in "${fixes[@]}"; do
-      echo "  → $fix"
+      echo "  │ $fix"
     done
+    echo "  └─────────────────────────────────────────"
     echo ""
   fi
 }
