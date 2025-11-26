@@ -67,13 +67,17 @@ The dotfiles are organized as follows:
 
 ```text
 ~/workspace/dotfiles
-├── bootstrap-dotfiles.sh     # Shared symlink bootstrap (zshrc, p10k, Ghostty)
+├── bootstrap-dotfiles.sh     # Shared symlink bootstrap (zshrc, p10k, Ghostty, Claude)
 ├── bootstrap-lima.sh         # Lima / Linux-specific bootstrap wrapper
 ├── bootstrap-mac.sh          # macOS-specific bootstrap wrapper
 ├── check-health.sh           # Verify installation health
 ├── Brewfile                  # Unified Homebrew bundle (macOS + Lima)
 ├── CHANGELOG.md              # Version history
 ├── .gitignore                # Excludes .bw-session, editor files
+├── claude
+│   ├── settings.json         # Claude Code settings (permissions, preferences)
+│   └── commands/             # Custom slash commands
+│       └── health.md         # /health - run dotfiles health check
 ├── ghostty
 │   └── config                # Ghostty terminal config
 ├── lima
@@ -98,11 +102,12 @@ The dotfiles are organized as follows:
 
 Key pieces:
 
-- **zsh/zshrc**: Main Zsh configuration file  
-- **zsh/p10k.zsh**: Powerlevel10k theme configuration  
-- **ghostty/config**: Ghostty terminal configuration  
-- **vault/**: Bitwarden-based secure bootstrap for SSH, AWS, and environment secrets  
-- **Brewfile**: Shared Homebrew definition used by both macOS and Lima bootstrap scripts  
+- **zsh/zshrc**: Main Zsh configuration file
+- **zsh/p10k.zsh**: Powerlevel10k theme configuration
+- **ghostty/config**: Ghostty terminal configuration
+- **vault/**: Bitwarden-based secure bootstrap for SSH, AWS, and environment secrets
+- **claude/**: Claude Code configuration (settings, slash commands)
+- **Brewfile**: Shared Homebrew definition used by both macOS and Lima bootstrap scripts
 - **Claude Workspace Symlink** inside `bootstrap-dotfiles.sh` ensures that both macOS and Lima point to the shared workspace directory:
 
   ```
