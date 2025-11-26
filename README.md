@@ -72,19 +72,25 @@ The dotfiles are organized as follows:
 ├── bootstrap-mac.sh          # macOS-specific bootstrap wrapper
 ├── check-health.sh           # Verify installation health
 ├── Brewfile                  # Unified Homebrew bundle (macOS + Lima)
+├── CHANGELOG.md              # Version history
+├── .gitignore                # Excludes .bw-session, editor files
 ├── ghostty
 │   └── config                # Ghostty terminal config
 ├── lima
 │   └── lima.yaml             # Lima VM config (host-side)
 ├── vault
+│   ├── _common.sh            # Shared library (colors, logging, session, SSH_KEYS)
 │   ├── bootstrap-vault.sh    # Orchestrates all Bitwarden restores
 │   ├── check-vault-items.sh  # Validates required Bitwarden items exist
+│   ├── create-vault-item.sh  # Creates new Bitwarden secure notes
+│   ├── delete-vault-item.sh  # Deletes items from Bitwarden (with safety)
 │   ├── list-vault-items.sh   # Lists all vault items (debug/inventory)
 │   ├── sync-to-bitwarden.sh  # Syncs local changes back to Bitwarden
 │   ├── restore-ssh.sh        # Restores SSH keys and config from Bitwarden
 │   ├── restore-aws.sh        # Restores ~/.aws/config & ~/.aws/credentials
 │   ├── restore-env.sh        # Restores environment secrets to ~/.local
-│   └── restore-git.sh        # Restores ~/.gitconfig from Bitwarden
+│   ├── restore-git.sh        # Restores ~/.gitconfig from Bitwarden
+│   └── README.md             # Vault system documentation
 └── zsh
     ├── p10k.zsh              # Powerlevel10k theme config
     └── zshrc                 # Main Zsh configuration
