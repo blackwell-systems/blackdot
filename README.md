@@ -1188,6 +1188,7 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 
 **AWS Profile Management:**
 
+- `awstools` → **Show all AWS commands** with ASCII banner + current status
 - `awsprofiles` → List all configured profiles (marks active one)
 - `awsswitch` → Interactive profile selector with fzf (auto-login if needed)
 - `awsset <profile>` → Set AWS_PROFILE for current shell
