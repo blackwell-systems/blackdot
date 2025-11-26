@@ -6,53 +6,19 @@
 # ============================================================
 set -uo pipefail
 
-# Colors
-if [[ -t 1 ]]; then
-    RED='\033[0;31m'
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    CYAN='\033[0;36m'
-    DIM='\033[2m'
-    NC='\033[0m'
-else
-    RED='' GREEN='' YELLOW='' BLUE='' CYAN='' DIM='' NC=''
-fi
+# Source common functions
+source "$(dirname "$0")/_common.sh"
 
 VERBOSE=false
 [[ "${1:-}" == "--verbose" || "${1:-}" == "-v" ]] && VERBOSE=true
 
-VAULT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Check prerequisites
+require_bw
+require_jq
 
-# Expected items for dotfiles
-EXPECTED_ITEMS=(
-    "SSH-GitHub-Enterprise"
-    "SSH-GitHub-Blackwell"
-    "SSH-Config"
-    "AWS-Config"
-    "AWS-Credentials"
-    "Git-Config"
-    "Environment-Secrets"
-)
-
-# Get session
-SESSION="${BW_SESSION:-}"
-if [[ -z "$SESSION" && -f "$VAULT_DIR/.bw-session" ]]; then
-    SESSION="$(cat "$VAULT_DIR/.bw-session")"
-fi
-
-if [[ -z "$SESSION" ]] || ! bw unlock --check --session "$SESSION" >/dev/null 2>&1; then
-    echo -e "${YELLOW}Bitwarden locked. Unlocking...${NC}"
-    SESSION="$(bw unlock --raw)"
-    if [[ -z "$SESSION" ]]; then
-        echo -e "${RED}Failed to unlock Bitwarden${NC}"
-        exit 1
-    fi
-fi
-
-# Sync
-echo -e "${BLUE}Syncing Bitwarden vault...${NC}"
-bw sync --session "$SESSION" >/dev/null
+# Get session and sync
+SESSION=$(get_session)
+sync_vault "$SESSION"
 
 echo ""
 echo "========================================"
@@ -66,7 +32,8 @@ ALL_ITEMS=$(bw list items --session "$SESSION" 2>/dev/null)
 echo -e "${CYAN}=== Expected Dotfiles Items ===${NC}"
 echo ""
 
-for item_name in "${EXPECTED_ITEMS[@]}"; do
+# Use DOTFILES_ITEMS from _common.sh
+for item_name in "${!DOTFILES_ITEMS[@]}"; do
     # Find item
     item_json=$(echo "$ALL_ITEMS" | jq -r ".[] | select(.name == \"$item_name\")")
 
@@ -100,7 +67,7 @@ for item_name in "${EXPECTED_ITEMS[@]}"; do
         echo -e "${RED}[MISSING]${NC} $item_name"
     fi
     echo ""
-done
+done | sort
 
 echo -e "${CYAN}=== All Secure Notes in Vault ===${NC}"
 echo ""
@@ -108,12 +75,7 @@ echo ""
 # List all secure notes (type 2)
 echo "$ALL_ITEMS" | jq -r '.[] | select(.type == 2) | .name' | sort | while read -r name; do
     # Check if it's an expected item
-    is_expected=false
-    for expected in "${EXPECTED_ITEMS[@]}"; do
-        [[ "$name" == "$expected" ]] && is_expected=true && break
-    done
-
-    if $is_expected; then
+    if is_protected_item "$name"; then
         echo -e "  ${GREEN}✓${NC} $name ${DIM}(dotfiles)${NC}"
     else
         echo -e "  ${DIM}○${NC} $name"

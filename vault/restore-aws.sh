@@ -5,19 +5,19 @@
 # ============================================================
 set -euo pipefail
 
+# Source common functions
+source "$(dirname "$0")/_common.sh"
+
 # Accept session from argument or environment variable
 SESSION="${1:-${BW_SESSION:-}}"
 
 if [[ -z "$SESSION" ]]; then
-  echo "restore-aws.sh: BW_SESSION or session argument is required." >&2
-  exit 1
+    fail "restore-aws.sh: BW_SESSION or session argument is required."
+    exit 1
 fi
 
 # Verify jq is available
-if ! command -v jq >/dev/null 2>&1; then
-  echo "restore-aws.sh: 'jq' is required but not installed." >&2
-  exit 1
-fi
+require_jq
 
 AWS_DIR="$HOME/.aws"
 mkdir -p "$AWS_DIR"
@@ -31,7 +31,8 @@ restore_aws_note() {
 
     # Fetch item from Bitwarden (graceful failure if not found)
     local json notes
-    if ! json="$(bw get item "$item_name" --session "$SESSION" 2>/dev/null)"; then
+    json=$(bw_get_item "$item_name" "$SESSION")
+    if [[ -z "$json" ]]; then
         echo "  [SKIP] Item '$item_name' not found in Bitwarden."
         return 0
     fi
@@ -47,7 +48,7 @@ restore_aws_note() {
     printf '%s\n' "$notes" > "$target_path"
     chmod 600 "$target_path"
 
-    echo "  [OK] Restored: $target_path"
+    pass "Restored: $target_path"
 }
 
 # ============================================================
