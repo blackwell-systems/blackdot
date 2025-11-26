@@ -24,6 +24,8 @@ This directory contains scripts for **bidirectional secret management** with Bit
 | `check-vault-items.sh` | Pre-flight validation | `bw-check` |
 | `list-vault-items.sh` | Debug/inventory tool | `bw-list [-v]` |
 | `_common.sh` | Shared functions library | Sourced by other scripts |
+| `template-aws-config` | Reference template | Example AWS config structure |
+| `template-aws-credentials` | Reference template | Example AWS credentials structure |
 
 ### Shell Aliases
 
@@ -353,6 +355,44 @@ DOTFILES_ITEMS["Git-Config"]="$HOME/.gitconfig:required:file"
 # Items that can be synced (excludes SSH keys)
 SYNCABLE_ITEMS["Git-Config"]="$HOME/.gitconfig"
 ```
+
+---
+
+### `template-aws-config`
+
+Reference template showing the expected structure for `~/.aws/config`.
+
+**Contains:**
+- SSO profile definitions with placeholder URLs
+- Multiple account profiles (dev, prod, personal)
+- Region settings
+
+**Placeholders:**
+- `{{SSO_DEV_START_URL}}` - Your dev SSO portal URL
+- `{{SSO_DEV_REGION}}` - SSO region for dev
+- `{{SSO_PROD_START_URL}}` - Your prod SSO portal URL
+- `{{SSO_PROD_REGION}}` - SSO region for prod
+
+**When to use:** Reference when creating your `AWS-Config` Bitwarden item.
+
+---
+
+### `template-aws-credentials`
+
+Reference template showing the expected structure for `~/.aws/credentials`.
+
+**Contains:**
+- Static credential profiles with placeholder keys
+- Session token example for temporary credentials
+
+**Placeholders:**
+- `{{PERSONAL_AWS_ACCESS_KEY_ID}}` - Your personal access key
+- `{{PERSONAL_AWS_SECRET_ACCESS_KEY}}` - Your personal secret key
+- `{{BWS_AWS_ACCESS_KEY_ID}}` - Blackwell Systems access key
+- `{{BWS_AWS_SECRET_ACCESS_KEY}}` - Blackwell Systems secret key
+- `{{PROD_WB_*}}` - Production workbench temporary credentials
+
+**When to use:** Reference when creating your `AWS-Credentials` Bitwarden item.
 
 ---
 
