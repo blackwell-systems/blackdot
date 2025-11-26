@@ -6,31 +6,11 @@
 # ============================================================
 set -uo pipefail
 
-# Colors
-if [[ -t 1 ]]; then
-    RED='\033[0;31m'
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    CYAN='\033[0;36m'
-    NC='\033[0m'
-else
-    RED='' GREEN='' YELLOW='' BLUE='' CYAN='' NC=''
-fi
+# Source common functions
+source "$(dirname "$0")/_common.sh"
 
-VAULT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SESSION_FILE="$VAULT_DIR/.bw-session"
 DRY_RUN=false
 ITEMS_TO_SYNC=()
-
-# Syncable items and their local file paths
-declare -A ITEM_FILES=(
-    ["SSH-Config"]="$HOME/.ssh/config"
-    ["AWS-Config"]="$HOME/.aws/config"
-    ["AWS-Credentials"]="$HOME/.aws/credentials"
-    ["Git-Config"]="$HOME/.gitconfig"
-    ["Environment-Secrets"]="$HOME/.local/env.secrets"
-)
 
 usage() {
     cat <<EOF
@@ -44,11 +24,11 @@ OPTIONS:
     --help, -h       Show this help
 
 ITEMS:
-    SSH-Config          ~/.ssh/config
-    AWS-Config          ~/.aws/config
-    AWS-Credentials     ~/.aws/credentials
-    Git-Config          ~/.gitconfig
-    Environment-Secrets ~/.local/env.secrets
+EOF
+    for item in "${!SYNCABLE_ITEMS[@]}"; do
+        printf "    %-20s %s\n" "$item" "${SYNCABLE_ITEMS[$item]}"
+    done | sort
+    cat <<EOF
 
 EXAMPLES:
     $(basename "$0") --dry-run --all     # Preview all changes
@@ -59,12 +39,6 @@ EOF
     exit 0
 }
 
-info() { echo -e "${BLUE}[INFO]${NC} $1"; }
-pass() { echo -e "${GREEN}[OK]${NC} $1"; }
-warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-fail() { echo -e "${RED}[FAIL]${NC} $1"; }
-dry() { echo -e "${CYAN}[DRY-RUN]${NC} $1"; }
-
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -73,22 +47,22 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --all|-a)
-            ITEMS_TO_SYNC=("${!ITEM_FILES[@]}")
+            ITEMS_TO_SYNC=("${!SYNCABLE_ITEMS[@]}")
             shift
             ;;
         --help|-h)
             usage
             ;;
         -*)
-            echo "Unknown option: $1" >&2
+            fail "Unknown option: $1"
             usage
             ;;
         *)
-            if [[ -v "ITEM_FILES[$1]" ]]; then
+            if [[ -v "SYNCABLE_ITEMS[$1]" ]]; then
                 ITEMS_TO_SYNC+=("$1")
             else
-                echo "Unknown item: $1" >&2
-                echo "Valid items: ${!ITEM_FILES[*]}" >&2
+                fail "Unknown item: $1"
+                echo "Valid items: ${!SYNCABLE_ITEMS[*]}" >&2
                 exit 1
             fi
             shift
@@ -97,40 +71,18 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ ${#ITEMS_TO_SYNC[@]} -eq 0 ]]; then
-    echo "No items specified. Use --all or specify items to sync."
+    warn "No items specified. Use --all or specify items to sync."
     echo ""
     usage
 fi
 
 # Verify prerequisites
-if ! command -v bw >/dev/null 2>&1; then
-    fail "Bitwarden CLI (bw) is not installed."
-    exit 1
-fi
+require_bw
+require_jq
 
-if ! command -v jq >/dev/null 2>&1; then
-    fail "jq is not installed."
-    exit 1
-fi
-
-# Get session
-SESSION="${BW_SESSION:-}"
-if [[ -z "$SESSION" && -f "$SESSION_FILE" ]]; then
-    SESSION="$(cat "$SESSION_FILE")"
-fi
-
-if [[ -z "$SESSION" ]] || ! bw unlock --check --session "$SESSION" >/dev/null 2>&1; then
-    info "Unlocking Bitwarden vault..."
-    SESSION="$(bw unlock --raw)"
-    if [[ -z "$SESSION" ]]; then
-        fail "Failed to unlock Bitwarden vault."
-        exit 1
-    fi
-fi
-
-# Sync vault first
-info "Syncing Bitwarden vault..."
-bw sync --session "$SESSION" >/dev/null
+# Get session and sync
+SESSION=$(get_session)
+sync_vault "$SESSION"
 
 echo ""
 echo "========================================"
@@ -147,7 +99,7 @@ FAILED=0
 
 sync_item() {
     local item_name="$1"
-    local local_file="${ITEM_FILES[$item_name]}"
+    local local_file="${SYNCABLE_ITEMS[$item_name]}"
 
     echo -e "${BLUE}--- $item_name ---${NC}"
 
@@ -160,9 +112,10 @@ sync_item() {
 
     # Get current Bitwarden content
     local bw_json bw_notes item_id
-    if ! bw_json="$(bw get item "$item_name" --session "$SESSION" 2>/dev/null)"; then
+    bw_json=$(bw_get_item "$item_name" "$SESSION")
+    if [[ -z "$bw_json" ]]; then
         warn "Item '$item_name' not found in Bitwarden"
-        echo "    To create it, see README.md 'One-Time: Push Current Files into Bitwarden'"
+        echo "    To create it: bw-create $item_name"
         ((SKIPPED++))
         return 0
     fi

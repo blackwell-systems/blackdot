@@ -6,35 +6,13 @@
 # ============================================================
 set -uo pipefail
 
-# Colors
-if [[ -t 1 ]]; then
-    RED='\033[0;31m'
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    CYAN='\033[0;36m'
-    DIM='\033[2m'
-    NC='\033[0m'
-else
-    RED='' GREEN='' YELLOW='' BLUE='' CYAN='' DIM='' NC=''
-fi
+# Source common functions
+source "$(dirname "$0")/_common.sh"
 
-VAULT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SESSION_FILE="$VAULT_DIR/.bw-session"
 DRY_RUN=false
 FORCE=false
 ITEMS_TO_DELETE=()
-
-# Protected items that require extra confirmation
-PROTECTED_ITEMS=(
-    "SSH-GitHub-Enterprise"
-    "SSH-GitHub-Blackwell"
-    "SSH-Config"
-    "AWS-Config"
-    "AWS-Credentials"
-    "Git-Config"
-    "Environment-Secrets"
-)
+LIST_MODE=false
 
 usage() {
     cat <<EOF
@@ -64,20 +42,6 @@ EOF
     exit 0
 }
 
-info() { echo -e "${BLUE}[INFO]${NC} $1"; }
-pass() { echo -e "${GREEN}[OK]${NC} $1"; }
-warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-fail() { echo -e "${RED}[FAIL]${NC} $1"; }
-dry() { echo -e "${CYAN}[DRY-RUN]${NC} $1"; }
-
-is_protected() {
-    local name="$1"
-    for protected in "${PROTECTED_ITEMS[@]}"; do
-        [[ "$name" == "$protected" ]] && return 0
-    done
-    return 1
-}
-
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -90,7 +54,6 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --list|-l)
-            # Quick list mode - handled after session setup
             LIST_MODE=true
             shift
             ;;
@@ -98,7 +61,7 @@ while [[ $# -gt 0 ]]; do
             usage
             ;;
         -*)
-            echo "Unknown option: $1" >&2
+            fail "Unknown option: $1"
             usage
             ;;
         *)
@@ -109,37 +72,15 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Verify prerequisites
-if ! command -v bw >/dev/null 2>&1; then
-    fail "Bitwarden CLI (bw) is not installed."
-    exit 1
-fi
+require_bw
+require_jq
 
-if ! command -v jq >/dev/null 2>&1; then
-    fail "jq is not installed."
-    exit 1
-fi
-
-# Get session
-SESSION="${BW_SESSION:-}"
-if [[ -z "$SESSION" && -f "$SESSION_FILE" ]]; then
-    SESSION="$(cat "$SESSION_FILE")"
-fi
-
-if [[ -z "$SESSION" ]] || ! bw unlock --check --session "$SESSION" >/dev/null 2>&1; then
-    info "Unlocking Bitwarden vault..."
-    SESSION="$(bw unlock --raw)"
-    if [[ -z "$SESSION" ]]; then
-        fail "Failed to unlock Bitwarden vault."
-        exit 1
-    fi
-fi
-
-# Sync vault
-info "Syncing Bitwarden vault..."
-bw sync --session "$SESSION" >/dev/null
+# Get session and sync
+SESSION=$(get_session)
+sync_vault "$SESSION"
 
 # Handle list mode
-if [[ "${LIST_MODE:-false}" == "true" ]]; then
+if $LIST_MODE; then
     echo ""
     echo "=== All Items in Vault ==="
     echo ""
@@ -150,7 +91,7 @@ fi
 
 # Check we have items to delete
 if [[ ${#ITEMS_TO_DELETE[@]} -eq 0 ]]; then
-    echo "No items specified."
+    warn "No items specified."
     echo ""
     usage
 fi
@@ -175,7 +116,8 @@ delete_item() {
 
     # Get item details
     local item_json
-    if ! item_json="$(bw get item "$item_name" --session "$SESSION" 2>/dev/null)"; then
+    item_json=$(bw_get_item "$item_name" "$SESSION")
+    if [[ -z "$item_json" ]]; then
         warn "Item '$item_name' not found in Bitwarden"
         ((SKIPPED++))
         return 0
@@ -201,8 +143,8 @@ delete_item() {
     echo -e "  ${DIM}ID: $item_id${NC}"
     echo ""
 
-    # Handle protected items
-    if is_protected "$item_name"; then
+    # Handle protected items (use is_protected_item from _common.sh)
+    if is_protected_item "$item_name"; then
         echo -e "${RED}⚠ WARNING: This is a protected dotfiles item!${NC}"
         echo "Deleting this will break your dotfiles restore."
         echo ""

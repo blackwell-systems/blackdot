@@ -5,19 +5,19 @@
 # ============================================================
 set -euo pipefail
 
+# Source common functions
+source "$(dirname "$0")/_common.sh"
+
 # Accept session from argument or environment variable
 SESSION="${1:-${BW_SESSION:-}}"
 
 if [[ -z "$SESSION" ]]; then
-  echo "restore-env.sh: BW_SESSION or session argument is required." >&2
-  exit 1
+    fail "restore-env.sh: BW_SESSION or session argument is required."
+    exit 1
 fi
 
 # Verify jq is available
-if ! command -v jq >/dev/null 2>&1; then
-  echo "restore-env.sh: 'jq' is required but not installed." >&2
-  exit 1
-fi
+require_jq
 
 LOCAL_DIR="$HOME/.local"
 ENV_FILE="$LOCAL_DIR/env.secrets"
@@ -28,8 +28,8 @@ mkdir -p "$LOCAL_DIR"
 echo "Restoring environment secrets from Bitwarden item: Environment-Secrets"
 
 # Fetch item from Bitwarden (graceful failure if not found)
-json=""
-if ! json="$(bw get item "Environment-Secrets" --session "$SESSION" 2>/dev/null)"; then
+json=$(bw_get_item "Environment-Secrets" "$SESSION")
+if [[ -z "$json" ]]; then
     echo "  [SKIP] Item 'Environment-Secrets' not found in Bitwarden."
     exit 0
 fi
@@ -65,8 +65,8 @@ LOADER
 
 chmod 700 "$LOADER_FILE"
 
-echo "  [OK] Restored: $ENV_FILE"
-echo "  [OK] Created:  $LOADER_FILE"
+pass "Restored: $ENV_FILE"
+pass "Created:  $LOADER_FILE"
 echo ""
 echo "To load secrets in your shell, run:"
 echo "  source ~/.local/load-env.sh"
