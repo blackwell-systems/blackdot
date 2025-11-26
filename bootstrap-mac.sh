@@ -76,7 +76,7 @@ mkdir -p "$HOME/workspace/code"
 # across macOS and Linux (encodes to -workspace-... instead of -Users-...).
 if [ ! -e /workspace ]; then
   echo "Creating /workspace symlink (requires sudo)..."
-  if sudo mkdir -p /workspace 2>/dev/null && sudo rm -rf /workspace && sudo ln -sfn "$HOME/workspace" /workspace; then
+  if sudo ln -sfn "$HOME/workspace" /workspace; then
     echo "Created /workspace -> $HOME/workspace"
   else
     echo "WARNING: Could not create /workspace symlink."
