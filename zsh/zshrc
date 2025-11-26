@@ -238,29 +238,27 @@ status() {
     fi
   fi
 
-  # City skyline with status windows
+  # City silhouette (inspired by Joan Stark)
   cat << EOF
 
-                ▄▄▄▄▄
-               ▐█$s_aws█▌
-       ▄▄▄▄▄   ▐█ █▌  ▄▄▄▄▄▄▄
-      ▐█$s_zshrc█▌  ▐███▌ ▐██$s_lima██▌
-      ▐█ █▌  ▐███▌ ▐██ ██▌
-  ▄▄▄▄████▄▄▄▄████▄▄████████▄▄▄▄
- ▐██$s_claude██$s_ssh██████$s_workspace██████████████▌
- ▐██ ██ ██████ ██████████████▌
-▄██████████████████████████████▄
-░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+                          .│
+                          │$s_aws│            ._____
+              ___         │ │            │$s_workspace    │
+    _    _.-"   "-._      │ │    _.--"│  │     │
+ .-"│  _.│ $s_zshrc│$s_claude│ │   ._-"  │  │  $s_lima  │
+ │  │ │  │  │  │ │   -.__ │    │     │
+ │$s_ssh│ "-"    "    ""    "-"  "-."   "\`     │____
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 
 EOF
 
   # Diagnostic details
-  echo "  zshrc     $s_zshrc  $s_zshrc_info"
-  echo "  claude    $s_claude  $s_claude_info"
-  echo "  /workspace$s_workspace  $s_workspace_info"
-  echo "  ssh       $s_ssh  $s_ssh_info"
-  echo "  aws       $s_aws  $s_aws_info"
-  [[ -n "$s_lima_info" ]] && echo "  lima      $s_lima  $s_lima_info"
+  echo "  zshrc      $s_zshrc  $s_zshrc_info"
+  echo "  claude     $s_claude  $s_claude_info"
+  echo "  /workspace $s_workspace  $s_workspace_info"
+  echo "  ssh        $s_ssh  $s_ssh_info"
+  echo "  aws        $s_aws  $s_aws_info"
+  [[ -n "$s_lima_info" ]] && echo "  lima       $s_lima  $s_lima_info"
   echo ""
 
   # Fixes if needed
