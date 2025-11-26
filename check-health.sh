@@ -6,6 +6,12 @@
 # ============================================================
 set -uo pipefail
 
+# Source vault common for SSH_KEYS and AWS_EXPECTED_PROFILES
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "$SCRIPT_DIR/vault/_common.sh" ]]; then
+    source "$SCRIPT_DIR/vault/_common.sh"
+fi
+
 # Parse arguments
 FIX_MODE=false
 DRIFT_MODE=false
@@ -216,8 +222,17 @@ check_ssh_key() {
     fi
 }
 
-check_ssh_key "id_ed25519_enterprise_ghub"
-check_ssh_key "id_ed25519_blackwell"
+# Check SSH keys (from SSH_KEYS in vault/_common.sh)
+if [[ -v SSH_KEYS[@] ]]; then
+    for key_path in "${SSH_KEYS[@]}"; do
+        key_name="$(basename "$key_path")"
+        check_ssh_key "$key_name"
+    done
+else
+    # Fallback if _common.sh not sourced
+    check_ssh_key "id_ed25519_enterprise_ghub"
+    check_ssh_key "id_ed25519_blackwell"
+fi
 
 # Check SSH config file
 if [[ -f "$HOME/.ssh/config" ]]; then
@@ -269,14 +284,17 @@ if [[ -f "$HOME/.aws/config" ]]; then
         fi
     fi
 
-    # Check for expected profiles
-    for profile in dev-profile prod-profile; do
-        if grep -q "\[profile $profile\]" "$HOME/.aws/config" 2>/dev/null; then
-            pass "AWS profile '$profile' configured"
-        else
-            info "AWS profile '$profile' not found in config"
-        fi
-    done
+    # Check for expected profiles (from AWS_EXPECTED_PROFILES in vault/_common.sh)
+    if [[ -v AWS_EXPECTED_PROFILES[@] ]]; then
+        for profile in "${AWS_EXPECTED_PROFILES[@]}"; do
+            if grep -q "\[profile $profile\]" "$HOME/.aws/config" 2>/dev/null || \
+               grep -q "^\[$profile\]" "$HOME/.aws/config" 2>/dev/null; then
+                pass "AWS profile '$profile' configured"
+            else
+                info "AWS profile '$profile' not found in config"
+            fi
+        done
+    fi
 else
     info "~/.aws/config not found (run bw-restore to restore from Bitwarden)"
 fi

@@ -923,27 +923,23 @@ export BW_SESSION="$(bw unlock --raw)"
 }' | bw encode | bw create item --session "$BW_SESSION"
 ```
 
-### 3. Update `restore-ssh.sh`
+### 3. Add to `_common.sh` (single source of truth)
 
-Add a new block to `vault/restore-ssh.sh`:
-
-```bash
-# NewService key
-restore_key "SSH-NewService" "id_ed25519_newservice"
-```
-
-Or if the script uses explicit blocks, add:
+Edit `vault/_common.sh` and add the new key to the `SSH_KEYS` array:
 
 ```bash
-echo "Restoring SSH-NewService..."
-NOTES=$(bw get notes "SSH-NewService" --session "$BW_SESSION")
-echo "$NOTES" | grep -A 100 "BEGIN OPENSSH PRIVATE KEY" | grep -B 100 "END OPENSSH PRIVATE KEY" > ~/.ssh/id_ed25519_newservice
-echo "$NOTES" | grep "^ssh-ed25519" > ~/.ssh/id_ed25519_newservice.pub
-chmod 600 ~/.ssh/id_ed25519_newservice
-chmod 644 ~/.ssh/id_ed25519_newservice.pub
+declare -A SSH_KEYS=(
+    ["SSH-GitHub-Enterprise"]="$HOME/.ssh/id_ed25519_enterprise_ghub"
+    ["SSH-GitHub-Blackwell"]="$HOME/.ssh/id_ed25519_blackwell"
+    ["SSH-NewService"]="$HOME/.ssh/id_ed25519_newservice"  # ← Add here
+)
 ```
 
-### 4. Add to SSH config (optional)
+This automatically propagates to:
+- `restore-ssh.sh` (restores the key from Bitwarden)
+- `check-health.sh` (validates key exists with correct permissions)
+
+### 4. Add to SSH config
 
 ```bash
 # ~/.ssh/config
@@ -965,6 +961,7 @@ After editing `~/.ssh/config`, sync it back:
 If you want the new key auto-loaded into the SSH agent, add to `zsh/zshrc`:
 
 ```bash
+# SSH keys to auto-add (canonical list in vault/_common.sh SSH_KEYS array)
 _ssh_add_if_missing ~/.ssh/id_ed25519_newservice
 ```
 
@@ -1013,11 +1010,10 @@ Complete checklist when adding a new SSH identity:
 
 - [ ] Generate key pair: `ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey`
 - [ ] Push to Bitwarden (see "Adding New SSH Keys" section above)
-- [ ] Update `vault/restore-ssh.sh` - add `restore_key_note` call
-- [ ] Update `vault/check-vault-items.sh` - add to `REQUIRED_ITEMS` array
+- [ ] **Add to `SSH_KEYS` array in `vault/_common.sh`** (propagates to restore + health check)
 - [ ] Update `~/.ssh/config` with Host entry
 - [ ] Sync SSH config: `./vault/sync-to-bitwarden.sh SSH-Config`
-- [ ] Update `zsh/zshrc` - add `_ssh_add_if_missing` line (optional)
+- [ ] Update `zsh/zshrc` - add `_ssh_add_if_missing` line (optional, for ssh-agent)
 - [ ] Commit dotfiles changes
 
 ### Updating AWS Credentials

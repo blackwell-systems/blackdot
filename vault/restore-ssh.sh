@@ -109,20 +109,16 @@ restore_ssh_config() {
 }
 
 # ============================================================
-# Restore configured SSH identities
+# Restore configured SSH identities (from SSH_KEYS in _common.sh)
 # ============================================================
 
-# GitHub Enterprise (SSO)
-restore_key_note \
-    "SSH-GitHub-Enterprise" \
-    "$SSH_DIR/id_ed25519_enterprise_ghub" \
-    "$SSH_DIR/id_ed25519_enterprise_ghub.pub"
-
-# GitHub - Blackwell Systems
-restore_key_note \
-    "SSH-GitHub-Blackwell" \
-    "$SSH_DIR/id_ed25519_blackwell" \
-    "$SSH_DIR/id_ed25519_blackwell.pub"
+for item_name in "${!SSH_KEYS[@]}"; do
+    key_path="${SSH_KEYS[$item_name]}"
+    restore_key_note \
+        "$item_name" \
+        "$key_path" \
+        "${key_path}.pub"
+done
 
 # ============================================================
 # Restore SSH config

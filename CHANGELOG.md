@@ -2,6 +2,28 @@
 
 All notable changes to this dotfiles repository will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- `vault/_common.sh` - Shared library for all vault scripts (colors, logging, session management)
+- `vault/create-vault-item.sh` - Create new Bitwarden secure notes
+- `vault/delete-vault-item.sh` - Delete Bitwarden items with safety guards
+- `vault/list-vault-items.sh` - List vault items with metadata
+- Shell aliases: `bw-restore`, `bw-sync`, `bw-create`, `bw-delete`, `bw-list`, `bw-check`
+- Centralized SSH_KEYS and AWS_EXPECTED_PROFILES in `_common.sh` (single source of truth)
+- `.gitignore` to exclude `.bw-session` and editor files
+- KEY=VALUE validation in `restore-env.sh`
+
+### Changed
+- Refactored all vault scripts to use shared `_common.sh` library (~50 lines saved per script)
+- `dotfiles-update` now detects current branch instead of assuming `main`
+- `check-health.sh` now sources `_common.sh` for SSH keys and AWS profiles
+- Updated `vault/README.md` with comprehensive script documentation
+
+### Fixed
+- SSH key names no longer hardcoded in multiple files
+- AWS profile names no longer hardcoded in check-health.sh
+
 ## [1.0.0] - 2024-11-25
 
 ### Added

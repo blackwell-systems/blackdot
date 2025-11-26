@@ -495,7 +495,18 @@ rm vault/.bw-session
 
 1. Generate key: `ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey`
 2. Push to Bitwarden (see main README)
-3. Update `restore-ssh.sh` - add `restore_key_note` call
-4. Update `check-vault-items.sh` - add to `REQUIRED_ITEMS` array
-5. Update `~/.ssh/config` with Host entry
-6. Sync: `./sync-to-bitwarden.sh SSH-Config`
+3. **Add to `SSH_KEYS` array in `vault/_common.sh`** (single source of truth):
+   ```bash
+   declare -A SSH_KEYS=(
+       ["SSH-GitHub-Enterprise"]="$HOME/.ssh/id_ed25519_enterprise_ghub"
+       ["SSH-GitHub-Blackwell"]="$HOME/.ssh/id_ed25519_blackwell"
+       ["SSH-NewService"]="$HOME/.ssh/id_ed25519_newkey"  # ← Add here
+   )
+   ```
+   This automatically propagates to `restore-ssh.sh` and `check-health.sh`.
+4. Update `~/.ssh/config` with Host entry
+5. Sync: `./sync-to-bitwarden.sh SSH-Config`
+6. (Optional) Add to `zsh/zshrc` for ssh-agent auto-load:
+   ```bash
+   _ssh_add_if_missing ~/.ssh/id_ed25519_newkey
+   ```
