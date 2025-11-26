@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow_bash": true,
+    "allow_read": true,
+    "allow_write": true,
+    "allow_mcp": true
+  },
+  "preferences": {
+    "autoUpdaterStatus": "disabled"
+  }
+}
