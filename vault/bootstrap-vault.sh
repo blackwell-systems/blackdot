@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 # ============================================================
 # FILE: vault/bootstrap-vault.sh
 # Orchestrates Bitwarden-based restoration of secrets

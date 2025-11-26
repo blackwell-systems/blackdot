@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 # ============================================================
 # FILE: vault/check-vault-items.sh
 # Validates that all required Bitwarden items exist before restore
@@ -67,7 +67,7 @@ ALL_ITEMS=$(bw list items --session "$SESSION" 2>/dev/null | jq -r '.[].name')
 # Build required/optional lists from DOTFILES_ITEMS
 REQUIRED_ITEMS=()
 OPTIONAL_ITEMS=()
-for item in "${!DOTFILES_ITEMS[@]}"; do
+for item in "${(k)DOTFILES_ITEMS[@]}"; do
     spec="${DOTFILES_ITEMS[$item]}"
     if [[ "$spec" == *":required:"* ]]; then
         REQUIRED_ITEMS+=("$item")
