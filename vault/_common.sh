@@ -5,6 +5,17 @@
 # Source this file: source "$(dirname "$0")/_common.sh"
 # ============================================================
 
+# Require bash 4.0+ for associative arrays
+if ((BASH_VERSINFO[0] < 4)); then
+    echo "Error: Vault scripts require bash 4.0+ for associative arrays." >&2
+    echo "macOS ships with bash 3.2. Install newer bash:" >&2
+    echo "  brew install bash" >&2
+    echo "Then either:" >&2
+    echo "  - Run scripts with: /opt/homebrew/bin/bash $0" >&2
+    echo "  - Or add /opt/homebrew/bin to your PATH before /bin" >&2
+    return 1 2>/dev/null || exit 1
+fi
+
 # Prevent multiple sourcing
 [[ -n "${_VAULT_COMMON_LOADED:-}" ]] && return 0
 _VAULT_COMMON_LOADED=1
