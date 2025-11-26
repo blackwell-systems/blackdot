@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 # ============================================================
 # FILE: vault/delete-vault-item.sh
 # Deletes items from Bitwarden vault

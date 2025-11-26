@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 # ============================================================
 # FILE: check-health.sh
 # Verifies dotfiles installation health
@@ -7,7 +7,7 @@
 set -uo pipefail
 
 # Source vault common for SSH_KEYS and AWS_EXPECTED_PROFILES
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="${0:a:h}"
 if [[ -f "$SCRIPT_DIR/vault/_common.sh" ]]; then
     source "$SCRIPT_DIR/vault/_common.sh"
 fi
@@ -223,7 +223,7 @@ check_ssh_key() {
 }
 
 # Check SSH keys (from SSH_KEYS in vault/_common.sh)
-if [[ -v SSH_KEYS[@] ]]; then
+if (( ${+SSH_KEYS} )); then
     for key_path in "${SSH_KEYS[@]}"; do
         key_name="$(basename "$key_path")"
         check_ssh_key "$key_name"
@@ -285,7 +285,7 @@ if [[ -f "$HOME/.aws/config" ]]; then
     fi
 
     # Check for expected profiles (from AWS_EXPECTED_PROFILES in vault/_common.sh)
-    if [[ -v AWS_EXPECTED_PROFILES[@] ]]; then
+    if (( ${+AWS_EXPECTED_PROFILES} )); then
         for profile in "${AWS_EXPECTED_PROFILES[@]}"; do
             if grep -q "\[profile $profile\]" "$HOME/.aws/config" 2>/dev/null || \
                grep -q "^\[$profile\]" "$HOME/.aws/config" 2>/dev/null; then
@@ -452,7 +452,7 @@ if $DRIFT_MODE; then
         bw sync --session "$SESSION" >/dev/null 2>&1
 
         # Items to check for drift
-        declare -A DRIFT_ITEMS=(
+        typeset -A DRIFT_ITEMS=(
             ["SSH-Config"]="$HOME/.ssh/config"
             ["AWS-Config"]="$HOME/.aws/config"
             ["AWS-Credentials"]="$HOME/.aws/credentials"
@@ -461,7 +461,7 @@ if $DRIFT_MODE; then
         )
 
         DRIFT_COUNT=0
-        for item_name in "${!DRIFT_ITEMS[@]}"; do
+        for item_name in "${(k)DRIFT_ITEMS[@]}"; do
             local_file="${DRIFT_ITEMS[$item_name]}"
 
             # Skip if local file doesn't exist

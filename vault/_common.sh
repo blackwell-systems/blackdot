@@ -1,20 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 # ============================================================
 # FILE: vault/_common.sh
 # Shared functions and definitions for vault scripts
 # Source this file: source "$(dirname "$0")/_common.sh"
 # ============================================================
-
-# Require bash 4.0+ for associative arrays
-if ((BASH_VERSINFO[0] < 4)); then
-    echo "Error: Vault scripts require bash 4.0+ for associative arrays." >&2
-    echo "macOS ships with bash 3.2. Install newer bash:" >&2
-    echo "  brew install bash" >&2
-    echo "Then either:" >&2
-    echo "  - Run scripts with: /opt/homebrew/bin/bash $0" >&2
-    echo "  - Or add /opt/homebrew/bin to your PATH before /bin" >&2
-    return 1 2>/dev/null || exit 1
-fi
 
 # Prevent multiple sourcing
 [[ -n "${_VAULT_COMMON_LOADED:-}" ]] && return 0
@@ -23,7 +12,8 @@ _VAULT_COMMON_LOADED=1
 # ============================================================
 # Directory paths
 # ============================================================
-VAULT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# In zsh, ${0:a:h} gets the absolute path's directory for sourced scripts
+VAULT_DIR="${0:a:h}"
 SESSION_FILE="$VAULT_DIR/.bw-session"
 
 # ============================================================
@@ -45,19 +35,19 @@ fi
 # ============================================================
 # Logging functions
 # ============================================================
-info()  { echo -e "${BLUE}[INFO]${NC} $1"; }
-pass()  { echo -e "${GREEN}[OK]${NC} $1"; }
-warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
-fail()  { echo -e "${RED}[FAIL]${NC} $1"; }
-dry()   { echo -e "${CYAN}[DRY-RUN]${NC} $1"; }
-debug() { [[ "${DEBUG:-}" == "1" ]] && echo -e "${DIM}[DEBUG] $1${NC}"; }
+info()  { print "${BLUE}[INFO]${NC} $1"; }
+pass()  { print "${GREEN}[OK]${NC} $1"; }
+warn()  { print "${YELLOW}[WARN]${NC} $1"; }
+fail()  { print "${RED}[FAIL]${NC} $1"; }
+dry()   { print "${CYAN}[DRY-RUN]${NC} $1"; }
+debug() { [[ "${DEBUG:-}" == "1" ]] && print "${DIM}[DEBUG] $1${NC}"; }
 
 # ============================================================
 # Single source of truth: SSH Keys
-# Format: "bitwarden_item:private_key_path:public_key_path"
+# Format: "bitwarden_item" => "private_key_path"
 # To add a new SSH key, add it here and it propagates everywhere
 # ============================================================
-declare -A SSH_KEYS=(
+typeset -A SSH_KEYS=(
     ["SSH-GitHub-Enterprise"]="$HOME/.ssh/id_ed25519_enterprise_ghub"
     ["SSH-GitHub-Blackwell"]="$HOME/.ssh/id_ed25519_blackwell"
 )
@@ -71,7 +61,7 @@ get_ssh_key_paths() {
 
 # Get list of SSH key Bitwarden item names
 get_ssh_key_items() {
-    for item in "${!SSH_KEYS[@]}"; do
+    for item in "${(k)SSH_KEYS[@]}"; do
         echo "$item"
     done | sort
 }
@@ -88,7 +78,7 @@ AWS_EXPECTED_PROFILES=(
 # Single source of truth: Dotfiles items and their mappings
 # Format: "local_path:required|optional:type"
 # ============================================================
-declare -A DOTFILES_ITEMS=(
+typeset -A DOTFILES_ITEMS=(
     ["SSH-GitHub-Enterprise"]="$HOME/.ssh/id_ed25519_enterprise_ghub:required:sshkey"
     ["SSH-GitHub-Blackwell"]="$HOME/.ssh/id_ed25519_blackwell:required:sshkey"
     ["SSH-Config"]="$HOME/.ssh/config:required:file"
@@ -99,7 +89,7 @@ declare -A DOTFILES_ITEMS=(
 )
 
 # Items that can be synced (file-based, not SSH keys)
-declare -A SYNCABLE_ITEMS=(
+typeset -A SYNCABLE_ITEMS=(
     ["SSH-Config"]="$HOME/.ssh/config"
     ["AWS-Config"]="$HOME/.aws/config"
     ["AWS-Credentials"]="$HOME/.aws/credentials"
@@ -110,7 +100,7 @@ declare -A SYNCABLE_ITEMS=(
 # Get required items list
 get_required_items() {
     local items=()
-    for item in "${!DOTFILES_ITEMS[@]}"; do
+    for item in "${(k)DOTFILES_ITEMS[@]}"; do
         local spec="${DOTFILES_ITEMS[$item]}"
         [[ "$spec" == *":required:"* ]] && items+=("$item")
     done
@@ -120,7 +110,7 @@ get_required_items() {
 # Get optional items list
 get_optional_items() {
     local items=()
-    for item in "${!DOTFILES_ITEMS[@]}"; do
+    for item in "${(k)DOTFILES_ITEMS[@]}"; do
         local spec="${DOTFILES_ITEMS[$item]}"
         [[ "$spec" == *":optional:"* ]] && items+=("$item")
     done
@@ -137,7 +127,7 @@ get_item_path() {
 # Check if item is a protected dotfiles item
 is_protected_item() {
     local item="$1"
-    [[ -v "DOTFILES_ITEMS[$item]" ]]
+    (( ${+DOTFILES_ITEMS[$item]} ))
 }
 
 # ============================================================

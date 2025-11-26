@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 # ============================================================
 # FILE: vault/restore-git.sh
 # Restores Git config from Bitwarden Secure Note
