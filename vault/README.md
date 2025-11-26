@@ -3,23 +3,40 @@
 This directory contains scripts for **bidirectional secret management** with Bitwarden:
 
 - **Restore scripts** pull secrets from Bitwarden → local files
-- **Sync script** pushes local changes → Bitwarden
-- **Utility scripts** for validation, debugging, and inventory
+- **Sync/Create scripts** push local changes → Bitwarden
+- **Utility scripts** for validation, debugging, deletion, and inventory
+- **Shared library** (`_common.sh`) with reusable functions
 
 ---
 
 ## Quick Reference
 
-| Script | Purpose | Usage |
-|--------|---------|-------|
-| `bootstrap-vault.sh` | Orchestrates all restores | `./bootstrap-vault.sh` or `bw-restore` |
+| Script | Purpose | Usage / Alias |
+|--------|---------|---------------|
+| `bootstrap-vault.sh` | Orchestrates all restores | `bw-restore` |
 | `restore-ssh.sh` | Restores SSH keys + config | Called by bootstrap |
 | `restore-aws.sh` | Restores AWS config/creds | Called by bootstrap |
 | `restore-env.sh` | Restores env secrets | Called by bootstrap |
 | `restore-git.sh` | Restores gitconfig | Called by bootstrap |
-| `sync-to-bitwarden.sh` | Syncs local → Bitwarden | `./sync-to-bitwarden.sh --all` |
-| `check-vault-items.sh` | Pre-flight validation | `./check-vault-items.sh` |
-| `list-vault-items.sh` | Debug/inventory tool | `./list-vault-items.sh [-v]` |
+| `create-vault-item.sh` | Creates new vault items | `bw-create ITEM [FILE]` |
+| `sync-to-bitwarden.sh` | Syncs local → Bitwarden | `bw-sync --all` |
+| `delete-vault-item.sh` | Deletes items from vault | `bw-delete ITEM` |
+| `check-vault-items.sh` | Pre-flight validation | `bw-check` |
+| `list-vault-items.sh` | Debug/inventory tool | `bw-list [-v]` |
+| `_common.sh` | Shared functions library | Sourced by other scripts |
+
+### Shell Aliases
+
+All vault scripts have convenient aliases (defined in `zsh/zshrc`):
+
+```bash
+bw-restore  # Restore all secrets from Bitwarden
+bw-sync     # Sync local changes to Bitwarden
+bw-create   # Create new Bitwarden items
+bw-delete   # Delete items from Bitwarden
+bw-list     # List all vault items
+bw-check    # Validate required items exist
+```
 
 ---
 
@@ -177,6 +194,69 @@ Pushes local config changes back to Bitwarden.
 
 ---
 
+### `create-vault-item.sh`
+
+Creates new Bitwarden Secure Note items from local files.
+
+```bash
+# Create from known dotfile (auto-detects path)
+./create-vault-item.sh Git-Config
+
+# Create with explicit path
+./create-vault-item.sh Git-Config ~/.gitconfig
+
+# Create custom item
+./create-vault-item.sh My-Custom-Note ~/my-file.txt
+
+# Preview creation
+./create-vault-item.sh --dry-run Git-Config
+
+# Overwrite existing item
+./create-vault-item.sh --force Git-Config
+```
+
+**Known items (auto-detect path):**
+
+| Item Name | Default Path |
+|-----------|--------------|
+| `SSH-Config` | `~/.ssh/config` |
+| `AWS-Config` | `~/.aws/config` |
+| `AWS-Credentials` | `~/.aws/credentials` |
+| `Git-Config` | `~/.gitconfig` |
+| `Environment-Secrets` | `~/.local/env.secrets` |
+
+**When to use:** Initial setup to push local configs to Bitwarden for the first time.
+
+---
+
+### `delete-vault-item.sh`
+
+Deletes items from Bitwarden vault with safety checks.
+
+```bash
+# Preview deletion (recommended first step)
+./delete-vault-item.sh --dry-run TEST-NOTE
+
+# Delete with confirmation prompt
+./delete-vault-item.sh TEST-NOTE
+
+# Delete multiple items without prompts
+./delete-vault-item.sh --force OLD-KEY OTHER-ITEM
+
+# List all items (to find exact names)
+./delete-vault-item.sh --list
+```
+
+**Safety features:**
+- Protected items (SSH-*, AWS-*, Git-Config, etc.) require typing the item name to confirm
+- Non-protected items prompt for y/N confirmation (bypass with `--force`)
+- `--dry-run` shows what would be deleted without making changes
+- Shows item details (type, size, modified date) before deletion
+
+**When to use:** Cleaning up test items, removing old/unused secrets.
+
+---
+
 ### `check-vault-items.sh`
 
 Pre-flight validation - ensures required Bitwarden items exist.
@@ -240,6 +320,42 @@ Debug tool - lists all Bitwarden items relevant to dotfiles.
 
 ---
 
+### `_common.sh`
+
+Shared library sourced by other vault scripts. Provides:
+
+- **Color definitions** - Consistent terminal colors across all scripts
+- **Logging functions** - `info()`, `pass()`, `warn()`, `fail()`, `dry()`
+- **Item definitions** - Single source of truth for all dotfiles items
+- **Session management** - `get_session()`, `sync_vault()`
+- **Prerequisite checks** - `require_bw()`, `require_jq()`, `require_logged_in()`
+- **Bitwarden helpers** - `bw_get_item()`, `bw_get_notes()`, `bw_item_exists()`
+
+**Usage in scripts:**
+```bash
+#!/usr/bin/env bash
+source "$(dirname "$0")/_common.sh"
+
+require_bw
+require_jq
+SESSION=$(get_session)
+sync_vault "$SESSION"
+
+info "Doing something..."
+pass "Success!"
+```
+
+**Key data structures:**
+```bash
+# All dotfiles items with their paths and requirements
+DOTFILES_ITEMS["Git-Config"]="$HOME/.gitconfig:required:file"
+
+# Items that can be synced (excludes SSH keys)
+SYNCABLE_ITEMS["Git-Config"]="$HOME/.gitconfig"
+```
+
+---
+
 ## Data Flow
 
 ```
@@ -277,9 +393,11 @@ Debug tool - lists all Bitwarden items relevant to dotfiles.
 │   ═══════════════════════════════════════════════════════════   │
 │                                                                  │
 │   UTILITIES:                                                     │
-│   • check-vault-items.sh  →  Pre-flight validation               │
-│   • list-vault-items.sh   →  Debug/inventory tool                │
-│   • bootstrap-vault.sh    →  Orchestrates all restore-*.sh       │
+│   • bootstrap-vault.sh     →  Orchestrates all restore-*.sh      │
+│   • create-vault-item.sh   →  Initial push to Bitwarden          │
+│   • check-vault-items.sh   →  Pre-flight validation              │
+│   • list-vault-items.sh    →  Debug/inventory tool               │
+│   • delete-vault-item.sh   →  Remove items from vault            │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```

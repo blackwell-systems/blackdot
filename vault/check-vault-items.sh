@@ -6,109 +6,75 @@
 # ============================================================
 set -uo pipefail
 
-# Colors for output
-if [[ -t 1 ]]; then
-    RED='\033[0;31m'
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    NC='\033[0m'
-else
-    RED='' GREEN='' YELLOW='' BLUE='' NC=''
-fi
-
-# Required Bitwarden items for vault restoration
-REQUIRED_ITEMS=(
-    "SSH-GitHub-Enterprise"
-    "SSH-GitHub-Blackwell"
-    "SSH-Config"
-    "AWS-Config"
-    "AWS-Credentials"
-    "Git-Config"
-)
-
-# Optional items (warn if missing, don't fail)
-OPTIONAL_ITEMS=(
-    "Environment-Secrets"
-)
-
-pass() { echo -e "${GREEN}[OK]${NC} $1"; }
-fail() { echo -e "${RED}[MISSING]${NC} $1"; }
-warn() { echo -e "${YELLOW}[OPTIONAL]${NC} $1"; }
-info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+# Source common functions
+source "$(dirname "$0")/_common.sh"
 
 usage() {
-    echo "Usage: $0 [--session SESSION]"
-    echo ""
-    echo "Validates that all required Bitwarden items exist."
-    echo ""
-    echo "Options:"
-    echo "  --session SESSION   Use provided session token"
-    echo "  -h, --help          Show this help"
-    echo ""
-    echo "If no session is provided, uses BW_SESSION environment variable."
+    cat <<EOF
+Usage: $(basename "$0") [--session SESSION]
+
+Validates that all required Bitwarden items exist.
+
+Options:
+  --session SESSION   Use provided session token
+  -h, --help          Show this help
+
+If no session is provided, uses BW_SESSION environment variable.
+EOF
     exit 0
 }
 
 # Parse arguments
-SESSION="${BW_SESSION:-}"
+SESSION_ARG=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --session)
-            SESSION="$2"
+            SESSION_ARG="$2"
             shift 2
             ;;
         -h|--help)
             usage
             ;;
         *)
-            echo "Unknown option: $1" >&2
+            fail "Unknown option: $1"
             usage
             ;;
     esac
 done
 
 # Check prerequisites
-if ! command -v bw >/dev/null 2>&1; then
-    echo "ERROR: Bitwarden CLI (bw) is not installed." >&2
-    exit 1
-fi
+require_bw
+require_jq
 
-if ! command -v jq >/dev/null 2>&1; then
-    echo "ERROR: jq is not installed." >&2
-    exit 1
-fi
-
-# Get session if not provided
-if [[ -z "$SESSION" ]]; then
-    VAULT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    SESSION_FILE="$VAULT_DIR/.bw-session"
-
-    if [[ -f "$SESSION_FILE" ]]; then
-        SESSION="$(cat "$SESSION_FILE")"
-        if ! bw unlock --check --session "$SESSION" >/dev/null 2>&1; then
-            echo "Cached session expired. Please unlock Bitwarden:" >&2
-            SESSION="$(bw unlock --raw)"
-        fi
-    else
-        echo "No session found. Please unlock Bitwarden:" >&2
-        SESSION="$(bw unlock --raw)"
+# Get session (use arg if provided, otherwise use common function)
+if [[ -n "$SESSION_ARG" ]]; then
+    SESSION="$SESSION_ARG"
+    if ! bw unlock --check --session "$SESSION" >/dev/null 2>&1; then
+        fail "Invalid session token provided"
+        exit 1
     fi
-fi
-
-# Verify session is valid
-if ! bw unlock --check --session "$SESSION" >/dev/null 2>&1; then
-    echo "ERROR: Invalid Bitwarden session." >&2
-    exit 1
+else
+    SESSION=$(get_session)
 fi
 
 # Sync vault
-info "Syncing Bitwarden vault..."
-bw sync --session "$SESSION" >/dev/null
+sync_vault "$SESSION"
 
 # Get all item names
 info "Fetching item list..."
 ALL_ITEMS=$(bw list items --session "$SESSION" 2>/dev/null | jq -r '.[].name')
+
+# Build required/optional lists from DOTFILES_ITEMS
+REQUIRED_ITEMS=()
+OPTIONAL_ITEMS=()
+for item in "${!DOTFILES_ITEMS[@]}"; do
+    spec="${DOTFILES_ITEMS[$item]}"
+    if [[ "$spec" == *":required:"* ]]; then
+        REQUIRED_ITEMS+=("$item")
+    else
+        OPTIONAL_ITEMS+=("$item")
+    fi
+done
 
 echo ""
 echo "=== Required Items ==="
@@ -117,10 +83,10 @@ for item in "${REQUIRED_ITEMS[@]}"; do
     if echo "$ALL_ITEMS" | grep -qx "$item"; then
         pass "$item"
     else
-        fail "$item"
+        echo -e "${RED}[MISSING]${NC} $item"
         ((MISSING++))
     fi
-done
+done | sort
 
 echo ""
 echo "=== Optional Items ==="
@@ -130,7 +96,7 @@ for item in "${OPTIONAL_ITEMS[@]}"; do
     else
         warn "$item - not found (this is optional)"
     fi
-done
+done | sort
 
 echo ""
 echo "========================================"
@@ -141,7 +107,7 @@ if [[ $MISSING -eq 0 ]]; then
 else
     echo -e "${RED}Missing $MISSING required item(s)${NC}"
     echo ""
-    echo "To create missing items, see README.md section:"
-    echo "  'One-Time: Push Current Files into Bitwarden'"
+    echo "To create missing items:"
+    echo "  bw-create ITEM-NAME"
     exit 1
 fi

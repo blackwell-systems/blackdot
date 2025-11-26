@@ -5,58 +5,20 @@
 # ============================================================
 set -euo pipefail
 
-# Dynamically determine script location
-VAULT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SESSION_FILE="$VAULT_DIR/.bw-session"
+# Source common functions
+source "$(dirname "$0")/_common.sh"
 
 echo "=== Bitwarden vault bootstrap starting ==="
 echo "Vault directory: $VAULT_DIR"
 
-# Verify Bitwarden CLI is available
-if ! command -v bw >/dev/null 2>&1; then
-    echo "ERROR: Bitwarden CLI (bw) is not installed." >&2
-    echo "Install with: brew install bitwarden-cli" >&2
-    exit 1
-fi
+# Verify prerequisites
+require_bw
+require_logged_in
 
-# Check if logged in to Bitwarden
-if ! bw login --check >/dev/null 2>&1; then
-    echo "ERROR: Not logged in to Bitwarden." >&2
-    echo "Please run: bw login" >&2
-    exit 1
-fi
-
-# ============================================================
-# Unlock Bitwarden and get session
-# ============================================================
-SESSION=""
-
-# Try to reuse existing session file
-if [[ -f "$SESSION_FILE" ]]; then
-    SESSION="$(cat "$SESSION_FILE")"
-    if ! bw unlock --check --session "$SESSION" >/dev/null 2>&1; then
-        echo "Cached session expired, re-unlocking..."
-        rm -f "$SESSION_FILE"
-        SESSION=""
-    else
-        echo "Reusing cached Bitwarden session."
-    fi
-fi
-
-# Unlock if we don't have a valid session
-if [[ -z "$SESSION" ]]; then
-    echo "Unlocking Bitwarden vault..."
-    SESSION="$(bw unlock --raw)"
-
-    # Write session file with secure permissions (atomic)
-    (umask 077 && printf '%s' "$SESSION" > "$SESSION_FILE")
-
-    echo "Vault unlocked and session cached."
-fi
-
-# Sync to ensure we have latest data
-echo "Syncing Bitwarden vault..."
-bw sync --session "$SESSION" >/dev/null
+# Get session and sync
+SESSION=$(get_session)
+echo "Vault unlocked and session cached."
+sync_vault "$SESSION"
 
 # ============================================================
 # Run restoration scripts
