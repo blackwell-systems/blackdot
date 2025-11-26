@@ -192,45 +192,41 @@ status() {
   local fixes=()
 
   # Gather status
-  local s_zshrc=$([[ -L ~/.zshrc ]] && echo "●" || { fixes+=("zshrc: bootstrap-dotfiles.sh"); echo "○"; })
-  local s_claude=$([[ -L ~/.claude ]] && echo "●" || { fixes+=("claude: bootstrap-dotfiles.sh"); echo "○"; })
-  local s_workspace=$([[ -L /workspace ]] && echo "●" || { fixes+=("/workspace: sudo ln -sfn \$HOME/workspace /workspace"); echo "○"; })
+  local s_zshrc=$([[ -L ~/.zshrc ]] && echo "◆" || { fixes+=("zshrc: bootstrap-dotfiles.sh"); echo "◇"; })
+  local s_claude=$([[ -L ~/.claude ]] && echo "◆" || { fixes+=("claude: bootstrap-dotfiles.sh"); echo "◇"; })
+  local s_workspace=$([[ -L /workspace ]] && echo "◆" || { fixes+=("/workspace: sudo ln -sfn \$HOME/workspace /workspace"); echo "◇"; })
 
   local ssh_count=$(ssh-add -l 2>/dev/null | wc -l | tr -d ' ')
-  local s_ssh=$([[ "$ssh_count" -gt 0 ]] && echo "●" || { fixes+=("ssh: bw-restore"); echo "○"; })
+  local s_ssh=$([[ "$ssh_count" -gt 0 ]] && echo "◆" || { fixes+=("ssh: bw-restore"); echo "◇"; })
 
-  local s_aws=$(aws sts get-caller-identity --profile "${_CLAUDE_BEDROCK_PROFILE:-dev-profile}" &>/dev/null && echo "●" || { fixes+=("aws: awslogin"); echo "○"; })
+  local s_aws=$(aws sts get-caller-identity --profile "${_CLAUDE_BEDROCK_PROFILE:-dev-profile}" &>/dev/null && echo "◆" || { fixes+=("aws: awslogin"); echo "◇"; })
 
-  local s_lima="·"
+  local s_lima=" "
   if [[ "$OS" == "Darwin" ]] && command -v limactl &>/dev/null; then
-    s_lima=$(limactl list 2>/dev/null | grep -q Running && echo "●" || { fixes+=("lima: lima-start"); echo "○"; })
+    s_lima=$(limactl list 2>/dev/null | grep -q Running && echo "◆" || { fixes+=("lima: lima-start"); echo "◇"; })
   fi
 
-  # City skyline
+  # Minimal wireframe city
   cat << EOF
 
-          ▄▄              ▄▄▄▄
-      ▄▄▄████▄▄        ▄██████▄    ▄▄
-     ▐██▌$s_zshrc▐██▌      ▐██▌$s_aws▐██▌  ████
-     ▐██▌ ▐██▌      ▐██▌ ▐██▌  █$s_lima██
-  ▄▄▄████▄████▄▄  ▄▄████▄████▄▄████▄▄
- ▐██▌$s_claude▐██▌$s_ssh▐██▌▐██▌$s_workspace▐██▌ ▐██▌ ▐██▌
- ▐██▌ ▐██▌ ▐██▌▐██▌ ▐██▌ ▐██▌ ▐██▌
-▄████████████████████████████████████▄
+            ┌───┐
+    ┌───┐   │$s_aws│   ┌───┐
+    │$s_zshrc│   │ │   │$s_lima│
+┌───┼───┼───┼───┼───┼───┼───┐
+│$s_claude│ │$s_ssh│ │$s_workspace│ │   │ │
+└───┴───┴───┴───┴───┴───┴───┘
+
 EOF
 
-  # Legend - minimal
-  echo ""
+  # Legend
   echo "  zsh $s_zshrc  claude $s_claude  /ws $s_workspace  ssh $s_ssh  aws $s_aws  lima $s_lima"
   echo ""
 
   # Fixes if needed
   if [[ ${#fixes[@]} -gt 0 ]]; then
-    echo "  ┌─ fixes needed ─────────────────────"
     for fix in "${fixes[@]}"; do
-      echo "  │ → $fix"
+      echo "  → $fix"
     done
-    echo "  └─────────────────────────────────────"
     echo ""
   fi
 }
