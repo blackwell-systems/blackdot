@@ -75,32 +75,8 @@ mkdir -p "$HOME/workspace/code"
 echo "Linking dotfiles..."
 "$DOTFILES_DIR/bootstrap-dotfiles.sh"
 
-# 6. Shared Claude data symlink ----------------------------------------
-# Goal: make ~/.claude point at the shared ~/workspace/.claude so both
-# macOS and Lima use the same history / state.
-CLAUDE_SHARED="$HOME/workspace/.claude"
-
-if [ -e "$CLAUDE_SHARED" ]; then
-  echo "Found shared Claude directory at $CLAUDE_SHARED"
-
-  # If a real ~/.claude exists and is NOT a symlink, back it up once
-  if [ -e "$HOME/.claude" ] && [ ! -L "$HOME/.claude" ]; then
-    BACKUP="$HOME/.claude.bak-$(date +%Y%m%d%H%M%S)"
-    echo "Backing up existing ~/.claude to $BACKUP"
-    mv "$HOME/.claude" "$BACKUP"
-  fi
-
-  ln -sfn "$CLAUDE_SHARED" "$HOME/.claude"
-  echo "Linked ~/.claude -> $CLAUDE_SHARED"
-else
-  echo "Note: $CLAUDE_SHARED does not exist yet; skipping Claude symlink."
-  echo "      After you untar/restore your Claude data into $CLAUDE_SHARED,"
-  echo "      rerun this script or create the symlink manually:"
-  echo "        ln -sfn \$HOME/workspace/.claude \$HOME/.claude"
-fi
-
 echo "=== macOS bootstrap complete ==="
 echo "Next:"
 echo "  - Open Ghostty and confirm Meslo Nerd Font is selected."
 echo "  - Clone your repos into ~/workspace (whitepapers, patent-pool, etc.)."
-echo "  - Claude CLI/Code will now use shared history via ~/workspace/.claude."
+echo "  - Claude CLI/Code uses shared state via ~/workspace/.claude (set up by bootstrap-dotfiles.sh)."
