@@ -163,6 +163,8 @@ alias dotfiles-doctor='$HOME/workspace/dotfiles/check-health.sh && bw-check 2>/d
 
 # Quick status dashboard - see everything at a glance
 status() {
+  local fixes=()
+
   echo ""
   echo "═══════════════════════════════════════"
   echo "           DOTFILES STATUS"
@@ -171,29 +173,60 @@ status() {
 
   # Symlinks
   printf "Symlinks:   "
-  [[ -L ~/.zshrc ]] && printf "✓ zshrc  " || printf "✗ zshrc  "
-  [[ -L ~/.claude ]] && printf "✓ claude  " || printf "✗ claude  "
-  [[ -L /workspace ]] && printf "✓ /workspace" || printf "✗ /workspace"
+  if [[ -L ~/.zshrc ]]; then
+    printf "✓ zshrc  "
+  else
+    printf "✗ zshrc  "
+    fixes+=("zshrc not symlinked: ~/workspace/dotfiles/bootstrap-dotfiles.sh")
+  fi
+  if [[ -L ~/.claude ]]; then
+    printf "✓ claude  "
+  else
+    printf "✗ claude  "
+    fixes+=("claude not symlinked: ~/workspace/dotfiles/bootstrap-dotfiles.sh")
+  fi
+  if [[ -L /workspace ]]; then
+    printf "✓ /workspace"
+  else
+    printf "✗ /workspace"
+    if [[ "$OS" == "Darwin" ]]; then
+      fixes+=("/workspace missing: sudo ln -sfn \$HOME/workspace /workspace")
+    else
+      fixes+=("/workspace missing: sudo ln -sfn \$HOME/workspace /workspace")
+    fi
+  fi
   echo ""
 
   # Workspace target
   printf "Workspace:  "
   if [[ -L /workspace ]]; then
-    echo "/workspace → $(readlink /workspace)"
+    local target=$(readlink /workspace)
+    if [[ "$target" == "$HOME/workspace" ]]; then
+      echo "/workspace → $target"
+    else
+      echo "/workspace → $target (wrong target!)"
+      fixes+=("/workspace points wrong: sudo ln -sfn \$HOME/workspace /workspace")
+    fi
   else
     echo "/workspace missing"
   fi
 
   # SSH Agent
   local ssh_keys=$(ssh-add -l 2>/dev/null | wc -l | tr -d ' ')
-  echo "SSH Agent:  $ssh_keys keys loaded"
+  if [[ "$ssh_keys" -gt 0 ]]; then
+    echo "SSH Agent:  $ssh_keys keys loaded"
+  else
+    echo "SSH Agent:  ✗ no keys loaded"
+    fixes+=("SSH keys not loaded: bw-restore (or ssh-add ~/.ssh/id_ed25519_*)")
+  fi
 
   # AWS SSO (quick check, don't block)
   printf "AWS SSO:    "
   if aws sts get-caller-identity --profile "${_CLAUDE_BEDROCK_PROFILE:-dev-profile}" &>/dev/null; then
     echo "✓ authenticated"
   else
-    echo "✗ not authenticated (run: awslogin)"
+    echo "✗ not authenticated"
+    fixes+=("AWS SSO expired: awslogin")
   fi
 
   # Lima (macOS only)
@@ -202,11 +235,25 @@ status() {
     if limactl list 2>/dev/null | grep -q Running; then
       echo "✓ running"
     else
-      echo "○ stopped (run: lima-start)"
+      echo "○ stopped"
+      fixes+=("Lima VM stopped: lima-start")
     fi
   fi
 
   echo ""
+
+  # Show fixes if any
+  if [[ ${#fixes[@]} -gt 0 ]]; then
+    echo "═══════════════════════════════════════"
+    echo "           SUGGESTED FIXES"
+    echo "═══════════════════════════════════════"
+    echo ""
+    for fix in "${fixes[@]}"; do
+      echo "  → $fix"
+    done
+    echo ""
+  fi
+
   echo "═══════════════════════════════════════"
 }
 
