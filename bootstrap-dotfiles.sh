@@ -41,9 +41,6 @@ ln -sfn "$CLAUDE_SHARED" "$HOME/.claude"
 if [ -f "$DOTFILES_DIR/claude/settings.json" ]; then
   ln -sf "$DOTFILES_DIR/claude/settings.json" "$CLAUDE_SHARED/settings.json"
 fi
-if [ -f "$DOTFILES_DIR/claude/CLAUDE.md" ]; then
-  ln -sf "$DOTFILES_DIR/claude/CLAUDE.md" "$CLAUDE_SHARED/CLAUDE.md"
-fi
 
 # Link slash commands
 if [ -d "$DOTFILES_DIR/claude/commands" ]; then

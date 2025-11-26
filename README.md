@@ -76,7 +76,6 @@ The dotfiles are organized as follows:
 ├── .gitignore                # Excludes .bw-session, editor files
 ├── claude
 │   ├── settings.json         # Claude Code settings (permissions, preferences)
-│   ├── CLAUDE.md             # Global Claude instructions
 │   └── commands/             # Custom slash commands
 │       └── health.md         # /health - run dotfiles health check
 ├── ghostty
@@ -107,7 +106,7 @@ Key pieces:
 - **zsh/p10k.zsh**: Powerlevel10k theme configuration
 - **ghostty/config**: Ghostty terminal configuration
 - **vault/**: Bitwarden-based secure bootstrap for SSH, AWS, and environment secrets
-- **claude/**: Claude Code configuration (settings, global instructions, slash commands)
+- **claude/**: Claude Code configuration (settings, slash commands)
 - **Brewfile**: Shared Homebrew definition used by both macOS and Lima bootstrap scripts
 - **Claude Workspace Symlink** inside `bootstrap-dotfiles.sh` ensures that both macOS and Lima point to the shared workspace directory:
 
