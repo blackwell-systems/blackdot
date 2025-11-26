@@ -17,6 +17,8 @@ brew "fzf"       # Fuzzy finder (Ctrl+R, file search)
 brew "eza"       # Modern ls replacement
 brew "fd"        # Fast find alternative (pairs with fzf)
 brew "ripgrep"   # Fast grep alternative (rg)
+brew "zoxide"    # Smarter cd that learns your habits (z command)
+brew "glow"      # Render markdown beautifully in terminal
 
 # Containers / dev
 brew "docker"
