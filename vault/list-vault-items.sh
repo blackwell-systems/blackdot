@@ -34,14 +34,14 @@ echo ""
 
 # Use DOTFILES_ITEMS from _common.sh
 for item_name in "${(k)DOTFILES_ITEMS[@]}"; do
-    # Find item
-    item_json=$(echo "$ALL_ITEMS" | jq -r ".[] | select(.name == \"$item_name\")")
+    # Find item (use printf to handle large JSON safely)
+    item_json=$(printf '%s' "$ALL_ITEMS" | jq -r ".[] | select(.name == \"$item_name\")")
 
     if [[ -n "$item_json" ]]; then
-        item_id=$(echo "$item_json" | jq -r '.id')
-        item_type=$(echo "$item_json" | jq -r '.type')
-        notes_length=$(echo "$item_json" | jq -r '.notes // "" | length')
-        modified=$(echo "$item_json" | jq -r '.revisionDate // "unknown"' | cut -d'T' -f1)
+        item_id=$(printf '%s' "$item_json" | jq -r '.id')
+        item_type=$(printf '%s' "$item_json" | jq -r '.type')
+        notes_length=$(printf '%s' "$item_json" | jq -r '.notes // "" | length')
+        modified=$(printf '%s' "$item_json" | jq -r '.revisionDate // "unknown"' | cut -d'T' -f1)
 
         # Type name
         case "$item_type" in
@@ -52,28 +52,28 @@ for item_name in "${(k)DOTFILES_ITEMS[@]}"; do
             *) type_name="Unknown" ;;
         esac
 
-        echo -e "${GREEN}[FOUND]${NC} $item_name"
-        echo -e "        Type: $type_name | Notes: ${notes_length} chars | Modified: $modified"
+        print "${GREEN}[FOUND]${NC} $item_name"
+        print "        Type: $type_name | Notes: ${notes_length} chars | Modified: $modified"
 
         if $VERBOSE; then
-            echo -e "        ${DIM}ID: $item_id${NC}"
+            print "        ${DIM}ID: $item_id${NC}"
             # Show first 100 chars of notes
-            notes_preview=$(echo "$item_json" | jq -r '.notes // ""' | head -c 100 | tr '\n' ' ')
+            notes_preview=$(printf '%s' "$item_json" | jq -r '.notes // ""' | head -c 100 | tr '\n' ' ')
             if [[ -n "$notes_preview" ]]; then
-                echo -e "        ${DIM}Preview: ${notes_preview}...${NC}"
+                print "        ${DIM}Preview: ${notes_preview}...${NC}"
             fi
         fi
     else
-        echo -e "${RED}[MISSING]${NC} $item_name"
+        print "${RED}[MISSING]${NC} $item_name"
     fi
     echo ""
-done | sort
+done
 
 echo -e "${CYAN}=== All Secure Notes in Vault ===${NC}"
 echo ""
 
 # List all secure notes (type 2)
-echo "$ALL_ITEMS" | jq -r '.[] | select(.type == 2) | .name' | sort | while read -r name; do
+printf '%s' "$ALL_ITEMS" | jq -r '.[] | select(.type == 2) | .name' | sort | while read -r name; do
     # Check if it's an expected item
     if is_protected_item "$name"; then
         echo -e "  ${GREEN}✓${NC} $name ${DIM}(dotfiles)${NC}"
