@@ -123,6 +123,32 @@ if command -v fzf >/dev/null 2>&1; then
   fi
 fi
 
+# dust - intuitive disk usage (du replacement)
+if command -v dust >/dev/null 2>&1; then
+  alias du='dust'
+  alias dus='dust -s'      # summary only
+  alias dud='dust -d 1'    # depth 1
+fi
+
+# yazi - terminal file manager (cd to directory on exit)
+if command -v yazi >/dev/null 2>&1; then
+  # y: launch yazi and cd to directory when you quit
+  y() {
+    local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+    yazi "$@" --cwd-file="$tmp"
+    if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+      cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
+  }
+  alias fm='y'  # muscle memory alias
+fi
+
+# yq - YAML processor (like jq for YAML)
+# Usage: yq '.spec.containers[0].image' deployment.yaml
+#        cat config.yaml | yq '.database.host'
+#        yq -i '.version = "2.0"' config.yaml  # in-place edit
+
 # =========================
 # SHARED ENV / TOOLING
 # =========================
