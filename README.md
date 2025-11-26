@@ -1119,6 +1119,27 @@ Complete checklist for a fresh machine:
 - `lm` → `eza -la --icons --sort=modified` (by modified time)
 - `lr` → `eza -la --icons --sort=size --reverse` (by size)
 
+**Disk usage (dust - du replacement):**
+
+- `du` → `dust` (visual disk usage with bar charts)
+- `dus` → `dust -s` (summary only)
+- `dud` → `dust -d 1` (depth 1, top-level only)
+
+**File manager (yazi):**
+
+- `y` → Launch yazi file manager (cd to directory on exit)
+- `fm` → Alias for `y`
+- Inside yazi: `h/j/k/l` to navigate, `Enter` to open, `q` to quit
+
+**YAML processing (yq):**
+
+```bash
+yq '.spec.containers[0].image' deployment.yaml   # extract value
+cat config.yaml | yq '.database.host'            # pipe input
+yq -i '.version = "2.0"' config.yaml             # in-place edit
+yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
+```
+
 **Fuzzy finder (fzf):**
 
 - `Ctrl+R` → Fuzzy search command history
@@ -1133,6 +1154,18 @@ Complete checklist for a fresh machine:
 - `cwhite` → `cd ~/workspace/whitepapers`
 - `cpat` → `cd ~/workspace/patent-pool`
 - `j` → Fuzzy jump to any git project in `/workspace` (requires fzf)
+
+**Smart directory jumping (zoxide):**
+
+- `z <partial>` → Jump to directory matching pattern (learns your habits)
+- `z dot` → Jumps to ~/workspace/dotfiles (after visiting once)
+- `z code` → Jumps to ~/workspace/code
+- `zi` → Interactive selection with fzf
+
+**Markdown viewing (glow):**
+
+- `md <file>` → Render markdown file beautifully in terminal
+- `readme` → Shortcut for `glow README.md`
 
 **Quick Notes:**
 
