@@ -160,11 +160,14 @@ The workspace provides a consistent hierarchy:
 ```
 ~/workspace/
 ├── .claude/           # Shared Claude CLI state (symlinked from ~/.claude)
+├── .zsh_history       # Shared shell history across platforms
 ├── dotfiles/          # This repository
 ├── code/              # Active projects
 ├── whitepapers/       # Documentation, specs
 └── patent-pool/       # IP work
 ```
+
+**Shared shell history**: Command history is stored in `~/workspace/.zsh_history` so your history follows you between macOS and Lima sessions.
 
 Navigation aliases make this seamless:
 - `cws` → `cd ~/workspace`
@@ -1137,8 +1140,21 @@ Complete checklist for a fresh machine:
 
 - `dotfiles` → `cd ~/workspace/dotfiles`
 - `dotfiles-doctor` → Run health check + vault item validation
-- `dotfiles-sync` → Sync local configs back to Bitwarden
 - `dotfiles-update` → Pull latest dotfiles and re-source zshrc
+- `status` → Quick dashboard showing symlinks, SSH, AWS, Lima status
+
+**Lima VM (macOS only):**
+
+- `lima-dev` → Shell into dev-ubuntu VM
+- `lima-start` → Start the VM
+- `lima-stop` → Stop the VM
+- `lima-status` → List VM status
+
+**Claude Code:**
+
+- `claude` → Wrapper that auto-uses `/workspace` path for portable sessions
+- `claude-bedrock` → Run Claude via AWS Bedrock
+- `claude-max` → Run Claude via Max subscription
 
 **Clipboard (cross-platform):**
 
