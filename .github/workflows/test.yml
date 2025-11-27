@@ -47,11 +47,53 @@ jobs:
           fi
 
           echo "✅ All bash scripts passed validation!"
+
+      - name: Validate ZSH scripts syntax
+        run: |
           echo ""
-          echo "ℹ️  ZSH scripts not validated (ShellCheck doesn't support ZSH):"
-          echo "   - check-health.sh"
-          echo "   - show-metrics.sh"
-          echo "   - All vault/*.sh scripts"
+          echo "🔍 Validating ZSH script syntax..."
+          echo "ℹ️  Note: ShellCheck doesn't support ZSH, but we can check syntax"
+
+          # Install ZSH if not present
+          if ! command -v zsh &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y zsh
+          fi
+
+          ZSH_SCRIPTS=(
+            check-health.sh
+            show-metrics.sh
+            vault/_common.sh
+            vault/bootstrap-vault.sh
+            vault/check-vault-items.sh
+            vault/create-vault-item.sh
+            vault/delete-vault-item.sh
+            vault/list-vault-items.sh
+            vault/restore-aws.sh
+            vault/restore-env.sh
+            vault/restore-git.sh
+            vault/restore-ssh.sh
+            vault/sync-to-bitwarden.sh
+          )
+
+          ERRORS=0
+          for script in "${ZSH_SCRIPTS[@]}"; do
+            if [[ -f "$script" ]]; then
+              echo "Checking $script..."
+              if ! zsh -n "$script"; then
+                echo "❌ Syntax error in $script"
+                ((ERRORS++))
+              fi
+            fi
+          done
+
+          if [[ $ERRORS -gt 0 ]]; then
+            echo "❌ $ERRORS ZSH script(s) have syntax errors"
+            exit 1
+          fi
+
+          echo "✅ All ZSH scripts have valid syntax!"
+          echo "ℹ️  ZSH is better than bash, but ShellCheck only supports sh/bash/dash/ksh"
+          echo "ℹ️  We use 'zsh -n' for syntax checking - catches parse errors but not logic issues"
 
   markdown-lint:
     name: Markdown Validation
