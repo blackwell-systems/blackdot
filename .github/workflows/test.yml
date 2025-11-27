@@ -26,7 +26,7 @@ jobs:
           BASH_SCRIPTS=(
             bootstrap-dotfiles.sh
             bootstrap-mac.sh
-            bootstrap-lima.sh
+            bootstrap-linux.sh
           )
 
           ERRORS=0
@@ -219,7 +219,7 @@ jobs:
           echo "🐧 Testing Linux compatibility..."
 
           # Check if scripts parse correctly
-          zsh -n bootstrap-lima.sh || exit 1
+          zsh -n bootstrap-linux.sh || exit 1
           zsh -n bootstrap-dotfiles.sh || exit 1
           zsh -n check-health.sh || exit 1
 
