@@ -64,25 +64,10 @@ brew "awscli"
 brew "bitwarden-cli"
 
 # ============================================================
-# macOS-only casks
-# (GUI apps you’re already using on macOS)
+# macOS-only casks (GUI apps)
+# Note: These will be skipped on Linux automatically
 # ============================================================
-on_macos do
-  cask "ghostty"
-  cask "claude-code"
-  cask "font-meslo-for-powerlevel10k"
-  cask "microsoft-edge"
-  cask "mongodb-compass"
-  cask "nosql-workbench"
-  cask "rectangle"
-  cask "vscodium"
-end
-
-# ============================================================
-# Linux (Lima) casks
-# (same GUI stack you already have under Linuxbrew)
-# ============================================================
-on_linux do
+if OS.mac?
   cask "ghostty"
   cask "claude-code"
   cask "font-meslo-for-powerlevel10k"
