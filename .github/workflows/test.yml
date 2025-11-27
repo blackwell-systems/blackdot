@@ -253,8 +253,8 @@ jobs:
           # Check for required sections in README
           REQUIRED_SECTIONS=(
             "Quick Start"
-            "Directory Structure"
-            "Bootstrap"
+            "Project Structure"
+            "Platform Support"
             "Troubleshooting"
           )
 
