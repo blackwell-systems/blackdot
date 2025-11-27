@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# ============================================================
+# FILE: .pre-commit-hook.sample
+# Pre-commit hook for dotfiles repository
+# To install: cp .pre-commit-hook.sample .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+# ============================================================
+set -e
+
+echo "Running pre-commit checks..."
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+# ============================================================
+# 1. ShellCheck validation for bash scripts
+# ============================================================
+echo "Checking bash scripts with shellcheck..."
+
+BASH_SCRIPTS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.sh$|^bootstrap-' | grep -v '.sample$' || true)
+
+if [ -n "$BASH_SCRIPTS" ]; then
+    if command -v shellcheck >/dev/null 2>&1; then
+        SHELLCHECK_FAILED=0
+        for script in $BASH_SCRIPTS; do
+            if [[ -f "$script" ]]; then
+                # Only check bash scripts (not zsh)
+                if head -1 "$script" | grep -q 'bash'; then
+                    if ! shellcheck "$script"; then
+                        SHELLCHECK_FAILED=1
+                        echo -e "${RED}✗ ShellCheck failed: $script${NC}"
+                    else
+                        echo -e "${GREEN}✓ ShellCheck passed: $script${NC}"
+                    fi
+                fi
+            fi
+        done
+
+        if [ $SHELLCHECK_FAILED -eq 1 ]; then
+            echo -e "${RED}Pre-commit hook failed: Fix shellcheck errors before committing${NC}"
+            exit 1
+        fi
+    else
+        echo -e "${YELLOW}⚠ ShellCheck not installed - skipping bash validation${NC}"
+        echo "  Install with: brew install shellcheck"
+    fi
+fi
+
+# ============================================================
+# 2. ZSH syntax validation
+# ============================================================
+echo "Checking ZSH scripts syntax..."
+
+ZSH_SCRIPTS=$(git diff --cached --name-only --diff-filter=ACM | \
+    grep -E '\.zsh$|zshrc$|^vault/.*\.sh$' | grep -v '.sample$' || true)
+
+if [ -n "$ZSH_SCRIPTS" ]; then
+    if command -v zsh >/dev/null 2>&1; then
+        ZSH_FAILED=0
+        for script in $ZSH_SCRIPTS; do
+            if [[ -f "$script" ]]; then
+                if ! zsh -n "$script" 2>/dev/null; then
+                    ZSH_FAILED=1
+                    echo -e "${RED}✗ ZSH syntax error: $script${NC}"
+                else
+                    echo -e "${GREEN}✓ ZSH syntax OK: $script${NC}"
+                fi
+            fi
+        done
+
+        if [ $ZSH_FAILED -eq 1 ]; then
+            echo -e "${RED}Pre-commit hook failed: Fix ZSH syntax errors before committing${NC}"
+            exit 1
+        fi
+    else
+        echo -e "${YELLOW}⚠ ZSH not installed - skipping ZSH validation${NC}"
+    fi
+fi
+
+# ============================================================
+# 3. Prevent committing secrets
+# ============================================================
+echo "Checking for secrets..."
+
+SECRETS_FOUND=0
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM || true)
+
+# Check for common secret patterns in staged files
+for file in $STAGED_FILES; do
+    if [[ -f "$file" ]]; then
+        # Skip binary files and specific directories
+        if file "$file" | grep -q text; then
+            # Check for potential secrets (basic patterns)
+            if grep -E 'AKIA[0-9A-Z]{16}' "$file" >/dev/null 2>&1; then
+                echo -e "${RED}✗ Potential AWS access key found in: $file${NC}"
+                SECRETS_FOUND=1
+            fi
+            if grep -E 'ssh-rsa AAAA[0-9A-Za-z+/]{200,}' "$file" >/dev/null 2>&1; then
+                echo -e "${RED}✗ Potential SSH private key found in: $file${NC}"
+                SECRETS_FOUND=1
+            fi
+            if grep -E '-----BEGIN (RSA |OPENSSH )?PRIVATE KEY-----' "$file" >/dev/null 2>&1; then
+                echo -e "${RED}✗ Private key found in: $file${NC}"
+                SECRETS_FOUND=1
+            fi
+        fi
+    fi
+done
+
+if [ $SECRETS_FOUND -eq 1 ]; then
+    echo -e "${RED}Pre-commit hook failed: Remove secrets before committing${NC}"
+    exit 1
+fi
+
+# ============================================================
+# 4. Ensure required files exist
+# ============================================================
+echo "Checking repository structure..."
+
+REQUIRED_FILES=(
+    "README.md"
+    "Brewfile"
+    ".gitignore"
+    "bootstrap-mac.sh"
+    "bootstrap-linux.sh"
+    "bootstrap-dotfiles.sh"
+)
+
+MISSING_FILES=0
+for file in "${REQUIRED_FILES[@]}"; do
+    if [[ ! -f "$file" ]]; then
+        echo -e "${RED}✗ Required file missing: $file${NC}"
+        MISSING_FILES=1
+    fi
+done
+
+if [ $MISSING_FILES -eq 1 ]; then
+    echo -e "${RED}Pre-commit hook failed: Required files missing${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✓ All pre-commit checks passed!${NC}"
+exit 0

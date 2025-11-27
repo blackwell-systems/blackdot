@@ -42,7 +42,7 @@ This repository contains my personal dotfiles for **macOS** and **Lima** (Linux)
 
 ```bash
 # New macOS machine
-git clone git@github.com:your-username/dotfiles.git ~/workspace/dotfiles
+git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles && ./bootstrap-mac.sh
 
 # New Lima VM
@@ -301,9 +301,9 @@ A key architectural decision in this setup is the **canonical workspace director
 ### 1. Username-Agnostic Paths
 
 Your home directory path varies by platform and username:
-- macOS: `/Users/dayna.blackwell`
-- Lima: `/home/dayna.blackwell.linux` or `/home/ubuntu`
-- Work laptop: `/Users/dblackwell`
+- macOS: `/Users/yourname`
+- Lima: `/home/yourname.linux` or `/home/ubuntu`
+- Work laptop: `/Users/yourname`
 
 By standardizing on `~/workspace`, all your scripts, aliases, and configurations can reference a **predictable location** regardless of the underlying username or OS.
 
@@ -368,7 +368,7 @@ alias cws='cd "$WORKSPACE"'
 ### 5. Claude Session Portability (`/workspace`)
 
 Claude Code stores session history in `~/.claude/projects/` using **path-encoded folder names**:
-- Working in `/Users/dayna/workspace/dotfiles` → sessions in `-Users-dayna-workspace-dotfiles/`
+- Working in `/Users/yourname/workspace/dotfiles` → sessions in `-Users-yourname-workspace-dotfiles/`
 - Working in `/home/ubuntu/workspace/dotfiles` → sessions in `-home-ubuntu-workspace-dotfiles/`
 
 Even with the same files (via Lima mount), different paths = different session folders = lost context.
@@ -399,7 +399,7 @@ claude
 │                                                                              │
 │   macOS                              Lima VM                                 │
 │   ══════                             ════════                                │
-│   /Users/dayna.blackwell/            /home/ubuntu/                           │
+│   /Users/yourname/                   /home/ubuntu/                           │
 │          │                                  │                                │
 │          ├── .ssh/        ←── secrets ──→   ├── .ssh/                        │
 │          ├── .aws/        (per-machine)     ├── .aws/                        │
@@ -535,7 +535,7 @@ cd ~/workspace
 2. **Clone dotfiles repo**
 
 ```bash
-git clone git@github.com:your-username/dotfiles.git
+git clone git@github.com:blackwell-systems/dotfiles.git
 cd ~/workspace/dotfiles
 ```
 
@@ -837,7 +837,7 @@ After this finishes:
 - Reads Bitwarden **Secure Note** items:
 
   - `"SSH-GitHub-Enterprise"` → SSH key for GitHub Enterprise/SSO
-  - `"SSH-GitHub-Blackwell"` → SSH key for Blackwell Systems GitHub
+  - `"SSH-GitHub-Personal"` → SSH key for personal GitHub account
   - `"SSH-Config"` → SSH config file with host mappings
 
 - Each SSH key item's **notes** field should contain:
@@ -853,13 +853,13 @@ The script:
 
   - `~/.ssh/id_ed25519_enterprise_ghub`
   - `~/.ssh/id_ed25519_enterprise_ghub.pub`
-  - `~/.ssh/id_ed25519_blackwell`
-  - `~/.ssh/id_ed25519_blackwell.pub`
+  - `~/.ssh/id_ed25519_personal`
+  - `~/.ssh/id_ed25519_personal.pub`
   - `~/.ssh/config`
 
 - Sets appropriate permissions (`600` for private keys and config, `644` for public keys).
 
-> **Important:** The exact item names (`SSH-GitHub-Enterprise`, `SSH-GitHub-Blackwell`, `SSH-Config`) must match.
+> **Important:** The exact item names (`SSH-GitHub-Enterprise`, `SSH-GitHub-Personal`, `SSH-Config`) must match.
 
 ---
 
@@ -928,7 +928,7 @@ Example output:
 ```
 === Required Items ===
 [OK] SSH-GitHub-Enterprise
-[OK] SSH-GitHub-Blackwell
+[OK] SSH-GitHub-Personal
 [OK] SSH-Config
 [OK] AWS-Config
 [OK] AWS-Credentials
@@ -1010,7 +1010,7 @@ printf '%s' "$CREDS_JSON" | bw encode | bw edit item "$AWS_CREDS_ID" --session "
 You'll create one note per SSH identity:
 
 - `SSH-GitHub-Enterprise`    → `id_ed25519_enterprise_ghub`
-- `SSH-GitHub-Blackwell`     → `id_ed25519_blackwell`
+- `SSH-GitHub-Personal`     → `id_ed25519_personal`
 
 Each note will contain the **private key** (already passphrase-protected by OpenSSH) and optionally the **public key**.
 
@@ -1029,16 +1029,16 @@ Each note will contain the **private key** (already passphrase-protected by Open
 }' | bw encode | bw create item --session "$BW_SESSION"
 ```
 
-#### Blackwell key
+#### Personal GitHub key
 
 ```bash
 (
-  cat ~/.ssh/id_ed25519_blackwell
+  cat ~/.ssh/id_ed25519_personal
   echo
-  cat ~/.ssh/id_ed25519_blackwell.pub
+  cat ~/.ssh/id_ed25519_personal.pub
 ) | jq -Rs '{
   type: 2,
-  name: "SSH-GitHub-Blackwell",
+  name: "SSH-GitHub-Personal",
   secureNote: { type: 0 },
   notes: .
 }' | bw encode | bw create item --session "$BW_SESSION"
@@ -1080,11 +1080,11 @@ Host github-sso
   IdentitiesOnly yes
   AddKeysToAgent yes
 
-# GitHub - Business (Blackwell Systems)
-Host github-blackwell
+# GitHub - Personal
+Host github-personal
   HostName github.com
   User git
-  IdentityFile ~/.ssh/id_ed25519_blackwell
+  IdentityFile ~/.ssh/id_ed25519_personal
   IdentitiesOnly yes
 ```
 
@@ -1243,7 +1243,7 @@ Edit `vault/_common.sh` and add the new key to the `SSH_KEYS` array:
 ```bash
 declare -A SSH_KEYS=(
     ["SSH-GitHub-Enterprise"]="$HOME/.ssh/id_ed25519_enterprise_ghub"
-    ["SSH-GitHub-Blackwell"]="$HOME/.ssh/id_ed25519_blackwell"
+    ["SSH-GitHub-Personal"]="$HOME/.ssh/id_ed25519_personal"
     ["SSH-NewService"]="$HOME/.ssh/id_ed25519_newservice"  # ← Add here
 )
 ```
@@ -1316,6 +1316,47 @@ When you modify local config files (`~/.ssh/config`, `~/.aws/config`, `~/.gitcon
 ---
 
 ## Maintenance Checklists
+
+### Security Maintenance
+
+Regular security maintenance schedule to keep your dotfiles and credentials secure:
+
+**Annual Tasks:**
+- [ ] **Rotate SSH keys** - Generate new SSH key pairs and update Bitwarden
+  - Generate: `ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey`
+  - Update GitHub/GitLab/etc. with new public key
+  - Sync to Bitwarden: `./vault/sync-to-bitwarden.sh SSH-GitHub-*`
+  - Test connections: `ssh -T git@github.com`
+- [ ] **Update Bitwarden master password** - Use a strong, unique password
+  - Update in Bitwarden app or web vault
+  - Re-login on all machines: `bw logout && bw login`
+
+**Quarterly Tasks:**
+- [ ] **Review AWS credentials** - Check for unused or expired credentials
+  - Audit IAM access keys in AWS Console
+  - Rotate if compromised or shared accidentally
+  - Update local files and sync: `./vault/sync-to-bitwarden.sh AWS-Credentials`
+- [ ] **Audit vault items** - Review all items stored in Bitwarden
+  - Run: `./vault/check-vault-items.sh -v` for detailed view
+  - Remove obsolete credentials
+  - Verify all required items exist
+
+**Monthly Tasks:**
+- [ ] **Check for dotfiles updates** - Keep dotfiles current with latest improvements
+  - Run: `dotfiles-upgrade` or `git pull && ./bootstrap-*.sh`
+  - Review CHANGELOG.md for breaking changes
+- [ ] **Run health check with drift detection** - Ensure local files match Bitwarden
+  - Run: `./check-health.sh --drift`
+  - Sync any differences: `./vault/sync-to-bitwarden.sh --all`
+
+**Best Practices:**
+- Never commit secrets to git (`.gitignore` protects you, but verify with `git diff`)
+- Use different SSH keys for different services (work vs personal)
+- Enable 2FA on Bitwarden account
+- Regularly backup Bitwarden vault (export encrypted JSON)
+- Review file permissions monthly: `./check-health.sh --fix`
+
+---
 
 ### Adding a New SSH Key
 
@@ -1608,8 +1649,8 @@ Example output:
 [OK] jq (jq-1.7)
 
 === SSH Keys ===
-[OK] id_ed25519_blackwell (permissions: 600)
-[OK] id_ed25519_blackwell.pub (permissions: 644)
+[OK] id_ed25519_personal (permissions: 600)
+[OK] id_ed25519_personal.pub (permissions: 644)
 [OK] ~/.ssh/config (permissions: 600)
 
 ========================================
@@ -1768,7 +1809,7 @@ shellcheck vault/bootstrap-vault.sh
 Add to your forked README:
 
 ```markdown
-![Test Status](https://github.com/your-username/dotfiles/workflows/Test%20Dotfiles/badge.svg)
+![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)
 ```
 
 ---
@@ -1850,14 +1891,14 @@ chmod 644 ~/.ssh/id_ed25519_*.pub
 **Test SSH connection:**
 
 ```bash
-ssh -T git@github.com -i ~/.ssh/id_ed25519_blackwell
+ssh -T git@github.com -i ~/.ssh/id_ed25519_personal
 ```
 
 **SSH agent not running:**
 
 ```bash
 eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/id_ed25519_blackwell
+ssh-add ~/.ssh/id_ed25519_personal
 ```
 
 ### AWS credentials not working
