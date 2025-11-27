@@ -1,15 +1,19 @@
-# Dotfiles & Vault Setup
+# Dotfiles & Vault Setup - Full Documentation
 
-**Version:** 1.0.0 | [Changelog](CHANGELOG.md)
+[![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-This repository contains my personal dotfiles for **macOS** and **Lima** (Linux), used to configure my development environment consistently across both platforms. The dotfiles include configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude helpers**, and a **Bitwarden-based vault bootstrap** for SSH keys, AWS config/credentials, and environment secrets.
+> **Enterprise-grade dotfiles system** with Bitwarden vault integration, cross-platform support, and automated health checks.
+
+**Version:** 1.0.0 | [Changelog](../CHANGELOG.md) | [Quick Start Guide](../README.md)
+
+This is the comprehensive reference documentation for the dotfiles system. It covers configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code**, and a **Bitwarden-based vault bootstrap** for SSH keys, AWS credentials, and environment secrets across **macOS**, **Lima**, **WSL2**, and **Linux**.
 
 ---
 
 ## Table of Contents
 
 - [Quick Start](#quick-start)
-- [What's New](#whats-new)
 - [Directory Structure](#directory-structure)
 - [Canonical Workspace](#canonical-workspace-workspace)
 - [Global Prerequisites](#global-prerequisites)
@@ -38,60 +42,32 @@ This repository contains my personal dotfiles for **macOS** and **Lima** (Linux)
 
 ## Quick Start
 
-**Already set up? Here's the TL;DR:**
-
 ```bash
-# New macOS machine
-git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
-cd ~/workspace/dotfiles && ./bootstrap-mac.sh
+# 1. Clone repository
+git clone git@github.com:YOUR-USERNAME/dotfiles.git ~/workspace/dotfiles
+cd ~/workspace/dotfiles
 
-# New Lima VM
-cd ~/workspace/dotfiles && ./bootstrap-linux.sh
+# 2. Run bootstrap (choose platform)
+./bootstrap-mac.sh      # macOS
+./bootstrap-linux.sh    # Lima / Linux / WSL2
 
-# Restore secrets from Bitwarden (either platform)
-bw login && export BW_SESSION="$(bw unlock --raw)"
+# 3. Restore secrets from Bitwarden
+bw login
+export BW_SESSION="$(bw unlock --raw)"
 ./vault/bootstrap-vault.sh
+
+# 4. Verify installation
+./check-health.sh
 
 # Or use the alias (after shell restart)
 bw-restore
 ```
 
-**What gets set up:**
+**What gets installed:**
 - Zsh + Powerlevel10k + plugins (autosuggestions, syntax highlighting)
 - All Homebrew packages from `Brewfile`
-- SSH keys, AWS credentials, and env secrets from Bitwarden
-- Claude CLI with shared workspace across macOS/Lima
-
----
-
-## What's New
-
-### Recent Improvements
-
-**✨ Automation & Quality**
-- **Pre-commit Hooks**: Automatic shellcheck validation before commits
-- **CI/CD Pipeline**: GitHub Actions testing on macOS + Linux
-- **Auto-upgrade Command**: `dotfiles-upgrade` - one-command upgrade with health check
-
-**📊 Metrics & Observability**
-- **Health Metrics**: Automatic tracking of health check results over time
-- **Visualization**: `show-metrics.sh` for trend analysis and statistics
-- **Health Score**: Track dotfiles health (0-100) with historical trends
-
-**🎯 Developer Experience**
-- **Update Notifications**: Daily check for dotfiles updates
-- **Local Overrides**: Machine-specific customizations via `.zshrc.local`
-- **Tab Completions**: ZSH completions for AWS commands, dotfiles tools
-- **Better Docs**: Comprehensive review and recommendations in `REVIEW.md`
-
-**🔧 New Commands**
-```bash
-dotfiles-upgrade          # One-command upgrade flow
-show-metrics.sh           # View health metrics and trends
-dotfiles-upgrade          # Replaces dotfiles-update (with improvements)
-```
-
-See [CHANGELOG.md](CHANGELOG.md) for complete version history.
+- SSH keys, AWS credentials, and environment secrets from Bitwarden
+- Claude Code with shared workspace across platforms
 
 ---
 
@@ -226,10 +202,9 @@ These work on **any platform** without modification:
 
 ### Adding a New Platform
 
-Example: Adding Arch Linux support
+Example: Adding Arch Linux support (~30 lines)
 
 ```bash
-# bootstrap-arch.sh (30 lines)
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -238,8 +213,8 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # 1. System packages (platform-specific)
 sudo pacman -Syu --noconfirm git zsh curl base-devel
 
-# 2. Install yay (AUR helper) or use Homebrew
-# ... package manager setup ...
+# 2. Install package manager (Homebrew recommended)
+# ... setup ...
 
 # 3. SHARED: Use same Brewfile
 brew bundle --file="$DOTFILES_DIR/Brewfile"
@@ -251,7 +226,7 @@ brew bundle --file="$DOTFILES_DIR/Brewfile"
 chsh -s $(command -v zsh)
 ```
 
-**That's it!** Everything else (vault, health checks, configs, metrics) just works.
+Everything else (vault, health checks, configs, metrics) works without modification.
 
 ### Platform Detection in Scripts
 
@@ -281,14 +256,13 @@ esac
 
 ### Why This Architecture Matters
 
-**Portability**: Use the same dotfiles on your:
-- Work laptop (macOS)
-- Personal laptop (Linux)
-- Development VM (Lima/WSL)
+**Portability**: Use the same dotfiles across:
+- Work and personal machines (macOS/Linux)
+- Development VMs (Lima/WSL)
 - CI/CD containers (Docker)
-- Cloud instances (any Linux)
+- Cloud instances
 
-**Maintainability**: Fix a bug or add a feature **once**, benefits **all platforms**.
+**Maintainability**: Fix bugs or add features **once**, benefits **all platforms**.
 
 **Extensibility**: New platform = ~30 lines of platform-specific code + reuse 90%.
 
@@ -296,38 +270,27 @@ esac
 
 ## Canonical Workspace (`~/workspace`)
 
-A key architectural decision in this setup is the **canonical workspace directory** at `~/workspace`. This serves multiple purposes:
+A key architectural decision is the **canonical workspace directory** at `~/workspace`. This serves multiple purposes:
 
 ### 1. Username-Agnostic Paths
 
-Your home directory path varies by platform and username:
-- macOS: `/Users/yourname`
-- Lima: `/home/yourname.linux` or `/home/ubuntu`
-- Work laptop: `/Users/yourname`
+Home directory paths vary by platform and username:
+- macOS: `/Users/username`
+- Lima: `/home/username.linux` or `/home/ubuntu`
+- WSL2: `/home/username`
 
-By standardizing on `~/workspace`, all your scripts, aliases, and configurations can reference a **predictable location** regardless of the underlying username or OS.
+By standardizing on `~/workspace`, all scripts, aliases, and configurations can reference a **predictable location** regardless of the underlying username or OS.
 
 ### 2. Cross-Platform Mount Point
 
-Lima mounts your macOS home directory into the VM. With `~/workspace` as the canonical location:
+Lima mounts the macOS home directory into the VM. With `~/workspace` as the canonical location, both environments see the **same files**:
+- macOS: `/Users/username/workspace` → actual files
+- Lima: `/home/username.linux/workspace` → mounted from macOS
 
-```yaml
-# lima.yaml
-mounts:
-  - location: "~"
-    writable: true
-    sshfs:
-      followSymlinks: true
-```
-
-Both macOS and Lima see the **same files** at `~/workspace`:
-- macOS: `/Users/you/workspace` → actual files
-- Lima: `/home/you.linux/workspace` → mounted from macOS
-
-This means:
+This enables:
 - Edit code on macOS, run tests in Lima
-- Same dotfiles repo accessible from both
-- Claude CLI shares state via `~/.claude → ~/workspace/.claude`
+- Same dotfiles repo accessible from both platforms
+- Claude Code shares state via `~/.claude → ~/workspace/.claude`
 
 ### 3. Organizational Structure
 
@@ -344,7 +307,7 @@ The workspace provides a consistent hierarchy:
 └── patent-pool/       # IP work
 ```
 
-**Shared shell history**: Command history is stored in `~/workspace/.zsh_history` so your history follows you between macOS and Lima sessions.
+**Shared shell history**: Command history is stored in `~/workspace/.zsh_history` and syncs between macOS and Lima sessions.
 
 Navigation aliases make this seamless:
 - `cws` → `cd ~/workspace`
@@ -353,11 +316,11 @@ Navigation aliases make this seamless:
 
 ### 4. Decoupled from User Identity
 
-Your secrets (SSH keys, AWS creds) live in `~/.ssh` and `~/.aws` (user-specific), but your **work** lives in `~/workspace` (portable). This separation means:
+Secrets (SSH keys, AWS credentials) live in `~/.ssh` and `~/.aws` (user-specific), while work files live in `~/workspace` (portable). This separation means:
 
 - Secrets are restored per-machine via Bitwarden
 - Work files are either shared (Lima mount) or synced (git)
-- Dotfiles reference `$WORKSPACE` variable, not hardcoded paths
+- Scripts reference `$WORKSPACE` variable, not hardcoded paths
 
 ```bash
 # In zshrc
@@ -388,46 +351,11 @@ claude
 # → Sessions stored in -workspace-dotfiles/ on BOTH machines
 ```
 
-**Usage habit**: Always `cd /workspace/...` instead of `~/workspace/...` when running Claude.
-
-### Visual Overview
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                     CANONICAL WORKSPACE ARCHITECTURE                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│   macOS                              Lima VM                                 │
-│   ══════                             ════════                                │
-│   /Users/yourname/                   /home/ubuntu/                           │
-│          │                                  │                                │
-│          ├── .ssh/        ←── secrets ──→   ├── .ssh/                        │
-│          ├── .aws/        (per-machine)     ├── .aws/                        │
-│          ├── .gitconfig                     ├── .gitconfig                   │
-│          │                                  │                                │
-│          └── workspace/ ←────────────────→  └── workspace/ (mounted)         │
-│                 │                                  │                         │
-│                 ├── dotfiles/    ════════════     (same files)               │
-│                 ├── code/                                                    │
-│                 ├── .claude/  ←─── symlinked from ~/.claude                  │
-│                 └── ...                                                      │
-│                                                                              │
-│   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │  KEY INSIGHT: /workspace is the canonical path for Claude            │   │
-│   │                                                                      │   │
-│   │  /workspace → ~/workspace (symlink created by bootstrap scripts)    │   │
-│   │                                                                      │   │
-│   │  • cd /workspace/dotfiles && claude  → -workspace-dotfiles/         │   │
-│   │  • Same session folder on macOS AND Lima                            │   │
-│   │  • Portable session history across platforms                        │   │
-│   └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+**Best Practice**: Always use `cd /workspace/...` instead of `~/workspace/...` when running Claude Code for portable sessions.
 
 ### Why This Matters
 
-When you set up a new machine or VM, you don't need to update scripts with new usernames. Everything just works because:
+When setting up a new machine or VM, no username updates are needed. Everything just works because:
 
 1. `~` expands to the correct home directory
 2. `~/workspace` is always where your work lives
@@ -834,30 +762,19 @@ After this finishes:
 
 ### `restore-ssh.sh`
 
-- Reads Bitwarden **Secure Note** items:
+Reads Bitwarden **Secure Note** items:
 
-  - `"SSH-GitHub-Enterprise"` → SSH key for GitHub Enterprise/SSO
-  - `"SSH-GitHub-Personal"` → SSH key for personal GitHub account
-  - `"SSH-Config"` → SSH config file with host mappings
+- `"SSH-GitHub-Enterprise"` → SSH key for work/enterprise account
+- `"SSH-GitHub-Personal"` → SSH key for personal account
+- `"SSH-Config"` → SSH config file with host mappings
 
-- Each SSH key item's **notes** field should contain:
+Each SSH key item's **notes** field should contain:
+- The full **OpenSSH private key** block
+- Optionally the corresponding `ssh-ed25519 ...` public key line
 
-  - The full **OpenSSH private key** block.
-  - Optionally the corresponding `ssh-ed25519 ...` public key line.
+The `SSH-Config` item's **notes** field should contain the complete `~/.ssh/config` file.
 
-- The `SSH-Config` item's **notes** field should contain your full `~/.ssh/config` file.
-
-The script:
-
-- Reconstructs these files:
-
-  - `~/.ssh/id_ed25519_enterprise_ghub`
-  - `~/.ssh/id_ed25519_enterprise_ghub.pub`
-  - `~/.ssh/id_ed25519_personal`
-  - `~/.ssh/id_ed25519_personal.pub`
-  - `~/.ssh/config`
-
-- Sets appropriate permissions (`600` for private keys and config, `644` for public keys).
+The script reconstructs files and sets appropriate permissions (`600` for private keys and config, `644` for public keys).
 
 > **Important:** The exact item names (`SSH-GitHub-Enterprise`, `SSH-GitHub-Personal`, `SSH-Config`) must match.
 
@@ -865,53 +782,41 @@ The script:
 
 ### `restore-aws.sh`
 
-- Expects two **Secure Note** items in Bitwarden:
+Expects two **Secure Note** items in Bitwarden:
 
-  - `"AWS-Config"`       → contains your full `~/.aws/config`
-  - `"AWS-Credentials"`  → contains your full `~/.aws/credentials`
+- `"AWS-Config"` → contains complete `~/.aws/config`
+- `"AWS-Credentials"` → contains complete `~/.aws/credentials`
 
-- The **notes** field of each item is the raw file content.
+The **notes** field of each item contains the raw file content.
 
-The script:
-
-- Writes `~/.aws/config` and `~/.aws/credentials` directly from these notes.
-- Sets safe permissions (`600` where appropriate).
+The script writes files directly from notes and sets safe permissions (`600`).
 
 ---
 
 ### `restore-env.sh`
 
-- Expects a **Secure Note** item named `"Environment-Secrets"`.
+Expects a **Secure Note** item named `"Environment-Secrets"` with content like:
 
-- The **notes** field should contain lines like:
-
-  ```text
-  SOME_API_KEY=...
-  ANOTHER_SECRET=...
-  ```
+```text
+SOME_API_KEY=...
+ANOTHER_SECRET=...
+```
 
 The script:
+- Writes content to `~/.local/env.secrets`
+- Creates `~/.local/load-env.sh` which exports variables when sourced:
 
-- Writes this into `~/.local/env.secrets`.
-- Creates `~/.local/load-env.sh` which exports everything when sourced:
-
-  ```bash
-  # Example usage in your shell:
-  source ~/.local/load-env.sh
-  ```
+```bash
+source ~/.local/load-env.sh
+```
 
 ---
 
 ### `restore-git.sh`
 
-- Expects a **Secure Note** item named `"Git-Config"`.
+Expects a **Secure Note** item named `"Git-Config"` containing the complete `~/.gitconfig` file.
 
-- The **notes** field should contain your full `~/.gitconfig` file.
-
-The script:
-
-- Writes this to `~/.gitconfig` (backing up any existing file).
-- Sets permissions to `644`.
+The script writes to `~/.gitconfig` (backing up any existing file) and sets permissions to `644`.
 
 ---
 
@@ -946,11 +851,11 @@ If items are missing, the script will tell you which ones and exit with an error
 
 ---
 
-## One-Time: Push Current Files into Bitwarden (for Future-You)
+## One-Time: Push Current Files into Bitwarden
 
-The idea: run these **once** on a "known-good" machine (your macOS host), so future machines can restore from Bitwarden with `bootstrap-vault.sh`.
+Run these commands **once** on a configured machine to populate Bitwarden, enabling future machines to restore via `bootstrap-vault.sh`.
 
-You can also do all of this manually in the Bitwarden GUI, but here's the CLI version for reproducibility.
+This can also be done manually in the Bitwarden GUI. CLI commands are provided for automation and reproducibility.
 
 ### 1. Ensure `BW_SESSION` is set
 
@@ -1072,20 +977,21 @@ printf '%s' "$SSH_CONFIG_JSON" | bw encode | bw edit item "$SSH_CONFIG_ID" --ses
 Example `~/.ssh/config` content:
 
 ```text
-# GitHub-Enterprise - BWH (current SSO / enterprise alias)
-Host github-sso
+# GitHub - Enterprise/Work Account
+Host github-work
   HostName github.com
   User git
   IdentityFile ~/.ssh/id_ed25519_enterprise_ghub
   IdentitiesOnly yes
   AddKeysToAgent yes
 
-# GitHub - Personal
+# GitHub - Personal Account
 Host github-personal
   HostName github.com
   User git
   IdentityFile ~/.ssh/id_ed25519_personal
   IdentitiesOnly yes
+  AddKeysToAgent yes
 ```
 
 ---
@@ -1350,11 +1256,11 @@ Regular security maintenance schedule to keep your dotfiles and credentials secu
   - Sync any differences: `./vault/sync-to-bitwarden.sh --all`
 
 **Best Practices:**
-- Never commit secrets to git (`.gitignore` protects you, but verify with `git diff`)
+- Never commit secrets to git (verify with `git diff` before committing)
 - Use different SSH keys for different services (work vs personal)
 - Enable 2FA on Bitwarden account
 - Regularly backup Bitwarden vault (export encrypted JSON)
-- Review file permissions monthly: `./check-health.sh --fix`
+- Review file permissions regularly: `./check-health.sh --fix`
 
 ---
 
@@ -1505,13 +1411,13 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 
 **AWS Profile Management:**
 
-- `awstools` → **Show all AWS commands** with ASCII banner + current status
+- `awstools` → Show all AWS commands with current status
 - `awsprofiles` → List all configured profiles (marks active one)
 - `awsswitch` → Interactive profile selector with fzf (auto-login if needed)
 - `awsset <profile>` → Set AWS_PROFILE for current shell
 - `awsunset` → Clear AWS_PROFILE (return to default)
 - `awswho` → Show current AWS identity (account, user, ARN)
-- `awslogin [profile]` → SSO login (defaults to current or dev-profile)
+- `awslogin [profile]` → SSO login (defaults to current profile)
 - `awsassume <role-arn>` → Assume a role for cross-account access
 - `awsclear` → Clear temporary assumed-role credentials
 
@@ -1521,7 +1427,7 @@ awsswitch              # fuzzy-select profile, auto-login
 awswho                 # verify identity
 
 # Or manually
-awsset prod-profile
+awsset production
 awslogin
 ```
 
@@ -1553,10 +1459,9 @@ awslogin
 - `paste` / `cbp` → Paste clipboard to stdout
 
 ```bash
-# Examples
 cat file.txt | copy
 echo "hello" | copy
-paste > pasted.txt
+paste > output.txt
 ```
 
 **System monitoring:**
@@ -1640,8 +1545,8 @@ Example output:
 
 ```
 === Symlinks ===
-[OK] ~/.zshrc -> /Users/you/workspace/dotfiles/zsh/zshrc
-[OK] ~/.p10k.zsh -> /Users/you/workspace/dotfiles/zsh/p10k.zsh
+[OK] ~/.zshrc -> ~/workspace/dotfiles/zsh/zshrc
+[OK] ~/.p10k.zsh -> ~/workspace/dotfiles/zsh/p10k.zsh
 
 === Required Commands ===
 [OK] brew (Homebrew 4.x.x)
@@ -1699,7 +1604,8 @@ Use the `show-metrics.sh` script to visualize your dotfiles health:
 ./show-metrics.sh --all
 ```
 
-**Example output:**
+Example output:
+
 ```
 === Dotfiles Health Metrics Summary ===
 
@@ -1708,7 +1614,7 @@ Total health checks: 47
 Last 10 health checks:
 ✅ 2025-11-27 | Score: 100/100 | E:0 W:0 | main
 ✅ 2025-11-26 | Score: 95/100 | E:0 W:1 | main
-⚠️  2025-11-25 | Score: 85/100 | E:0 W:3 | feature-branch
+⚠️  2025-11-25 | Score: 85/100 | E:0 W:3 | feature
 
 Statistics:
   Average health score: 94/100
@@ -1915,13 +1821,13 @@ chmod 600 ~/.aws/config ~/.aws/credentials
 
 ```bash
 aws configure list-profiles
-aws sts get-caller-identity --profile dev-profile
+aws sts get-caller-identity --profile PROFILE-NAME
 ```
 
 **SSO session expired:**
 
 ```bash
-aws sso login --profile dev-profile
+aws sso login --profile PROFILE-NAME
 ```
 
 ### Lima VM issues
