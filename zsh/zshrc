@@ -882,6 +882,56 @@ if command -v glow >/dev/null 2>&1; then
 fi
 
 # =========================
+# Dotfiles Update Checker
+# =========================
+# Checks once per day if dotfiles repo has upstream updates
+# Shows notification if updates are available
+check_dotfiles_updates() {
+  local cache="$HOME/.dotfiles-update-check"
+  local dotfiles_dir="${HOME}/workspace/dotfiles"
+
+  # Skip if not in a git repo
+  [[ ! -d "$dotfiles_dir/.git" ]] && return 0
+
+  # Get age of cache file
+  local age=0
+  if [[ -f "$cache" ]]; then
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+      # macOS: stat -f %m returns modification time
+      age=$(($(date +%s) - $(stat -f %m "$cache" 2>/dev/null || echo 0)))
+    else
+      # Linux: stat -c %Y returns modification time
+      age=$(($(date +%s) - $(stat -c %Y "$cache" 2>/dev/null || echo 0)))
+    fi
+  else
+    # No cache file - force check
+    age=86401
+  fi
+
+  # Check once per day (86400 seconds)
+  if [[ $age -gt 86400 ]]; then
+    # Fetch updates in background (don't block shell startup)
+    (
+      cd "$dotfiles_dir" 2>/dev/null || exit 0
+      git fetch --quiet origin 2>/dev/null || exit 0
+
+      # Count commits behind upstream
+      local behind=$(git rev-list --count HEAD..@{u} 2>/dev/null || echo 0)
+
+      if [[ $behind -gt 0 ]]; then
+        echo "⚠️  Dotfiles: $behind update(s) available (run: dotfiles-upgrade)"
+      fi
+
+      # Update cache timestamp
+      touch "$cache"
+    ) &
+  fi
+}
+
+# Run update check on shell startup (non-blocking)
+check_dotfiles_updates
+
+# =========================
 # Machine-specific local overrides
 # =========================
 # Load local customizations that shouldn't be in version control

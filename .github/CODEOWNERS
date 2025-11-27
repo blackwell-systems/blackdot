@@ -1,0 +1,11 @@
+# Dotfiles CODEOWNERS
+# This file defines who owns the code in this repository
+# All pull requests will automatically request review from these users
+
+# Global owners - all files
+* @blackwell-systems
+
+# Specific component owners (optional - can add later)
+# /vault/ @blackwell-systems
+# /.github/ @blackwell-systems
+# /zsh/ @blackwell-systems
