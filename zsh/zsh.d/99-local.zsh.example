@@ -1,0 +1,16 @@
+# Machine-specific local overrides
+# =====================================
+# Copy this to 99-local.zsh (gitignored) and customize
+
+# Example: Set default AWS profile
+# export AWS_PROFILE="work-profile"
+
+# Example: Machine-specific aliases
+# alias work='cd ~/workspace/work-project'
+# alias home='cd ~/workspace/personal-project'
+
+# Example: Override tool behavior
+# export FZF_DEFAULT_OPTS="--height 60% --border"
+
+# Example: Add machine-specific PATH entries
+# export PATH="$HOME/custom-tools/bin:$PATH"
