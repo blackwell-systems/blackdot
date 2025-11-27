@@ -258,11 +258,12 @@ dotfiles/
 
 ## Documentation
 
+- **Quick overview:** this README
 - **[Full Documentation](docs/README-FULL.md)** - Complete guide (1,900+ lines)
+- **[Vault README](vault/README.md)** - Bitwarden vault details
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contributor guide
 - **[SECURITY.md](SECURITY.md)** - Security policy
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
-- **[Vault README](vault/README.md)** - Bitwarden vault details
 
 ---
 
