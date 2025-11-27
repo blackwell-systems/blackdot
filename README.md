@@ -11,6 +11,7 @@
 
 ## Features
 
+- 🤖 **Portable Claude Code Sessions** - Work across multiple machines with shared session history via `/workspace` symlink
 - 🔐 **Bitwarden Vault Integration** - Secure secret management for SSH keys, AWS credentials, and environment variables
 - 🌍 **Cross-Platform** - Seamless setup for macOS, Lima, WSL2, and Linux
 - 🏥 **Health Checks** - Automated validation with drift detection and auto-fix
@@ -44,6 +45,20 @@ export BW_SESSION="$(bw unlock --raw)"
 ```
 
 **That's it!** Your environment is now configured.
+
+### 💡 Pro Tip: Portable Claude Code Sessions
+
+Always use `/workspace` instead of `~/workspace` when working with Claude Code:
+
+```bash
+cd /workspace/dotfiles  # ✅ Portable sessions across ALL machines
+claude                  # Session: -workspace-dotfiles-
+
+# Not this:
+cd ~/workspace/dotfiles # ❌ Different paths on macOS vs Linux
+```
+
+**Why?** The bootstrap creates `/workspace → ~/workspace` symlink, ensuring Claude Code sessions use identical paths across macOS (`/Users/username`), Lima (`/home/username.linux`), and WSL (`/home/username`). Your conversation history follows you everywhere!
 
 ---
 
@@ -95,20 +110,42 @@ bw-restore  # Alias for ./vault/bootstrap-vault.sh
 - Git configuration (.gitconfig)
 - Environment variables (.local/env.secrets)
 
-### Cross-Platform Workspace
+### Portable Claude Code Workflow
 
-The `/workspace` symlink ensures portable Claude Code sessions:
+One of the most powerful features: **Claude Code sessions that follow you across machines**.
+
+#### The Problem
+Claude Code stores sessions based on the working directory path:
+- macOS: `/Users/yourname/workspace/dotfiles` → `-Users-yourname-workspace-dotfiles-`
+- Lima: `/home/yourname.linux/workspace/dotfiles` → `-home-yourname.linux-workspace-dotfiles-`
+- Different paths = different sessions = **lost conversation history** when switching machines
+
+#### The Solution
+Bootstrap creates a `/workspace` symlink pointing to `~/workspace`:
 
 ```bash
-# Created by bootstrap (both macOS and Linux)
-/workspace -> ~/workspace
+# Same path on ALL platforms
+/workspace/dotfiles
 
-# Use this path for Claude sessions
-cd /workspace/dotfiles
-claude  # Session: -workspace-dotfiles- (same on all platforms!)
+# Claude session folder (identical everywhere)
+~/.claude/projects/-workspace-dotfiles-/
 ```
 
-**Why this matters:** Without `/workspace`, Claude sessions encode different paths on macOS vs Linux, losing context when switching machines.
+#### Usage
+```bash
+# ✅ Always use /workspace for Claude sessions
+cd /workspace/dotfiles
+claude  # Picks up your conversation from ANY machine
+
+# ✅ Works with all Claude commands
+cd /workspace/my-project
+claude --model sonnet-4
+
+# ❌ Don't use ~/workspace (different paths per OS)
+cd ~/workspace/dotfiles  # Session won't be portable
+```
+
+**Result:** Start a conversation on macOS, continue it in Lima, finish it on WSL - **same session, full history**.
 
 ### Health Checks
 

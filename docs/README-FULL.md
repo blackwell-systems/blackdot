@@ -3,11 +3,15 @@
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Enterprise-grade dotfiles system** with Bitwarden vault integration, cross-platform support, and automated health checks.
+> **Enterprise-grade dotfiles system** with Bitwarden vault integration, cross-platform support, portable Claude Code sessions, and automated health checks.
 
 **Version:** 1.0.0 | [Changelog](../CHANGELOG.md) | [Quick Start Guide](../README.md)
 
-This is the comprehensive reference documentation for the dotfiles system. It covers configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code**, and a **Bitwarden-based vault bootstrap** for SSH keys, AWS credentials, and environment secrets across **macOS**, **Lima**, **WSL2**, and **Linux**.
+This is the comprehensive reference documentation for the dotfiles system. It covers configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code portable sessions**, and a **Bitwarden-based vault bootstrap** for SSH keys, AWS credentials, and environment secrets across **macOS**, **Lima**, **WSL2**, and **Linux**.
+
+### 🌟 Key Innovation: Portable Claude Code Sessions
+
+Unlike most dotfiles, this system enables **true Claude Code session portability** across machines. Work on macOS, continue in Lima, finish in WSL - **same conversation, full history**. Achieved through the `/workspace` symlink architecture detailed below.
 
 ---
 
@@ -58,16 +62,26 @@ export BW_SESSION="$(bw unlock --raw)"
 
 # 4. Verify installation
 ./check-health.sh
-
-# Or use the alias (after shell restart)
-bw-restore
 ```
 
 **What gets installed:**
 - Zsh + Powerlevel10k + plugins (autosuggestions, syntax highlighting)
 - All Homebrew packages from `Brewfile`
 - SSH keys, AWS credentials, and environment secrets from Bitwarden
-- Claude Code with shared workspace across platforms
+- **Portable Claude Code sessions** via `/workspace` symlink
+
+### 💡 Critical: Use `/workspace` for Claude Code
+
+After bootstrap, **always** use `/workspace` paths:
+
+```bash
+cd /workspace/dotfiles  # ✅ Portable sessions
+claude                  # Same session on ALL machines
+
+cd ~/workspace/dotfiles # ❌ Non-portable (different paths per OS)
+```
+
+The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identical paths across macOS, Lima, and WSL, preserving your conversation history when switching machines.
 
 ---
 
@@ -328,30 +342,68 @@ export WORKSPACE="$HOME/workspace"
 alias cws='cd "$WORKSPACE"'
 ```
 
-### 5. Claude Session Portability (`/workspace`)
+### 5. Claude Code Session Portability (`/workspace`) 🌟
 
-Claude Code stores session history in `~/.claude/projects/` using **path-encoded folder names**:
-- Working in `/Users/yourname/workspace/dotfiles` → sessions in `-Users-yourname-workspace-dotfiles/`
-- Working in `/home/ubuntu/workspace/dotfiles` → sessions in `-home-ubuntu-workspace-dotfiles/`
+**This is a key innovation that sets this dotfiles system apart.**
 
-Even with the same files (via Lima mount), different paths = different session folders = lost context.
+#### The Challenge
+Claude Code stores sessions based on your working directory path:
+- macOS: `/Users/username/workspace/dotfiles` → session `-Users-username-workspace-dotfiles-`
+- Lima: `/home/username.linux/workspace/dotfiles` → session `-home-username.linux-workspace-dotfiles-`
+- WSL: `/home/username/workspace/dotfiles` → session `-home-username-workspace-dotfiles-`
 
-**Solution**: The bootstrap scripts create a `/workspace` symlink:
+Even with the same files (via Lima mount or git sync), **different absolute paths = different session folders = lost conversation history** when switching machines.
+
+#### The Innovation
+Bootstrap creates a **platform-independent symlink**:
 
 ```bash
-# Created by bootstrap-mac.sh and bootstrap-linux.sh
+# Created automatically by bootstrap scripts
 /workspace → ~/workspace
 ```
 
-Now you can work from `/workspace/...` on both platforms:
+This symlink resolves to the correct home directory on each platform but provides a **canonical absolute path**:
+- macOS: `/workspace/dotfiles` (symlink resolves to `/Users/username/workspace/dotfiles`)
+- Lima: `/workspace/dotfiles` (symlink resolves to `/home/username.linux/workspace/dotfiles`)
+- WSL: `/workspace/dotfiles` (symlink resolves to `/home/username/workspace/dotfiles`)
+
+#### The Result
+Claude Code sees **the same path** (`/workspace/dotfiles`) on all platforms:
 
 ```bash
+# On macOS
 cd /workspace/dotfiles
 claude
-# → Sessions stored in -workspace-dotfiles/ on BOTH machines
+# Session stored in: ~/.claude/projects/-workspace-dotfiles-/
+
+# On Lima (same session!)
+cd /workspace/dotfiles
+claude
+# Session stored in: ~/.claude/projects/-workspace-dotfiles-/
+# ✅ Conversation history continues from macOS!
 ```
 
-**Best Practice**: Always use `cd /workspace/...` instead of `~/workspace/...` when running Claude Code for portable sessions.
+#### Usage Pattern
+```bash
+# ✅ ALWAYS use /workspace for Claude Code
+cd /workspace/my-project
+claude
+
+# ✅ Start on macOS, continue on Lima
+# macOS:
+cd /workspace/dotfiles && claude
+# ... work, exit ...
+
+# Lima (same conversation):
+cd /workspace/dotfiles && claude
+# Your conversation history is preserved!
+
+# ❌ DON'T use ~/workspace (non-portable)
+cd ~/workspace/dotfiles  # Different on each OS
+claude                    # New session every time
+```
+
+**Best Practice**: Make it a habit - always `cd /workspace/...` for Claude Code sessions.
 
 ### Visual Overview
 
