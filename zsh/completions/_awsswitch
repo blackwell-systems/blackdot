@@ -1,0 +1,16 @@
+#compdef awsswitch
+# ZSH completion for awsswitch command
+
+_awsswitch() {
+  local -a profiles
+  profiles=($(aws configure list-profiles 2>/dev/null))
+
+  if [[ ${#profiles[@]} -eq 0 ]]; then
+    _message "no AWS profiles configured"
+    return 1
+  fi
+
+  _describe 'AWS profile' profiles
+}
+
+_awsswitch "$@"
