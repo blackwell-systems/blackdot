@@ -125,6 +125,30 @@ defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 defaults write com.apple.finder NewWindowTarget -string "PfHm"
 defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/"
 
+# Allow quitting Finder (Cmd+Q)
+defaults write com.apple.finder QuitMenuItem -bool true
+
+# Disable window animations
+defaults write com.apple.finder DisableAllAnimations -bool true
+
+# Set sidebar icon size to medium
+defaults write NSGlobalDomain NSTableViewDefaultSizeMode -int 2
+
+# Expand file info panes by default
+defaults write com.apple.finder FXInfoPanesExpanded -dict \
+  General -bool true \
+  OpenWith -bool true \
+  Privileges -bool true
+
+# Show icons for hard drives, servers, removables on desktop
+defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true
+defaults write com.apple.finder ShowHardDrivesOnDesktop -bool false
+defaults write com.apple.finder ShowMountedServersOnDesktop -bool true
+defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true
+
+# Disable spring loading for directories
+defaults write NSGlobalDomain com.apple.springing.enabled -bool false
+
 ###############################################################################
 # Screenshots                                                                 #
 ###############################################################################
@@ -137,6 +161,119 @@ defaults write com.apple.screencapture type -string "png"
 
 # Disable screenshot shadow
 defaults write com.apple.screencapture disable-shadow -bool true
+
+###############################################################################
+# Safari                                                                      #
+###############################################################################
+
+# Show full URL in address bar
+defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool true
+
+# Enable developer menu and web inspector
+defaults write com.apple.Safari IncludeDevelopMenu -bool true
+defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
+defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
+
+# Add context menu for web inspector in all apps
+defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
+
+# Disable AutoFill
+defaults write com.apple.Safari AutoFillFromAddressBook -bool false
+defaults write com.apple.Safari AutoFillPasswords -bool false
+defaults write com.apple.Safari AutoFillCreditCardData -bool false
+
+# Warn about fraudulent websites
+defaults write com.apple.Safari WarnAboutFraudulentWebsites -bool true
+
+# Enable "Do Not Track"
+defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true
+
+# Don't open "safe" files after downloading
+defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
+
+###############################################################################
+# Spotlight                                                                   #
+###############################################################################
+
+# Disable Spotlight indexing for any mounted volume
+sudo defaults write /.Spotlight-V100/VolumeConfiguration Exclusions -array "/Volumes"
+
+# Change indexing order and disable some categories
+defaults write com.apple.spotlight orderedItems -array \
+  '{"enabled" = 1;"name" = "APPLICATIONS";}' \
+  '{"enabled" = 1;"name" = "SYSTEM_PREFS";}' \
+  '{"enabled" = 1;"name" = "DIRECTORIES";}' \
+  '{"enabled" = 1;"name" = "PDF";}' \
+  '{"enabled" = 1;"name" = "DOCUMENTS";}' \
+  '{"enabled" = 0;"name" = "FONTS";}' \
+  '{"enabled" = 0;"name" = "MESSAGES";}' \
+  '{"enabled" = 0;"name" = "CONTACT";}' \
+  '{"enabled" = 0;"name" = "EVENT_TODO";}' \
+  '{"enabled" = 0;"name" = "IMAGES";}' \
+  '{"enabled" = 0;"name" = "BOOKMARKS";}' \
+  '{"enabled" = 0;"name" = "MUSIC";}' \
+  '{"enabled" = 0;"name" = "MOVIES";}' \
+  '{"enabled" = 0;"name" = "PRESENTATIONS";}' \
+  '{"enabled" = 0;"name" = "SPREADSHEETS";}' \
+  '{"enabled" = 0;"name" = "SOURCE";}'
+
+###############################################################################
+# Hot Corners                                                                 #
+###############################################################################
+# Possible values:
+#  0: no-op
+#  2: Mission Control
+#  3: Show application windows
+#  4: Desktop
+#  5: Start screen saver
+#  6: Disable screen saver
+#  7: Dashboard
+# 10: Put display to sleep
+# 11: Launchpad
+# 12: Notification Center
+# 13: Lock Screen
+# 14: Quick Note
+
+# Bottom-left: Start screen saver
+defaults write com.apple.dock wvous-bl-corner -int 5
+defaults write com.apple.dock wvous-bl-modifier -int 0
+
+# Bottom-right: Desktop
+defaults write com.apple.dock wvous-br-corner -int 4
+defaults write com.apple.dock wvous-br-modifier -int 0
+
+###############################################################################
+# Time Machine                                                                #
+###############################################################################
+
+# Prevent prompting to use new drives as backup
+defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
+
+# Disable local Time Machine backups (if you use network backup)
+# Uncomment if needed:
+# hash tmutil &> /dev/null && sudo tmutil disablelocal
+
+###############################################################################
+# Energy & Power                                                              #
+###############################################################################
+
+# Never sleep when on power
+sudo pmset -c displaysleep 15
+sudo pmset -c sleep 0
+
+# Sleep after 5 min on battery
+sudo pmset -b displaysleep 5
+sudo pmset -b sleep 10
+
+# Enable lid wakeup
+sudo pmset -a lidwake 1
+
+###############################################################################
+# Bluetooth                                                                   #
+###############################################################################
+
+# Increase sound quality for Bluetooth headphones
+defaults write com.apple.BluetoothAudioAgent "Apple Bitpool Min (editable)" -int 40
 
 ###############################################################################
 # Menu Bar                                                                    #
