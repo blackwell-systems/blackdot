@@ -26,6 +26,23 @@
 
 ---
 
+## Prerequisites
+
+You don’t need Git or the Bitwarden CLI preinstalled – the bootstrap scripts will install the tooling for you.
+
+What you do need:
+
+- A supported environment: macOS, Linux, WSL2, or Lima
+- Internet access (to install Homebrew/Brew packages and the Bitwarden CLI)
+- A Bitwarden account (for vault-backed secrets)
+- A GitHub account with access to this repository
+
+To clone via SSH (recommended), you’ll also want an SSH key configured with GitHub. If you don’t have Git yet, you can either:
+- install it the way you normally would on your platform, or  
+- download this repository as a ZIP from GitHub, extract it, and run `bootstrap-mac.sh` / `bootstrap-linux.sh` – the scripts will install Git and the Bitwarden CLI for you.
+
+---
+
 ## Quick Start
 
 ### New Machine Setup
