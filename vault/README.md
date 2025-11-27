@@ -469,7 +469,7 @@ All items must be **Secure Notes** with content in the **notes** field:
 git clone git@github.com:you/dotfiles.git ~/workspace/dotfiles
 
 # 2. Run bootstrap (packages, symlinks)
-./bootstrap-mac.sh  # or ./bootstrap-lima.sh
+./bootstrap-mac.sh  # or ./bootstrap-linux.sh
 
 # 3. Login to Bitwarden
 bw login

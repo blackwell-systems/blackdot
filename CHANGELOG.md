@@ -85,6 +85,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added - Documentation
 
+- **Multi-Platform Architecture Documentation**
+  - Comprehensive "Multi-Platform Architecture" section in README
+  - Platform support matrix (macOS, Lima, WSL2, Ubuntu/Debian)
+  - Architecture layers diagram (10% platform-specific + 90% shared)
+  - Platform-independent components breakdown
+  - Guide for adding new platforms (15-30 minutes each)
+  - WSL2 auto-detection and Windows interop tools support
+  - Renamed `bootstrap-lima.sh` → `bootstrap-linux.sh` (with backward-compatible symlink)
+  - Platform detection examples showing auto-detection of WSL/Lima/bare Linux
+
 - **REVIEW.md** (8,700 words)
   - Comprehensive architecture analysis
   - Professional comparison vs FAANG companies
@@ -103,9 +113,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New "What's New" section
   - "Metrics & Observability" section
   - "CI/CD & Testing" section
+  - "Multi-Platform Architecture" section
   - Updated Table of Contents
 
 ### Changed
+
+#### Multi-Platform Improvements
+- **Renamed `bootstrap-lima.sh` → `bootstrap-linux.sh`** for clarity
+  - Now detects WSL2, Lima, or bare Linux automatically
+  - Platform-specific setup (WSL: Windows interop tools, Lima: integration notes)
+  - Backward-compatible symlink maintained for existing scripts/docs
+- **Updated all references** throughout codebase (CI/CD, docs, health checks)
+- **Enhanced platform detection** in bootstrap-linux.sh:
+  - Detects WSL2 via `/proc/version`
+  - Detects Lima via `$LIMA_INSTANCE` environment variable
+  - Provides platform-specific tips after installation
 
 #### Refactored Components
 - Vault scripts now use shared `_common.sh` library (~50 lines saved per script)
