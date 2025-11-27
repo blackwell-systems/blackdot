@@ -61,6 +61,19 @@ case "$OS" in
 esac
 
 # =========================
+# COMPLETIONS
+# =========================
+# Load custom completions from dotfiles
+DOTFILES_COMPLETIONS="$HOME/workspace/dotfiles/zsh/completions"
+if [[ -d "$DOTFILES_COMPLETIONS" ]]; then
+  fpath=($DOTFILES_COMPLETIONS $fpath)
+fi
+
+# Initialize completion system
+autoload -Uz compinit
+compinit
+
+# =========================
 # SHARED PLUGIN LOADING (brew-managed)
 # =========================
 # Unified approach: both macOS and Linux use brew-installed plugins directly.
@@ -358,16 +371,78 @@ notes() {
   esac
 }
 
+# Deprecated: use dotfiles-upgrade instead
 dotfiles-update() {
+    warn "dotfiles-update is deprecated, use dotfiles-upgrade instead"
+    dotfiles-upgrade
+}
+
+# One-command upgrade flow with health check
+dotfiles-upgrade() {
     local DOTFILES_DIR="$HOME/workspace/dotfiles"
+    echo "🚀 Upgrading dotfiles..."
+
+    # Pull latest changes
     local branch
     branch="$(cd "$DOTFILES_DIR" && git rev-parse --abbrev-ref HEAD)"
-    echo "Updating dotfiles (branch: $branch)..."
+    echo "   Pulling from $branch..."
     (cd "$DOTFILES_DIR" && git pull --rebase origin "$branch")
-    echo "Re-sourcing zshrc..."
-    source "$HOME/.zshrc"
-    echo "Done! Run 'dotfiles-doctor' to verify."
+
+    # Re-run bootstrap to update symlinks
+    echo "   Re-bootstrapping..."
+    "$DOTFILES_DIR/bootstrap-dotfiles.sh"
+
+    # Update Homebrew packages
+    if command -v brew >/dev/null 2>&1; then
+        echo "   Updating Homebrew packages..."
+        brew bundle --file="$DOTFILES_DIR/Brewfile" --quiet
+    fi
+
+    # Run health check with auto-fix
+    echo "   Running health check..."
+    "$DOTFILES_DIR/check-health.sh" --fix
+
+    echo "✅ Upgrade complete! Restart shell to apply all changes."
+    echo "   Or run: source ~/.zshrc"
 }
+
+# Check for dotfiles updates (once per day)
+_check_dotfiles_updates() {
+    local dotfiles_dir="$HOME/workspace/dotfiles"
+    local cache_file="$HOME/.dotfiles-update-check"
+
+    # Skip if checked recently (within last day)
+    if [[ -f "$cache_file" ]]; then
+        # Check if cache is less than 1 day old
+        if [[ "$(uname)" == "Darwin" ]]; then
+            # macOS
+            local cache_age=$(( $(date +%s) - $(stat -f %m "$cache_file") ))
+        else
+            # Linux
+            local cache_age=$(( $(date +%s) - $(stat -c %Y "$cache_file") ))
+        fi
+        # 86400 seconds = 1 day
+        [[ $cache_age -lt 86400 ]] && return
+    fi
+
+    # Fetch and compare (silently)
+    (cd "$dotfiles_dir" && git fetch origin -q 2>/dev/null) || return
+    local current_branch=$(cd "$dotfiles_dir" && git rev-parse --abbrev-ref HEAD 2>/dev/null)
+    local behind=$(cd "$dotfiles_dir" && git rev-list --count HEAD..origin/"$current_branch" 2>/dev/null)
+
+    if [[ -n "$behind" && "$behind" -gt 0 ]]; then
+        echo ""
+        echo "📦 Dotfiles update available ($behind commit(s) behind origin/$current_branch)"
+        echo "   Run: dotfiles-upgrade"
+        echo ""
+    fi
+
+    # Update cache
+    touch "$cache_file"
+}
+
+# Auto-check on shell startup
+_check_dotfiles_updates
 
 # Load your custom env block if it exists
 if [ -f "$HOME/.local/bin/env" ]; then
@@ -765,6 +840,16 @@ fi
 if command -v glow >/dev/null 2>&1; then
   alias readme='glow README.md'
   alias md='glow'
+fi
+
+# =========================
+# Machine-specific local overrides
+# =========================
+# Load local customizations that shouldn't be in version control
+# Use this for machine-specific aliases, env vars, or functions
+# Example: Work laptop might need different AWS_PROFILE defaults
+if [[ -f ~/.zshrc.local ]]; then
+  source ~/.zshrc.local
 fi
 
 # =========================

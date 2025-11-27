@@ -521,4 +521,53 @@ else
 fi
 echo "========================================"
 
+# ============================================================
+# METRICS COLLECTION
+# ============================================================
+# Track health check results over time for trend analysis
+if command -v jq >/dev/null 2>&1; then
+    METRICS_FILE="$HOME/.dotfiles-metrics.jsonl"
+
+    # Get current git info
+    DOTFILES_DIR="${SCRIPT_DIR:-$HOME/workspace/dotfiles}"
+    GIT_BRANCH="unknown"
+    GIT_COMMIT="unknown"
+    if [[ -d "$DOTFILES_DIR/.git" ]]; then
+        GIT_BRANCH=$(cd "$DOTFILES_DIR" && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+        GIT_COMMIT=$(cd "$DOTFILES_DIR" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+    fi
+
+    # Calculate health score (0-100)
+    # Perfect = 100, each error -10, each warning -5
+    HEALTH_SCORE=$((100 - (ERRORS * 10) - (WARNINGS * 5)))
+    [[ $HEALTH_SCORE -lt 0 ]] && HEALTH_SCORE=0
+
+    # Record metrics
+    jq -n \
+        --arg date "$(date -Iseconds)" \
+        --arg hostname "$(hostname)" \
+        --arg os "$(uname -s)" \
+        --argjson errors "$ERRORS" \
+        --argjson warnings "$WARNINGS" \
+        --argjson fixed "$FIXED" \
+        --argjson health_score "$HEALTH_SCORE" \
+        --arg branch "$GIT_BRANCH" \
+        --arg commit "$GIT_COMMIT" \
+        --arg fix_mode "$FIX_MODE" \
+        --arg drift_mode "$DRIFT_MODE" \
+        '{
+            timestamp: $date,
+            hostname: $hostname,
+            os: $os,
+            errors: $errors,
+            warnings: $warnings,
+            fixed: $fixed,
+            health_score: $health_score,
+            git_branch: $branch,
+            git_commit: $commit,
+            fix_mode: ($fix_mode == "true"),
+            drift_mode: ($drift_mode == "true")
+        }' >> "$METRICS_FILE" 2>/dev/null
+fi
+
 exit $ERRORS

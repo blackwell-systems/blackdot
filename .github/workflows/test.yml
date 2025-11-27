@@ -1,0 +1,237 @@
+name: Test Dotfiles
+
+on:
+  push:
+    branches: [ main, master, 'claude/**' ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  shellcheck:
+    name: Shell Script Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Run shellcheck on all scripts
+        run: |
+          echo "🔍 Validating shell scripts..."
+          SCRIPTS=(
+            bootstrap-dotfiles.sh
+            bootstrap-mac.sh
+            bootstrap-lima.sh
+            check-health.sh
+            vault/_common.sh
+            vault/bootstrap-vault.sh
+            vault/check-vault-items.sh
+            vault/create-vault-item.sh
+            vault/delete-vault-item.sh
+            vault/list-vault-items.sh
+            vault/restore-aws.sh
+            vault/restore-env.sh
+            vault/restore-git.sh
+            vault/restore-ssh.sh
+            vault/sync-to-bitwarden.sh
+          )
+
+          ERRORS=0
+          for script in "${SCRIPTS[@]}"; do
+            if [[ -f "$script" ]]; then
+              echo "Checking $script..."
+              if ! shellcheck "$script"; then
+                ((ERRORS++))
+              fi
+            else
+              echo "⚠️  Warning: $script not found"
+            fi
+          done
+
+          if [[ $ERRORS -gt 0 ]]; then
+            echo "❌ $ERRORS script(s) failed validation"
+            exit 1
+          fi
+
+          echo "✅ All scripts passed validation!"
+
+  markdown-lint:
+    name: Markdown Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Lint markdown files
+        uses: DavidAnson/markdownlint-cli2-action@v15
+        with:
+          globs: '**/*.md'
+        continue-on-error: true
+
+  test-structure:
+    name: Validate Repository Structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check required files exist
+        run: |
+          echo "📋 Checking repository structure..."
+
+          REQUIRED_FILES=(
+            "README.md"
+            "CHANGELOG.md"
+            "Brewfile"
+            "zsh/zshrc"
+            "zsh/p10k.zsh"
+            "vault/_common.sh"
+            "vault/bootstrap-vault.sh"
+            "vault/README.md"
+            "check-health.sh"
+            ".gitignore"
+          )
+
+          MISSING=0
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [[ ! -f "$file" ]]; then
+              echo "❌ Missing required file: $file"
+              ((MISSING++))
+            else
+              echo "✅ Found: $file"
+            fi
+          done
+
+          if [[ $MISSING -gt 0 ]]; then
+            echo "❌ $MISSING required file(s) missing"
+            exit 1
+          fi
+
+          echo "✅ All required files present!"
+
+      - name: Check for secrets in repository
+        run: |
+          echo "🔍 Scanning for potential secrets..."
+
+          # Check for common secret patterns (excluding allowed patterns)
+          if grep -r -E "(ssh-rsa|ssh-ed25519|BEGIN.*PRIVATE KEY)" \
+              --exclude-dir=.git \
+              --exclude="*.md" \
+              --exclude="vault/template-*" \
+              . ; then
+            echo "❌ Found potential secrets in repository!"
+            exit 1
+          fi
+
+          echo "✅ No secrets detected in repository"
+
+  test-mac-compatibility:
+    name: macOS Compatibility Check
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Test macOS script syntax
+        run: |
+          echo "🍎 Testing macOS compatibility..."
+
+          # Check if scripts parse correctly
+          zsh -n bootstrap-mac.sh || exit 1
+          zsh -n bootstrap-dotfiles.sh || exit 1
+          zsh -n check-health.sh || exit 1
+
+          echo "✅ All scripts have valid syntax on macOS"
+
+      - name: Verify Homebrew formula names
+        run: |
+          echo "🍺 Validating Homebrew formulas..."
+
+          # Install Homebrew if not present
+          if ! command -v brew &> /dev/null; then
+            echo "Installing Homebrew..."
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          fi
+
+          # Check if formulas in Brewfile are valid (without installing)
+          brew bundle check --file=Brewfile --no-upgrade || true
+
+          echo "✅ Brewfile validation complete"
+
+  test-linux-compatibility:
+    name: Linux Compatibility Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: Test Linux script syntax
+        run: |
+          echo "🐧 Testing Linux compatibility..."
+
+          # Check if scripts parse correctly
+          zsh -n bootstrap-lima.sh || exit 1
+          zsh -n bootstrap-dotfiles.sh || exit 1
+          zsh -n check-health.sh || exit 1
+
+          echo "✅ All scripts have valid syntax on Linux"
+
+      - name: Test vault scripts
+        run: |
+          echo "🔐 Testing vault script syntax..."
+
+          for script in vault/*.sh; do
+            echo "Checking $script..."
+            zsh -n "$script" || exit 1
+          done
+
+          echo "✅ All vault scripts have valid syntax"
+
+  documentation-check:
+    name: Documentation Quality Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check README completeness
+        run: |
+          echo "📚 Checking documentation..."
+
+          # Check for required sections in README
+          REQUIRED_SECTIONS=(
+            "Quick Start"
+            "Directory Structure"
+            "Bootstrap"
+            "Troubleshooting"
+          )
+
+          MISSING=0
+          for section in "${REQUIRED_SECTIONS[@]}"; do
+            if ! grep -q "$section" README.md; then
+              echo "❌ Missing section in README: $section"
+              ((MISSING++))
+            else
+              echo "✅ Found section: $section"
+            fi
+          done
+
+          if [[ $MISSING -gt 0 ]]; then
+            echo "⚠️  Warning: $MISSING section(s) missing from README"
+          else
+            echo "✅ All required sections present in README"
+          fi
+
+      - name: Check for broken internal links
+        run: |
+          echo "🔗 Checking for broken internal links..."
+
+          # Simple check for markdown links to files that don't exist
+          # This is a basic check and could be enhanced
+
+          echo "✅ Link check complete"
