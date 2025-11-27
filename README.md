@@ -7,7 +7,7 @@
 ![Secrets](https://img.shields.io/badge/Secrets-Bitwarden-ff4081)
 ![Claude Portability](https://img.shields.io/badge/Claude_Portability-Enabled-8A2BE2)
 
-> **Enterprise-grade dotfiles** with Bitwarden vault integration, cross-platform support, and automated health checks.
+> Enterprise-grade, vault-backed dotfiles for multi-machine development. Bitwarden provides the source of truth for secrets, a canonical `/workspace` path keeps Claude Code sessions portable across macOS, Linux, Lima, and WSL2, and health checks guard against drift, broken symlinks, and missing vault state.
 
 **Version:** 1.0.0 | [Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
 
@@ -15,14 +15,14 @@
 
 ## Features
 
-- 🤖 **Portable Claude Code Sessions** - Work across multiple machines with shared session history via `/workspace` symlink
-- 🔐 **Bitwarden Vault Integration** - Secure secret management for SSH keys, AWS credentials, and environment variables
-- 🌍 **Cross-Platform** - Seamless setup for macOS, Lima, WSL2, and Linux
-- 🏥 **Health Checks** - Automated validation with drift detection and auto-fix
-- 📊 **Metrics & Observability** - Track dotfiles health over time
-- 🚀 **Modern CLI Tools** - eza, fzf, ripgrep, zoxide, and more
-- ⚡ **Fast Setup** - Bootstrap from scratch in under 5 minutes
-- 🔄 **Idempotent** - Safe to run repeatedly without side effects
+- **Portable Claude Code sessions** – Canonical `/workspace` layout so Claude Code sessions and projects stay portable across macOS, Linux, Lima, and WSL2
+- **Bitwarden vault integration** – Bitwarden is the source of truth for SSH keys, AWS credentials, Git config, and environment secrets
+- **Cross-platform bootstrap** – Single setup flow for macOS, Linux, WSL2, and Lima with consistent paths and behavior
+- **Automated health checks** – Validate symlinks, required tools, permissions, and vault sync, with drift detection and optional auto-fix
+- **Metrics and observability** – Track dotfiles health over time and surface failures, drift, and missing vault items
+- **Modern CLI stack** – Includes eza, fzf, ripgrep, zoxide, and other modern Unix tools
+- **Fast setup** – Bootstrap a new machine from clone to ready-to-work shell in under five minutes
+- **Idempotent design** – Safe to rerun bootstrap and health checks at any time; scripts are designed to converge on a known-good state
 
 ---
 
