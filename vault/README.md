@@ -72,7 +72,7 @@ Restores SSH keys and config from Bitwarden.
 | Item Name | Contains | Writes To |
 |-----------|----------|-----------|
 | `SSH-GitHub-Enterprise` | Private + public key | `~/.ssh/id_ed25519_enterprise_ghub{,.pub}` |
-| `SSH-GitHub-Blackwell` | Private + public key | `~/.ssh/id_ed25519_blackwell{,.pub}` |
+| `SSH-GitHub-Personal` | Private + public key | `~/.ssh/id_ed25519_personal{,.pub}` |
 | `SSH-Config` | Full SSH config | `~/.ssh/config` |
 
 **Notes field format for SSH keys:**
@@ -81,7 +81,7 @@ Restores SSH keys and config from Bitwarden.
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAA...
 -----END OPENSSH PRIVATE KEY-----
 
-ssh-ed25519 AAAAC3NzaC1lZDI1... user@host
+ssh-ed25519 AAAAC3NzaC1lZDI1... username@hostname
 ```
 
 **Permissions:** Private keys `600`, public keys `644`, config `600`
@@ -106,7 +106,7 @@ region = us-east-1
 output = json
 
 [profile work]
-sso_start_url = https://mycompany.awsapps.com/start
+sso_start_url = https://COMPANY.awsapps.com/start
 sso_region = us-east-1
 sso_account_id = 123456789012
 sso_role_name = DeveloperAccess
@@ -155,8 +155,8 @@ Restores Git configuration.
 **Example notes:**
 ```ini
 [user]
-    name = Your Name
-    email = you@example.com
+    name = Full Name
+    email = email@example.com
 
 [core]
     editor = vim
@@ -271,7 +271,7 @@ Pre-flight validation - ensures required Bitwarden items exist.
 ```
 === Required Items ===
 [OK] SSH-GitHub-Enterprise
-[OK] SSH-GitHub-Blackwell
+[OK] SSH-GitHub-Personal
 [OK] SSH-Config
 [OK] AWS-Config
 [OK] AWS-Credentials
@@ -386,11 +386,11 @@ Reference template showing the expected structure for `~/.aws/credentials`.
 - Session token example for temporary credentials
 
 **Placeholders:**
-- `{{PERSONAL_AWS_ACCESS_KEY_ID}}` - Your personal access key
-- `{{PERSONAL_AWS_SECRET_ACCESS_KEY}}` - Your personal secret key
-- `{{BWS_AWS_ACCESS_KEY_ID}}` - Blackwell Systems access key
-- `{{BWS_AWS_SECRET_ACCESS_KEY}}` - Blackwell Systems secret key
-- `{{PROD_WB_*}}` - Production workbench temporary credentials
+- `{{PERSONAL_AWS_ACCESS_KEY_ID}}` - Personal account access key
+- `{{PERSONAL_AWS_SECRET_ACCESS_KEY}}` - Personal account secret key
+- `{{WORK_AWS_ACCESS_KEY_ID}}` - Work account access key
+- `{{WORK_AWS_SECRET_ACCESS_KEY}}` - Work account secret key
+- `{{PROD_*}}` - Production environment temporary credentials
 
 **When to use:** Reference when creating your `AWS-Credentials` Bitwarden item.
 
@@ -450,8 +450,8 @@ All items must be **Secure Notes** with content in the **notes** field:
 
 | Item Name | Required | Description |
 |-----------|----------|-------------|
-| `SSH-GitHub-Enterprise` | Yes | SSH key for GitHub Enterprise/SSO |
-| `SSH-GitHub-Blackwell` | Yes | SSH key for Blackwell Systems GitHub |
+| `SSH-GitHub-Enterprise` | Yes | SSH key for work/enterprise account |
+| `SSH-GitHub-Personal` | Yes | SSH key for personal account |
 | `SSH-Config` | Yes | Full `~/.ssh/config` contents |
 | `AWS-Config` | Yes | Full `~/.aws/config` contents |
 | `AWS-Credentials` | Yes | Full `~/.aws/credentials` contents |
@@ -466,7 +466,8 @@ All items must be **Secure Notes** with content in the **notes** field:
 
 ```bash
 # 1. Clone dotfiles
-git clone git@github.com:you/dotfiles.git ~/workspace/dotfiles
+git clone git@github.com:YOUR-USERNAME/dotfiles.git ~/workspace/dotfiles
+cd ~/workspace/dotfiles
 
 # 2. Run bootstrap (packages, symlinks)
 ./bootstrap-mac.sh  # or ./bootstrap-linux.sh
@@ -539,7 +540,7 @@ rm vault/.bw-session
    ```bash
    declare -A SSH_KEYS=(
        ["SSH-GitHub-Enterprise"]="$HOME/.ssh/id_ed25519_enterprise_ghub"
-       ["SSH-GitHub-Blackwell"]="$HOME/.ssh/id_ed25519_blackwell"
+       ["SSH-GitHub-Personal"]="$HOME/.ssh/id_ed25519_personal"
        ["SSH-NewService"]="$HOME/.ssh/id_ed25519_newkey"  # ← Add here
    )
    ```
