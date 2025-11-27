@@ -2,6 +2,10 @@
 
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux%20%7C%20Lima%20%7C%20WSL2-blue)
+![Shell](https://img.shields.io/badge/Shell-Zsh-blueviolet)
+![Secrets](https://img.shields.io/badge/Secrets-Bitwarden-ff4081)
+![Claude Portability](https://img.shields.io/badge/Claude_Portability-Enabled-8A2BE2)
 
 > **Enterprise-grade dotfiles** with Bitwarden vault integration, cross-platform support, and automated health checks.
 
