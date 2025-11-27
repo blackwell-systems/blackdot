@@ -77,7 +77,8 @@ Commands with ASCII art banner via `awstools`:
 ### 7. Zellij Config
 - Location: `zellij/config.kdl`
 - Symlinked to `~/.config/zellij/config.kdl`
-- Features: vim-like scroll, Alt+arrows for pane nav, Alt+n/p for tabs, Alt+1-9 for tab jump
+- Features: Alt+arrows for pane nav, Alt+n/p for tabs, Alt+1-9 for tab jump
+- Scroll mode: arrows, PageUp/Down, Home/End
 
 ### 8. Cross-Platform Clipboard (`copy`, `paste`)
 - Works on macOS, Linux X11/Wayland, WSL
