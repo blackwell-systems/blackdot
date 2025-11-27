@@ -685,10 +685,29 @@ EOF
 # =========================
 # Automatically use /workspace path for portable session history.
 # When in ~/workspace/*, transparently cd to /workspace/* before running claude.
+# This ensures Claude Code sessions are portable across macOS, Lima, and WSL.
 claude() {
   if [[ "$PWD" == "$HOME/workspace"* && -d "/workspace" ]]; then
     local canonical_path="/workspace${PWD#$HOME/workspace}"
     if [[ -d "$canonical_path" ]]; then
+      # Educational message to teach the correct pattern
+      echo "╭──────────────────────────────────────────────────────────────────╮"
+      echo "│ 🤖 CLAUDE CODE PORTABLE SESSION REDIRECT                        │"
+      echo "├──────────────────────────────────────────────────────────────────┤"
+      echo "│                                                                  │"
+      echo "│ You're in:  $PWD"
+      echo "│ Redirecting to:  $canonical_path"
+      echo "│                                                                  │"
+      echo "│ WHY: Claude Code session paths must be identical across all     │"
+      echo "│      machines for conversation history to sync properly.        │"
+      echo "│                                                                  │"
+      echo "│ ✅ BEST PRACTICE: Always use /workspace instead of ~/workspace  │"
+      echo "│    Example: cd /workspace/dotfiles && claude                    │"
+      echo "│                                                                  │"
+      echo "│ This enables the same session on macOS, Lima, WSL, and Linux.   │"
+      echo "╰──────────────────────────────────────────────────────────────────╯"
+      echo ""
+
       ( cd "$canonical_path" && command claude "$@" )
       return $?
     fi

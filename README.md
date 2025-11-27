@@ -69,17 +69,35 @@ export BW_SESSION="$(bw unlock --raw)"
 
 ### 💡 Pro Tip: Portable Claude Code Sessions
 
-Always use `/workspace` instead of `~/workspace` when working with Claude Code:
+The `claude` command **automatically redirects** from `~/workspace` to `/workspace` for portable sessions:
 
 ```bash
+# Best practice: Use /workspace paths directly
 cd /workspace/dotfiles  # ✅ Portable sessions across ALL machines
 claude                  # Session: -workspace-dotfiles-
 
-# Not this:
-cd ~/workspace/dotfiles # ❌ Different paths on macOS vs Linux
+# If you forget and use ~/workspace:
+cd ~/workspace/dotfiles # Shows educational message + auto-redirects
+claude                  # Still works! Teaches you the pattern
 ```
 
-**Why?** The bootstrap creates `/workspace → ~/workspace` symlink, ensuring Claude Code sessions use identical paths across macOS (`/Users/username`), Lima (`/home/username.linux`), and WSL (`/home/username`). Your conversation history follows you everywhere!
+**Auto-redirect message:**
+```
+╭──────────────────────────────────────────────────────────────────╮
+│ 🤖 CLAUDE CODE PORTABLE SESSION REDIRECT                        │
+├──────────────────────────────────────────────────────────────────┤
+│ You're in:  /Users/username/workspace/dotfiles                  │
+│ Redirecting to:  /workspace/dotfiles                            │
+│                                                                  │
+│ WHY: Claude Code session paths must be identical across all     │
+│      machines for conversation history to sync properly.        │
+│                                                                  │
+│ ✅ BEST PRACTICE: Always use /workspace instead of ~/workspace  │
+│    Example: cd /workspace/dotfiles && claude                    │
+╰──────────────────────────────────────────────────────────────────╯
+```
+
+**Why this matters:** The bootstrap creates `/workspace → ~/workspace` symlink, ensuring Claude Code sessions use identical paths across macOS, Lima, and WSL. The wrapper function **educates you while ensuring sessions are always portable**!
 
 ---
 
@@ -154,19 +172,26 @@ Bootstrap creates a `/workspace` symlink pointing to `~/workspace`:
 
 #### Usage
 ```bash
-# ✅ Always use /workspace for Claude sessions
+# ✅ BEST: Use /workspace for Claude Code (recommended)
 cd /workspace/dotfiles
 claude  # Picks up your conversation from ANY machine
 
-# ✅ Works with all Claude commands
-cd /workspace/my-project
-claude --model sonnet-4
+# ✅ SAFE: Using ~/workspace auto-redirects with educational message
+cd ~/workspace/my-project
+claude  # Wrapper automatically switches to /workspace/my-project
 
-# ❌ Don't use ~/workspace (different paths per OS)
-cd ~/workspace/dotfiles  # Session won't be portable
+# ✅ Works with all Claude commands
+cd /workspace/dotfiles
+claude --model sonnet-4
 ```
 
-**Result:** Start a conversation on macOS, continue it in Lima, finish it on WSL - **same session, full history**.
+**Auto-redirect wrapper behavior:**
+1. Detects if you're in `~/workspace/*` (non-portable path)
+2. Shows educational message explaining why `/workspace` is better
+3. Automatically redirects to equivalent `/workspace/*` path
+4. Runs Claude Code with portable session storage
+
+**Result:** Start a conversation on macOS, continue it in Lima, finish it on WSL - **same session, full history**. The wrapper ensures this works even if you forget to use `/workspace`!
 
 ### Health Checks
 
