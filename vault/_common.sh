@@ -235,3 +235,170 @@ bw_get_item_id() {
     json=$(bw_get_item "$item_name" "$session")
     [[ -n "$json" ]] && printf '%s' "$json" | jq -r '.id'
 }
+
+# ============================================================
+# Schema Validation Functions
+# ============================================================
+
+# Validate that an item exists
+validate_item_exists() {
+    local item_name="$1"
+    local session="$2"
+
+    if ! bw_item_exists "$item_name" "$session"; then
+        fail "Validation failed: Item '$item_name' does not exist in Bitwarden vault"
+        return 1
+    fi
+
+    debug "✓ Item '$item_name' exists"
+    return 0
+}
+
+# Validate that an item has notes field with content
+validate_item_has_notes() {
+    local item_name="$1"
+    local session="$2"
+
+    local notes
+    notes=$(bw_get_notes "$item_name" "$session")
+
+    if [[ -z "$notes" || "$notes" == "null" ]]; then
+        fail "Validation failed: Item '$item_name' has empty or missing notes field"
+        return 1
+    fi
+
+    debug "✓ Item '$item_name' has notes content"
+    return 0
+}
+
+# Validate that an item is a secure note
+validate_item_type() {
+    local item_name="$1"
+    local session="$2"
+    local expected_type="${3:-2}"  # 2 = secureNote in Bitwarden
+
+    local json item_type
+    json=$(bw_get_item "$item_name" "$session")
+    item_type=$(printf '%s' "$json" | jq -r '.type // ""')
+
+    if [[ "$item_type" != "$expected_type" ]]; then
+        fail "Validation failed: Item '$item_name' has type $item_type, expected $expected_type (secureNote)"
+        return 1
+    fi
+
+    debug "✓ Item '$item_name' has correct type"
+    return 0
+}
+
+# Validate SSH key item structure
+validate_ssh_key_item() {
+    local item_name="$1"
+    local session="$2"
+
+    # Check item exists
+    validate_item_exists "$item_name" "$session" || return 1
+
+    # Check it's a secure note
+    validate_item_type "$item_name" "$session" || return 1
+
+    # Check it has notes
+    validate_item_has_notes "$item_name" "$session" || return 1
+
+    # Check notes contain private key
+    local notes
+    notes=$(bw_get_notes "$item_name" "$session")
+
+    if ! printf '%s' "$notes" | grep -q "BEGIN OPENSSH PRIVATE KEY"; then
+        fail "Validation failed: Item '$item_name' notes do not contain 'BEGIN OPENSSH PRIVATE KEY'"
+        return 1
+    fi
+
+    if ! printf '%s' "$notes" | grep -q "END OPENSSH PRIVATE KEY"; then
+        fail "Validation failed: Item '$item_name' notes do not contain 'END OPENSSH PRIVATE KEY'"
+        return 1
+    fi
+
+    # Check notes contain public key
+    if ! printf '%s' "$notes" | grep -qE "^ssh-(ed25519|rsa|ecdsa) "; then
+        fail "Validation failed: Item '$item_name' notes do not contain a public key line (ssh-ed25519/rsa/ecdsa)"
+        return 1
+    fi
+
+    pass "✓ SSH key item '$item_name' validated successfully"
+    return 0
+}
+
+# Validate file-based config item
+validate_config_item() {
+    local item_name="$1"
+    local session="$2"
+    local min_length="${3:-10}"  # Minimum content length
+
+    # Check item exists
+    validate_item_exists "$item_name" "$session" || return 1
+
+    # Check it's a secure note
+    validate_item_type "$item_name" "$session" || return 1
+
+    # Check it has notes with minimum length
+    local notes
+    notes=$(bw_get_notes "$item_name" "$session")
+
+    if [[ -z "$notes" || "$notes" == "null" ]]; then
+        fail "Validation failed: Item '$item_name' has empty notes"
+        return 1
+    fi
+
+    local content_length
+    content_length=$(printf '%s' "$notes" | wc -c | tr -d ' ')
+
+    if [[ "$content_length" -lt "$min_length" ]]; then
+        fail "Validation failed: Item '$item_name' notes too short ($content_length < $min_length chars)"
+        return 1
+    fi
+
+    pass "✓ Config item '$item_name' validated successfully"
+    return 0
+}
+
+# Validate all required vault items
+validate_all_items() {
+    local session="$1"
+    local errors=0
+
+    info "Validating vault items schema..."
+
+    # Validate SSH keys
+    for item in "${(k)SSH_KEYS[@]}"; do
+        if ! validate_ssh_key_item "$item" "$session" 2>&1; then
+            ((errors++))
+        fi
+    done
+
+    # Validate config files
+    for item in SSH-Config AWS-Config AWS-Credentials Git-Config; do
+        if [[ -n "${DOTFILES_ITEMS[$item]:-}" ]]; then
+            if ! validate_config_item "$item" "$session" 2>&1; then
+                ((errors++))
+            fi
+        fi
+    done
+
+    # Optional items (don't fail if missing, but validate if present)
+    for item in "${(k)DOTFILES_ITEMS[@]}"; do
+        local spec="${DOTFILES_ITEMS[$item]}"
+        if [[ "$spec" == *":optional:"* ]] && bw_item_exists "$item" "$session"; then
+            if ! validate_config_item "$item" "$session" 1 2>&1; then
+                warn "Optional item '$item' failed validation"
+            fi
+        fi
+    done
+
+    if [[ $errors -gt 0 ]]; then
+        fail "Validation completed with $errors error(s)"
+        return 1
+    fi
+
+    pass "All vault items validated successfully"
+    return 0
+}

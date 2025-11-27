@@ -48,33 +48,39 @@ fi
 # ============================================================
 # Claude Code setup
 # ============================================================
-CLAUDE_SHARED="$HOME/workspace/.claude"
+SKIP_CLAUDE_SETUP="${SKIP_CLAUDE_SETUP:-false}"
 
-# Create shared Claude directory if it doesn't exist
-mkdir -p "$CLAUDE_SHARED"
-mkdir -p "$CLAUDE_SHARED/commands"
+if [ "$SKIP_CLAUDE_SETUP" != "true" ]; then
+  CLAUDE_SHARED="$HOME/workspace/.claude"
 
-# Symlink ~/.claude to shared location
-if [ -e "$HOME/.claude" ] && [ ! -L "$HOME/.claude" ]; then
-  BACKUP="$HOME/.claude.bak-$(date +%Y%m%d%H%M%S)"
-  echo "Backing up existing ~/.claude to $BACKUP"
-  mv "$HOME/.claude" "$BACKUP"
+  # Create shared Claude directory if it doesn't exist
+  mkdir -p "$CLAUDE_SHARED"
+  mkdir -p "$CLAUDE_SHARED/commands"
+
+  # Symlink ~/.claude to shared location
+  if [ -e "$HOME/.claude" ] && [ ! -L "$HOME/.claude" ]; then
+    BACKUP="$HOME/.claude.bak-$(date +%Y%m%d%H%M%S)"
+    echo "Backing up existing ~/.claude to $BACKUP"
+    mv "$HOME/.claude" "$BACKUP"
+  fi
+  ln -sfn "$CLAUDE_SHARED" "$HOME/.claude"
+
+  # Link Claude config files from dotfiles
+  if [ -f "$DOTFILES_DIR/claude/settings.json" ]; then
+    safe_symlink "$DOTFILES_DIR/claude/settings.json" "$CLAUDE_SHARED/settings.json"
+  fi
+
+  # Link slash commands
+  if [ -d "$DOTFILES_DIR/claude/commands" ]; then
+    for cmd in "$DOTFILES_DIR/claude/commands"/*.md; do
+      [ -f "$cmd" ] && safe_symlink "$cmd" "$CLAUDE_SHARED/commands/$(basename "$cmd")"
+    done
+  fi
+
+  echo "Claude setup complete: ~/.claude -> $CLAUDE_SHARED"
+else
+  echo "Skipping Claude setup (SKIP_CLAUDE_SETUP=true)"
 fi
-ln -sfn "$CLAUDE_SHARED" "$HOME/.claude"
-
-# Link Claude config files from dotfiles
-if [ -f "$DOTFILES_DIR/claude/settings.json" ]; then
-  safe_symlink "$DOTFILES_DIR/claude/settings.json" "$CLAUDE_SHARED/settings.json"
-fi
-
-# Link slash commands
-if [ -d "$DOTFILES_DIR/claude/commands" ]; then
-  for cmd in "$DOTFILES_DIR/claude/commands"/*.md; do
-    [ -f "$cmd" ] && safe_symlink "$cmd" "$CLAUDE_SHARED/commands/$(basename "$cmd")"
-  done
-fi
-
-echo "Claude setup complete: ~/.claude -> $CLAUDE_SHARED"
 
 # ============================================================
 # Summary
