@@ -20,6 +20,7 @@ This directory contains scripts for **bidirectional secret management** with Bit
 | `restore-git.sh` | Restores gitconfig | Called by bootstrap |
 | `create-vault-item.sh` | Creates new vault items | `bw-create ITEM [FILE]` |
 | `sync-to-bitwarden.sh` | Syncs local → Bitwarden | `bw-sync --all` |
+| `validate-schema.sh` | Validates vault item schema | `bw-validate` |
 | `delete-vault-item.sh` | Deletes items from vault | `bw-delete ITEM` |
 | `check-vault-items.sh` | Pre-flight validation | `bw-check` |
 | `list-vault-items.sh` | Debug/inventory tool | `bw-list [-v]` |
@@ -32,12 +33,13 @@ This directory contains scripts for **bidirectional secret management** with Bit
 All vault scripts have convenient aliases (defined in `zsh/zshrc`):
 
 ```bash
-bw-restore  # Restore all secrets from Bitwarden
-bw-sync     # Sync local changes to Bitwarden
-bw-create   # Create new Bitwarden items
-bw-delete   # Delete items from Bitwarden
-bw-list     # List all vault items
-bw-check    # Validate required items exist
+bw-restore   # Restore all secrets from Bitwarden
+bw-sync      # Sync local changes to Bitwarden
+bw-create    # Create new Bitwarden items
+bw-validate  # Validate vault item schema
+bw-delete    # Delete items from Bitwarden
+bw-list      # List all vault items
+bw-check     # Validate required items exist
 ```
 
 ---
@@ -228,6 +230,60 @@ Creates new Bitwarden Secure Note items from local files.
 | `Environment-Secrets` | `~/.local/env.secrets` |
 
 **When to use:** Initial setup to push local configs to Bitwarden for the first time.
+
+---
+
+### `validate-schema.sh`
+
+Validates that all Bitwarden vault items have the correct schema and structure.
+
+```bash
+# Validate all vault items
+./validate-schema.sh
+
+# Or use the alias
+bw-validate
+```
+
+**What it validates:**
+
+| Check | SSH Keys | Config Files |
+|-------|----------|--------------|
+| Item exists in vault | ✅ | ✅ |
+| Item type is Secure Note | ✅ | ✅ |
+| Notes field has content | ✅ | ✅ |
+| Contains `BEGIN OPENSSH PRIVATE KEY` | ✅ | - |
+| Contains `END OPENSSH PRIVATE KEY` | ✅ | - |
+| Contains public key line (ssh-ed25519/rsa) | ✅ | - |
+| Notes length > minimum chars | - | ✅ |
+
+**Exit codes:**
+- `0` = All items validated successfully
+- `1` = One or more validation failures
+
+**Example output:**
+```
+Validating vault items schema...
+[OK] ✓ SSH key item 'SSH-GitHub-Enterprise' validated successfully
+[OK] ✓ SSH key item 'SSH-GitHub-Personal' validated successfully
+[OK] ✓ Config item 'SSH-Config' validated successfully
+[OK] ✓ Config item 'AWS-Config' validated successfully
+[OK] ✓ Config item 'AWS-Credentials' validated successfully
+[OK] ✓ Config item 'Git-Config' validated successfully
+[OK] ✓ All vault items validated successfully
+```
+
+**Common validation errors:**
+- **Item missing**: Item name typo or not created yet → use `bw-create`
+- **Empty notes**: Item exists but has no content → re-sync with `bw-sync`
+- **Missing key blocks**: SSH key format incorrect → check Bitwarden web vault
+- **Wrong item type**: Should be "Secure Note" not "Login" or "Card"
+
+**When to use:**
+- Before restoring secrets on a new machine
+- After manually editing items in Bitwarden web vault
+- In CI/CD to validate vault state before deployments
+- Troubleshooting restoration issues
 
 ---
 

@@ -15,14 +15,18 @@
 
 ## Features
 
-- **Portable Claude Code sessions** – Canonical `/workspace` layout so Claude Code sessions and projects stay portable across macOS, Linux, Lima, and WSL2
-- **Bitwarden vault integration** – Bitwarden is the source of truth for SSH keys, AWS credentials, Git config, and environment secrets
-- **Cross-platform bootstrap** – Single setup flow for macOS, Linux, WSL2, and Lima with consistent paths and behavior
-- **Automated health checks** – Validate symlinks, required tools, permissions, and vault sync, with drift detection and optional auto-fix
-- **Metrics and observability** – Track dotfiles health over time and surface failures, drift, and missing vault items
-- **Modern CLI stack** – Includes eza, fzf, ripgrep, zoxide, and other modern Unix tools
-- **Fast setup** – Bootstrap a new machine from clone to ready-to-work shell in under five minutes
-- **Idempotent design** – Safe to rerun bootstrap and health checks at any time; scripts are designed to converge on a known-good state
+### Core (works everywhere)
+- **Bitwarden vault integration** – SSH keys, AWS credentials, Git config, and environment secrets restored from Bitwarden. One unlock, full environment. Schema validation ensures item integrity.
+- **Automated health checks** – Validate symlinks, permissions, required tools, and vault sync. Optional auto-fix and drift detection.
+- **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat, and other modern Unix replacements, configured and ready.
+- **Idempotent design** – Run bootstrap repeatedly. Scripts converge to known-good state without breaking existing setup.
+- **Fast setup** – Clone to working shell in under five minutes.
+- **Unit tested** – 23+ tests for vault functions ensure reliability across platforms.
+
+### Advanced (opt-in)
+- **Cross-platform portability** – Same dotfiles on macOS, Linux, WSL2, Lima, or Docker with ~90% shared code.
+- **Portable Claude Code sessions** – `/workspace` symlink ensures Claude sessions sync across machines. Start on macOS, continue on Linux, keep your conversation.
+- **Metrics and observability** – Track dotfiles health over time. Surface drift, failures, and missing vault items.
 
 ---
 
@@ -45,59 +49,74 @@ To clone via SSH (recommended), you’ll also want an SSH key configured with Gi
 
 ## Quick Start
 
-### New Machine Setup
-
 ```bash
-# 1. Clone repository
+# 1. Clone
 git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
-# 2. Run bootstrap (choose your platform)
+# 2. Bootstrap (picks your platform automatically)
 ./bootstrap-mac.sh      # macOS
-./bootstrap-linux.sh    # Lima / Linux / WSL2
+./bootstrap-linux.sh    # Linux / WSL2 / Lima / Docker
 
 # 3. Restore secrets from Bitwarden
 bw login
 export BW_SESSION="$(bw unlock --raw)"
 ./vault/bootstrap-vault.sh
 
-# 4. Verify everything is working
+# 4. Verify
 ./check-health.sh
 ```
 
-**That's it!** Your environment is now configured.
+**That's it.** Shell configured, secrets restored, health validated.
 
-### 💡 Pro Tip: Portable Claude Code Sessions
+<details>
+<summary><b>Don't use Bitwarden?</b></summary>
 
-The `claude` command **automatically redirects** from `~/workspace` to `/workspace` for portable sessions:
+The vault system is optional. Skip step 3 and manually configure:
+
+- `~/.ssh/` – your SSH keys
+- `~/.aws/` – your AWS credentials
+- `~/.gitconfig` – your git identity
+
+Everything else still works.
+</details>
+
+<details>
+<summary><b>Optional Components (environment variables)</b></summary>
+
+Skip optional features using environment variables:
 
 ```bash
-# Best practice: Use /workspace paths directly
-cd /workspace/dotfiles  # ✅ Portable sessions across ALL machines
-claude                  # Session: -workspace-dotfiles-
+# Skip /workspace symlink creation (single-machine setup)
+SKIP_WORKSPACE_SYMLINK=true ./bootstrap-mac.sh
 
-# If you forget and use ~/workspace:
-cd ~/workspace/dotfiles # Shows educational message + auto-redirects
-claude                  # Still works! Teaches you the pattern
+# Skip Claude Code setup
+SKIP_CLAUDE_SETUP=true ./bootstrap-linux.sh
+
+# Combine flags
+SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap-mac.sh
 ```
 
-**Auto-redirect message:**
-```
-╭──────────────────────────────────────────────────────────────────╮
-│ 🤖 CLAUDE CODE PORTABLE SESSION REDIRECT                        │
-├──────────────────────────────────────────────────────────────────┤
-│ You're in:  /Users/username/workspace/dotfiles                  │
-│ Redirecting to:  /workspace/dotfiles                            │
-│                                                                  │
-│ WHY: Claude Code session paths must be identical across all     │
-│      machines for conversation history to sync properly.        │
-│                                                                  │
-│ ✅ BEST PRACTICE: Always use /workspace instead of ~/workspace  │
-│    Example: cd /workspace/dotfiles && claude                    │
-╰──────────────────────────────────────────────────────────────────╯
-```
+**Available flags:**
+- `SKIP_WORKSPACE_SYMLINK=true` – Skip `/workspace` symlink creation (for single-machine setups)
+- `SKIP_CLAUDE_SETUP=true` – Skip `~/.claude` configuration symlink
 
-**Why this matters:** The bootstrap creates `/workspace → ~/workspace` symlink, ensuring Claude Code sessions use identical paths across macOS, Lima, and WSL. The wrapper function **educates you while ensuring sessions are always portable**!
+All features are opt-in by default and can be disabled without breaking the rest of the setup.
+</details>
+
+---
+
+## Use Cases
+
+**Single Linux machine** – Vault-backed secrets, health checks, modern CLI. No cross-platform complexity.
+
+**macOS daily driver** – Full experience including Ghostty terminal config and macOS system preferences.
+
+**Docker/CI environments** – Bootstrap in containers for reproducible builds. Vault restore from CI secrets.
+
+**Multi-machine workflow** – Develop on macOS, test on Linux VM, deploy from WSL. Same dotfiles, same secrets, same Claude sessions everywhere.
+
+**Team onboarding** – New developer? Clone, bootstrap, unlock vault. Consistent environment in minutes, not days.
 
 ---
 
@@ -138,6 +157,9 @@ All secrets are stored in Bitwarden and restored on new machines:
 # New machine: Restore secrets
 bw-restore  # Alias for ./vault/bootstrap-vault.sh
 
+# Validate vault item schema
+bw-validate  # Ensure all items have correct structure
+
 # Check for drift (local vs Bitwarden)
 ./check-health.sh --drift
 ```
@@ -149,49 +171,25 @@ bw-restore  # Alias for ./vault/bootstrap-vault.sh
 - Git configuration (.gitconfig)
 - Environment variables (.local/env.secrets)
 
-### Portable Claude Code Workflow
+### Tips
 
-One of the most powerful features: **Claude Code sessions that follow you across machines**.
+<details>
+<summary><b>Portable Claude Code Sessions (optional)</b></summary>
 
-#### The Problem
-Claude Code stores sessions based on the working directory path:
-- macOS: `/Users/yourname/workspace/dotfiles` → `-Users-yourname-workspace-dotfiles-`
-- Lima: `/home/yourname.linux/workspace/dotfiles` → `-home-yourname.linux-workspace-dotfiles-`
-- Different paths = different sessions = **lost conversation history** when switching machines
-
-#### The Solution
-Bootstrap creates a `/workspace` symlink pointing to `~/workspace`:
+If you use Claude Code across multiple machines, the `/workspace` symlink keeps your sessions in sync:
 
 ```bash
-# Same path on ALL platforms
-/workspace/dotfiles
-
-# Claude session folder (identical everywhere)
-~/.claude/projects/-workspace-dotfiles-/
+cd /workspace/my-project  # Same path on all machines
+claude                     # Same session everywhere
 ```
 
-#### Usage
-```bash
-# ✅ BEST: Use /workspace for Claude Code (recommended)
-cd /workspace/dotfiles
-claude  # Picks up your conversation from ANY machine
+The bootstrap creates `/workspace → ~/workspace` automatically. If you're on a single machine, this just works transparently—no action needed.
 
-# ✅ SAFE: Using ~/workspace auto-redirects with educational message
-cd ~/workspace/my-project
-claude  # Wrapper automatically switches to /workspace/my-project
+**Why this matters:** Claude Code stores sessions by working directory path. Different machines have different home directories (`/Users/name` vs `/home/name`), creating different session IDs. The `/workspace` symlink normalizes this.
 
-# ✅ Works with all Claude commands
-cd /workspace/dotfiles
-claude --model sonnet-4
-```
+**Auto-redirect:** The `claude` wrapper detects `~/workspace/*` paths and automatically switches to `/workspace/*`, showing an educational message to teach you the pattern.
 
-**Auto-redirect wrapper behavior:**
-1. Detects if you're in `~/workspace/*` (non-portable path)
-2. Shows educational message explaining why `/workspace` is better
-3. Automatically redirects to equivalent `/workspace/*` path
-4. Runs Claude Code with portable session storage
-
-**Result:** Start a conversation on macOS, continue it in Lima, finish it on WSL - **same session, full history**. The wrapper ensures this works even if you forget to use `/workspace`!
+</details>
 
 ### Health Checks
 
@@ -258,20 +256,40 @@ dotfiles/
 ├── bootstrap-mac.sh           # macOS setup
 ├── bootstrap-linux.sh         # Lima/Linux/WSL2 setup
 ├── bootstrap-dotfiles.sh      # Shared symlink creation
-├── check-health.sh            # Health validation (574 lines)
+├── check-health.sh            # Health validation
 ├── show-metrics.sh            # Metrics visualization
 ├── Brewfile                   # Package definitions
+├── Dockerfile                 # Docker bootstrap example
+├── .dockerignore              # Docker build exclusions
 │
 ├── vault/                     # Bitwarden secret management
-│   ├── _common.sh            # Shared config (SSH_KEYS array)
+│   ├── _common.sh            # Shared config & validation functions
 │   ├── bootstrap-vault.sh    # Orchestrator
 │   ├── restore-*.sh          # Restore SSH, AWS, Git, env
 │   ├── sync-to-bitwarden.sh  # Sync local → Bitwarden
+│   ├── validate-schema.sh    # Validate vault item structure
 │   └── check-vault-items.sh  # Pre-flight validation
 │
 ├── zsh/                       # Shell configuration
-│   ├── zshrc                 # Main config (900+ lines)
-│   └── p10k.zsh             # Powerlevel10k theme
+│   ├── zshrc                 # Main loader (sources zsh.d/*.zsh)
+│   ├── p10k.zsh             # Powerlevel10k theme
+│   └── zsh.d/               # Modular configuration
+│       ├── 00-init.zsh      # Initialization & OS detection
+│       ├── 10-plugins.zsh   # Plugin loading
+│       ├── 20-env.zsh       # Environment variables
+│       ├── 30-tools.zsh     # Modern CLI tools
+│       ├── 40-aliases.zsh   # Aliases
+│       ├── 50-functions.zsh # Shell functions
+│       ├── 60-aws.zsh       # AWS helpers
+│       ├── 70-claude.zsh    # Claude Code wrapper
+│       ├── 80-git.zsh       # Git shortcuts
+│       ├── 90-integrations.zsh # Tool integrations
+│       └── 99-local.zsh     # Machine-specific overrides (gitignored)
+│
+├── test/                      # Unit tests (bats-core)
+│   ├── vault_common.bats     # Tests for vault/_common.sh
+│   ├── setup_bats.sh         # Install bats-core
+│   └── run_tests.sh          # Test runner
 │
 ├── claude/                    # Claude Code integration
 │   └── settings.json         # Permissions & preferences
@@ -282,6 +300,82 @@ dotfiles/
 └── docs/                      # Documentation
     └── README-FULL.md        # Complete documentation
 ```
+
+---
+
+## Development & Testing
+
+### Docker Bootstrap
+
+Test the bootstrap process in a clean Ubuntu container:
+
+```bash
+# Build the Docker image
+docker build -t dotfiles-dev .
+
+# Run interactive shell
+docker run -it --rm dotfiles-dev
+
+# Run with Bitwarden vault restore
+export BW_SESSION="$(bw unlock --raw)"
+docker run -it --rm -e BW_SESSION="$BW_SESSION" dotfiles-dev
+
+# Mount local dotfiles for testing changes
+docker run -it --rm -v $PWD:/home/developer/workspace/dotfiles dotfiles-dev
+```
+
+The Dockerfile demonstrates:
+- Clean environment setup from Ubuntu 24.04
+- Full bootstrap process (Homebrew, packages, dotfiles)
+- CI/CD integration patterns
+- Reproducible development containers
+
+### Unit Tests
+
+Run tests with bats-core:
+
+```bash
+# Install bats-core (if not already installed)
+./test/setup_bats.sh
+
+# Run all tests
+./test/run_tests.sh
+
+# Or use bats directly
+bats test/vault_common.bats
+```
+
+**Current test coverage:**
+- ✅ vault/_common.sh data structure helpers (23 tests)
+- ✅ Logging functions (info, pass, warn, fail, debug)
+- ✅ Item path lookups and validation
+- ⏳ Future: vault restoration scripts
+
+Tests run automatically in GitHub Actions on every push.
+
+### Modular Shell Configuration
+
+The zsh configuration is modular for easier maintenance and customization:
+
+```bash
+zsh/zsh.d/
+├── 00-init.zsh          # Powerlevel10k, OS detection
+├── 10-plugins.zsh       # Plugin loading
+├── 20-env.zsh           # Environment variables
+├── 30-tools.zsh         # CLI tool configurations (eza, fzf, bat)
+├── 40-aliases.zsh       # Aliases
+├── 50-functions.zsh     # Shell functions
+├── 60-aws.zsh           # AWS helpers
+├── 70-claude.zsh        # Claude Code wrapper
+├── 80-git.zsh           # Git shortcuts
+├── 90-integrations.zsh  # Tool integrations
+└── 99-local.zsh         # Machine-specific overrides (gitignored)
+```
+
+To customize:
+1. Copy `zsh/zsh.d/99-local.zsh.example` to `zsh/zsh.d/99-local.zsh`
+2. Add machine-specific aliases, environment variables, or PATH entries
+3. This file is gitignored and won't be overwritten on updates
 
 ---
 

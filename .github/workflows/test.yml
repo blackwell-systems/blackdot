@@ -95,6 +95,33 @@ jobs:
           echo "ℹ️  ZSH is better than bash, but ShellCheck only supports sh/bash/dash/ksh"
           echo "ℹ️  We use 'zsh -n' for syntax checking - catches parse errors but not logic issues"
 
+  unit-tests:
+    name: Unit Tests (bats-core)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install bats-core
+        run: |
+          echo "📦 Installing bats-core..."
+          sudo apt-get update
+          sudo apt-get install -y bats
+
+      - name: Install zsh (required for vault scripts)
+        run: |
+          echo "📦 Installing zsh..."
+          sudo apt-get install -y zsh
+
+      - name: Run unit tests
+        run: |
+          echo "🧪 Running unit tests..."
+          bats --timing test/*.bats
+
+      - name: Test summary
+        if: success()
+        run: echo "✅ All unit tests passed!"
+
   markdown-lint:
     name: Markdown Validation
     runs-on: ubuntu-latest
