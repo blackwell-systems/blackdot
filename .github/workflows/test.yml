@@ -116,12 +116,17 @@ jobs:
           echo "🔍 Scanning for potential secrets..."
 
           # Check for common secret patterns (excluding allowed patterns)
+          # Exclude: workflow file itself, vault scripts (they're just templates/docs), markdown docs
           if grep -r -E "(ssh-rsa|ssh-ed25519|BEGIN.*PRIVATE KEY)" \
               --exclude-dir=.git \
+              --exclude-dir=.github \
               --exclude="*.md" \
               --exclude="vault/template-*" \
+              --exclude="vault/restore-*.sh" \
+              --exclude="vault/_common.sh" \
               . ; then
             echo "❌ Found potential secrets in repository!"
+            echo "⚠️  If these are false positives (templates, docs), update the workflow exclude list"
             exit 1
           fi
 
