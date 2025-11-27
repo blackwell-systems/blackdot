@@ -1,0 +1,140 @@
+// Zellij Configuration
+// Symlink: ~/.config/zellij/config.kdl -> ~/workspace/dotfiles/zellij/config.kdl
+
+// =========================
+// General Settings
+// =========================
+
+// Use 24-bit color
+simplified_ui false
+
+// Default shell (uses $SHELL if not set)
+// default_shell "zsh"
+
+// Copy to system clipboard
+copy_on_select true
+copy_clipboard "system"
+
+// Scrollback buffer (lines)
+scroll_buffer_size 50000
+
+// Mouse support
+mouse_mode true
+
+// Mirror session across terminal size changes
+// pane_viewport_serialization true
+
+// =========================
+// Appearance
+// =========================
+
+// Theme - using custom Elegant theme to match Ghostty
+theme "elegant"
+
+// Default layout
+default_layout "compact"
+
+// UI settings
+ui {
+    pane_frames {
+        rounded_corners true
+        hide_session_name false
+    }
+}
+
+// =========================
+// Keybindings
+// =========================
+// Zellij uses modes: normal, locked, pane, tab, scroll, resize, move, search, session
+// Default leader: Ctrl+g (to enter mode selection)
+
+keybinds clear-defaults=false {
+    // Quick shortcuts without entering modes
+    shared_except "locked" {
+        // Ctrl+t for new tab (familiar from browsers/tmux)
+        bind "Ctrl t" { NewTab; }
+
+        // Alt+arrow to switch panes (like many IDEs)
+        bind "Alt Left" { MoveFocus "Left"; }
+        bind "Alt Right" { MoveFocus "Right"; }
+        bind "Alt Up" { MoveFocus "Up"; }
+        bind "Alt Down" { MoveFocus "Down"; }
+
+        // Alt+n/p for next/previous tab
+        bind "Alt n" { GoToNextTab; }
+        bind "Alt p" { GoToPreviousTab; }
+
+        // Alt+1-9 to jump to tab by number
+        bind "Alt 1" { GoToTab 1; }
+        bind "Alt 2" { GoToTab 2; }
+        bind "Alt 3" { GoToTab 3; }
+        bind "Alt 4" { GoToTab 4; }
+        bind "Alt 5" { GoToTab 5; }
+        bind "Alt 6" { GoToTab 6; }
+        bind "Alt 7" { GoToTab 7; }
+        bind "Alt 8" { GoToTab 8; }
+        bind "Alt 9" { GoToTab 9; }
+    }
+
+    // Scroll mode customizations
+    scroll {
+        // Arrow keys and Page Up/Down for scrolling
+        bind "Down" { ScrollDown; }
+        bind "Up" { ScrollUp; }
+        bind "PageDown" { PageScrollDown; }
+        bind "PageUp" { PageScrollUp; }
+        bind "End" { ScrollToBottom; }
+        bind "Home" { ScrollToTop; }
+    }
+}
+
+// =========================
+// Plugins
+// =========================
+
+plugins {
+    // Built-in plugins
+    tab-bar location="zellij:tab-bar"
+    status-bar location="zellij:status-bar"
+    strider location="zellij:strider"
+    compact-bar location="zellij:compact-bar"
+    session-manager location="zellij:session-manager"
+    welcome-screen location="zellij:session-manager" {
+        welcome_screen true
+    }
+    filepicker location="zellij:strider" {
+        cwd "/"
+    }
+}
+
+// =========================
+// Session behavior
+// =========================
+
+// What to do on detach
+on_force_close "detach"
+
+// Session serialization (for restoring sessions)
+session_serialization true
+
+// Auto-attach to existing session or create new
+// attach_to_session true
+
+// =========================
+// Custom Theme: Elegant (matches Ghostty)
+// =========================
+themes {
+    elegant {
+        fg "#ced2d6"
+        bg "#292b31"
+        black "#0a1222"
+        red "#ff0257"
+        green "#85cc95"
+        yellow "#ffcb8b"
+        blue "#8dabe1"
+        magenta "#c792eb"
+        cyan "#78ccf0"
+        white "#ffffff"
+        orange "#ffcb8b"
+    }
+}
