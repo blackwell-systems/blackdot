@@ -22,6 +22,7 @@ brew "glow"      # Render markdown beautifully in terminal
 brew "dust"      # Intuitive disk usage (du replacement)
 brew "yazi"      # Blazing fast terminal file manager
 brew "yq"        # jq for YAML files
+brew "btop"      # Beautiful system monitor (htop replacement)
 
 # Containers / dev
 brew "docker"

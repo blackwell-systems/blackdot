@@ -97,6 +97,8 @@ The dotfiles are organized as follows:
 │   ├── template-aws-config   # Reference template for AWS config
 │   ├── template-aws-credentials # Reference template for AWS credentials
 │   └── README.md             # Vault system documentation
+├── zellij
+│   └── config.kdl            # Zellij multiplexer config
 └── zsh
     ├── p10k.zsh              # Powerlevel10k theme config
     └── zshrc                 # Main Zsh configuration
@@ -104,9 +106,10 @@ The dotfiles are organized as follows:
 
 Key pieces:
 
-- **zsh/zshrc**: Main Zsh configuration file
+- **zsh/zshrc**: Main Zsh configuration file (~820 lines, well-organized sections)
 - **zsh/p10k.zsh**: Powerlevel10k theme configuration
 - **ghostty/config**: Ghostty terminal configuration
+- **zellij/config.kdl**: Zellij multiplexer configuration
 - **vault/**: Bitwarden-based secure bootstrap for SSH, AWS, and environment secrets
 - **claude/**: Claude Code configuration (settings, slash commands)
 - **Brewfile**: Shared Homebrew definition used by both macOS and Lima bootstrap scripts
@@ -474,7 +477,18 @@ brew "zsh-syntax-highlighting"
 brew "jq"
 brew "awscli"
 brew "bitwarden-cli"
-brew "claude-code"
+
+# Modern CLI tools
+brew "fzf"       # Fuzzy finder
+brew "eza"       # Modern ls
+brew "fd"        # Fast find
+brew "ripgrep"   # Fast grep
+brew "zoxide"    # Smart cd
+brew "glow"      # Markdown renderer
+brew "dust"      # Disk usage
+brew "yazi"      # File manager
+brew "yq"        # YAML processor
+brew "btop"      # System monitor
 
 on_macos do
   cask "ghostty"
@@ -1215,6 +1229,15 @@ awslogin
 - `lima-stop` → Stop the VM
 - `lima-status` → List VM status
 
+**Zellij (terminal multiplexer):**
+
+- `Ctrl+g` → Enter mode selection (default leader)
+- `Alt+←/→/↑/↓` → Switch between panes
+- `Alt+n/p` → Next/previous tab
+- `Alt+1-9` → Jump to tab by number
+- `Ctrl+t` → New tab
+- In scroll mode: `j/k` scroll, `d/u` half-page, `g/G` top/bottom
+
 **Claude Code:**
 
 - `claude` → Wrapper that auto-uses `/workspace` path for portable sessions
@@ -1231,6 +1254,23 @@ awslogin
 cat file.txt | copy
 echo "hello" | copy
 paste > pasted.txt
+```
+
+**System monitoring:**
+
+- `btop` → Beautiful system monitor (htop replacement)
+
+### Shell Performance
+
+NVM and SDKMAN are lazy-loaded to speed up shell startup. They only initialize when you actually use them:
+
+- **NVM**: Loads when you run `nvm`, `node`, `npm`, `npx`, `yarn`, `pnpm`, or `corepack`
+- **SDKMAN**: Loads when you run `sdk`, `java`, `gradle`, `mvn`, `kotlin`, `groovy`, or `scala`
+
+This saves ~200-400ms on every new shell. Measure your startup time with:
+
+```bash
+time zsh -i -c exit
 ```
 
 ### Claude helpers

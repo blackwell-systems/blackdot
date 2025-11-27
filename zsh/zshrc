@@ -402,18 +402,57 @@ _ssh_add_if_missing() {
 _ssh_add_if_missing ~/.ssh/id_ed25519_enterprise_ghub
 _ssh_add_if_missing ~/.ssh/id_ed25519_blackwell
 
-# SDKMAN
+# =========================
+# SDKMAN (lazy loaded for faster shell startup)
+# =========================
 export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+# Lazy load: only initialize SDKMAN when sdk/java/gradle/maven/kotlin are called
+_lazy_load_sdkman() {
+  unfunction sdk java gradle mvn kotlin groovy scala 2>/dev/null
+  if [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]]; then
+    source "$SDKMAN_DIR/bin/sdkman-init.sh"
+  fi
+}
+
+# Create lazy wrapper functions
+for cmd in sdk java gradle mvn kotlin groovy scala; do
+  eval "$cmd() { _lazy_load_sdkman && $cmd \"\$@\" }"
+done
+unset cmd
 
 # Best Western config
 export ENV=prod
 export BWH_CONFIG_DIR="$HOME/.config/bwh"
 
-# Node / nvm setup (safe on both OSes)
+# =========================
+# NVM (lazy loaded for faster shell startup)
+# =========================
+# NVM adds 200-400ms to shell startup. Lazy load it instead.
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+
+_lazy_load_nvm() {
+  unfunction nvm node npm npx yarn pnpm corepack 2>/dev/null
+  if [[ -s "$NVM_DIR/nvm.sh" ]]; then
+    source "$NVM_DIR/nvm.sh"
+    [[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
+  fi
+}
+
+# Create lazy wrapper functions for node ecosystem commands
+for cmd in nvm node npm npx yarn pnpm corepack; do
+  eval "$cmd() { _lazy_load_nvm && $cmd \"\$@\" }"
+done
+unset cmd
+
+# Auto-switch node version when entering directory with .nvmrc
+# (only triggers if nvm is needed)
+_nvm_auto_switch() {
+  if [[ -f .nvmrc ]] && command -v nvm &>/dev/null; then
+    nvm use 2>/dev/null
+  fi
+}
+add-zsh-hook chpwd _nvm_auto_switch 2>/dev/null
 
 # =========================
 # AWS Profile Management
