@@ -14,3 +14,12 @@ vault/.bw-session
 *~
 .idea/
 .vscode/
+
+# Machine-specific local overrides (not tracked)
+*.local
+
+# Update check cache
+.dotfiles-update-check
+
+# Metrics files
+.dotfiles-metrics.jsonl

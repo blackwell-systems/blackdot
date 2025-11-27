@@ -1,0 +1,15 @@
+#compdef dotfiles-doctor
+# ZSH completion for dotfiles-doctor command
+
+_dotfiles_doctor() {
+  local -a args
+  args=(
+    '--fix:Automatically fix permission issues'
+    '--drift:Check for drift between local files and Bitwarden'
+    '--help:Show help message'
+  )
+
+  _describe 'option' args
+}
+
+_dotfiles_doctor "$@"
