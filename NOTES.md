@@ -7,7 +7,11 @@
 
 ## Current State Summary
 
-The dotfiles repo is fully functional with all features intact. Recent work involved adding terminal enhancements, then rolling back an overly theatrical "Cyber Weapons Suite".
+The dotfiles repo is fully functional with all features intact. Recent session work:
+- Added lazy loading for nvm and sdkman (faster shell startup)
+- Added zellij config to dotfiles
+- Added btop to Brewfile
+- Decided NOT to modularize zshrc (well-organized as-is at ~820 lines)
 
 ### Recent Commits (most recent first)
 ```
@@ -59,24 +63,35 @@ Commands with ASCII art banner via `awstools`:
 - `dust` - Visual disk usage (`du`, `dus`, `dud` aliases)
 - `yazi` - Terminal file manager (`y`, `fm` aliases)
 - `yq` - jq for YAML files
+- `btop` - Beautiful system monitor (htop replacement)
 - `eza` - Modern ls replacement (various `ll`, `la`, `lt` aliases)
 - `fzf` - Fuzzy finder (Ctrl+R, Ctrl+T, Alt+C)
 - `fd` - Fast find alternative
 - `ripgrep` - Fast grep (`rg`)
 
-### 6. Cross-Platform Clipboard (`copy`, `paste`)
+### 6. Lazy Loading (Performance)
+- NVM lazy loaded - only initializes when node/npm/nvm/yarn/pnpm called
+- SDKMAN lazy loaded - only initializes when sdk/java/gradle/mvn called
+- Saves 200-400ms on shell startup
+
+### 7. Zellij Config
+- Location: `zellij/config.kdl`
+- Symlinked to `~/.config/zellij/config.kdl`
+- Features: vim-like scroll, Alt+arrows for pane nav, Alt+n/p for tabs, Alt+1-9 for tab jump
+
+### 8. Cross-Platform Clipboard (`copy`, `paste`)
 - Works on macOS, Linux X11/Wayland, WSL
 - Aliases: `cb`, `cbp`
 - Location: `zsh/zshrc` lines 717-754
 
-### 7. Claude Routing Helpers
+### 9. Claude Routing Helpers
 - `claude` - Wrapper that uses /workspace path for portable sessions
 - `claude-bedrock` - Run via AWS Bedrock
 - `claude-max` - Run via Max subscription
 - `claude-run {bedrock|max}` - Unified interface
 - Location: `zsh/zshrc` lines 572-681
 
-### 8. Git Shortcuts
+### 10. Git Shortcuts
 - Standard aliases: `gst`, `gss`, `ga`, `gaa`, `gco`, `gcb`, `gd`, `gds`, `gpl`, `gp`, `gpf`, `gcm`, `gca`, `gl1`, `glg`
 - Location: `zsh/zshrc` lines 685-711
 
@@ -97,8 +112,10 @@ Commands with ASCII art banner via `awstools`:
 ├── ghostty/              # Ghostty terminal config
 ├── lima/                 # Lima VM config
 ├── vault/                # Bitwarden-based secret management
+├── zellij/
+│   └── config.kdl        # Zellij multiplexer config
 └── zsh/
-    ├── zshrc             # Main shell config (~780 lines)
+    ├── zshrc             # Main shell config (~820 lines)
     └── p10k.zsh          # Powerlevel10k theme
 ```
 
