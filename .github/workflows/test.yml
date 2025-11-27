@@ -17,30 +17,20 @@ jobs:
       - name: Install shellcheck
         run: sudo apt-get update && sudo apt-get install -y shellcheck
 
-      - name: Run shellcheck on all scripts
+      - name: Run shellcheck on bash scripts
         run: |
           echo "🔍 Validating shell scripts..."
 
           # Note: ShellCheck only supports sh/bash/dash/ksh (not zsh)
-          # check-health.sh and vault/_common.sh use zsh-specific syntax
-          SCRIPTS=(
+          # All vault/*.sh and check-health.sh use ZSH, so only validate bash scripts
+          BASH_SCRIPTS=(
             bootstrap-dotfiles.sh
             bootstrap-mac.sh
             bootstrap-lima.sh
-            vault/bootstrap-vault.sh
-            vault/check-vault-items.sh
-            vault/create-vault-item.sh
-            vault/delete-vault-item.sh
-            vault/list-vault-items.sh
-            vault/restore-aws.sh
-            vault/restore-env.sh
-            vault/restore-git.sh
-            vault/restore-ssh.sh
-            vault/sync-to-bitwarden.sh
           )
 
           ERRORS=0
-          for script in "${SCRIPTS[@]}"; do
+          for script in "${BASH_SCRIPTS[@]}"; do
             if [[ -f "$script" ]]; then
               echo "Checking $script..."
               if ! shellcheck "$script"; then
@@ -56,8 +46,12 @@ jobs:
             exit 1
           fi
 
-          echo "✅ All scripts passed validation!"
-          echo "ℹ️  Note: ZSH scripts (check-health.sh, vault/_common.sh) skipped - ShellCheck doesn't support ZSH"
+          echo "✅ All bash scripts passed validation!"
+          echo ""
+          echo "ℹ️  ZSH scripts not validated (ShellCheck doesn't support ZSH):"
+          echo "   - check-health.sh"
+          echo "   - show-metrics.sh"
+          echo "   - All vault/*.sh scripts"
 
   markdown-lint:
     name: Markdown Validation
