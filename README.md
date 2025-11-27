@@ -42,7 +42,7 @@ This repository contains my personal dotfiles for **macOS** and **Lima** (Linux)
 
 ```bash
 # New macOS machine
-git clone git@github.com:your-username/dotfiles.git ~/workspace/dotfiles
+git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles && ./bootstrap-mac.sh
 
 # New Lima VM
@@ -535,7 +535,7 @@ cd ~/workspace
 2. **Clone dotfiles repo**
 
 ```bash
-git clone git@github.com:your-username/dotfiles.git
+git clone git@github.com:blackwell-systems/dotfiles.git
 cd ~/workspace/dotfiles
 ```
 
@@ -1809,7 +1809,7 @@ shellcheck vault/bootstrap-vault.sh
 Add to your forked README:
 
 ```markdown
-![Test Status](https://github.com/your-username/dotfiles/workflows/Test%20Dotfiles/badge.svg)
+![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)
 ```
 
 ---
