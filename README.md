@@ -9,6 +9,7 @@ This repository contains my personal dotfiles for **macOS** and **Lima** (Linux)
 ## Table of Contents
 
 - [Quick Start](#quick-start)
+- [What's New](#whats-new)
 - [Directory Structure](#directory-structure)
 - [Canonical Workspace](#canonical-workspace-workspace)
 - [Global Prerequisites](#global-prerequisites)
@@ -28,6 +29,8 @@ This repository contains my personal dotfiles for **macOS** and **Lima** (Linux)
 - [Maintenance Checklists](#maintenance-checklists)
 - [Using the Dotfiles Day-to-Day](#using-the-dotfiles-day-to-day)
 - [Health Check](#health-check)
+- [Metrics & Observability](#metrics--observability)
+- [CI/CD & Testing](#cicd--testing)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
@@ -58,6 +61,37 @@ bw-restore
 - All Homebrew packages from `Brewfile`
 - SSH keys, AWS credentials, and env secrets from Bitwarden
 - Claude CLI with shared workspace across macOS/Lima
+
+---
+
+## What's New
+
+### Recent Improvements
+
+**✨ Automation & Quality**
+- **Pre-commit Hooks**: Automatic shellcheck validation before commits
+- **CI/CD Pipeline**: GitHub Actions testing on macOS + Linux
+- **Auto-upgrade Command**: `dotfiles-upgrade` - one-command upgrade with health check
+
+**📊 Metrics & Observability**
+- **Health Metrics**: Automatic tracking of health check results over time
+- **Visualization**: `show-metrics.sh` for trend analysis and statistics
+- **Health Score**: Track dotfiles health (0-100) with historical trends
+
+**🎯 Developer Experience**
+- **Update Notifications**: Daily check for dotfiles updates
+- **Local Overrides**: Machine-specific customizations via `.zshrc.local`
+- **Tab Completions**: ZSH completions for AWS commands, dotfiles tools
+- **Better Docs**: Comprehensive review and recommendations in `REVIEW.md`
+
+**🔧 New Commands**
+```bash
+dotfiles-upgrade          # One-command upgrade flow
+show-metrics.sh           # View health metrics and trends
+dotfiles-upgrade          # Replaces dotfiles-update (with improvements)
+```
+
+See [CHANGELOG.md](CHANGELOG.md) for complete version history.
 
 ---
 
@@ -1316,6 +1350,158 @@ Health check passed!
 ```
 
 Use this after initial setup or when debugging issues.
+
+---
+
+## Metrics & Observability
+
+The dotfiles now include comprehensive metrics collection to track health over time.
+
+### Automatic Metrics Collection
+
+Every time you run `check-health.sh`, metrics are automatically recorded to `~/.dotfiles-metrics.jsonl`:
+
+```json
+{
+  "timestamp": "2025-11-27T10:30:00-08:00",
+  "hostname": "macbook-pro",
+  "os": "Darwin",
+  "errors": 0,
+  "warnings": 2,
+  "fixed": 1,
+  "health_score": 90,
+  "git_branch": "main",
+  "git_commit": "abc1234"
+}
+```
+
+### Viewing Metrics
+
+Use the `show-metrics.sh` script to visualize your dotfiles health:
+
+```bash
+# Summary view (default)
+./show-metrics.sh
+
+# Graph of health score trend
+./show-metrics.sh --graph
+
+# All recorded entries
+./show-metrics.sh --all
+```
+
+**Example output:**
+```
+=== Dotfiles Health Metrics Summary ===
+
+Total health checks: 47
+
+Last 10 health checks:
+✅ 2025-11-27 | Score: 100/100 | E:0 W:0 | main
+✅ 2025-11-26 | Score: 95/100 | E:0 W:1 | main
+⚠️  2025-11-25 | Score: 85/100 | E:0 W:3 | feature-branch
+
+Statistics:
+  Average health score: 94/100
+  Total errors found:   3
+  Total warnings found: 28
+  Total auto-fixed:     15
+  Perfect runs:         35 (74%)
+
+Recent trend (last 5 vs previous 5):
+  📈 Improving (92 → 96)
+```
+
+### Health Score Calculation
+
+- **Perfect (100)**: No errors, no warnings
+- **Each error**: -10 points
+- **Each warning**: -5 points
+- **Minimum**: 0 points
+
+### Metrics in Aliases
+
+Add to your workflow:
+
+```bash
+# Check health and view trends
+check-health.sh && show-metrics.sh --graph
+
+# Auto-fix and track
+check-health.sh --fix && show-metrics.sh
+```
+
+---
+
+## CI/CD & Testing
+
+The dotfiles repository includes comprehensive automated testing via GitHub Actions.
+
+### Continuous Integration
+
+Every push and pull request triggers automated tests:
+
+**Test Jobs:**
+1. **ShellCheck Validation**: Validates all shell scripts for syntax and best practices
+2. **Markdown Linting**: Checks documentation quality
+3. **Repository Structure**: Validates required files exist
+4. **Secrets Scanning**: Ensures no secrets in repository
+5. **macOS Compatibility**: Tests scripts on macOS
+6. **Linux Compatibility**: Tests scripts on Linux
+7. **Documentation Quality**: Validates README completeness
+
+### GitHub Actions Workflow
+
+Location: `.github/workflows/test.yml`
+
+```yaml
+name: Test Dotfiles
+on: [push, pull_request]
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run shellcheck
+        run: shellcheck bootstrap-*.sh vault/*.sh check-health.sh
+  # ... more jobs
+```
+
+### Pre-commit Hooks
+
+Local validation before you commit:
+
+**Installed hooks:**
+- ShellCheck validation of all scripts
+- Auto-fails commit if validation errors found
+- Provides clear error messages
+
+**Bypass if needed:**
+```bash
+git commit --no-verify  # Use sparingly!
+```
+
+### Running Tests Locally
+
+```bash
+# Install shellcheck
+brew install shellcheck
+
+# Run on all scripts
+shellcheck bootstrap-*.sh vault/*.sh check-health.sh
+
+# Check specific script
+shellcheck vault/bootstrap-vault.sh
+```
+
+### Status Badges
+
+Add to your forked README:
+
+```markdown
+![Test Status](https://github.com/your-username/dotfiles/workflows/Test%20Dotfiles/badge.svg)
+```
 
 ---
 

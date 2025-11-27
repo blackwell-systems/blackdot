@@ -1,0 +1,18 @@
+#compdef show-metrics.sh
+# ZSH completion for show-metrics.sh command
+
+_show_metrics() {
+  local -a modes
+  modes=(
+    '--summary:Show summary statistics (default)'
+    '--all:Show all health check entries'
+    '--graph:Show health score trend graph'
+    '-s:Show summary statistics (short)'
+    '-a:Show all entries (short)'
+    '-g:Show graph (short)'
+  )
+
+  _describe 'display mode' modes
+}
+
+_show_metrics "$@"
