@@ -22,14 +22,6 @@ brew "glow"      # Render markdown beautifully in terminal
 brew "dust"      # Intuitive disk usage (du replacement)
 brew "yazi"      # Blazing fast terminal file manager
 brew "yq"        # jq for YAML files
-brew "lazygit"   # Terminal UI for git
-
-# ⚡ Cyber weapons / visual flair
-brew "cmatrix"   # Matrix screensaver
-brew "figlet"    # ASCII art text banners
-brew "lolcat"    # Rainbow colorize output
-brew "pv"        # Pipe viewer (progress + hackertype effect)
-brew "fswatch"   # File watcher for reactive workflows
 
 # Containers / dev
 brew "docker"
