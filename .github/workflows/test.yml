@@ -302,8 +302,11 @@ jobs:
             apt-get update -qq
             apt-get install -y -qq curl git sudo
 
-            echo "=== Running bootstrap ==="
+            echo "=== Making scripts executable ==="
             cd /dotfiles
+            chmod +x *.sh vault/*.sh 2>/dev/null || true
+
+            echo "=== Running bootstrap ==="
             bash ./bootstrap-linux.sh
 
             echo "=== Verifying installation ==="
