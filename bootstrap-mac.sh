@@ -72,9 +72,11 @@ mkdir -p "$HOME/workspace/code"
 #   ~/workspace/whitepapers or ~/workspace/patent-pool to avoid nesting.
 
 # 5. Canonical /workspace path ------------------------------------------
-# Creates /workspace -> ~/workspace so Claude sessions use consistent paths
-# across macOS and Linux (encodes to -workspace-... instead of -Users-...).
-if [ ! -e /workspace ]; then
+# Creates /workspace -> ~/workspace for consistent Claude session paths.
+# Optional: enables session portability across machines if you use multiple.
+SKIP_WORKSPACE_SYMLINK="${SKIP_WORKSPACE_SYMLINK:-false}"
+
+if [ "$SKIP_WORKSPACE_SYMLINK" != "true" ] && [ ! -e /workspace ]; then
   echo "Creating /workspace symlink (requires sudo)..."
   if sudo ln -sfn "$HOME/workspace" /workspace; then
     echo "Created /workspace -> $HOME/workspace"
@@ -83,7 +85,7 @@ if [ ! -e /workspace ]; then
     echo "         Claude sessions will use OS-specific paths."
     echo "         To fix manually: sudo ln -sfn $HOME/workspace /workspace"
   fi
-elif [ -L /workspace ]; then
+elif [ "$SKIP_WORKSPACE_SYMLINK" != "true" ] && [ -L /workspace ]; then
   # Already a symlink - verify it points to the right place
   current_target=$(readlink /workspace)
   if [ "$current_target" != "$HOME/workspace" ]; then
@@ -93,7 +95,9 @@ elif [ -L /workspace ]; then
   else
     echo "/workspace symlink already correct."
   fi
-else
+elif [ "$SKIP_WORKSPACE_SYMLINK" = "true" ]; then
+  echo "Skipping /workspace symlink (SKIP_WORKSPACE_SYMLINK=true)"
+elif [ -e /workspace ]; then
   echo "WARNING: /workspace exists but is not a symlink. Skipping."
 fi
 
@@ -105,4 +109,4 @@ echo "=== macOS bootstrap complete ==="
 echo "Next:"
 echo "  - Open Ghostty and confirm Meslo Nerd Font is selected."
 echo "  - Clone your repos into ~/workspace (whitepapers, patent-pool, etc.)."
-echo "  - Use 'cd /workspace/...' when running Claude for portable session history."
+echo "  - Use 'cd /workspace/...' for Claude (optional: enables cross-machine sessions)."
