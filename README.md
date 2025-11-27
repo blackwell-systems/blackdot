@@ -1236,7 +1236,7 @@ awslogin
 - `Alt+n/p` → Next/previous tab
 - `Alt+1-9` → Jump to tab by number
 - `Ctrl+t` → New tab
-- In scroll mode: `j/k` scroll, `d/u` half-page, `g/G` top/bottom
+- In scroll mode: arrows, PageUp/Down, Home/End
 
 **Claude Code:**
 

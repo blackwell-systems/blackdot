@@ -79,13 +79,13 @@ keybinds clear-defaults=false {
 
     // Scroll mode customizations
     scroll {
-        // vim-like scrolling
-        bind "j" { ScrollDown; }
-        bind "k" { ScrollUp; }
-        bind "d" { HalfPageScrollDown; }
-        bind "u" { HalfPageScrollUp; }
-        bind "G" { ScrollToBottom; }
-        bind "g" { ScrollToTop; }
+        // Arrow keys and Page Up/Down for scrolling
+        bind "Down" { ScrollDown; }
+        bind "Up" { ScrollUp; }
+        bind "PageDown" { PageScrollDown; }
+        bind "PageUp" { PageScrollUp; }
+        bind "End" { ScrollToBottom; }
+        bind "Home" { ScrollToTop; }
     }
 }
 
