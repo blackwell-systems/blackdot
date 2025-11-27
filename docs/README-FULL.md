@@ -353,6 +353,42 @@ claude
 
 **Best Practice**: Always use `cd /workspace/...` instead of `~/workspace/...` when running Claude Code for portable sessions.
 
+### Visual Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     CANONICAL WORKSPACE ARCHITECTURE                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   Host Machine                       Guest VM / Remote                       │
+│   ══════════════                     ═══════════════════                     │
+│   /Users/username/                   /home/username/                         │
+│   (macOS example)                    (Linux/Lima/WSL example)                │
+│          │                                  │                                │
+│          ├── .ssh/        ←── secrets ──→   ├── .ssh/                        │
+│          ├── .aws/        (per-machine)     ├── .aws/                        │
+│          ├── .gitconfig                     ├── .gitconfig                   │
+│          │                                  │                                │
+│          └── workspace/ ←────────────────→  └── workspace/ (mounted/synced)  │
+│                 │                                  │                         │
+│                 ├── dotfiles/    ════════════     (same files)               │
+│                 ├── code/                                                    │
+│                 ├── .claude/  ←─── symlinked from ~/.claude                  │
+│                 └── ...                                                      │
+│                                                                              │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │  KEY INSIGHT: /workspace is the canonical path for Claude Code      │   │
+│   │                                                                      │   │
+│   │  /workspace → ~/workspace (symlink created by bootstrap scripts)    │   │
+│   │                                                                      │   │
+│   │  • cd /workspace/dotfiles && claude  → -workspace-dotfiles/         │   │
+│   │  • Same session folder across ALL machines                          │   │
+│   │  • Portable session history across platforms                        │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Why This Matters
 
 When setting up a new machine or VM, no username updates are needed. Everything just works because:
