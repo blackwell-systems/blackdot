@@ -282,3 +282,67 @@ jobs:
           # This is a basic check and could be enhanced
 
           echo "✅ Link check complete"
+
+  test-bootstrap-integration:
+    name: Bootstrap Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Test Linux bootstrap in Docker (Ubuntu)
+        run: |
+          echo "🐳 Testing bootstrap in clean Ubuntu container..."
+
+          docker run --rm -v $PWD:/dotfiles ubuntu:24.04 bash -c '
+            set -e
+            export DEBIAN_FRONTEND=noninteractive
+
+            echo "=== Installing prerequisites ==="
+            apt-get update -qq
+            apt-get install -y -qq curl git sudo
+
+            echo "=== Running bootstrap ==="
+            cd /dotfiles
+            bash ./bootstrap-linux.sh
+
+            echo "=== Verifying installation ==="
+            # Check if brew was installed
+            if [ -d "$HOME/.linuxbrew" ] || [ -d "/home/linuxbrew/.linuxbrew" ]; then
+              echo "✅ Homebrew installed successfully"
+            else
+              echo "❌ Homebrew installation failed"
+              exit 1
+            fi
+
+            # Check if workspace directory was created
+            if [ -d "$HOME/workspace" ]; then
+              echo "✅ Workspace directory created"
+            else
+              echo "❌ Workspace directory not created"
+              exit 1
+            fi
+
+            # Check if symlinks were created
+            if [ -L "$HOME/.zshrc" ]; then
+              echo "✅ Zsh configuration symlinked"
+            else
+              echo "⚠️  Zsh configuration not symlinked (may be expected)"
+            fi
+
+            echo "=== Bootstrap integration test passed! ==="
+          '
+
+      - name: Test script syntax validation
+        run: |
+          echo "🔍 Validating all shell scripts can be parsed..."
+
+          # Test all .sh files can be parsed
+          for script in *.sh vault/*.sh; do
+            if [[ -f "$script" ]]; then
+              echo "Checking: $script"
+              bash -n "$script" || exit 1
+            fi
+          done
+
+          echo "✅ All scripts have valid syntax"
