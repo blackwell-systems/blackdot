@@ -166,7 +166,7 @@ check_command() {
     fi
 }
 
-check_command "brew" "Run bootstrap-mac.sh or bootstrap-lima.sh"
+check_command "brew" "Run bootstrap-mac.sh or bootstrap-linux.sh"
 check_command "zsh" "brew install zsh"
 check_command "git" "brew install git"
 check_command "jq" "brew install jq"

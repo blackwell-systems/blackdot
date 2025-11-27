@@ -46,7 +46,7 @@ git clone git@github.com:your-username/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles && ./bootstrap-mac.sh
 
 # New Lima VM
-cd ~/workspace/dotfiles && ./bootstrap-lima.sh
+cd ~/workspace/dotfiles && ./bootstrap-linux.sh
 
 # Restore secrets from Bitwarden (either platform)
 bw login && export BW_SESSION="$(bw unlock --raw)"
@@ -102,7 +102,7 @@ The dotfiles are organized as follows:
 ```text
 ~/workspace/dotfiles
 ├── bootstrap-dotfiles.sh     # Shared symlink bootstrap (zshrc, p10k, Ghostty, Claude)
-├── bootstrap-lima.sh         # Lima / Linux-specific bootstrap wrapper
+├── bootstrap-linux.sh         # Lima / Linux-specific bootstrap wrapper
 ├── bootstrap-mac.sh          # macOS-specific bootstrap wrapper
 ├── check-health.sh           # Verify installation health
 ├── Brewfile                  # Unified Homebrew bundle (macOS + Lima)
@@ -157,6 +157,140 @@ Key pieces:
   ```
   ~/.claude → ~/workspace/.claude
   ```
+
+---
+
+## Multi-Platform Architecture
+
+This dotfiles system is designed for extensibility across multiple platforms with **90% shared code**.
+
+### Currently Supported Platforms
+
+| Platform | Bootstrap Script | Status | Notes |
+|----------|-----------------|---------|-------|
+| **macOS** | `bootstrap-mac.sh` | ✅ Fully tested | Apple Silicon & Intel |
+| **Lima VM** | `bootstrap-linux.sh` | ✅ Fully tested | Ubuntu 24.04 |
+| **WSL2** | `bootstrap-linux.sh` | ✅ Auto-detected | Windows 10/11 |
+| **Ubuntu/Debian** | `bootstrap-linux.sh` | ✅ Compatible | Bare metal or VM |
+
+### Extensible to (15-30 minutes each):
+- Docker containers
+- Arch Linux
+- Fedora/RHEL
+- FreeBSD/OpenBSD
+- Any POSIX-compliant system with ZSH
+
+### Architecture Layers
+
+```
+┌──────────────────────────────────────────────┐
+│  Platform-Specific Bootstrap (10% of code)   │
+│  • Package manager setup (apt/brew/pacman)   │
+│  • System-specific configuration             │
+│  • GUI tool installation                     │
+└──────────────┬───────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────┐
+│  Shared Dotfiles Layer (90% of code)         │
+│  • Symlink management (bootstrap-dotfiles)   │
+│  • Shell configuration (zshrc)               │
+│  • Vault system (all scripts)                │
+│  • Health checks & metrics                   │
+│  • Tab completions                           │
+└──────────────────────────────────────────────┘
+```
+
+### Platform-Independent Components
+
+These work on **any platform** without modification:
+
+**✅ Vault System** (100% portable)
+- All `vault/*.sh` scripts
+- Just needs: `zsh`, `bw`, `jq`
+- Works on Linux, macOS, BSD, WSL, Docker
+
+**✅ Health & Metrics** (100% portable)
+- `check-health.sh`
+- `show-metrics.sh`
+- Cross-platform file permissions handling
+
+**✅ Shell Configuration** (OS-aware)
+- `zshrc` with OS detection
+- Conditional loading for macOS/Linux
+- Portable modern CLI tools (eza, fzf, etc.)
+
+**✅ Package Management** (cross-platform)
+- `Brewfile` works on macOS + Linux (Linuxbrew)
+- Conditional sections (`on_macos`, `on_linux`)
+
+### Adding a New Platform
+
+Example: Adding Arch Linux support
+
+```bash
+# bootstrap-arch.sh (30 lines)
+#!/usr/bin/env bash
+set -euo pipefail
+
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# 1. System packages (platform-specific)
+sudo pacman -Syu --noconfirm git zsh curl base-devel
+
+# 2. Install yay (AUR helper) or use Homebrew
+# ... package manager setup ...
+
+# 3. SHARED: Use same Brewfile
+brew bundle --file="$DOTFILES_DIR/Brewfile"
+
+# 4. SHARED: Use same dotfiles bootstrap
+"$DOTFILES_DIR/bootstrap-dotfiles.sh"
+
+# 5. Set shell to zsh
+chsh -s $(command -v zsh)
+```
+
+**That's it!** Everything else (vault, health checks, configs, metrics) just works.
+
+### Platform Detection in Scripts
+
+The bootstrap scripts auto-detect their environment:
+
+```bash
+# bootstrap-linux.sh detects:
+if grep -qiE "(microsoft|wsl)" /proc/version; then
+  PLATFORM="WSL2"
+  # Install Windows interop tools
+elif [[ -n "${LIMA_INSTANCE:-}" ]]; then
+  PLATFORM="Lima"
+  # Lima-specific tips
+fi
+```
+
+The `zshrc` also detects OS:
+
+```bash
+OS="$(uname -s)"
+case "$OS" in
+  Darwin)  # macOS-specific settings ;;
+  Linux)   # Linux-specific settings ;;
+  FreeBSD) # BSD-specific settings ;;
+esac
+```
+
+### Why This Architecture Matters
+
+**Portability**: Use the same dotfiles on your:
+- Work laptop (macOS)
+- Personal laptop (Linux)
+- Development VM (Lima/WSL)
+- CI/CD containers (Docker)
+- Cloud instances (any Linux)
+
+**Maintainability**: Fix a bug or add a feature **once**, benefits **all platforms**.
+
+**Extensibility**: New platform = ~30 lines of platform-specific code + reuse 90%.
 
 ---
 
@@ -242,7 +376,7 @@ Even with the same files (via Lima mount), different paths = different session f
 **Solution**: The bootstrap scripts create a `/workspace` symlink:
 
 ```bash
-# Created by bootstrap-mac.sh and bootstrap-lima.sh
+# Created by bootstrap-mac.sh and bootstrap-linux.sh
 /workspace → ~/workspace
 ```
 
@@ -329,7 +463,7 @@ There are two big pillars:
 
    - `bootstrap-dotfiles.sh`
    - `bootstrap-mac.sh`
-   - `bootstrap-lima.sh`
+   - `bootstrap-linux.sh`
 
    Goal: consistent Zsh + p10k + plugins + Ghostty config + Claude across host and Lima.
 
@@ -454,10 +588,10 @@ limactl shell lima-dev-ubuntu
 
 ```bash
 cd ~/workspace/dotfiles
-./bootstrap-lima.sh
+./bootstrap-linux.sh
 ```
 
-Typical responsibilities of `bootstrap-lima.sh`:
+Typical responsibilities of `bootstrap-linux.sh`:
 
 - Install essential packages (`git`, `zsh`, etc.).  
 - Install **Linuxbrew** if missing.  
@@ -1225,7 +1359,7 @@ When AWS credentials or config change:
 Complete checklist for a fresh machine:
 
 1. [ ] Clone dotfiles: `git clone ... ~/workspace/dotfiles`
-2. [ ] Run bootstrap: `./bootstrap-mac.sh` or `./bootstrap-lima.sh`
+2. [ ] Run bootstrap: `./bootstrap-mac.sh` or `./bootstrap-linux.sh`
 3. [ ] Login to Bitwarden: `bw login`
 4. [ ] Validate vault items: `./vault/check-vault-items.sh`
 5. [ ] Restore secrets: `bw-restore`
