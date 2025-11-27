@@ -28,9 +28,8 @@ mouse_mode true
 // Appearance
 // =========================
 
-// Theme (built-in: default, dracula, gruvbox-dark, gruvbox-light,
-//        nord, one-half-dark, solarized-dark, solarized-light, tokyo-night, tokyo-night-storm)
-theme "default"
+// Theme - using custom Elegant theme to match Ghostty
+theme "elegant"
 
 // Default layout
 default_layout "compact"
@@ -120,3 +119,22 @@ session_serialization true
 
 // Auto-attach to existing session or create new
 // attach_to_session true
+
+// =========================
+// Custom Theme: Elegant (matches Ghostty)
+// =========================
+themes {
+    elegant {
+        fg "#ced2d6"
+        bg "#292b31"
+        black "#0a1222"
+        red "#ff0257"
+        green "#85cc95"
+        yellow "#ffcb8b"
+        blue "#8dabe1"
+        magenta "#c792eb"
+        cyan "#78ccf0"
+        white "#ffffff"
+        orange "#ffcb8b"
+    }
+}
