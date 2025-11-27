@@ -9,8 +9,9 @@
 
 The dotfiles repo is fully functional with all features intact. Recent session work:
 - Added lazy loading for nvm and sdkman (faster shell startup)
-- Added zellij config to dotfiles
+- Added zellij config to dotfiles (Elegant theme matching Ghostty)
 - Added btop to Brewfile
+- Added macOS settings discovery and apply scripts
 - Decided NOT to modularize zshrc (well-organized as-is at ~820 lines)
 
 ### Recent Commits (most recent first)
@@ -96,6 +97,13 @@ Commands with ASCII art banner via `awstools`:
 - Standard aliases: `gst`, `gss`, `ga`, `gaa`, `gco`, `gcb`, `gd`, `gds`, `gpl`, `gp`, `gpf`, `gcm`, `gca`, `gl1`, `glg`
 - Location: `zsh/zshrc` lines 685-711
 
+### 11. macOS System Settings
+- Location: `macos/`
+- `discover-settings.sh` - Capture current settings, diff changes, generate settings.sh
+- `apply-settings.sh` - Apply settings from settings.sh
+- `settings.sh` - The actual defaults commands to run
+- Covers: trackpad, mouse, keyboard, dock, finder, screenshots
+
 ---
 
 ## Directory Structure
@@ -112,6 +120,10 @@ Commands with ASCII art banner via `awstools`:
 ├── claude/               # Claude Code settings + commands
 ├── ghostty/              # Ghostty terminal config
 ├── lima/                 # Lima VM config
+├── macos/                # macOS system settings
+│   ├── discover-settings.sh
+│   ├── apply-settings.sh
+│   └── settings.sh
 ├── vault/                # Bitwarden-based secret management
 ├── zellij/
 │   └── config.kdl        # Zellij multiplexer config

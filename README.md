@@ -82,6 +82,11 @@ The dotfiles are organized as follows:
 │   └── config                # Ghostty terminal config
 ├── lima
 │   └── lima.yaml             # Lima VM config (host-side)
+├── macos
+│   ├── apply-settings.sh     # Apply macOS system settings
+│   ├── discover-settings.sh  # Capture/diff macOS settings
+│   ├── settings.sh           # The actual settings to apply
+│   └── snapshots/            # Setting snapshots for diff
 ├── vault
 │   ├── _common.sh            # Shared library (colors, logging, session, SSH_KEYS)
 │   ├── bootstrap-vault.sh    # Orchestrates all Bitwarden restores
@@ -509,6 +514,95 @@ brew bundle dump --force --file=./Brewfile
 ```
 
 and prune as needed.
+
+---
+
+## macOS System Settings
+
+Lives under:
+
+```
+~/workspace/dotfiles/macos
+```
+
+These scripts let you capture, track, and restore macOS system preferences (trackpad, keyboard, dock, finder, etc.) across machines.
+
+### Workflow: Discover Your Settings
+
+```bash
+cd ~/workspace/dotfiles/macos
+
+# 1. Take a snapshot of current settings
+./discover-settings.sh --snapshot
+
+# 2. Change settings in System Preferences (trackpad speed, dock size, etc.)
+
+# 3. See what changed
+./discover-settings.sh --diff
+
+# 4. Generate settings.sh from your current preferences
+./discover-settings.sh --generate
+```
+
+### Workflow: Apply Settings on New Machine
+
+```bash
+cd ~/workspace/dotfiles/macos
+
+# Review settings first
+./apply-settings.sh --dry-run
+
+# Apply settings
+./apply-settings.sh
+
+# Or backup before applying
+./apply-settings.sh --backup
+```
+
+### What's Included
+
+The default `settings.sh` includes sensible developer defaults for:
+
+| Category | Settings |
+|----------|----------|
+| **Trackpad** | Tap to click, tracking speed, three-finger drag, natural scrolling |
+| **Mouse** | Tracking speed |
+| **Keyboard** | Fast key repeat, disable auto-correct/capitalize/smart quotes |
+| **Dock** | Size, auto-hide, no recent apps, fast animations |
+| **Finder** | Show extensions, hidden files, path bar, list view, no .DS_Store on network |
+| **Screenshots** | Location, format, no shadow |
+| **Misc** | Expanded save dialogs, password on wake, disable crash reporter |
+
+### Customizing
+
+Edit `macos/settings.sh` directly, or regenerate it from your current preferences:
+
+```bash
+# Capture YOUR current settings
+./discover-settings.sh --generate
+
+# This overwrites settings.sh with your preferences
+```
+
+### Useful Commands
+
+```bash
+# List all preference domains on your system
+./discover-settings.sh --list-domains
+
+# Dump a specific domain
+./discover-settings.sh --domain com.apple.dock
+
+# Dump all tracked domains
+./discover-settings.sh --all
+
+# Manual: read a specific setting
+defaults read com.apple.dock autohide
+
+# Manual: write a setting
+defaults write com.apple.dock autohide -bool true
+killall Dock
+```
 
 ---
 
