@@ -15,14 +15,17 @@
 
 ## Features
 
-- **Portable Claude Code sessions** – Canonical `/workspace` layout so Claude Code sessions and projects stay portable across macOS, Linux, Lima, and WSL2
-- **Bitwarden vault integration** – Bitwarden is the source of truth for SSH keys, AWS credentials, Git config, and environment secrets
-- **Cross-platform bootstrap** – Single setup flow for macOS, Linux, WSL2, and Lima with consistent paths and behavior
-- **Automated health checks** – Validate symlinks, required tools, permissions, and vault sync, with drift detection and optional auto-fix
-- **Metrics and observability** – Track dotfiles health over time and surface failures, drift, and missing vault items
-- **Modern CLI stack** – Includes eza, fzf, ripgrep, zoxide, and other modern Unix tools
-- **Fast setup** – Bootstrap a new machine from clone to ready-to-work shell in under five minutes
-- **Idempotent design** – Safe to rerun bootstrap and health checks at any time; scripts are designed to converge on a known-good state
+### Core (works everywhere)
+- **Bitwarden vault integration** – SSH keys, AWS credentials, Git config, and environment secrets restored from Bitwarden. One unlock, full environment.
+- **Automated health checks** – Validate symlinks, permissions, required tools, and vault sync. Optional auto-fix and drift detection.
+- **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat, and other modern Unix replacements, configured and ready.
+- **Idempotent design** – Run bootstrap repeatedly. Scripts converge to known-good state without breaking existing setup.
+- **Fast setup** – Clone to working shell in under five minutes.
+
+### Advanced (opt-in)
+- **Cross-platform portability** – Same dotfiles on macOS, Linux, WSL2, Lima, or Docker with ~90% shared code.
+- **Portable Claude Code sessions** – `/workspace` symlink ensures Claude sessions sync across machines. Start on macOS, continue on Linux, keep your conversation.
+- **Metrics and observability** – Track dotfiles health over time. Surface drift, failures, and missing vault items.
 
 ---
 
@@ -45,59 +48,51 @@ To clone via SSH (recommended), you’ll also want an SSH key configured with Gi
 
 ## Quick Start
 
-### New Machine Setup
-
 ```bash
-# 1. Clone repository
+# 1. Clone
 git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
-# 2. Run bootstrap (choose your platform)
+# 2. Bootstrap (picks your platform automatically)
 ./bootstrap-mac.sh      # macOS
-./bootstrap-linux.sh    # Lima / Linux / WSL2
+./bootstrap-linux.sh    # Linux / WSL2 / Lima / Docker
 
 # 3. Restore secrets from Bitwarden
 bw login
 export BW_SESSION="$(bw unlock --raw)"
 ./vault/bootstrap-vault.sh
 
-# 4. Verify everything is working
+# 4. Verify
 ./check-health.sh
 ```
 
-**That's it!** Your environment is now configured.
+**That's it.** Shell configured, secrets restored, health validated.
 
-### 💡 Pro Tip: Portable Claude Code Sessions
+<details>
+<summary><b>Don't use Bitwarden?</b></summary>
 
-The `claude` command **automatically redirects** from `~/workspace` to `/workspace` for portable sessions:
+The vault system is optional. Skip step 3 and manually configure:
 
-```bash
-# Best practice: Use /workspace paths directly
-cd /workspace/dotfiles  # ✅ Portable sessions across ALL machines
-claude                  # Session: -workspace-dotfiles-
+- `~/.ssh/` – your SSH keys
+- `~/.aws/` – your AWS credentials
+- `~/.gitconfig` – your git identity
 
-# If you forget and use ~/workspace:
-cd ~/workspace/dotfiles # Shows educational message + auto-redirects
-claude                  # Still works! Teaches you the pattern
-```
+Everything else still works.
+</details>
 
-**Auto-redirect message:**
-```
-╭──────────────────────────────────────────────────────────────────╮
-│ 🤖 CLAUDE CODE PORTABLE SESSION REDIRECT                        │
-├──────────────────────────────────────────────────────────────────┤
-│ You're in:  /Users/username/workspace/dotfiles                  │
-│ Redirecting to:  /workspace/dotfiles                            │
-│                                                                  │
-│ WHY: Claude Code session paths must be identical across all     │
-│      machines for conversation history to sync properly.        │
-│                                                                  │
-│ ✅ BEST PRACTICE: Always use /workspace instead of ~/workspace  │
-│    Example: cd /workspace/dotfiles && claude                    │
-╰──────────────────────────────────────────────────────────────────╯
-```
+---
 
-**Why this matters:** The bootstrap creates `/workspace → ~/workspace` symlink, ensuring Claude Code sessions use identical paths across macOS, Lima, and WSL. The wrapper function **educates you while ensuring sessions are always portable**!
+## Use Cases
+
+**Single Linux machine** – Vault-backed secrets, health checks, modern CLI. No cross-platform complexity.
+
+**macOS daily driver** – Full experience including Ghostty terminal config and macOS system preferences.
+
+**Docker/CI environments** – Bootstrap in containers for reproducible builds. Vault restore from CI secrets.
+
+**Multi-machine workflow** – Develop on macOS, test on Linux VM, deploy from WSL. Same dotfiles, same secrets, same Claude sessions everywhere.
+
+**Team onboarding** – New developer? Clone, bootstrap, unlock vault. Consistent environment in minutes, not days.
 
 ---
 
@@ -149,49 +144,25 @@ bw-restore  # Alias for ./vault/bootstrap-vault.sh
 - Git configuration (.gitconfig)
 - Environment variables (.local/env.secrets)
 
-### Portable Claude Code Workflow
+### Tips
 
-One of the most powerful features: **Claude Code sessions that follow you across machines**.
+<details>
+<summary><b>Portable Claude Code Sessions (optional)</b></summary>
 
-#### The Problem
-Claude Code stores sessions based on the working directory path:
-- macOS: `/Users/yourname/workspace/dotfiles` → `-Users-yourname-workspace-dotfiles-`
-- Lima: `/home/yourname.linux/workspace/dotfiles` → `-home-yourname.linux-workspace-dotfiles-`
-- Different paths = different sessions = **lost conversation history** when switching machines
-
-#### The Solution
-Bootstrap creates a `/workspace` symlink pointing to `~/workspace`:
+If you use Claude Code across multiple machines, the `/workspace` symlink keeps your sessions in sync:
 
 ```bash
-# Same path on ALL platforms
-/workspace/dotfiles
-
-# Claude session folder (identical everywhere)
-~/.claude/projects/-workspace-dotfiles-/
+cd /workspace/my-project  # Same path on all machines
+claude                     # Same session everywhere
 ```
 
-#### Usage
-```bash
-# ✅ BEST: Use /workspace for Claude Code (recommended)
-cd /workspace/dotfiles
-claude  # Picks up your conversation from ANY machine
+The bootstrap creates `/workspace → ~/workspace` automatically. If you're on a single machine, this just works transparently—no action needed.
 
-# ✅ SAFE: Using ~/workspace auto-redirects with educational message
-cd ~/workspace/my-project
-claude  # Wrapper automatically switches to /workspace/my-project
+**Why this matters:** Claude Code stores sessions by working directory path. Different machines have different home directories (`/Users/name` vs `/home/name`), creating different session IDs. The `/workspace` symlink normalizes this.
 
-# ✅ Works with all Claude commands
-cd /workspace/dotfiles
-claude --model sonnet-4
-```
+**Auto-redirect:** The `claude` wrapper detects `~/workspace/*` paths and automatically switches to `/workspace/*`, showing an educational message to teach you the pattern.
 
-**Auto-redirect wrapper behavior:**
-1. Detects if you're in `~/workspace/*` (non-portable path)
-2. Shows educational message explaining why `/workspace` is better
-3. Automatically redirects to equivalent `/workspace/*` path
-4. Runs Claude Code with portable session storage
-
-**Result:** Start a conversation on macOS, continue it in Lima, finish it on WSL - **same session, full history**. The wrapper ensures this works even if you forget to use `/workspace`!
+</details>
 
 ### Health Checks
 
