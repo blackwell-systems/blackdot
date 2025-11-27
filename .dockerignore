@@ -1,0 +1,26 @@
+# Git
+.git
+.github
+
+# Editor / IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# System
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.log
+
+# Local config
+.zshrc.local
+zsh/zsh.d/99-local.zsh
+
+# Secrets (never should be here anyway, but be safe)
+.env
+.env.*
+vault/.bw-session

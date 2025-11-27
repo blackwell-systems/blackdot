@@ -16,11 +16,12 @@
 ## Features
 
 ### Core (works everywhere)
-- **Bitwarden vault integration** – SSH keys, AWS credentials, Git config, and environment secrets restored from Bitwarden. One unlock, full environment.
+- **Bitwarden vault integration** – SSH keys, AWS credentials, Git config, and environment secrets restored from Bitwarden. One unlock, full environment. Schema validation ensures item integrity.
 - **Automated health checks** – Validate symlinks, permissions, required tools, and vault sync. Optional auto-fix and drift detection.
 - **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat, and other modern Unix replacements, configured and ready.
 - **Idempotent design** – Run bootstrap repeatedly. Scripts converge to known-good state without breaking existing setup.
 - **Fast setup** – Clone to working shell in under five minutes.
+- **Unit tested** – 23+ tests for vault functions ensure reliability across platforms.
 
 ### Advanced (opt-in)
 - **Cross-platform portability** – Same dotfiles on macOS, Linux, WSL2, Lima, or Docker with ~90% shared code.
@@ -80,6 +81,29 @@ The vault system is optional. Skip step 3 and manually configure:
 Everything else still works.
 </details>
 
+<details>
+<summary><b>Optional Components (environment variables)</b></summary>
+
+Skip optional features using environment variables:
+
+```bash
+# Skip /workspace symlink creation (single-machine setup)
+SKIP_WORKSPACE_SYMLINK=true ./bootstrap-mac.sh
+
+# Skip Claude Code setup
+SKIP_CLAUDE_SETUP=true ./bootstrap-linux.sh
+
+# Combine flags
+SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap-mac.sh
+```
+
+**Available flags:**
+- `SKIP_WORKSPACE_SYMLINK=true` – Skip `/workspace` symlink creation (for single-machine setups)
+- `SKIP_CLAUDE_SETUP=true` – Skip `~/.claude` configuration symlink
+
+All features are opt-in by default and can be disabled without breaking the rest of the setup.
+</details>
+
 ---
 
 ## Use Cases
@@ -132,6 +156,9 @@ All secrets are stored in Bitwarden and restored on new machines:
 
 # New machine: Restore secrets
 bw-restore  # Alias for ./vault/bootstrap-vault.sh
+
+# Validate vault item schema
+bw-validate  # Ensure all items have correct structure
 
 # Check for drift (local vs Bitwarden)
 ./check-health.sh --drift
@@ -229,20 +256,40 @@ dotfiles/
 ├── bootstrap-mac.sh           # macOS setup
 ├── bootstrap-linux.sh         # Lima/Linux/WSL2 setup
 ├── bootstrap-dotfiles.sh      # Shared symlink creation
-├── check-health.sh            # Health validation (574 lines)
+├── check-health.sh            # Health validation
 ├── show-metrics.sh            # Metrics visualization
 ├── Brewfile                   # Package definitions
+├── Dockerfile                 # Docker bootstrap example
+├── .dockerignore              # Docker build exclusions
 │
 ├── vault/                     # Bitwarden secret management
-│   ├── _common.sh            # Shared config (SSH_KEYS array)
+│   ├── _common.sh            # Shared config & validation functions
 │   ├── bootstrap-vault.sh    # Orchestrator
 │   ├── restore-*.sh          # Restore SSH, AWS, Git, env
 │   ├── sync-to-bitwarden.sh  # Sync local → Bitwarden
+│   ├── validate-schema.sh    # Validate vault item structure
 │   └── check-vault-items.sh  # Pre-flight validation
 │
 ├── zsh/                       # Shell configuration
-│   ├── zshrc                 # Main config (900+ lines)
-│   └── p10k.zsh             # Powerlevel10k theme
+│   ├── zshrc                 # Main loader (sources zsh.d/*.zsh)
+│   ├── p10k.zsh             # Powerlevel10k theme
+│   └── zsh.d/               # Modular configuration
+│       ├── 00-init.zsh      # Initialization & OS detection
+│       ├── 10-plugins.zsh   # Plugin loading
+│       ├── 20-env.zsh       # Environment variables
+│       ├── 30-tools.zsh     # Modern CLI tools
+│       ├── 40-aliases.zsh   # Aliases
+│       ├── 50-functions.zsh # Shell functions
+│       ├── 60-aws.zsh       # AWS helpers
+│       ├── 70-claude.zsh    # Claude Code wrapper
+│       ├── 80-git.zsh       # Git shortcuts
+│       ├── 90-integrations.zsh # Tool integrations
+│       └── 99-local.zsh     # Machine-specific overrides (gitignored)
+│
+├── test/                      # Unit tests (bats-core)
+│   ├── vault_common.bats     # Tests for vault/_common.sh
+│   ├── setup_bats.sh         # Install bats-core
+│   └── run_tests.sh          # Test runner
 │
 ├── claude/                    # Claude Code integration
 │   └── settings.json         # Permissions & preferences
@@ -253,6 +300,82 @@ dotfiles/
 └── docs/                      # Documentation
     └── README-FULL.md        # Complete documentation
 ```
+
+---
+
+## Development & Testing
+
+### Docker Bootstrap
+
+Test the bootstrap process in a clean Ubuntu container:
+
+```bash
+# Build the Docker image
+docker build -t dotfiles-dev .
+
+# Run interactive shell
+docker run -it --rm dotfiles-dev
+
+# Run with Bitwarden vault restore
+export BW_SESSION="$(bw unlock --raw)"
+docker run -it --rm -e BW_SESSION="$BW_SESSION" dotfiles-dev
+
+# Mount local dotfiles for testing changes
+docker run -it --rm -v $PWD:/home/developer/workspace/dotfiles dotfiles-dev
+```
+
+The Dockerfile demonstrates:
+- Clean environment setup from Ubuntu 24.04
+- Full bootstrap process (Homebrew, packages, dotfiles)
+- CI/CD integration patterns
+- Reproducible development containers
+
+### Unit Tests
+
+Run tests with bats-core:
+
+```bash
+# Install bats-core (if not already installed)
+./test/setup_bats.sh
+
+# Run all tests
+./test/run_tests.sh
+
+# Or use bats directly
+bats test/vault_common.bats
+```
+
+**Current test coverage:**
+- ✅ vault/_common.sh data structure helpers (23 tests)
+- ✅ Logging functions (info, pass, warn, fail, debug)
+- ✅ Item path lookups and validation
+- ⏳ Future: vault restoration scripts
+
+Tests run automatically in GitHub Actions on every push.
+
+### Modular Shell Configuration
+
+The zsh configuration is modular for easier maintenance and customization:
+
+```bash
+zsh/zsh.d/
+├── 00-init.zsh          # Powerlevel10k, OS detection
+├── 10-plugins.zsh       # Plugin loading
+├── 20-env.zsh           # Environment variables
+├── 30-tools.zsh         # CLI tool configurations (eza, fzf, bat)
+├── 40-aliases.zsh       # Aliases
+├── 50-functions.zsh     # Shell functions
+├── 60-aws.zsh           # AWS helpers
+├── 70-claude.zsh        # Claude Code wrapper
+├── 80-git.zsh           # Git shortcuts
+├── 90-integrations.zsh  # Tool integrations
+└── 99-local.zsh         # Machine-specific overrides (gitignored)
+```
+
+To customize:
+1. Copy `zsh/zsh.d/99-local.zsh.example` to `zsh/zsh.d/99-local.zsh`
+2. Add machine-specific aliases, environment variables, or PATH entries
+3. This file is gitignored and won't be overwritten on updates
 
 ---
 
