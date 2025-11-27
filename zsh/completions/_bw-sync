@@ -1,0 +1,34 @@
+#compdef bw-sync
+# ZSH completion for bw-sync (sync-to-bitwarden.sh) command
+
+_bw_sync() {
+  local -a syncable_items
+  syncable_items=(
+    'SSH-Config:Sync SSH configuration'
+    'AWS-Config:Sync AWS configuration'
+    'AWS-Credentials:Sync AWS credentials'
+    'Git-Config:Sync Git configuration'
+    'Environment-Secrets:Sync environment secrets'
+  )
+
+  local -a options
+  options=(
+    '--all:Sync all items'
+    '--dry-run:Show what would be synced without making changes'
+    '--help:Show help message'
+  )
+
+  _arguments \
+    '*::item:->items' \
+    && return 0
+
+  case $state in
+    items)
+      _alternative \
+        'items:syncable item:_describe "item to sync" syncable_items' \
+        'options:option:_describe "option" options'
+      ;;
+  esac
+}
+
+_bw_sync "$@"

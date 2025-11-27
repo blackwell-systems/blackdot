@@ -15,7 +15,8 @@ safe_symlink() {
 
   # If target exists and is NOT a symlink, back it up
   if [ -e "$tgt" ] && [ ! -L "$tgt" ]; then
-    local backup="${tgt}.bak-$(date +%Y%m%d%H%M%S)"
+    local backup
+    backup="${tgt}.bak-$(date +%Y%m%d%H%M%S)"
     echo "Backing up existing $tgt to $backup"
     mv "$tgt" "$backup"
   fi
