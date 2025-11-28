@@ -478,17 +478,28 @@ When setting up a new machine or VM, no username updates are needed. Everything 
 
 ## Global Prerequisites
 
-On **both macOS and Lima/Linux**, you’ll eventually want:
+### Required
+- A supported environment: macOS, Linux, WSL2, or Lima
+- Internet access (for installing packages)
 
-- **Zsh** as your login shell  
-- **Homebrew** (macOS or Linuxbrew)  
-- **Git**  
-- **Bitwarden CLI** (`bw`)  
-- **jq** (for JSON manipulation)  
-- **AWS CLI v2** (for AWS workflows)  
-- **Claude Code (CLI)** via Homebrew (installed from Brewfile on both macOS + Lima)
+### Auto-installed (if missing)
+- **Git** (via Xcode tools on macOS or apt on Linux)
+- **Zsh** as your login shell (bootstrap sets this up)
+- **Homebrew/Linuxbrew** (bootstrap will install)
+- **jq** (for JSON manipulation, installed via Brewfile)
 
-You can install most of these via Homebrew (after the basic bootstrap is done).
+### Optional (for vault features only)
+- **Bitwarden CLI** (`bw`) - For automated secret sync
+  - Skip with `--minimal` flag or just don't run `dotfiles vault` commands
+  - Without vault: manually configure `~/.ssh`, `~/.aws`, `~/.gitconfig`
+
+### Optional (for specific workflows)
+- **AWS CLI v2** (for AWS workflows, installed via Brewfile if needed)
+- **Claude Code (CLI)** - For portable session sync
+  - Skip with `SKIP_CLAUDE_SETUP=true`
+  - Installed via Brewfile on both macOS + Lima
+
+Most tools are installed automatically via Homebrew after the basic bootstrap is done.
 
 ---
 
