@@ -244,6 +244,20 @@ The bootstrap creates `/workspace → ~/workspace` automatically. If you're on a
 
 **Auto-redirect:** The `claude` wrapper detects `~/workspace/*` paths and automatically switches to `/workspace/*`, showing an educational message to teach you the pattern.
 
+### The `dotfiles` Command
+
+A unified command for managing your dotfiles:
+
+```bash
+dotfiles doctor          # Run comprehensive health check
+dotfiles doctor --fix    # Auto-repair permission issues
+dotfiles doctor --quick  # Fast checks (skip vault)
+dotfiles upgrade         # Pull latest, run bootstrap, verify
+dotfiles cd              # Navigate to dotfiles directory
+dotfiles edit            # Open dotfiles in $EDITOR
+dotfiles help            # Show all commands
+```
+
 ### Health Checks
 
 Validate your environment anytime:
