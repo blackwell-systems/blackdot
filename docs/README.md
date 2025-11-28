@@ -298,20 +298,71 @@ bw-validate  # Ensure all items have correct structure
 
 ### Tips
 
-#### Portable Claude Code Sessions (optional)
+#### Claude Code Integration (optional)
 
-If you use Claude Code across multiple machines, the `/workspace` symlink keeps your sessions in sync:
+This repo includes a full Claude Code integration layer supporting multiple backends:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    User Commands                        │
+│   claude │ claude-max │ claude-bedrock │ claude-status │
+└────────────────────────┬────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────┐
+│              Session Portability Layer                  │
+│   ~/workspace/* → /workspace/* path normalization       │
+│   Enables cross-machine session continuity              │
+└────────────────────────┬────────────────────────────────┘
+                         │
+          ┌──────────────┴──────────────┐
+          ▼                             ▼
+┌─────────────────────┐     ┌─────────────────────┐
+│    Claude Max       │     │   AWS Bedrock       │
+│  (Direct Anthropic) │     │ (Enterprise/SSO)    │
+│                     │     │                     │
+│  - Consumer plan    │     │  - Cost controls    │
+│  - Simple auth      │     │  - SSO integration  │
+│  - No setup needed  │     │  - Usage tracking   │
+└─────────────────────┘     └─────────────────────┘
+```
+
+| Command | Backend | Use Case |
+|---------|---------|----------|
+| `claude` | Default | Uses Max subscription or direct API |
+| `claude-max` / `cm` | Anthropic Max | Personal/consumer subscription |
+| `claude-bedrock` / `cb` | AWS Bedrock | Enterprise, cost-controlled, SSO |
+| `claude-status` | — | Show current configuration |
+
+**Setup for AWS Bedrock:**
+
+```bash
+# Copy the example config
+cp ~/workspace/dotfiles/claude.local.example ~/.claude.local
+
+# Edit with your AWS SSO profile
+vim ~/.claude.local
+```
+
+Example `~/.claude.local`:
+```bash
+export CLAUDE_BEDROCK_PROFILE="your-sso-profile"
+export CLAUDE_BEDROCK_REGION="us-west-2"
+```
+
+**Portable Sessions (multi-machine):**
+
+If you use Claude Code across multiple machines, the `/workspace` symlink keeps sessions in sync:
 
 ```bash
 cd /workspace/my-project  # Same path on all machines
 claude                     # Same session everywhere
 ```
 
-The bootstrap creates `/workspace → ~/workspace` automatically. If you're on a single machine, this just works transparently—no action needed.
+The bootstrap creates `/workspace → ~/workspace` automatically. If you're on a single machine, this works transparently—no action needed.
 
 **Why this matters:** Claude Code stores sessions by working directory path. Different machines have different home directories (`/Users/name` vs `/home/name`), creating different session IDs. The `/workspace` symlink normalizes this.
 
-**Auto-redirect:** The `claude` wrapper detects `~/workspace/*` paths and automatically switches to `/workspace/*`, showing an educational message to teach you the pattern.
+**Auto-redirect:** The `claude` wrapper detects `~/workspace/*` paths and automatically switches to `/workspace/*`.
 
 ### The `dotfiles` Command
 
