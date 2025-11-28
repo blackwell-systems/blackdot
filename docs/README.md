@@ -1,8 +1,10 @@
 # Dotfiles & Vault Setup
 
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
+[![ShellCheck](https://img.shields.io/badge/ShellCheck-Passing-brightgreen)](https://github.com/blackwell-systems/dotfiles/actions)
+[![Unit Tests](https://img.shields.io/badge/Unit_Tests-23%2B-brightgreen)](test/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux%20%7C%20Lima%20%7C%20WSL2-blue)
+![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux%20%7C%20Lima%20%7C%20WSL2%20%7C%20Docker-blue)
 ![Shell](https://img.shields.io/badge/Shell-Zsh-blueviolet)
 ![Secrets](https://img.shields.io/badge/Secrets-Bitwarden-ff4081)
 ![Claude Portability](https://img.shields.io/badge/Claude_Portability-Enabled-8A2BE2)
@@ -47,7 +49,25 @@ To clone via SSH (recommended), you’ll also want an SSH key configured with Gi
 
 ---
 
-## Quick Start
+## One-Line Install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+```
+
+Or with options:
+
+```bash
+# Interactive mode - prompts for configuration
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --interactive
+
+# Minimal mode - skip optional features
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
+```
+
+---
+
+## Quick Start (Manual)
 
 ```bash
 # 1. Clone
@@ -58,13 +78,16 @@ cd ~/workspace/dotfiles
 ./bootstrap-mac.sh      # macOS
 ./bootstrap-linux.sh    # Linux / WSL2 / Lima / Docker
 
+# Or use interactive mode for guided setup:
+./bootstrap-mac.sh --interactive
+
 # 3. Restore secrets from Bitwarden
 bw login
 export BW_SESSION="$(bw unlock --raw)"
 ./vault/bootstrap-vault.sh
 
 # 4. Verify
-./check-health.sh
+dotfiles doctor
 ```
 
 **That's it.** Shell configured, secrets restored, health validated.
@@ -191,23 +214,39 @@ The bootstrap creates `/workspace → ~/workspace` automatically. If you're on a
 
 </details>
 
+### The `dotfiles` Command
+
+A unified command for managing your dotfiles:
+
+```bash
+dotfiles doctor          # Run comprehensive health check
+dotfiles doctor --fix    # Auto-repair permission issues
+dotfiles doctor --quick  # Fast checks (skip vault)
+dotfiles upgrade         # Pull latest, run bootstrap, verify
+dotfiles cd              # Navigate to dotfiles directory
+dotfiles edit            # Open dotfiles in $EDITOR
+dotfiles help            # Show all commands
+```
+
 ### Health Checks
 
 Validate your environment anytime:
 
 ```bash
-./check-health.sh           # Run validation
-./check-health.sh --fix     # Auto-repair permissions
+dotfiles doctor             # Comprehensive check (recommended)
+dotfiles doctor --fix       # Auto-repair permissions
 ./check-health.sh --drift   # Compare local vs Bitwarden
 ```
 
 **Checks performed:**
+- Version & update status
 - Symlinks (zshrc, p10k, claude, ghostty)
-- Required commands (brew, zsh, git, bw, aws)
+- Required commands (brew, zsh, git, bw, jq)
 - SSH keys and permissions (600 private, 644 public)
 - AWS configuration and credentials
-- Bitwarden login status
-- Drift detection (local vs vault)
+- Bitwarden vault status
+- Shell configuration and modules
+- Health score (0-100)
 
 ---
 
@@ -216,7 +255,7 @@ Validate your environment anytime:
 ### Update Dotfiles
 
 ```bash
-dotfiles-upgrade  # Pull latest, run bootstrap, check health
+dotfiles upgrade  # Pull latest, run bootstrap, check health
 ```
 
 ### Sync Secrets
@@ -253,10 +292,12 @@ See [Maintenance Checklists](docs/README-FULL.md#maintenance-checklists) for mor
 
 ```
 dotfiles/
-├── bootstrap-mac.sh           # macOS setup
-├── bootstrap-linux.sh         # Lima/Linux/WSL2 setup
+├── install.sh                 # One-line installer (curl | bash)
+├── bootstrap-mac.sh           # macOS setup (supports --interactive)
+├── bootstrap-linux.sh         # Lima/Linux/WSL2 setup (supports --interactive)
 ├── bootstrap-dotfiles.sh      # Shared symlink creation
-├── check-health.sh            # Health validation
+├── dotfiles-doctor.sh         # Comprehensive health check
+├── check-health.sh            # Legacy health validation
 ├── show-metrics.sh            # Metrics visualization
 ├── Brewfile                   # Package definitions
 ├── Dockerfile                 # Docker bootstrap example
