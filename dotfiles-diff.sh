@@ -10,20 +10,11 @@
 # ============================================================
 set -uo pipefail
 
-# Colors
-if [[ -t 1 ]]; then
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    RED='\033[0;31m'
-    CYAN='\033[0;36m'
-    BOLD='\033[1m'
-    NC='\033[0m'
-else
-    GREEN='' YELLOW='' BLUE='' RED='' CYAN='' BOLD='' NC=''
-fi
+# Source shared logging functions
+SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
+source "$SCRIPT_DIR/lib/_logging.sh"
 
-info()  { echo -e "${BLUE}[INFO]${NC} $1"; }
+# Override for diff-specific labels
 pass()  { echo -e "${GREEN}[SYNC]${NC} $1"; }
 warn()  { echo -e "${YELLOW}[DIFF]${NC} $1"; }
 
