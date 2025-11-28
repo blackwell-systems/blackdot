@@ -7,7 +7,7 @@
 
 **Version:** 1.0.0 | [Changelog](../CHANGELOG.md) | [Quick Start Guide](../README.md)
 
-This is the comprehensive reference documentation for the dotfiles system. It covers configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code portable sessions**, and a **Bitwarden-based vault bootstrap** for SSH keys, AWS credentials, and environment secrets across **macOS**, **Lima**, **WSL2**, and **Linux**.
+This is the comprehensive reference documentation for the dotfiles system. It covers configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code portable sessions**, and a **Bitwarden-based vault bootstrap** for SSH keys, AWS credentials, and environment secrets across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
 
 ### 🌟 Key Innovation: Portable Claude Code Sessions
 
@@ -479,7 +479,7 @@ When setting up a new machine or VM, no username updates are needed. Everything 
 ## Global Prerequisites
 
 ### Required
-- A supported environment: macOS, Linux, WSL2, or Lima
+- A supported environment: macOS, Windows, Linux, WSL2, or Lima
 - Internet access (for installing packages)
 
 ### Auto-installed (if missing)
@@ -2062,4 +2062,4 @@ echo $SOME_EXPECTED_VAR
 
 This repository is licensed under the **MIT License**.
 
-By following this guide, you can fully restore your **dotfiles**, **SSH keys**, **AWS configuration**, **packages via Brewfile**, **Claude workspace**, and **environment secrets** across macOS and Lima/Linux in a reproducible, vault-backed, fully unified way.
+By following this guide, you can fully restore your **dotfiles**, **SSH keys**, **AWS configuration**, **packages via Brewfile**, **Claude workspace**, and **environment secrets** across macOS, Windows, and Linux in a reproducible, vault-backed, fully unified way.
