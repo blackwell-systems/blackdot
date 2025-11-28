@@ -76,6 +76,16 @@ if [[ ${#ITEMS_TO_SYNC[@]} -eq 0 ]]; then
     usage
 fi
 
+# Check offline mode
+if is_offline; then
+    warn "DOTFILES_OFFLINE=1 - Cannot sync to Bitwarden in offline mode"
+    echo ""
+    echo "To sync later:"
+    echo "  unset DOTFILES_OFFLINE"
+    echo "  dotfiles vault sync --all"
+    exit 0
+fi
+
 # Verify prerequisites
 require_bw
 require_jq

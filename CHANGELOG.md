@@ -11,6 +11,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Blog posts on dotfiles architecture and Claude session portability
 - Open source vault system as standalone project
 
+## [1.5.0] - 2025-11-28
+
+### Added - Offline Mode Support
+
+#### Offline Mode
+- **`DOTFILES_OFFLINE=1`** - Skip all Bitwarden vault operations gracefully
+  - `is_offline()` - Check if offline mode is enabled
+  - `require_online()` - Helper to skip vault operations in offline mode
+  - `require_bw()` and `require_logged_in()` - Skip checks in offline mode
+
+#### Use Cases
+- Air-gapped environments without Bitwarden access
+- Bitwarden service outages
+- Development/testing without vault connectivity
+- CI/CD pipelines without secrets
+
+### Changed
+- `vault/bootstrap-vault.sh` - Exits gracefully with helpful message in offline mode
+- `vault/sync-to-bitwarden.sh` - Skips sync with explanation in offline mode
+- Updated all documentation with offline mode usage
+
+### Documentation
+- Added offline mode to README.md and docs/README.md environment flags
+- Added "Air-gapped/Offline" use case to both READMEs
+- Updated vault documentation with offline mode examples
+- Updated ROADMAP.md - marked offline mode as completed
+
 ## [1.4.0] - 2025-11-28
 
 ### Added - Bootstrap Consolidation & Safety Features
