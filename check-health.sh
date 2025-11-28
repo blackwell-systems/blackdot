@@ -1,9 +1,18 @@
 #!/usr/bin/env zsh
 # ============================================================
-# FILE: check-health.sh
+# FILE: check-health.sh (LEGACY)
 # Verifies dotfiles installation health
 # Usage: ./check-health.sh [--fix] [--drift]
+#
+# NOTE: Prefer `dotfiles doctor` for health checks.
+# This script is kept for --drift functionality.
 # ============================================================
+
+# Deprecation notice (only for non-drift usage)
+if [[ ! " $* " =~ " --drift " ]] && [[ ! " $* " =~ " -d " ]]; then
+    echo -e "\033[33m[NOTE]\033[0m Consider using 'dotfiles doctor' instead"
+    echo ""
+fi
 set -uo pipefail
 
 # Source vault common for SSH_KEYS and AWS_EXPECTED_PROFILES
