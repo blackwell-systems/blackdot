@@ -162,6 +162,61 @@ jobs:
         if: success()
         run: echo "✅ All integration tests passed!"
 
+  coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          echo "📦 Installing dependencies..."
+          sudo apt-get update
+          sudo apt-get install -y bats zsh kcov
+
+      - name: Make scripts executable
+        run: |
+          chmod +x test/mocks/bw
+          chmod +x *.sh vault/*.sh 2>/dev/null || true
+
+      - name: Run unit tests with coverage
+        run: |
+          echo "🧪 Running unit tests with coverage..."
+          mkdir -p coverage/unit
+          kcov --include-path=./vault,./zsh coverage/unit bats test/vault_common.bats test/cli_commands.bats || true
+
+      - name: Run integration tests with coverage
+        run: |
+          echo "🧪 Running integration tests with coverage..."
+          mkdir -p coverage/integration
+          kcov --include-path=./vault,./ coverage/integration bats test/integration.bats || true
+
+      - name: Merge coverage reports
+        run: |
+          echo "📊 Merging coverage reports..."
+          mkdir -p coverage/merged
+          kcov --merge coverage/merged coverage/unit coverage/integration || true
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          directory: ./coverage/merged
+          flags: unittests,integrationtests
+          fail_ci_if_error: false
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          echo "📊 Coverage collection complete"
+          if [ -d "coverage/merged" ]; then
+            echo "Coverage files:"
+            find coverage/merged -name "*.json" -o -name "*.xml" | head -5
+          fi
+
   markdown-lint:
     name: Markdown Validation
     runs-on: ubuntu-latest
