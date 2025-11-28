@@ -7,28 +7,11 @@
 # ============================================================
 set -uo pipefail
 
-# Colors for output (if terminal supports it)
-if [[ -t 1 ]]; then
-    RED='\033[0;31m'
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    NC='\033[0m'
-else
-    RED=''
-    GREEN=''
-    YELLOW=''
-    BLUE=''
-    NC=''
-fi
+# Source shared logging functions
+SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
+source "$SCRIPT_DIR/lib/_logging.sh"
 
-pass() { echo -e "${GREEN}[OK]${NC} $1"; }
-warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-info() { echo -e "${BLUE}[INFO]${NC} $1"; }
-
-echo ""
-echo -e "${BLUE}=== Drift Detection (Local vs Bitwarden) ===${NC}"
-echo ""
+section "Drift Detection (Local vs Bitwarden)"
 
 # Get Bitwarden session
 VAULT_DIR="$HOME/workspace/dotfiles/vault"

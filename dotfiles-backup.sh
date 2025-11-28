@@ -10,24 +10,12 @@
 # ============================================================
 set -uo pipefail
 
+# Source shared logging functions
+SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
+source "$SCRIPT_DIR/lib/_logging.sh"
+
 BACKUP_DIR="$HOME/.dotfiles-backups"
 MAX_BACKUPS=10
-
-# Colors
-if [[ -t 1 ]]; then
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    RED='\033[0;31m'
-    NC='\033[0m'
-else
-    GREEN='' YELLOW='' BLUE='' RED='' NC=''
-fi
-
-info()  { echo -e "${BLUE}[INFO]${NC} $1"; }
-pass()  { echo -e "${GREEN}[OK]${NC} $1"; }
-warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
-fail()  { echo -e "${RED}[FAIL]${NC} $1"; }
 
 # Files to backup
 BACKUP_FILES=(

@@ -6,17 +6,11 @@
 # ============================================================
 set -uo pipefail
 
-# Colors
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-BOLD='\033[1m'
-NC='\033[0m'
+# Source shared logging functions
+SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
+source "$SCRIPT_DIR/lib/_logging.sh"
 
-info()  { echo -e "${BLUE}[INFO]${NC} $1"; }
-pass()  { echo -e "${GREEN}[OK]${NC} $1"; }
-warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
+# Additional init-specific function
 step()  { echo -e "\n${BOLD}${CYAN}==> $1${NC}"; }
 
 DOTFILES_DIR="$HOME/workspace/dotfiles"
