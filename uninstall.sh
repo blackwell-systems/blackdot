@@ -1,0 +1,150 @@
+#!/usr/bin/env bash
+# ============================================================
+# FILE: uninstall.sh
+# Cleanly remove dotfiles configuration
+# Usage: ./uninstall.sh [--dry-run] [--keep-secrets]
+# ============================================================
+set -euo pipefail
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+DRY_RUN=false
+KEEP_SECRETS=false
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --dry-run|-n) DRY_RUN=true; shift ;;
+        --keep-secrets|-k) KEEP_SECRETS=true; shift ;;
+        --help|-h)
+            echo "Dotfiles Uninstaller"
+            echo ""
+            echo "Usage: ./uninstall.sh [options]"
+            echo ""
+            echo "Options:"
+            echo "  --dry-run, -n      Show what would be removed (don't delete)"
+            echo "  --keep-secrets, -k Keep SSH keys and AWS credentials"
+            echo "  --help, -h         Show this help"
+            exit 0
+            ;;
+        *) echo "Unknown option: $1"; exit 1 ;;
+    esac
+done
+
+echo ""
+echo -e "${BOLD}${RED}Dotfiles Uninstaller${NC}"
+echo ""
+
+if $DRY_RUN; then
+    echo -e "${YELLOW}DRY RUN MODE - No changes will be made${NC}"
+    echo ""
+fi
+
+# Files/symlinks to remove
+SYMLINKS=(
+    "$HOME/.zshrc"
+    "$HOME/.p10k.zsh"
+    "$HOME/.config/ghostty/config"
+    "$HOME/.claude"
+    "/workspace"
+)
+
+CONFIG_FILES=(
+    "$HOME/.dotfiles-metrics.jsonl"
+    "$HOME/.dotfiles-backups"
+)
+
+SECRET_FILES=(
+    "$HOME/.ssh/config"
+    "$HOME/.aws/config"
+    "$HOME/.aws/credentials"
+    "$HOME/.gitconfig"
+    "$HOME/.local/env.secrets"
+)
+
+remove_item() {
+    local item="$1"
+    local type="$2"
+
+    if [[ -e "$item" ]] || [[ -L "$item" ]]; then
+        if $DRY_RUN; then
+            echo -e "  ${YELLOW}Would remove${NC}: $item ($type)"
+        else
+            rm -rf "$item"
+            echo -e "  ${GREEN}Removed${NC}: $item"
+        fi
+    fi
+}
+
+# Remove symlinks
+echo -e "${BLUE}Removing symlinks...${NC}"
+for link in "${SYMLINKS[@]}"; do
+    if [[ -L "$link" ]]; then
+        remove_item "$link" "symlink"
+    fi
+done
+
+# Remove config files
+echo ""
+echo -e "${BLUE}Removing config files...${NC}"
+for file in "${CONFIG_FILES[@]}"; do
+    remove_item "$file" "config"
+done
+
+# Handle secrets
+echo ""
+if $KEEP_SECRETS; then
+    echo -e "${BLUE}Keeping secrets (--keep-secrets specified)${NC}"
+else
+    echo -e "${BLUE}Removing secrets...${NC}"
+    echo -e "${YELLOW}WARNING: This will delete SSH keys, AWS credentials, etc.${NC}"
+
+    if ! $DRY_RUN; then
+        read -p "Are you sure? (yes/no): " confirm
+        if [[ "$confirm" != "yes" ]]; then
+            echo "Keeping secrets."
+            KEEP_SECRETS=true
+        fi
+    fi
+
+    if ! $KEEP_SECRETS; then
+        for file in "${SECRET_FILES[@]}"; do
+            remove_item "$file" "secret"
+        done
+    fi
+fi
+
+# Remove dotfiles repo
+echo ""
+echo -e "${BLUE}Dotfiles repository...${NC}"
+if [[ -d "$HOME/workspace/dotfiles" ]]; then
+    if $DRY_RUN; then
+        echo -e "  ${YELLOW}Would remove${NC}: $HOME/workspace/dotfiles (repository)"
+    else
+        read -p "Remove dotfiles repository? (yes/no): " confirm
+        if [[ "$confirm" == "yes" ]]; then
+            rm -rf "$HOME/workspace/dotfiles"
+            echo -e "  ${GREEN}Removed${NC}: $HOME/workspace/dotfiles"
+        else
+            echo "  Keeping repository."
+        fi
+    fi
+fi
+
+# Summary
+echo ""
+if $DRY_RUN; then
+    echo -e "${YELLOW}Dry run complete. Run without --dry-run to apply changes.${NC}"
+else
+    echo -e "${GREEN}Uninstall complete.${NC}"
+    echo ""
+    echo "To reinstall:"
+    echo "  curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash"
+fi
+echo ""

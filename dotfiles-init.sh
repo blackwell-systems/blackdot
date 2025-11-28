@@ -1,0 +1,175 @@
+#!/usr/bin/env zsh
+# ============================================================
+# FILE: dotfiles-init.sh
+# Interactive first-time setup wizard
+# Usage: dotfiles init
+# ============================================================
+set -uo pipefail
+
+# Colors
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+info()  { echo -e "${BLUE}[INFO]${NC} $1"; }
+pass()  { echo -e "${GREEN}[OK]${NC} $1"; }
+warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
+step()  { echo -e "\n${BOLD}${CYAN}==> $1${NC}"; }
+
+DOTFILES_DIR="$HOME/workspace/dotfiles"
+
+echo ""
+echo -e "${BOLD}${CYAN}"
+cat << 'EOF'
+    ____        __  _____ __
+   / __ \____  / /_/ __(_) /__  _____
+  / / / / __ \/ __/ /_/ / / _ \/ ___/
+ / /_/ / /_/ / /_/ __/ / /  __(__  )
+/_____/\____/\__/_/ /_/_/\___/____/
+
+         First-Time Setup Wizard
+EOF
+echo -e "${NC}"
+
+# Check if already initialized
+step "Checking current state"
+
+NEEDS_SETUP=false
+
+if [[ ! -L "$HOME/.zshrc" ]]; then
+    warn "zshrc not linked"
+    NEEDS_SETUP=true
+else
+    pass "zshrc linked"
+fi
+
+if ! command -v bw &>/dev/null; then
+    warn "Bitwarden CLI not installed"
+    NEEDS_SETUP=true
+else
+    pass "Bitwarden CLI installed"
+fi
+
+if [[ -z "${BW_SESSION:-}" ]]; then
+    warn "Bitwarden not unlocked"
+    NEEDS_SETUP=true
+else
+    pass "Bitwarden session active"
+fi
+
+if ! $NEEDS_SETUP; then
+    echo ""
+    pass "Dotfiles already initialized!"
+    echo ""
+    echo "Quick commands:"
+    echo "  dotfiles status    - Visual dashboard"
+    echo "  dotfiles doctor    - Health check"
+    echo "  dotfiles help      - All commands"
+    exit 0
+fi
+
+# Step 1: Run bootstrap if needed
+step "Step 1: Bootstrap"
+
+if [[ ! -L "$HOME/.zshrc" ]]; then
+    echo "Running bootstrap to create symlinks..."
+    read -p "Continue? [Y/n]: " confirm
+    if [[ "${confirm:-Y}" =~ ^[Yy]$ ]]; then
+        if [[ "$(uname -s)" == "Darwin" ]]; then
+            "$DOTFILES_DIR/bootstrap-mac.sh"
+        else
+            "$DOTFILES_DIR/bootstrap-linux.sh"
+        fi
+        pass "Bootstrap complete"
+    else
+        warn "Skipped bootstrap"
+    fi
+else
+    pass "Bootstrap already done"
+fi
+
+# Step 2: Bitwarden setup
+step "Step 2: Bitwarden Setup"
+
+if ! command -v bw &>/dev/null; then
+    echo "Bitwarden CLI is required for secret management."
+    echo ""
+    echo "Install with:"
+    echo "  brew install bitwarden-cli"
+    echo ""
+    echo "Or skip if you don't use Bitwarden vault features."
+    read -p "Skip Bitwarden setup? [y/N]: " skip
+    if [[ "${skip:-N}" =~ ^[Yy]$ ]]; then
+        warn "Skipped Bitwarden setup"
+    else
+        echo "Please install Bitwarden CLI and run 'dotfiles init' again."
+        exit 1
+    fi
+else
+    # Check login status
+    if ! bw login --check &>/dev/null; then
+        echo "Please log in to Bitwarden:"
+        bw login
+    fi
+
+    # Check unlock status
+    if [[ -z "${BW_SESSION:-}" ]]; then
+        echo ""
+        echo "Unlock your vault:"
+        echo "  export BW_SESSION=\"\$(bw unlock --raw)\""
+        echo ""
+        read -p "Run this now? [Y/n]: " confirm
+        if [[ "${confirm:-Y}" =~ ^[Yy]$ ]]; then
+            export BW_SESSION="$(bw unlock --raw)"
+            if [[ -n "$BW_SESSION" ]]; then
+                pass "Vault unlocked"
+                # Cache session
+                echo "$BW_SESSION" > "$DOTFILES_DIR/vault/.bw-session"
+                chmod 600 "$DOTFILES_DIR/vault/.bw-session"
+            fi
+        fi
+    else
+        pass "Already unlocked"
+    fi
+fi
+
+# Step 3: Restore secrets
+step "Step 3: Restore Secrets"
+
+if [[ -n "${BW_SESSION:-}" ]]; then
+    echo "Would you like to restore secrets from Bitwarden?"
+    echo "This will restore: SSH keys, AWS credentials, Git config, etc."
+    echo ""
+    read -p "Restore secrets? [Y/n]: " confirm
+    if [[ "${confirm:-Y}" =~ ^[Yy]$ ]]; then
+        "$DOTFILES_DIR/vault/bootstrap-vault.sh"
+        pass "Secrets restored"
+    else
+        warn "Skipped secret restore"
+    fi
+else
+    warn "Skipped (Bitwarden not configured)"
+fi
+
+# Step 4: Health check
+step "Step 4: Health Check"
+
+echo "Running health check..."
+"$DOTFILES_DIR/dotfiles-doctor.sh" || true
+
+# Complete
+step "Setup Complete!"
+
+echo ""
+echo "Your dotfiles are configured. Start a new shell or run:"
+echo "  exec zsh"
+echo ""
+echo "Quick commands:"
+echo "  dotfiles status         - Visual dashboard"
+echo "  dotfiles doctor         - Health check"
+echo "  dotfiles vault restore  - Restore secrets"
+echo "  dotfiles help           - All commands"
+echo ""
