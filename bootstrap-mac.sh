@@ -1,10 +1,91 @@
 #!/usr/bin/env bash
 # ============================================================
 # FILE: bootstrap-mac.sh
+# Usage:
+#   ./bootstrap-mac.sh              # Standard bootstrap
+#   ./bootstrap-mac.sh --interactive  # Prompt for options
+#   ./bootstrap-mac.sh --help       # Show help
 # ============================================================
 set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+# Interactive mode flag
+INTERACTIVE=false
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --interactive|-i)
+            INTERACTIVE=true
+            shift
+            ;;
+        --help|-h)
+            echo "macOS Bootstrap Script"
+            echo ""
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --interactive, -i    Prompt for configuration options"
+            echo "  --help, -h           Show this help"
+            echo ""
+            echo "Environment variables:"
+            echo "  SKIP_WORKSPACE_SYMLINK=true   Skip /workspace symlink creation"
+            echo "  SKIP_CLAUDE_SETUP=true        Skip Claude Code configuration"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
+# Interactive prompts
+prompt_yes_no() {
+    local prompt="$1"
+    local default="${2:-Y}"
+    local result
+
+    if [[ "$default" == "Y" ]]; then
+        prompt="$prompt [Y/n]"
+    else
+        prompt="$prompt [y/N]"
+    fi
+
+    echo -en "${CYAN}$prompt ${NC}"
+    read -r result
+
+    if [[ -z "$result" ]]; then
+        result="$default"
+    fi
+
+    [[ "$result" =~ ^[Yy] ]]
+}
+
+if $INTERACTIVE; then
+    echo ""
+    echo -e "${BLUE}=== Interactive Bootstrap Configuration ===${NC}"
+    echo ""
+
+    if ! prompt_yes_no "Enable /workspace symlink for portable Claude sessions?" "Y"; then
+        export SKIP_WORKSPACE_SYMLINK=true
+    fi
+
+    if ! prompt_yes_no "Configure Claude Code integration?" "Y"; then
+        export SKIP_CLAUDE_SETUP=true
+    fi
+
+    echo ""
+fi
 
 echo "=== macOS bootstrap starting ==="
 

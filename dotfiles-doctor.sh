@@ -1,0 +1,371 @@
+#!/usr/bin/env bash
+# ============================================================
+# dotfiles-doctor - Comprehensive dotfiles health check
+#
+# Usage:
+#   dotfiles doctor          # Run all checks
+#   dotfiles doctor --fix    # Auto-fix permissions
+#   dotfiles doctor --quick  # Fast checks only
+#
+# Combines: health check + vault status + update check
+# ============================================================
+set -uo pipefail
+
+# Find dotfiles directory
+if [[ -n "${DOTFILES_DIR:-}" ]]; then
+    DOTFILES_DIR="$DOTFILES_DIR"
+elif [[ -d "$HOME/workspace/dotfiles" ]]; then
+    DOTFILES_DIR="$HOME/workspace/dotfiles"
+elif [[ -d "/workspace/dotfiles" ]]; then
+    DOTFILES_DIR="/workspace/dotfiles"
+else
+    echo "Error: Could not find dotfiles directory"
+    exit 1
+fi
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+DIM='\033[2m'
+NC='\033[0m'
+
+# Counters
+CHECKS_PASSED=0
+CHECKS_FAILED=0
+CHECKS_WARNED=0
+
+# Parse arguments
+FIX_MODE=false
+QUICK_MODE=false
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --fix|-f)
+            FIX_MODE=true
+            shift
+            ;;
+        --quick|-q)
+            QUICK_MODE=true
+            shift
+            ;;
+        --help|-h)
+            echo "dotfiles-doctor - Comprehensive dotfiles health check"
+            echo ""
+            echo "Usage: dotfiles doctor [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --fix, -f      Auto-fix permission issues"
+            echo "  --quick, -q    Run quick checks only (skip vault)"
+            echo "  --help, -h     Show this help"
+            exit 0
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
+# Logging functions
+pass() {
+    echo -e "${GREEN}✓${NC} $1"
+    ((CHECKS_PASSED++))
+}
+
+fail() {
+    echo -e "${RED}✗${NC} $1"
+    ((CHECKS_FAILED++))
+}
+
+warn() {
+    echo -e "${YELLOW}!${NC} $1"
+    ((CHECKS_WARNED++))
+}
+
+info() {
+    echo -e "${BLUE}ℹ${NC} $1"
+}
+
+section() {
+    echo ""
+    echo -e "${BOLD}${CYAN}── $1 ──${NC}"
+}
+
+# Banner
+echo ""
+echo -e "${BOLD}${CYAN}"
+cat << 'EOF'
+    ____        __  _____ __                ____             __
+   / __ \____  / /_/ __(_) /__  _____      / __ \____  _____/ /_____  _____
+  / / / / __ \/ __/ /_/ / / _ \/ ___/_____/ / / / __ \/ ___/ __/ __ \/ ___/
+ / /_/ / /_/ / /_/ __/ / /  __(__  )_____/ /_/ / /_/ / /__/ /_/ /_/ / /
+/_____/\____/\__/_/ /_/_/\___/____/     /_____/\____/\___/\__/\____/_/
+EOF
+echo -e "${NC}"
+echo -e "${DIM}Comprehensive dotfiles health check${NC}"
+echo ""
+
+# ============================================================
+# Section 1: Version & Updates
+# ============================================================
+section "Version & Updates"
+
+# Check current version
+if [[ -f "$DOTFILES_DIR/VERSION" ]]; then
+    VERSION=$(cat "$DOTFILES_DIR/VERSION")
+    pass "Dotfiles version: $VERSION"
+else
+    warn "VERSION file not found"
+fi
+
+# Check for updates (quick git fetch)
+if [[ -d "$DOTFILES_DIR/.git" ]]; then
+    cd "$DOTFILES_DIR"
+
+    # Check if we can reach origin
+    if git fetch origin main --dry-run 2>/dev/null; then
+        LOCAL=$(git rev-parse HEAD 2>/dev/null)
+        REMOTE=$(git rev-parse origin/main 2>/dev/null)
+
+        if [[ "$LOCAL" == "$REMOTE" ]]; then
+            pass "Up to date with origin/main"
+        else
+            BEHIND=$(git rev-list --count HEAD..origin/main 2>/dev/null || echo "?")
+            warn "Behind origin/main by $BEHIND commit(s) - run: dotfiles-upgrade"
+        fi
+    else
+        info "Could not check for updates (offline?)"
+    fi
+else
+    warn "Not a git repository"
+fi
+
+# ============================================================
+# Section 2: Core Components
+# ============================================================
+section "Core Components"
+
+# Check symlinks
+check_symlink() {
+    local name="$1"
+    local link="$2"
+    local target="$3"
+
+    if [[ -L "$link" ]]; then
+        local actual_target=$(readlink "$link")
+        if [[ "$actual_target" == "$target" || "$actual_target" == "$DOTFILES_DIR/$target" ]]; then
+            pass "$name symlink OK"
+        else
+            fail "$name points to wrong target: $actual_target"
+        fi
+    elif [[ -e "$link" ]]; then
+        warn "$name exists but is not a symlink"
+    else
+        fail "$name symlink missing"
+    fi
+}
+
+check_symlink "~/.zshrc" "$HOME/.zshrc" "zsh/zshrc"
+check_symlink "~/.p10k.zsh" "$HOME/.p10k.zsh" "zsh/p10k.zsh"
+check_symlink "~/.claude" "$HOME/.claude" "$HOME/workspace/.claude"
+
+# Check /workspace symlink
+if [[ -L "/workspace" ]]; then
+    pass "/workspace symlink exists"
+else
+    warn "/workspace symlink not configured (optional for multi-machine)"
+fi
+
+# ============================================================
+# Section 3: Required Commands
+# ============================================================
+section "Required Commands"
+
+check_command() {
+    local cmd="$1"
+    local pkg="${2:-$1}"
+
+    if command -v "$cmd" >/dev/null 2>&1; then
+        local version=$("$cmd" --version 2>/dev/null | head -1 | cut -d' ' -f2- | head -c 30)
+        pass "$cmd ${DIM}($version)${NC}"
+    else
+        fail "$cmd not found - install with: brew install $pkg"
+    fi
+}
+
+check_command "zsh"
+check_command "git"
+check_command "brew" "homebrew"
+check_command "jq"
+
+# Optional but recommended
+if command -v bw >/dev/null 2>&1; then
+    pass "bw (Bitwarden CLI)"
+else
+    info "bw not installed (optional - for vault features)"
+fi
+
+# ============================================================
+# Section 4: SSH Configuration
+# ============================================================
+section "SSH Configuration"
+
+SSH_DIR="$HOME/.ssh"
+
+if [[ -d "$SSH_DIR" ]]; then
+    # Check directory permissions
+    perms=$(stat -c "%a" "$SSH_DIR" 2>/dev/null || stat -f "%OLp" "$SSH_DIR" 2>/dev/null)
+    if [[ "$perms" == "700" ]]; then
+        pass "~/.ssh directory permissions (700)"
+    else
+        if $FIX_MODE; then
+            chmod 700 "$SSH_DIR"
+            pass "~/.ssh permissions fixed to 700"
+        else
+            fail "~/.ssh has permissions $perms (should be 700)"
+        fi
+    fi
+
+    # Check for SSH keys
+    key_count=$(find "$SSH_DIR" -name "id_*" -not -name "*.pub" 2>/dev/null | wc -l)
+    if [[ $key_count -gt 0 ]]; then
+        pass "Found $key_count SSH private key(s)"
+
+        # Check key permissions
+        for key in "$SSH_DIR"/id_*; do
+            [[ -f "$key" && ! "$key" == *.pub ]] || continue
+            perms=$(stat -c "%a" "$key" 2>/dev/null || stat -f "%OLp" "$key" 2>/dev/null)
+            if [[ "$perms" != "600" ]]; then
+                if $FIX_MODE; then
+                    chmod 600 "$key"
+                    pass "Fixed permissions on $(basename "$key")"
+                else
+                    fail "$(basename "$key") has permissions $perms (should be 600)"
+                fi
+            fi
+        done
+    else
+        warn "No SSH keys found in ~/.ssh"
+    fi
+else
+    warn "~/.ssh directory does not exist"
+fi
+
+# ============================================================
+# Section 5: AWS Configuration (if present)
+# ============================================================
+if [[ -d "$HOME/.aws" ]] || command -v aws >/dev/null 2>&1; then
+    section "AWS Configuration"
+
+    if [[ -f "$HOME/.aws/config" ]]; then
+        pass "~/.aws/config exists"
+    else
+        warn "~/.aws/config not found"
+    fi
+
+    if [[ -f "$HOME/.aws/credentials" ]]; then
+        perms=$(stat -c "%a" "$HOME/.aws/credentials" 2>/dev/null || stat -f "%OLp" "$HOME/.aws/credentials" 2>/dev/null)
+        if [[ "$perms" == "600" ]]; then
+            pass "~/.aws/credentials permissions (600)"
+        else
+            if $FIX_MODE; then
+                chmod 600 "$HOME/.aws/credentials"
+                pass "Fixed ~/.aws/credentials permissions"
+            else
+                fail "~/.aws/credentials has permissions $perms (should be 600)"
+            fi
+        fi
+    else
+        info "~/.aws/credentials not found (using SSO or IAM roles?)"
+    fi
+fi
+
+# ============================================================
+# Section 6: Bitwarden Vault (unless quick mode)
+# ============================================================
+if ! $QUICK_MODE && command -v bw >/dev/null 2>&1; then
+    section "Bitwarden Vault"
+
+    if bw login --check >/dev/null 2>&1; then
+        pass "Logged in to Bitwarden"
+
+        # Check if unlocked
+        if bw unlock --check >/dev/null 2>&1; then
+            pass "Vault is unlocked"
+        else
+            warn "Vault is locked - run: export BW_SESSION=\"\$(bw unlock --raw)\""
+        fi
+    else
+        warn "Not logged in to Bitwarden - run: bw login"
+    fi
+fi
+
+# ============================================================
+# Section 7: Shell Configuration
+# ============================================================
+section "Shell Configuration"
+
+# Check default shell
+if [[ "$SHELL" == *"zsh"* ]]; then
+    pass "Default shell is zsh"
+else
+    warn "Default shell is $SHELL (expected zsh)"
+fi
+
+# Check zsh modules exist
+if [[ -d "$DOTFILES_DIR/zsh/zsh.d" ]]; then
+    module_count=$(find "$DOTFILES_DIR/zsh/zsh.d" -name "*.zsh" | wc -l)
+    pass "Found $module_count zsh modules in zsh.d/"
+else
+    warn "zsh.d/ directory not found"
+fi
+
+# Check Powerlevel10k
+if [[ -f "$HOME/.p10k.zsh" ]]; then
+    pass "Powerlevel10k configuration exists"
+else
+    warn "Powerlevel10k configuration missing"
+fi
+
+# ============================================================
+# Summary
+# ============================================================
+echo ""
+echo -e "${BOLD}═══════════════════════════════════════════════════════════${NC}"
+echo ""
+
+TOTAL=$((CHECKS_PASSED + CHECKS_FAILED + CHECKS_WARNED))
+
+if [[ $CHECKS_FAILED -eq 0 && $CHECKS_WARNED -eq 0 ]]; then
+    echo -e "${GREEN}${BOLD}  ✓ All $TOTAL checks passed!${NC}"
+    HEALTH_SCORE=100
+elif [[ $CHECKS_FAILED -eq 0 ]]; then
+    echo -e "${YELLOW}${BOLD}  ! $CHECKS_PASSED passed, $CHECKS_WARNED warnings${NC}"
+    HEALTH_SCORE=$((100 - (CHECKS_WARNED * 5)))
+else
+    echo -e "${RED}${BOLD}  ✗ $CHECKS_PASSED passed, $CHECKS_FAILED failed, $CHECKS_WARNED warnings${NC}"
+    HEALTH_SCORE=$((100 - (CHECKS_FAILED * 10) - (CHECKS_WARNED * 5)))
+    [[ $HEALTH_SCORE -lt 0 ]] && HEALTH_SCORE=0
+fi
+
+echo ""
+echo -e "  Health Score: ${BOLD}$HEALTH_SCORE/100${NC}"
+echo ""
+
+if [[ $CHECKS_FAILED -gt 0 && ! $FIX_MODE ]]; then
+    echo -e "  ${DIM}Run with --fix to auto-repair permission issues${NC}"
+    echo ""
+fi
+
+echo -e "${BOLD}═══════════════════════════════════════════════════════════${NC}"
+echo ""
+
+# Exit with appropriate code
+if [[ $CHECKS_FAILED -gt 0 ]]; then
+    exit 1
+else
+    exit 0
+fi
