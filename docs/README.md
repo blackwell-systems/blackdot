@@ -167,15 +167,15 @@ All features are opt-in by default and can be disabled without breaking the rest
 
 ## Use Cases
 
-**Single Linux machine** – Vault-backed secrets, health checks, modern CLI. No cross-platform complexity.
+- **Single Linux machine** – Vault-backed secrets, health checks, modern CLI. No cross-platform complexity.
 
-**macOS daily driver** – Full experience including Ghostty terminal config and macOS system preferences.
+- **macOS daily driver** – Full experience including Ghostty terminal config and macOS system preferences.
 
-**Docker/CI environments** – Bootstrap in containers for reproducible builds. Vault restore from CI secrets.
+- **Docker/CI environments** – Bootstrap in containers for reproducible builds. Vault restore from CI secrets.
 
-**Multi-machine workflow** – Develop on macOS, test on Linux VM, deploy from WSL. Same dotfiles, same secrets, same Claude sessions everywhere.
+- **Multi-machine workflow** – Develop on macOS, test on Linux VM, deploy from WSL. Same dotfiles, same secrets, same Claude sessions everywhere.
 
-**Team onboarding** – New developer? Clone, bootstrap, unlock vault. Consistent environment in minutes, not days.
+- **Team onboarding** – New developer? Clone, bootstrap, unlock vault. Consistent environment in minutes, not days.
 
 ---
 
@@ -232,8 +232,7 @@ bw-validate  # Ensure all items have correct structure
 
 ### Tips
 
-<details>
-<summary><b>Portable Claude Code Sessions (optional)</b></summary>
+#### Portable Claude Code Sessions (optional)
 
 If you use Claude Code across multiple machines, the `/workspace` symlink keeps your sessions in sync:
 
