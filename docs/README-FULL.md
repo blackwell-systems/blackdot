@@ -1644,7 +1644,7 @@ The recommended way to manage and check your dotfiles:
 dotfiles status          # Quick visual dashboard (color-coded)
 dotfiles doctor          # Comprehensive health check
 dotfiles doctor --fix    # Auto-repair permission issues
-dotfiles doctor --quick  # Fast checks (skip vault status)
+dotfiles drift           # Compare local files vs Bitwarden vault
 dotfiles upgrade         # Pull latest, run bootstrap, verify
 dotfiles cd              # Navigate to dotfiles directory
 dotfiles edit            # Open dotfiles in $EDITOR
@@ -1657,7 +1657,7 @@ Run the health check to verify your dotfiles installation:
 
 ```bash
 dotfiles doctor          # Recommended
-./check-health.sh        # Legacy command (also works)
+dotfiles drift           # Compare local vs Bitwarden
 ```
 
 The script verifies:
@@ -1675,13 +1675,12 @@ The script verifies:
 
 ```bash
 dotfiles doctor --fix
-./check-health.sh --fix
 ```
 
-**Drift detection**: Run with `--drift` to compare local files vs Bitwarden:
+**Drift detection**: Compare local files vs Bitwarden vault:
 
 ```bash
-./check-health.sh --drift
+dotfiles drift
 ```
 
 This checks if your local `~/.ssh/config`, `~/.aws/config`, `~/.gitconfig`, etc. differ from what's stored in Bitwarden. Useful for detecting unsync'd changes before switching machines.

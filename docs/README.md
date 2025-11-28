@@ -372,7 +372,7 @@ A unified command for managing your dotfiles:
 dotfiles status          # Quick visual dashboard (color-coded)
 dotfiles doctor          # Comprehensive health check
 dotfiles doctor --fix    # Auto-repair permission issues
-dotfiles doctor --quick  # Fast checks (skip vault)
+dotfiles drift           # Compare local files vs Bitwarden vault
 dotfiles upgrade         # Pull latest, run bootstrap, verify
 dotfiles cd              # Navigate to dotfiles directory
 dotfiles edit            # Open dotfiles in $EDITOR
@@ -384,9 +384,9 @@ dotfiles help            # Show all commands
 Validate your environment anytime:
 
 ```bash
-./check-health.sh           # Run validation
-./check-health.sh --fix     # Auto-repair permissions
-./check-health.sh --drift   # Compare local vs Bitwarden
+dotfiles doctor             # Comprehensive check
+dotfiles doctor --fix       # Auto-repair permissions
+dotfiles drift              # Compare local vs Bitwarden vault
 ```
 
 **Checks performed:**

@@ -34,6 +34,9 @@ dotfiles() {
         doctor|health|check)
             "$HOME/workspace/dotfiles/dotfiles-doctor.sh" "$@"
             ;;
+        drift)
+            "$HOME/workspace/dotfiles/check-health.sh" --drift
+            ;;
         upgrade|update)
             dotfiles-upgrade
             ;;
@@ -51,6 +54,7 @@ dotfiles() {
             echo "Commands:"
             echo "  status, s         Quick visual dashboard"
             echo "  doctor, health    Run comprehensive health check"
+            echo "  drift             Compare local files vs Bitwarden vault"
             echo "  upgrade, update   Pull latest and run bootstrap"
             echo "  cd                Change to dotfiles directory"
             echo "  edit              Open dotfiles in editor"
@@ -59,6 +63,7 @@ dotfiles() {
             echo "Examples:"
             echo "  dotfiles doctor          # Run health check"
             echo "  dotfiles doctor --fix    # Auto-fix permissions"
+            echo "  dotfiles drift           # Check for vault drift"
             echo "  dotfiles upgrade         # Update dotfiles"
             ;;
         *)

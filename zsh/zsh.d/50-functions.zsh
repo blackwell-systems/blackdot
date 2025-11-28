@@ -208,7 +208,7 @@ dotfiles-upgrade() {
 
     # Run health check with auto-fix
     echo "   Running health check..."
-    "$DOTFILES_DIR/check-health.sh" --fix
+    "$DOTFILES_DIR/dotfiles-doctor.sh" --fix
 
     echo "✅ Upgrade complete! Restart shell to apply all changes."
     echo "   Or run: source ~/.zshrc"

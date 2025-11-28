@@ -81,7 +81,7 @@ cat << 'EOF'
 
 EOF
 echo -e "${NC}"
-echo -e "${BOLD}Enterprise-grade, vault-backed dotfiles${NC}"
+echo -e "${BOLD}Vault-backed configuration that travels with you${NC}"
 echo ""
 
 # Detect OS
