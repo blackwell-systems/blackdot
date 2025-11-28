@@ -1,0 +1,17 @@
+{
+  "id": "mock-ssh-config-id",
+  "organizationId": null,
+  "folderId": null,
+  "type": 2,
+  "reprompt": 0,
+  "name": "dotfiles-SSH-Config",
+  "notes": "# SSH Config for testing\nHost github.com\n    HostName github.com\n    User git\n    IdentityFile ~/.ssh/id_ed25519_test\n    IdentitiesOnly yes\n\nHost *\n    AddKeysToAgent yes\n    IdentitiesOnly yes\n",
+  "favorite": false,
+  "secureNote": {
+    "type": 0
+  },
+  "collectionIds": [],
+  "revisionDate": "2025-01-15T10:00:00.000Z",
+  "creationDate": "2025-01-01T00:00:00.000Z",
+  "deletedDate": null
+}

@@ -118,14 +118,49 @@ jobs:
           echo "📦 Installing zsh..."
           sudo apt-get install -y zsh
 
+      - name: Make mock bw executable
+        run: chmod +x test/mocks/bw
+
       - name: Run unit tests
         run: |
           echo "🧪 Running unit tests..."
-          bats --timing test/*.bats
+          bats --timing test/vault_common.bats test/cli_commands.bats
 
       - name: Test summary
         if: success()
         run: echo "✅ All unit tests passed!"
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install bats-core
+        run: |
+          echo "📦 Installing bats-core..."
+          sudo apt-get update
+          sudo apt-get install -y bats
+
+      - name: Install zsh
+        run: |
+          echo "📦 Installing zsh..."
+          sudo apt-get install -y zsh
+
+      - name: Make scripts executable
+        run: |
+          chmod +x test/mocks/bw
+          chmod +x *.sh vault/*.sh 2>/dev/null || true
+
+      - name: Run integration tests
+        run: |
+          echo "🧪 Running integration tests..."
+          bats --timing test/integration.bats
+
+      - name: Test summary
+        if: success()
+        run: echo "✅ All integration tests passed!"
 
   markdown-lint:
     name: Markdown Validation

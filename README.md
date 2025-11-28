@@ -584,11 +584,18 @@ Run tests with bats-core:
 bats test/vault_common.bats
 ```
 
-**Current test coverage:**
-- ✅ vault/_common.sh data structure helpers (23 tests)
-- ✅ Logging functions (info, pass, warn, fail, debug)
-- ✅ Item path lookups and validation
-- ⏳ Future: vault restoration scripts
+**Test coverage:**
+- ✅ Unit tests: vault/_common.sh data structure helpers (23+ tests)
+- ✅ CLI tests: Script existence and syntax validation
+- ✅ Integration tests: Backup/restore cycles, mock Bitwarden operations (20+ tests)
+- ✅ Error handling: Graceful degradation on failures
+
+```bash
+# Run specific test suites
+./test/run_tests.sh unit         # Unit tests only
+./test/run_tests.sh integration  # Integration tests only
+./test/run_tests.sh all          # All tests (default)
+```
 
 Tests run automatically in GitHub Actions on every push.
 
