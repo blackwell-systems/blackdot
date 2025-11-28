@@ -369,7 +369,8 @@ The bootstrap creates `/workspace → ~/workspace` automatically. If you're on a
 A unified command for managing your dotfiles:
 
 ```bash
-dotfiles doctor          # Run comprehensive health check
+dotfiles status          # Quick visual dashboard (color-coded)
+dotfiles doctor          # Comprehensive health check
 dotfiles doctor --fix    # Auto-repair permission issues
 dotfiles doctor --quick  # Fast checks (skip vault)
 dotfiles upgrade         # Pull latest, run bootstrap, verify
