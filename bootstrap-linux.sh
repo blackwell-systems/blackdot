@@ -11,10 +11,8 @@ set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Colors (only define what we use to satisfy shellcheck)
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-NC='\033[0m'
+# Source shared logging functions
+source "$DOTFILES_DIR/lib/_logging.sh"
 
 # Interactive mode flag
 INTERACTIVE=false

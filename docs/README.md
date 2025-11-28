@@ -2,7 +2,7 @@
 
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
 [![ShellCheck](https://img.shields.io/badge/ShellCheck-Passing-brightgreen)](https://github.com/blackwell-systems/dotfiles/actions)
-[![Unit Tests](https://img.shields.io/badge/Unit_Tests-23%2B-brightgreen)](test/)
+[![Tests](https://img.shields.io/badge/Tests-80%2B-brightgreen)](test/)
 [![codecov](https://codecov.io/gh/blackwell-systems/dotfiles/branch/main/graph/badge.svg)](https://codecov.io/gh/blackwell-systems/dotfiles)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)
@@ -24,7 +24,7 @@
 - **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat, and other modern Unix replacements, configured and ready.
 - **Idempotent design** – Run bootstrap repeatedly. Scripts converge to known-good state without breaking existing setup.
 - **Fast setup** – Clone to working shell in under five minutes.
-- **Unit tested** – 23+ tests for vault functions ensure reliability across platforms.
+- **Comprehensive testing** – 80+ tests (unit, integration, error scenarios) ensure reliability across platforms.
 
 ### Advanced (opt-in)
 - **Cross-platform portability** – Same dotfiles on macOS, Linux, Windows, WSL2, or Docker with ~90% shared code.
@@ -43,7 +43,7 @@
 | **Health validation**  | 573-line checker with `--fix`                 | None                             |
 | **Drift detection**    | Compare local vs vault state                  | None                             |
 | **Schema validation**  | Validates SSH keys & config structure         | None                             |
-| **Unit tests**         | 23+ bats-core tests                           | Rare                             |
+| **Unit tests**         | 80+ bats-core tests                           | Rare                             |
 | **Docker support**     | Full Dockerfile for containerized bootstrap   | Rare                             |
 | **Modular shell config** | 10 modules in `zsh.d/`                      | Single monolithic file           |
 | **Optional components** | `SKIP_*` env flags                           | All-or-nothing                   |
@@ -63,7 +63,7 @@
 | **Health Checks** | ✅ 573 lines + auto-fix | ❌ | ❌ | ❌ | ❌ |
 | **Drift Detection** | ✅ Local vs Vault | ❌ | ❌ | ❌ | ❌ |
 | **Schema Validation** | ✅ SSH keys, configs | ❌ | ❌ | ❌ | ❌ |
-| **Unit Tests** | ✅ 23+ bats tests | ❌ | ❌ | ❌ | ❌ |
+| **Unit Tests** | ✅ 80+ bats tests | ❌ | ❌ | ❌ | ❌ |
 | **CI/CD Integration** | ✅ GitHub Actions | ⚠️ Basic | ❌ | ❌ | ❌ |
 | **Modular Shell Config** | ✅ 10 modules | ❌ Monolithic | ❌ Monolithic | ❌ Monolithic | ⚠️ Partial |
 | **Optional Components** | ✅ SKIP_* flags | ❌ | ❌ | ❌ | ❌ |
@@ -121,7 +121,7 @@
 - **Vault-backed secrets**: SSH keys, AWS credentials, and configs live in Bitwarden—not scattered across machines or committed to git
 - **Self-healing dotfiles**: Health checks catch permission drift, broken symlinks, and missing vault items. Auto-fix with `--fix`
 - **Observable state**: Track health metrics over time, detect when things break
-- **Tested**: CI runs shellcheck, zsh syntax validation, and unit tests on every push
+- **Tested**: CI runs 80+ tests (unit, integration, error scenarios) on every push
 
 ### What's optional
 

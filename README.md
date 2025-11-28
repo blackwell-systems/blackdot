@@ -2,7 +2,7 @@
 
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
 [![ShellCheck](https://img.shields.io/badge/ShellCheck-Passing-brightgreen)](https://github.com/blackwell-systems/dotfiles/actions)
-[![Unit Tests](https://img.shields.io/badge/Unit_Tests-23%2B-brightgreen)](test/)
+[![Tests](https://img.shields.io/badge/Tests-80%2B-brightgreen)](test/)
 [![codecov](https://codecov.io/gh/blackwell-systems/dotfiles/branch/main/graph/badge.svg)](https://codecov.io/gh/blackwell-systems/dotfiles)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)
@@ -24,7 +24,7 @@
 - **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat, and other modern Unix replacements, configured and ready.
 - **Idempotent design** – Run bootstrap repeatedly. Scripts converge to known-good state without breaking existing setup.
 - **Fast setup** – Clone to working shell in under five minutes.
-- **Unit tested** – 23+ tests for vault functions ensure reliability across platforms.
+- **Comprehensive testing** – 80+ tests (unit, integration, error scenarios) ensure reliability across platforms.
 
 ### Advanced (opt-in)
 - **Cross-platform portability** – Same dotfiles on macOS, Linux, Windows, WSL2, or Docker with ~90% shared code.
@@ -43,7 +43,7 @@
 | **Health validation**  | 573-line checker with `--fix`                 | None                             |
 | **Drift detection**    | Compare local vs vault state                  | None                             |
 | **Schema validation**  | Validates SSH keys & config structure         | None                             |
-| **Unit tests**         | 23+ bats-core tests                           | Rare                             |
+| **Unit tests**         | 80+ bats-core tests                           | Rare                             |
 | **Docker support**     | Full Dockerfile for containerized bootstrap   | Rare                             |
 | **Modular shell config** | 10 modules in `zsh.d/`                      | Single monolithic file           |
 | **Optional components** | `SKIP_*` env flags                           | All-or-nothing                   |
@@ -63,7 +63,7 @@
 | **Health Checks** | ✅ 573 lines + auto-fix | ❌ | ❌ | ❌ | ❌ |
 | **Drift Detection** | ✅ Local vs Vault | ❌ | ❌ | ❌ | ❌ |
 | **Schema Validation** | ✅ SSH keys, configs | ❌ | ❌ | ❌ | ❌ |
-| **Unit Tests** | ✅ 23+ bats tests | ❌ | ❌ | ❌ | ❌ |
+| **Unit Tests** | ✅ 80+ bats tests | ❌ | ❌ | ❌ | ❌ |
 | **CI/CD Integration** | ✅ GitHub Actions | ⚠️ Basic | ❌ | ❌ | ❌ |
 | **Modular Shell Config** | ✅ 10 modules | ❌ Monolithic | ❌ Monolithic | ❌ Monolithic | ⚠️ Partial |
 | **Optional Components** | ✅ SKIP_* flags | ❌ | ❌ | ❌ | ❌ |
@@ -525,10 +525,15 @@ dotfiles/
 │       ├── 90-integrations.zsh # Tool integrations
 │       └── 99-local.zsh     # Machine-specific overrides (gitignored)
 │
-├── test/                      # Unit tests (bats-core)
-│   ├── vault_common.bats     # Tests for vault/_common.sh
-│   ├── cli_commands.bats     # Tests for CLI commands
-│   ├── setup_bats.sh         # Install bats-core
+├── lib/                       # Shared libraries
+│   └── _logging.sh           # Colors and logging functions
+│
+├── test/                      # Test suites (bats-core)
+│   ├── vault_common.bats     # Unit tests for vault/_common.sh
+│   ├── cli_commands.bats     # Unit tests for CLI commands
+│   ├── integration.bats      # Integration tests with mock Bitwarden
+│   ├── error_scenarios.bats  # Error handling tests
+│   ├── mocks/bw              # Mock Bitwarden CLI
 │   └── run_tests.sh          # Test runner
 │
 ├── claude/                    # Claude Code integration
@@ -570,7 +575,7 @@ The Dockerfile demonstrates:
 - CI/CD integration patterns
 - Reproducible development containers
 
-### Unit Tests
+### Testing (80+ tests)
 
 Run tests with bats-core:
 
@@ -581,24 +586,27 @@ Run tests with bats-core:
 # Run all tests
 ./test/run_tests.sh
 
-# Or use bats directly
-bats test/vault_common.bats
-```
-
-**Test coverage:**
-- ✅ Unit tests: vault/_common.sh data structure helpers (23+ tests)
-- ✅ CLI tests: Script existence and syntax validation
-- ✅ Integration tests: Backup/restore cycles, mock Bitwarden operations (20+ tests)
-- ✅ Error handling: Graceful degradation on failures
-
-```bash
-# Run specific test suites
+# Or run specific suites
 ./test/run_tests.sh unit         # Unit tests only
 ./test/run_tests.sh integration  # Integration tests only
+./test/run_tests.sh error        # Error scenario tests only
 ./test/run_tests.sh all          # All tests (default)
 ```
 
-Tests run automatically in GitHub Actions on every push.
+**Test suites:**
+
+| Suite | Tests | Description |
+|-------|-------|-------------|
+| Unit | 39 | vault/_common.sh functions, CLI commands |
+| Integration | 21 | Mock Bitwarden, backup/restore cycles |
+| Error Scenarios | 20+ | Permission errors, missing files, edge cases |
+
+**CI/CD validates on every push:**
+- ShellCheck for bash scripts
+- ZSH syntax validation
+- All test suites (unit, integration, error)
+- Code coverage via kcov + Codecov
+- Cross-platform compatibility (macOS + Linux)
 
 ### Modular Shell Configuration
 

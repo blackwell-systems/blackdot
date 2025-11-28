@@ -162,6 +162,38 @@ jobs:
         if: success()
         run: echo "✅ All integration tests passed!"
 
+  error-tests:
+    name: Error Scenario Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install bats-core
+        run: |
+          echo "📦 Installing bats-core..."
+          sudo apt-get update
+          sudo apt-get install -y bats
+
+      - name: Install zsh
+        run: |
+          echo "📦 Installing zsh..."
+          sudo apt-get install -y zsh
+
+      - name: Make scripts executable
+        run: |
+          chmod +x test/mocks/bw
+          chmod +x *.sh vault/*.sh 2>/dev/null || true
+
+      - name: Run error scenario tests
+        run: |
+          echo "🧪 Running error scenario tests..."
+          bats --timing test/error_scenarios.bats
+
+      - name: Test summary
+        if: success()
+        run: echo "✅ All error scenario tests passed!"
+
   coverage:
     name: Code Coverage
     runs-on: ubuntu-latest
@@ -205,11 +237,17 @@ jobs:
           mkdir -p coverage/integration
           kcov --include-path=./vault,./ coverage/integration bats test/integration.bats || true
 
+      - name: Run error scenario tests with coverage
+        run: |
+          echo "🧪 Running error scenario tests with coverage..."
+          mkdir -p coverage/error
+          kcov --include-path=./vault,./ coverage/error bats test/error_scenarios.bats || true
+
       - name: Merge coverage reports
         run: |
           echo "📊 Merging coverage reports..."
           mkdir -p coverage/merged
-          kcov --merge coverage/merged coverage/unit coverage/integration || true
+          kcov --merge coverage/merged coverage/unit coverage/integration coverage/error || true
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5

@@ -4,14 +4,69 @@ This document outlines potential improvements and refactoring opportunities for 
 
 ---
 
-## Current State (v1.2.x)
+## Current State (v1.3.0)
 
 The dotfiles system is **production-ready** with:
-- 60+ test cases across unit and integration tests
-- CI/CD with 12 validation jobs
+- 80+ test cases across unit, integration, and error scenario tests
+- CI/CD with 13 validation jobs (including error scenario tests)
 - Comprehensive documentation (8,600+ lines)
 - Cross-platform support (macOS, Linux, Windows, WSL2, Docker)
 - Bitwarden vault integration with bidirectional sync
+- Shared logging library for consistent output formatting
+
+---
+
+## Completed Improvements
+
+### ✅ Shared Library Adoption (v1.3.0)
+
+**Status:** COMPLETED
+
+**What:** Created `lib/_logging.sh` shared library to reduce code duplication (~15 lines per script).
+
+**Updated scripts:**
+- [x] `dotfiles-backup.sh`
+- [x] `dotfiles-diff.sh`
+- [x] `dotfiles-drift.sh`
+- [x] `dotfiles-init.sh`
+- [x] `show-metrics.sh`
+- [x] `uninstall.sh`
+- [x] `bootstrap-mac.sh`
+- [x] `bootstrap-linux.sh`
+
+**Intentionally not updated:**
+- `install.sh` - Must remain standalone (runs via `curl | bash` before repo exists)
+
+**Files:**
+```
+lib/
+└── _logging.sh       # Bash-compatible shared library
+```
+
+---
+
+### ✅ Error Scenario Test Coverage (v1.3.0)
+
+**Status:** COMPLETED
+
+**What:** Added comprehensive error scenario tests in `test/error_scenarios.bats`.
+
+**Test categories covered:**
+- [x] Permission denied errors (SSH directory, unreadable files)
+- [x] Missing files/directories handling
+- [x] Corrupted backup files
+- [x] Invalid JSON data
+- [x] Vault locked/session errors
+- [x] Edge cases (special characters, long paths, symlink loops)
+- [x] Concurrent execution safety
+- [x] CLI argument validation
+
+**Files:**
+```
+test/
+├── error_scenarios.bats  # 20+ error handling tests
+└── run_tests.sh          # Updated with 'error' mode
+```
 
 ---
 
@@ -19,55 +74,7 @@ The dotfiles system is **production-ready** with:
 
 ### Priority: HIGH
 
-#### 1. Complete Shared Library Adoption
-
-**Status:** Partially complete
-
-**What:** The `lib/_logging.sh` shared library was created to reduce code duplication. Some scripts have been updated, others still have inline definitions.
-
-**Scripts still needing update:**
-- [ ] `install.sh` - Has inline color/logging definitions
-- [ ] `uninstall.sh` - Has inline color/logging definitions
-- [ ] `show-metrics.sh` - Has inline color definitions
-- [ ] `bootstrap-mac.sh` - Has inline logging (but needs bash compatibility)
-- [ ] `bootstrap-linux.sh` - Has inline logging (but needs bash compatibility)
-
-**Note:** Bootstrap scripts use `/bin/bash` shebang for maximum compatibility during initial setup when zsh may not be installed. Consider creating `lib/_logging_bash.sh` for bash-only scripts.
-
-**Files:**
-```
-lib/
-├── _logging.sh       # ZSH-compatible (exists)
-└── _logging_bash.sh  # Bash-compatible (to create)
-```
-
----
-
-#### 2. Error Scenario Test Coverage
-
-**Status:** Not started
-
-**What:** Current tests cover happy paths well but lack error scenario coverage.
-
-**Missing test scenarios:**
-- [ ] Permission denied errors during restore
-- [ ] Network failures during Bitwarden sync
-- [ ] Corrupted vault items (invalid JSON)
-- [ ] Session expiration mid-operation
-- [ ] Missing required files during backup
-- [ ] Disk full scenarios
-- [ ] Concurrent execution safety
-
-**Implementation:**
-```bash
-# Example: test/error_scenarios.bats
-@test "restore: handles permission denied gracefully" {
-    chmod 000 "$TEST_HOME/.ssh"
-    run restore_ssh
-    [ "$status" -ne 0 ]
-    [[ "$output" =~ "permission denied" ]]
-}
-```
+*(All HIGH priority items completed in v1.3.0)*
 
 ---
 
@@ -299,7 +306,8 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 | 1.2.0 | Integration tests, architecture docs, release workflow |
 | 1.2.1 | Mock Bitwarden CLI, comprehensive integration tests |
 | 1.2.2 | Codecov integration, kcov coverage |
-| 1.3.0 | (Planned) Shared library consolidation, error tests |
+| 1.3.0 | Shared library consolidation, error scenario tests |
+| 1.4.0 | (Next) Bootstrap consolidation, auto-backup before restore |
 
 ---
 
