@@ -1,4 +1,4 @@
-![logo](assets/logo.png ':size=140')
+![logo](assets/logo.png ':size=180')
 
 # dotfiles
 
