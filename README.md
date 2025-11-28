@@ -30,6 +30,42 @@
 
 ---
 
+## How This Differs
+
+| Capability           | This Repo                                      | Typical Dotfiles                 |
+|----------------------|-----------------------------------------------|----------------------------------|
+| **Secrets management** | Bitwarden vault with restore/sync             | Manual copy between machines     |
+| **Health validation**  | 573-line checker with `--fix`                 | None                             |
+| **Drift detection**    | Compare local vs vault state                  | None                             |
+| **Schema validation**  | Validates SSH keys & config structure         | None                             |
+| **Unit tests**         | 23+ bats-core tests                           | Rare                             |
+| **Docker support**     | Full Dockerfile for containerized bootstrap   | Rare                             |
+| **Modular shell config** | 10 modules in `zsh.d/`                      | Single monolithic file           |
+| **Optional components** | `SKIP_*` env flags                           | All-or-nothing                   |
+| **Cross-platform**     | macOS, Linux, WSL2, Lima, Docker              | Usually single-platform          |
+
+### What you get
+
+- **Vault-backed secrets**: SSH keys, AWS credentials, and configs live in Bitwarden—not scattered across machines or committed to git
+- **Self-healing dotfiles**: Health checks catch permission drift, broken symlinks, and missing vault items. Auto-fix with `--fix`
+- **Observable state**: Track health metrics over time, detect when things break
+- **Tested**: CI runs shellcheck, zsh syntax validation, and unit tests on every push
+
+### What's optional
+
+Everything works on a single machine. Cross-platform sync, Claude session portability, and even Bitwarden itself are opt-in:
+
+```bash
+# Minimal install (no vault, no /workspace symlink, no Claude setup)
+SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap-linux.sh
+
+# Then manually configure ~/.ssh, ~/.aws, ~/.gitconfig
+```
+
+Inspired by: holman/dotfiles, thoughtbot/dotfiles, mathiasbynens/dotfiles
+
+---
+
 ## Prerequisites
 
 You don’t need Git or the Bitwarden CLI preinstalled – the bootstrap scripts will install the tooling for you.
