@@ -10,33 +10,78 @@ alias ccode='cd "$WORKSPACE/code"'
 alias cwhite='cd "$WORKSPACE/whitepapers"'
 alias cpat='cd "$WORKSPACE/patent-pool"'
 
-# Bitwarden vault helpers
-alias bw-restore='$HOME/workspace/dotfiles/vault/bootstrap-vault.sh'
-alias bw-sync='$HOME/workspace/dotfiles/vault/sync-to-bitwarden.sh'
-alias bw-create='$HOME/workspace/dotfiles/vault/create-vault-item.sh'
-alias bw-validate='$HOME/workspace/dotfiles/vault/validate-schema.sh'
-alias bw-delete='$HOME/workspace/dotfiles/vault/delete-vault-item.sh'
-alias bw-list='$HOME/workspace/dotfiles/vault/list-vault-items.sh'
-alias bw-check='$HOME/workspace/dotfiles/vault/check-vault-items.sh'
-
-# Dotfiles management helpers
-alias dotfiles-cd='cd $HOME/workspace/dotfiles'
-
 # Unified dotfiles command with subcommands
 dotfiles() {
     local cmd="${1:-help}"
     shift 2>/dev/null || true
+    local VAULT_DIR="$HOME/workspace/dotfiles/vault"
 
     case "$cmd" in
+        # Status & Health
         status|s)
             status "$@"
             ;;
-        doctor|health|check)
+        doctor|health)
             "$HOME/workspace/dotfiles/dotfiles-doctor.sh" "$@"
             ;;
         drift)
-            "$HOME/workspace/dotfiles/check-health.sh" --drift
+            "$HOME/workspace/dotfiles/dotfiles-drift.sh"
             ;;
+
+        # Vault operations
+        vault)
+            local subcmd="${1:-help}"
+            shift 2>/dev/null || true
+            case "$subcmd" in
+                restore)
+                    "$VAULT_DIR/bootstrap-vault.sh" "$@"
+                    ;;
+                sync)
+                    "$VAULT_DIR/sync-to-bitwarden.sh" "$@"
+                    ;;
+                list)
+                    "$VAULT_DIR/list-vault-items.sh" "$@"
+                    ;;
+                check)
+                    "$VAULT_DIR/check-vault-items.sh" "$@"
+                    ;;
+                validate)
+                    "$VAULT_DIR/validate-schema.sh" "$@"
+                    ;;
+                create)
+                    "$VAULT_DIR/create-vault-item.sh" "$@"
+                    ;;
+                delete)
+                    "$VAULT_DIR/delete-vault-item.sh" "$@"
+                    ;;
+                help|--help|-h|"")
+                    echo "dotfiles vault - Bitwarden vault operations"
+                    echo ""
+                    echo "Usage: dotfiles vault <command> [options]"
+                    echo ""
+                    echo "Commands:"
+                    echo "  restore          Restore all secrets from Bitwarden"
+                    echo "  sync [item]      Sync local files to Bitwarden (--all for all)"
+                    echo "  list             List vault items"
+                    echo "  check            Validate vault items exist"
+                    echo "  validate         Validate vault item schema"
+                    echo "  create           Create new vault item"
+                    echo "  delete           Delete vault item"
+                    echo ""
+                    echo "Examples:"
+                    echo "  dotfiles vault restore        # Restore all secrets"
+                    echo "  dotfiles vault sync --all     # Sync all to Bitwarden"
+                    echo "  dotfiles vault sync Git-Config"
+                    ;;
+                *)
+                    echo "Unknown vault command: $subcmd"
+                    echo "Run 'dotfiles vault help' for usage"
+                    return 1
+                    ;;
+            esac
+            ;;
+
+        # Maintenance
         upgrade|update)
             dotfiles-upgrade
             ;;
@@ -46,6 +91,8 @@ dotfiles() {
         edit)
             ${EDITOR:-vim} "$HOME/workspace/dotfiles"
             ;;
+
+        # Help
         help|--help|-h)
             echo "dotfiles - Manage your dotfiles"
             echo ""
@@ -55,16 +102,17 @@ dotfiles() {
             echo "  status, s         Quick visual dashboard"
             echo "  doctor, health    Run comprehensive health check"
             echo "  drift             Compare local files vs Bitwarden vault"
+            echo "  vault <cmd>       Bitwarden vault operations (restore, sync, list...)"
             echo "  upgrade, update   Pull latest and run bootstrap"
             echo "  cd                Change to dotfiles directory"
             echo "  edit              Open dotfiles in editor"
             echo "  help              Show this help"
             echo ""
             echo "Examples:"
-            echo "  dotfiles doctor          # Run health check"
-            echo "  dotfiles doctor --fix    # Auto-fix permissions"
-            echo "  dotfiles drift           # Check for vault drift"
-            echo "  dotfiles upgrade         # Update dotfiles"
+            echo "  dotfiles status              # Visual dashboard"
+            echo "  dotfiles doctor --fix        # Health check with auto-fix"
+            echo "  dotfiles vault restore       # Restore secrets from Bitwarden"
+            echo "  dotfiles vault sync --all    # Sync local to Bitwarden"
             ;;
         *)
             echo "Unknown command: $cmd"

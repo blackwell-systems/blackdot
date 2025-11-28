@@ -108,6 +108,6 @@ else
     echo -e "${RED}Missing $MISSING required item(s)${NC}"
     echo ""
     echo "To create missing items:"
-    echo "  bw-create ITEM-NAME"
+    echo "  dotfiles vault create ITEM-NAME"
     exit 1
 fi

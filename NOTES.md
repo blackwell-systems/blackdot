@@ -116,7 +116,8 @@ Commands with ASCII art banner via `awstools`:
 ├── bootstrap-dotfiles.sh # Symlink setup
 ├── bootstrap-lima.sh     # Lima-specific bootstrap
 ├── bootstrap-mac.sh      # macOS-specific bootstrap
-├── check-health.sh       # Verify installation
+├── dotfiles-doctor.sh    # Health check (use: dotfiles doctor)
+├── dotfiles-drift.sh     # Drift detection (use: dotfiles drift)
 ├── claude/               # Claude Code settings + commands
 ├── ghostty/              # Ghostty terminal config
 ├── lima/                 # Lima VM config
@@ -158,8 +159,8 @@ The "Cyber Weapons Suite" (commit 9838dd5) was reverted. It included:
 
 ### Bitwarden Vault System
 - SSH keys, AWS creds, git config stored in Bitwarden Secure Notes
-- `vault/*.sh` scripts handle restore/sync
-- `bw-restore` alias runs full bootstrap
+- `vault/*.sh` scripts handle restore/sync (accessed via `dotfiles vault` command)
+- `dotfiles vault restore` runs full bootstrap
 - Required items: SSH-GitHub-Enterprise, SSH-GitHub-Blackwell, SSH-Config, AWS-Config, AWS-Credentials, Git-Config
 
 ### Cross-Platform Design
@@ -174,9 +175,9 @@ The "Cyber Weapons Suite" (commit 9838dd5) was reverted. It included:
 
 ```bash
 # Status & Health
-status              # Dashboard with city skyline art
-dotfiles-doctor     # Run health check + vault validation
-check-health.sh     # Detailed health verification
+dotfiles status     # Dashboard with city skyline art
+dotfiles doctor     # Run health check + vault validation
+dotfiles drift      # Compare local vs Bitwarden vault
 
 # Navigation
 j                   # Fuzzy jump to git project
@@ -193,8 +194,9 @@ note "text"         # Quick note
 notes               # View recent notes
 
 # Vault
-bw-restore          # Restore all secrets from Bitwarden
-bw-sync             # Sync local changes to Bitwarden
+dotfiles vault restore   # Restore all secrets from Bitwarden
+dotfiles vault sync      # Sync local changes to Bitwarden
+dotfiles vault list      # List vault items
 
 # Claude
 claude-bedrock      # Use Bedrock backend

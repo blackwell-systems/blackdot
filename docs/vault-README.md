@@ -11,35 +11,36 @@ This directory contains scripts for **bidirectional secret management** with Bit
 
 ## Quick Reference
 
-| Script | Purpose | Usage / Alias |
-|--------|---------|---------------|
-| `bootstrap-vault.sh` | Orchestrates all restores | `bw-restore` |
+| Script | Purpose | Command |
+|--------|---------|---------|
+| `bootstrap-vault.sh` | Orchestrates all restores | `dotfiles vault restore` |
 | `restore-ssh.sh` | Restores SSH keys + config | Called by bootstrap |
 | `restore-aws.sh` | Restores AWS config/creds | Called by bootstrap |
 | `restore-env.sh` | Restores env secrets | Called by bootstrap |
 | `restore-git.sh` | Restores gitconfig | Called by bootstrap |
-| `create-vault-item.sh` | Creates new vault items | `bw-create ITEM [FILE]` |
-| `sync-to-bitwarden.sh` | Syncs local → Bitwarden | `bw-sync --all` |
-| `validate-schema.sh` | Validates vault item schema | `bw-validate` |
-| `delete-vault-item.sh` | Deletes items from vault | `bw-delete ITEM` |
-| `check-vault-items.sh` | Pre-flight validation | `bw-check` |
-| `list-vault-items.sh` | Debug/inventory tool | `bw-list [-v]` |
+| `create-vault-item.sh` | Creates new vault items | `dotfiles vault create ITEM` |
+| `sync-to-bitwarden.sh` | Syncs local → Bitwarden | `dotfiles vault sync --all` |
+| `validate-schema.sh` | Validates vault item schema | `dotfiles vault validate` |
+| `delete-vault-item.sh` | Deletes items from vault | `dotfiles vault delete ITEM` |
+| `check-vault-items.sh` | Pre-flight validation | `dotfiles vault check` |
+| `list-vault-items.sh` | Debug/inventory tool | `dotfiles vault list` |
 | `_common.sh` | Shared functions library | Sourced by other scripts |
 | `template-aws-config` | Reference template | Example AWS config structure |
 | `template-aws-credentials` | Reference template | Example AWS credentials structure |
 
-### Shell Aliases
+### Commands
 
-All vault scripts have convenient aliases (defined in `zsh/zshrc`):
+All vault operations are accessed via the unified `dotfiles vault` command:
 
 ```bash
-bw-restore   # Restore all secrets from Bitwarden
-bw-sync      # Sync local changes to Bitwarden
-bw-create    # Create new Bitwarden items
-bw-validate  # Validate vault item schema
-bw-delete    # Delete items from Bitwarden
-bw-list      # List all vault items
-bw-check     # Validate required items exist
+dotfiles vault restore     # Restore all secrets from Bitwarden
+dotfiles vault sync        # Sync local changes to Bitwarden
+dotfiles vault sync --all  # Sync all items
+dotfiles vault create      # Create new vault item
+dotfiles vault validate    # Validate vault item schema
+dotfiles vault delete      # Delete vault item
+dotfiles vault list        # List all vault items
+dotfiles vault check       # Validate required items exist
 ```
 
 > 📖 **Full Documentation:** For complete documentation including all script details, item formats, and workflows, see the [vault/README.md](https://github.com/blackwell-systems/dotfiles/blob/main/vault/README.md) file in the repository.
@@ -55,10 +56,10 @@ bw-check     # Validate required items exist
 bw login
 
 # 2. Push your existing secrets to Bitwarden
-bw-sync --all
+dotfiles vault sync --all
 
 # 3. Verify items were created
-bw-list
+dotfiles vault list
 ```
 
 ### New Machine Setup
@@ -75,7 +76,7 @@ cd ~/workspace/dotfiles
 bw login
 
 # 4. Restore all secrets
-bw-restore
+dotfiles vault restore
 ```
 
 ### Daily Operations
@@ -85,13 +86,13 @@ bw-restore
 vim ~/.ssh/config
 
 # Sync changes to Bitwarden
-bw-sync SSH-Config
+dotfiles vault sync SSH-Config
 
 # Check vault health
-bw-check
+dotfiles vault check
 
 # Validate vault schema
-bw-validate
+dotfiles vault validate
 ```
 
 ---
@@ -134,7 +135,7 @@ The `validate-schema.sh` script ensures all vault items have correct structure:
 
 ```bash
 # Validate all items
-bw-validate
+dotfiles vault validate
 ```
 
 **Validates:**
@@ -146,8 +147,8 @@ bw-validate
 - ✅ Config files meet minimum length
 
 **Common errors:**
-- Item missing → Create with `bw-create`
-- Empty notes → Re-sync with `bw-sync`
+- Item missing → Create with `dotfiles vault create`
+- Empty notes → Re-sync with `dotfiles vault sync`
 - Wrong format → Edit in Bitwarden web vault
 
 ---
@@ -169,10 +170,10 @@ bw login
 
 ```bash
 # List all items to verify name
-bw-list
+dotfiles vault list
 
 # Check for typos in item name
-bw-check
+dotfiles vault check
 ```
 
 ### Permission Errors

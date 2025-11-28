@@ -66,7 +66,7 @@ CMD ["zsh"]
 #   test:
 #     image: dotfiles-dev:latest
 #     script:
-#       - ./check-health.sh
+#       - dotfiles doctor
 #
 # Docker Compose:
 #   services:
