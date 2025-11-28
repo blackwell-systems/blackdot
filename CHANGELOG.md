@@ -11,6 +11,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Blog posts on dotfiles architecture and Claude session portability
 - Open source vault system as standalone project
 
+## [1.2.2] - 2025-11-28
+
+### Added - Code Coverage
+
+#### Codecov Integration
+- **`codecov.yml`** - Codecov configuration file
+  - 60% target coverage for project
+  - 50% target coverage for patches
+  - Ignores test files, docs, and configs from coverage
+  - PR comments with coverage diffs
+  - Flags for unit and integration tests
+
+#### CI/CD Coverage Job
+- **`.github/workflows/test.yml`** - Added coverage job
+  - kcov for shell script coverage collection
+  - Separate unit and integration coverage runs
+  - Merged coverage reports
+  - Automatic upload to Codecov
+  - Coverage badge in README
+
+### Changed
+- Added Codecov badge to README.md and docs/README.md
+
 ## [1.2.1] - 2025-11-28
 
 ### Added - Integration Tests
