@@ -96,10 +96,10 @@ The health check validates file permissions:
 
 ```bash
 # Check permissions
-./check-health.sh
+dotfiles doctor
 
 # Auto-fix permission issues
-./check-health.sh --fix
+dotfiles doctor --fix
 ```
 
 Expected permissions:

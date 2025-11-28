@@ -22,7 +22,7 @@ jobs:
           echo "🔍 Validating shell scripts..."
 
           # Note: ShellCheck only supports sh/bash/dash/ksh (not zsh)
-          # All vault/*.sh and check-health.sh use ZSH, so only validate bash scripts
+          # All vault/*.sh and dotfiles-*.sh use ZSH, so only validate bash scripts
           BASH_SCRIPTS=(
             bootstrap-dotfiles.sh
             bootstrap-mac.sh
@@ -60,7 +60,8 @@ jobs:
           fi
 
           ZSH_SCRIPTS=(
-            check-health.sh
+            dotfiles-doctor.sh
+            dotfiles-drift.sh
             show-metrics.sh
             vault/_common.sh
             vault/bootstrap-vault.sh
@@ -155,7 +156,8 @@ jobs:
             "vault/_common.sh"
             "vault/bootstrap-vault.sh"
             "vault/README.md"
-            "check-health.sh"
+            "dotfiles-doctor.sh"
+            "dotfiles-drift.sh"
             ".gitignore"
           )
 
@@ -215,7 +217,8 @@ jobs:
           # Check if scripts parse correctly
           zsh -n bootstrap-mac.sh || exit 1
           zsh -n bootstrap-dotfiles.sh || exit 1
-          zsh -n check-health.sh || exit 1
+          zsh -n dotfiles-doctor.sh || exit 1
+          zsh -n dotfiles-drift.sh || exit 1
 
           echo "✅ All scripts have valid syntax on macOS"
 
@@ -251,7 +254,8 @@ jobs:
           # Check if scripts parse correctly
           zsh -n bootstrap-linux.sh || exit 1
           zsh -n bootstrap-dotfiles.sh || exit 1
-          zsh -n check-health.sh || exit 1
+          zsh -n dotfiles-doctor.sh || exit 1
+          zsh -n dotfiles-drift.sh || exit 1
 
           echo "✅ All scripts have valid syntax on Linux"
 

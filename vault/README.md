@@ -538,7 +538,7 @@ bw login
 ./vault/bootstrap-vault.sh  # or: bw-restore
 
 # 6. Verify
-./check-health.sh
+dotfiles doctor
 ```
 
 ### After Editing Local Config
@@ -568,7 +568,7 @@ bw get item "Git-Config" --session "$BW_SESSION" | jq '.notes'
 
 ```bash
 # Compare local files vs Bitwarden
-../check-health.sh --drift
+dotfiles drift
 ```
 
 ---
@@ -600,7 +600,7 @@ rm vault/.bw-session
        ["SSH-NewService"]="$HOME/.ssh/id_ed25519_newkey"  # ← Add here
    )
    ```
-   This automatically propagates to `restore-ssh.sh` and `check-health.sh`.
+   This automatically propagates to `restore-ssh.sh` and `dotfiles-doctor.sh`.
 4. Update `~/.ssh/config` with Host entry
 5. Sync: `./sync-to-bitwarden.sh SSH-Config`
 6. (Optional) Add to `zsh/zshrc` for ssh-agent auto-load:

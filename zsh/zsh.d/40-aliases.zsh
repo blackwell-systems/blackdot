@@ -35,7 +35,7 @@ dotfiles() {
             "$HOME/workspace/dotfiles/dotfiles-doctor.sh" "$@"
             ;;
         drift)
-            "$HOME/workspace/dotfiles/check-health.sh" --drift
+            "$HOME/workspace/dotfiles/dotfiles-drift.sh"
             ;;
         upgrade|update)
             dotfiles-upgrade

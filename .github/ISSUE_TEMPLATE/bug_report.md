@@ -41,7 +41,7 @@ assignees: ''
 
 ## Health Check Output
 
-<!-- Run ./check-health.sh and paste output -->
+<!-- Run 'dotfiles doctor' and paste output -->
 
 ```bash
 # Paste health check output here
@@ -58,7 +58,7 @@ assignees: ''
 <!-- What have you tried so far to fix the issue? -->
 
 - [ ] Re-ran bootstrap script
-- [ ] Ran `./check-health.sh --fix`
+- [ ] Ran `dotfiles doctor --fix`
 - [ ] Checked file permissions
 - [ ] Reviewed CHANGELOG for breaking changes
 - [ ] Searched existing issues
