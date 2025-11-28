@@ -29,6 +29,7 @@
   - [Contributing](CONTRIBUTING.md)
   - [Security](SECURITY.md)
   - [Changelog](CHANGELOG.md)
+  - [Roadmap](ROADMAP.md)
 
 - **Links**
   - [![GitHub](https://icongr.am/simple/github.svg?size=16&colored=false) GitHub Repo](https://github.com/blackwell-systems/dotfiles)
