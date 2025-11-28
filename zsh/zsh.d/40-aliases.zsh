@@ -27,6 +27,12 @@ dotfiles() {
         drift)
             "$HOME/workspace/dotfiles/dotfiles-drift.sh"
             ;;
+        diff)
+            "$HOME/workspace/dotfiles/dotfiles-diff.sh" "$@"
+            ;;
+        backup)
+            "$HOME/workspace/dotfiles/dotfiles-backup.sh" "$@"
+            ;;
 
         # Vault operations
         vault)
@@ -81,7 +87,13 @@ dotfiles() {
             esac
             ;;
 
-        # Maintenance
+        # Setup & Maintenance
+        init)
+            "$HOME/workspace/dotfiles/dotfiles-init.sh" "$@"
+            ;;
+        uninstall)
+            "$HOME/workspace/dotfiles/uninstall.sh" "$@"
+            ;;
         upgrade|update)
             dotfiles-upgrade
             ;;
@@ -102,8 +114,12 @@ dotfiles() {
             echo "  status, s         Quick visual dashboard"
             echo "  doctor, health    Run comprehensive health check"
             echo "  drift             Compare local files vs Bitwarden vault"
+            echo "  diff              Preview changes before sync/restore"
+            echo "  backup            Backup and restore configuration"
             echo "  vault <cmd>       Bitwarden vault operations (restore, sync, list...)"
+            echo "  init              First-time setup wizard"
             echo "  upgrade, update   Pull latest and run bootstrap"
+            echo "  uninstall         Remove dotfiles configuration"
             echo "  cd                Change to dotfiles directory"
             echo "  edit              Open dotfiles in editor"
             echo "  help              Show this help"
@@ -111,8 +127,11 @@ dotfiles() {
             echo "Examples:"
             echo "  dotfiles status              # Visual dashboard"
             echo "  dotfiles doctor --fix        # Health check with auto-fix"
+            echo "  dotfiles diff --restore      # Preview what restore would change"
+            echo "  dotfiles backup              # Create backup of current config"
             echo "  dotfiles vault restore       # Restore secrets from Bitwarden"
             echo "  dotfiles vault sync --all    # Sync local to Bitwarden"
+            echo "  dotfiles init                # First-time setup wizard"
             ;;
         *)
             echo "Unknown command: $cmd"
