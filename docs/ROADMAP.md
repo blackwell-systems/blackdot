@@ -4,7 +4,7 @@ This document outlines potential improvements and refactoring opportunities for 
 
 ---
 
-## Current State (v1.3.0)
+## Current State (v1.4.0)
 
 The dotfiles system is **production-ready** with:
 - 80+ test cases across unit, integration, and error scenario tests
@@ -12,7 +12,8 @@ The dotfiles system is **production-ready** with:
 - Comprehensive documentation (8,600+ lines)
 - Cross-platform support (macOS, Linux, Windows, WSL2, Docker)
 - Bitwarden vault integration with bidirectional sync
-- Shared logging library for consistent output formatting
+- Shared libraries for logging and bootstrap functions
+- Pre-restore drift check for data safety
 
 ---
 
@@ -70,76 +71,73 @@ test/
 
 ---
 
+### ✅ Bootstrap Script Consolidation (v1.4.0)
+
+**Status:** COMPLETED
+
+**What:** Consolidated ~60% shared code between `bootstrap-mac.sh` and `bootstrap-linux.sh` into `bootstrap/_common.sh`.
+
+**Consolidated functions:**
+- [x] `parse_bootstrap_args()` - Argument parsing
+- [x] `prompt_yes_no()` - Interactive prompts
+- [x] `run_interactive_config()` - Interactive setup
+- [x] `setup_workspace_layout()` - ~/workspace creation
+- [x] `setup_workspace_symlink()` - /workspace symlink
+- [x] `link_dotfiles()` - Dotfiles symlinking
+- [x] `run_brew_bundle()` - Homebrew bundle
+- [x] `add_brew_to_zprofile()` - Homebrew PATH setup
+
+**Files:**
+```
+bootstrap/
+└── _common.sh      # Shared bootstrap functions
+bootstrap-mac.sh    # Sources bootstrap/_common.sh
+bootstrap-linux.sh  # Sources bootstrap/_common.sh
+```
+
+---
+
+### ✅ Pre-Restore Drift Check (v1.4.0)
+
+**Status:** COMPLETED
+
+**What:** Added safety check before `dotfiles vault restore` to detect local changes that would be overwritten.
+
+**Better than auto-backup:** Instead of silently backing up and overwriting, we alert the user when local files have drifted from the vault, giving them the choice to:
+1. Sync local changes to vault first (`dotfiles vault sync`)
+2. Force overwrite (`dotfiles vault restore --force`)
+3. Review differences (`dotfiles drift`)
+
+**Implementation:**
+- `check_item_drift()` - Check single item for drift
+- `check_pre_restore_drift()` - Check all syncable items
+- `skip_drift_check()` - Check DOTFILES_SKIP_DRIFT_CHECK env var
+
+**Usage:**
+```bash
+# Normal restore (checks for drift)
+dotfiles vault restore
+
+# Skip drift check
+dotfiles vault restore --force
+
+# Skip drift check via env (for automation)
+DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
+```
+
+---
+
 ## Suggested Improvements
 
 ### Priority: HIGH
 
-*(All HIGH priority items completed in v1.3.0)*
+*(All HIGH priority items completed)*
 
 ---
 
 ### Priority: MEDIUM
 
-#### 3. Bootstrap Script Consolidation
-
-**Status:** Not started
-
-**What:** `bootstrap-mac.sh` and `bootstrap-linux.sh` share ~60% identical code.
-
-**Duplicated code:**
-- Argument parsing (`--help`, `--interactive`, `--minimal`)
-- `prompt_yes_no()` function
-- Help text formatting
-- Homebrew bundle installation
-- Post-install messages
-
-**Proposed structure:**
-```
-bootstrap/
-├── _common.sh      # Shared functions (argument parsing, prompts)
-├── macos.sh        # macOS-specific (Xcode tools, paths)
-├── linux.sh        # Linux-specific (apt, linuxbrew paths)
-└── docker.sh       # Docker-specific (non-interactive)
-```
-
-**Current structure (keep working):**
-```
-bootstrap-mac.sh    # Calls bootstrap/_common.sh + macos-specific
-bootstrap-linux.sh  # Calls bootstrap/_common.sh + linux-specific
-```
-
----
-
-#### 4. Auto-Backup Before Restore
-
-**Status:** Not started
-
-**What:** Vault restore operations overwrite local files without automatic backup.
-
-**Risk:** User loses local changes if they forgot to sync first.
-
-**Proposed solution:**
-```bash
-# In restore-*.sh scripts, before overwriting:
-backup_before_restore() {
-    local file="$1"
-    if [[ -f "$file" ]]; then
-        local backup="${file}.bak-$(date +%Y%m%d-%H%M%S)"
-        cp "$file" "$backup"
-        info "Backed up $file to $backup"
-    fi
-}
-```
-
-**Configuration:**
-```bash
-# Environment variable to control behavior
-DOTFILES_BACKUP_BEFORE_RESTORE=1  # Default: enabled
-```
-
----
-
-#### 5. Offline Mode Support
+#### 4. Offline Mode Support
 
 **Status:** Not started
 
@@ -307,7 +305,8 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 | 1.2.1 | Mock Bitwarden CLI, comprehensive integration tests |
 | 1.2.2 | Codecov integration, kcov coverage |
 | 1.3.0 | Shared library consolidation, error scenario tests |
-| 1.4.0 | (Next) Bootstrap consolidation, auto-backup before restore |
+| 1.4.0 | Bootstrap consolidation, pre-restore drift check |
+| 1.5.0 | (Next) Offline mode support, CLI reorganization |
 
 ---
 

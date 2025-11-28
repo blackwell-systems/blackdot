@@ -2,11 +2,43 @@
 # ============================================================
 # FILE: vault/bootstrap-vault.sh
 # Orchestrates Bitwarden-based restoration of secrets
+# Usage:
+#   ./bootstrap-vault.sh              # Restore with drift check
+#   ./bootstrap-vault.sh --force      # Restore without drift check
+#   DOTFILES_SKIP_DRIFT_CHECK=1 ./bootstrap-vault.sh  # Skip drift check
 # ============================================================
 set -euo pipefail
 
 # Source common functions
 source "$(dirname "$0")/_common.sh"
+
+# Parse arguments
+FORCE=false
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --force|-f)
+            FORCE=true
+            shift
+            ;;
+        --help|-h)
+            echo "Restore secrets from Bitwarden vault"
+            echo ""
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --force, -f    Skip drift check and overwrite local changes"
+            echo "  --help, -h     Show this help"
+            echo ""
+            echo "Environment variables:"
+            echo "  DOTFILES_SKIP_DRIFT_CHECK=1   Skip drift check (for automation)"
+            exit 0
+            ;;
+        *)
+            fail "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
 
 echo "=== Bitwarden vault bootstrap starting ==="
 echo "Vault directory: $VAULT_DIR"
@@ -19,6 +51,18 @@ require_logged_in
 SESSION=$(get_session)
 echo "Vault unlocked and session cached."
 sync_vault "$SESSION"
+
+# ============================================================
+# Pre-restore drift check (unless skipped)
+# ============================================================
+if ! skip_drift_check && [[ "$FORCE" != "true" ]]; then
+    echo ""
+    if ! check_pre_restore_drift "$SESSION" "$FORCE"; then
+        echo ""
+        echo "To force restore: dotfiles vault restore --force"
+        exit 1
+    fi
+fi
 
 # ============================================================
 # Run restoration scripts
