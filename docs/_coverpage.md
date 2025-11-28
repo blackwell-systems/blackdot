@@ -1,19 +1,18 @@
-# Dotfiles
+# dotfiles
 
-> Enterprise-grade, vault-backed dotfiles for multi-machine development
+> Vault-backed configuration that travels with you
 
-**Cross-platform • Bitwarden Integration • Portable Sessions • Modern CLI**
+```bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+```
 
-- 🔐 **Bitwarden vault integration** – SSH keys, AWS credentials, Git config restored from Bitwarden
-- 🌍 **Cross-platform portability** – macOS, Linux, WSL2, Lima, Docker with ~90% shared code
-- 🤖 **Portable Claude Code sessions** – `/workspace` symlink keeps sessions in sync across machines
-- ✅ **Automated health checks** – Validate symlinks, permissions, vault sync with auto-fix
-- ⚡ **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat pre-configured
-- 🐳 **Docker support** – Test bootstrap in clean containers
-- 🧪 **Unit tested** – 23+ tests for vault functions ensure reliability
+- Secrets in Bitwarden, not scattered across machines
+- Health checks with drift detection and auto-fix
+- Works on macOS, Linux, WSL2, Docker
+- Tested and validated on every push
 
 [Get Started](#quick-start)
-[GitHub](https://github.com/blackwell-systems/dotfiles)
-[Full Documentation](README-FULL.md)
+[View on GitHub](https://github.com/blackwell-systems/dotfiles)
 
-![color](#8A2BE2)
+<!-- Subtle dark background -->
+![color](#1a1a2e)
