@@ -28,6 +28,9 @@ dotfiles() {
     shift 2>/dev/null || true
 
     case "$cmd" in
+        status|s)
+            status "$@"
+            ;;
         doctor|health|check)
             "$HOME/workspace/dotfiles/dotfiles-doctor.sh" "$@"
             ;;
@@ -46,6 +49,7 @@ dotfiles() {
             echo "Usage: dotfiles <command> [options]"
             echo ""
             echo "Commands:"
+            echo "  status, s         Quick visual dashboard"
             echo "  doctor, health    Run comprehensive health check"
             echo "  upgrade, update   Pull latest and run bootstrap"
             echo "  cd                Change to dotfiles directory"
