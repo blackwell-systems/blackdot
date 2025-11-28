@@ -86,6 +86,30 @@ run_integration_tests() {
   fi
 }
 
+# Run error scenario tests
+run_error_tests() {
+  echo -e "${BLUE}=== Running Error Scenario Tests ===${NC}"
+  echo ""
+
+  if [[ ! -f "$SCRIPT_DIR/error_scenarios.bats" ]]; then
+    echo "No error scenario tests found."
+    return 0
+  fi
+
+  # Verify mock bw is executable
+  if [[ ! -x "$SCRIPT_DIR/mocks/bw" ]]; then
+    chmod +x "$SCRIPT_DIR/mocks/bw" 2>/dev/null || true
+  fi
+
+  if bats --timing "$SCRIPT_DIR/error_scenarios.bats"; then
+    echo -e "${GREEN}✓ Error scenario tests passed${NC}"
+    return 0
+  else
+    echo -e "${RED}✗ Error scenario tests failed${NC}"
+    return 1
+  fi
+}
+
 case "$TEST_MODE" in
   unit)
     run_unit_tests || FAILED=1
@@ -93,17 +117,23 @@ case "$TEST_MODE" in
   integration)
     run_integration_tests || FAILED=1
     ;;
+  error|errors)
+    run_error_tests || FAILED=1
+    ;;
   all|"")
     run_unit_tests || FAILED=1
     echo ""
     run_integration_tests || FAILED=1
+    echo ""
+    run_error_tests || FAILED=1
     ;;
   *)
-    echo "Usage: $0 [unit|integration|all]"
+    echo "Usage: $0 [unit|integration|error|all]"
     echo ""
     echo "Options:"
     echo "  unit         Run unit tests only"
     echo "  integration  Run integration tests only"
+    echo "  error        Run error scenario tests only"
     echo "  all          Run all tests (default)"
     exit 1
     ;;

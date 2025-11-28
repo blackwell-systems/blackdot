@@ -11,6 +11,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Blog posts on dotfiles architecture and Claude session portability
 - Open source vault system as standalone project
 
+## [1.3.0] - 2025-11-28
+
+### Added - Shared Library & Error Tests
+
+#### Shared Logging Library
+- **`lib/_logging.sh`** - Centralized logging and color functions
+  - Color definitions (RED, GREEN, YELLOW, BLUE, CYAN, MAGENTA, BOLD, NC)
+  - Logging functions: `info()`, `pass()`, `warn()`, `fail()`, `dry()`, `debug()`
+  - Helper functions: `section()`, `separator()`, `confirm()`
+  - Guard against multiple sourcing
+  - Works with both bash and zsh
+
+#### Error Scenario Tests
+- **`test/error_scenarios.bats`** - 20+ error handling tests
+  - Permission denied scenarios
+  - Missing file/directory handling
+  - Invalid data (corrupted backups, invalid JSON)
+  - Vault/session error states
+  - Edge cases (empty directories, special characters, symlink loops)
+  - CLI argument validation
+  - Concurrent operation safety
+
+### Changed
+- Scripts now use shared `lib/_logging.sh` instead of inline definitions:
+  - `dotfiles-backup.sh`
+  - `dotfiles-diff.sh`
+  - `dotfiles-drift.sh`
+  - `dotfiles-init.sh`
+  - `show-metrics.sh`
+  - `uninstall.sh`
+  - `bootstrap-mac.sh`
+  - `bootstrap-linux.sh`
+- CI/CD workflow now includes error scenario tests
+- Test runner supports `error` mode: `./run_tests.sh error`
+- Documentation updated with Windows platform support
+
+### Documentation
+- **`docs/ROADMAP.md`** - Future improvements roadmap
+  - Prioritized improvement list
+  - Design decisions documentation
+  - Contributing guidelines for roadmap items
+
 ## [1.2.2] - 2025-11-28
 
 ### Added - Code Coverage
