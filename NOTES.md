@@ -159,8 +159,8 @@ The "Cyber Weapons Suite" (commit 9838dd5) was reverted. It included:
 
 ### Bitwarden Vault System
 - SSH keys, AWS creds, git config stored in Bitwarden Secure Notes
-- `vault/*.sh` scripts handle restore/sync
-- `bw-restore` alias runs full bootstrap
+- `vault/*.sh` scripts handle restore/sync (accessed via `dotfiles vault` command)
+- `dotfiles vault restore` runs full bootstrap
 - Required items: SSH-GitHub-Enterprise, SSH-GitHub-Blackwell, SSH-Config, AWS-Config, AWS-Credentials, Git-Config
 
 ### Cross-Platform Design
@@ -194,8 +194,9 @@ note "text"         # Quick note
 notes               # View recent notes
 
 # Vault
-bw-restore          # Restore all secrets from Bitwarden
-bw-sync             # Sync local changes to Bitwarden
+dotfiles vault restore   # Restore all secrets from Bitwarden
+dotfiles vault sync      # Sync local changes to Bitwarden
+dotfiles vault list      # List vault items
 
 # Claude
 claude-bedrock      # Use Bedrock backend
