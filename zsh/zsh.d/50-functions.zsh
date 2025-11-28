@@ -8,66 +8,70 @@
 status() {
   local fixes=()
 
+  # Colors
+  local g=$'\e[32m'  # green
+  local r=$'\e[31m'  # red
+  local d=$'\e[2m'   # dim
+  local n=$'\e[0m'   # reset
+
   # Gather detailed status
-  local s_zshrc="◇" s_zshrc_info="not linked"
+  local s_zshrc="${r}◇${n}" s_zshrc_info="not linked"
   if [[ -L ~/.zshrc ]]; then
-    s_zshrc="◆"; s_zshrc_info="→ dotfiles/zsh/zshrc"
+    s_zshrc="${g}◆${n}"; s_zshrc_info="${d}→ dotfiles/zsh/zshrc${n}"
   else
     fixes+=("zshrc: bootstrap-dotfiles.sh")
   fi
 
-  local s_claude="◇" s_claude_info="not linked"
+  local s_claude="${r}◇${n}" s_claude_info="not linked"
   if [[ -L ~/.claude ]]; then
-    s_claude="◆"; s_claude_info="→ workspace/.claude"
+    s_claude="${g}◆${n}"; s_claude_info="${d}→ workspace/.claude${n}"
   else
     fixes+=("claude: bootstrap-dotfiles.sh")
   fi
 
-  local s_workspace="◇" s_workspace_info="missing"
+  local s_workspace="${r}◇${n}" s_workspace_info="missing"
   if [[ -L /workspace ]]; then
-    s_workspace="◆"; s_workspace_info="→ $(readlink /workspace)"
+    s_workspace="${g}◆${n}"; s_workspace_info="${d}→ $(readlink /workspace)${n}"
   else
     fixes+=("/workspace: sudo ln -sfn \$HOME/workspace /workspace")
   fi
 
   local ssh_count=$(ssh-add -l 2>/dev/null | wc -l | tr -d ' ')
-  local s_ssh="◇" s_ssh_info="no keys"
+  local s_ssh="${r}◇${n}" s_ssh_info="${r}no keys${n}"
   if [[ "$ssh_count" -gt 0 ]]; then
-    s_ssh="◆"; s_ssh_info="$ssh_count keys loaded"
+    s_ssh="${g}◆${n}"; s_ssh_info="${g}$ssh_count keys loaded${n}"
   else
     fixes+=("ssh: bw-restore")
   fi
 
-  local s_aws="◇" s_aws_info="not authenticated"
-  if aws sts get-caller-identity --profile "${_CLAUDE_BEDROCK_PROFILE:-dev-profile}" &>/dev/null; then
-    s_aws="◆"; s_aws_info="authenticated"
+  local s_aws="${r}◇${n}" s_aws_info="${d}not authenticated${n}"
+  if aws sts get-caller-identity --profile "${_CLAUDE_BEDROCK_PROFILE:-}" &>/dev/null 2>&1; then
+    s_aws="${g}◆${n}"; s_aws_info="${g}authenticated${n}"
   else
-    fixes+=("aws: awslogin")
+    [[ -n "${_CLAUDE_BEDROCK_PROFILE:-}" ]] && fixes+=("aws: aws sso login --profile $_CLAUDE_BEDROCK_PROFILE")
   fi
 
-  local s_lima="·" s_lima_info=""
-  if [[ "$OS" == "Darwin" ]] && command -v limactl &>/dev/null; then
+  local s_lima="${d}·${n}" s_lima_info=""
+  if [[ "$OSTYPE" == darwin* ]] && command -v limactl &>/dev/null; then
     if limactl list 2>/dev/null | grep -q Running; then
-      s_lima="◆"; s_lima_info="running"
+      s_lima="${g}◆${n}"; s_lima_info="${g}running${n}"
     else
-      s_lima="◇"; s_lima_info="stopped"
-      fixes+=("lima: lima-start")
+      s_lima="${r}◇${n}"; s_lima_info="${d}stopped${n}"
+      fixes+=("lima: limactl start")
     fi
   fi
 
   # City silhouette (inspired by Joan Stark)
-  cat << EOF
-
-                          .│
-                          │$s_aws│            ._____
-              ___         │ │            │$s_workspace    │
-    _    _.-"   "-._      │ │    _.--"│  │     │
- .-"│  _.│ $s_zshrc│$s_claude│ │   ._-"  │  │  $s_lima  │
- │  │ │  │  │  │ │   -.__ │    │     │
- │$s_ssh│ "-"    "    ""    "-"  "-."   "\`     │____
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
-EOF
+  echo ""
+  echo "                          .│"
+  echo "                          │${s_aws}│            ._____"
+  echo "              ___         │ │            │${s_workspace}    │"
+  echo "    _    _.-\"   \"-._      │ │    _.--\"│  │     │"
+  echo " .-\"│  _.│ ${s_zshrc}│${s_claude}│ │   ._-\"  │  │  ${s_lima}  │"
+  echo " │  │ │  │  │  │ │   -.__ │    │     │"
+  echo " │${s_ssh}│ \"-\"    \"    \"\"    \"-\"  \"-.\"   \"\`     │____"
+  echo "▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔"
+  echo ""
 
   # Diagnostic details
   echo "  zshrc      $s_zshrc  $s_zshrc_info"
@@ -80,11 +84,11 @@ EOF
 
   # Fixes if needed
   if [[ ${#fixes[@]} -gt 0 ]]; then
-    echo "  ┌─ fixes ────────────────────────────────"
+    echo "  ${d}┌─ fixes ────────────────────────────────${n}"
     for fix in "${fixes[@]}"; do
-      echo "  │ $fix"
+      echo "  ${d}│${n} $fix"
     done
-    echo "  └─────────────────────────────────────────"
+    echo "  ${d}└─────────────────────────────────────────${n}"
     echo ""
   fi
 }
