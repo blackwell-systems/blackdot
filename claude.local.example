@@ -1,0 +1,40 @@
+# ~/.claude.local - Personal Claude Code configuration
+# Copy this file to ~/.claude.local and customize for your setup.
+# This file is sourced by zsh.d/70-claude.zsh
+#
+# To use: cp ~/workspace/dotfiles/claude.local.example ~/.claude.local
+
+# =========================
+# AWS Bedrock Configuration
+# =========================
+# Required for claude-bedrock command. Leave empty to disable Bedrock.
+
+# Your AWS SSO profile name (from ~/.aws/config)
+export CLAUDE_BEDROCK_PROFILE="your-sso-profile"
+
+# AWS region where Bedrock is enabled
+export CLAUDE_BEDROCK_REGION="us-west-2"
+
+# Bedrock model IDs (defaults shown - override if needed)
+# export CLAUDE_BEDROCK_MODEL="us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+# export CLAUDE_BEDROCK_FAST_MODEL="us.anthropic.claude-3-5-haiku-20241022-v1:0"
+
+# =========================
+# Claude Code Settings
+# =========================
+
+# Maximum output tokens (default: 60000)
+# export CLAUDE_CODE_MAX_OUTPUT_TOKENS=60000
+
+# =========================
+# Usage
+# =========================
+# claude          - Default Claude (uses Max if logged in, or direct API)
+# claude-max      - Force Anthropic Max subscription
+# claude-bedrock  - Force AWS Bedrock (requires profile above)
+# claude-run max|bedrock  - Explicit backend selection
+# claude-status   - Show current configuration
+#
+# Shortcuts:
+# cm  - claude-max
+# cb  - claude-bedrock
