@@ -62,7 +62,11 @@ jobs:
           ZSH_SCRIPTS=(
             dotfiles-doctor.sh
             dotfiles-drift.sh
+            dotfiles-backup.sh
+            dotfiles-diff.sh
+            dotfiles-init.sh
             show-metrics.sh
+            uninstall.sh
             vault/_common.sh
             vault/bootstrap-vault.sh
             vault/check-vault-items.sh
@@ -153,11 +157,16 @@ jobs:
             "Brewfile"
             "zsh/zshrc"
             "zsh/p10k.zsh"
+            "zsh/completions/_dotfiles"
             "vault/_common.sh"
             "vault/bootstrap-vault.sh"
             "vault/README.md"
             "dotfiles-doctor.sh"
             "dotfiles-drift.sh"
+            "dotfiles-backup.sh"
+            "dotfiles-diff.sh"
+            "dotfiles-init.sh"
+            "uninstall.sh"
             ".gitignore"
           )
 
@@ -219,6 +228,10 @@ jobs:
           zsh -n bootstrap-dotfiles.sh || exit 1
           zsh -n dotfiles-doctor.sh || exit 1
           zsh -n dotfiles-drift.sh || exit 1
+          zsh -n dotfiles-backup.sh || exit 1
+          zsh -n dotfiles-diff.sh || exit 1
+          zsh -n dotfiles-init.sh || exit 1
+          zsh -n uninstall.sh || exit 1
 
           echo "✅ All scripts have valid syntax on macOS"
 
@@ -256,6 +269,10 @@ jobs:
           zsh -n bootstrap-dotfiles.sh || exit 1
           zsh -n dotfiles-doctor.sh || exit 1
           zsh -n dotfiles-drift.sh || exit 1
+          zsh -n dotfiles-backup.sh || exit 1
+          zsh -n dotfiles-diff.sh || exit 1
+          zsh -n dotfiles-init.sh || exit 1
+          zsh -n uninstall.sh || exit 1
 
           echo "✅ All scripts have valid syntax on Linux"
 

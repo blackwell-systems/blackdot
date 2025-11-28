@@ -10,7 +10,86 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Planned
 - Blog posts on dotfiles architecture and Claude session portability
 - Open source vault system as standalone project
-- Additional ZSH completions for more commands
+
+## [1.2.0] - 2025-11-28
+
+### Added - CLI Commands
+
+#### Unified `dotfiles` Command Expansion
+- **`dotfiles diff`** - Preview changes before sync or restore
+  - `dotfiles diff --sync` - Show what would be synced to vault
+  - `dotfiles diff --restore` - Show what restore would change
+  - Unified diff output with color coding
+
+- **`dotfiles backup`** - Backup and restore configuration
+  - Creates timestamped tar.gz archives in `~/.dotfiles-backups/`
+  - `dotfiles backup` - Create new backup
+  - `dotfiles backup --list` - List available backups
+  - `dotfiles backup restore` - Interactive restore from backup
+  - Auto-cleanup keeps only 10 most recent backups
+
+- **`dotfiles init`** - First-time setup wizard
+  - Interactive walkthrough for new installations
+  - Guides through bootstrap, Bitwarden setup, secret restoration
+  - ASCII art banner and step-by-step progress
+
+- **`dotfiles uninstall`** - Clean removal script
+  - `dotfiles uninstall --dry-run` - Preview what would be removed
+  - `dotfiles uninstall --keep-secrets` - Remove dotfiles but keep SSH/AWS/Git
+  - Safe removal with confirmation prompts
+
+#### Tab Completion
+- **`_dotfiles` completion** - Full tab completion for dotfiles command
+  - All subcommands with descriptions
+  - Vault subcommands with item names
+  - Flag completions for all options
+
+### Added - New Scripts
+- `dotfiles-backup.sh` - Backup and restore functionality
+- `dotfiles-diff.sh` - Preview changes before sync/restore
+- `dotfiles-init.sh` - First-time setup wizard
+- `uninstall.sh` - Clean removal script
+
+### Added - Documentation
+- **Architecture page** (`docs/architecture.md`)
+  - Mermaid diagrams for system overview
+  - Component architecture diagrams
+  - ZSH module load order diagram
+  - Vault system sequence diagram
+  - Data flow summary table
+
+- **Troubleshooting guide** (`docs/troubleshooting.md`)
+  - Quick diagnostics section
+  - Installation issues and fixes
+  - Shell issues (prompt, completions)
+  - Bitwarden/vault issues
+  - Permission fixes
+  - Platform-specific issues
+  - Backup/restore issues
+
+### Added - CI/CD
+- **Release workflow** (`.github/workflows/release.yml`)
+  - Automated releases on git tag push
+  - Changelog generation from commits
+  - Archive creation (tar.gz and zip)
+  - SHA256 checksums
+  - GitHub release with notes
+
+- **Enhanced test coverage**
+  - `test/cli_commands.bats` - Tests for all CLI scripts
+  - Syntax validation for all new scripts
+  - Help flag tests for all commands
+
+### Changed
+- Updated `40-aliases.zsh` with new commands (diff, backup, init, uninstall)
+- Updated test workflow to validate new scripts
+- Updated documentation with new commands and features
+- Expanded `dotfiles help` output with all new commands
+
+### Infrastructure
+- New scripts made executable with proper permissions
+- Tab completion file added to `zsh/completions/`
+- Documentation sidebar updated with new pages
 
 ## [1.1.0] - 2025-11-27
 
