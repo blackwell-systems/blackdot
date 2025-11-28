@@ -93,8 +93,8 @@ case "${1:-}" in
         fi
 
         shift
-        local item_type=""
-        local item_id=""
+        item_type=""
+        item_id=""
 
         while [[ $# -gt 0 ]]; do
             case "$1" in
@@ -119,8 +119,8 @@ case "${1:-}" in
         fi
 
         shift
-        local list_type="${1:-items}"
-        local search_term=""
+        list_type="${1:-items}"
+        search_term=""
 
         while [[ $# -gt 0 ]]; do
             case "$1" in
@@ -132,10 +132,10 @@ case "${1:-}" in
         done
 
         # Return list of mock items
-        local items_dir="$MOCK_DATA_DIR/items"
+        items_dir="$MOCK_DATA_DIR/items"
         if [[ -d "$items_dir" ]]; then
             echo "["
-            local first=true
+            first=true
             for item_file in "$items_dir"/*.json; do
                 [[ -f "$item_file" ]] || continue
 
@@ -166,10 +166,9 @@ case "${1:-}" in
         fi
 
         shift
-        local item_type="${1:-item}"
+        item_type="${1:-item}"
 
         # Read JSON from stdin or encoded arg
-        local json_data
         if [[ "${2:-}" == "--" ]]; then
             json_data=$(cat)
         else
@@ -178,7 +177,6 @@ case "${1:-}" in
         fi
 
         # Extract name and save
-        local item_name
         item_name=$(echo "$json_data" | grep -o '"name":"[^"]*"' | cut -d'"' -f4)
 
         if [[ -n "$item_name" ]]; then
@@ -198,11 +196,10 @@ case "${1:-}" in
         fi
 
         shift
-        local item_id="${1:-}"
+        item_id="${1:-}"
         shift
 
         # Read updated JSON
-        local json_data
         json_data=$(echo "${1:-}" | base64 -d 2>/dev/null || cat)
 
         if [[ -n "$item_id" ]]; then
@@ -219,9 +216,9 @@ case "${1:-}" in
         fi
 
         shift
-        local item_type="${1:-item}"
+        item_type="${1:-item}"
         shift
-        local item_id="${1:-}"
+        item_id="${1:-}"
 
         if [[ -f "$MOCK_DATA_DIR/items/${item_id}.json" ]]; then
             rm -f "$MOCK_DATA_DIR/items/${item_id}.json"
