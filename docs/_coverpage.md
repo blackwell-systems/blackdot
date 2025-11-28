@@ -1,3 +1,5 @@
+![logo](assets/logo.png ':size=180')
+
 # dotfiles
 
 > Vault-backed configuration that travels with you
@@ -14,5 +16,5 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 [Get Started](#quick-start)
 [View on GitHub](https://github.com/blackwell-systems/dotfiles)
 
-<!-- Subtle dark background -->
-![color](#1a1a2e)
+<!-- Dark background to match logo -->
+![color](#1a1a1a)
