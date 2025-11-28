@@ -116,7 +116,8 @@ Commands with ASCII art banner via `awstools`:
 ├── bootstrap-dotfiles.sh # Symlink setup
 ├── bootstrap-lima.sh     # Lima-specific bootstrap
 ├── bootstrap-mac.sh      # macOS-specific bootstrap
-├── check-health.sh       # Verify installation
+├── dotfiles-doctor.sh    # Health check (use: dotfiles doctor)
+├── dotfiles-drift.sh     # Drift detection (use: dotfiles drift)
 ├── claude/               # Claude Code settings + commands
 ├── ghostty/              # Ghostty terminal config
 ├── lima/                 # Lima VM config
@@ -174,9 +175,9 @@ The "Cyber Weapons Suite" (commit 9838dd5) was reverted. It included:
 
 ```bash
 # Status & Health
-status              # Dashboard with city skyline art
-dotfiles-doctor     # Run health check + vault validation
-check-health.sh     # Detailed health verification
+dotfiles status     # Dashboard with city skyline art
+dotfiles doctor     # Run health check + vault validation
+dotfiles drift      # Compare local vs Bitwarden vault
 
 # Navigation
 j                   # Fuzzy jump to git project

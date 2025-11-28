@@ -24,7 +24,7 @@ fi
 
 # Check if metrics file exists
 if [[ ! -f "$METRICS_FILE" ]]; then
-    echo "No metrics found. Run ./check-health.sh to start collecting metrics."
+    echo "No metrics found. Run 'dotfiles doctor' to start collecting metrics."
     exit 1
 fi
 
