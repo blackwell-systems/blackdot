@@ -28,12 +28,13 @@ teardown() {
   [[ "${output}" =~ "backup" ]]
 }
 
-@test "backup --list works without existing backups" {
+@test "backup --list handles no existing backups" {
   export HOME="$TEST_TMP"
   run "$DOTFILES_DIR/dotfiles-backup.sh" --list
 
-  # Should succeed even with no backups
-  [ "$status" -eq 0 ]
+  # Returns 1 when no backups exist (warning state)
+  [ "$status" -eq 1 ]
+  [[ "${output}" =~ "No backups found" ]]
 }
 
 # ============================================================

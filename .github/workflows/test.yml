@@ -173,7 +173,16 @@ jobs:
         run: |
           echo "📦 Installing dependencies..."
           sudo apt-get update
-          sudo apt-get install -y bats zsh kcov
+          sudo apt-get install -y bats zsh
+
+      - name: Install kcov
+        run: |
+          echo "📦 Installing kcov from source..."
+          sudo apt-get install -y binutils-dev libcurl4-openssl-dev zlib1g-dev libdw-dev libiberty-dev cmake
+          cd /tmp
+          curl -L https://github.com/SimonKagworthy/kcov/releases/download/v42/kcov-amd64.tar.gz | tar xz
+          sudo mv kcov-amd64/usr/local/bin/kcov /usr/local/bin/
+          kcov --version
 
       - name: Make scripts executable
         run: |
