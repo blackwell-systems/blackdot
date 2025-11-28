@@ -177,11 +177,15 @@ jobs:
 
       - name: Install kcov
         run: |
-          echo "📦 Installing kcov from source..."
+          echo "📦 Building kcov from source..."
           sudo apt-get install -y binutils-dev libcurl4-openssl-dev zlib1g-dev libdw-dev libiberty-dev cmake
           cd /tmp
-          curl -L https://github.com/SimonKagworthy/kcov/releases/download/v42/kcov-amd64.tar.gz | tar xz
-          sudo mv kcov-amd64/usr/local/bin/kcov /usr/local/bin/
+          git clone --depth 1 https://github.com/SimonKagstrom/kcov.git
+          cd kcov
+          mkdir build && cd build
+          cmake ..
+          make -j$(nproc)
+          sudo make install
           kcov --version
 
       - name: Make scripts executable
