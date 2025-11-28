@@ -5,5 +5,5 @@ Run the dotfiles health check and summarize any issues:
 ```
 
 If there are permission warnings, offer to run with `--fix`.
-If there are missing items, explain how to restore them with `bw-restore`.
+If there are missing items, explain how to restore them with `dotfiles vault restore`.
 For drift detection, suggest running `dotfiles drift`.

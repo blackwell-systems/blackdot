@@ -1419,25 +1419,25 @@ Complete checklist when adding a new SSH identity:
 When AWS credentials or config change:
 
 - [ ] Edit `~/.aws/config` and/or `~/.aws/credentials`
-- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh AWS-Config AWS-Credentials`
-- [ ] Verify on other machines: `bw-restore`
+- [ ] Sync to Bitwarden: `dotfiles vault sync AWS-Config AWS-Credentials`
+- [ ] Verify on other machines: `dotfiles vault restore`
 
 ### Adding a New Environment Variable
 
 - [ ] Edit `~/.local/env.secrets`
-- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh Environment-Secrets`
+- [ ] Sync to Bitwarden: `dotfiles vault sync Environment-Secrets`
 - [ ] Source on current shell: `source ~/.local/load-env.sh`
 
 ### Modifying SSH Config (add hosts, change options)
 
 - [ ] Edit `~/.ssh/config`
-- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh SSH-Config`
-- [ ] Restore on other machines: `bw-restore`
+- [ ] Sync to Bitwarden: `dotfiles vault sync SSH-Config`
+- [ ] Restore on other machines: `dotfiles vault restore`
 
 ### Updating Git Config
 
 - [ ] Edit `~/.gitconfig`
-- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh Git-Config`
+- [ ] Sync to Bitwarden: `dotfiles vault sync Git-Config`
 
 ### New Machine Setup
 
@@ -1446,8 +1446,8 @@ Complete checklist for a fresh machine:
 1. [ ] Clone dotfiles: `git clone ... ~/workspace/dotfiles`
 2. [ ] Run bootstrap: `./bootstrap-mac.sh` or `./bootstrap-linux.sh`
 3. [ ] Login to Bitwarden: `bw login`
-4. [ ] Validate vault items: `./vault/check-vault-items.sh`
-5. [ ] Restore secrets: `bw-restore`
+4. [ ] Validate vault items: `dotfiles vault check`
+5. [ ] Restore secrets: `dotfiles vault restore`
 6. [ ] Run health check: `dotfiles doctor`
 7. [ ] Restart shell or `source ~/.zshrc`
 
@@ -1538,13 +1538,19 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 
 **Vault:**
 
-- `bw-restore` → Run Bitwarden vault bootstrap
+- `dotfiles vault restore` → Restore all secrets from Bitwarden
+- `dotfiles vault sync` → Sync local files to Bitwarden
+- `dotfiles vault list` → List vault items
+- `dotfiles vault check` → Validate vault items exist
+- `dotfiles vault validate` → Validate vault item schema
 
 **Dotfiles Management:**
 
-- `dotfiles` → `cd ~/workspace/dotfiles`
-- `dotfiles-doctor` → Run health check + vault item validation
-- `dotfiles-update` → Pull latest dotfiles and re-source zshrc
+- `dotfiles status` → Visual dashboard
+- `dotfiles doctor` → Run health check + vault item validation
+- `dotfiles upgrade` → Pull latest dotfiles and run bootstrap
+- `dotfiles cd` → Navigate to dotfiles directory
+- `dotfiles edit` → Open in editor
 - `status` → Quick dashboard showing symlinks, SSH, AWS, Lima status
 
 **AWS Profile Management:**

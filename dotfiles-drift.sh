@@ -98,9 +98,9 @@ else
     echo -e "${YELLOW}$DRIFT_COUNT of $CHECKED_COUNT items have drifted${NC}"
     echo ""
     info "To sync local changes to Bitwarden:"
-    echo "  ./vault/sync-to-bitwarden.sh --all"
+    echo "  dotfiles vault sync --all"
     echo ""
     info "To restore from Bitwarden (overwrite local):"
-    echo "  bw-restore"
+    echo "  dotfiles vault restore"
 fi
 echo "========================================"

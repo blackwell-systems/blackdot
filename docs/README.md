@@ -277,13 +277,13 @@ All secrets are stored in Bitwarden and restored on new machines:
 
 ```bash
 # First time: Push secrets to Bitwarden
-./vault/sync-to-bitwarden.sh --all
+dotfiles vault sync --all
 
 # New machine: Restore secrets
-bw-restore  # Alias for ./vault/bootstrap-vault.sh
+dotfiles vault restore
 
 # Validate vault item schema
-bw-validate  # Ensure all items have correct structure
+dotfiles vault validate
 
 # Check for drift (local vs Bitwarden)
 dotfiles drift
