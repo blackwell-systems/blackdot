@@ -11,10 +11,7 @@ set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
+# Colors (only define what we use to satisfy shellcheck)
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m'
