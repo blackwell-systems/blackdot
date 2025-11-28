@@ -20,5 +20,47 @@ alias bw-list='$HOME/workspace/dotfiles/vault/list-vault-items.sh'
 alias bw-check='$HOME/workspace/dotfiles/vault/check-vault-items.sh'
 
 # Dotfiles management helpers
-alias dotfiles='cd $HOME/workspace/dotfiles'
-alias dotfiles-doctor='$HOME/workspace/dotfiles/check-health.sh && bw-check 2>/dev/null'
+alias dotfiles-cd='cd $HOME/workspace/dotfiles'
+
+# Unified dotfiles command with subcommands
+dotfiles() {
+    local cmd="${1:-help}"
+    shift 2>/dev/null || true
+
+    case "$cmd" in
+        doctor|health|check)
+            "$HOME/workspace/dotfiles/dotfiles-doctor.sh" "$@"
+            ;;
+        upgrade|update)
+            dotfiles-upgrade
+            ;;
+        cd)
+            cd "$HOME/workspace/dotfiles"
+            ;;
+        edit)
+            ${EDITOR:-vim} "$HOME/workspace/dotfiles"
+            ;;
+        help|--help|-h)
+            echo "dotfiles - Manage your dotfiles"
+            echo ""
+            echo "Usage: dotfiles <command> [options]"
+            echo ""
+            echo "Commands:"
+            echo "  doctor, health    Run comprehensive health check"
+            echo "  upgrade, update   Pull latest and run bootstrap"
+            echo "  cd                Change to dotfiles directory"
+            echo "  edit              Open dotfiles in editor"
+            echo "  help              Show this help"
+            echo ""
+            echo "Examples:"
+            echo "  dotfiles doctor          # Run health check"
+            echo "  dotfiles doctor --fix    # Auto-fix permissions"
+            echo "  dotfiles upgrade         # Update dotfiles"
+            ;;
+        *)
+            echo "Unknown command: $cmd"
+            echo "Run 'dotfiles help' for usage"
+            return 1
+            ;;
+    esac
+}

@@ -18,10 +18,13 @@ Unlike most dotfiles, this system enables **true Claude Code session portability
 ## Table of Contents
 
 - [Quick Start](#quick-start)
+  - [One-Line Install](#one-line-install)
+  - [Manual Install](#manual-install)
 - [Directory Structure](#directory-structure)
 - [Canonical Workspace](#canonical-workspace-workspace)
 - [Global Prerequisites](#global-prerequisites)
 - [Bootstrap Overview](#bootstrap-overview)
+  - [Interactive Mode](#interactive-mode)
 - [Bootstrapping macOS from Scratch](#bootstrapping-macos-from-scratch)
 - [Bootstrapping Lima / Linux Guest](#bootstrapping-lima--linux-guest)
 - [Dotfiles Bootstrap Details](#dotfiles-bootstrap-details)
@@ -37,6 +40,7 @@ Unlike most dotfiles, this system enables **true Claude Code session portability
 - [Maintenance Checklists](#maintenance-checklists)
 - [Using the Dotfiles Day-to-Day](#using-the-dotfiles-day-to-day)
 - [Health Check](#health-check)
+  - [The dotfiles Command](#the-dotfiles-command)
 - [Metrics & Observability](#metrics--observability)
 - [CI/CD & Testing](#cicd--testing)
 - [Troubleshooting](#troubleshooting)
@@ -45,6 +49,19 @@ Unlike most dotfiles, this system enables **true Claude Code session portability
 ---
 
 ## Quick Start
+
+### One-Line Install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+```
+
+Options:
+- `--interactive` - Prompt for configuration choices
+- `--minimal` - Skip optional features (vault, Claude setup)
+- `--ssh` - Clone using SSH instead of HTTPS
+
+### Manual Install
 
 ```bash
 # 1. Clone repository
@@ -55,13 +72,16 @@ cd ~/workspace/dotfiles
 ./bootstrap-mac.sh      # macOS
 ./bootstrap-linux.sh    # Lima / Linux / WSL2
 
+# Or use interactive mode for guided setup:
+./bootstrap-mac.sh --interactive
+
 # 3. Restore secrets from Bitwarden
 bw login
 export BW_SESSION="$(bw unlock --raw)"
 ./vault/bootstrap-vault.sh
 
 # 4. Verify installation
-./check-health.sh
+dotfiles doctor
 ```
 
 **What gets installed:**
@@ -69,6 +89,7 @@ export BW_SESSION="$(bw unlock --raw)"
 - All Homebrew packages from `Brewfile`
 - SSH keys, AWS credentials, and environment secrets from Bitwarden
 - **Portable Claude Code sessions** via `/workspace` symlink
+- The `dotfiles` command for ongoing management
 
 ### 💡 Critical: Use `/workspace` for Claude Code
 
@@ -91,10 +112,12 @@ The dotfiles are organized as follows:
 
 ```text
 ~/workspace/dotfiles
+├── install.sh                # One-line installer (curl | bash)
 ├── bootstrap-dotfiles.sh     # Shared symlink bootstrap (zshrc, p10k, Ghostty, Claude)
-├── bootstrap-linux.sh         # Lima / Linux-specific bootstrap wrapper
-├── bootstrap-mac.sh          # macOS-specific bootstrap wrapper
-├── check-health.sh           # Verify installation health
+├── bootstrap-linux.sh        # Lima / Linux-specific bootstrap (--interactive supported)
+├── bootstrap-mac.sh          # macOS-specific bootstrap (--interactive supported)
+├── dotfiles-doctor.sh        # Comprehensive health check
+├── check-health.sh           # Legacy health validation
 ├── Brewfile                  # Unified Homebrew bundle (macOS + Lima)
 ├── CHANGELOG.md              # Version history
 ├── .gitignore                # Excludes .bw-session, editor files
@@ -493,6 +516,33 @@ There are two big pillars:
    - `vault/restore-env.sh`
 
    Goal: restore **SSH keys**, **AWS config/credentials**, and **env secrets** from Bitwarden.
+
+### Interactive Mode
+
+Both bootstrap scripts support an interactive mode that guides you through configuration choices:
+
+```bash
+./bootstrap-mac.sh --interactive
+./bootstrap-linux.sh --interactive
+```
+
+Interactive mode prompts for:
+- **Workspace symlink**: Enable `/workspace` symlink for portable Claude sessions?
+- **Claude setup**: Configure Claude Code integration?
+
+You can also use environment variables instead:
+
+```bash
+# Skip optional features
+SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap-linux.sh
+```
+
+Use `--help` to see all available options:
+
+```bash
+./bootstrap-mac.sh --help
+./bootstrap-linux.sh --help
+```
 
 ### Architecture Diagram
 
@@ -1586,26 +1636,44 @@ source ~/.local/load-env.sh
 
 ## Health Check
 
-Run the health check script to verify your dotfiles installation:
+### The `dotfiles` Command
+
+The recommended way to manage and check your dotfiles:
 
 ```bash
-./check-health.sh
+dotfiles doctor          # Comprehensive health check
+dotfiles doctor --fix    # Auto-repair permission issues
+dotfiles doctor --quick  # Fast checks (skip vault status)
+dotfiles upgrade         # Pull latest, run bootstrap, verify
+dotfiles cd              # Navigate to dotfiles directory
+dotfiles edit            # Open dotfiles in $EDITOR
+dotfiles help            # Show all commands
+```
+
+### Health Check Details
+
+Run the health check to verify your dotfiles installation:
+
+```bash
+dotfiles doctor          # Recommended
+./check-health.sh        # Legacy command (also works)
 ```
 
 The script verifies:
 
-- **Symlinks**: `~/.zshrc`, `~/.p10k.zsh`, Ghostty config, Claude workspace
-- **Required commands**: brew, zsh, git, jq, bw, aws
-- **SSH keys and config**: Existence and correct permissions (600 for private keys and config, 644 for public keys)
+- **Version & Updates**: Current version, behind origin/main
+- **Symlinks**: `~/.zshrc`, `~/.p10k.zsh`, `~/.claude`, `/workspace`
+- **Required commands**: brew, zsh, git, jq, bw
+- **SSH keys and config**: Existence and correct permissions (600 for private keys, 644 for public keys)
 - **AWS configuration**: Config and credentials files with correct permissions
-- **Environment secrets**: `~/.local/env.secrets` and loader script
 - **Bitwarden status**: Login and unlock state
-- **Shell configuration**: Default shell, plugin availability
-- **Workspace layout**: Required directories exist
+- **Shell configuration**: Default shell, zsh modules, Powerlevel10k
+- **Health Score**: 0-100 score based on check results
 
 **Auto-fix mode**: Run with `--fix` to automatically correct permission issues:
 
 ```bash
+dotfiles doctor --fix
 ./check-health.sh --fix
 ```
 
