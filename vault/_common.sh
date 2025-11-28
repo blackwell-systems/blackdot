@@ -402,3 +402,104 @@ validate_all_items() {
     pass "All vault items validated successfully"
     return 0
 }
+
+# ============================================================
+# Pre-restore drift check
+# Checks if local files differ from vault before restore
+# ============================================================
+
+# Check if a single item has drifted from vault
+# Returns 0 if no drift, 1 if drifted, 2 if local missing
+check_item_drift() {
+    local item_name="$1"
+    local session="$2"
+    local local_path
+
+    # Get local path for this item
+    local_path=$(get_item_path "$item_name")
+    if [[ -z "$local_path" ]]; then
+        # Try SYNCABLE_ITEMS
+        local_path="${SYNCABLE_ITEMS[$item_name]:-}"
+    fi
+
+    if [[ -z "$local_path" ]]; then
+        debug "No local path for item '$item_name'"
+        return 0
+    fi
+
+    # If local file doesn't exist, no drift to worry about
+    if [[ ! -f "$local_path" ]]; then
+        debug "Local file not found: $local_path"
+        return 2
+    fi
+
+    # Get vault content
+    local vault_content
+    vault_content=$(bw_get_notes "$item_name" "$session")
+
+    if [[ -z "$vault_content" || "$vault_content" == "null" ]]; then
+        debug "Vault item '$item_name' has no content"
+        return 0
+    fi
+
+    # Compare local vs vault
+    local local_content
+    local_content=$(cat "$local_path")
+
+    if [[ "$local_content" != "$vault_content" ]]; then
+        return 1  # Drifted
+    fi
+
+    return 0  # No drift
+}
+
+# Check all syncable items for drift before restore
+# Returns 0 if safe to restore, 1 if drift detected (user should sync first)
+check_pre_restore_drift() {
+    local session="$1"
+    local force="${2:-false}"
+    local drifted_items=()
+
+    info "Checking for local changes before restore..."
+
+    for item_name in "${(k)SYNCABLE_ITEMS[@]}"; do
+        local result
+        check_item_drift "$item_name" "$session"
+        result=$?
+
+        if [[ $result -eq 1 ]]; then
+            drifted_items+=("$item_name")
+        fi
+    done
+
+    if [[ ${#drifted_items[@]} -gt 0 ]]; then
+        warn "Local files have changed since last vault sync:"
+        for item in "${drifted_items[@]}"; do
+            local path="${SYNCABLE_ITEMS[$item]:-$(get_item_path "$item")}"
+            echo "  - $item ($path)"
+        done
+        echo ""
+
+        if [[ "$force" == "true" ]]; then
+            warn "Proceeding with restore (--force specified)"
+            return 0
+        fi
+
+        echo -e "${YELLOW}Options:${NC}"
+        echo "  1. Run 'dotfiles vault sync' first to save local changes"
+        echo "  2. Run restore with --force to overwrite local changes"
+        echo "  3. Run 'dotfiles drift' to see detailed differences"
+        echo ""
+        fail "Restore aborted to prevent data loss"
+        return 1
+    fi
+
+    pass "No local drift detected - safe to restore"
+    return 0
+}
+
+# Environment variable to skip drift check (for automation)
+# Usage: DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
+skip_drift_check() {
+    [[ "${DOTFILES_SKIP_DRIFT_CHECK:-0}" == "1" ]]
+}

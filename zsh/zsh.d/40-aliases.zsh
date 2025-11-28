@@ -67,6 +67,7 @@ dotfiles() {
                     echo ""
                     echo "Commands:"
                     echo "  restore          Restore all secrets from Bitwarden"
+                    echo "                   --force: Skip drift check, overwrite local changes"
                     echo "  sync [item]      Sync local files to Bitwarden (--all for all)"
                     echo "  list             List vault items"
                     echo "  check            Validate vault items exist"

@@ -11,6 +11,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Blog posts on dotfiles architecture and Claude session portability
 - Open source vault system as standalone project
 
+## [1.4.0] - 2025-11-28
+
+### Added - Bootstrap Consolidation & Safety Features
+
+#### Bootstrap Shared Library
+- **`bootstrap/_common.sh`** - Shared bootstrap functions
+  - `parse_bootstrap_args()` - Argument parsing (--interactive, --help)
+  - `prompt_yes_no()` - Interactive yes/no prompts
+  - `run_interactive_config()` - Interactive setup wizard
+  - `setup_workspace_layout()` - ~/workspace directory creation
+  - `setup_workspace_symlink()` - /workspace symlink setup
+  - `link_dotfiles()` - Dotfiles symlinking
+  - `run_brew_bundle()` - Homebrew bundle installation
+  - `add_brew_to_zprofile()` - Homebrew PATH setup
+
+#### Pre-Restore Drift Check
+- **Safety feature** - Prevents accidental data loss during `dotfiles vault restore`
+  - Detects when local files have changed since last vault sync
+  - Warns user and suggests options: sync first, force restore, or review diff
+  - `check_item_drift()` - Check single item for drift
+  - `check_pre_restore_drift()` - Check all syncable items
+  - `skip_drift_check()` - Check DOTFILES_SKIP_DRIFT_CHECK env var
+  - `--force` flag to skip drift check when needed
+
+### Changed
+- `bootstrap-mac.sh` - Now sources `bootstrap/_common.sh` for shared functions
+- `bootstrap-linux.sh` - Now sources `bootstrap/_common.sh` for shared functions
+- `vault/bootstrap-vault.sh` - Added drift check before restore
+- Help text updated for `dotfiles vault restore --force`
+- Reduced code duplication by ~60% in bootstrap scripts
+
+### Documentation
+- Updated `docs/ROADMAP.md` with completed v1.4.0 improvements
+- Updated README.md and docs/README.md with new vault restore options
+- Added bootstrap/ directory to project structure documentation
+
 ## [1.3.0] - 2025-11-28
 
 ### Added - Shared Library & Error Tests

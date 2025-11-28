@@ -33,14 +33,43 @@ This directory contains scripts for **bidirectional secret management** with Bit
 All vault operations are accessed via the unified `dotfiles vault` command:
 
 ```bash
-dotfiles vault restore     # Restore all secrets from Bitwarden
-dotfiles vault sync        # Sync local changes to Bitwarden
-dotfiles vault sync --all  # Sync all items
-dotfiles vault create      # Create new vault item
-dotfiles vault validate    # Validate vault item schema
-dotfiles vault delete      # Delete vault item
-dotfiles vault list        # List all vault items
-dotfiles vault check       # Validate required items exist
+dotfiles vault restore          # Restore all secrets (checks for local drift first)
+dotfiles vault restore --force  # Skip drift check, overwrite local changes
+dotfiles vault sync             # Sync local changes to Bitwarden
+dotfiles vault sync --all       # Sync all items
+dotfiles vault create           # Create new vault item
+dotfiles vault validate         # Validate vault item schema
+dotfiles vault delete           # Delete vault item
+dotfiles vault list             # List all vault items
+dotfiles vault check            # Validate required items exist
+```
+
+### Pre-Restore Safety Check
+
+The restore command automatically checks if your local files have changed since the last vault sync. This prevents accidental data loss:
+
+```bash
+$ dotfiles vault restore
+[INFO] Checking for local changes before restore...
+[WARN] Local files have changed since last vault sync:
+  - Git-Config (~/.gitconfig)
+  - SSH-Config (~/.ssh/config)
+
+Options:
+  1. Run 'dotfiles vault sync' first to save local changes
+  2. Run restore with --force to overwrite local changes
+  3. Run 'dotfiles drift' to see detailed differences
+
+[FAIL] Restore aborted to prevent data loss
+```
+
+To skip this check (for automation or when you intentionally want to overwrite):
+```bash
+# Use --force flag
+dotfiles vault restore --force
+
+# Or set environment variable
+DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
 ```
 
 > 📖 **Full Documentation:** For complete documentation including all script details, item formats, and workflows, see the [vault/README.md](https://github.com/blackwell-systems/dotfiles/blob/main/vault/README.md) file in the repository.
