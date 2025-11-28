@@ -218,8 +218,6 @@ jobs:
           flags: unittests,integrationtests
           fail_ci_if_error: false
           verbose: true
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Coverage summary
         if: always()
