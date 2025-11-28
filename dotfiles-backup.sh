@@ -1,0 +1,192 @@
+#!/usr/bin/env zsh
+# ============================================================
+# FILE: dotfiles-backup.sh
+# Backup and restore dotfiles configuration
+# Usage:
+#   dotfiles backup              # Create backup
+#   dotfiles backup --list       # List backups
+#   dotfiles backup restore      # Restore latest
+#   dotfiles backup restore <id> # Restore specific
+# ============================================================
+set -uo pipefail
+
+BACKUP_DIR="$HOME/.dotfiles-backups"
+MAX_BACKUPS=10
+
+# Colors
+if [[ -t 1 ]]; then
+    GREEN='\033[0;32m'
+    YELLOW='\033[0;33m'
+    BLUE='\033[0;34m'
+    RED='\033[0;31m'
+    NC='\033[0m'
+else
+    GREEN='' YELLOW='' BLUE='' RED='' NC=''
+fi
+
+info()  { echo -e "${BLUE}[INFO]${NC} $1"; }
+pass()  { echo -e "${GREEN}[OK]${NC} $1"; }
+warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
+fail()  { echo -e "${RED}[FAIL]${NC} $1"; }
+
+# Files to backup
+BACKUP_FILES=(
+    "$HOME/.ssh/config"
+    "$HOME/.ssh/known_hosts"
+    "$HOME/.gitconfig"
+    "$HOME/.aws/config"
+    "$HOME/.aws/credentials"
+    "$HOME/.local/env.secrets"
+    "$HOME/.zshrc"
+    "$HOME/.p10k.zsh"
+)
+
+create_backup() {
+    mkdir -p "$BACKUP_DIR"
+
+    local timestamp=$(date +%Y%m%d-%H%M%S)
+    local backup_name="backup-$timestamp"
+    local backup_path="$BACKUP_DIR/$backup_name"
+
+    info "Creating backup: $backup_name"
+    mkdir -p "$backup_path"
+
+    local count=0
+    for file in "${BACKUP_FILES[@]}"; do
+        if [[ -f "$file" ]]; then
+            local rel_path="${file#$HOME/}"
+            local dest_dir="$backup_path/$(dirname "$rel_path")"
+            mkdir -p "$dest_dir"
+            cp "$file" "$backup_path/$rel_path"
+            ((count++))
+        fi
+    done
+
+    # Create manifest
+    cat > "$backup_path/manifest.json" << EOF
+{
+    "timestamp": "$timestamp",
+    "date": "$(date -Iseconds)",
+    "hostname": "$(hostname)",
+    "files_count": $count,
+    "dotfiles_version": "$(cd "$HOME/workspace/dotfiles" && git rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
+}
+EOF
+
+    # Create tarball
+    tar -czf "$BACKUP_DIR/$backup_name.tar.gz" -C "$BACKUP_DIR" "$backup_name"
+    rm -rf "$backup_path"
+
+    pass "Backup created: $backup_name.tar.gz ($count files)"
+
+    # Cleanup old backups
+    cleanup_old_backups
+}
+
+cleanup_old_backups() {
+    local backup_count=$(ls -1 "$BACKUP_DIR"/*.tar.gz 2>/dev/null | wc -l)
+    if [[ $backup_count -gt $MAX_BACKUPS ]]; then
+        local to_delete=$((backup_count - MAX_BACKUPS))
+        info "Cleaning up $to_delete old backup(s)..."
+        ls -1t "$BACKUP_DIR"/*.tar.gz | tail -n $to_delete | xargs rm -f
+    fi
+}
+
+list_backups() {
+    if [[ ! -d "$BACKUP_DIR" ]] || [[ -z "$(ls -A "$BACKUP_DIR" 2>/dev/null)" ]]; then
+        warn "No backups found"
+        echo "Create one with: dotfiles backup"
+        return 1
+    fi
+
+    echo ""
+    echo "Available backups:"
+    echo "=================="
+
+    for backup in $(ls -1t "$BACKUP_DIR"/*.tar.gz 2>/dev/null); do
+        local name=$(basename "$backup" .tar.gz)
+        local size=$(du -h "$backup" | cut -f1)
+        local date_part="${name#backup-}"
+        echo "  $name  ($size)"
+    done
+
+    echo ""
+    echo "Restore with: dotfiles backup restore [backup-name]"
+}
+
+restore_backup() {
+    local backup_name="$1"
+
+    if [[ -z "$backup_name" ]]; then
+        # Get latest
+        backup_name=$(ls -1t "$BACKUP_DIR"/*.tar.gz 2>/dev/null | head -1 | xargs basename 2>/dev/null | sed 's/.tar.gz//')
+    fi
+
+    if [[ -z "$backup_name" ]]; then
+        fail "No backups found"
+        return 1
+    fi
+
+    local backup_file="$BACKUP_DIR/$backup_name.tar.gz"
+    if [[ ! -f "$backup_file" ]]; then
+        backup_file="$BACKUP_DIR/${backup_name}.tar.gz"
+    fi
+
+    if [[ ! -f "$backup_file" ]]; then
+        fail "Backup not found: $backup_name"
+        list_backups
+        return 1
+    fi
+
+    info "Restoring from: $(basename "$backup_file")"
+
+    # Extract to temp
+    local temp_dir=$(mktemp -d)
+    tar -xzf "$backup_file" -C "$temp_dir"
+
+    local backup_dir=$(ls "$temp_dir")
+    local restored=0
+
+    # Restore files
+    for file in "${BACKUP_FILES[@]}"; do
+        local rel_path="${file#$HOME/}"
+        local src="$temp_dir/$backup_dir/$rel_path"
+        if [[ -f "$src" ]]; then
+            local dest_dir=$(dirname "$file")
+            mkdir -p "$dest_dir"
+            cp "$src" "$file"
+            pass "Restored: $rel_path"
+            ((restored++))
+        fi
+    done
+
+    rm -rf "$temp_dir"
+
+    echo ""
+    pass "Restored $restored files from $backup_name"
+}
+
+# Main
+case "${1:-}" in
+    --list|-l|list)
+        list_backups
+        ;;
+    restore)
+        restore_backup "${2:-}"
+        ;;
+    --help|-h|help)
+        echo "dotfiles backup - Backup and restore configuration"
+        echo ""
+        echo "Usage:"
+        echo "  dotfiles backup              Create new backup"
+        echo "  dotfiles backup --list       List available backups"
+        echo "  dotfiles backup restore      Restore from latest backup"
+        echo "  dotfiles backup restore ID   Restore specific backup"
+        echo ""
+        echo "Backups are stored in: $BACKUP_DIR"
+        echo "Maximum backups kept: $MAX_BACKUPS"
+        ;;
+    *)
+        create_backup
+        ;;
+esac

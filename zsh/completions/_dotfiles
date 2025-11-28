@@ -1,0 +1,90 @@
+#compdef dotfiles
+# ZSH completion for the unified dotfiles command
+
+_dotfiles_vault_items() {
+    local -a items
+    items=(
+        'SSH-Config:SSH configuration file'
+        'AWS-Config:AWS config file'
+        'AWS-Credentials:AWS credentials file'
+        'Git-Config:Git configuration'
+        'Environment-Secrets:Environment secrets'
+    )
+    _describe 'vault item' items
+}
+
+_dotfiles_vault() {
+    local -a vault_commands
+    vault_commands=(
+        'restore:Restore all secrets from Bitwarden'
+        'sync:Sync local files to Bitwarden'
+        'list:List vault items'
+        'check:Validate vault items exist'
+        'validate:Validate vault item schema'
+        'create:Create new vault item'
+        'delete:Delete vault item'
+        'help:Show vault help'
+    )
+
+    case $words[2] in
+        sync)
+            _arguments \
+                '--all[Sync all items]' \
+                '--dry-run[Show what would be synced]' \
+                '*::item:_dotfiles_vault_items'
+            ;;
+        create|delete)
+            _dotfiles_vault_items
+            ;;
+        *)
+            _describe 'vault command' vault_commands
+            ;;
+    esac
+}
+
+_dotfiles() {
+    local -a commands
+    commands=(
+        'status:Quick visual dashboard'
+        's:Quick visual dashboard (alias)'
+        'doctor:Run comprehensive health check'
+        'health:Run comprehensive health check (alias)'
+        'drift:Compare local files vs Bitwarden vault'
+        'diff:Preview changes before sync/restore'
+        'backup:Backup current configuration'
+        'vault:Bitwarden vault operations'
+        'upgrade:Pull latest and run bootstrap'
+        'update:Pull latest and run bootstrap (alias)'
+        'init:Initialize dotfiles on new machine'
+        'uninstall:Remove dotfiles configuration'
+        'cd:Change to dotfiles directory'
+        'edit:Open dotfiles in editor'
+        'help:Show help'
+    )
+
+    case $words[2] in
+        doctor|health)
+            _arguments \
+                '--fix[Auto-fix permission issues]' \
+                '--help[Show help]'
+            ;;
+        vault)
+            _dotfiles_vault
+            ;;
+        backup)
+            _arguments \
+                'restore:Restore from backup' \
+                '--list[List available backups]'
+            ;;
+        diff)
+            _arguments \
+                '--vault[Compare local vs vault]' \
+                '--restore[Show what restore would change]'
+            ;;
+        *)
+            _describe 'command' commands
+            ;;
+    esac
+}
+
+_dotfiles "$@"
