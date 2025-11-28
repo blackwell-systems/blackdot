@@ -133,20 +133,37 @@ SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap-linux.sh
 # Then manually configure ~/.ssh, ~/.aws, ~/.gitconfig
 ```
 
+> 💡 **Don't use Bitwarden?** No problem!
+>
+> The vault system is completely optional. Run with `--minimal` flag:
+> ```bash
+> curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
+> ```
+> Then manually configure `~/.ssh`, `~/.aws`, `~/.gitconfig`. All shell config, aliases, and tools still work!
+
 Inspired by: holman/dotfiles, thoughtbot/dotfiles, mathiasbynens/dotfiles
 
 ---
 
 ## Prerequisites
 
-You don’t need Git or the Bitwarden CLI preinstalled – the bootstrap scripts will install the tooling for you.
-
-What you do need:
-
+**Required:**
 - A supported environment: macOS, Linux, WSL2, or Lima
-- Internet access (to install Homebrew/Brew packages and the Bitwarden CLI)
-- A Bitwarden account (for vault-backed secrets)
-- A GitHub account with access to this repository
+- Internet access (for installing packages)
+
+**Auto-installed (if missing):**
+- Git (via Xcode tools on macOS or apt on Linux)
+- Homebrew/Linuxbrew (bootstrap will install)
+- Modern CLI tools (eza, fzf, ripgrep, etc. via Brewfile)
+
+**Optional (for vault features only):**
+- **Bitwarden CLI + account** - For automated secret sync
+  - Skip with `--minimal` flag (or just don't run `dotfiles vault` commands)
+  - Without vault: manually configure `~/.ssh`, `~/.aws`, `~/.gitconfig`
+
+**Optional (for Claude Code portable sessions):**
+- **Claude Code installed** - For cross-machine session sync
+  - Skip with `SKIP_CLAUDE_SETUP=true`
 
 To clone via SSH (recommended), you’ll also want an SSH key configured with GitHub. If you don’t have Git yet, you can either:
 - install it the way you normally would on your platform, or  
@@ -197,13 +214,20 @@ dotfiles doctor
 <details>
 <summary><b>Don't use Bitwarden?</b></summary>
 
-The vault system is optional. Skip step 3 and manually configure:
+The vault system is completely optional. Two options:
 
+**Option 1: Use `--minimal` flag**
+```bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
+```
+
+**Option 2: Skip step 3 and manually configure:**
 - `~/.ssh/` – your SSH keys
 - `~/.aws/` – your AWS credentials
 - `~/.gitconfig` – your git identity
+- `~/.local/env.secrets` – environment variables
 
-Everything else still works.
+All shell config, aliases, functions, and CLI tools still work. Only vault sync features are disabled.
 </details>
 
 <details>
