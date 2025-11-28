@@ -8,7 +8,9 @@ set -uo pipefail
 
 # Source shared logging functions
 SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
-source "$SCRIPT_DIR/lib/_logging.sh"
+# DOTFILES_DIR is parent of bin/
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+source "$DOTFILES_DIR/lib/_logging.sh"
 
 # Additional init-specific function
 step()  { echo -e "\n${BOLD}${CYAN}==> $1${NC}"; }

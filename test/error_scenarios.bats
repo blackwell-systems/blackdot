@@ -59,7 +59,7 @@ teardown() {
 
     # Backup should handle this gracefully (warn but not crash)
     export HOME="$TEST_HOME"
-    run "$DOTFILES_DIR/dotfiles-backup.sh" 2>&1
+    run "$DOTFILES_DIR/bin/dotfiles-backup" 2>&1
 
     # Should complete (might warn, but shouldn't crash hard)
     # Exit code 0 or 1 both acceptable (depends on implementation)
@@ -91,7 +91,7 @@ teardown() {
     export HOME="$TEST_HOME"
 
     # Backup should handle missing files gracefully
-    run "$DOTFILES_DIR/dotfiles-backup.sh" 2>&1
+    run "$DOTFILES_DIR/bin/dotfiles-backup" 2>&1
 
     # Should succeed but backup will have fewer files
     [[ "$status" -eq 0 ]] || [[ "$status" -eq 1 ]]
@@ -101,7 +101,7 @@ teardown() {
     # Run doctor with non-existent DOTFILES_DIR
     export DOTFILES_DIR="/nonexistent/path"
 
-    run "$BATS_TEST_DIRNAME/../dotfiles-doctor.sh" 2>&1
+    run "$BATS_TEST_DIRNAME/../bin/dotfiles-doctor" 2>&1
 
     # Should fail gracefully
     [ "$status" -ne 0 ] || [[ "$output" =~ "not found" ]] || [[ "$output" =~ "error" ]]
@@ -112,7 +112,7 @@ teardown() {
     rm -f "$TEST_HOME/.dotfiles-metrics.jsonl"
 
     export HOME="$TEST_HOME"
-    run "$DOTFILES_DIR/show-metrics.sh" 2>&1
+    run "$DOTFILES_DIR/bin/dotfiles-metrics" 2>&1
 
     # Should exit with error and helpful message
     [ "$status" -ne 0 ]
@@ -142,7 +142,7 @@ teardown() {
     export HOME="$TEST_HOME"
 
     # List should still work
-    run "$DOTFILES_DIR/dotfiles-backup.sh" --list 2>&1
+    run "$DOTFILES_DIR/bin/dotfiles-backup" --list 2>&1
 
     # Should show backups (even if corrupted)
     [[ "$output" =~ "backup-corrupted" ]] || [ "$status" -eq 1 ]
@@ -154,7 +154,7 @@ teardown() {
     echo "corrupted data" > "$TEST_HOME/.dotfiles-backups/backup-20250101-120000.tar.gz"
 
     export HOME="$TEST_HOME"
-    run "$DOTFILES_DIR/dotfiles-backup.sh" restore backup-20250101-120000 2>&1
+    run "$DOTFILES_DIR/bin/dotfiles-backup" restore backup-20250101-120000 2>&1
 
     # Should fail but not crash
     [ "$status" -ne 0 ]
@@ -211,7 +211,7 @@ teardown() {
     # Directory exists but is empty
 
     export HOME="$TEST_HOME"
-    run "$DOTFILES_DIR/dotfiles-backup.sh" --list 2>&1
+    run "$DOTFILES_DIR/bin/dotfiles-backup" --list 2>&1
 
     # Should indicate no backups
     [ "$status" -eq 1 ]
@@ -255,9 +255,9 @@ teardown() {
     export HOME="$TEST_HOME"
 
     # Start two backups simultaneously
-    "$DOTFILES_DIR/dotfiles-backup.sh" &
+    "$DOTFILES_DIR/bin/dotfiles-backup" &
     local pid1=$!
-    "$DOTFILES_DIR/dotfiles-backup.sh" &
+    "$DOTFILES_DIR/bin/dotfiles-backup" &
     local pid2=$!
 
     # Wait for both to complete
@@ -281,7 +281,7 @@ teardown() {
     done
 
     export HOME="$TEST_HOME"
-    run "$DOTFILES_DIR/dotfiles-backup.sh" --list 2>&1
+    run "$DOTFILES_DIR/bin/dotfiles-backup" --list 2>&1
 
     # Should list backups without error
     [ "$status" -eq 0 ]
@@ -293,21 +293,21 @@ teardown() {
 # ============================================================
 
 @test "error: backup rejects invalid arguments" {
-    run "$DOTFILES_DIR/dotfiles-backup.sh" --invalid-flag 2>&1
+    run "$DOTFILES_DIR/bin/dotfiles-backup" --invalid-flag 2>&1
 
     # Should show help or error
     [[ "$output" =~ "Usage" ]] || [[ "$output" =~ "help" ]] || [ "$status" -ne 0 ]
 }
 
 @test "error: uninstall --help exits cleanly" {
-    run "$DOTFILES_DIR/uninstall.sh" --help 2>&1
+    run "$DOTFILES_DIR/bin/dotfiles-uninstall" --help 2>&1
 
     [ "$status" -eq 0 ]
     [[ "$output" =~ "Usage" ]] || [[ "$output" =~ "Uninstall" ]]
 }
 
 @test "error: doctor --help exits cleanly" {
-    run "$DOTFILES_DIR/dotfiles-doctor.sh" --help 2>&1
+    run "$DOTFILES_DIR/bin/dotfiles-doctor" --help 2>&1
 
     [ "$status" -eq 0 ]
 }

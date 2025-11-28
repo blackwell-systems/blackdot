@@ -11,6 +11,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Blog posts on dotfiles architecture and Claude session portability
 - Open source vault system as standalone project
 
+## [1.6.0] - 2025-11-28
+
+### Added - CLI Reorganization
+
+#### bin/ Directory Structure
+- **Moved CLI scripts to `bin/`** for cleaner repository root
+  - `dotfiles-doctor` - Health validation
+  - `dotfiles-drift` - Drift detection
+  - `dotfiles-backup` - Backup/restore
+  - `dotfiles-diff` - Preview changes
+  - `dotfiles-init` - Setup wizard
+  - `dotfiles-metrics` - Metrics visualization (renamed from show-metrics.sh)
+  - `dotfiles-uninstall` - Clean removal (renamed from uninstall.sh)
+
+### Changed
+- Scripts now source `lib/_logging.sh` from `$DOTFILES_DIR/lib/` (parent of bin/)
+- `zsh/zsh.d/40-aliases.zsh` updated to reference `bin/` paths
+- All test files updated with new paths
+- CI/CD workflow updated with new paths
+- Removed `.sh` extensions from CLI scripts for cleaner invocation
+
+### Documentation
+- Updated project structure in README.md and docs/README.md
+- Updated ROADMAP.md to mark CLI reorganization as completed
+- Updated CHANGELOG.md with v1.6.0 entry
+
+## [1.5.0] - 2025-11-28
+
+### Added - Offline Mode Support
+
+#### Offline Mode
+- **`DOTFILES_OFFLINE=1`** - Skip all Bitwarden vault operations gracefully
+  - `is_offline()` - Check if offline mode is enabled
+  - `require_online()` - Helper to skip vault operations in offline mode
+  - `require_bw()` and `require_logged_in()` - Skip checks in offline mode
+
+#### Use Cases
+- Air-gapped environments without Bitwarden access
+- Bitwarden service outages
+- Development/testing without vault connectivity
+- CI/CD pipelines without secrets
+
+### Changed
+- `vault/bootstrap-vault.sh` - Exits gracefully with helpful message in offline mode
+- `vault/sync-to-bitwarden.sh` - Skips sync with explanation in offline mode
+- Updated all documentation with offline mode usage
+
+### Documentation
+- Added offline mode to README.md and docs/README.md environment flags
+- Added "Air-gapped/Offline" use case to both READMEs
+- Updated vault documentation with offline mode examples
+- Updated ROADMAP.md - marked offline mode as completed
+
 ## [1.4.0] - 2025-11-28
 
 ### Added - Bootstrap Consolidation & Safety Features

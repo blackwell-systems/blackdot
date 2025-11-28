@@ -12,7 +12,9 @@ set -uo pipefail
 
 # Source shared logging functions
 SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
-source "$SCRIPT_DIR/lib/_logging.sh"
+# DOTFILES_DIR is parent of bin/
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+source "$DOTFILES_DIR/lib/_logging.sh"
 
 BACKUP_DIR="$HOME/.dotfiles-backups"
 MAX_BACKUPS=10

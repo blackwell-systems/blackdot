@@ -131,9 +131,32 @@ is_protected_item() {
 }
 
 # ============================================================
+# Offline mode support
+# ============================================================
+# Check if running in offline mode
+# Usage: if is_offline; then skip_vault_ops; fi
+is_offline() {
+    [[ "${DOTFILES_OFFLINE:-0}" == "1" ]]
+}
+
+# Wrapper to skip vault operations in offline mode
+# Returns 0 (success) if offline, allowing graceful skip
+# Usage: require_online || return 0
+require_online() {
+    if is_offline; then
+        warn "Offline mode enabled (DOTFILES_OFFLINE=1) - skipping vault operation"
+        return 1
+    fi
+    return 0
+}
+
+# ============================================================
 # Prerequisite checks
 # ============================================================
 require_bw() {
+    # Skip in offline mode
+    is_offline && return 0
+
     if ! command -v bw >/dev/null 2>&1; then
         fail "Bitwarden CLI (bw) is not installed."
         echo "Install with: brew install bitwarden-cli" >&2
@@ -150,6 +173,9 @@ require_jq() {
 }
 
 require_logged_in() {
+    # Skip in offline mode
+    is_offline && return 0
+
     if ! bw login --check >/dev/null 2>&1; then
         fail "Not logged in to Bitwarden."
         echo "Please run: bw login" >&2

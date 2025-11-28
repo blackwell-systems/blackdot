@@ -250,6 +250,7 @@ SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap-mac.sh
 **Available flags:**
 - `SKIP_WORKSPACE_SYMLINK=true` – Skip `/workspace` symlink creation (for single-machine setups)
 - `SKIP_CLAUDE_SETUP=true` – Skip `~/.claude` configuration symlink
+- `DOTFILES_OFFLINE=1` – Skip all Bitwarden vault operations (for air-gapped or offline environments)
 
 All features are opt-in by default and can be disabled without breaking the rest of the setup.
 </details>
@@ -263,6 +264,8 @@ All features are opt-in by default and can be disabled without breaking the rest
 - **macOS daily driver** – Full experience including Ghostty terminal config and macOS system preferences.
 
 - **Docker/CI environments** – Bootstrap in containers for reproducible builds. Vault restore from CI secrets.
+
+- **Air-gapped/Offline** – Use `DOTFILES_OFFLINE=1` when Bitwarden isn't available. Vault operations skip gracefully.
 
 - **Multi-machine workflow** – Develop on macOS, test on Linux VM, deploy from WSL. Same dotfiles, same secrets, same Claude sessions everywhere.
 
@@ -489,16 +492,18 @@ dotfiles/
 ├── bootstrap-mac.sh           # macOS setup
 ├── bootstrap-linux.sh         # Lima/Linux/WSL2 setup
 ├── bootstrap-dotfiles.sh      # Shared symlink creation
-├── dotfiles-doctor.sh         # Health validation (use: dotfiles doctor)
-├── dotfiles-drift.sh          # Drift detection (use: dotfiles drift)
-├── dotfiles-backup.sh         # Backup/restore (use: dotfiles backup)
-├── dotfiles-diff.sh           # Preview changes (use: dotfiles diff)
-├── dotfiles-init.sh           # Setup wizard (use: dotfiles init)
-├── uninstall.sh               # Clean removal (use: dotfiles uninstall)
-├── show-metrics.sh            # Metrics visualization
 ├── Brewfile                   # Package definitions
 ├── Dockerfile                 # Docker bootstrap example
 ├── .dockerignore              # Docker build exclusions
+│
+├── bin/                       # CLI commands (use: dotfiles <command>)
+│   ├── dotfiles-doctor       # Health validation
+│   ├── dotfiles-drift        # Drift detection
+│   ├── dotfiles-backup       # Backup/restore
+│   ├── dotfiles-diff         # Preview changes
+│   ├── dotfiles-init         # Setup wizard
+│   ├── dotfiles-metrics      # Metrics visualization
+│   └── dotfiles-uninstall    # Clean removal
 │
 ├── vault/                     # Bitwarden secret management
 │   ├── _common.sh            # Shared config & validation functions

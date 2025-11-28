@@ -5,7 +5,7 @@
 # Usage:
 #   ./bootstrap-vault.sh              # Restore with drift check
 #   ./bootstrap-vault.sh --force      # Restore without drift check
-#   DOTFILES_SKIP_DRIFT_CHECK=1 ./bootstrap-vault.sh  # Skip drift check
+#   DOTFILES_OFFLINE=1 ./bootstrap-vault.sh  # Skip vault operations
 # ============================================================
 set -euo pipefail
 
@@ -30,6 +30,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --help, -h     Show this help"
             echo ""
             echo "Environment variables:"
+            echo "  DOTFILES_OFFLINE=1            Run in offline mode (skip vault operations)"
             echo "  DOTFILES_SKIP_DRIFT_CHECK=1   Skip drift check (for automation)"
             exit 0
             ;;
@@ -39,6 +40,21 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# ============================================================
+# Offline mode - skip vault operations entirely
+# ============================================================
+if is_offline; then
+    echo "=== Offline mode enabled ==="
+    warn "DOTFILES_OFFLINE=1 - Skipping Bitwarden vault operations"
+    echo ""
+    echo "Vault restore skipped. Your existing local files are unchanged."
+    echo ""
+    echo "To restore from vault later:"
+    echo "  unset DOTFILES_OFFLINE"
+    echo "  dotfiles vault restore"
+    exit 0
+fi
 
 echo "=== Bitwarden vault bootstrap starting ==="
 echo "Vault directory: $VAULT_DIR"

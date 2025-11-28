@@ -108,7 +108,7 @@ teardown() {
     echo "test ssh config" > "$TEST_HOME/.ssh/config"
     echo "test git config" > "$TEST_HOME/.gitconfig"
 
-    run "$DOTFILES_DIR/dotfiles-backup.sh"
+    run "$DOTFILES_DIR/bin/dotfiles-backup"
 
     [ "$status" -eq 0 ]
 
@@ -121,9 +121,9 @@ teardown() {
 @test "backup: --list shows available backups" {
     # Create a backup first
     echo "test" > "$TEST_HOME/.gitconfig"
-    "$DOTFILES_DIR/dotfiles-backup.sh" >/dev/null 2>&1
+    "$DOTFILES_DIR/bin/dotfiles-backup" >/dev/null 2>&1
 
-    run "$DOTFILES_DIR/dotfiles-backup.sh" --list
+    run "$DOTFILES_DIR/bin/dotfiles-backup" --list
 
     [ "$status" -eq 0 ]
     [[ "$output" =~ "backup-" ]] || [[ "$output" =~ ".tar.gz" ]] || [[ "$output" =~ "Available" ]]
@@ -136,7 +136,7 @@ teardown() {
     echo "git-config-content" > "$TEST_HOME/.gitconfig"
 
     # Create backup
-    "$DOTFILES_DIR/dotfiles-backup.sh" >/dev/null 2>&1
+    "$DOTFILES_DIR/bin/dotfiles-backup" >/dev/null 2>&1
 
     # Find the backup
     local backup_file
@@ -157,7 +157,7 @@ teardown() {
     echo "original-git-config" > "$TEST_HOME/.gitconfig"
 
     # Create backup
-    "$DOTFILES_DIR/dotfiles-backup.sh" >/dev/null 2>&1
+    "$DOTFILES_DIR/bin/dotfiles-backup" >/dev/null 2>&1
 
     # Modify files
     echo "modified-ssh-config" > "$TEST_HOME/.ssh/config"
@@ -183,7 +183,7 @@ teardown() {
 # ============================================================
 
 @test "diff: --help shows usage" {
-    run "$DOTFILES_DIR/dotfiles-diff.sh" --help
+    run "$DOTFILES_DIR/bin/dotfiles-diff" --help
 
     [ "$status" -eq 0 ]
     [[ "$output" =~ "Usage" ]] || [[ "$output" =~ "diff" ]]
@@ -195,7 +195,7 @@ teardown() {
     echo "local-ssh-config" > "$TEST_HOME/.ssh/config"
 
     # Just verify the script runs (may show "no diff" or actual diff)
-    run "$DOTFILES_DIR/dotfiles-diff.sh"
+    run "$DOTFILES_DIR/bin/dotfiles-diff"
 
     # Should not crash
     [ "$status" -eq 0 ] || [ "$status" -eq 1 ]
@@ -209,14 +209,14 @@ teardown() {
     # Create symlinks that would be removed
     ln -sf /nonexistent "$TEST_HOME/.zshrc"
 
-    run "$DOTFILES_DIR/uninstall.sh" --dry-run
+    run "$DOTFILES_DIR/bin/dotfiles-uninstall" --dry-run
 
     [ "$status" -eq 0 ]
     [[ "$output" =~ "DRY RUN" ]]
 }
 
 @test "uninstall: --help shows usage" {
-    run "$DOTFILES_DIR/uninstall.sh" --help
+    run "$DOTFILES_DIR/bin/dotfiles-uninstall" --help
 
     [ "$status" -eq 0 ]
     [[ "$output" =~ "Usage" ]]
@@ -232,7 +232,7 @@ teardown() {
     rm -rf "$TEST_HOME/.aws"
 
     # Should not crash
-    run "$DOTFILES_DIR/dotfiles-backup.sh"
+    run "$DOTFILES_DIR/bin/dotfiles-backup"
 
     # May succeed with warning or fail gracefully
     [ "$status" -eq 0 ] || [ "$status" -eq 1 ]
@@ -241,7 +241,7 @@ teardown() {
 @test "error: diff handles locked vault" {
     touch "$MOCK_DATA_DIR/.locked"
 
-    run "$DOTFILES_DIR/dotfiles-diff.sh" --restore
+    run "$DOTFILES_DIR/bin/dotfiles-diff" --restore
 
     # Should fail gracefully, not crash
     [ "$status" -eq 0 ] || [ "$status" -eq 1 ]
@@ -252,14 +252,14 @@ teardown() {
 # ============================================================
 
 @test "doctor: runs health check" {
-    run "$DOTFILES_DIR/dotfiles-doctor.sh"
+    run "$DOTFILES_DIR/bin/dotfiles-doctor"
 
     # Doctor may report issues (non-zero) but shouldn't crash
     [[ "$output" =~ "Symlinks" ]] || [[ "$output" =~ "dotfiles" ]] || [[ "$output" =~ "Health" ]] || true
 }
 
 @test "doctor: --help shows usage" {
-    run "$DOTFILES_DIR/dotfiles-doctor.sh" --help
+    run "$DOTFILES_DIR/bin/dotfiles-doctor" --help
 
     [ "$status" -eq 0 ]
 }
@@ -269,7 +269,7 @@ teardown() {
 # ============================================================
 
 @test "init: script exists and has valid syntax" {
-    run bash -n "$DOTFILES_DIR/dotfiles-init.sh"
+    run bash -n "$DOTFILES_DIR/bin/dotfiles-init"
 
     [ "$status" -eq 0 ]
 }
@@ -284,7 +284,7 @@ teardown() {
     echo "version: 1" > "$TEST_HOME/.ssh/config"
 
     # Step 1: Create backup
-    run "$DOTFILES_DIR/dotfiles-backup.sh"
+    run "$DOTFILES_DIR/bin/dotfiles-backup"
     [ "$status" -eq 0 ]
 
     # Step 2: Verify backup exists
@@ -310,7 +310,7 @@ teardown() {
     # Create multiple backups
     for i in {1..3}; do
         echo "config v$i" > "$TEST_HOME/.ssh/config"
-        "$DOTFILES_DIR/dotfiles-backup.sh" >/dev/null 2>&1
+        "$DOTFILES_DIR/bin/dotfiles-backup" >/dev/null 2>&1
         sleep 1  # Ensure different timestamps
     done
 

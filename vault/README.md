@@ -73,6 +73,11 @@ dotfiles vault restore --force  # Skip drift check
 DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
 ```
 
+**Offline mode:** For air-gapped environments or when Bitwarden is unavailable:
+```bash
+DOTFILES_OFFLINE=1 dotfiles vault restore  # Exits gracefully, keeps local files
+```
+
 **When to use:** New machine setup, or after secrets change in Bitwarden.
 
 ---

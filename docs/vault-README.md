@@ -76,6 +76,26 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
 
 ---
 
+### Offline Mode
+
+For air-gapped environments, Bitwarden outages, or when you simply don't have vault access:
+
+```bash
+# Skip all vault operations during bootstrap
+DOTFILES_OFFLINE=1 ./bootstrap-mac.sh
+
+# Or for individual commands
+DOTFILES_OFFLINE=1 dotfiles vault restore  # Exits gracefully
+DOTFILES_OFFLINE=1 dotfiles vault sync     # Exits gracefully
+```
+
+When offline mode is enabled:
+- `dotfiles vault restore` - Skips restore, keeps existing local files
+- `dotfiles vault sync` - Skips sync with helpful message
+- All other dotfiles commands work normally
+
+---
+
 ## Common Workflows
 
 ### First Time Setup

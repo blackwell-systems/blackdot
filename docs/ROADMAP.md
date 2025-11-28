@@ -4,7 +4,7 @@ This document outlines potential improvements and refactoring opportunities for 
 
 ---
 
-## Current State (v1.4.0)
+## Current State (v1.5.0)
 
 The dotfiles system is **production-ready** with:
 - 80+ test cases across unit, integration, and error scenario tests
@@ -14,6 +14,7 @@ The dotfiles system is **production-ready** with:
 - Bitwarden vault integration with bidirectional sync
 - Shared libraries for logging and bootstrap functions
 - Pre-restore drift check for data safety
+- Offline mode for air-gapped environments
 
 ---
 
@@ -135,42 +136,58 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
 
 ---
 
-### Priority: MEDIUM
+### ✅ Offline Mode Support (v1.5.0)
 
-#### 4. Offline Mode Support
+**Status:** COMPLETED
 
-**Status:** Not started
+**What:** Run dotfiles without Bitwarden access for air-gapped environments, outages, or offline development.
 
-**What:** Document and support running without Bitwarden access.
+**Implementation:**
+- `is_offline()` - Check if DOTFILES_OFFLINE=1 is set
+- `require_online()` - Skip vault operations gracefully in offline mode
+- All vault scripts check offline mode before attempting Bitwarden operations
+
+**Usage:**
+```bash
+# Skip vault operations during bootstrap
+DOTFILES_OFFLINE=1 ./bootstrap-mac.sh
+
+# Skip vault restore (keeps local files)
+DOTFILES_OFFLINE=1 dotfiles vault restore
+
+# Skip vault sync
+DOTFILES_OFFLINE=1 dotfiles vault sync
+```
 
 **Use cases:**
 - Air-gapped environments
 - Bitwarden service outages
 - Development without vault access
-
-**Proposed implementation:**
-```bash
-# New environment variable
-DOTFILES_OFFLINE=1
-
-# In vault scripts:
-if [[ "${DOTFILES_OFFLINE:-0}" == "1" ]]; then
-    warn "Running in offline mode - vault operations skipped"
-    return 0
-fi
-```
+- CI/CD without secrets
 
 ---
 
-### Priority: LOW (Nice-to-have)
+## Suggested Improvements
 
-#### 6. CLI Script Reorganization
+### Priority: HIGH
 
-**Status:** Not started (optional)
+*(All HIGH priority items completed)*
 
-**What:** Move CLI scripts to `bin/` directory for cleaner root.
+---
 
-**Current:**
+### Priority: MEDIUM
+
+*(All MEDIUM priority items completed)*
+
+---
+
+### ✅ CLI Script Reorganization (v1.6.0)
+
+**Status:** COMPLETED
+
+**What:** Moved CLI scripts to `bin/` directory for cleaner root.
+
+**Before:**
 ```
 dotfiles/
 ├── dotfiles-doctor.sh
@@ -182,7 +199,7 @@ dotfiles/
 └── show-metrics.sh
 ```
 
-**Proposed:**
+**After:**
 ```
 dotfiles/
 └── bin/
@@ -195,12 +212,17 @@ dotfiles/
     └── dotfiles-metrics
 ```
 
-**Impact:** Would require updating:
-- `zsh/zsh.d/40-aliases.zsh` (dotfiles command)
-- Documentation paths
-- CI/CD workflow paths
+**Updated:**
+- [x] `zsh/zsh.d/40-aliases.zsh` - dotfiles command paths
+- [x] `test/cli_commands.bats` - Test paths
+- [x] `test/integration.bats` - Test paths
+- [x] `test/error_scenarios.bats` - Test paths
+- [x] `.github/workflows/test.yml` - CI workflow paths
+- [x] Documentation (README.md, docs/README.md, ROADMAP.md)
 
-**Decision:** Keep current structure unless actively refactoring. Works fine as-is.
+---
+
+### Priority: LOW (Nice-to-have)
 
 ---
 
@@ -306,7 +328,9 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 | 1.2.2 | Codecov integration, kcov coverage |
 | 1.3.0 | Shared library consolidation, error scenario tests |
 | 1.4.0 | Bootstrap consolidation, pre-restore drift check |
-| 1.5.0 | (Next) Offline mode support, CLI reorganization |
+| 1.5.0 | Offline mode support |
+| 1.6.0 | CLI reorganization (bin/ directory) |
+| 1.7.0 | (Next) Session management improvements |
 
 ---
 
