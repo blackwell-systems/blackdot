@@ -115,7 +115,7 @@ sync_item() {
     bw_json=$(bw_get_item "$item_name" "$SESSION")
     if [[ -z "$bw_json" ]]; then
         warn "Item '$item_name' not found in Bitwarden"
-        echo "    To create it: bw-create $item_name"
+        echo "    To create it: dotfiles vault create $item_name"
         ((SKIPPED++))
         return 0
     fi

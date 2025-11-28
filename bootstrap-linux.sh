@@ -218,4 +218,4 @@ fi
 
 echo "To restore secrets from Bitwarden:"
 echo "  bw login && export BW_SESSION=\"\$(bw unlock --raw)\""
-echo "  bw-restore"
+echo "  dotfiles vault restore"
