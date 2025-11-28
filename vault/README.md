@@ -33,14 +33,15 @@ This directory contains scripts for **bidirectional secret management** with Bit
 All vault operations are accessed via the unified `dotfiles vault` command:
 
 ```bash
-dotfiles vault restore     # Restore all secrets from Bitwarden
-dotfiles vault sync        # Sync local changes to Bitwarden
-dotfiles vault sync --all  # Sync all items
-dotfiles vault create      # Create new vault item
-dotfiles vault validate    # Validate vault item schema
-dotfiles vault delete      # Delete vault item
-dotfiles vault list        # List all vault items
-dotfiles vault check       # Validate required items exist
+dotfiles vault restore          # Restore all secrets (checks for local drift first)
+dotfiles vault restore --force  # Skip drift check, overwrite local changes
+dotfiles vault sync             # Sync local changes to Bitwarden
+dotfiles vault sync --all       # Sync all items
+dotfiles vault create           # Create new vault item
+dotfiles vault validate         # Validate vault item schema
+dotfiles vault delete           # Delete vault item
+dotfiles vault list             # List all vault items
+dotfiles vault check            # Validate required items exist
 ```
 
 ---
@@ -52,13 +53,25 @@ dotfiles vault check       # Validate required items exist
 **Main entry point** - orchestrates all secret restoration.
 
 ```bash
-dotfiles vault restore
+dotfiles vault restore          # Normal restore (checks for drift)
+dotfiles vault restore --force  # Skip drift check
 ```
 
 **What it does:**
 1. Checks/prompts for Bitwarden unlock
 2. Caches session to `.bw-session` (secure permissions)
-3. Calls each restore script in sequence
+3. **Checks for local drift** - warns if local files differ from vault
+4. Calls each restore script in sequence
+
+**Pre-restore drift check:** Before overwriting local files, the script checks if they've changed since the last vault sync. If drift is detected, you'll be prompted to either:
+- Sync local changes first (`dotfiles vault sync`)
+- Force the restore (`--force` flag)
+- Review differences (`dotfiles drift`)
+
+**Skip drift check for automation:**
+```bash
+DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
+```
 
 **When to use:** New machine setup, or after secrets change in Bitwarden.
 

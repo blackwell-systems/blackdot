@@ -407,7 +407,8 @@ dotfiles backup --list   # List available backups
 dotfiles backup restore  # Restore from backup
 
 # Vault Operations
-dotfiles vault restore   # Restore secrets from Bitwarden
+dotfiles vault restore   # Restore secrets (checks for local drift first)
+dotfiles vault restore --force  # Skip drift check, overwrite local
 dotfiles vault sync      # Sync local files to Bitwarden
 dotfiles vault list      # List vault items
 dotfiles vault check     # Validate vault items exist
