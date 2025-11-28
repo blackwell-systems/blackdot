@@ -1,0 +1,17 @@
+{
+  "id": "mock-aws-config-id",
+  "organizationId": null,
+  "folderId": null,
+  "type": 2,
+  "reprompt": 0,
+  "name": "dotfiles-AWS-Config",
+  "notes": "[default]\nregion = us-east-1\noutput = json\n\n[profile dev]\nregion = us-west-2\noutput = json\n",
+  "favorite": false,
+  "secureNote": {
+    "type": 0
+  },
+  "collectionIds": [],
+  "revisionDate": "2025-01-15T10:00:00.000Z",
+  "creationDate": "2025-01-01T00:00:00.000Z",
+  "deletedDate": null
+}
