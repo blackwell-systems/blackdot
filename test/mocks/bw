@@ -1,0 +1,253 @@
+#!/usr/bin/env bash
+# Mock Bitwarden CLI for integration testing
+# This script simulates bw CLI responses for testing vault operations
+
+set -euo pipefail
+
+# Mock data directory (set by test setup)
+MOCK_DATA_DIR="${BW_MOCK_DATA_DIR:-/tmp/bw-mock}"
+
+# Simulated session state
+SESSION_FILE="$MOCK_DATA_DIR/.session"
+VAULT_LOCKED_FILE="$MOCK_DATA_DIR/.locked"
+
+# Helper to check if vault is "unlocked"
+is_unlocked() {
+    [[ -f "$SESSION_FILE" ]] && [[ ! -f "$VAULT_LOCKED_FILE" ]]
+}
+
+# Helper to get mock item content
+get_mock_item() {
+    local item_name="$1"
+    local item_file="$MOCK_DATA_DIR/items/${item_name}.json"
+
+    if [[ -f "$item_file" ]]; then
+        cat "$item_file"
+    else
+        echo '{"error":"Item not found"}' >&2
+        return 1
+    fi
+}
+
+# Main command dispatch
+case "${1:-}" in
+    status)
+        if is_unlocked; then
+            echo '{"serverUrl":"https://vault.bitwarden.com","lastSync":"2025-01-15T10:00:00.000Z","userEmail":"test@example.com","userId":"mock-user-id","status":"unlocked"}'
+        elif [[ -f "$SESSION_FILE" ]]; then
+            echo '{"serverUrl":"https://vault.bitwarden.com","lastSync":"2025-01-15T10:00:00.000Z","userEmail":"test@example.com","userId":"mock-user-id","status":"locked"}'
+        else
+            echo '{"serverUrl":null,"lastSync":null,"userEmail":null,"userId":null,"status":"unauthenticated"}'
+        fi
+        ;;
+
+    login)
+        mkdir -p "$MOCK_DATA_DIR"
+        echo "mock-session-token" > "$SESSION_FILE"
+        rm -f "$VAULT_LOCKED_FILE"
+        echo "You are logged in!"
+        ;;
+
+    logout)
+        rm -f "$SESSION_FILE" "$VAULT_LOCKED_FILE"
+        echo "You have logged out."
+        ;;
+
+    unlock)
+        shift
+        if [[ "${1:-}" == "--check" ]]; then
+            if is_unlocked; then
+                exit 0
+            else
+                exit 1
+            fi
+        elif [[ "${1:-}" == "--raw" ]]; then
+            rm -f "$VAULT_LOCKED_FILE"
+            echo "mock-session-token"
+        else
+            rm -f "$VAULT_LOCKED_FILE"
+            echo "Your vault is now unlocked!"
+            echo ""
+            echo "To unlock your vault, use the BW_SESSION environment variable:"
+            echo "export BW_SESSION=\"mock-session-token\""
+        fi
+        ;;
+
+    lock)
+        touch "$VAULT_LOCKED_FILE"
+        echo "Your vault is locked."
+        ;;
+
+    sync)
+        if ! is_unlocked; then
+            echo "Vault is locked." >&2
+            exit 1
+        fi
+        echo "Syncing complete."
+        ;;
+
+    get)
+        if ! is_unlocked; then
+            echo "Vault is locked." >&2
+            exit 1
+        fi
+
+        shift
+        local item_type=""
+        local item_id=""
+
+        while [[ $# -gt 0 ]]; do
+            case "$1" in
+                item) item_type="item"; shift ;;
+                --session) shift; shift ;;  # Skip session arg
+                *) item_id="$1"; shift ;;
+            esac
+        done
+
+        if [[ -n "$item_id" ]]; then
+            get_mock_item "$item_id"
+        else
+            echo "Error: No item specified" >&2
+            exit 1
+        fi
+        ;;
+
+    list)
+        if ! is_unlocked; then
+            echo "Vault is locked." >&2
+            exit 1
+        fi
+
+        shift
+        local list_type="${1:-items}"
+        local search_term=""
+
+        while [[ $# -gt 0 ]]; do
+            case "$1" in
+                items) shift ;;
+                --search) shift; search_term="$1"; shift ;;
+                --session) shift; shift ;;
+                *) shift ;;
+            esac
+        done
+
+        # Return list of mock items
+        local items_dir="$MOCK_DATA_DIR/items"
+        if [[ -d "$items_dir" ]]; then
+            echo "["
+            local first=true
+            for item_file in "$items_dir"/*.json; do
+                [[ -f "$item_file" ]] || continue
+
+                # Filter by search term if provided
+                if [[ -n "$search_term" ]]; then
+                    if ! grep -q "$search_term" "$item_file" 2>/dev/null; then
+                        continue
+                    fi
+                fi
+
+                if [[ "$first" == "true" ]]; then
+                    first=false
+                else
+                    echo ","
+                fi
+                cat "$item_file"
+            done
+            echo "]"
+        else
+            echo "[]"
+        fi
+        ;;
+
+    create)
+        if ! is_unlocked; then
+            echo "Vault is locked." >&2
+            exit 1
+        fi
+
+        shift
+        local item_type="${1:-item}"
+
+        # Read JSON from stdin or encoded arg
+        local json_data
+        if [[ "${2:-}" == "--" ]]; then
+            json_data=$(cat)
+        else
+            # Base64 encoded
+            json_data=$(echo "${2:-}" | base64 -d 2>/dev/null || echo "${2:-}")
+        fi
+
+        # Extract name and save
+        local item_name
+        item_name=$(echo "$json_data" | grep -o '"name":"[^"]*"' | cut -d'"' -f4)
+
+        if [[ -n "$item_name" ]]; then
+            mkdir -p "$MOCK_DATA_DIR/items"
+            echo "$json_data" > "$MOCK_DATA_DIR/items/${item_name}.json"
+            echo "$json_data"
+        else
+            echo "Error: Could not parse item name" >&2
+            exit 1
+        fi
+        ;;
+
+    edit)
+        if ! is_unlocked; then
+            echo "Vault is locked." >&2
+            exit 1
+        fi
+
+        shift
+        local item_id="${1:-}"
+        shift
+
+        # Read updated JSON
+        local json_data
+        json_data=$(echo "${1:-}" | base64 -d 2>/dev/null || cat)
+
+        if [[ -n "$item_id" ]]; then
+            mkdir -p "$MOCK_DATA_DIR/items"
+            echo "$json_data" > "$MOCK_DATA_DIR/items/${item_id}.json"
+            echo "$json_data"
+        fi
+        ;;
+
+    delete)
+        if ! is_unlocked; then
+            echo "Vault is locked." >&2
+            exit 1
+        fi
+
+        shift
+        local item_type="${1:-item}"
+        shift
+        local item_id="${1:-}"
+
+        if [[ -f "$MOCK_DATA_DIR/items/${item_id}.json" ]]; then
+            rm -f "$MOCK_DATA_DIR/items/${item_id}.json"
+            echo "Item deleted."
+        else
+            echo "Error: Item not found" >&2
+            exit 1
+        fi
+        ;;
+
+    encode)
+        # Base64 encode stdin
+        base64
+        ;;
+
+    --version)
+        echo "2024.1.0"
+        ;;
+
+    --help|-h|"")
+        echo "Mock Bitwarden CLI for testing"
+        echo "Commands: status, login, logout, unlock, lock, sync, get, list, create, edit, delete"
+        ;;
+
+    *)
+        echo "Unknown command: $1" >&2
+        exit 1
+        ;;
+esac

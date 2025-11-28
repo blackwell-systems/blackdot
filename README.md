@@ -3,6 +3,7 @@
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
 [![ShellCheck](https://img.shields.io/badge/ShellCheck-Passing-brightgreen)](https://github.com/blackwell-systems/dotfiles/actions)
 [![Unit Tests](https://img.shields.io/badge/Unit_Tests-23%2B-brightgreen)](test/)
+[![codecov](https://codecov.io/gh/blackwell-systems/dotfiles/branch/main/graph/badge.svg)](https://codecov.io/gh/blackwell-systems/dotfiles)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux%20%7C%20Lima%20%7C%20WSL2%20%7C%20Docker-blue)
 ![Shell](https://img.shields.io/badge/Shell-Zsh-blueviolet)
@@ -584,11 +585,18 @@ Run tests with bats-core:
 bats test/vault_common.bats
 ```
 
-**Current test coverage:**
-- ✅ vault/_common.sh data structure helpers (23 tests)
-- ✅ Logging functions (info, pass, warn, fail, debug)
-- ✅ Item path lookups and validation
-- ⏳ Future: vault restoration scripts
+**Test coverage:**
+- ✅ Unit tests: vault/_common.sh data structure helpers (23+ tests)
+- ✅ CLI tests: Script existence and syntax validation
+- ✅ Integration tests: Backup/restore cycles, mock Bitwarden operations (20+ tests)
+- ✅ Error handling: Graceful degradation on failures
+
+```bash
+# Run specific test suites
+./test/run_tests.sh unit         # Unit tests only
+./test/run_tests.sh integration  # Integration tests only
+./test/run_tests.sh all          # All tests (default)
+```
 
 Tests run automatically in GitHub Actions on every push.
 

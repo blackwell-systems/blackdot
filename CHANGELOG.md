@@ -11,6 +11,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Blog posts on dotfiles architecture and Claude session portability
 - Open source vault system as standalone project
 
+## [1.2.2] - 2025-11-28
+
+### Added - Code Coverage
+
+#### Codecov Integration
+- **`codecov.yml`** - Codecov configuration file
+  - 60% target coverage for project
+  - 50% target coverage for patches
+  - Ignores test files, docs, and configs from coverage
+  - PR comments with coverage diffs
+  - Flags for unit and integration tests
+
+#### CI/CD Coverage Job
+- **`.github/workflows/test.yml`** - Added coverage job
+  - kcov for shell script coverage collection
+  - Separate unit and integration coverage runs
+  - Merged coverage reports
+  - Automatic upload to Codecov
+  - Coverage badge in README
+
+### Changed
+- Added Codecov badge to README.md and docs/README.md
+
+## [1.2.1] - 2025-11-28
+
+### Added - Integration Tests
+
+#### Mock Bitwarden CLI
+- **`test/mocks/bw`** - Mock Bitwarden CLI for testing
+  - Simulates all bw commands (status, get, list, create, etc.)
+  - Configurable vault state (locked/unlocked)
+  - Uses file-based mock data for predictable results
+
+#### Test Fixtures
+- **`test/fixtures/vault-items/`** - Sample vault items
+  - SSH-Config, Git-Config, AWS-Config, AWS-Credentials
+  - Environment-Secrets
+  - Realistic JSON structure matching real Bitwarden items
+
+#### Integration Test Suite
+- **`test/integration.bats`** - 20+ integration tests
+  - Mock bw CLI validation tests
+  - Backup create/list/restore cycle tests
+  - Diff preview tests
+  - Uninstall dry-run tests
+  - Error handling tests
+  - End-to-end workflow tests
+
+### Changed
+- **`test/run_tests.sh`** - Enhanced test runner
+  - Supports `unit`, `integration`, or `all` modes
+  - Separate execution of unit vs integration tests
+  - Colored output with clear status
+
+- **`.github/workflows/test.yml`** - Added integration test job
+  - Separate CI job for integration tests
+  - Mock bw CLI setup in CI environment
+
 ## [1.2.0] - 2025-11-28
 
 ### Added - CLI Commands
