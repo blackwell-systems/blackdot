@@ -7,20 +7,11 @@
 
 set -uo pipefail
 
-METRICS_FILE="$HOME/.dotfiles-metrics.jsonl"
+# Source shared logging functions
+SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
+source "$SCRIPT_DIR/lib/_logging.sh"
 
-# Colors
-if [[ -t 1 ]]; then
-    RED='\033[0;31m'
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    CYAN='\033[0;36m'
-    BOLD='\033[1m'
-    NC='\033[0m'
-else
-    RED='' GREEN='' YELLOW='' BLUE='' CYAN='' BOLD='' NC=''
-fi
+METRICS_FILE="$HOME/.dotfiles-metrics.jsonl"
 
 # Check if metrics file exists
 if [[ ! -f "$METRICS_FILE" ]]; then
