@@ -393,11 +393,30 @@ The bootstrap creates `/workspace → ~/workspace` automatically. If you're on a
 A unified command for managing your dotfiles:
 
 ```bash
+# Status & Health
 dotfiles status          # Quick visual dashboard (color-coded)
 dotfiles doctor          # Comprehensive health check
 dotfiles doctor --fix    # Auto-repair permission issues
 dotfiles drift           # Compare local files vs Bitwarden vault
+dotfiles diff            # Preview changes before sync/restore
+
+# Backup & Restore
+dotfiles backup          # Create timestamped backup
+dotfiles backup --list   # List available backups
+dotfiles backup restore  # Restore from backup
+
+# Vault Operations
+dotfiles vault restore   # Restore secrets from Bitwarden
+dotfiles vault sync      # Sync local files to Bitwarden
+dotfiles vault list      # List vault items
+dotfiles vault check     # Validate vault items exist
+
+# Setup & Maintenance
+dotfiles init            # First-time setup wizard
 dotfiles upgrade         # Pull latest, run bootstrap, verify
+dotfiles uninstall       # Clean removal (with --dry-run option)
+
+# Navigation
 dotfiles cd              # Navigate to dotfiles directory
 dotfiles edit            # Open dotfiles in $EDITOR
 dotfiles help            # Show all commands
@@ -470,6 +489,10 @@ dotfiles/
 ├── bootstrap-dotfiles.sh      # Shared symlink creation
 ├── dotfiles-doctor.sh         # Health validation (use: dotfiles doctor)
 ├── dotfiles-drift.sh          # Drift detection (use: dotfiles drift)
+├── dotfiles-backup.sh         # Backup/restore (use: dotfiles backup)
+├── dotfiles-diff.sh           # Preview changes (use: dotfiles diff)
+├── dotfiles-init.sh           # Setup wizard (use: dotfiles init)
+├── uninstall.sh               # Clean removal (use: dotfiles uninstall)
 ├── show-metrics.sh            # Metrics visualization
 ├── Brewfile                   # Package definitions
 ├── Dockerfile                 # Docker bootstrap example
@@ -486,6 +509,8 @@ dotfiles/
 ├── zsh/                       # Shell configuration
 │   ├── zshrc                 # Main loader (sources zsh.d/*.zsh)
 │   ├── p10k.zsh             # Powerlevel10k theme
+│   ├── completions/          # Tab completions
+│   │   └── _dotfiles        # dotfiles command completions
 │   └── zsh.d/               # Modular configuration
 │       ├── 00-init.zsh      # Initialization & OS detection
 │       ├── 10-plugins.zsh   # Plugin loading
@@ -501,6 +526,7 @@ dotfiles/
 │
 ├── test/                      # Unit tests (bats-core)
 │   ├── vault_common.bats     # Tests for vault/_common.sh
+│   ├── cli_commands.bats     # Tests for CLI commands
 │   ├── setup_bats.sh         # Install bats-core
 │   └── run_tests.sh          # Test runner
 │
@@ -609,6 +635,8 @@ To customize:
 
 - **Quick overview:** this README
 - **[Full Documentation](docs/README-FULL.md)** - Complete guide (1,900+ lines)
+- **[Architecture](docs/architecture.md)** - System diagrams and component overview
+- **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
 - **[Vault README](vault/README.md)** - Bitwarden vault details
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contributor guide
 - **[SECURITY.md](SECURITY.md)** - Security policy
@@ -618,41 +646,36 @@ To customize:
 
 ## Troubleshooting
 
-### Common Issues
+### Quick Fixes
 
-**Claude workspace not detected:**
 ```bash
-# Ensure /workspace symlink exists
-ls -la /workspace
-# Should point to: /Users/yourname/workspace (macOS) or /home/yourname/workspace (Linux)
-
-# Fix if missing:
-sudo ln -sfn $HOME/workspace /workspace
+# Run diagnostics
+dotfiles doctor          # Check all systems
+dotfiles doctor --fix    # Auto-repair issues
+dotfiles status          # Visual dashboard
 ```
+
+### Common Issues
 
 **SSH keys not working:**
 ```bash
-# Check permissions
-dotfiles doctor --fix
-
-# Verify keys are loaded
-ssh-add -l
-
-# Test connection
-ssh -T git@github.com
+dotfiles doctor --fix    # Fix permissions
+ssh-add -l               # Verify keys loaded
+ssh -T git@github.com    # Test connection
 ```
 
 **Bitwarden session expired:**
 ```bash
-# Re-unlock vault
 export BW_SESSION="$(bw unlock --raw)"
-
-# Or logout and login again
-bw logout
-bw login
 ```
 
-See [Full Troubleshooting Guide](docs/README-FULL.md#troubleshooting) for more.
+**Tab completion not working:**
+```bash
+rm -f ~/.zcompdump*      # Clear completion cache
+exec zsh                 # Reload shell
+```
+
+See **[Troubleshooting Guide](docs/troubleshooting.md)** for complete solutions.
 
 ---
 
