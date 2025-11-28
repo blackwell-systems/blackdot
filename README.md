@@ -492,16 +492,18 @@ dotfiles/
 ├── bootstrap-mac.sh           # macOS setup
 ├── bootstrap-linux.sh         # Lima/Linux/WSL2 setup
 ├── bootstrap-dotfiles.sh      # Shared symlink creation
-├── dotfiles-doctor.sh         # Health validation (use: dotfiles doctor)
-├── dotfiles-drift.sh          # Drift detection (use: dotfiles drift)
-├── dotfiles-backup.sh         # Backup/restore (use: dotfiles backup)
-├── dotfiles-diff.sh           # Preview changes (use: dotfiles diff)
-├── dotfiles-init.sh           # Setup wizard (use: dotfiles init)
-├── uninstall.sh               # Clean removal (use: dotfiles uninstall)
-├── show-metrics.sh            # Metrics visualization
 ├── Brewfile                   # Package definitions
 ├── Dockerfile                 # Docker bootstrap example
 ├── .dockerignore              # Docker build exclusions
+│
+├── bin/                       # CLI commands (use: dotfiles <command>)
+│   ├── dotfiles-doctor       # Health validation
+│   ├── dotfiles-drift        # Drift detection
+│   ├── dotfiles-backup       # Backup/restore
+│   ├── dotfiles-diff         # Preview changes
+│   ├── dotfiles-init         # Setup wizard
+│   ├── dotfiles-metrics      # Metrics visualization
+│   └── dotfiles-uninstall    # Clean removal
 │
 ├── vault/                     # Bitwarden secret management
 │   ├── _common.sh            # Shared config & validation functions

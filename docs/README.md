@@ -492,16 +492,18 @@ dotfiles/
 ├── bootstrap-mac.sh           # macOS setup
 ├── bootstrap-linux.sh         # Lima/Linux/WSL2 setup
 ├── bootstrap-dotfiles.sh      # Shared symlink creation
-├── dotfiles-doctor.sh         # Health validation (use: dotfiles doctor)
-├── dotfiles-drift.sh          # Drift detection (use: dotfiles drift)
-├── dotfiles-backup.sh         # Backup/restore (use: dotfiles backup)
-├── dotfiles-diff.sh           # Preview changes (use: dotfiles diff)
-├── dotfiles-init.sh           # Setup wizard (use: dotfiles init)
-├── uninstall.sh               # Clean removal (use: dotfiles uninstall)
-├── show-metrics.sh            # Metrics visualization
 ├── Brewfile                   # Package definitions
 ├── Dockerfile                 # Docker bootstrap example
 ├── .dockerignore              # Docker build exclusions
+│
+├── bin/                       # CLI commands (use: dotfiles <command>)
+│   ├── dotfiles-doctor       # Health validation
+│   ├── dotfiles-drift        # Drift detection
+│   ├── dotfiles-backup       # Backup/restore
+│   ├── dotfiles-diff         # Preview changes
+│   ├── dotfiles-init         # Setup wizard
+│   ├── dotfiles-metrics      # Metrics visualization
+│   └── dotfiles-uninstall    # Clean removal
 │
 ├── vault/                     # Bitwarden secret management
 │   ├── _common.sh            # Shared config & validation functions
@@ -529,10 +531,18 @@ dotfiles/
 │       ├── 90-integrations.zsh # Tool integrations
 │       └── 99-local.zsh     # Machine-specific overrides (gitignored)
 │
-├── test/                      # Unit tests (bats-core)
-│   ├── vault_common.bats     # Tests for vault/_common.sh
-│   ├── cli_commands.bats     # Tests for CLI commands
-│   ├── setup_bats.sh         # Install bats-core
+├── lib/                       # Shared libraries
+│   └── _logging.sh           # Colors and logging functions
+│
+├── bootstrap/                 # Bootstrap shared code
+│   └── _common.sh            # Shared bootstrap functions
+│
+├── test/                      # Test suites (bats-core)
+│   ├── vault_common.bats     # Unit tests for vault/_common.sh
+│   ├── cli_commands.bats     # Unit tests for CLI commands
+│   ├── integration.bats      # Integration tests with mock Bitwarden
+│   ├── error_scenarios.bats  # Error handling tests
+│   ├── mocks/bw              # Mock Bitwarden CLI
 │   └── run_tests.sh          # Test runner
 │
 ├── claude/                    # Claude Code integration

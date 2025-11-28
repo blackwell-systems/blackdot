@@ -8,7 +8,9 @@ set -euo pipefail
 
 # Source shared logging functions
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/lib/_logging.sh"
+# DOTFILES_DIR is parent of bin/
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+source "$DOTFILES_DIR/lib/_logging.sh"
 
 DRY_RUN=false
 KEEP_SECRETS=false

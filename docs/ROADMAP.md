@@ -181,15 +181,13 @@ DOTFILES_OFFLINE=1 dotfiles vault sync
 
 ---
 
-### Priority: LOW (Nice-to-have)
+### ✅ CLI Script Reorganization (v1.6.0)
 
-#### 6. CLI Script Reorganization
+**Status:** COMPLETED
 
-**Status:** Not started (optional)
+**What:** Moved CLI scripts to `bin/` directory for cleaner root.
 
-**What:** Move CLI scripts to `bin/` directory for cleaner root.
-
-**Current:**
+**Before:**
 ```
 dotfiles/
 ├── dotfiles-doctor.sh
@@ -201,7 +199,7 @@ dotfiles/
 └── show-metrics.sh
 ```
 
-**Proposed:**
+**After:**
 ```
 dotfiles/
 └── bin/
@@ -214,12 +212,17 @@ dotfiles/
     └── dotfiles-metrics
 ```
 
-**Impact:** Would require updating:
-- `zsh/zsh.d/40-aliases.zsh` (dotfiles command)
-- Documentation paths
-- CI/CD workflow paths
+**Updated:**
+- [x] `zsh/zsh.d/40-aliases.zsh` - dotfiles command paths
+- [x] `test/cli_commands.bats` - Test paths
+- [x] `test/integration.bats` - Test paths
+- [x] `test/error_scenarios.bats` - Test paths
+- [x] `.github/workflows/test.yml` - CI workflow paths
+- [x] Documentation (README.md, docs/README.md, ROADMAP.md)
 
-**Decision:** Keep current structure unless actively refactoring. Works fine as-is.
+---
+
+### Priority: LOW (Nice-to-have)
 
 ---
 
@@ -326,7 +329,8 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 | 1.3.0 | Shared library consolidation, error scenario tests |
 | 1.4.0 | Bootstrap consolidation, pre-restore drift check |
 | 1.5.0 | Offline mode support |
-| 1.6.0 | (Next) CLI reorganization, session management |
+| 1.6.0 | CLI reorganization (bin/ directory) |
+| 1.7.0 | (Next) Session management improvements |
 
 ---
 

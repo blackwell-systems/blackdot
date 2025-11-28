@@ -13,15 +13,15 @@ teardown() {
 }
 
 # ============================================================
-# dotfiles-backup.sh Tests
+# bin/dotfiles-backup Tests
 # ============================================================
 
 @test "backup script exists and is executable" {
-  [ -x "$DOTFILES_DIR/dotfiles-backup.sh" ]
+  [ -x "$DOTFILES_DIR/bin/dotfiles-backup" ]
 }
 
 @test "backup --help shows usage" {
-  run "$DOTFILES_DIR/dotfiles-backup.sh" --help
+  run "$DOTFILES_DIR/bin/dotfiles-backup" --help
 
   [ "$status" -eq 0 ]
   [[ "${output}" =~ "Usage" ]]
@@ -30,7 +30,7 @@ teardown() {
 
 @test "backup --list handles no existing backups" {
   export HOME="$TEST_TMP"
-  run "$DOTFILES_DIR/dotfiles-backup.sh" --list
+  run "$DOTFILES_DIR/bin/dotfiles-backup" --list
 
   # Returns 1 when no backups exist (warning state)
   [ "$status" -eq 1 ]
@@ -38,15 +38,15 @@ teardown() {
 }
 
 # ============================================================
-# dotfiles-diff.sh Tests
+# bin/dotfiles-diff Tests
 # ============================================================
 
 @test "diff script exists and is executable" {
-  [ -x "$DOTFILES_DIR/dotfiles-diff.sh" ]
+  [ -x "$DOTFILES_DIR/bin/dotfiles-diff" ]
 }
 
 @test "diff --help shows usage" {
-  run "$DOTFILES_DIR/dotfiles-diff.sh" --help
+  run "$DOTFILES_DIR/bin/dotfiles-diff" --help
 
   [ "$status" -eq 0 ]
   [[ "${output}" =~ "Usage" ]]
@@ -54,46 +54,46 @@ teardown() {
 }
 
 # ============================================================
-# dotfiles-doctor.sh Tests
+# bin/dotfiles-doctor Tests
 # ============================================================
 
 @test "doctor script exists and is executable" {
-  [ -x "$DOTFILES_DIR/dotfiles-doctor.sh" ]
+  [ -x "$DOTFILES_DIR/bin/dotfiles-doctor" ]
 }
 
 @test "doctor --help shows usage" {
-  run "$DOTFILES_DIR/dotfiles-doctor.sh" --help
+  run "$DOTFILES_DIR/bin/dotfiles-doctor" --help
 
   [ "$status" -eq 0 ]
   [[ "${output}" =~ "Usage" ]] || [[ "${output}" =~ "doctor" ]]
 }
 
 # ============================================================
-# dotfiles-drift.sh Tests
+# bin/dotfiles-drift Tests
 # ============================================================
 
 @test "drift script exists and is executable" {
-  [ -x "$DOTFILES_DIR/dotfiles-drift.sh" ]
+  [ -x "$DOTFILES_DIR/bin/dotfiles-drift" ]
 }
 
 # ============================================================
-# dotfiles-init.sh Tests
+# bin/dotfiles-init Tests
 # ============================================================
 
 @test "init script exists and is executable" {
-  [ -x "$DOTFILES_DIR/dotfiles-init.sh" ]
+  [ -x "$DOTFILES_DIR/bin/dotfiles-init" ]
 }
 
 # ============================================================
-# uninstall.sh Tests
+# bin/dotfiles-uninstall Tests
 # ============================================================
 
 @test "uninstall script exists and is executable" {
-  [ -x "$DOTFILES_DIR/uninstall.sh" ]
+  [ -x "$DOTFILES_DIR/bin/dotfiles-uninstall" ]
 }
 
 @test "uninstall --help shows usage" {
-  run "$DOTFILES_DIR/uninstall.sh" --help
+  run "$DOTFILES_DIR/bin/dotfiles-uninstall" --help
 
   [ "$status" -eq 0 ]
   [[ "${output}" =~ "Usage" ]]
@@ -107,7 +107,7 @@ teardown() {
   mkdir -p "$TEST_TMP/.config/ghostty"
   ln -sf /nonexistent "$TEST_TMP/.zshrc"
 
-  run "$DOTFILES_DIR/uninstall.sh" --dry-run
+  run "$DOTFILES_DIR/bin/dotfiles-uninstall" --dry-run
 
   [ "$status" -eq 0 ]
   [[ "${output}" =~ "DRY RUN" ]]

@@ -60,13 +60,13 @@ jobs:
           fi
 
           ZSH_SCRIPTS=(
-            dotfiles-doctor.sh
-            dotfiles-drift.sh
-            dotfiles-backup.sh
-            dotfiles-diff.sh
-            dotfiles-init.sh
-            show-metrics.sh
-            uninstall.sh
+            bin/dotfiles-doctor
+            bin/dotfiles-drift
+            bin/dotfiles-backup
+            bin/dotfiles-diff
+            bin/dotfiles-init
+            bin/dotfiles-metrics
+            bin/dotfiles-uninstall
             vault/_common.sh
             vault/bootstrap-vault.sh
             vault/check-vault-items.sh
@@ -301,12 +301,12 @@ jobs:
             "vault/_common.sh"
             "vault/bootstrap-vault.sh"
             "vault/README.md"
-            "dotfiles-doctor.sh"
-            "dotfiles-drift.sh"
-            "dotfiles-backup.sh"
-            "dotfiles-diff.sh"
-            "dotfiles-init.sh"
-            "uninstall.sh"
+            "bin/dotfiles-doctor"
+            "bin/dotfiles-drift"
+            "bin/dotfiles-backup"
+            "bin/dotfiles-diff"
+            "bin/dotfiles-init"
+            "bin/dotfiles-uninstall"
             ".gitignore"
           )
 
@@ -366,12 +366,12 @@ jobs:
           # Check if scripts parse correctly
           zsh -n bootstrap-mac.sh || exit 1
           zsh -n bootstrap-dotfiles.sh || exit 1
-          zsh -n dotfiles-doctor.sh || exit 1
-          zsh -n dotfiles-drift.sh || exit 1
-          zsh -n dotfiles-backup.sh || exit 1
-          zsh -n dotfiles-diff.sh || exit 1
-          zsh -n dotfiles-init.sh || exit 1
-          zsh -n uninstall.sh || exit 1
+          zsh -n bin/dotfiles-doctor || exit 1
+          zsh -n bin/dotfiles-drift || exit 1
+          zsh -n bin/dotfiles-backup || exit 1
+          zsh -n bin/dotfiles-diff || exit 1
+          zsh -n bin/dotfiles-init || exit 1
+          zsh -n bin/dotfiles-uninstall || exit 1
 
           echo "✅ All scripts have valid syntax on macOS"
 
@@ -407,12 +407,12 @@ jobs:
           # Check if scripts parse correctly
           zsh -n bootstrap-linux.sh || exit 1
           zsh -n bootstrap-dotfiles.sh || exit 1
-          zsh -n dotfiles-doctor.sh || exit 1
-          zsh -n dotfiles-drift.sh || exit 1
-          zsh -n dotfiles-backup.sh || exit 1
-          zsh -n dotfiles-diff.sh || exit 1
-          zsh -n dotfiles-init.sh || exit 1
-          zsh -n uninstall.sh || exit 1
+          zsh -n bin/dotfiles-doctor || exit 1
+          zsh -n bin/dotfiles-drift || exit 1
+          zsh -n bin/dotfiles-backup || exit 1
+          zsh -n bin/dotfiles-diff || exit 1
+          zsh -n bin/dotfiles-init || exit 1
+          zsh -n bin/dotfiles-uninstall || exit 1
 
           echo "✅ All scripts have valid syntax on Linux"
 

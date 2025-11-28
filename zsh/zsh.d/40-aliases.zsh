@@ -22,16 +22,16 @@ dotfiles() {
             status "$@"
             ;;
         doctor|health)
-            "$HOME/workspace/dotfiles/dotfiles-doctor.sh" "$@"
+            "$HOME/workspace/dotfiles/bin/dotfiles-doctor" "$@"
             ;;
         drift)
-            "$HOME/workspace/dotfiles/dotfiles-drift.sh"
+            "$HOME/workspace/dotfiles/bin/dotfiles-drift"
             ;;
         diff)
-            "$HOME/workspace/dotfiles/dotfiles-diff.sh" "$@"
+            "$HOME/workspace/dotfiles/bin/dotfiles-diff" "$@"
             ;;
         backup)
-            "$HOME/workspace/dotfiles/dotfiles-backup.sh" "$@"
+            "$HOME/workspace/dotfiles/bin/dotfiles-backup" "$@"
             ;;
 
         # Vault operations
@@ -90,10 +90,10 @@ dotfiles() {
 
         # Setup & Maintenance
         init)
-            "$HOME/workspace/dotfiles/dotfiles-init.sh" "$@"
+            "$HOME/workspace/dotfiles/bin/dotfiles-init" "$@"
             ;;
         uninstall)
-            "$HOME/workspace/dotfiles/uninstall.sh" "$@"
+            "$HOME/workspace/dotfiles/bin/dotfiles-uninstall" "$@"
             ;;
         upgrade|update)
             dotfiles-upgrade

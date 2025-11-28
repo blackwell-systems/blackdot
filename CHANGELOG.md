@@ -11,6 +11,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Blog posts on dotfiles architecture and Claude session portability
 - Open source vault system as standalone project
 
+## [1.6.0] - 2025-11-28
+
+### Added - CLI Reorganization
+
+#### bin/ Directory Structure
+- **Moved CLI scripts to `bin/`** for cleaner repository root
+  - `dotfiles-doctor` - Health validation
+  - `dotfiles-drift` - Drift detection
+  - `dotfiles-backup` - Backup/restore
+  - `dotfiles-diff` - Preview changes
+  - `dotfiles-init` - Setup wizard
+  - `dotfiles-metrics` - Metrics visualization (renamed from show-metrics.sh)
+  - `dotfiles-uninstall` - Clean removal (renamed from uninstall.sh)
+
+### Changed
+- Scripts now source `lib/_logging.sh` from `$DOTFILES_DIR/lib/` (parent of bin/)
+- `zsh/zsh.d/40-aliases.zsh` updated to reference `bin/` paths
+- All test files updated with new paths
+- CI/CD workflow updated with new paths
+- Removed `.sh` extensions from CLI scripts for cleaner invocation
+
+### Documentation
+- Updated project structure in README.md and docs/README.md
+- Updated ROADMAP.md to mark CLI reorganization as completed
+- Updated CHANGELOG.md with v1.6.0 entry
+
 ## [1.5.0] - 2025-11-28
 
 ### Added - Offline Mode Support
