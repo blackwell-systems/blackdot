@@ -24,7 +24,7 @@ assignees: ''
 - [ ] Read the [README](../../README.md)
 - [ ] Searched [existing issues](https://github.com/blackwell-systems/dotfiles/issues)
 - [ ] Checked the troubleshooting section
-- [ ] Ran `./check-health.sh`
+- [ ] Ran `dotfiles doctor`
 
 ## Relevant Configuration
 

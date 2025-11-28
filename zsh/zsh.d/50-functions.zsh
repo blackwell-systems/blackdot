@@ -41,7 +41,7 @@ status() {
   if [[ "$ssh_count" -gt 0 ]]; then
     s_ssh="${g}◆${n}"; s_ssh_info="${g}$ssh_count keys loaded${n}"
   else
-    fixes+=("ssh: bw-restore")
+    fixes+=("ssh: dotfiles vault restore")
   fi
 
   local s_aws="${r}◇${n}" s_aws_info="${d}not authenticated${n}"

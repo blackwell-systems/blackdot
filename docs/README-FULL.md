@@ -116,8 +116,8 @@ The dotfiles are organized as follows:
 ├── bootstrap-dotfiles.sh     # Shared symlink bootstrap (zshrc, p10k, Ghostty, Claude)
 ├── bootstrap-linux.sh        # Lima / Linux-specific bootstrap (--interactive supported)
 ├── bootstrap-mac.sh          # macOS-specific bootstrap (--interactive supported)
-├── dotfiles-doctor.sh        # Comprehensive health check
-├── check-health.sh           # Legacy health validation
+├── dotfiles-doctor.sh        # Health check (use: dotfiles doctor)
+├── dotfiles-drift.sh         # Drift detection (use: dotfiles drift)
 ├── Brewfile                  # Unified Homebrew bundle (macOS + Lima)
 ├── CHANGELOG.md              # Version history
 ├── .gitignore                # Excludes .bw-session, editor files
@@ -224,7 +224,7 @@ These work on **any platform** without modification:
 - Works on Linux, macOS, BSD, WSL, Docker
 
 **✅ Health & Metrics** (100% portable)
-- `check-health.sh`
+- `dotfiles-doctor.sh` / `dotfiles-drift.sh`
 - `show-metrics.sh`
 - Cross-platform file permissions handling
 
@@ -1294,7 +1294,7 @@ declare -A SSH_KEYS=(
 
 This automatically propagates to:
 - `restore-ssh.sh` (restores the key from Bitwarden)
-- `check-health.sh` (validates key exists with correct permissions)
+- `dotfiles-doctor.sh` (validates key exists with correct permissions)
 
 ### 4. Add to SSH config
 
@@ -1390,7 +1390,7 @@ Regular security maintenance schedule to keep your dotfiles and credentials secu
   - Run: `dotfiles-upgrade` or `git pull && ./bootstrap-*.sh`
   - Review CHANGELOG.md for breaking changes
 - [ ] **Run health check with drift detection** - Ensure local files match Bitwarden
-  - Run: `./check-health.sh --drift`
+  - Run: `dotfiles drift`
   - Sync any differences: `./vault/sync-to-bitwarden.sh --all`
 
 **Best Practices:**
@@ -1398,7 +1398,7 @@ Regular security maintenance schedule to keep your dotfiles and credentials secu
 - Use different SSH keys for different services (work vs personal)
 - Enable 2FA on Bitwarden account
 - Regularly backup Bitwarden vault (export encrypted JSON)
-- Review file permissions regularly: `./check-health.sh --fix`
+- Review file permissions regularly: `dotfiles doctor --fix`
 
 ---
 
@@ -1419,25 +1419,25 @@ Complete checklist when adding a new SSH identity:
 When AWS credentials or config change:
 
 - [ ] Edit `~/.aws/config` and/or `~/.aws/credentials`
-- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh AWS-Config AWS-Credentials`
-- [ ] Verify on other machines: `bw-restore`
+- [ ] Sync to Bitwarden: `dotfiles vault sync AWS-Config AWS-Credentials`
+- [ ] Verify on other machines: `dotfiles vault restore`
 
 ### Adding a New Environment Variable
 
 - [ ] Edit `~/.local/env.secrets`
-- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh Environment-Secrets`
+- [ ] Sync to Bitwarden: `dotfiles vault sync Environment-Secrets`
 - [ ] Source on current shell: `source ~/.local/load-env.sh`
 
 ### Modifying SSH Config (add hosts, change options)
 
 - [ ] Edit `~/.ssh/config`
-- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh SSH-Config`
-- [ ] Restore on other machines: `bw-restore`
+- [ ] Sync to Bitwarden: `dotfiles vault sync SSH-Config`
+- [ ] Restore on other machines: `dotfiles vault restore`
 
 ### Updating Git Config
 
 - [ ] Edit `~/.gitconfig`
-- [ ] Sync to Bitwarden: `./vault/sync-to-bitwarden.sh Git-Config`
+- [ ] Sync to Bitwarden: `dotfiles vault sync Git-Config`
 
 ### New Machine Setup
 
@@ -1446,9 +1446,9 @@ Complete checklist for a fresh machine:
 1. [ ] Clone dotfiles: `git clone ... ~/workspace/dotfiles`
 2. [ ] Run bootstrap: `./bootstrap-mac.sh` or `./bootstrap-linux.sh`
 3. [ ] Login to Bitwarden: `bw login`
-4. [ ] Validate vault items: `./vault/check-vault-items.sh`
-5. [ ] Restore secrets: `bw-restore`
-6. [ ] Run health check: `./check-health.sh`
+4. [ ] Validate vault items: `dotfiles vault check`
+5. [ ] Restore secrets: `dotfiles vault restore`
+6. [ ] Run health check: `dotfiles doctor`
 7. [ ] Restart shell or `source ~/.zshrc`
 
 ---
@@ -1538,13 +1538,19 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 
 **Vault:**
 
-- `bw-restore` → Run Bitwarden vault bootstrap
+- `dotfiles vault restore` → Restore all secrets from Bitwarden
+- `dotfiles vault sync` → Sync local files to Bitwarden
+- `dotfiles vault list` → List vault items
+- `dotfiles vault check` → Validate vault items exist
+- `dotfiles vault validate` → Validate vault item schema
 
 **Dotfiles Management:**
 
-- `dotfiles` → `cd ~/workspace/dotfiles`
-- `dotfiles-doctor` → Run health check + vault item validation
-- `dotfiles-update` → Pull latest dotfiles and re-source zshrc
+- `dotfiles status` → Visual dashboard
+- `dotfiles doctor` → Run health check + vault item validation
+- `dotfiles upgrade` → Pull latest dotfiles and run bootstrap
+- `dotfiles cd` → Navigate to dotfiles directory
+- `dotfiles edit` → Open in editor
 - `status` → Quick dashboard showing symlinks, SSH, AWS, Lima status
 
 **AWS Profile Management:**
@@ -1729,7 +1735,7 @@ The dotfiles now include comprehensive metrics collection to track health over t
 
 ### Automatic Metrics Collection
 
-Every time you run `check-health.sh`, metrics are automatically recorded to `~/.dotfiles-metrics.jsonl`:
+Every time you run `dotfiles doctor`, metrics are automatically recorded to `~/.dotfiles-metrics.jsonl`:
 
 ```json
 {
@@ -1796,10 +1802,10 @@ Add to your workflow:
 
 ```bash
 # Check health and view trends
-check-health.sh && show-metrics.sh --graph
+dotfiles doctor && show-metrics.sh --graph
 
 # Auto-fix and track
-check-health.sh --fix && show-metrics.sh
+dotfiles doctor --fix && show-metrics.sh
 ```
 
 ---
@@ -1835,7 +1841,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run shellcheck
-        run: shellcheck bootstrap-*.sh vault/*.sh check-health.sh
+        run: shellcheck bootstrap-*.sh vault/*.sh dotfiles-*.sh
   # ... more jobs
 ```
 
@@ -1860,7 +1866,7 @@ git commit --no-verify  # Use sparingly!
 brew install shellcheck
 
 # Run on all scripts
-shellcheck bootstrap-*.sh vault/*.sh check-health.sh
+shellcheck bootstrap-*.sh vault/*.sh dotfiles-*.sh
 
 # Check specific script
 shellcheck vault/bootstrap-vault.sh

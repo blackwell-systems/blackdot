@@ -11,35 +11,36 @@ This directory contains scripts for **bidirectional secret management** with Bit
 
 ## Quick Reference
 
-| Script | Purpose | Usage / Alias |
-|--------|---------|---------------|
-| `bootstrap-vault.sh` | Orchestrates all restores | `bw-restore` |
+| Script | Purpose | Command |
+|--------|---------|---------|
+| `bootstrap-vault.sh` | Orchestrates all restores | `dotfiles vault restore` |
 | `restore-ssh.sh` | Restores SSH keys + config | Called by bootstrap |
 | `restore-aws.sh` | Restores AWS config/creds | Called by bootstrap |
 | `restore-env.sh` | Restores env secrets | Called by bootstrap |
 | `restore-git.sh` | Restores gitconfig | Called by bootstrap |
-| `create-vault-item.sh` | Creates new vault items | `bw-create ITEM [FILE]` |
-| `sync-to-bitwarden.sh` | Syncs local → Bitwarden | `bw-sync --all` |
-| `validate-schema.sh` | Validates vault item schema | `bw-validate` |
-| `delete-vault-item.sh` | Deletes items from vault | `bw-delete ITEM` |
-| `check-vault-items.sh` | Pre-flight validation | `bw-check` |
-| `list-vault-items.sh` | Debug/inventory tool | `bw-list [-v]` |
+| `create-vault-item.sh` | Creates new vault items | `dotfiles vault create ITEM` |
+| `sync-to-bitwarden.sh` | Syncs local → Bitwarden | `dotfiles vault sync --all` |
+| `validate-schema.sh` | Validates vault item schema | `dotfiles vault validate` |
+| `delete-vault-item.sh` | Deletes items from vault | `dotfiles vault delete ITEM` |
+| `check-vault-items.sh` | Pre-flight validation | `dotfiles vault check` |
+| `list-vault-items.sh` | Debug/inventory tool | `dotfiles vault list` |
 | `_common.sh` | Shared functions library | Sourced by other scripts |
 | `template-aws-config` | Reference template | Example AWS config structure |
 | `template-aws-credentials` | Reference template | Example AWS credentials structure |
 
-### Shell Aliases
+### Commands
 
-All vault scripts have convenient aliases (defined in `zsh/zshrc`):
+All vault operations are accessed via the unified `dotfiles vault` command:
 
 ```bash
-bw-restore   # Restore all secrets from Bitwarden
-bw-sync      # Sync local changes to Bitwarden
-bw-create    # Create new Bitwarden items
-bw-validate  # Validate vault item schema
-bw-delete    # Delete items from Bitwarden
-bw-list      # List all vault items
-bw-check     # Validate required items exist
+dotfiles vault restore     # Restore all secrets from Bitwarden
+dotfiles vault sync        # Sync local changes to Bitwarden
+dotfiles vault sync --all  # Sync all items
+dotfiles vault create      # Create new vault item
+dotfiles vault validate    # Validate vault item schema
+dotfiles vault delete      # Delete vault item
+dotfiles vault list        # List all vault items
+dotfiles vault check       # Validate required items exist
 ```
 
 ---
@@ -51,9 +52,7 @@ bw-check     # Validate required items exist
 **Main entry point** - orchestrates all secret restoration.
 
 ```bash
-./bootstrap-vault.sh
-# Or use the alias:
-bw-restore
+dotfiles vault restore
 ```
 
 **What it does:**
@@ -239,10 +238,7 @@ Validates that all Bitwarden vault items have the correct schema and structure.
 
 ```bash
 # Validate all vault items
-./validate-schema.sh
-
-# Or use the alias
-bw-validate
+dotfiles vault validate
 ```
 
 **What it validates:**
@@ -274,8 +270,8 @@ Validating vault items schema...
 ```
 
 **Common validation errors:**
-- **Item missing**: Item name typo or not created yet → use `bw-create`
-- **Empty notes**: Item exists but has no content → re-sync with `bw-sync`
+- **Item missing**: Item name typo or not created yet → use `dotfiles vault create`
+- **Empty notes**: Item exists but has no content → re-sync with `dotfiles vault sync`
 - **Missing key blocks**: SSH key format incorrect → check Bitwarden web vault
 - **Wrong item type**: Should be "Secure Note" not "Login" or "Card"
 
@@ -532,13 +528,13 @@ cd ~/workspace/dotfiles
 bw login
 
 # 4. Validate vault items exist
-./vault/check-vault-items.sh
+dotfiles vault check
 
 # 5. Restore secrets
-./vault/bootstrap-vault.sh  # or: bw-restore
+dotfiles vault restore
 
 # 6. Verify
-./check-health.sh
+dotfiles doctor
 ```
 
 ### After Editing Local Config
@@ -548,17 +544,17 @@ bw login
 vim ~/.gitconfig
 
 # Sync to Bitwarden
-./vault/sync-to-bitwarden.sh Git-Config
+dotfiles vault sync Git-Config
 
 # Or sync all
-./vault/sync-to-bitwarden.sh --all
+dotfiles vault sync --all
 ```
 
 ### Troubleshooting Missing Items
 
 ```bash
 # List all vault items
-./vault/list-vault-items.sh --verbose
+dotfiles vault list
 
 # Check specific item
 bw get item "Git-Config" --session "$BW_SESSION" | jq '.notes'
@@ -568,7 +564,7 @@ bw get item "Git-Config" --session "$BW_SESSION" | jq '.notes'
 
 ```bash
 # Compare local files vs Bitwarden
-../check-health.sh --drift
+dotfiles drift
 ```
 
 ---
@@ -600,7 +596,7 @@ rm vault/.bw-session
        ["SSH-NewService"]="$HOME/.ssh/id_ed25519_newkey"  # ← Add here
    )
    ```
-   This automatically propagates to `restore-ssh.sh` and `check-health.sh`.
+   This automatically propagates to `restore-ssh.sh` and `dotfiles-doctor.sh`.
 4. Update `~/.ssh/config` with Host entry
 5. Sync: `./sync-to-bitwarden.sh SSH-Config`
 6. (Optional) Add to `zsh/zshrc` for ssh-agent auto-load:

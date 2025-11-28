@@ -277,16 +277,16 @@ All secrets are stored in Bitwarden and restored on new machines:
 
 ```bash
 # First time: Push secrets to Bitwarden
-./vault/sync-to-bitwarden.sh --all
+dotfiles vault sync --all
 
 # New machine: Restore secrets
-bw-restore  # Alias for ./vault/bootstrap-vault.sh
+dotfiles vault restore
 
 # Validate vault item schema
-bw-validate  # Ensure all items have correct structure
+dotfiles vault validate
 
 # Check for drift (local vs Bitwarden)
-./check-health.sh --drift
+dotfiles drift
 ```
 
 **Supported secrets:**
@@ -444,7 +444,8 @@ dotfiles/
 ├── bootstrap-mac.sh           # macOS setup
 ├── bootstrap-linux.sh         # Lima/Linux/WSL2 setup
 ├── bootstrap-dotfiles.sh      # Shared symlink creation
-├── check-health.sh            # Health validation
+├── dotfiles-doctor.sh         # Health validation (use: dotfiles doctor)
+├── dotfiles-drift.sh          # Drift detection (use: dotfiles drift)
 ├── show-metrics.sh            # Metrics visualization
 ├── Brewfile                   # Package definitions
 ├── Dockerfile                 # Docker bootstrap example
@@ -608,7 +609,7 @@ sudo ln -sfn $HOME/workspace /workspace
 **SSH keys not working:**
 ```bash
 # Check permissions
-./check-health.sh --fix
+dotfiles doctor --fix
 
 # Verify keys are loaded
 ssh-add -l

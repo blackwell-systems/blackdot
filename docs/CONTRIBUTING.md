@@ -120,7 +120,7 @@ shellcheck your-script.sh
 zsh -n vault/your-script.sh
 
 # 3. Run health check
-./check-health.sh
+dotfiles doctor
 
 # 4. Test on clean environment (if possible)
 # macOS:
@@ -160,7 +160,7 @@ cd vault
 ```bash
 # Test full bootstrap on macOS
 ./bootstrap-mac.sh
-./check-health.sh --fix
+dotfiles doctor --fix
 ```
 
 **Linux (Docker):**
@@ -169,7 +169,7 @@ cd vault
 docker run -it --rm -v $PWD:/dotfiles ubuntu:24.04 bash
 cd /dotfiles
 ./bootstrap-linux.sh
-./check-health.sh
+dotfiles doctor
 ```
 
 ### CI/CD
@@ -350,7 +350,7 @@ Help test and improve support for:
 **How to ask:**
 - Open a [GitHub Issue](https://github.com/blackwell-systems/dotfiles/issues/new/choose)
 - Provide details: OS, version, error messages, steps to reproduce
-- Include output from `./check-health.sh`
+- Include output from `dotfiles doctor`
 
 **For bugs:**
 - Use the [bug report template](.github/ISSUE_TEMPLATE/bug_report.md)
