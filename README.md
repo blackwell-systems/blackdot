@@ -608,6 +608,15 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
+## Trademarks
+
+Blackwell Systems™ and the Blackwell Systems logo are trademarks of Dayna Blackwell.
+You may use the name "Blackwell Systems" to refer to this project, but you may not
+use the name or logo in a way that suggests endorsement or official affiliation
+without prior written permission. See [BRAND.md](BRAND.md) for usage guidelines.
+
+---
+
 ## Acknowledgments
 
 **Tools:**
