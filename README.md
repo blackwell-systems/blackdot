@@ -5,12 +5,12 @@
 [![Unit Tests](https://img.shields.io/badge/Unit_Tests-23%2B-brightgreen)](test/)
 [![codecov](https://codecov.io/gh/blackwell-systems/dotfiles/branch/main/graph/badge.svg)](https://codecov.io/gh/blackwell-systems/dotfiles)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux%20%7C%20Lima%20%7C%20WSL2%20%7C%20Docker-blue)
+![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)
 ![Shell](https://img.shields.io/badge/Shell-Zsh-blueviolet)
 ![Secrets](https://img.shields.io/badge/Secrets-Bitwarden-ff4081)
 ![Claude Portability](https://img.shields.io/badge/Claude_Portability-Enabled-8A2BE2)
 
-> Enterprise-grade, vault-backed dotfiles for multi-machine development. Bitwarden provides the source of truth for secrets, a canonical `/workspace` path keeps Claude Code sessions portable across macOS, Linux, Lima, and WSL2, and health checks guard against drift, broken symlinks, and missing vault state.
+> Enterprise-grade, vault-backed dotfiles for multi-machine development. Bitwarden provides the source of truth for secrets, a canonical `/workspace` path keeps Claude Code sessions portable across macOS, Linux, Windows, and WSL2, and health checks guard against drift, broken symlinks, and missing vault state.
 
 **Version:** 1.0.0 | [Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
 
@@ -27,7 +27,7 @@
 - **Unit tested** – 23+ tests for vault functions ensure reliability across platforms.
 
 ### Advanced (opt-in)
-- **Cross-platform portability** – Same dotfiles on macOS, Linux, WSL2, Lima, or Docker with ~90% shared code.
+- **Cross-platform portability** – Same dotfiles on macOS, Linux, Windows, WSL2, or Docker with ~90% shared code.
 - **Portable Claude Code sessions** – `/workspace` symlink ensures Claude sessions sync across machines. Start on macOS, continue on Linux, keep your conversation.
 - **Metrics and observability** – Track dotfiles health over time. Surface drift, failures, and missing vault items.
 
@@ -47,7 +47,7 @@
 | **Docker support**     | Full Dockerfile for containerized bootstrap   | Rare                             |
 | **Modular shell config** | 10 modules in `zsh.d/`                      | Single monolithic file           |
 | **Optional components** | `SKIP_*` env flags                           | All-or-nothing                   |
-| **Cross-platform**     | macOS, Linux, WSL2, Lima, Docker              | Usually single-platform          |
+| **Cross-platform**     | macOS, Linux, Windows, WSL2, Docker           | Usually single-platform          |
 
 ### Detailed Comparison vs Popular Dotfiles
 
@@ -58,7 +58,7 @@
 |---------|-----------|------------|--------|---------------|------|
 | **Secrets Management** | ✅ Bitwarden vault | ❌ Manual | ❌ Manual | ❌ Manual | ❌ Manual |
 | **Bidirectional Sync** | ✅ Local ↔ Vault | ❌ | ❌ | ❌ | ❌ |
-| **Cross-Platform** | ✅ macOS, Linux, WSL2, Lima, Docker | ⚠️ Limited | ⚠️ macOS only | ⚠️ macOS only | ⚠️ Limited |
+| **Cross-Platform** | ✅ macOS, Linux, Windows, WSL2, Docker | ⚠️ Limited | ⚠️ macOS only | ⚠️ macOS only | ⚠️ Limited |
 | **Claude Code Sessions** | ✅ Portable via `/workspace` | ❌ | ❌ | ❌ | ❌ |
 | **Health Checks** | ✅ 573 lines + auto-fix | ❌ | ❌ | ❌ | ❌ |
 | **Drift Detection** | ✅ Local vs Vault | ❌ | ❌ | ❌ | ❌ |
