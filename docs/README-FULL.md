@@ -1641,6 +1641,7 @@ source ~/.local/load-env.sh
 The recommended way to manage and check your dotfiles:
 
 ```bash
+dotfiles status          # Quick visual dashboard (color-coded)
 dotfiles doctor          # Comprehensive health check
 dotfiles doctor --fix    # Auto-repair permission issues
 dotfiles doctor --quick  # Fast checks (skip vault status)
