@@ -35,14 +35,14 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 dotfiles doctor --fix
 ```
 
-### Install hangs on "Waiting for Bitwarden"
+### Install hangs on "Waiting for vault"
 
-**Symptom:** Install prompts for Bitwarden but you don't use it.
+**Symptom:** Install prompts for vault but you don't use one.
 
 **Solution:**
 ```bash
-# Skip Bitwarden entirely
-SKIP_BITWARDEN=1 ./install.sh
+# Skip vault entirely
+./install.sh --minimal
 
 # Or use interactive mode to skip
 ./install.sh --interactive
@@ -135,7 +135,7 @@ for f in ~/workspace/dotfiles/zsh/zsh.d/*.zsh; do
 done
 ```
 
-## Bitwarden / Vault Issues
+## Vault Issues (Bitwarden / 1Password / pass)
 
 ### "BW_SESSION not set"
 
@@ -165,8 +165,8 @@ dotfiles vault list
 # Check expected item names
 # Items should be named: dotfiles-SSH-Config, dotfiles-AWS-Config, etc.
 
-# Verify items exist in Bitwarden
-bw list items --search dotfiles
+# Verify items exist in vault
+dotfiles vault list
 
 # Create missing items
 dotfiles vault create
@@ -190,20 +190,23 @@ dotfiles vault restore
 dotfiles vault sync --all
 ```
 
-### "bw: command not found"
+### Vault CLI not found
 
-**Symptom:** Bitwarden CLI not installed.
+**Symptom:** Vault CLI not installed.
 
 **Solution:**
 ```bash
-# macOS
-brew install bitwarden-cli
+# Bitwarden
+brew install bitwarden-cli  # macOS
+npm install -g @bitwarden/cli  # Linux
 
-# Linux (npm)
-npm install -g @bitwarden/cli
+# 1Password
+brew install --cask 1password-cli  # macOS
+# See 1Password docs for Linux
 
-# Linux (snap)
-sudo snap install bw
+# pass
+brew install pass  # macOS
+sudo apt install pass  # Linux
 ```
 
 ## Permission Issues
