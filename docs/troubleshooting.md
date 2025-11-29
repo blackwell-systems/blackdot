@@ -62,7 +62,7 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 eval "$(/usr/local/bin/brew shellenv)"
 
 # Then re-run bootstrap
-./bootstrap-mac.sh
+./bootstrap/bootstrap-mac.sh
 ```
 
 ## Shell Issues
@@ -91,7 +91,7 @@ ls -la ~/.zshrc
 # Should show: .zshrc -> ~/workspace/dotfiles/zsh/.zshrc
 
 # If not linked, re-run bootstrap
-./bootstrap-mac.sh  # or bootstrap-linux.sh
+./bootstrap/bootstrap-mac.sh  # or bootstrap-linux.sh
 
 # Or manually link
 ln -sf ~/workspace/dotfiles/zsh/.zshrc ~/.zshrc
@@ -301,7 +301,7 @@ limactl shell default mount
 ls -la /workspace
 
 # Re-run bootstrap if needed
-./bootstrap-linux.sh
+./bootstrap/bootstrap-linux.sh
 ```
 
 ### Docker: Changes not persisting
@@ -341,7 +341,7 @@ git pull origin main
 git stash pop
 
 # Re-run bootstrap
-./bootstrap-mac.sh  # or bootstrap-linux.sh
+./bootstrap/bootstrap-mac.sh  # or bootstrap-linux.sh
 ```
 
 ### After upgrade, features missing
@@ -351,7 +351,7 @@ git stash pop
 **Solution:**
 ```bash
 # Ensure bootstrap ran
-./bootstrap-mac.sh  # or bootstrap-linux.sh
+./bootstrap/bootstrap-mac.sh  # or bootstrap-linux.sh
 
 # Reload shell
 exec zsh

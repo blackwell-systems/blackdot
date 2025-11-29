@@ -22,10 +22,11 @@ dotfiles upgrade         # Pull latest and run bootstrap
 
 ```
 dotfiles/
-├── zsh/zsh.d/*.zsh      # Shell config (numbered load order: 00-99)
+├── bootstrap/           # Platform setup scripts
+├── bin/                 # CLI tools (doctor, drift, backup, etc.)
 ├── vault/*.sh           # Bitwarden integration scripts
-├── bootstrap-*.sh       # Platform setup (mac/linux)
-├── dotfiles-*.sh        # CLI tools (doctor, drift)
+├── zsh/zsh.d/*.zsh      # Shell config (numbered load order: 00-99)
+├── lib/                 # Shared libraries
 ├── claude/              # Claude Code config & commands
 └── docs/                # Docsify documentation site
 ```
@@ -37,7 +38,7 @@ dotfiles/
 | `zsh/zsh.d/40-aliases.zsh` | The `dotfiles` command lives here |
 | `zsh/zsh.d/50-functions.zsh` | Shell functions including `status` |
 | `vault/_common.sh` | Shared vault functions, SSH_KEYS config |
-| `dotfiles-doctor.sh` | Health check implementation |
+| `bin/dotfiles-doctor` | Health check implementation |
 
 ---
 
@@ -329,5 +330,5 @@ Before completing work, verify:
 
 ---
 
-**Last Updated:** 2025-11-28
-**Version:** 1.0.0
+**Last Updated:** 2025-11-29
+**Version:** 1.7.0

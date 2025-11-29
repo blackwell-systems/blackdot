@@ -9,21 +9,22 @@
 # ============================================================
 set -euo pipefail
 
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# DOTFILES_DIR is parent of bootstrap/
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # ============================================================
 # Detect environment (before sourcing common)
 # ============================================================
 IS_WSL=false
 IS_LIMA=false
-PLATFORM_NAME="Linux"
+export PLATFORM_NAME="Linux"
 
 if grep -qiE "(microsoft|wsl)" /proc/version 2>/dev/null; then
     IS_WSL=true
-    PLATFORM_NAME="WSL2"
+    export PLATFORM_NAME="WSL2"
 elif [[ -n "${LIMA_INSTANCE:-}" ]]; then
     IS_LIMA=true
-    PLATFORM_NAME="Lima"
+    export PLATFORM_NAME="Lima"
 fi
 
 # Source shared bootstrap functions

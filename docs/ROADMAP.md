@@ -150,7 +150,7 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
 **Usage:**
 ```bash
 # Skip vault operations during bootstrap
-DOTFILES_OFFLINE=1 ./bootstrap-mac.sh
+DOTFILES_OFFLINE=1 ./bootstrap/bootstrap-mac.sh
 
 # Skip vault restore (keeps local files)
 DOTFILES_OFFLINE=1 dotfiles vault restore
@@ -330,7 +330,8 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 | 1.4.0 | Bootstrap consolidation, pre-restore drift check |
 | 1.5.0 | Offline mode support |
 | 1.6.0 | CLI reorganization (bin/ directory) |
-| 1.7.0 | (Next) Session management improvements |
+| 1.7.0 | Root directory cleanup (bootstrap/, docs/) |
+| 1.8.0 | (Next) Session management improvements |
 
 ---
 

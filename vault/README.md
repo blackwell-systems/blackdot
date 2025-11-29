@@ -540,7 +540,7 @@ git clone git@github.com:YOUR-USERNAME/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
 # 2. Run bootstrap (packages, symlinks)
-./bootstrap-mac.sh  # or ./bootstrap-linux.sh
+./bootstrap/bootstrap-mac.sh  # or ./bootstrap/bootstrap-linux.sh
 
 # 3. Login to Bitwarden
 bw login
@@ -614,7 +614,7 @@ rm vault/.bw-session
        ["SSH-NewService"]="$HOME/.ssh/id_ed25519_newkey"  # ← Add here
    )
    ```
-   This automatically propagates to `restore-ssh.sh` and `dotfiles-doctor.sh`.
+   This automatically propagates to `restore-ssh.sh` and `bin/dotfiles-doctor`.
 4. Update `~/.ssh/config` with Host entry
 5. Sync: `./sync-to-bitwarden.sh SSH-Config`
 6. (Optional) Add to `zsh/zshrc` for ssh-agent auto-load:

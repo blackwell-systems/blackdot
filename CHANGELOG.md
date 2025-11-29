@@ -11,6 +11,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Blog posts on dotfiles architecture and Claude session portability
 - Open source vault system as standalone project
 
+## [1.7.0] - 2025-11-29
+
+### Added - Root Directory Cleanup
+
+#### Consolidated bootstrap/ Directory
+- **Moved bootstrap scripts to `bootstrap/`** for cleaner repository root
+  - `bootstrap/bootstrap-mac.sh` - macOS setup
+  - `bootstrap/bootstrap-linux.sh` - Linux/WSL2/Lima setup
+  - `bootstrap/bootstrap-dotfiles.sh` - Symlink creation
+  - `bootstrap/_common.sh` - Shared bootstrap functions (already here)
+
+#### Relocated Configuration Files
+- **Moved `codecov.yml` to `.github/`** - CI configuration with other GitHub files
+- **Moved `claude.local.example` to `claude/`** - Example config with Claude settings
+- **Moved `NOTES.md` and `BRAND.md` to `docs/`** - Documentation in docs directory
+
+### Removed
+- **`VERSION` file** - Redundant with CHANGELOG.md as source of truth
+- **`bootstrap-lima.sh` symlink** - Deprecated alias for bootstrap-linux.sh
+
+### Changed
+- Bootstrap scripts updated to find DOTFILES_DIR from parent directory
+- `install.sh` updated with new bootstrap script paths
+- `Dockerfile` updated with new bootstrap script path
+- All CI workflow paths updated for new locations
+- Updated all documentation with new paths and project structure
+
+### Documentation
+- Updated project structure in README.md, docs/README.md, CLAUDE.md
+- Updated Quick Start instructions with new bootstrap paths
+- Updated claude.local.example path references
+
 ## [1.6.0] - 2025-11-28
 
 ### Added - CLI Reorganization

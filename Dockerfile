@@ -33,7 +33,7 @@ RUN git clone "$DOTFILES_REPO" /home/developer/workspace/dotfiles
 
 # Run bootstrap
 WORKDIR /home/developer/workspace/dotfiles
-RUN ./bootstrap-linux.sh
+RUN ./bootstrap/bootstrap-linux.sh
 
 # Optional: Restore secrets from Bitwarden
 # Requires BW_SESSION to be passed at runtime:

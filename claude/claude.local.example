@@ -2,7 +2,7 @@
 # Copy this file to ~/.claude.local and customize for your setup.
 # This file is sourced by zsh.d/70-claude.zsh
 #
-# To use: cp ~/workspace/dotfiles/claude.local.example ~/.claude.local
+# To use: cp ~/workspace/dotfiles/claude/claude.local.example ~/.claude.local
 
 # =========================
 # AWS Bedrock Configuration

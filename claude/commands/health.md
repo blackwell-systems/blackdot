@@ -1,7 +1,7 @@
 Run the dotfiles health check and summarize any issues:
 
 ```bash
-~/workspace/dotfiles/dotfiles-doctor.sh
+~/workspace/dotfiles/bin/dotfiles-doctor
 ```
 
 If there are permission warnings, offer to run with `--fix`.

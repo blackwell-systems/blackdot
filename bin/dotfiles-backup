@@ -132,7 +132,11 @@ restore_backup() {
 
     # Extract to temp
     local temp_dir=$(mktemp -d)
-    tar -xzf "$backup_file" -C "$temp_dir"
+    if ! tar -xzf "$backup_file" -C "$temp_dir" 2>/dev/null; then
+        fail "Failed to extract backup (corrupted or invalid archive)"
+        rm -rf "$temp_dir"
+        return 1
+    fi
 
     local backup_dir=$(ls "$temp_dir")
     local restored=0
@@ -175,6 +179,11 @@ case "${1:-}" in
         echo ""
         echo "Backups are stored in: $BACKUP_DIR"
         echo "Maximum backups kept: $MAX_BACKUPS"
+        ;;
+    -*)
+        fail "Unknown option: $1"
+        echo "Usage: dotfiles backup [--list|restore|--help]"
+        exit 1
         ;;
     *)
         create_backup
