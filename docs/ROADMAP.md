@@ -226,7 +226,72 @@ dotfiles/
 
 ---
 
-#### 7. Session Management Improvements
+#### 7. MCP Server for Claude Code Integration
+
+**Status:** Not started (Concept documented)
+
+**What:** Create an MCP (Model Context Protocol) server that allows Claude Code to directly interact with dotfiles operations.
+
+**Why:** Currently, Claude interacts with dotfiles via shell commands. An MCP server would provide:
+- **Native tool integration** - Claude sees `dotfiles_health_check`, `dotfiles_vault_sync` as first-class tools
+- **Structured responses** - JSON responses instead of parsing shell output
+- **Proactive actions** - Claude could auto-fix issues during coding sessions
+- **Real-time status** - Claude knows dotfiles health without running commands
+
+**Proposed MCP Tools:**
+```typescript
+// Health & Status
+dotfiles_health_check()     // Returns structured health report
+dotfiles_status()           // Quick status with issues count
+dotfiles_drift_check()      // Check vault drift
+
+// Vault Operations
+dotfiles_vault_restore()    // Restore secrets (with drift check)
+dotfiles_vault_sync(item?)  // Sync specific or all items
+dotfiles_vault_list()       // List vault items
+
+// Configuration
+dotfiles_template_render()  // Generate machine-specific configs
+dotfiles_doctor_fix()       // Auto-repair issues
+```
+
+**Example MCP Server Architecture:**
+```
+mcp-server-dotfiles/
+├── src/
+│   ├── index.ts            # MCP server entry point
+│   ├── tools/
+│   │   ├── health.ts       # Health check tool
+│   │   ├── vault.ts        # Vault operations
+│   │   └── template.ts     # Template tools
+│   └── utils/
+│       └── shell.ts        # Execute dotfiles commands
+├── package.json
+└── README.md
+```
+
+**Implementation Approach:**
+1. Create TypeScript MCP server using `@modelcontextprotocol/sdk`
+2. Wrap existing shell scripts with structured JSON output
+3. Add to Claude Code config: `"mcpServers": { "dotfiles": {...} }`
+4. Claude gains native dotfiles tools
+
+**Benefits:**
+- Claude can proactively check/fix dotfiles health during sessions
+- No need to remember `dotfiles doctor` commands
+- Structured data flow between Claude and dotfiles
+- Opens door for Claude-assisted dotfiles management
+
+**Risk Mitigation:**
+- MCP server is additive (existing CLI continues to work)
+- Read-only operations by default, mutations require confirmation
+- Session authentication passes through to vault
+
+**Related:** [MCP Protocol](https://modelcontextprotocol.io/)
+
+---
+
+#### 8. Session Management Improvements
 
 **Status:** Not started
 
@@ -331,7 +396,8 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 | 1.5.0 | Offline mode support |
 | 1.6.0 | CLI reorganization (bin/ directory) |
 | 1.7.0 | Root directory cleanup (bootstrap/, docs/) |
-| 1.8.0 | (Next) Session management improvements |
+| 1.8.0 | Native Windows support, git safety hooks, marketing refresh |
+| 1.9.0 | (Next) MCP server for Claude Code integration |
 
 ---
 
