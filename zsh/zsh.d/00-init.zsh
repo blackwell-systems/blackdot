@@ -64,4 +64,31 @@ case "$OS" in
       export PATH="/snap/bin:$PATH"
     fi
     ;;
+
+  MINGW*|MSYS*|CYGWIN*)
+    # ---------- Windows (Git Bash / MSYS2 / Cygwin) ----------
+    # Fix TERM for Windows terminals
+    export TERM=xterm-256color
+
+    # Add common Windows paths
+    if [ -d "/c/Program Files/Git/bin" ]; then
+      export PATH="/c/Program Files/Git/bin:$PATH"
+    fi
+
+    # Enable ls colors
+    alias ls='ls --color=auto'
+    alias ll='ls -lash --color=auto'
+    alias la='ls -Ah --color=auto'
+    alias l='ls -CF --color=auto'
+
+    # Windows-specific utilities
+    alias open='start'
+    alias explorer='explorer.exe'
+
+    # Clipboard integration
+    if command -v clip.exe >/dev/null 2>&1; then
+      alias pbcopy='clip.exe'
+      alias pbpaste='powershell.exe -command "Get-Clipboard"'
+    fi
+    ;;
 esac

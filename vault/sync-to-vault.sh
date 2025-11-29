@@ -1,8 +1,8 @@
 #!/usr/bin/env zsh
 # ============================================================
-# FILE: vault/sync-to-bitwarden.sh
-# Syncs local config files back to Bitwarden (inverse of restore)
-# Usage: ./sync-to-bitwarden.sh [--dry-run] [--all | item...]
+# FILE: vault/sync-to-vault.sh
+# Syncs local config files back to vault (inverse of restore)
+# Usage: ./sync-to-vault.sh [--dry-run] [--all | item...]
 # ============================================================
 set -uo pipefail
 
@@ -16,7 +16,7 @@ usage() {
     cat <<EOF
 Usage: $(basename "$0") [OPTIONS] [ITEMS...]
 
-Syncs local config files back to Bitwarden.
+Syncs local config files back to vault.
 
 OPTIONS:
     --dry-run, -n    Show what would be synced without making changes

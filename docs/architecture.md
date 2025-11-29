@@ -122,7 +122,7 @@ dotfiles/
 ├── vault/
 │   ├── _common.sh          # Shared definitions
 │   ├── bootstrap-vault.sh  # Restore secrets
-│   ├── sync-to-bitwarden.sh
+│   ├── sync-to-vault.sh
 │   └── restore-*.sh        # Category restores
 │
 ├── macos/

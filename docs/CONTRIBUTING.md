@@ -151,7 +151,7 @@ cd vault
 ./restore-ssh.sh --help
 
 # Test with dry-run mode (where available)
-./sync-to-bitwarden.sh --dry-run SSH-Config
+dotfiles vault sync --dry-run SSH-Config
 ```
 
 ### Integration Testing
@@ -369,7 +369,7 @@ export BW_SESSION="$(bw unlock --raw)"
 
 # Test vault operations (use test account!)
 ./vault/check-vault-items.sh -v
-./vault/sync-to-bitwarden.sh --dry-run SSH-Config
+dotfiles vault sync --dry-run SSH-Config
 ```
 
 ### Debugging
