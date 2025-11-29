@@ -36,6 +36,8 @@ dotfiles/
 │   └── _variables*.sh   # Variable definitions
 ├── generated/           # Rendered templates (gitignored)
 ├── claude/              # Claude Code config & commands
+│   ├── hooks/           # Defensive git hooks (PreToolUse, SessionStart)
+│   └── commands/        # Custom slash commands
 └── docs/                # Docsify documentation site
 ```
 
@@ -258,26 +260,53 @@ When modifying zsh config:
 - If you detect uncommitted changes you didn't make, ask the user
 - If remote has commits not in local, pull before continuing
 
-### Session Start Hook
+### Defensive Hooks
 
-This repository includes a session start hook that automatically checks git sync status:
+This repository includes Claude Code hooks that enforce safe git practices:
+
+#### SessionStart Hook (`git-sync-check.sh`)
+
+Automatically checks git sync status when a session starts:
+- Fetches latest from remote
+- Reports ahead/behind status
+- Warns if branch has diverged
+- Suggests resolution steps before proceeding
+
+#### PreToolUse Hook (`block-dangerous-git.sh`)
+
+Blocks potentially destructive git commands before execution:
+
+| Command | Action | Reason |
+|---------|--------|--------|
+| `git push --force` / `-f` | **BLOCKED** | Can overwrite remote history |
+| `git reset --hard` | **BLOCKED** | Discards uncommitted changes permanently |
+| `git clean -f` | **BLOCKED** | Removes untracked files permanently |
+| `git checkout --force` | **BLOCKED** | Can discard local changes |
+| `git rebase -i` | **BLOCKED** | Not supported in non-interactive env |
+| `git branch -D` | WARNING | Force deletes unmerged branches |
+| `git commit --amend` | WARNING | Check authorship first |
+
+#### Hook Configuration (`claude/settings.json`)
 
 ```json
 {
-  "hooks": [
-    {
-      "event": "on_session_start",
-      "command": "git fetch && git status --porcelain=v2 --branch",
-      "description": "Check git sync status at session start"
-    }
-  ]
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "claude/hooks/block-dangerous-git.sh" }]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [{ "type": "command", "command": "claude/hooks/git-sync-check.sh" }]
+      }
+    ]
+  }
 }
 ```
 
-The hook output will show:
-- `# branch.ab +N -M` - N commits ahead, M commits behind remote
-- If behind remote, run `git pull --rebase` before making changes
-- If diverged, ask the user before proceeding
+See `claude/hooks/README.md` for full documentation on customizing these hooks
 
 ---
 
@@ -388,4 +417,4 @@ Before completing work, verify:
 ---
 
 **Last Updated:** 2025-11-29
-**Version:** 1.8.0
+**Version:** 1.8.1
