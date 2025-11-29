@@ -131,7 +131,7 @@ Everything works on a single machine. Cross-platform sync, Claude session portab
 
 ```bash
 # Minimal install (no vault, no /workspace symlink, no Claude setup)
-SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap-linux.sh
+SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
 
 # Then manually configure ~/.ssh, ~/.aws, ~/.gitconfig
 ```
@@ -240,13 +240,13 @@ Skip optional features using environment variables:
 
 ```bash
 # Skip /workspace symlink creation (single-machine setup)
-SKIP_WORKSPACE_SYMLINK=true ./bootstrap-mac.sh
+SKIP_WORKSPACE_SYMLINK=true ./bootstrap/bootstrap-mac.sh
 
 # Skip Claude Code setup
-SKIP_CLAUDE_SETUP=true ./bootstrap-linux.sh
+SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
 
 # Combine flags
-SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap-mac.sh
+SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-mac.sh
 ```
 
 **Available flags:**

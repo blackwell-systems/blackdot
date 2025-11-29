@@ -150,7 +150,7 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
 **Usage:**
 ```bash
 # Skip vault operations during bootstrap
-DOTFILES_OFFLINE=1 ./bootstrap-mac.sh
+DOTFILES_OFFLINE=1 ./bootstrap/bootstrap-mac.sh
 
 # Skip vault restore (keeps local files)
 DOTFILES_OFFLINE=1 dotfiles vault restore

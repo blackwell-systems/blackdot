@@ -82,7 +82,7 @@ For air-gapped environments, Bitwarden outages, or when you simply don't have va
 
 ```bash
 # Skip all vault operations during bootstrap
-DOTFILES_OFFLINE=1 ./bootstrap-mac.sh
+DOTFILES_OFFLINE=1 ./bootstrap/bootstrap-mac.sh
 
 # Or for individual commands
 DOTFILES_OFFLINE=1 dotfiles vault restore  # Exits gracefully
@@ -119,7 +119,7 @@ git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
 # 2. Bootstrap the system
-./bootstrap-mac.sh  # or bootstrap-linux.sh
+./bootstrap/bootstrap-mac.sh  # or bootstrap-linux.sh
 
 # 3. Login to Bitwarden
 bw login

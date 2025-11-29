@@ -492,10 +492,10 @@ jobs:
 
             echo "=== Making scripts executable ==="
             cd /dotfiles
-            chmod +x *.sh vault/*.sh 2>/dev/null || true
+            chmod +x bootstrap/*.sh vault/*.sh bin/* 2>/dev/null || true
 
             echo "=== Running bootstrap ==="
-            bash ./bootstrap-linux.sh
+            bash ./bootstrap/bootstrap-linux.sh
 
             echo "=== Verifying installation ==="
             # Check if brew was installed
