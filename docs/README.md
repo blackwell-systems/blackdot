@@ -422,6 +422,10 @@ dotfiles vault check     # Validate vault items exist
 dotfiles init            # First-time setup wizard
 dotfiles upgrade         # Pull latest, run bootstrap, verify
 dotfiles uninstall       # Clean removal (with --dry-run option)
+dotfiles lint            # Validate shell config syntax
+dotfiles lint --fix      # Auto-fix permissions
+dotfiles packages        # Check Brewfile package status
+dotfiles packages --install  # Install missing packages
 
 # Navigation
 dotfiles cd              # Navigate to dotfiles directory

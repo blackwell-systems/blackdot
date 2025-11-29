@@ -46,7 +46,7 @@ typeset -A DRIFT_ITEMS=(
 DRIFT_COUNT=0
 CHECKED_COUNT=0
 
-for item_name in "${(k)DRIFT_ITEMS[@]}"; do
+for item_name in "${(@k)DRIFT_ITEMS}"; do
     local_file="${DRIFT_ITEMS[$item_name]}"
 
     # Skip if local file doesn't exist
