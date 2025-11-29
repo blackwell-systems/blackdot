@@ -210,8 +210,8 @@ View test results in the GitHub Actions tab.
 ```
 feat: Add drift detection to health check
 
-Implements --drift flag that compares local files with vault
-items. Helps identify unsync'd changes before switching machines.
+Implements --drift flag that compares local files with Bitwarden
+vault items. Helps identify unsync'd changes before switching machines.
 
 Closes #42
 ```
@@ -229,7 +229,7 @@ Fixes #38
 docs: Add security maintenance schedule to README
 
 Documents recommended frequency for rotating SSH keys, AWS credentials,
-and vault master password.
+and Bitwarden password.
 ```
 
 ### Pre-commit Hooks
@@ -314,7 +314,7 @@ Once approved:
 Browse [open issues](https://github.com/blackwell-systems/dotfiles/issues) for ideas, or propose your own:
 
 **Desired features:**
-- [x] Support for additional secret managers (1Password, pass) ✅ Implemented in v1.7.0
+- [ ] Support for additional secret managers (age, pass, 1Password)
 - [ ] Web-based metrics dashboard
 - [ ] Automated rollback on failed upgrades
 - [ ] Plugin system for extensibility
@@ -364,14 +364,11 @@ Help test and improve support for:
 ### Testing Vault Scripts
 
 ```bash
-# Set up test vault account (recommended!)
-# Bitwarden:
+# Set up test Bitwarden account (recommended!)
 export BW_SESSION="$(bw unlock --raw)"
-# 1Password: op signin
-# pass: no setup needed
 
 # Test vault operations (use test account!)
-dotfiles vault check
+./vault/check-vault-items.sh -v
 dotfiles vault sync --dry-run SSH-Config
 ```
 

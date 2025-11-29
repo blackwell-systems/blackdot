@@ -144,7 +144,7 @@ if [[ -n "$EXISTING_JSON" ]]; then
     echo ""
 
     if ! $FORCE; then
-        fail "Use --force to overwrite, or use sync-to-bitwarden.sh to update"
+        fail "Use --force to overwrite, or use 'dotfiles vault sync' to update"
         exit 1
     fi
 

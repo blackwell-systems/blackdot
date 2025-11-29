@@ -43,7 +43,7 @@
 | Capability           | This Repo                                      | Typical Dotfiles                 |
 |----------------------|-----------------------------------------------|----------------------------------|
 | **Secrets management** | Multi-vault (Bitwarden, 1Password, pass)      | Manual copy between machines     |
-| **Health validation**  | 573-line checker with `--fix`                 | None                             |
+| **Health validation**  | 446-line checker with `--fix`                 | None                             |
 | **Drift detection**    | Compare local vs vault state                  | None                             |
 | **Schema validation**  | Validates SSH keys & config structure         | None                             |
 | **Unit tests**         | 80+ bats-core tests                           | Rare                             |
@@ -63,7 +63,7 @@
 | **Bidirectional Sync** | ✅ Local ↔ Vault | ❌ | ❌ | ❌ | ❌ |
 | **Cross-Platform** | ✅ macOS, Linux, Windows, WSL2, Docker | ⚠️ Limited | ⚠️ macOS only | ⚠️ macOS only | ⚠️ Limited |
 | **Claude Code Sessions** | ✅ Portable via `/workspace` | ❌ | ❌ | ❌ | ❌ |
-| **Health Checks** | ✅ 573 lines + auto-fix | ❌ | ❌ | ❌ | ❌ |
+| **Health Checks** | ✅ 446 lines + auto-fix | ❌ | ❌ | ❌ | ❌ |
 | **Drift Detection** | ✅ Local vs Vault | ❌ | ❌ | ❌ | ❌ |
 | **Schema Validation** | ✅ SSH keys, configs | ❌ | ❌ | ❌ | ❌ |
 | **Unit Tests** | ✅ 80+ bats tests | ❌ | ❌ | ❌ | ❌ |
@@ -112,7 +112,7 @@
 
 1. **Only dotfiles with multi-vault backend support** - Bitwarden, 1Password, or pass with unified API
 2. **Only dotfiles with Claude Code session portability** - `/workspace` symlink + auto-redirect
-3. **Only dotfiles with comprehensive health checks** - 573-line validator with auto-fix
+3. **Only dotfiles with comprehensive health checks** - 446-line validator with auto-fix
 4. **Only dotfiles with drift detection** - Compare local vs vault state
 5. **Only dotfiles with schema validation** - Ensures SSH keys/configs are valid before restore
 6. **Only dotfiles with Docker bootstrap testing** - Reproducible CI/CD environments
@@ -138,13 +138,15 @@ SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.s
 # Then manually configure ~/.ssh, ~/.aws, ~/.gitconfig
 ```
 
-> 💡 **Don't use a vault?** No problem!
+> 💡 **Don't use a vault manager?** No problem!
 >
 > The vault system is completely optional. Run with `--minimal` flag:
 > ```bash
 > curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
 > ```
 > Then manually configure `~/.ssh`, `~/.aws`, `~/.gitconfig`. All shell config, aliases, and tools still work!
+>
+> Or choose your preferred vault backend: Bitwarden (default), 1Password, or pass.
 
 Inspired by: holman/dotfiles, thoughtbot/dotfiles, mathiasbynens/dotfiles
 
@@ -172,7 +174,7 @@ Inspired by: holman/dotfiles, thoughtbot/dotfiles, mathiasbynens/dotfiles
 
 To clone via SSH (recommended), you’ll also want an SSH key configured with GitHub. If you don’t have Git yet, you can either:
 - install it the way you normally would on your platform, or  
-- download this repository as a ZIP from GitHub, extract it, and run `bootstrap-mac.sh` / `bootstrap-linux.sh` – the scripts will install Git and your chosen vault CLI for you.
+- download this repository as a ZIP from GitHub, extract it, and run `bootstrap-mac.sh` / `bootstrap-linux.sh` / `bootstrap-windows.sh` – the scripts will install Git and configure your environment.
 
 ---
 
@@ -206,9 +208,8 @@ cd ~/workspace/dotfiles
 ./bootstrap/bootstrap-linux.sh    # Linux / WSL2 / Lima / Docker
 
 # 3. Restore secrets from vault
-# Bitwarden: bw login && export BW_SESSION="$(bw unlock --raw)"
-# 1Password: op signin
-# pass: (uses GPG, no login needed)
+bw login                    # or: op signin (1Password) / gpg for pass
+export BW_SESSION="$(bw unlock --raw)"  # Bitwarden only
 ./vault/bootstrap-vault.sh
 
 # 4. Verify
@@ -218,9 +219,9 @@ dotfiles doctor
 **That's it.** Shell configured, secrets restored, health validated.
 
 <details>
-<summary><b>Don't use a vault?</b></summary>
+<summary><b>Don't use a vault manager?</b></summary>
 
-The vault system is completely optional. Two options:
+The vault system supports Bitwarden, 1Password, and pass. Or skip it entirely:
 
 **Option 1: Use `--minimal` flag**
 ```bash
@@ -583,7 +584,7 @@ dotfiles/
 │   │   └── pass.sh           # pass (GPG) backend
 │   ├── bootstrap-vault.sh    # Orchestrator
 │   ├── restore-*.sh          # Restore SSH, AWS, Git, env
-│   ├── sync-to-bitwarden.sh  # Sync local → vault
+│   ├── sync-to-vault.sh      # Sync local → vault
 │   ├── validate-schema.sh    # Validate vault item structure
 │   └── check-vault-items.sh  # Pre-flight validation
 │
@@ -738,6 +739,7 @@ To customize:
 | macOS (Intel) | ✅ Fully tested | Auto-detects architecture |
 | Lima (Ubuntu 24.04) | ✅ Fully tested | Recommended Linux VM for macOS |
 | WSL2 (Windows) | ✅ Auto-detected | Uses Linux bootstrap |
+| Windows (Git Bash/MSYS2) | ✅ Native support | Uses Windows bootstrap |
 | Ubuntu/Debian | ✅ Compatible | Tested on Ubuntu 24.04 |
 | Arch/Fedora/BSD | ⚠️ Experimental | 15-30 min adaptation needed |
 
@@ -750,7 +752,7 @@ To customize:
 - **[Template Guide](docs/templates.md)** - Machine-specific configuration templates
 - **[Architecture](docs/architecture.md)** - System diagrams and component overview
 - **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
-- **[Vault README](vault/README.md)** - Multi-vault system details
+- **[Vault README](vault/README.md)** - Multi-vault backend details
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contributor guide
 - **[SECURITY.md](SECURITY.md)** - Security policy
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
@@ -782,7 +784,7 @@ ssh -T git@github.com    # Test connection
 # Bitwarden
 export BW_SESSION="$(bw unlock --raw)"
 
-# 1Password
+# 1Password - re-sign in
 op signin
 ```
 
