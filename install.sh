@@ -160,11 +160,9 @@ fi
 info "Running bootstrap script..."
 echo ""
 
-if [[ -n "$BOOTSTRAP_ARGS" ]]; then
-    ./"$BOOTSTRAP_SCRIPT" $BOOTSTRAP_ARGS
-else
-    ./"$BOOTSTRAP_SCRIPT"
-fi
+# Note: BOOTSTRAP_ARGS is intentionally unquoted to allow word splitting for multiple flags
+# shellcheck disable=SC2086
+./"$BOOTSTRAP_SCRIPT" $BOOTSTRAP_ARGS
 
 # Success message
 echo ""

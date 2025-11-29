@@ -100,7 +100,7 @@ show_sync_preview() {
     echo -e "${BOLD}Preview: What 'dotfiles vault sync' would push to Bitwarden${NC}"
     echo ""
 
-    for item_name in "${(k)DIFF_ITEMS[@]}"; do
+    for item_name in "${(@k)DIFF_ITEMS}"; do
         local local_file="${DIFF_ITEMS[$item_name]}"
         if [[ -f "$local_file" ]]; then
             local vault_content=$(get_vault_content "$item_name" 2>/dev/null)
@@ -121,7 +121,7 @@ show_restore_preview() {
     echo -e "${BOLD}Preview: What 'dotfiles vault restore' would change locally${NC}"
     echo ""
 
-    for item_name in "${(k)DIFF_ITEMS[@]}"; do
+    for item_name in "${(@k)DIFF_ITEMS}"; do
         local local_file="${DIFF_ITEMS[$item_name]}"
         local vault_content=$(get_vault_content "$item_name" 2>/dev/null)
 
@@ -183,11 +183,11 @@ case "${1:-}" in
         echo "  dotfiles diff --restore    Preview what restore would change"
         echo "  dotfiles diff ITEM         Show diff for specific item"
         echo ""
-        echo "Items: ${(k)DIFF_ITEMS[@]}"
+        echo "Items: ${(@k)DIFF_ITEMS}"
         ;;
     "")
         check_session
-        for item_name in "${(k)DIFF_ITEMS[@]}"; do
+        for item_name in "${(@k)DIFF_ITEMS}"; do
             show_diff "$item_name"
         done
         ;;
@@ -197,7 +197,7 @@ case "${1:-}" in
             show_diff "$1"
         else
             echo -e "${RED}Unknown item: $1${NC}"
-            echo "Available: ${(k)DIFF_ITEMS[@]}"
+            echo "Available: ${(@k)DIFF_ITEMS}"
             exit 1
         fi
         ;;
