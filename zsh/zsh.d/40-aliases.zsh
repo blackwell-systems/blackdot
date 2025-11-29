@@ -104,6 +104,9 @@ dotfiles() {
         packages|pkg)
             "$HOME/workspace/dotfiles/bin/dotfiles-packages" "$@"
             ;;
+        template|tmpl)
+            "$HOME/workspace/dotfiles/bin/dotfiles-template" "$@"
+            ;;
         cd)
             cd "$HOME/workspace/dotfiles"
             ;;
@@ -124,6 +127,7 @@ dotfiles() {
             echo "  diff              Preview changes before sync/restore"
             echo "  backup            Backup and restore configuration"
             echo "  vault <cmd>       Bitwarden vault operations (restore, sync, list...)"
+            echo "  template, tmpl    Machine-specific config templates"
             echo "  lint              Validate shell config syntax"
             echo "  packages, pkg     Check/install Brewfile packages"
             echo "  init              First-time setup wizard"
@@ -139,6 +143,8 @@ dotfiles() {
             echo "  dotfiles lint --fix          # Check syntax, fix permissions"
             echo "  dotfiles packages --check    # Show missing packages"
             echo "  dotfiles packages --install  # Install from Brewfile"
+            echo "  dotfiles template init       # Setup machine-specific config"
+            echo "  dotfiles template render     # Generate configs from templates"
             echo "  dotfiles vault restore       # Restore secrets from Bitwarden"
             echo "  dotfiles vault sync --all    # Sync local to Bitwarden"
             ;;

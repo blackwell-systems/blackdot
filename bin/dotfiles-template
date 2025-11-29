@@ -1,0 +1,383 @@
+#!/usr/bin/env zsh
+# ============================================================
+# FILE: bin/dotfiles-template
+# Template management CLI for machine-specific configurations
+#
+# Usage:
+#   dotfiles template init          # Interactive setup
+#   dotfiles template render        # Render all templates
+#   dotfiles template render FILE   # Render specific template
+#   dotfiles template check         # Validate template syntax
+#   dotfiles template diff          # Show what would change
+#   dotfiles template vars          # List all variables
+#   dotfiles template edit          # Edit local variables
+#   dotfiles template link          # Symlink generated files
+#
+# Environment Variables:
+#   DEBUG=1                         # Enable debug output
+#   DOTFILES_TMPL_*                 # Override any template variable
+#   DOTFILES_MACHINE_TYPE           # Force machine type (work/personal)
+#
+# Examples:
+#   dotfiles template init
+#   dotfiles template render --dry-run
+#   dotfiles template vars --quiet
+#   DOTFILES_TMPL_GIT_EMAIL="me@example.com" dotfiles template render
+# ============================================================
+
+set -euo pipefail
+
+# ============================================================
+# Setup
+# ============================================================
+SCRIPT_DIR="${0:A:h}"
+DOTFILES_DIR="${SCRIPT_DIR:h}"
+
+# Source template library
+source "$DOTFILES_DIR/lib/_templates.sh"
+
+# ============================================================
+# Usage
+# ============================================================
+usage() {
+    cat <<EOF
+${BOLD}dotfiles template${NC} - Machine-specific configuration management
+
+${CYAN}USAGE${NC}
+    dotfiles template <command> [options]
+
+${CYAN}COMMANDS${NC}
+    init              Interactive setup - creates _variables.local.sh
+    render            Render all templates to generated/
+    render <file>     Render a specific template file
+    check             Validate template syntax
+    diff              Show differences between templates and generated files
+    vars              List all template variables and values
+    edit              Open _variables.local.sh in editor
+    link              Create symlinks from generated files to destinations
+    help              Show this help message
+
+${CYAN}OPTIONS${NC}
+    --dry-run, -n     Show what would be done without doing it
+    --force, -f       Force re-render even if up to date
+    --verbose, -v     Show detailed output
+    --quiet, -q       Minimal output
+
+${CYAN}EXAMPLES${NC}
+    # First-time setup
+    dotfiles template init
+
+    # See current variable values
+    dotfiles template vars
+
+    # Preview what would be generated
+    dotfiles template render --dry-run
+
+    # Render and link all templates
+    dotfiles template render && dotfiles template link
+
+    # Override a variable for one render
+    DOTFILES_TMPL_GIT_EMAIL="other@example.com" dotfiles template render
+
+${CYAN}TEMPLATE SYNTAX${NC}
+    {{ variable }}              Variable substitution
+    {{#if variable }}...{{/if}} Conditional block
+    {{#if var == "value" }}     Conditional with comparison
+    {{#unless variable }}       Negative conditional
+
+${CYAN}FILES${NC}
+    templates/_variables.sh         Default variable definitions
+    templates/_variables.local.sh   Machine-specific overrides (gitignored)
+    templates/configs/*.tmpl        Template files
+    generated/*                     Rendered output (gitignored)
+
+EOF
+}
+
+# ============================================================
+# Commands
+# ============================================================
+
+# Interactive initialization
+cmd_init() {
+    local local_file="$TEMPLATES_DIR/_variables.local.sh"
+    local example_file="$TEMPLATES_DIR/_variables.local.sh.example"
+
+    print "${BOLD}Template System Setup${NC}"
+    print "═════════════════════════════════════════════════════════════"
+    print ""
+
+    # Build auto vars to show current detection
+    build_auto_vars
+
+    print "${CYAN}Detected System:${NC}"
+    printf "  %-20s %s\n" "Hostname:" "${TMPL_AUTO[hostname]}"
+    printf "  %-20s %s\n" "OS:" "${TMPL_AUTO[os]} (${TMPL_AUTO[os_family]})"
+    printf "  %-20s %s\n" "Architecture:" "${TMPL_AUTO[arch]}"
+    printf "  %-20s %s\n" "User:" "${TMPL_AUTO[user]}"
+    printf "  %-20s %s\n" "Machine Type:" "${TMPL_AUTO[machine_type]}"
+    print ""
+
+    # Check if local file exists
+    if [[ -f "$local_file" ]]; then
+        warn "Local variables file already exists: $local_file"
+        print ""
+        read -q "?Overwrite with fresh template? [y/N] " || { print ""; return 0; }
+        print ""
+    fi
+
+    # Copy example file
+    if [[ -f "$example_file" ]]; then
+        cp "$example_file" "$local_file"
+        pass "Created: $local_file"
+    else
+        fail "Example file not found: $example_file"
+        return 1
+    fi
+
+    print ""
+    print "${CYAN}Next steps:${NC}"
+    print "  1. Edit your configuration:"
+    print "     ${BOLD}dotfiles template edit${NC}"
+    print ""
+    print "  2. Review your variables:"
+    print "     ${BOLD}dotfiles template vars${NC}"
+    print ""
+    print "  3. Render templates:"
+    print "     ${BOLD}dotfiles template render${NC}"
+    print ""
+    print "  4. Create symlinks to generated files:"
+    print "     ${BOLD}dotfiles template link${NC}"
+    print ""
+
+    # Ask if user wants to edit now
+    read -q "?Open editor now? [Y/n] " response || response="y"
+    print ""
+    if [[ "$response" =~ ^[Yy]?$ ]]; then
+        ${EDITOR:-vim} "$local_file"
+    fi
+}
+
+# Render templates
+cmd_render() {
+    local dry_run=false
+    local force=false
+    local specific_file=""
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run|-n) dry_run=true ;;
+            --force|-f) force=true ;;
+            --verbose|-v) DEBUG=1 ;;
+            -*)
+                fail "Unknown option: $1"
+                return 1
+                ;;
+            *)
+                specific_file="$1"
+                ;;
+        esac
+        shift
+    done
+
+    if [[ -n "$specific_file" ]]; then
+        # Render specific template
+        local template_path="$specific_file"
+
+        # If just filename, look in configs/
+        if [[ ! -f "$template_path" ]]; then
+            template_path="$TEMPLATES_CONFIG_DIR/$specific_file"
+        fi
+        # Add .tmpl if missing
+        if [[ ! -f "$template_path" && ! "$template_path" == *.tmpl ]]; then
+            template_path="${template_path}.tmpl"
+        fi
+
+        if [[ ! -f "$template_path" ]]; then
+            fail "Template not found: $specific_file"
+            return 1
+        fi
+
+        local basename="${template_path:t:r}"
+        local output_file="$GENERATED_DIR/$basename"
+
+        render_template "$template_path" "$output_file" "$dry_run"
+    else
+        # Render all templates
+        render_all_templates "$dry_run" "$force"
+    fi
+}
+
+# Check template syntax
+cmd_check() {
+    validate_all_templates
+}
+
+# Show diff
+cmd_diff() {
+    local verbose=false
+    [[ "${1:-}" == "-v" || "${1:-}" == "--verbose" ]] && verbose=true
+
+    show_template_diff "$verbose"
+}
+
+# List variables
+cmd_vars() {
+    local quiet=false
+    [[ "${1:-}" == "-q" || "${1:-}" == "--quiet" ]] && quiet=true
+
+    if [[ "$quiet" == "true" ]]; then
+        list_template_vars false
+    else
+        list_template_vars true
+    fi
+}
+
+# Edit local variables
+cmd_edit() {
+    local local_file="$TEMPLATES_DIR/_variables.local.sh"
+
+    if [[ ! -f "$local_file" ]]; then
+        warn "Local variables file not found"
+        print "Run 'dotfiles template init' first"
+        return 1
+    fi
+
+    ${EDITOR:-vim} "$local_file"
+    pass "Edited: $local_file"
+    print ""
+    print "${CYAN}Tip:${NC} Run 'dotfiles template render' to apply changes"
+}
+
+# Link generated files to destinations
+cmd_link() {
+    local dry_run=false
+    [[ "${1:-}" == "--dry-run" || "${1:-}" == "-n" ]] && dry_run=true
+
+    info "Linking generated files..."
+
+    # Define destinations for generated files
+    # Format: generated_filename -> destination_path
+    typeset -A LINK_MAP=(
+        [gitconfig]="$HOME/.gitconfig"
+        [99-local.zsh]="$DOTFILES_DIR/zsh/zsh.d/99-local.zsh"
+        [ssh-config]="$HOME/.ssh/config"
+        [claude.local]="$HOME/.claude.local"
+    )
+
+    local count=0
+    local errors=0
+
+    for file dest in "${(@kv)LINK_MAP}"; do
+        local src="$GENERATED_DIR/$file"
+
+        if [[ ! -f "$src" ]]; then
+            debug "Skipping (not generated): $file"
+            continue
+        fi
+
+        if [[ "$dry_run" == "true" ]]; then
+            dry "Would link: $src → $dest"
+        else
+            # Create parent directory if needed
+            mkdir -p "$(dirname "$dest")"
+
+            # Backup existing file if it's not already a symlink to our file
+            if [[ -e "$dest" && ! -L "$dest" ]]; then
+                local backup="${dest}.backup.$(date +%Y%m%d%H%M%S)"
+                mv "$dest" "$backup"
+                info "Backed up: $dest → $backup"
+            elif [[ -L "$dest" ]]; then
+                # Remove existing symlink
+                rm "$dest"
+            fi
+
+            # Create symlink
+            if ln -s "$src" "$dest"; then
+                pass "Linked: $file → $dest"
+                (( count++ ))
+            else
+                fail "Failed to link: $file"
+                (( errors++ ))
+            fi
+        fi
+    done
+
+    if [[ $count -eq 0 && "$dry_run" != "true" ]]; then
+        info "No files to link (run 'dotfiles template render' first)"
+    else
+        info "Linked $count file(s)"
+    fi
+
+    [[ $errors -eq 0 ]]
+}
+
+# List available templates
+cmd_list() {
+    print "${BOLD}Available Templates${NC}"
+    print "───────────────────────────────────────"
+
+    for template in "$TEMPLATES_CONFIG_DIR"/*.tmpl(N); do
+        local basename="${template:t:r}"
+        local output="$GENERATED_DIR/$basename"
+        local status
+
+        if [[ -f "$output" ]]; then
+            if [[ "$output" -nt "$template" ]]; then
+                status="${GREEN}✓ up to date${NC}"
+            else
+                status="${YELLOW}○ stale${NC}"
+            fi
+        else
+            status="${RED}✗ not generated${NC}"
+        fi
+
+        printf "  %-25s %b\n" "$basename" "$status"
+    done
+}
+
+# ============================================================
+# Main
+# ============================================================
+main() {
+    local command="${1:-help}"
+    shift 2>/dev/null || true
+
+    case "$command" in
+        init)
+            cmd_init "$@"
+            ;;
+        render)
+            cmd_render "$@"
+            ;;
+        check|validate)
+            cmd_check "$@"
+            ;;
+        diff)
+            cmd_diff "$@"
+            ;;
+        vars|variables)
+            cmd_vars "$@"
+            ;;
+        edit)
+            cmd_edit "$@"
+            ;;
+        link|symlink)
+            cmd_link "$@"
+            ;;
+        list|ls)
+            cmd_list "$@"
+            ;;
+        help|-h|--help)
+            usage
+            ;;
+        *)
+            fail "Unknown command: $command"
+            print "Run 'dotfiles template help' for usage"
+            return 1
+            ;;
+    esac
+}
+
+main "$@"

@@ -157,6 +157,29 @@ link_dotfiles() {
 }
 
 # ============================================================
+# Template rendering (machine-specific configs)
+# ============================================================
+render_templates() {
+    local template_script="$DOTFILES_DIR/bin/dotfiles-template"
+    local local_vars="$DOTFILES_DIR/templates/_variables.local.sh"
+
+    # Check if template system is configured
+    if [[ ! -f "$local_vars" ]]; then
+        echo "Template system not configured yet."
+        echo "Run 'dotfiles template init' after bootstrap to set up machine-specific configs."
+        return 0
+    fi
+
+    # Render templates if configured
+    if [[ -x "$template_script" ]]; then
+        echo "Rendering machine-specific templates..."
+        "$template_script" render --force
+    else
+        echo "Template script not found or not executable: $template_script"
+    fi
+}
+
+# ============================================================
 # Brew bundle (shared between macOS and Linux)
 # ============================================================
 run_brew_bundle() {

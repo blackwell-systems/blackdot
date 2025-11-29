@@ -1573,6 +1573,10 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 - `dotfiles lint --fix` → Auto-fix script permissions
 - `dotfiles packages` → Check Brewfile package status
 - `dotfiles packages --install` → Install missing packages
+- `dotfiles template init` → Setup machine-specific config templates
+- `dotfiles template vars` → List template variables and values
+- `dotfiles template render` → Generate configs from templates
+- `dotfiles template link` → Symlink generated files to destinations
 - `dotfiles cd` → Navigate to dotfiles directory
 - `dotfiles edit` → Open in editor
 - `status` → Quick dashboard showing symlinks, SSH, AWS, Lima status
@@ -1679,6 +1683,10 @@ dotfiles lint            # Validate shell config syntax
 dotfiles lint --fix      # Auto-fix script permissions
 dotfiles packages        # Check Brewfile package status
 dotfiles packages --install  # Install missing packages
+dotfiles template init   # Setup machine-specific config templates
+dotfiles template vars   # List template variables and values
+dotfiles template render # Generate configs from templates
+dotfiles template link   # Symlink generated files to destinations
 dotfiles upgrade         # Pull latest, run bootstrap, verify
 dotfiles cd              # Navigate to dotfiles directory
 dotfiles edit            # Open dotfiles in $EDITOR

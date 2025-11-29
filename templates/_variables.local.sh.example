@@ -1,0 +1,79 @@
+#!/usr/bin/env zsh
+# ============================================================
+# FILE: templates/_variables.local.sh
+# Machine-specific template variable overrides
+#
+# This file is gitignored. Create it by running:
+#   dotfiles template init
+#
+# Or copy this example:
+#   cp templates/_variables.local.sh.example templates/_variables.local.sh
+#
+# Then edit to match your machine's configuration.
+# ============================================================
+
+# ============================================================
+# Required: Git Configuration
+# ============================================================
+TMPL_DEFAULTS[git_name]="Your Name"
+TMPL_DEFAULTS[git_email]="your.email@example.com"
+
+# Optional: GPG signing key
+# TMPL_DEFAULTS[git_signing_key]="ABCD1234EFGH5678"
+
+# ============================================================
+# Optional: Force Machine Type
+# Values: work, personal, unknown
+# If not set, auto-detected from hostname
+# ============================================================
+# TMPL_AUTO[machine_type]="work"
+
+# ============================================================
+# Work Machine Overrides
+# Only applied when machine_type == "work"
+# ============================================================
+TMPL_WORK[git_email]="your.name@company.com"
+TMPL_WORK[aws_profile]="work"
+TMPL_WORK[github_enterprise_host]="github.company.com"
+TMPL_WORK[github_enterprise_user]="your-work-username"
+
+# ============================================================
+# Personal Machine Overrides
+# Only applied when machine_type == "personal"
+# ============================================================
+TMPL_PERSONAL[git_email]="personal@example.com"
+TMPL_PERSONAL[aws_profile]="personal"
+
+# ============================================================
+# AWS Bedrock Configuration (for Claude Code)
+# ============================================================
+# TMPL_DEFAULTS[bedrock_profile]="bedrock"
+# TMPL_DEFAULTS[bedrock_region]="us-west-2"
+
+# ============================================================
+# GitHub Configuration
+# ============================================================
+TMPL_DEFAULTS[github_user]="your-github-username"
+
+# ============================================================
+# SSH Hosts
+# Format: name|hostname|user|identity_file|extra_options
+# ============================================================
+SSH_HOSTS=(
+    "github|github.com|git|~/.ssh/id_ed25519|"
+    # "work-bastion|bastion.company.com|admin|~/.ssh/id_ed25519_work|"
+    # "prod-server|prod.company.com|deploy|~/.ssh/id_ed25519_work|ProxyJump work-bastion"
+)
+
+# ============================================================
+# Custom Paths (optional)
+# ============================================================
+# TMPL_DEFAULTS[projects_dir]="$HOME/code"
+# TMPL_DEFAULTS[notes_dir]="$HOME/Documents/notes"
+
+# ============================================================
+# Feature Toggles
+# ============================================================
+# TMPL_DEFAULTS[enable_nvm]="true"
+# TMPL_DEFAULTS[enable_pyenv]="true"
+# TMPL_DEFAULTS[enable_k8s_prompt]="true"

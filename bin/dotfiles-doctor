@@ -335,6 +335,55 @@ else
 fi
 
 # ============================================================
+# Section 8: Template System
+# ============================================================
+section "Template System"
+
+TEMPLATES_DIR="$DOTFILES_DIR/templates"
+GENERATED_DIR="$DOTFILES_DIR/generated"
+
+# Check if template system is configured
+if [[ -f "$TEMPLATES_DIR/_variables.local.sh" ]]; then
+    pass "Template variables configured"
+
+    # Check if templates are rendered
+    if [[ -d "$GENERATED_DIR" ]]; then
+        generated_count=$(find "$GENERATED_DIR" -type f 2>/dev/null | wc -l)
+        if [[ $generated_count -gt 0 ]]; then
+            pass "Found $generated_count generated config(s)"
+
+            # Check for stale templates
+            stale_count=0
+            shopt -s nullglob
+            for tmpl in "$TEMPLATES_DIR/configs"/*.tmpl; do
+                [[ -f "$tmpl" ]] || continue
+                basename="${tmpl##*/}"
+                basename="${basename%.tmpl}"
+                generated="$GENERATED_DIR/$basename"
+
+                if [[ -f "$generated" && "$tmpl" -nt "$generated" ]]; then
+                    ((stale_count++))
+                fi
+            done
+            shopt -u nullglob
+
+            if [[ $stale_count -gt 0 ]]; then
+                warn "$stale_count template(s) need re-rendering - run: dotfiles template render"
+            else
+                pass "All generated configs up to date"
+            fi
+        else
+            warn "No generated configs - run: dotfiles template render"
+        fi
+    else
+        warn "Generated directory missing - run: dotfiles template render"
+    fi
+else
+    info "Template system not configured (optional)"
+    info "Run 'dotfiles template init' to set up machine-specific configs"
+fi
+
+# ============================================================
 # Summary
 # ============================================================
 echo ""

@@ -17,6 +17,8 @@ dotfiles vault restore   # Restore secrets from Bitwarden
 dotfiles vault sync      # Sync local to Bitwarden
 dotfiles lint            # Validate shell config syntax
 dotfiles packages        # Check/install Brewfile packages
+dotfiles template init   # Setup machine-specific configs
+dotfiles template render # Generate configs from templates
 dotfiles upgrade         # Pull latest and run bootstrap
 ```
 
@@ -28,7 +30,11 @@ dotfiles/
 ├── bin/                 # CLI tools (doctor, drift, backup, etc.)
 ├── vault/*.sh           # Bitwarden integration scripts
 ├── zsh/zsh.d/*.zsh      # Shell config (numbered load order: 00-99)
-├── lib/                 # Shared libraries
+├── lib/                 # Shared libraries (_logging.sh, _templates.sh)
+├── templates/           # Machine-specific config templates
+│   ├── configs/*.tmpl   # Template files (gitconfig, ssh-config, etc.)
+│   └── _variables*.sh   # Variable definitions
+├── generated/           # Rendered templates (gitignored)
 ├── claude/              # Claude Code config & commands
 └── docs/                # Docsify documentation site
 ```
@@ -41,6 +47,9 @@ dotfiles/
 | `zsh/zsh.d/50-functions.zsh` | Shell functions including `status` |
 | `vault/_common.sh` | Shared vault functions, SSH_KEYS config |
 | `bin/dotfiles-doctor` | Health check implementation |
+| `lib/_templates.sh` | Template engine for machine-specific configs |
+| `templates/_variables.sh` | Default template variable definitions |
+| `bin/dotfiles-template` | Template CLI tool |
 
 ---
 
@@ -56,6 +65,7 @@ When making changes that affect documentation, you MUST update all these files:
 ### GitHub Pages / Docsify Site (`docs/` directory)
 - **`docs/README.md`** - Homepage for GitHub Pages documentation site
 - **`docs/README-FULL.md`** - Comprehensive full documentation guide
+- **`docs/templates.md`** - Template system documentation
 - **`docs/vault-README.md`** - Vault system documentation
 - **`docs/macos-settings.md`** - macOS settings guide (if macOS-related changes)
 

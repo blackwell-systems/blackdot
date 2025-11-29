@@ -22,6 +22,7 @@
 
 ### Core (works everywhere)
 - **Bitwarden vault integration** – SSH keys, AWS credentials, Git config, and environment secrets restored from Bitwarden. One unlock, full environment. Schema validation ensures item integrity.
+- **Machine-specific templates** – Generate configs tailored to each machine (work vs personal, macOS vs Linux). Git identity, SSH hosts, shell settings all adapt automatically.
 - **Automated health checks** – Validate symlinks, permissions, required tools, and vault sync. Optional auto-fix and drift detection.
 - **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat, and other modern Unix replacements, configured and ready.
 - **Idempotent design** – Run bootstrap repeatedly. Scripts converge to known-good state without breaking existing setup.
@@ -326,6 +327,45 @@ dotfiles drift
 - Git configuration (.gitconfig)
 - Environment variables (.local/env.secrets)
 
+### Template System (Machine-Specific Configs)
+
+Generate configuration files tailored to each machine using templates:
+
+```bash
+# First-time setup
+dotfiles template init       # Interactive setup wizard
+
+# View detected values
+dotfiles template vars       # List all variables
+
+# Generate configs
+dotfiles template render     # Render all templates
+dotfiles template link       # Symlink to destinations
+
+# Maintenance
+dotfiles template check      # Validate syntax
+dotfiles template diff       # Show what would change
+```
+
+**How it works:**
+1. Templates in `templates/configs/*.tmpl` use `{{ variable }}` syntax
+2. Variables are auto-detected (hostname, OS, user) or user-configured
+3. Rendered files go to `generated/` and are symlinked to destinations
+
+**Supported templates:**
+- `.gitconfig` - Git identity, signing, editor, aliases
+- `99-local.zsh` - Machine-specific shell config
+- `ssh-config` - SSH host configurations
+- `claude.local` - Claude Code backend settings
+
+**Variable precedence:**
+1. Environment variables (`DOTFILES_TMPL_*`)
+2. Local overrides (`templates/_variables.local.sh`)
+3. Machine-type defaults (work/personal)
+4. Auto-detected values (hostname, OS, etc.)
+
+See [Template Guide](docs/templates.md) for full documentation.
+
 ### Tips
 
 #### Claude Code Integration (optional)
@@ -426,6 +466,13 @@ dotfiles lint            # Validate shell config syntax
 dotfiles lint --fix      # Auto-fix permissions
 dotfiles packages        # Check Brewfile package status
 dotfiles packages --install  # Install missing packages
+
+# Templates (machine-specific configs)
+dotfiles template init   # Setup template variables
+dotfiles template vars   # List all variables
+dotfiles template render # Generate configs from templates
+dotfiles template link   # Symlink generated files
+dotfiles template diff   # Show what would change
 
 # Navigation
 dotfiles cd              # Navigate to dotfiles directory
@@ -541,7 +588,19 @@ dotfiles/
 │       └── 99-local.zsh     # Machine-specific overrides (gitignored)
 │
 ├── lib/                       # Shared libraries
-│   └── _logging.sh           # Colors and logging functions
+│   ├── _logging.sh           # Colors and logging functions
+│   └── _templates.sh         # Template engine
+│
+├── templates/                 # Machine-specific templates
+│   ├── _variables.sh         # Default variable definitions
+│   ├── _variables.local.sh   # Local overrides (gitignored)
+│   └── configs/              # Template files
+│       ├── gitconfig.tmpl    # Git configuration
+│       ├── 99-local.zsh.tmpl # Shell customization
+│       ├── ssh-config.tmpl   # SSH hosts
+│       └── claude.local.tmpl # Claude Code settings
+│
+├── generated/                 # Rendered templates (gitignored)
 │
 ├── bootstrap/                 # Bootstrap shared code
 │   └── _common.sh            # Shared bootstrap functions
@@ -669,6 +728,7 @@ To customize:
 
 - **Quick overview:** this README
 - **[Full Documentation](docs/README-FULL.md)** - Complete guide (1,900+ lines)
+- **[Template Guide](docs/templates.md)** - Machine-specific configuration templates
 - **[Architecture](docs/architecture.md)** - System diagrams and component overview
 - **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
 - **[Vault README](vault/README.md)** - Bitwarden vault details
