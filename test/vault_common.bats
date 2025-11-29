@@ -167,7 +167,7 @@ zsh_var() {
 
 @test "SESSION_FILE points to vault directory" {
   result=$(zsh_var "SESSION_FILE")
-  [[ "$result" =~ vault/\.bw-session$ ]]
+  [[ "$result" =~ vault/\.vault-session$ ]]
 }
 
 @test "VAULT_DIR is set to vault directory" {
