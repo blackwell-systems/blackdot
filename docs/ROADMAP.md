@@ -11,7 +11,7 @@ The dotfiles system is **production-ready** with:
 - CI/CD with 13 validation jobs (including error scenario tests)
 - Comprehensive documentation (8,600+ lines)
 - Cross-platform support (macOS, Linux, Windows, WSL2, Docker)
-- Bitwarden vault integration with bidirectional sync
+- Multi-vault integration (Bitwarden, 1Password, pass) with bidirectional sync
 - Shared libraries for logging and bootstrap functions
 - Pre-restore drift check for data safety
 - Offline mode for air-gapped environments
@@ -140,12 +140,12 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
 
 **Status:** COMPLETED
 
-**What:** Run dotfiles without Bitwarden access for air-gapped environments, outages, or offline development.
+**What:** Run dotfiles without vault access for air-gapped environments, outages, or offline development.
 
 **Implementation:**
 - `is_offline()` - Check if DOTFILES_OFFLINE=1 is set
 - `require_online()` - Skip vault operations gracefully in offline mode
-- All vault scripts check offline mode before attempting Bitwarden operations
+- All vault scripts check offline mode before attempting vault operations
 
 **Usage:**
 ```bash
@@ -161,7 +161,7 @@ DOTFILES_OFFLINE=1 dotfiles vault sync
 
 **Use cases:**
 - Air-gapped environments
-- Bitwarden service outages
+- Vault service outages
 - Development without vault access
 - CI/CD without secrets
 

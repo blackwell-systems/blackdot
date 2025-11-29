@@ -20,7 +20,7 @@ graph TB
     end
 
     subgraph "External Services"
-        BW[Bitwarden Vault]
+        BW[Vault: Bitwarden/1Password/pass]
         GH[GitHub]
     end
 
@@ -70,7 +70,7 @@ flowchart TD
     end
 
     subgraph "Secret Management"
-        E[Bitwarden Vault] <-->|restore| F[Local Files]
+        E[Vault: Bitwarden/1Password/pass] <-->|restore| F[Local Files]
         F <-->|sync| E
     end
 
@@ -121,8 +121,9 @@ dotfiles/
 │
 ├── vault/
 │   ├── _common.sh          # Shared definitions
+│   ├── backends/           # Backend implementations (bitwarden, 1password, pass)
 │   ├── bootstrap-vault.sh  # Restore secrets
-│   ├── sync-to-bitwarden.sh
+│   ├── sync-to-bitwarden.sh # Sync local → vault
 │   └── restore-*.sh        # Category restores
 │
 ├── macos/
@@ -166,23 +167,23 @@ flowchart LR
 
 ## Vault System
 
-The vault system provides bidirectional sync with Bitwarden:
+The vault system provides bidirectional sync with your chosen vault backend (Bitwarden, 1Password, or pass):
 
 ```mermaid
 sequenceDiagram
     participant User
     participant CLI as dotfiles CLI
     participant Local as Local Files
-    participant BW as Bitwarden
+    participant Vault as Vault Backend
 
     User->>CLI: dotfiles vault restore
-    CLI->>BW: Fetch secrets
-    BW-->>CLI: Return encrypted data
+    CLI->>Vault: Fetch secrets
+    Vault-->>CLI: Return encrypted data
     CLI->>Local: Write files (600 perms)
 
     User->>CLI: dotfiles vault sync
     CLI->>Local: Read files
-    CLI->>BW: Update vault items
+    CLI->>Vault: Update vault items
 ```
 
 ### Protected Items
@@ -272,8 +273,8 @@ graph TB
 |------|--------|-------------|---------|
 | Install | GitHub | Local | `curl ... \| bash` |
 | Bootstrap | Scripts | System | `dotfiles init` |
-| Restore | Bitwarden | Local | `dotfiles vault restore` |
-| Sync | Local | Bitwarden | `dotfiles vault sync` |
+| Restore | Vault | Local | `dotfiles vault restore` |
+| Sync | Local | Vault | `dotfiles vault sync` |
 | Backup | Config | Archive | `dotfiles backup` |
 | Restore | Archive | Config | `dotfiles backup restore` |
 | Upgrade | GitHub | Local | `dotfiles upgrade` |

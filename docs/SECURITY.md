@@ -2,7 +2,7 @@
 
 ## Overview
 
-This dotfiles repository contains configurations and scripts for managing development environments. While the repository itself contains no secrets (all sensitive data is stored in Bitwarden), we take security seriously.
+This dotfiles repository contains configurations and scripts for managing development environments. While the repository itself contains no secrets (all sensitive data is stored in your vault—Bitwarden, 1Password, or pass), we take security seriously.
 
 ## Supported Versions
 
@@ -63,7 +63,7 @@ When using these dotfiles:
 
 ### 1. Never Commit Secrets
 
-- All secrets should be stored in Bitwarden
+- All secrets should be stored in your vault (Bitwarden, 1Password, or pass)
 - The `.gitignore` file protects common secret files
 - Pre-commit hooks scan for leaked credentials
 - Always review changes before committing: `git diff`
@@ -83,12 +83,15 @@ git log --oneline -10
 cat bootstrap-mac.sh  # or bootstrap-linux.sh
 ```
 
-### 3. Protect Your Bitwarden Vault
+### 3. Protect Your Vault
 
 - Use a strong master password (20+ characters)
 - Enable two-factor authentication (2FA)
-- Keep the Bitwarden CLI up to date: `brew upgrade bitwarden-cli`
-- Lock your vault when not in use: `bw lock`
+- Keep your vault CLI up to date:
+  - Bitwarden: `brew upgrade bitwarden-cli`
+  - 1Password: `brew upgrade --cask 1password-cli`
+  - pass: `brew upgrade pass`
+- Lock your vault when not in use (e.g., `bw lock` for Bitwarden)
 
 ### 4. File Permissions
 
@@ -118,18 +121,18 @@ dotfiles-upgrade
 # Update Homebrew packages
 brew update && brew upgrade
 
-# Update Bitwarden CLI
-brew upgrade bitwarden-cli
+# Update vault CLI
+brew upgrade bitwarden-cli   # or: brew upgrade --cask 1password-cli / brew upgrade pass
 ```
 
 ## Known Security Considerations
 
 ### Session Caching
 
-The vault system caches Bitwarden sessions in `vault/.bw-session`:
+The vault system caches sessions in `vault/.vault-session`:
 - File has `600` permissions (owner-only access)
-- Automatically expires after Bitwarden timeout
-- **Recommendation:** Run `bw lock` when leaving your machine
+- Automatically expires after vault timeout
+- **Recommendation:** Lock your vault when leaving your machine (e.g., `bw lock` for Bitwarden)
 
 ### SSH Agent
 
