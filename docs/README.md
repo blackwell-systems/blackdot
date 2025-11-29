@@ -10,7 +10,7 @@
 ![Secrets](https://img.shields.io/badge/Secrets-Bitwarden-ff4081)
 ![Claude Portability](https://img.shields.io/badge/Claude_Portability-Enabled-8A2BE2)
 
-> Enterprise-grade, vault-backed dotfiles for multi-machine development. Bitwarden provides the source of truth for secrets, a canonical `/workspace` path keeps Claude Code sessions portable across macOS, Linux, Windows, and WSL2, and health checks guard against drift, broken symlinks, and missing vault state.
+> Enterprise-grade dotfiles with Bitwarden vault integration, machine-specific templates, portable Claude Code sessions, and automated health checks. Works across macOS, Linux, Windows, WSL2, and Docker.
 
 [![Version](https://img.shields.io/badge/Version-1.7.0-blue)](CHANGELOG.md)
 
