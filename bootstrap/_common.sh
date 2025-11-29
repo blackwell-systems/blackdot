@@ -153,7 +153,7 @@ setup_workspace_symlink() {
 # ============================================================
 link_dotfiles() {
     echo "Linking dotfiles..."
-    "$DOTFILES_DIR/bootstrap-dotfiles.sh"
+    "$DOTFILES_DIR/bootstrap/bootstrap-dotfiles.sh"
 }
 
 # ============================================================
