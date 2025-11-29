@@ -177,9 +177,10 @@ echo -e "     ${CYAN}exec zsh${NC}"
 echo ""
 
 if ! $MINIMAL; then
-    echo "  2. (Optional) Restore secrets from Bitwarden:"
-    echo -e "     ${CYAN}bw login${NC}"
-    echo -e "     ${CYAN}export BW_SESSION=\"\$(bw unlock --raw)\"${NC}"
+    echo "  2. (Optional) Restore secrets from vault:"
+    echo -e "     ${CYAN}# Bitwarden: bw login && export BW_SESSION=\"\$(bw unlock --raw)\"${NC}"
+    echo -e "     ${CYAN}# 1Password: op signin${NC}"
+    echo -e "     ${CYAN}# pass: (uses GPG, no login needed)${NC}"
     echo -e "     ${CYAN}dotfiles vault restore${NC}"
     echo ""
     echo "  3. Verify installation:"
