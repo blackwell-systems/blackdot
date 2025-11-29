@@ -1,11 +1,39 @@
-# Bitwarden Vault Bootstrap System
+# Vault Bootstrap System
 
-This directory contains scripts for **bidirectional secret management** with Bitwarden:
+This directory contains scripts for **bidirectional secret management** with multiple vault backends:
 
-- **Restore scripts** pull secrets from Bitwarden → local files
-- **Sync/Create scripts** push local changes → Bitwarden
+- **Restore scripts** pull secrets from your vault → local files
+- **Sync/Create scripts** push local changes → your vault
 - **Utility scripts** for validation, debugging, deletion, and inventory
 - **Shared library** (`_common.sh`) with reusable functions
+- **Backend abstraction** supporting Bitwarden, 1Password, and pass
+
+---
+
+## Supported Backends
+
+| Backend | CLI Tool | Status | Description |
+|---------|----------|--------|-------------|
+| **Bitwarden** | `bw` | Default | Full-featured, cloud-synced |
+| **1Password** | `op` | Supported | v2 CLI with biometric auth |
+| **pass** | `pass` | Supported | GPG-based, git-synced |
+
+### Switching Backends
+
+```bash
+# Set your preferred backend (add to ~/.zshrc or ~/.zshenv)
+export DOTFILES_VAULT_BACKEND=bitwarden  # default
+export DOTFILES_VAULT_BACKEND=1password
+export DOTFILES_VAULT_BACKEND=pass
+
+# For 1Password, optionally set vault name
+export ONEPASSWORD_VAULT=Personal  # default
+
+# For pass, optionally set prefix
+export PASS_PREFIX=dotfiles  # default, items stored as dotfiles/Git-Config
+```
+
+All `dotfiles vault` commands work identically regardless of backend.
 
 ---
 
@@ -19,14 +47,12 @@ This directory contains scripts for **bidirectional secret management** with Bit
 | `restore-env.sh` | Restores env secrets | Called by bootstrap |
 | `restore-git.sh` | Restores gitconfig | Called by bootstrap |
 | `create-vault-item.sh` | Creates new vault items | `dotfiles vault create ITEM` |
-| `sync-to-bitwarden.sh` | Syncs local → Bitwarden | `dotfiles vault sync --all` |
+| `sync-to-bitwarden.sh` | Syncs local → vault | `dotfiles vault sync --all` |
 | `validate-schema.sh` | Validates vault item schema | `dotfiles vault validate` |
 | `delete-vault-item.sh` | Deletes items from vault | `dotfiles vault delete ITEM` |
 | `check-vault-items.sh` | Pre-flight validation | `dotfiles vault check` |
 | `list-vault-items.sh` | Debug/inventory tool | `dotfiles vault list` |
 | `_common.sh` | Shared functions library | Sourced by other scripts |
-| `template-aws-config` | Reference template | Example AWS config structure |
-| `template-aws-credentials` | Reference template | Example AWS credentials structure |
 
 ### Commands
 
@@ -35,13 +61,62 @@ All vault operations are accessed via the unified `dotfiles vault` command:
 ```bash
 dotfiles vault restore          # Restore all secrets (checks for local drift first)
 dotfiles vault restore --force  # Skip drift check, overwrite local changes
-dotfiles vault sync             # Sync local changes to Bitwarden
+dotfiles vault sync             # Sync local changes to vault
 dotfiles vault sync --all       # Sync all items
 dotfiles vault create           # Create new vault item
 dotfiles vault validate         # Validate vault item schema
 dotfiles vault delete           # Delete vault item
 dotfiles vault list             # List all vault items
 dotfiles vault check            # Validate required items exist
+```
+
+---
+
+## Backend Setup
+
+### Bitwarden (Default)
+
+```bash
+# Install CLI
+brew install bitwarden-cli
+
+# Login (one-time)
+bw login
+
+# Verify
+bw login --check
+```
+
+### 1Password
+
+```bash
+# Install CLI
+brew install --cask 1password-cli
+
+# Sign in (uses biometric on macOS)
+op signin
+
+# Set backend
+export DOTFILES_VAULT_BACKEND=1password
+
+# Optionally specify vault
+export ONEPASSWORD_VAULT=Personal
+```
+
+### pass (Standard Unix Password Manager)
+
+```bash
+# Install
+brew install pass gnupg
+
+# Initialize with your GPG key
+pass init "your-gpg-id@email.com"
+
+# Set backend
+export DOTFILES_VAULT_BACKEND=pass
+
+# Items will be stored under dotfiles/ prefix
+# e.g., dotfiles/Git-Config, dotfiles/SSH-Config
 ```
 
 ---
@@ -58,10 +133,11 @@ dotfiles vault restore --force  # Skip drift check
 ```
 
 **What it does:**
-1. Checks/prompts for Bitwarden unlock
-2. Caches session to `.bw-session` (secure permissions)
-3. **Checks for local drift** - warns if local files differ from vault
-4. Calls each restore script in sequence
+1. Initializes the configured vault backend
+2. Checks/prompts for vault unlock
+3. Caches session to `.vault-session` (secure permissions)
+4. **Checks for local drift** - warns if local files differ from vault
+5. Calls each restore script in sequence
 
 **Pre-restore drift check:** Before overwriting local files, the script checks if they've changed since the last vault sync. If drift is detected, you'll be prompted to either:
 - Sync local changes first (`dotfiles vault sync`)
@@ -73,25 +149,25 @@ dotfiles vault restore --force  # Skip drift check
 DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
 ```
 
-**Offline mode:** For air-gapped environments or when Bitwarden is unavailable:
+**Offline mode:** For air-gapped environments or when vault is unavailable:
 ```bash
 DOTFILES_OFFLINE=1 dotfiles vault restore  # Exits gracefully, keeps local files
 ```
 
-**When to use:** New machine setup, or after secrets change in Bitwarden.
+**When to use:** New machine setup, or after secrets change in your vault.
 
 ---
 
 ### `restore-ssh.sh`
 
-Restores SSH keys and config from Bitwarden.
+Restores SSH keys and config from vault.
 
-**Bitwarden items:**
+**Vault items:**
 
 | Item Name | Contains | Writes To |
 |-----------|----------|-----------|
 | `SSH-GitHub-Enterprise` | Private + public key | `~/.ssh/id_ed25519_enterprise_ghub{,.pub}` |
-| `SSH-GitHub-Personal` | Private + public key | `~/.ssh/id_ed25519_personal{,.pub}` |
+| `SSH-GitHub-Blackwell` | Private + public key | `~/.ssh/id_ed25519_blackwell{,.pub}` |
 | `SSH-Config` | Full SSH config | `~/.ssh/config` |
 
 **Notes field format for SSH keys:**
@@ -111,7 +187,7 @@ ssh-ed25519 AAAAC3NzaC1lZDI1... username@hostname
 
 Restores AWS CLI configuration files.
 
-**Bitwarden items:**
+**Vault items:**
 
 | Item Name | Writes To |
 |-----------|-----------|
@@ -139,7 +215,7 @@ sso_role_name = DeveloperAccess
 
 Restores environment secrets and creates a loader script.
 
-**Bitwarden items:**
+**Vault items:**
 
 | Item Name | Writes To |
 |-----------|-----------|
@@ -165,7 +241,7 @@ source ~/.local/load-env.sh
 
 Restores Git configuration.
 
-**Bitwarden items:**
+**Vault items:**
 
 | Item Name | Writes To |
 |-----------|-----------|
@@ -187,7 +263,7 @@ Restores Git configuration.
 
 ### `sync-to-bitwarden.sh`
 
-Pushes local config changes back to Bitwarden.
+Pushes local config changes back to vault.
 
 ```bash
 # Preview changes (no modification)
@@ -215,183 +291,6 @@ Pushes local config changes back to Bitwarden.
 
 ---
 
-### `create-vault-item.sh`
-
-Creates new Bitwarden Secure Note items from local files.
-
-```bash
-# Create from known dotfile (auto-detects path)
-./create-vault-item.sh Git-Config
-
-# Create with explicit path
-./create-vault-item.sh Git-Config ~/.gitconfig
-
-# Create custom item
-./create-vault-item.sh My-Custom-Note ~/my-file.txt
-
-# Preview creation
-./create-vault-item.sh --dry-run Git-Config
-
-# Overwrite existing item
-./create-vault-item.sh --force Git-Config
-```
-
-**Known items (auto-detect path):**
-
-| Item Name | Default Path |
-|-----------|--------------|
-| `SSH-Config` | `~/.ssh/config` |
-| `AWS-Config` | `~/.aws/config` |
-| `AWS-Credentials` | `~/.aws/credentials` |
-| `Git-Config` | `~/.gitconfig` |
-| `Environment-Secrets` | `~/.local/env.secrets` |
-
-**When to use:** Initial setup to push local configs to Bitwarden for the first time.
-
----
-
-### `validate-schema.sh`
-
-Validates that all Bitwarden vault items have the correct schema and structure.
-
-```bash
-# Validate all vault items
-dotfiles vault validate
-```
-
-**What it validates:**
-
-| Check | SSH Keys | Config Files |
-|-------|----------|--------------|
-| Item exists in vault | ✅ | ✅ |
-| Item type is Secure Note | ✅ | ✅ |
-| Notes field has content | ✅ | ✅ |
-| Contains `BEGIN OPENSSH PRIVATE KEY` | ✅ | - |
-| Contains `END OPENSSH PRIVATE KEY` | ✅ | - |
-| Contains public key line (ssh-ed25519/rsa) | ✅ | - |
-| Notes length > minimum chars | - | ✅ |
-
-**Exit codes:**
-- `0` = All items validated successfully
-- `1` = One or more validation failures
-
-**Example output:**
-```
-Validating vault items schema...
-[OK] ✓ SSH key item 'SSH-GitHub-Enterprise' validated successfully
-[OK] ✓ SSH key item 'SSH-GitHub-Personal' validated successfully
-[OK] ✓ Config item 'SSH-Config' validated successfully
-[OK] ✓ Config item 'AWS-Config' validated successfully
-[OK] ✓ Config item 'AWS-Credentials' validated successfully
-[OK] ✓ Config item 'Git-Config' validated successfully
-[OK] ✓ All vault items validated successfully
-```
-
-**Common validation errors:**
-- **Item missing**: Item name typo or not created yet → use `dotfiles vault create`
-- **Empty notes**: Item exists but has no content → re-sync with `dotfiles vault sync`
-- **Missing key blocks**: SSH key format incorrect → check Bitwarden web vault
-- **Wrong item type**: Should be "Secure Note" not "Login" or "Card"
-
-**When to use:**
-- Before restoring secrets on a new machine
-- After manually editing items in Bitwarden web vault
-- In CI/CD to validate vault state before deployments
-- Troubleshooting restoration issues
-
----
-
-### `delete-vault-item.sh`
-
-Deletes items from Bitwarden vault with safety checks.
-
-```bash
-# Preview deletion (recommended first step)
-./delete-vault-item.sh --dry-run TEST-NOTE
-
-# Delete with confirmation prompt
-./delete-vault-item.sh TEST-NOTE
-
-# Delete multiple items without prompts
-./delete-vault-item.sh --force OLD-KEY OTHER-ITEM
-
-# List all items (to find exact names)
-./delete-vault-item.sh --list
-```
-
-**Safety features:**
-- Protected items (SSH-*, AWS-*, Git-Config, etc.) require typing the item name to confirm
-- Non-protected items prompt for y/N confirmation (bypass with `--force`)
-- `--dry-run` shows what would be deleted without making changes
-- Shows item details (type, size, modified date) before deletion
-
-**When to use:** Cleaning up test items, removing old/unused secrets.
-
----
-
-### `check-vault-items.sh`
-
-Pre-flight validation - ensures required Bitwarden items exist.
-
-```bash
-./check-vault-items.sh
-```
-
-**Example output:**
-```
-=== Required Items ===
-[OK] SSH-GitHub-Enterprise
-[OK] SSH-GitHub-Personal
-[OK] SSH-Config
-[OK] AWS-Config
-[OK] AWS-Credentials
-[OK] Git-Config
-
-=== Optional Items ===
-[OK] Environment-Secrets
-
-========================================
-All required vault items present!
-```
-
-**When to use:** Before `bootstrap-vault.sh` on a new machine.
-
----
-
-### `list-vault-items.sh`
-
-Debug tool - lists all Bitwarden items relevant to dotfiles.
-
-```bash
-# Standard
-./list-vault-items.sh
-
-# Verbose (IDs + content preview)
-./list-vault-items.sh --verbose
-```
-
-**Example output:**
-```
-=== Expected Dotfiles Items ===
-
-[FOUND] SSH-GitHub-Enterprise
-        Type: Secure Note | Notes: 2048 chars | Modified: 2024-11-20
-
-[FOUND] Git-Config
-        Type: Secure Note | Notes: 512 chars | Modified: 2024-11-25
-
-[MISSING] Some-Other-Item
-
-=== All Secure Notes in Vault ===
-  ✓ SSH-Config (dotfiles)
-  ✓ Git-Config (dotfiles)
-  ○ Other-Secure-Note
-```
-
-**When to use:** Troubleshooting missing items, verifying what's stored.
-
----
-
 ### `_common.sh`
 
 Shared library sourced by other vault scripts. Provides:
@@ -399,16 +298,16 @@ Shared library sourced by other vault scripts. Provides:
 - **Color definitions** - Consistent terminal colors across all scripts
 - **Logging functions** - `info()`, `pass()`, `warn()`, `fail()`, `dry()`
 - **Item definitions** - Single source of truth for all dotfiles items
+- **Vault abstraction** - `vault_get_item()`, `vault_get_notes()`, `vault_item_exists()`
 - **Session management** - `get_session()`, `sync_vault()`
-- **Prerequisite checks** - `require_bw()`, `require_jq()`, `require_logged_in()`
-- **Bitwarden helpers** - `bw_get_item()`, `bw_get_notes()`, `bw_item_exists()`
+- **Legacy aliases** - `bw_*` functions for backward compatibility
 
 **Usage in scripts:**
 ```bash
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 source "$(dirname "$0")/_common.sh"
 
-require_bw
+require_vault
 require_jq
 SESSION=$(get_session)
 sync_vault "$SESSION"
@@ -428,100 +327,65 @@ SYNCABLE_ITEMS["Git-Config"]="$HOME/.gitconfig"
 
 ---
 
-### `template-aws-config`
+## Architecture
 
-Reference template showing the expected structure for `~/.aws/config`.
-
-**Contains:**
-- SSO profile definitions with placeholder URLs
-- Multiple account profiles (dev, prod, personal)
-- Region settings
-
-**Placeholders:**
-- `{{SSO_DEV_START_URL}}` - Your dev SSO portal URL
-- `{{SSO_DEV_REGION}}` - SSO region for dev
-- `{{SSO_PROD_START_URL}}` - Your prod SSO portal URL
-- `{{SSO_PROD_REGION}}` - SSO region for prod
-
-**When to use:** Reference when creating your `AWS-Config` Bitwarden item.
-
----
-
-### `template-aws-credentials`
-
-Reference template showing the expected structure for `~/.aws/credentials`.
-
-**Contains:**
-- Static credential profiles with placeholder keys
-- Session token example for temporary credentials
-
-**Placeholders:**
-- `{{PERSONAL_AWS_ACCESS_KEY_ID}}` - Personal account access key
-- `{{PERSONAL_AWS_SECRET_ACCESS_KEY}}` - Personal account secret key
-- `{{WORK_AWS_ACCESS_KEY_ID}}` - Work account access key
-- `{{WORK_AWS_SECRET_ACCESS_KEY}}` - Work account secret key
-- `{{PROD_*}}` - Production environment temporary credentials
-
-**When to use:** Reference when creating your `AWS-Credentials` Bitwarden item.
-
----
-
-## Data Flow
+### Backend Abstraction Layer
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    VAULT SCRIPTS DATA FLOW                       │
+│                    VAULT SYSTEM ARCHITECTURE                     │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│   BITWARDEN VAULT                    LOCAL MACHINE               │
-│   ═══════════════                    ═════════════               │
+│   USER COMMANDS                                                  │
+│   ═══════════════════════════════════════════════════════════    │
+│   dotfiles vault restore | sync | create | delete | list        │
+│                     ↓                                            │
+├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│   ┌─────────────────┐                ┌─────────────────┐        │
-│   │ SSH-GitHub-*    │ ──restore───▶  │ ~/.ssh/         │        │
-│   │ SSH-Config      │    ssh.sh      │   id_ed25519_*  │        │
-│   │                 │                │   config        │        │
-│   └─────────────────┘                └─────────────────┘        │
-│                                              │                   │
-│   ┌─────────────────┐                        │ sync-to-         │
-│   │ AWS-Config      │ ──restore───▶  ┌──────▼──────────┐        │
-│   │ AWS-Credentials │    aws.sh      │ ~/.aws/         │        │
-│   │                 │ ◀──────────────│   config        │        │
-│   └─────────────────┘   bitwarden.sh │   credentials   │        │
-│                                      └─────────────────┘        │
-│   ┌─────────────────┐                                           │
-│   │ Git-Config      │ ──restore───▶  ┌─────────────────┐        │
-│   │                 │    git.sh      │ ~/.gitconfig    │        │
-│   │                 │ ◀──────────────│                 │        │
-│   └─────────────────┘   bitwarden.sh └─────────────────┘        │
+│   OPERATION LAYER                                                │
+│   ═════════════════════════════════════════════════════════════  │
+│   restore-*.sh, sync-to-bitwarden.sh, create/delete scripts     │
+│                     ↓                                            │
+│   _common.sh (data structures, validation, drift detection)     │
+│                     ↓                                            │
+├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│   ┌─────────────────┐                ┌─────────────────┐        │
-│   │ Environment-    │ ──restore───▶  │ ~/.local/       │        │
-│   │ Secrets         │    env.sh      │   env.secrets   │        │
-│   │                 │ ◀──────────────│   load-env.sh   │        │
-│   └─────────────────┘   bitwarden.sh └─────────────────┘        │
+│   VAULT ABSTRACTION (lib/_vault.sh)                             │
+│   ═════════════════════════════════════════════════════════════  │
+│   vault_get_session()  vault_get_item()   vault_create_item()   │
+│   vault_sync()         vault_get_notes()  vault_update_item()   │
+│   vault_login_check()  vault_item_exists() vault_delete_item()  │
+│                     ↓                                            │
+│   Loads backend based on DOTFILES_VAULT_BACKEND                 │
+│                     ↓                                            │
+├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│   ═══════════════════════════════════════════════════════════   │
-│                                                                  │
-│   UTILITIES:                                                     │
-│   • bootstrap-vault.sh     →  Orchestrates all restore-*.sh      │
-│   • create-vault-item.sh   →  Initial push to Bitwarden          │
-│   • check-vault-items.sh   →  Pre-flight validation              │
-│   • list-vault-items.sh    →  Debug/inventory tool               │
-│   • delete-vault-item.sh   →  Remove items from vault            │
+│   BACKENDS (vault/backends/*.sh)                                │
+│   ═════════════════════════════════════════════════════════════  │
+│   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
+│   │  bitwarden  │  │  1password  │  │    pass     │             │
+│   │    (bw)     │  │    (op)     │  │ (pass/gpg)  │             │
+│   └─────────────┘  └─────────────┘  └─────────────┘             │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+### Adding a New Backend
+
+1. Create `vault/backends/newbackend.sh`
+2. Implement required functions (see `backends/_interface.md`)
+3. Test with `DOTFILES_VAULT_BACKEND=newbackend dotfiles vault list`
+
 ---
 
-## Bitwarden Item Names (Complete List)
+## Vault Items (Complete List)
 
-All items must be **Secure Notes** with content in the **notes** field:
+All items must be **Secure Notes** (or equivalent) with content in the **notes** field:
 
 | Item Name | Required | Description |
 |-----------|----------|-------------|
 | `SSH-GitHub-Enterprise` | Yes | SSH key for work/enterprise account |
-| `SSH-GitHub-Personal` | Yes | SSH key for personal account |
+| `SSH-GitHub-Blackwell` | Yes | SSH key for personal account |
 | `SSH-Config` | Yes | Full `~/.ssh/config` contents |
 | `AWS-Config` | Yes | Full `~/.aws/config` contents |
 | `AWS-Credentials` | Yes | Full `~/.aws/credentials` contents |
@@ -542,8 +406,10 @@ cd ~/workspace/dotfiles
 # 2. Run bootstrap (packages, symlinks)
 ./bootstrap/bootstrap-mac.sh  # or ./bootstrap/bootstrap-linux.sh
 
-# 3. Login to Bitwarden
-bw login
+# 3. Login to your vault
+bw login                    # Bitwarden
+op signin                   # 1Password
+# (pass uses GPG, no login needed)
 
 # 4. Validate vault items exist
 dotfiles vault check
@@ -561,35 +427,36 @@ dotfiles doctor
 # Edit config locally
 vim ~/.gitconfig
 
-# Sync to Bitwarden
+# Sync to vault
 dotfiles vault sync Git-Config
 
 # Or sync all
 dotfiles vault sync --all
 ```
 
-### Troubleshooting Missing Items
+### Switching Backends
 
 ```bash
-# List all vault items
-dotfiles vault list
+# 1. Export from current backend
+dotfiles vault list  # Note all items
 
-# Check specific item
-bw get item "Git-Config" --session "$BW_SESSION" | jq '.notes'
-```
+# 2. Set new backend
+export DOTFILES_VAULT_BACKEND=1password
 
-### Check for Drift
+# 3. Create items in new backend
+dotfiles vault create Git-Config
+dotfiles vault create SSH-Config
+# ... etc
 
-```bash
-# Compare local files vs Bitwarden
-dotfiles drift
+# 4. Verify
+dotfiles vault check
 ```
 
 ---
 
 ## Session Caching
 
-The `.bw-session` file caches your Bitwarden session token:
+The `.vault-session` file caches your vault session token:
 
 - Created by `bootstrap-vault.sh` with `600` permissions
 - Reused if still valid (avoids repeated unlock prompts)
@@ -597,7 +464,7 @@ The `.bw-session` file caches your Bitwarden session token:
 
 ```bash
 # Clear cached session
-rm vault/.bw-session
+rm vault/.vault-session
 ```
 
 ---
@@ -605,19 +472,15 @@ rm vault/.bw-session
 ## Adding a New SSH Key
 
 1. Generate key: `ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey`
-2. Push to Bitwarden (see main README)
+2. Push to vault (see main README)
 3. **Add to `SSH_KEYS` array in `vault/_common.sh`** (single source of truth):
    ```bash
-   declare -A SSH_KEYS=(
+   typeset -A SSH_KEYS=(
        ["SSH-GitHub-Enterprise"]="$HOME/.ssh/id_ed25519_enterprise_ghub"
-       ["SSH-GitHub-Personal"]="$HOME/.ssh/id_ed25519_personal"
+       ["SSH-GitHub-Blackwell"]="$HOME/.ssh/id_ed25519_blackwell"
        ["SSH-NewService"]="$HOME/.ssh/id_ed25519_newkey"  # ← Add here
    )
    ```
    This automatically propagates to `restore-ssh.sh` and `bin/dotfiles-doctor`.
 4. Update `~/.ssh/config` with Host entry
 5. Sync: `./sync-to-bitwarden.sh SSH-Config`
-6. (Optional) Add to `zsh/zshrc` for ssh-agent auto-load:
-   ```bash
-   _ssh_add_if_missing ~/.ssh/id_ed25519_newkey
-   ```

@@ -7,10 +7,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)
 ![Shell](https://img.shields.io/badge/Shell-Zsh-blueviolet)
-![Secrets](https://img.shields.io/badge/Secrets-Bitwarden-ff4081)
+![Secrets](https://img.shields.io/badge/Secrets-Multi--Vault-ff4081)
 ![Claude Portability](https://img.shields.io/badge/Claude_Portability-Enabled-8A2BE2)
 
-> Enterprise-grade dotfiles with Bitwarden vault integration, machine-specific templates, portable Claude Code sessions, and automated health checks. Works across macOS, Linux, Windows, WSL2, and Docker.
+> Enterprise-grade dotfiles with multi-vault secret management (Bitwarden, 1Password, pass), machine-specific templates, portable Claude Code sessions, and automated health checks. Works across macOS, Linux, Windows, WSL2, and Docker.
 
 [![Version](https://img.shields.io/badge/Version-1.7.0-blue)](CHANGELOG.md)
 
@@ -21,7 +21,7 @@
 ## Features
 
 ### Core (works everywhere)
-- **Bitwarden vault integration** – SSH keys, AWS credentials, Git config, and environment secrets restored from Bitwarden. One unlock, full environment. Schema validation ensures item integrity.
+- **Multi-vault secret management** – SSH keys, AWS credentials, Git config, and environment secrets synced with your choice of Bitwarden, 1Password, or pass. One unlock, full environment. Schema validation ensures item integrity.
 - **Machine-specific templates** – Generate configs tailored to each machine (work vs personal, macOS vs Linux). Git identity, SSH hosts, shell settings all adapt automatically.
 - **Automated health checks** – Validate symlinks, permissions, required tools, and vault sync. Optional auto-fix and drift detection.
 - **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat, and other modern Unix replacements, configured and ready.
@@ -302,12 +302,17 @@ See [Brewfile](Brewfile) for complete package list.
 
 ## Key Concepts
 
-### Bitwarden Vault System
+### Vault System (Multi-Backend)
 
-All secrets are stored in Bitwarden and restored on new machines:
+Secrets are stored in your preferred vault and restored on new machines:
 
 ```bash
-# First time: Push secrets to Bitwarden
+# Set your preferred backend (add to ~/.zshrc)
+export DOTFILES_VAULT_BACKEND=bitwarden  # default
+export DOTFILES_VAULT_BACKEND=1password  # 1Password CLI v2
+export DOTFILES_VAULT_BACKEND=pass       # Standard Unix password manager
+
+# First time: Push secrets to vault
 dotfiles vault sync --all
 
 # New machine: Restore secrets
@@ -316,9 +321,16 @@ dotfiles vault restore
 # Validate vault item schema
 dotfiles vault validate
 
-# Check for drift (local vs Bitwarden)
+# Check for drift (local vs vault)
 dotfiles drift
 ```
+
+**Supported backends:**
+| Backend | CLI Tool | Description |
+|---------|----------|-------------|
+| Bitwarden | `bw` | Default, full-featured, cloud-synced |
+| 1Password | `op` | v2 CLI with biometric auth |
+| pass | `pass` | GPG-based, git-synced, local-first |
 
 **Supported secrets:**
 - SSH keys (multiple identities)
@@ -561,11 +573,15 @@ dotfiles/
 │   ├── dotfiles-metrics      # Metrics visualization
 │   └── dotfiles-uninstall    # Clean removal
 │
-├── vault/                     # Bitwarden secret management
+├── vault/                     # Multi-backend secret management
 │   ├── _common.sh            # Shared config & validation functions
+│   ├── backends/             # Vault backend implementations
+│   │   ├── bitwarden.sh      # Bitwarden CLI backend
+│   │   ├── 1password.sh      # 1Password CLI v2 backend
+│   │   └── pass.sh           # pass (GPG) backend
 │   ├── bootstrap-vault.sh    # Orchestrator
 │   ├── restore-*.sh          # Restore SSH, AWS, Git, env
-│   ├── sync-to-bitwarden.sh  # Sync local → Bitwarden
+│   ├── sync-to-bitwarden.sh  # Sync local → vault
 │   ├── validate-schema.sh    # Validate vault item structure
 │   └── check-vault-items.sh  # Pre-flight validation
 │
@@ -589,7 +605,8 @@ dotfiles/
 │
 ├── lib/                       # Shared libraries
 │   ├── _logging.sh           # Colors and logging functions
-│   └── _templates.sh         # Template engine
+│   ├── _templates.sh         # Template engine
+│   └── _vault.sh             # Vault abstraction layer
 │
 ├── templates/                 # Machine-specific templates
 │   ├── _variables.sh         # Default variable definitions
