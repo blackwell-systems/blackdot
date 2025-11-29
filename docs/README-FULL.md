@@ -3,7 +3,7 @@
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Enterprise-grade dotfiles system** with Bitwarden vault integration, cross-platform support, portable Claude Code sessions, and automated health checks.
+> **Enterprise-grade dotfiles** with Bitwarden vault integration, machine-specific templates, portable Claude Code sessions, and automated health checks. Works across macOS, Linux, Windows, WSL2, and Docker.
 
 [![Version](https://img.shields.io/badge/Version-1.7.0-blue)](../CHANGELOG.md)
 
