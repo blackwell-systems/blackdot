@@ -1,0 +1,221 @@
+#!/usr/bin/env zsh
+# ============================================================
+# dotfiles-packages - Package discovery and management
+#
+# Usage:
+#   dotfiles packages              # Show package status
+#   dotfiles packages --check      # Show what's missing
+#   dotfiles packages --install    # Install missing packages
+#   dotfiles packages --outdated   # Show outdated packages
+#
+# Compares installed Homebrew packages against Brewfile
+# ============================================================
+set -uo pipefail
+
+# Find dotfiles directory
+if [[ -n "${DOTFILES_DIR:-}" ]]; then
+    DOTFILES_DIR="$DOTFILES_DIR"
+elif [[ -d "$HOME/workspace/dotfiles" ]]; then
+    DOTFILES_DIR="$HOME/workspace/dotfiles"
+elif [[ -d "/workspace/dotfiles" ]]; then
+    DOTFILES_DIR="/workspace/dotfiles"
+else
+    echo "Error: Could not find dotfiles directory"
+    exit 1
+fi
+
+# Source logging functions
+source "$DOTFILES_DIR/lib/_logging.sh"
+
+# Flags
+CHECK_MODE=false
+INSTALL_MODE=false
+OUTDATED_MODE=false
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --check|-c)
+            CHECK_MODE=true
+            shift
+            ;;
+        --install|-i)
+            INSTALL_MODE=true
+            shift
+            ;;
+        --outdated|-o)
+            OUTDATED_MODE=true
+            shift
+            ;;
+        --help|-h)
+            cat <<EOF
+dotfiles packages - Package discovery and management
+
+Usage:
+    dotfiles packages              Show package status overview
+    dotfiles packages --check      Show what's missing from Brewfile
+    dotfiles packages --install    Install missing packages
+    dotfiles packages --outdated   Show outdated packages
+
+Examples:
+    dotfiles packages --check      # See what needs installing
+    dotfiles packages --install    # Install everything from Brewfile
+
+EOF
+            exit 0
+            ;;
+        *)
+            warn "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
+# Check for Homebrew
+if ! command -v brew &>/dev/null; then
+    fail "Homebrew not installed"
+    echo "Install with: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+    exit 1
+fi
+
+BREWFILE="$DOTFILES_DIR/Brewfile"
+
+if [[ ! -f "$BREWFILE" ]]; then
+    fail "Brewfile not found at $BREWFILE"
+    exit 1
+fi
+
+echo ""
+echo -e "${BOLD}Dotfiles Package Manager${NC}"
+echo "========================"
+echo ""
+
+# ============================================================
+# Outdated Mode
+# ============================================================
+if $OUTDATED_MODE; then
+    info "Checking for outdated packages..."
+    echo ""
+
+    outdated=$(brew outdated 2>/dev/null)
+    if [[ -n "$outdated" ]]; then
+        echo "$outdated"
+        echo ""
+        warn "Run 'brew upgrade' to update packages"
+    else
+        pass "All packages are up to date"
+    fi
+    exit 0
+fi
+
+# ============================================================
+# Check/Install Mode
+# ============================================================
+info "Analyzing Brewfile..."
+
+# Get lists
+BREWFILE_FORMULAS=()
+BREWFILE_CASKS=()
+
+while IFS= read -r line; do
+    # Skip comments and empty lines
+    [[ "$line" =~ ^[[:space:]]*# ]] && continue
+    [[ -z "${line// }" ]] && continue
+
+    if [[ "$line" =~ ^brew[[:space:]]+[\"\']([^\"\']+)[\"\'] ]]; then
+        BREWFILE_FORMULAS+=("${match[1]}")
+    elif [[ "$line" =~ ^cask[[:space:]]+[\"\']([^\"\']+)[\"\'] ]]; then
+        BREWFILE_CASKS+=("${match[1]}")
+    fi
+done < "$BREWFILE"
+
+# Get installed packages
+INSTALLED_FORMULAS=($(brew list --formula 2>/dev/null))
+INSTALLED_CASKS=($(brew list --cask 2>/dev/null))
+
+# Find missing
+MISSING_FORMULAS=()
+MISSING_CASKS=()
+
+for formula in "${BREWFILE_FORMULAS[@]}"; do
+    if [[ ! " ${INSTALLED_FORMULAS[*]} " =~ " ${formula} " ]]; then
+        MISSING_FORMULAS+=("$formula")
+    fi
+done
+
+for cask in "${BREWFILE_CASKS[@]}"; do
+    if [[ ! " ${INSTALLED_CASKS[*]} " =~ " ${cask} " ]]; then
+        MISSING_CASKS+=("$cask")
+    fi
+done
+
+# ============================================================
+# Display Results
+# ============================================================
+if $CHECK_MODE || [[ ${#MISSING_FORMULAS[@]} -gt 0 || ${#MISSING_CASKS[@]} -gt 0 ]]; then
+    echo ""
+    echo -e "${BOLD}Brewfile Summary:${NC}"
+    echo "  Formulas defined: ${#BREWFILE_FORMULAS[@]}"
+    echo "  Casks defined: ${#BREWFILE_CASKS[@]}"
+    echo ""
+    echo -e "${BOLD}Installed:${NC}"
+    echo "  Formulas: ${#INSTALLED_FORMULAS[@]}"
+    echo "  Casks: ${#INSTALLED_CASKS[@]}"
+    echo ""
+fi
+
+if [[ ${#MISSING_FORMULAS[@]} -gt 0 ]]; then
+    warn "Missing formulas (${#MISSING_FORMULAS[@]}):"
+    for formula in "${MISSING_FORMULAS[@]}"; do
+        echo "  - $formula"
+    done
+    echo ""
+fi
+
+if [[ ${#MISSING_CASKS[@]} -gt 0 ]]; then
+    warn "Missing casks (${#MISSING_CASKS[@]}):"
+    for cask in "${MISSING_CASKS[@]}"; do
+        echo "  - $cask"
+    done
+    echo ""
+fi
+
+# ============================================================
+# Install Mode
+# ============================================================
+if $INSTALL_MODE; then
+    if [[ ${#MISSING_FORMULAS[@]} -eq 0 && ${#MISSING_CASKS[@]} -eq 0 ]]; then
+        pass "All Brewfile packages are installed"
+        exit 0
+    fi
+
+    info "Installing missing packages..."
+    echo ""
+
+    # Use brew bundle for proper installation
+    if brew bundle check --file="$BREWFILE" &>/dev/null; then
+        pass "All packages already installed"
+    else
+        brew bundle install --file="$BREWFILE"
+        if [[ $? -eq 0 ]]; then
+            pass "Packages installed successfully"
+        else
+            fail "Some packages failed to install"
+            exit 1
+        fi
+    fi
+    exit 0
+fi
+
+# ============================================================
+# Default: Summary
+# ============================================================
+if [[ ${#MISSING_FORMULAS[@]} -eq 0 && ${#MISSING_CASKS[@]} -eq 0 ]]; then
+    pass "All Brewfile packages are installed"
+else
+    total_missing=$((${#MISSING_FORMULAS[@]} + ${#MISSING_CASKS[@]}))
+    warn "$total_missing package(s) missing"
+    echo ""
+    echo "Run 'dotfiles packages --check' for details"
+    echo "Run 'dotfiles packages --install' to install"
+fi

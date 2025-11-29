@@ -1569,6 +1569,10 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 - `dotfiles status` → Visual dashboard
 - `dotfiles doctor` → Run health check + vault item validation
 - `dotfiles upgrade` → Pull latest dotfiles and run bootstrap
+- `dotfiles lint` → Validate shell config syntax
+- `dotfiles lint --fix` → Auto-fix script permissions
+- `dotfiles packages` → Check Brewfile package status
+- `dotfiles packages --install` → Install missing packages
 - `dotfiles cd` → Navigate to dotfiles directory
 - `dotfiles edit` → Open in editor
 - `status` → Quick dashboard showing symlinks, SSH, AWS, Lima status
@@ -1671,6 +1675,10 @@ dotfiles status          # Quick visual dashboard (color-coded)
 dotfiles doctor          # Comprehensive health check
 dotfiles doctor --fix    # Auto-repair permission issues
 dotfiles drift           # Compare local files vs Bitwarden vault
+dotfiles lint            # Validate shell config syntax
+dotfiles lint --fix      # Auto-fix script permissions
+dotfiles packages        # Check Brewfile package status
+dotfiles packages --install  # Install missing packages
 dotfiles upgrade         # Pull latest, run bootstrap, verify
 dotfiles cd              # Navigate to dotfiles directory
 dotfiles edit            # Open dotfiles in $EDITOR

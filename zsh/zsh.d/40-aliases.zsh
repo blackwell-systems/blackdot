@@ -98,6 +98,12 @@ dotfiles() {
         upgrade|update)
             dotfiles-upgrade
             ;;
+        lint)
+            "$HOME/workspace/dotfiles/bin/dotfiles-lint" "$@"
+            ;;
+        packages|pkg)
+            "$HOME/workspace/dotfiles/bin/dotfiles-packages" "$@"
+            ;;
         cd)
             cd "$HOME/workspace/dotfiles"
             ;;
@@ -118,6 +124,8 @@ dotfiles() {
             echo "  diff              Preview changes before sync/restore"
             echo "  backup            Backup and restore configuration"
             echo "  vault <cmd>       Bitwarden vault operations (restore, sync, list...)"
+            echo "  lint              Validate shell config syntax"
+            echo "  packages, pkg     Check/install Brewfile packages"
             echo "  init              First-time setup wizard"
             echo "  upgrade, update   Pull latest and run bootstrap"
             echo "  uninstall         Remove dotfiles configuration"
@@ -128,11 +136,11 @@ dotfiles() {
             echo "Examples:"
             echo "  dotfiles status              # Visual dashboard"
             echo "  dotfiles doctor --fix        # Health check with auto-fix"
-            echo "  dotfiles diff --restore      # Preview what restore would change"
-            echo "  dotfiles backup              # Create backup of current config"
+            echo "  dotfiles lint --fix          # Check syntax, fix permissions"
+            echo "  dotfiles packages --check    # Show missing packages"
+            echo "  dotfiles packages --install  # Install from Brewfile"
             echo "  dotfiles vault restore       # Restore secrets from Bitwarden"
             echo "  dotfiles vault sync --all    # Sync local to Bitwarden"
-            echo "  dotfiles init                # First-time setup wizard"
             ;;
         *)
             echo "Unknown command: $cmd"

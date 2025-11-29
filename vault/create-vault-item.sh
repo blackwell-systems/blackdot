@@ -99,7 +99,7 @@ if [[ -z "$FILE_PATH" ]]; then
         fail "Unknown item '$ITEM_NAME' - please provide a file path"
         echo ""
         echo "Known items:"
-        for item in "${(k)SYNCABLE_ITEMS[@]}"; do
+        for item in "${(@k)SYNCABLE_ITEMS}"; do
             echo "  $item → ${SYNCABLE_ITEMS[$item]}"
         done | sort
         exit 1

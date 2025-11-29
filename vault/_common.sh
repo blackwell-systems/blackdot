@@ -61,7 +61,7 @@ get_ssh_key_paths() {
 
 # Get list of SSH key Bitwarden item names
 get_ssh_key_items() {
-    for item in "${(k)SSH_KEYS[@]}"; do
+    for item in "${(@k)SSH_KEYS}"; do
         echo "$item"
     done | sort
 }
@@ -100,7 +100,7 @@ typeset -A SYNCABLE_ITEMS=(
 # Get required items list
 get_required_items() {
     local items=()
-    for item in "${(k)DOTFILES_ITEMS[@]}"; do
+    for item in "${(@k)DOTFILES_ITEMS}"; do
         local spec="${DOTFILES_ITEMS[$item]}"
         [[ "$spec" == *":required:"* ]] && items+=("$item")
     done
@@ -110,7 +110,7 @@ get_required_items() {
 # Get optional items list
 get_optional_items() {
     local items=()
-    for item in "${(k)DOTFILES_ITEMS[@]}"; do
+    for item in "${(@k)DOTFILES_ITEMS}"; do
         local spec="${DOTFILES_ITEMS[$item]}"
         [[ "$spec" == *":optional:"* ]] && items+=("$item")
     done
@@ -395,7 +395,7 @@ validate_all_items() {
     info "Validating vault items schema..."
 
     # Validate SSH keys
-    for item in "${(k)SSH_KEYS[@]}"; do
+    for item in "${(@k)SSH_KEYS}"; do
         if ! validate_ssh_key_item "$item" "$session" 2>&1; then
             ((errors++))
         fi
@@ -411,7 +411,7 @@ validate_all_items() {
     done
 
     # Optional items (don't fail if missing, but validate if present)
-    for item in "${(k)DOTFILES_ITEMS[@]}"; do
+    for item in "${(@k)DOTFILES_ITEMS}"; do
         local spec="${DOTFILES_ITEMS[$item]}"
         if [[ "$spec" == *":optional:"* ]] && bw_item_exists "$item" "$session"; then
             if ! validate_config_item "$item" "$session" 1 2>&1; then
@@ -488,7 +488,7 @@ check_pre_restore_drift() {
 
     info "Checking for local changes before restore..."
 
-    for item_name in "${(k)SYNCABLE_ITEMS[@]}"; do
+    for item_name in "${(@k)SYNCABLE_ITEMS}"; do
         local result
         check_item_drift "$item_name" "$session"
         result=$?

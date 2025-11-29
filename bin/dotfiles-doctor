@@ -113,12 +113,16 @@ echo ""
 # ============================================================
 section "Version & Updates"
 
-# Check current version
-if [[ -f "$DOTFILES_DIR/VERSION" ]]; then
-    VERSION=$(cat "$DOTFILES_DIR/VERSION")
-    pass "Dotfiles version: $VERSION"
+# Check current version (from CHANGELOG.md)
+if [[ -f "$DOTFILES_DIR/CHANGELOG.md" ]]; then
+    VERSION=$(grep -m1 '^\#\# \[' "$DOTFILES_DIR/CHANGELOG.md" | sed 's/.*\[\(.*\)\].*/\1/')
+    if [[ -n "$VERSION" ]]; then
+        pass "Dotfiles version: $VERSION"
+    else
+        warn "Could not parse version from CHANGELOG.md"
+    fi
 else
-    warn "VERSION file not found"
+    warn "CHANGELOG.md not found"
 fi
 
 # Check for updates (quick git fetch)
