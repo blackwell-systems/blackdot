@@ -12,7 +12,9 @@
 
 > Enterprise-grade, vault-backed dotfiles for multi-machine development. Bitwarden provides the source of truth for secrets, a canonical `/workspace` path keeps Claude Code sessions portable across macOS, Linux, Windows, and WSL2, and health checks guard against drift, broken symlinks, and missing vault state.
 
-**Version:** 1.0.0 | [Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
+[![Version](https://img.shields.io/badge/Version-1.7.0-blue)](CHANGELOG.md)
+
+**Version:** 1.7.0 | [Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
 
 ---
 
@@ -129,7 +131,7 @@ Everything works on a single machine. Cross-platform sync, Claude session portab
 
 ```bash
 # Minimal install (no vault, no /workspace symlink, no Claude setup)
-SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap-linux.sh
+SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
 
 # Then manually configure ~/.ssh, ~/.aws, ~/.gitconfig
 ```
@@ -198,8 +200,8 @@ git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
 # 2. Bootstrap (picks your platform automatically)
-./bootstrap-mac.sh      # macOS
-./bootstrap-linux.sh    # Linux / WSL2 / Lima / Docker
+./bootstrap/bootstrap-mac.sh      # macOS
+./bootstrap/bootstrap-linux.sh    # Linux / WSL2 / Lima / Docker
 
 # 3. Restore secrets from Bitwarden
 bw login
@@ -238,13 +240,13 @@ Skip optional features using environment variables:
 
 ```bash
 # Skip /workspace symlink creation (single-machine setup)
-SKIP_WORKSPACE_SYMLINK=true ./bootstrap-mac.sh
+SKIP_WORKSPACE_SYMLINK=true ./bootstrap/bootstrap-mac.sh
 
 # Skip Claude Code setup
-SKIP_CLAUDE_SETUP=true ./bootstrap-linux.sh
+SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
 
 # Combine flags
-SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap-mac.sh
+SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-mac.sh
 ```
 
 **Available flags:**
@@ -365,7 +367,7 @@ This repo includes a full Claude Code integration layer supporting multiple back
 
 ```bash
 # Copy the example config
-cp ~/workspace/dotfiles/claude.local.example ~/.claude.local
+cp ~/workspace/dotfiles/claude/claude.local.example ~/.claude.local
 
 # Edit with your AWS SSO profile
 vim ~/.claude.local
@@ -489,12 +491,15 @@ See [Maintenance Checklists](docs/README-FULL.md#maintenance-checklists) for mor
 
 ```
 dotfiles/
-├── bootstrap-mac.sh           # macOS setup
-├── bootstrap-linux.sh         # Lima/Linux/WSL2 setup
-├── bootstrap-dotfiles.sh      # Shared symlink creation
 ├── Brewfile                   # Package definitions
 ├── Dockerfile                 # Docker bootstrap example
-├── .dockerignore              # Docker build exclusions
+├── install.sh                 # One-line installer entry point
+│
+├── bootstrap/                 # Platform bootstrap scripts
+│   ├── _common.sh            # Shared bootstrap functions
+│   ├── bootstrap-mac.sh      # macOS setup
+│   ├── bootstrap-linux.sh    # Linux/WSL2/Lima setup
+│   └── bootstrap-dotfiles.sh # Symlink creation
 │
 ├── bin/                       # CLI commands (use: dotfiles <command>)
 │   ├── dotfiles-doctor       # Health validation
@@ -534,9 +539,6 @@ dotfiles/
 ├── lib/                       # Shared libraries
 │   └── _logging.sh           # Colors and logging functions
 │
-├── bootstrap/                 # Bootstrap shared code
-│   └── _common.sh            # Shared bootstrap functions
-│
 ├── test/                      # Test suites (bats-core)
 │   ├── vault_common.bats     # Unit tests for vault/_common.sh
 │   ├── cli_commands.bats     # Unit tests for CLI commands
@@ -546,13 +548,16 @@ dotfiles/
 │   └── run_tests.sh          # Test runner
 │
 ├── claude/                    # Claude Code integration
-│   └── settings.json         # Permissions & preferences
+│   ├── settings.json         # Permissions & preferences
+│   └── claude.local.example  # Local config template
 │
 ├── macos/                     # macOS-specific
 │   └── apply-settings.sh     # System preferences
 │
 └── docs/                      # Documentation
-    └── README-FULL.md        # Complete documentation
+    ├── README-FULL.md        # Complete documentation
+    ├── NOTES.md              # Development notes
+    └── BRAND.md              # Brand guidelines
 ```
 
 ---

@@ -5,7 +5,9 @@
 
 > **Enterprise-grade dotfiles system** with Bitwarden vault integration, cross-platform support, portable Claude Code sessions, and automated health checks.
 
-**Version:** 1.0.0 | [Changelog](../CHANGELOG.md) | [Quick Start Guide](../README.md)
+[![Version](https://img.shields.io/badge/Version-1.7.0-blue)](../CHANGELOG.md)
+
+**Version:** 1.7.0 | [Changelog](../CHANGELOG.md) | [Quick Start Guide](../README.md)
 
 This is the comprehensive reference documentation for the dotfiles system. It covers configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code portable sessions**, and a **Bitwarden-based vault bootstrap** for SSH keys, AWS credentials, and environment secrets across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
 
@@ -69,11 +71,11 @@ git clone git@github.com:YOUR-USERNAME/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
 # 2. Run bootstrap (choose platform)
-./bootstrap-mac.sh      # macOS
-./bootstrap-linux.sh    # Lima / Linux / WSL2
+./bootstrap/bootstrap-mac.sh      # macOS
+./bootstrap/bootstrap-linux.sh    # Lima / Linux / WSL2
 
 # Or use interactive mode for guided setup:
-./bootstrap-mac.sh --interactive
+./bootstrap/bootstrap-mac.sh --interactive
 
 # 3. Restore secrets from Bitwarden
 bw login
@@ -113,11 +115,18 @@ The dotfiles are organized as follows:
 ```text
 ~/workspace/dotfiles
 ├── install.sh                # One-line installer (curl | bash)
-├── bootstrap-dotfiles.sh     # Shared symlink bootstrap (zshrc, p10k, Ghostty, Claude)
-├── bootstrap-linux.sh        # Lima / Linux-specific bootstrap (--interactive supported)
-├── bootstrap-mac.sh          # macOS-specific bootstrap (--interactive supported)
-├── dotfiles-doctor.sh        # Health check (use: dotfiles doctor)
-├── dotfiles-drift.sh         # Drift detection (use: dotfiles drift)
+├── bootstrap/                # Platform bootstrap scripts
+│   ├── bootstrap-mac.sh      # macOS-specific bootstrap (--interactive supported)
+│   ├── bootstrap-linux.sh    # Linux-specific bootstrap (--interactive supported)
+│   ├── bootstrap-dotfiles.sh # Shared symlink bootstrap
+│   └── _common.sh            # Shared bootstrap functions
+├── bin/                      # CLI tools
+│   ├── dotfiles-doctor       # Health check (use: dotfiles doctor)
+│   ├── dotfiles-drift        # Drift detection (use: dotfiles drift)
+│   ├── dotfiles-backup       # Backup/restore
+│   ├── dotfiles-diff         # Preview changes
+│   ├── dotfiles-init         # Setup wizard
+│   └── dotfiles-uninstall    # Clean removal
 ├── Brewfile                  # Unified Homebrew bundle (macOS + Lima)
 ├── CHANGELOG.md              # Version history
 ├── .gitignore                # Excludes .bw-session, editor files
@@ -224,8 +233,8 @@ These work on **any platform** without modification:
 - Works on Linux, macOS, BSD, WSL, Docker
 
 **✅ Health & Metrics** (100% portable)
-- `dotfiles-doctor.sh` / `dotfiles-drift.sh`
-- `show-metrics.sh`
+- `bin/dotfiles-doctor` / `bin/dotfiles-drift`
+- `bin/dotfiles-metrics`
 - Cross-platform file permissions handling
 
 **✅ Shell Configuration** (OS-aware)
@@ -533,8 +542,8 @@ There are two big pillars:
 Both bootstrap scripts support an interactive mode that guides you through configuration choices:
 
 ```bash
-./bootstrap-mac.sh --interactive
-./bootstrap-linux.sh --interactive
+./bootstrap/bootstrap-mac.sh --interactive
+./bootstrap/bootstrap-linux.sh --interactive
 ```
 
 Interactive mode prompts for:
@@ -545,14 +554,14 @@ You can also use environment variables instead:
 
 ```bash
 # Skip optional features
-SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap-linux.sh
+SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
 ```
 
 Use `--help` to see all available options:
 
 ```bash
-./bootstrap-mac.sh --help
-./bootstrap-linux.sh --help
+./bootstrap/bootstrap-mac.sh --help
+./bootstrap/bootstrap-linux.sh --help
 ```
 
 ### Architecture Diagram
@@ -619,7 +628,7 @@ cd ~/workspace/dotfiles
 3. **Run macOS bootstrap**
 
 ```bash
-./bootstrap-mac.sh
+./bootstrap/bootstrap-mac.sh
 ```
 
 Typical responsibilities of `bootstrap-mac.sh`:
@@ -665,7 +674,7 @@ limactl shell lima-dev-ubuntu
 
 ```bash
 cd ~/workspace/dotfiles
-./bootstrap-linux.sh
+./bootstrap/bootstrap-linux.sh
 ```
 
 Typical responsibilities of `bootstrap-linux.sh`:
@@ -1305,7 +1314,7 @@ declare -A SSH_KEYS=(
 
 This automatically propagates to:
 - `restore-ssh.sh` (restores the key from Bitwarden)
-- `dotfiles-doctor.sh` (validates key exists with correct permissions)
+- `bin/dotfiles-doctor` (validates key exists with correct permissions)
 
 ### 4. Add to SSH config
 
@@ -1398,7 +1407,7 @@ Regular security maintenance schedule to keep your dotfiles and credentials secu
 
 **Monthly Tasks:**
 - [ ] **Check for dotfiles updates** - Keep dotfiles current with latest improvements
-  - Run: `dotfiles-upgrade` or `git pull && ./bootstrap-*.sh`
+  - Run: `dotfiles-upgrade` or `git pull && ./bootstrap/bootstrap-*.sh`
   - Review CHANGELOG.md for breaking changes
 - [ ] **Run health check with drift detection** - Ensure local files match Bitwarden
   - Run: `dotfiles drift`
@@ -1455,7 +1464,7 @@ When AWS credentials or config change:
 Complete checklist for a fresh machine:
 
 1. [ ] Clone dotfiles: `git clone ... ~/workspace/dotfiles`
-2. [ ] Run bootstrap: `./bootstrap-mac.sh` or `./bootstrap-linux.sh`
+2. [ ] Run bootstrap: `./bootstrap/bootstrap-mac.sh` or `./bootstrap/bootstrap-linux.sh`
 3. [ ] Login to Bitwarden: `bw login`
 4. [ ] Validate vault items: `dotfiles vault check`
 5. [ ] Restore secrets: `dotfiles vault restore`
