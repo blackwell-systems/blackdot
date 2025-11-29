@@ -153,7 +153,7 @@ The dotfiles are organized as follows:
 │   ├── create-vault-item.sh  # Creates new vault secure notes
 │   ├── delete-vault-item.sh  # Deletes items from vault (with safety)
 │   ├── list-vault-items.sh   # Lists all vault items (debug/inventory)
-│   ├── sync-to-bitwarden.sh  # Syncs local changes back to vault
+│   ├── sync-to-vault.sh      # Syncs local changes back to vault
 │   ├── restore-ssh.sh        # Restores SSH keys and config from vault
 │   ├── restore-aws.sh        # Restores ~/.aws/config & ~/.aws/credentials
 │   ├── restore-env.sh        # Restores environment secrets to ~/.local

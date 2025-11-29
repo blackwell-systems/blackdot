@@ -126,7 +126,7 @@ These run automatically on `git commit`.
 ├── vault/                  # Multi-vault integration (Bitwarden, 1Password, pass)
 │   ├── _common.sh          # Single source of truth (IMPORTANT!)
 │   ├── restore-*.sh        # Restore scripts for each category
-│   └── sync-to-bitwarden.sh
+│   └── sync-to-vault.sh
 ├── zsh/                    # Shell configuration
 │   └── zsh.d/              # Modular zsh config (10 files)
 ├── macos/                  # macOS-specific configs
@@ -233,6 +233,51 @@ When modifying zsh config:
 5. **DON'T** update README without updating docs/README.md
 6. **DON'T** modify `_common.sh` without checking dependent scripts
 7. **DON'T** skip tests (run `test/run_tests.sh` before committing)
+
+---
+
+## 🔒 Git Safety Rules
+
+**CRITICAL: Follow these rules to prevent merge conflicts and diverging branches.**
+
+### 1. Always sync before working
+- Run `git fetch && git status` at the start of every session
+- If the branch has diverged from remote, STOP and ask the user before proceeding
+- Run `git pull --rebase` before making any commits
+
+### 2. Never force push
+- Do not use `git push --force` or `git push -f`
+- If a push is rejected, ask the user how to proceed
+
+### 3. Check before committing
+- Run `git status` before staging changes
+- Ensure you're on the correct branch
+- Verify no unexpected changes are staged
+
+### 4. One session at a time
+- If you detect uncommitted changes you didn't make, ask the user
+- If remote has commits not in local, pull before continuing
+
+### Session Start Hook
+
+This repository includes a session start hook that automatically checks git sync status:
+
+```json
+{
+  "hooks": [
+    {
+      "event": "on_session_start",
+      "command": "git fetch && git status --porcelain=v2 --branch",
+      "description": "Check git sync status at session start"
+    }
+  ]
+}
+```
+
+The hook output will show:
+- `# branch.ab +N -M` - N commits ahead, M commits behind remote
+- If behind remote, run `git pull --rebase` before making changes
+- If diverged, ask the user before proceeding
 
 ---
 
@@ -343,4 +388,4 @@ Before completing work, verify:
 ---
 
 **Last Updated:** 2025-11-29
-**Version:** 1.7.0
+**Version:** 1.8.0

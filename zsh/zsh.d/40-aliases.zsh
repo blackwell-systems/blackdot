@@ -1,7 +1,7 @@
 # =========================
 # 40-aliases.zsh
 # =========================
-# Shell aliases for navigation, bitwarden, dotfiles, and utilities
+# Shell aliases for navigation, vault, dotfiles, and utilities
 # Convenient shortcuts for common operations
 
 # Convenience navigation aliases
@@ -43,7 +43,7 @@ dotfiles() {
                     "$VAULT_DIR/bootstrap-vault.sh" "$@"
                     ;;
                 sync)
-                    "$VAULT_DIR/sync-to-bitwarden.sh" "$@"
+                    "$VAULT_DIR/sync-to-vault.sh" "$@"
                     ;;
                 list)
                     "$VAULT_DIR/list-vault-items.sh" "$@"
@@ -61,14 +61,14 @@ dotfiles() {
                     "$VAULT_DIR/delete-vault-item.sh" "$@"
                     ;;
                 help|--help|-h|"")
-                    echo "dotfiles vault - Bitwarden vault operations"
+                    echo "dotfiles vault - Secret vault operations"
                     echo ""
                     echo "Usage: dotfiles vault <command> [options]"
                     echo ""
                     echo "Commands:"
-                    echo "  restore          Restore all secrets from Bitwarden"
+                    echo "  restore          Restore all secrets from vault"
                     echo "                   --force: Skip drift check, overwrite local changes"
-                    echo "  sync [item]      Sync local files to Bitwarden (--all for all)"
+                    echo "  sync [item]      Sync local files to vault (--all for all)"
                     echo "  list             List vault items"
                     echo "  check            Validate vault items exist"
                     echo "  validate         Validate vault item schema"
@@ -77,7 +77,7 @@ dotfiles() {
                     echo ""
                     echo "Examples:"
                     echo "  dotfiles vault restore        # Restore all secrets"
-                    echo "  dotfiles vault sync --all     # Sync all to Bitwarden"
+                    echo "  dotfiles vault sync --all     # Sync all to vault"
                     echo "  dotfiles vault sync Git-Config"
                     ;;
                 *)
@@ -123,10 +123,10 @@ dotfiles() {
             echo "Commands:"
             echo "  status, s         Quick visual dashboard"
             echo "  doctor, health    Run comprehensive health check"
-            echo "  drift             Compare local files vs Bitwarden vault"
+            echo "  drift             Compare local files vs vault"
             echo "  diff              Preview changes before sync/restore"
             echo "  backup            Backup and restore configuration"
-            echo "  vault <cmd>       Bitwarden vault operations (restore, sync, list...)"
+            echo "  vault <cmd>       Secret vault operations (restore, sync, list...)"
             echo "  template, tmpl    Machine-specific config templates"
             echo "  lint              Validate shell config syntax"
             echo "  packages, pkg     Check/install Brewfile packages"
@@ -145,8 +145,8 @@ dotfiles() {
             echo "  dotfiles packages --install  # Install from Brewfile"
             echo "  dotfiles template init       # Setup machine-specific config"
             echo "  dotfiles template render     # Generate configs from templates"
-            echo "  dotfiles vault restore       # Restore secrets from Bitwarden"
-            echo "  dotfiles vault sync --all    # Sync local to Bitwarden"
+            echo "  dotfiles vault restore       # Restore secrets from vault"
+            echo "  dotfiles vault sync --all    # Sync local to vault"
             ;;
         *)
             echo "Unknown command: $cmd"

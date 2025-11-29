@@ -47,7 +47,7 @@ All `dotfiles vault` commands work identically regardless of backend.
 | `restore-env.sh` | Restores env secrets | Called by bootstrap |
 | `restore-git.sh` | Restores gitconfig | Called by bootstrap |
 | `create-vault-item.sh` | Creates new vault items | `dotfiles vault create ITEM` |
-| `sync-to-bitwarden.sh` | Syncs local → vault | `dotfiles vault sync --all` |
+| `sync-to-vault.sh` | Syncs local → vault | `dotfiles vault sync --all` |
 | `validate-schema.sh` | Validates vault item schema | `dotfiles vault validate` |
 | `delete-vault-item.sh` | Deletes items from vault | `dotfiles vault delete ITEM` |
 | `check-vault-items.sh` | Pre-flight validation | `dotfiles vault check` |
@@ -261,20 +261,20 @@ Restores Git configuration.
 
 ---
 
-### `sync-to-bitwarden.sh`
+### `sync-to-vault.sh`
 
 Pushes local config changes back to vault.
 
 ```bash
 # Preview changes (no modification)
-./sync-to-bitwarden.sh --dry-run --all
+dotfiles vault sync --dry-run --all
 
 # Sync specific items
-./sync-to-bitwarden.sh SSH-Config
-./sync-to-bitwarden.sh AWS-Config Git-Config
+dotfiles vault sync SSH-Config
+dotfiles vault sync AWS-Config Git-Config
 
 # Sync all
-./sync-to-bitwarden.sh --all
+dotfiles vault sync --all
 ```
 
 **Supported items:**
@@ -344,7 +344,7 @@ SYNCABLE_ITEMS["Git-Config"]="$HOME/.gitconfig"
 │                                                                  │
 │   OPERATION LAYER                                                │
 │   ═════════════════════════════════════════════════════════════  │
-│   restore-*.sh, sync-to-bitwarden.sh, create/delete scripts     │
+│   restore-*.sh, sync-to-vault.sh, create/delete scripts         │
 │                     ↓                                            │
 │   _common.sh (data structures, validation, drift detection)     │
 │                     ↓                                            │
@@ -483,4 +483,4 @@ rm vault/.vault-session
    ```
    This automatically propagates to `restore-ssh.sh` and `bin/dotfiles-doctor`.
 4. Update `~/.ssh/config` with Host entry
-5. Sync: `./sync-to-bitwarden.sh SSH-Config`
+5. Sync: `dotfiles vault sync SSH-Config`

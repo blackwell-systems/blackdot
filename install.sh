@@ -101,6 +101,10 @@ case "$OS" in
             PLATFORM="Lima"
         fi
         ;;
+    MINGW*|MSYS*|CYGWIN*)
+        PLATFORM="Windows (Git Bash)"
+        BOOTSTRAP_SCRIPT="bootstrap/bootstrap-windows.sh"
+        ;;
     *)
         fail "Unsupported operating system: $OS"
         exit 1
