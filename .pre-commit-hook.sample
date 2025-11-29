@@ -115,7 +115,17 @@ if [ $SECRETS_FOUND -eq 1 ]; then
 fi
 
 # ============================================================
-# 4. Ensure required files exist
+# 4. Documentation sync reminder
+# ============================================================
+# Only check if README.md or docs/README.md were modified
+DOCS_MODIFIED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^(README\.md|docs/README\.md)$' || true)
+
+if [ -n "$DOCS_MODIFIED" ]; then
+    echo -e "${YELLOW}Reminder: If you modified README.md, also update docs/README.md (and vice versa)${NC}"
+fi
+
+# ============================================================
+# 5. Ensure required files exist
 # ============================================================
 echo "Checking repository structure..."
 

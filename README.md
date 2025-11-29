@@ -8,31 +8,46 @@
 ![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)
 ![Shell](https://img.shields.io/badge/Shell-Zsh-blueviolet)
 ![Secrets](https://img.shields.io/badge/Secrets-Multi--Vault-ff4081)
-![Claude Portability](https://img.shields.io/badge/Claude_Portability-Enabled-8A2BE2)
+![Claude Code](https://img.shields.io/badge/Claude_Code-Native_Integration-8A2BE2)
 
-> Enterprise-grade dotfiles with multi-vault secret management (Bitwarden, 1Password, pass), machine-specific templates, portable Claude Code sessions, and automated health checks. Works across macOS, Linux, Windows, WSL2, and Docker.
+> **The first dotfiles designed for AI-assisted development.** Multi-vault secrets, portable Claude Code sessions, machine-specific templates, and self-healing configuration. Start coding on macOS, continue on Linux—same secrets, same Claude session.
 
-[![Version](https://img.shields.io/badge/Version-1.7.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.8.0-blue)](CHANGELOG.md)
 
-**Version:** 1.7.0 | [Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
+**Version:** 1.8.0 | [Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
+
+---
+
+## 🤖 Why Claude Code Users Love This
+
+> **"Start on Mac, continue on Linux, keep your conversation."**
+
+If you use Claude Code across multiple machines, this is the only dotfiles solution that:
+
+1. **Portable Sessions** – `/workspace` symlink ensures identical paths everywhere. Claude sessions sync seamlessly.
+2. **Auto-Redirect** – Work in `~/workspace/project`? Claude automatically uses `/workspace/project` for session continuity.
+3. **Multi-Backend Support** – Works with Claude via Anthropic Max, AWS Bedrock, or any provider.
+4. **Session Start Hooks** – Automatic git sync check prevents branch divergence during AI-assisted coding.
+
+No other dotfiles repo has ANY Claude Code integration. This is a first.
 
 ---
 
 ## Features
 
 ### Core (works everywhere)
-- **Multi-vault secret management** – SSH keys, AWS credentials, Git config, and environment secrets synced with your choice of Bitwarden, 1Password, or pass. One unlock, full environment. Schema validation ensures item integrity.
-- **Machine-specific templates** – Generate configs tailored to each machine (work vs personal, macOS vs Linux). Git identity, SSH hosts, shell settings all adapt automatically.
-- **Automated health checks** – Validate symlinks, permissions, required tools, and vault sync. Optional auto-fix and drift detection.
-- **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat, and other modern Unix replacements, configured and ready.
-- **Idempotent design** – Run bootstrap repeatedly. Scripts converge to known-good state without breaking existing setup.
-- **Fast setup** – Clone to working shell in under five minutes.
-- **Comprehensive testing** – 80+ tests (unit, integration, error scenarios) ensure reliability across platforms.
+- **🔐 Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with Bitwarden, 1Password, or pass. One unlock, full environment.
+- **🤖 Claude Code integration** – Portable sessions across machines. Start coding on Mac, continue on Linux, same conversation.
+- **🏥 Self-healing configuration** – 446-line health checker with auto-fix. Drift detection catches local vs vault differences.
+- **📋 Machine-specific templates** – Generate configs tailored to each machine (work vs personal, macOS vs Linux).
+- **⚡ Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat—configured and ready.
+- **🔄 Idempotent design** – Run bootstrap repeatedly. Scripts converge to known-good state.
+- **✅ Comprehensive testing** – 80+ tests ensure reliability across platforms.
 
 ### Advanced (opt-in)
-- **Cross-platform portability** – Same dotfiles on macOS, Linux, Windows, WSL2, or Docker with ~90% shared code.
-- **Portable Claude Code sessions** – `/workspace` symlink ensures Claude sessions sync across machines. Start on macOS, continue on Linux, keep your conversation.
-- **Metrics and observability** – Track dotfiles health over time. Surface drift, failures, and missing vault items.
+- **Cross-platform portability** – Same dotfiles on macOS, Linux, Windows, WSL2, or Docker.
+- **Metrics and observability** – Track dotfiles health over time.
+- **Git safety hooks** – Defensive hooks block dangerous git commands (force push, hard reset). [Learn more](docs/claude-code.md)
 
 ---
 
@@ -51,6 +66,34 @@
 | **Modular shell config** | 10 modules in `zsh.d/`                      | Single monolithic file           |
 | **Optional components** | `SKIP_*` env flags                           | All-or-nothing                   |
 | **Cross-platform**     | macOS, Linux, Windows, WSL2, Docker           | Usually single-platform          |
+
+### Why This Repo vs chezmoi?
+
+[chezmoi](https://chezmoi.io) is the most popular dotfiles manager. Here's how we compare:
+
+| Feature | This Repo | chezmoi |
+|---------|-----------|---------|
+| **Secret Management** | ✅ 3 vault backends (bw/op/pass) with unified API | ⚠️ External tools only (no unified API) |
+| **Bidirectional Sync** | ✅ Local ↔ Vault | ⚠️ Templates only (one-way) |
+| **Claude Code Sessions** | ✅ **Native integration** | ❌ None |
+| **Health Checks** | ✅ 446-line checker + auto-fix | ❌ None |
+| **Drift Detection** | ✅ Local vs Vault comparison | ⚠️ `chezmoi diff` (files only) |
+| **Schema Validation** | ✅ SSH keys, configs | ❌ None |
+| **Machine Templates** | ✅ Custom engine | ✅ Go templates |
+| **Cross-Platform** | ✅ 5 platforms + Docker | ✅ Excellent |
+| **Learning Curve** | ⚠️ Shell scripts | ⚠️ YAML + Go templates |
+| **Single Binary** | ❌ Requires zsh | ✅ Go binary |
+
+**Choose This Repo If:**
+- You use Claude Code and want portable sessions
+- You need secrets stored in Bitwarden, 1Password, or pass
+- You want health checks and auto-repair
+- You prefer shell scripts over YAML configuration
+
+**Choose chezmoi If:**
+- You want a single binary with no dependencies
+- You prefer declarative YAML configuration
+- You don't need vault integration or Claude Code support
 
 ### Detailed Comparison vs Popular Dotfiles
 
