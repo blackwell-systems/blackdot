@@ -16,6 +16,7 @@ dotfiles drift           # Compare local vs vault
 dotfiles vault restore   # Restore secrets from vault
 dotfiles vault sync      # Sync local to vault
 dotfiles lint            # Validate shell config syntax
+dotfiles doc-sync        # Check docs are in sync (README vs docs/)
 dotfiles packages        # Check/install Brewfile packages
 dotfiles template init   # Setup machine-specific configs
 dotfiles template render # Generate configs from templates
