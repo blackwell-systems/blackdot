@@ -132,7 +132,7 @@ Commands with ASCII art banner via `awstools`:
 │   ├── discover-settings.sh
 │   ├── apply-settings.sh
 │   └── settings.sh
-├── vault/                # Bitwarden-based secret management
+├── vault/                # Multi-vault secret management (Bitwarden/1Password/pass)
 ├── zellij/
 │   └── config.kdl        # Zellij multiplexer config
 └── zsh/
@@ -165,8 +165,8 @@ The "Cyber Weapons Suite" (commit 9838dd5) was reverted. It included:
 - Lima mounts macOS `~/workspace` into the VM
 - Shared history at `~/workspace/.zsh_history`
 
-### Bitwarden Vault System
-- SSH keys, AWS creds, git config stored in Bitwarden Secure Notes
+### Multi-Vault System
+- SSH keys, AWS creds, git config stored in vault (Bitwarden, 1Password, or pass)
 - `vault/*.sh` scripts handle restore/sync (accessed via `dotfiles vault` command)
 - `dotfiles vault restore` runs full bootstrap
 - Required items: SSH-GitHub-Enterprise, SSH-GitHub-Blackwell, SSH-Config, AWS-Config, AWS-Credentials, Git-Config
@@ -185,7 +185,7 @@ The "Cyber Weapons Suite" (commit 9838dd5) was reverted. It included:
 # Status & Health
 dotfiles status     # Dashboard with city skyline art
 dotfiles doctor     # Run health check + vault validation
-dotfiles drift      # Compare local vs Bitwarden vault
+dotfiles drift      # Compare local vs vault
 
 # Navigation
 j                   # Fuzzy jump to git project
@@ -202,8 +202,8 @@ note "text"         # Quick note
 notes               # View recent notes
 
 # Vault
-dotfiles vault restore   # Restore all secrets from Bitwarden
-dotfiles vault sync      # Sync local changes to Bitwarden
+dotfiles vault restore   # Restore all secrets from vault
+dotfiles vault sync      # Sync local changes to vault
 dotfiles vault list      # List vault items
 
 # Claude

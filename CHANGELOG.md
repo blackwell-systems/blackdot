@@ -13,6 +13,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.7.0] - 2025-11-29
 
+### Added - Multi-Vault Backend Support
+
+#### Vault Abstraction Layer
+- **Multi-vault support** - Choose your preferred secret management backend:
+  - **Bitwarden** (`bw`) - Default, full-featured, cloud-synced
+  - **1Password** (`op`) - v2 CLI with biometric auth
+  - **pass** (`pass`) - GPG-based, git-synced, local-first
+- **`lib/_vault.sh`** - Unified vault API with pluggable backends
+- **`vault/backends/`** - Backend implementations
+  - `bitwarden.sh` - Bitwarden CLI backend
+  - `1password.sh` - 1Password CLI v2 backend
+  - `pass.sh` - pass (GPG) backend
+  - `_interface.md` - Interface specification for backend implementations
+- **`DOTFILES_VAULT_BACKEND`** - Environment variable to select backend (defaults to `bitwarden`)
+
+#### Backward Compatibility
+- Legacy `bw_*` functions still work (aliased to new `vault_*` API)
+- Existing vault items and workflows unchanged
+- Session caching unified across backends (`.vault-session`)
+
 ### Added - Root Directory Cleanup
 
 #### Consolidated bootstrap/ Directory
