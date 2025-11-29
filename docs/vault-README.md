@@ -1,11 +1,39 @@
-# Bitwarden Vault Bootstrap System
+# Vault Bootstrap System
 
-This directory contains scripts for **bidirectional secret management** with Bitwarden:
+This directory contains scripts for **bidirectional secret management** with multiple vault backends:
 
-- **Restore scripts** pull secrets from Bitwarden → local files
-- **Sync/Create scripts** push local changes → Bitwarden
+- **Restore scripts** pull secrets from your vault → local files
+- **Sync/Create scripts** push local changes → your vault
 - **Utility scripts** for validation, debugging, deletion, and inventory
 - **Shared library** (`_common.sh`) with reusable functions
+- **Backend abstraction** supporting Bitwarden, 1Password, and pass
+
+---
+
+## Supported Backends
+
+| Backend | CLI Tool | Status | Description |
+|---------|----------|--------|-------------|
+| **Bitwarden** | `bw` | Default | Full-featured, cloud-synced |
+| **1Password** | `op` | Supported | v2 CLI with biometric auth |
+| **pass** | `pass` | Supported | GPG-based, git-synced |
+
+### Switching Backends
+
+```bash
+# Set your preferred backend (add to ~/.zshrc or ~/.zshenv)
+export DOTFILES_VAULT_BACKEND=bitwarden  # default
+export DOTFILES_VAULT_BACKEND=1password
+export DOTFILES_VAULT_BACKEND=pass
+
+# For 1Password, optionally set vault name
+export ONEPASSWORD_VAULT=Personal  # default
+
+# For pass, optionally set prefix
+export PASS_PREFIX=dotfiles  # default, items stored as dotfiles/Git-Config
+```
+
+All `dotfiles vault` commands work identically regardless of backend.
 
 ---
 
@@ -19,14 +47,12 @@ This directory contains scripts for **bidirectional secret management** with Bit
 | `restore-env.sh` | Restores env secrets | Called by bootstrap |
 | `restore-git.sh` | Restores gitconfig | Called by bootstrap |
 | `create-vault-item.sh` | Creates new vault items | `dotfiles vault create ITEM` |
-| `sync-to-bitwarden.sh` | Syncs local → Bitwarden | `dotfiles vault sync --all` |
+| `sync-to-bitwarden.sh` | Syncs local → vault | `dotfiles vault sync --all` |
 | `validate-schema.sh` | Validates vault item schema | `dotfiles vault validate` |
 | `delete-vault-item.sh` | Deletes items from vault | `dotfiles vault delete ITEM` |
 | `check-vault-items.sh` | Pre-flight validation | `dotfiles vault check` |
 | `list-vault-items.sh` | Debug/inventory tool | `dotfiles vault list` |
 | `_common.sh` | Shared functions library | Sourced by other scripts |
-| `template-aws-config` | Reference template | Example AWS config structure |
-| `template-aws-credentials` | Reference template | Example AWS credentials structure |
 
 ### Commands
 
@@ -35,7 +61,7 @@ All vault operations are accessed via the unified `dotfiles vault` command:
 ```bash
 dotfiles vault restore          # Restore all secrets (checks for local drift first)
 dotfiles vault restore --force  # Skip drift check, overwrite local changes
-dotfiles vault sync             # Sync local changes to Bitwarden
+dotfiles vault sync             # Sync local changes to vault
 dotfiles vault sync --all       # Sync all items
 dotfiles vault create           # Create new vault item
 dotfiles vault validate         # Validate vault item schema
@@ -43,6 +69,57 @@ dotfiles vault delete           # Delete vault item
 dotfiles vault list             # List all vault items
 dotfiles vault check            # Validate required items exist
 ```
+
+---
+
+## Backend Setup
+
+### Bitwarden (Default)
+
+```bash
+# Install CLI
+brew install bitwarden-cli
+
+# Login (one-time)
+bw login
+
+# Verify
+bw login --check
+```
+
+### 1Password
+
+```bash
+# Install CLI
+brew install --cask 1password-cli
+
+# Sign in (uses biometric on macOS)
+op signin
+
+# Set backend
+export DOTFILES_VAULT_BACKEND=1password
+
+# Optionally specify vault
+export ONEPASSWORD_VAULT=Personal
+```
+
+### pass (Standard Unix Password Manager)
+
+```bash
+# Install
+brew install pass gnupg
+
+# Initialize with your GPG key
+pass init "your-gpg-id@email.com"
+
+# Set backend
+export DOTFILES_VAULT_BACKEND=pass
+
+# Items will be stored under dotfiles/ prefix
+# e.g., dotfiles/Git-Config, dotfiles/SSH-Config
+```
+
+---
 
 ### Pre-Restore Safety Check
 
@@ -72,13 +149,11 @@ dotfiles vault restore --force
 DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
 ```
 
-> 📖 **Full Documentation:** For complete documentation including all script details, item formats, and workflows, see the [vault/README.md](https://github.com/blackwell-systems/dotfiles/blob/main/vault/README.md) file in the repository.
-
 ---
 
 ### Offline Mode
 
-For air-gapped environments, Bitwarden outages, or when you simply don't have vault access:
+For air-gapped environments, vault outages, or when you simply don't have vault access:
 
 ```bash
 # Skip all vault operations during bootstrap
@@ -96,15 +171,68 @@ When offline mode is enabled:
 
 ---
 
+## Architecture
+
+### Backend Abstraction Layer
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    VAULT SYSTEM ARCHITECTURE                     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   USER COMMANDS                                                  │
+│   ═══════════════════════════════════════════════════════════    │
+│   dotfiles vault restore | sync | create | delete | list        │
+│                     ↓                                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   OPERATION LAYER                                                │
+│   ═════════════════════════════════════════════════════════════  │
+│   restore-*.sh, sync-to-bitwarden.sh, create/delete scripts     │
+│                     ↓                                            │
+│   _common.sh (data structures, validation, drift detection)     │
+│                     ↓                                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   VAULT ABSTRACTION (lib/_vault.sh)                             │
+│   ═════════════════════════════════════════════════════════════  │
+│   vault_get_session()  vault_get_item()   vault_create_item()   │
+│   vault_sync()         vault_get_notes()  vault_update_item()   │
+│   vault_login_check()  vault_item_exists() vault_delete_item()  │
+│                     ↓                                            │
+│   Loads backend based on DOTFILES_VAULT_BACKEND                 │
+│                     ↓                                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   BACKENDS (vault/backends/*.sh)                                │
+│   ═════════════════════════════════════════════════════════════  │
+│   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
+│   │  bitwarden  │  │  1password  │  │    pass     │             │
+│   │    (bw)     │  │    (op)     │  │ (pass/gpg)  │             │
+│   └─────────────┘  └─────────────┘  └─────────────┘             │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Adding a New Backend
+
+1. Create `vault/backends/newbackend.sh`
+2. Implement required functions (see `backends/_interface.md`)
+3. Test with `DOTFILES_VAULT_BACKEND=newbackend dotfiles vault list`
+
+---
+
 ## Common Workflows
 
 ### First Time Setup
 
 ```bash
-# 1. Login to Bitwarden
-bw login
+# 1. Login to your vault
+bw login                    # Bitwarden
+op signin                   # 1Password
+# (pass uses GPG, no login needed)
 
-# 2. Push your existing secrets to Bitwarden
+# 2. Push your existing secrets to vault
 dotfiles vault sync --all
 
 # 3. Verify items were created
@@ -121,8 +249,10 @@ cd ~/workspace/dotfiles
 # 2. Bootstrap the system
 ./bootstrap/bootstrap-mac.sh  # or bootstrap-linux.sh
 
-# 3. Login to Bitwarden
-bw login
+# 3. Login to your vault
+bw login                    # Bitwarden
+op signin                   # 1Password
+# (pass uses GPG, no login needed)
 
 # 4. Restore all secrets
 dotfiles vault restore
@@ -134,7 +264,7 @@ dotfiles vault restore
 # Update SSH config locally
 vim ~/.ssh/config
 
-# Sync changes to Bitwarden
+# Sync changes to vault
 dotfiles vault sync SSH-Config
 
 # Check vault health
@@ -142,6 +272,24 @@ dotfiles vault check
 
 # Validate vault schema
 dotfiles vault validate
+```
+
+### Switching Backends
+
+```bash
+# 1. Export from current backend
+dotfiles vault list  # Note all items
+
+# 2. Set new backend
+export DOTFILES_VAULT_BACKEND=1password
+
+# 3. Create items in new backend
+dotfiles vault create Git-Config
+dotfiles vault create SSH-Config
+# ... etc
+
+# 4. Verify
+dotfiles vault check
 ```
 
 ---
@@ -162,7 +310,7 @@ ssh-ed25519 AAAAC3... username@hostname
 
 **Item Names:**
 - `SSH-GitHub-Enterprise` → `~/.ssh/id_ed25519_enterprise_ghub{,.pub}`
-- `SSH-GitHub-Personal` → `~/.ssh/id_ed25519_personal{,.pub}`
+- `SSH-GitHub-Blackwell` → `~/.ssh/id_ed25519_blackwell{,.pub}`
 
 ### Configuration Files
 
@@ -188,17 +336,17 @@ dotfiles vault validate
 ```
 
 **Validates:**
-- ✅ Item exists in vault
-- ✅ Item type is Secure Note
-- ✅ Notes field has content
-- ✅ SSH keys contain BEGIN/END markers
-- ✅ SSH keys contain public key line
-- ✅ Config files meet minimum length
+- Item exists in vault
+- Item type is Secure Note
+- Notes field has content
+- SSH keys contain BEGIN/END markers
+- SSH keys contain public key line
+- Config files meet minimum length
 
 **Common errors:**
 - Item missing → Create with `dotfiles vault create`
 - Empty notes → Re-sync with `dotfiles vault sync`
-- Wrong format → Edit in Bitwarden web vault
+- Wrong format → Edit in vault web interface
 
 ---
 
@@ -207,12 +355,15 @@ dotfiles vault validate
 ### Session Expired
 
 ```bash
-# Re-unlock vault
+# Bitwarden: Re-unlock vault
 export BW_SESSION="$(bw unlock --raw)"
 
 # Or logout and login
 bw logout
 bw login
+
+# 1Password: Re-sign in
+op signin
 ```
 
 ### Item Not Found
@@ -238,7 +389,7 @@ chmod 600 ~/.ssh/config
 
 ## Security Notes
 
-- **Session file** (`.bw-session`) is created with `600` permissions (owner read/write only)
+- **Session file** (`.vault-session`) is created with `600` permissions (owner read/write only)
 - **SSH private keys** are set to `600` automatically
 - **Protected items** (SSH-*, AWS-*, Git-Config) require confirmation before deletion
 - **Vault sync** creates backups before overwriting (`.bak-YYYYMMDDHHMMSS`)
