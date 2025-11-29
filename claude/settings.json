@@ -1,11 +1,27 @@
 {
-  "hooks": [
-    {
-      "event": "on_session_start",
-      "command": "git fetch && git status --porcelain=v2 --branch",
-      "description": "Check git sync status at session start"
-    }
-  ],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "claude/hooks/block-dangerous-git.sh"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "claude/hooks/git-sync-check.sh"
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow_bash": true,
     "allow_read": true,
