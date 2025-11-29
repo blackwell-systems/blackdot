@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+# =============================================================================
+# dotfiles-doc-sync - Check that documentation is in sync across locations
+# =============================================================================
+# This script validates that key documentation sections are consistent between
+# the root README.md and docs/README.md files.
+#
+# Usage:
+#   dotfiles doc-sync        # Check for drift
+#   dotfiles doc-sync --fix  # Show what needs to be synced
+#
+# Exit codes:
+#   0 - Docs are in sync
+#   1 - Docs have drifted
+# =============================================================================
+
+set -euo pipefail
+
+# Get the dotfiles root directory
+DOTFILES_ROOT="${DOTFILES:-$(cd "$(dirname "$0")/.." && pwd)}"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+ROOT_README="$DOTFILES_ROOT/README.md"
+DOCS_README="$DOTFILES_ROOT/docs/README.md"
+
+# Track drift status
+DRIFT_FOUND=0
+
+info() { echo -e "${BLUE}[INFO]${NC} $*"; }
+pass() { echo -e "${GREEN}[PASS]${NC} $*"; }
+warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
+fail() { echo -e "${RED}[FAIL]${NC} $*"; }
+
+# =============================================================================
+# Extraction functions for key sections
+# =============================================================================
+
+# Extract a section by header (e.g., "## Features")
+extract_section() {
+    local file="$1"
+    local header="$2"
+    local next_header_pattern="${3:-^## }"
+
+    awk -v header="$header" -v pattern="$next_header_pattern" '
+        $0 ~ header { found=1; next }
+        found && $0 ~ pattern { exit }
+        found { print }
+    ' "$file"
+}
+
+# Extract version number
+extract_version() {
+    local file="$1"
+    grep -oP 'Version.*?(\d+\.\d+\.\d+)' "$file" | head -1 | grep -oP '\d+\.\d+\.\d+' || echo "unknown"
+}
+
+# =============================================================================
+# Comparison functions
+# =============================================================================
+
+compare_versions() {
+    local root_ver docs_ver
+    root_ver=$(extract_version "$ROOT_README")
+    docs_ver=$(extract_version "$DOCS_README")
+
+    if [[ "$root_ver" == "$docs_ver" ]]; then
+        pass "Version numbers match: $root_ver"
+    else
+        fail "Version mismatch: README.md=$root_ver, docs/README.md=$docs_ver"
+        DRIFT_FOUND=1
+    fi
+}
+
+compare_features() {
+    local root_features docs_features
+    root_features=$(extract_section "$ROOT_README" "^## Features" | wc -l)
+    docs_features=$(extract_section "$DOCS_README" "^## Features" | wc -l)
+
+    # Allow small differences (formatting), but flag major drift
+    local diff=$((root_features - docs_features))
+    diff=${diff#-}  # Absolute value
+
+    if [[ $diff -lt 3 ]]; then
+        pass "Features section similar ($root_features vs $docs_features lines)"
+    else
+        warn "Features section differs significantly ($root_features vs $docs_features lines)"
+        DRIFT_FOUND=1
+    fi
+}
+
+compare_badges() {
+    local root_badges docs_badges
+    root_badges=$(grep -c '\[!\[' "$ROOT_README" || echo 0)
+    docs_badges=$(grep -c '\[!\[' "$DOCS_README" || echo 0)
+
+    if [[ "$root_badges" == "$docs_badges" ]]; then
+        pass "Badge count matches: $root_badges"
+    else
+        warn "Badge count differs: README.md=$root_badges, docs/README.md=$docs_badges"
+        # Don't fail for badge differences
+    fi
+}
+
+compare_key_phrases() {
+    local phrases=(
+        "Multi-vault"
+        "Claude Code"
+        "446-line"
+        "80+ tests"
+        "defensive hooks"
+    )
+
+    for phrase in "${phrases[@]}"; do
+        local root_count docs_count
+        root_count=$(grep -c "$phrase" "$ROOT_README" || echo 0)
+        docs_count=$(grep -c "$phrase" "$DOCS_README" || echo 0)
+
+        if [[ "$root_count" == "$docs_count" ]]; then
+            pass "\"$phrase\" count matches: $root_count"
+        else
+            warn "\"$phrase\" differs: README.md=$root_count, docs/README.md=$docs_count"
+            DRIFT_FOUND=1
+        fi
+    done
+}
+
+# =============================================================================
+# Main
+# =============================================================================
+
+main() {
+    echo ""
+    echo "Documentation Sync Check"
+    echo "========================"
+    echo ""
+
+    # Check files exist
+    if [[ ! -f "$ROOT_README" ]]; then
+        fail "Root README.md not found: $ROOT_README"
+        exit 1
+    fi
+
+    if [[ ! -f "$DOCS_README" ]]; then
+        fail "docs/README.md not found: $DOCS_README"
+        exit 1
+    fi
+
+    info "Comparing README.md and docs/README.md..."
+    echo ""
+
+    compare_versions
+    compare_features
+    compare_badges
+    compare_key_phrases
+
+    echo ""
+
+    if [[ $DRIFT_FOUND -eq 0 ]]; then
+        pass "Documentation is in sync!"
+        exit 0
+    else
+        fail "Documentation has drifted. Please update both files."
+        echo ""
+        echo "Files to update:"
+        echo "  - $ROOT_README"
+        echo "  - $DOCS_README"
+        echo "  - docs/README-FULL.md (if applicable)"
+        echo ""
+        echo "See CLAUDE.md for documentation update guidelines."
+        exit 1
+    fi
+}
+
+main "$@"

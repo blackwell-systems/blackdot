@@ -47,7 +47,7 @@ No other dotfiles repo has ANY Claude Code integration. This is a first.
 ### Advanced (opt-in)
 - **Cross-platform portability** – Same dotfiles on macOS, Linux, Windows, WSL2, or Docker.
 - **Metrics and observability** – Track dotfiles health over time.
-- **Git safety hooks** – Session start hook prevents branch divergence.
+- **Git safety hooks** – Defensive hooks block dangerous git commands (force push, hard reset). [Learn more](docs/claude-code.md)
 
 ---
 

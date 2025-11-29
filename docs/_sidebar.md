@@ -5,6 +5,7 @@
   - [Quick Start](/#quick-start)
   - [Prerequisites](/#prerequisites)
   - [Use Cases](/#use-cases)
+  - [Claude Code Integration](claude-code.md)
 
 - **Configuration**
   - [What Gets Installed](/#what-gets-installed)
