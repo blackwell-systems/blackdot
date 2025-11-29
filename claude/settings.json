@@ -1,4 +1,11 @@
 {
+  "hooks": [
+    {
+      "event": "on_session_start",
+      "command": "git fetch && git status --porcelain=v2 --branch",
+      "description": "Check git sync status at session start"
+    }
+  ],
   "permissions": {
     "allow_bash": true,
     "allow_read": true,
