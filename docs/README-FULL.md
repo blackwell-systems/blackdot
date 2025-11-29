@@ -5,9 +5,9 @@
 
 > **Enterprise-grade dotfiles** with multi-vault secret management (Bitwarden, 1Password, pass), machine-specific templates, portable Claude Code sessions, and automated health checks. Works across macOS, Linux, Windows, WSL2, and Docker.
 
-[![Version](https://img.shields.io/badge/Version-1.7.0-blue)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.8.0-blue)](../CHANGELOG.md)
 
-**Version:** 1.7.0 | [Changelog](../CHANGELOG.md) | [Quick Start Guide](../README.md)
+**Version:** 1.8.0 | [Changelog](../CHANGELOG.md) | [Quick Start Guide](../README.md)
 
 This is the comprehensive reference documentation for the dotfiles system. It covers configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code portable sessions**, and a **multi-vault secret bootstrap** (supporting Bitwarden, 1Password, and pass) for SSH keys, AWS credentials, and environment secrets across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
 
