@@ -111,14 +111,21 @@ Commands with ASCII art banner via `awstools`:
 ~/workspace/dotfiles/
 ├── Brewfile              # Shared packages (macOS + Lima)
 ├── README.md             # Full documentation
-├── NOTES.md              # THIS FILE - session context
 ├── CHANGELOG.md          # Version history
-├── bootstrap-dotfiles.sh # Symlink setup
-├── bootstrap-lima.sh     # Lima-specific bootstrap
-├── bootstrap-mac.sh      # macOS-specific bootstrap
-├── dotfiles-doctor.sh    # Health check (use: dotfiles doctor)
-├── dotfiles-drift.sh     # Drift detection (use: dotfiles drift)
+├── bootstrap/            # Platform bootstrap scripts
+│   ├── bootstrap-mac.sh  # macOS-specific bootstrap
+│   ├── bootstrap-linux.sh # Linux/WSL/Lima bootstrap
+│   ├── bootstrap-dotfiles.sh # Symlink setup
+│   └── _common.sh        # Shared bootstrap functions
+├── bin/                  # CLI tools
+│   ├── dotfiles-doctor   # Health check (use: dotfiles doctor)
+│   ├── dotfiles-drift    # Drift detection (use: dotfiles drift)
+│   ├── dotfiles-backup   # Backup/restore
+│   ├── dotfiles-diff     # Preview changes
+│   ├── dotfiles-init     # Setup wizard
+│   └── dotfiles-uninstall # Clean removal
 ├── claude/               # Claude Code settings + commands
+├── docs/                 # Documentation (incl. this file)
 ├── ghostty/              # Ghostty terminal config
 ├── lima/                 # Lima VM config
 ├── macos/                # macOS system settings
@@ -129,8 +136,9 @@ Commands with ASCII art banner via `awstools`:
 ├── zellij/
 │   └── config.kdl        # Zellij multiplexer config
 └── zsh/
-    ├── zshrc             # Main shell config (~820 lines)
-    └── p10k.zsh          # Powerlevel10k theme
+    ├── .zshrc            # Main shell config (symlinked)
+    ├── .p10k.zsh         # Powerlevel10k theme
+    └── zsh.d/            # Modular zsh config
 ```
 
 ---

@@ -154,7 +154,7 @@ fi
 step "Step 4: Health Check"
 
 echo "Running health check..."
-"$DOTFILES_DIR/dotfiles-doctor.sh" || true
+"$DOTFILES_DIR/bin/dotfiles-doctor" || true
 
 # Complete
 step "Setup Complete!"

@@ -89,11 +89,11 @@ OS="$(uname -s)"
 case "$OS" in
     Darwin)
         PLATFORM="macOS"
-        BOOTSTRAP_SCRIPT="bootstrap-mac.sh"
+        BOOTSTRAP_SCRIPT="bootstrap/bootstrap-mac.sh"
         ;;
     Linux)
         PLATFORM="Linux"
-        BOOTSTRAP_SCRIPT="bootstrap-linux.sh"
+        BOOTSTRAP_SCRIPT="bootstrap/bootstrap-linux.sh"
         # Detect WSL/Lima
         if grep -qiE "(microsoft|wsl)" /proc/version 2>/dev/null; then
             PLATFORM="WSL2"

@@ -124,10 +124,10 @@ dotfiles doctor
 
 # 4. Test on clean environment (if possible)
 # macOS:
-./bootstrap-mac.sh
+./bootstrap/bootstrap-mac.sh
 
 # Linux:
-./bootstrap-linux.sh
+./bootstrap/bootstrap-linux.sh
 ```
 
 **Manual testing checklist:**
@@ -159,7 +159,7 @@ cd vault
 **macOS:**
 ```bash
 # Test full bootstrap on macOS
-./bootstrap-mac.sh
+./bootstrap/bootstrap-mac.sh
 dotfiles doctor --fix
 ```
 
@@ -168,7 +168,7 @@ dotfiles doctor --fix
 # Test in Docker (Ubuntu)
 docker run -it --rm -v $PWD:/dotfiles ubuntu:24.04 bash
 cd /dotfiles
-./bootstrap-linux.sh
+./bootstrap/bootstrap-linux.sh
 dotfiles doctor
 ```
 
@@ -381,7 +381,7 @@ export DEBUG=1
 ./vault/restore-ssh.sh
 
 # For shell scripts
-bash -x ./bootstrap-mac.sh
+bash -x ./bootstrap/bootstrap-mac.sh
 ```
 
 **Check logs:**

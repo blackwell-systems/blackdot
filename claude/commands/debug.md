@@ -15,7 +15,7 @@ cd ~/workspace/dotfiles 2>/dev/null && git log -1 --oneline || echo "Not found"
 echo ""
 
 echo "=== Health Check ==="
-~/workspace/dotfiles/dotfiles-doctor.sh 2>&1 | head -30
+~/workspace/dotfiles/bin/dotfiles-doctor 2>&1 | head -30
 ```
 
 Summarize any issues found and suggest fixes.

@@ -88,15 +88,19 @@ flowchart TD
 ```
 dotfiles/
 ├── install.sh              # One-line installer
-├── bootstrap-mac.sh        # macOS setup
-├── bootstrap-linux.sh      # Linux/WSL setup
-├── dotfiles-*.sh           # CLI tools
-│   ├── dotfiles-doctor.sh  # Health checks
-│   ├── dotfiles-drift.sh   # Vault comparison
-│   ├── dotfiles-diff.sh    # Preview changes
-│   ├── dotfiles-backup.sh  # Backup/restore
-│   └── dotfiles-init.sh    # Setup wizard
-├── uninstall.sh            # Clean removal
+├── bootstrap/              # Platform bootstrap scripts
+│   ├── bootstrap-mac.sh    # macOS setup
+│   ├── bootstrap-linux.sh  # Linux/WSL setup
+│   ├── bootstrap-dotfiles.sh # Symlink setup
+│   └── _common.sh          # Shared bootstrap functions
+├── bin/                    # CLI tools
+│   ├── dotfiles-doctor     # Health checks
+│   ├── dotfiles-drift      # Vault comparison
+│   ├── dotfiles-diff       # Preview changes
+│   ├── dotfiles-backup     # Backup/restore
+│   ├── dotfiles-init       # Setup wizard
+│   ├── dotfiles-uninstall  # Clean removal
+│   └── dotfiles-metrics    # Show metrics
 │
 ├── zsh/
 │   ├── .zshrc              # Main entry (symlinked)
