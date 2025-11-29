@@ -7,10 +7,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)
 ![Shell](https://img.shields.io/badge/Shell-Zsh-blueviolet)
-![Secrets](https://img.shields.io/badge/Secrets-Bitwarden-ff4081)
+![Secrets](https://img.shields.io/badge/Secrets-Multi--Vault-ff4081)
 ![Claude Portability](https://img.shields.io/badge/Claude_Portability-Enabled-8A2BE2)
 
-> Enterprise-grade dotfiles with Bitwarden vault integration, machine-specific templates, portable Claude Code sessions, and automated health checks. Works across macOS, Linux, Windows, WSL2, and Docker.
+> Enterprise-grade dotfiles with multi-vault secret management (Bitwarden, 1Password, pass), machine-specific templates, portable Claude Code sessions, and automated health checks. Works across macOS, Linux, Windows, WSL2, and Docker.
 
 [![Version](https://img.shields.io/badge/Version-1.7.0-blue)](CHANGELOG.md)
 
@@ -21,7 +21,7 @@
 ## Features
 
 ### Core (works everywhere)
-- **Bitwarden vault integration** – SSH keys, AWS credentials, Git config, and environment secrets restored from Bitwarden. One unlock, full environment. Schema validation ensures item integrity.
+- **Multi-vault secret management** – SSH keys, AWS credentials, Git config, and environment secrets synced with your choice of Bitwarden, 1Password, or pass. One unlock, full environment. Schema validation ensures item integrity.
 - **Machine-specific templates** – Generate configs tailored to each machine (work vs personal, macOS vs Linux). Git identity, SSH hosts, shell settings all adapt automatically.
 - **Automated health checks** – Validate symlinks, permissions, required tools, and vault sync. Optional auto-fix and drift detection.
 - **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat, and other modern Unix replacements, configured and ready.
@@ -42,7 +42,7 @@
 
 | Capability           | This Repo                                      | Typical Dotfiles                 |
 |----------------------|-----------------------------------------------|----------------------------------|
-| **Secrets management** | Bitwarden vault with restore/sync             | Manual copy between machines     |
+| **Secrets management** | Multi-vault (Bitwarden, 1Password, pass)      | Manual copy between machines     |
 | **Health validation**  | 573-line checker with `--fix`                 | None                             |
 | **Drift detection**    | Compare local vs vault state                  | None                             |
 | **Schema validation**  | Validates SSH keys & config structure         | None                             |
@@ -59,7 +59,7 @@
 
 | Feature | This Repo | thoughtbot | holman | mathiasbynens | YADR |
 |---------|-----------|------------|--------|---------------|------|
-| **Secrets Management** | ✅ Bitwarden vault | ❌ Manual | ❌ Manual | ❌ Manual | ❌ Manual |
+| **Secrets Management** | ✅ Multi-vault (bw/op/pass) | ❌ Manual | ❌ Manual | ❌ Manual | ❌ Manual |
 | **Bidirectional Sync** | ✅ Local ↔ Vault | ❌ | ❌ | ❌ | ❌ |
 | **Cross-Platform** | ✅ macOS, Linux, Windows, WSL2, Docker | ⚠️ Limited | ⚠️ macOS only | ⚠️ macOS only | ⚠️ Limited |
 | **Claude Code Sessions** | ✅ Portable via `/workspace` | ❌ | ❌ | ❌ | ❌ |
@@ -83,19 +83,19 @@
 #### Key Differentiators
 
 **vs thoughtbot/dotfiles:**
-- ✨ **Secrets Management**: Bitwarden vault vs manual copying
+- ✨ **Secrets Management**: Multi-vault backends vs manual copying
 - ✨ **Cross-Platform**: Full Docker/WSL2/Lima support vs macOS/Linux only
 - ✨ **Health Monitoring**: Comprehensive checks vs none
 - ✨ **Testing**: Unit tests + CI vs basic install script
 
 **vs holman/dotfiles:**
 - ✨ **Active Development**: Regular updates vs archived (2018)
-- ✨ **Enterprise Ready**: Vault integration, team onboarding vs personal use
+- ✨ **Enterprise Ready**: Multi-vault support, team onboarding vs personal use
 - ✨ **Cross-Platform**: Multi-OS support vs macOS only
 - ✨ **Portability**: Claude Code sessions, /workspace symlink vs static paths
 
 **vs mathiasbynens/dotfiles:**
-- ✨ **Secrets Management**: Vault system vs exposed in git
+- ✨ **Secrets Management**: Multi-vault system vs exposed in git
 - ✨ **Health Validation**: Auto-fix capability vs none
 - ✨ **Cross-Platform**: Full Linux/WSL2 support vs macOS focus
 - ✨ **Testing**: Automated tests vs manual verification
@@ -103,32 +103,33 @@
 
 **vs YADR (Yet Another Dotfile Repo):**
 - ✨ **Lighter Weight**: Focused tooling vs kitchen sink approach
-- ✨ **Secrets Safety**: Vault-backed vs all in git
+- ✨ **Secrets Safety**: Multi-vault backends vs all in git
 - ✨ **Modern Stack**: eza, fzf, zoxide vs older tools
 - ✨ **Maintenance**: Active vs minimal updates
 - 🤝 **Similar**: Both aim for comprehensive setup
 
 #### What Makes This Unique
 
-1. **Only dotfiles with Bitwarden bidirectional sync** - Create, restore, validate vault items
+1. **Only dotfiles with multi-vault backend support** - Bitwarden, 1Password, or pass with unified API
 2. **Only dotfiles with Claude Code session portability** - `/workspace` symlink + auto-redirect
 3. **Only dotfiles with comprehensive health checks** - 573-line validator with auto-fix
 4. **Only dotfiles with drift detection** - Compare local vs vault state
 5. **Only dotfiles with schema validation** - Ensures SSH keys/configs are valid before restore
 6. **Only dotfiles with Docker bootstrap testing** - Reproducible CI/CD environments
+7. **Only dotfiles with machine-specific templates** - Auto-generate configs for work vs personal machines
 
 </details>
 
 ### What you get
 
-- **Vault-backed secrets**: SSH keys, AWS credentials, and configs live in Bitwarden—not scattered across machines or committed to git
+- **Vault-backed secrets**: SSH keys, AWS credentials, and configs live in your vault (Bitwarden, 1Password, or pass)—not scattered across machines or committed to git
 - **Self-healing dotfiles**: Health checks catch permission drift, broken symlinks, and missing vault items. Auto-fix with `--fix`
 - **Observable state**: Track health metrics over time, detect when things break
 - **Tested**: CI runs 80+ tests (unit, integration, error scenarios) on every push
 
 ### What's optional
 
-Everything works on a single machine. Cross-platform sync, Claude session portability, and even Bitwarden itself are opt-in:
+Everything works on a single machine. Cross-platform sync, Claude session portability, and vault integration are opt-in:
 
 ```bash
 # Minimal install (no vault, no /workspace symlink, no Claude setup)
@@ -137,13 +138,15 @@ SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.s
 # Then manually configure ~/.ssh, ~/.aws, ~/.gitconfig
 ```
 
-> 💡 **Don't use Bitwarden?** No problem!
+> 💡 **Don't use a vault?** No problem!
 >
 > The vault system is completely optional. Run with `--minimal` flag:
 > ```bash
 > curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
 > ```
 > Then manually configure `~/.ssh`, `~/.aws`, `~/.gitconfig`. All shell config, aliases, and tools still work!
+>
+> Or choose your preferred vault backend: Bitwarden (default), 1Password, or pass.
 
 Inspired by: holman/dotfiles, thoughtbot/dotfiles, mathiasbynens/dotfiles
 
@@ -161,7 +164,7 @@ Inspired by: holman/dotfiles, thoughtbot/dotfiles, mathiasbynens/dotfiles
 - Modern CLI tools (eza, fzf, ripgrep, etc. via Brewfile)
 
 **Optional (for vault features only):**
-- **Bitwarden CLI + account** - For automated secret sync
+- **Vault CLI** - Bitwarden (`bw`), 1Password (`op`), or pass for automated secret sync
   - Skip with `--minimal` flag (or just don't run `dotfiles vault` commands)
   - Without vault: manually configure `~/.ssh`, `~/.aws`, `~/.gitconfig`
 
@@ -204,9 +207,9 @@ cd ~/workspace/dotfiles
 ./bootstrap/bootstrap-mac.sh      # macOS
 ./bootstrap/bootstrap-linux.sh    # Linux / WSL2 / Lima / Docker
 
-# 3. Restore secrets from Bitwarden
-bw login
-export BW_SESSION="$(bw unlock --raw)"
+# 3. Restore secrets from vault
+bw login                    # or: op signin (1Password) / gpg for pass
+export BW_SESSION="$(bw unlock --raw)"  # Bitwarden only
 ./vault/bootstrap-vault.sh
 
 # 4. Verify
@@ -216,9 +219,9 @@ dotfiles doctor
 **That's it.** Shell configured, secrets restored, health validated.
 
 <details>
-<summary><b>Don't use Bitwarden?</b></summary>
+<summary><b>Don't use a vault manager?</b></summary>
 
-The vault system is completely optional. Two options:
+The vault system supports Bitwarden, 1Password, and pass. Or skip it entirely:
 
 **Option 1: Use `--minimal` flag**
 ```bash
@@ -253,7 +256,7 @@ SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-mac.sh
 **Available flags:**
 - `SKIP_WORKSPACE_SYMLINK=true` – Skip `/workspace` symlink creation (for single-machine setups)
 - `SKIP_CLAUDE_SETUP=true` – Skip `~/.claude` configuration symlink
-- `DOTFILES_OFFLINE=1` – Skip all Bitwarden vault operations (for air-gapped or offline environments)
+- `DOTFILES_OFFLINE=1` – Skip all vault operations (for air-gapped or offline environments)
 
 All features are opt-in by default and can be disabled without breaking the rest of the setup.
 </details>
@@ -268,7 +271,7 @@ All features are opt-in by default and can be disabled without breaking the rest
 
 - **Docker/CI environments** – Bootstrap in containers for reproducible builds. Vault restore from CI secrets.
 
-- **Air-gapped/Offline** – Use `DOTFILES_OFFLINE=1` when Bitwarden isn't available. Vault operations skip gracefully.
+- **Air-gapped/Offline** – Use `DOTFILES_OFFLINE=1` when vault isn't available. Vault operations skip gracefully.
 
 - **Multi-machine workflow** – Develop on macOS, test on Linux VM, deploy from WSL. Same dotfiles, same secrets, same Claude sessions everywhere.
 
@@ -290,10 +293,10 @@ All features are opt-in by default and can be disabled without breaking the rest
 - AWS CLI, Bitwarden CLI
 
 ### Configurations
-- SSH keys and config (from Bitwarden)
-- AWS credentials and config (from Bitwarden)
-- Git configuration (from Bitwarden)
-- Environment secrets (from Bitwarden)
+- SSH keys and config (from vault)
+- AWS credentials and config (from vault)
+- Git configuration (from vault)
+- Environment secrets (from vault)
 - Claude Code settings (shared workspace)
 
 See [Brewfile](Brewfile) for complete package list.
@@ -302,12 +305,17 @@ See [Brewfile](Brewfile) for complete package list.
 
 ## Key Concepts
 
-### Bitwarden Vault System
+### Vault System (Multi-Backend)
 
-All secrets are stored in Bitwarden and restored on new machines:
+Secrets are stored in your preferred vault and restored on new machines:
 
 ```bash
-# First time: Push secrets to Bitwarden
+# Set your preferred backend (add to ~/.zshrc)
+export DOTFILES_VAULT_BACKEND=bitwarden  # default
+export DOTFILES_VAULT_BACKEND=1password  # 1Password CLI v2
+export DOTFILES_VAULT_BACKEND=pass       # Standard Unix password manager
+
+# First time: Push secrets to vault
 dotfiles vault sync --all
 
 # New machine: Restore secrets
@@ -316,9 +324,16 @@ dotfiles vault restore
 # Validate vault item schema
 dotfiles vault validate
 
-# Check for drift (local vs Bitwarden)
+# Check for drift (local vs vault)
 dotfiles drift
 ```
+
+**Supported backends:**
+| Backend | CLI Tool | Description |
+|---------|----------|-------------|
+| Bitwarden | `bw` | Default, full-featured, cloud-synced |
+| 1Password | `op` | v2 CLI with biometric auth |
+| pass | `pass` | GPG-based, git-synced, local-first |
 
 **Supported secrets:**
 - SSH keys (multiple identities)
@@ -437,7 +452,7 @@ A unified command for managing your dotfiles:
 dotfiles status          # Quick visual dashboard (color-coded)
 dotfiles doctor          # Comprehensive health check
 dotfiles doctor --fix    # Auto-repair permission issues
-dotfiles drift           # Compare local files vs Bitwarden vault
+dotfiles drift           # Compare local files vs vault
 dotfiles diff            # Preview changes before sync/restore
 
 # Backup & Restore
@@ -448,7 +463,7 @@ dotfiles backup restore  # Restore from backup
 # Vault Operations
 dotfiles vault restore   # Restore secrets (checks for local drift first)
 dotfiles vault restore --force  # Skip drift check, overwrite local
-dotfiles vault sync      # Sync local files to Bitwarden
+dotfiles vault sync      # Sync local files to vault
 dotfiles vault list      # List vault items
 dotfiles vault check     # Validate vault items exist
 
@@ -481,7 +496,7 @@ Validate your environment anytime:
 ```bash
 dotfiles doctor             # Comprehensive check
 dotfiles doctor --fix       # Auto-repair permissions
-dotfiles drift              # Compare local vs Bitwarden vault
+dotfiles drift              # Compare local vs vault
 ```
 
 **Checks performed:**
@@ -489,7 +504,7 @@ dotfiles drift              # Compare local vs Bitwarden vault
 - Required commands (brew, zsh, git, bw, aws)
 - SSH keys and permissions (600 private, 644 public)
 - AWS configuration and credentials
-- Bitwarden login status
+- Vault login status
 - Drift detection (local vs vault)
 
 ---
@@ -505,7 +520,7 @@ dotfiles-upgrade  # Pull latest, run bootstrap, check health
 ### Sync Secrets
 
 ```bash
-# Update SSH config locally, then sync to Bitwarden
+# Update SSH config locally, then sync to vault
 vim ~/.ssh/config
 ./vault/sync-to-bitwarden.sh SSH-Config
 
@@ -520,7 +535,7 @@ vim ~/.ssh/config
 ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey
 
 # 2. Add to vault/_common.sh SSH_KEYS array
-# 3. Sync to Bitwarden
+# 3. Sync to vault
 ./vault/sync-to-bitwarden.sh SSH-GitHub-NewKey
 
 # 4. Update SSH config
@@ -555,11 +570,15 @@ dotfiles/
 │   ├── dotfiles-metrics      # Metrics visualization
 │   └── dotfiles-uninstall    # Clean removal
 │
-├── vault/                     # Bitwarden secret management
+├── vault/                     # Multi-backend secret management
 │   ├── _common.sh            # Shared config & validation functions
+│   ├── backends/             # Vault backend implementations
+│   │   ├── bitwarden.sh      # Bitwarden CLI backend
+│   │   ├── 1password.sh      # 1Password CLI v2 backend
+│   │   └── pass.sh           # pass (GPG) backend
 │   ├── bootstrap-vault.sh    # Orchestrator
 │   ├── restore-*.sh          # Restore SSH, AWS, Git, env
-│   ├── sync-to-bitwarden.sh  # Sync local → Bitwarden
+│   ├── sync-to-bitwarden.sh  # Sync local → vault
 │   ├── validate-schema.sh    # Validate vault item structure
 │   └── check-vault-items.sh  # Pre-flight validation
 │
@@ -583,7 +602,8 @@ dotfiles/
 │
 ├── lib/                       # Shared libraries
 │   ├── _logging.sh           # Colors and logging functions
-│   └── _templates.sh         # Template engine
+│   ├── _templates.sh         # Template engine
+│   └── _vault.sh             # Vault abstraction layer
 │
 ├── templates/                 # Machine-specific templates
 │   ├── _variables.sh         # Default variable definitions
@@ -715,7 +735,7 @@ To customize:
 - **[Template Guide](templates.md)** - Machine-specific configuration templates
 - **[Architecture](architecture.md)** - System diagrams and component overview
 - **[Troubleshooting](troubleshooting.md)** - Common issues and solutions
-- **[Vault README](vault-README.md)** - Bitwarden vault details
+- **[Vault README](vault-README.md)** - Multi-vault backend details
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contributor guide
 - **[SECURITY.md](SECURITY.md)** - Security policy
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
@@ -742,9 +762,13 @@ ssh-add -l               # Verify keys loaded
 ssh -T git@github.com    # Test connection
 ```
 
-**Bitwarden session expired:**
+**Vault session expired:**
 ```bash
+# Bitwarden
 export BW_SESSION="$(bw unlock --raw)"
+
+# 1Password - re-sign in
+op signin
 ```
 
 **Tab completion not working:**
@@ -771,7 +795,7 @@ See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community guidelines.
 
 ## Security
 
-- All secrets stored in Bitwarden (encrypted)
+- All secrets stored in vault (encrypted)
 - Session caching with 600 permissions
 - Pre-commit hooks prevent secret leaks
 - Regular security audits (see [SECURITY.md](SECURITY.md))

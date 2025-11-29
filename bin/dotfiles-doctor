@@ -205,11 +205,15 @@ check_command "git"
 check_command "brew" "homebrew"
 check_command "jq"
 
-# Optional but recommended
+# Optional: vault CLI tools
 if command -v bw >/dev/null 2>&1; then
     pass "bw (Bitwarden CLI)"
+elif command -v op >/dev/null 2>&1; then
+    pass "op (1Password CLI)"
+elif command -v pass >/dev/null 2>&1; then
+    pass "pass (standard Unix password manager)"
 else
-    info "bw not installed (optional - for vault features)"
+    info "No vault CLI installed (optional - for vault features)"
 fi
 
 # ============================================================
@@ -288,22 +292,40 @@ if [[ -d "$HOME/.aws" ]] || command -v aws >/dev/null 2>&1; then
 fi
 
 # ============================================================
-# Section 6: Bitwarden Vault (unless quick mode)
+# Section 6: Vault Status (unless quick mode)
 # ============================================================
-if ! $QUICK_MODE && command -v bw >/dev/null 2>&1; then
-    section "Bitwarden Vault"
+if ! $QUICK_MODE; then
+    if command -v bw >/dev/null 2>&1; then
+        section "Vault Status (Bitwarden)"
 
-    if bw login --check >/dev/null 2>&1; then
-        pass "Logged in to Bitwarden"
+        if bw login --check >/dev/null 2>&1; then
+            pass "Logged in to Bitwarden"
 
-        # Check if unlocked
-        if bw unlock --check >/dev/null 2>&1; then
-            pass "Vault is unlocked"
+            # Check if unlocked
+            if bw unlock --check >/dev/null 2>&1; then
+                pass "Vault is unlocked"
+            else
+                warn "Vault is locked - run: export BW_SESSION=\"\$(bw unlock --raw)\""
+            fi
         else
-            warn "Vault is locked - run: export BW_SESSION=\"\$(bw unlock --raw)\""
+            warn "Not logged in to Bitwarden - run: bw login"
         fi
-    else
-        warn "Not logged in to Bitwarden - run: bw login"
+    elif command -v op >/dev/null 2>&1; then
+        section "Vault Status (1Password)"
+
+        if op account get >/dev/null 2>&1; then
+            pass "Signed in to 1Password"
+        else
+            warn "Not signed in to 1Password - run: op signin"
+        fi
+    elif command -v pass >/dev/null 2>&1; then
+        section "Vault Status (pass)"
+
+        if [[ -d "$HOME/.password-store" ]]; then
+            pass "Password store initialized"
+        else
+            warn "Password store not initialized - run: pass init <gpg-id>"
+        fi
     fi
 fi
 
