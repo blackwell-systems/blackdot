@@ -33,7 +33,7 @@ echo -e "${CYAN}=== Expected Dotfiles Items ===${NC}"
 echo ""
 
 # Use DOTFILES_ITEMS from _common.sh
-for item_name in "${(k)DOTFILES_ITEMS[@]}"; do
+for item_name in "${(@k)DOTFILES_ITEMS}"; do
     # Find item (use printf to handle large JSON safely)
     item_json=$(printf '%s' "$ALL_ITEMS" | jq -r ".[] | select(.name == \"$item_name\")")
 

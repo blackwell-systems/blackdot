@@ -122,7 +122,7 @@ restore_ssh_config() {
 # Restore configured SSH identities (from SSH_KEYS in _common.sh)
 # ============================================================
 
-for item_name in "${(k)SSH_KEYS[@]}"; do
+for item_name in "${(@k)SSH_KEYS}"; do
     key_path="${SSH_KEYS[$item_name]}"
     restore_key_note \
         "$item_name" \

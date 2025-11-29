@@ -1,0 +1,225 @@
+#!/usr/bin/env zsh
+# ============================================================
+# dotfiles-lint - Validate shell configuration syntax
+#
+# Usage:
+#   dotfiles lint            # Check all configs
+#   dotfiles lint --fix      # Auto-fix what's possible
+#   dotfiles lint --verbose  # Show detailed output
+#
+# Checks:
+#   - ZSH syntax in zsh.d/*.zsh
+#   - Bash syntax in *.sh scripts
+#   - Shellcheck warnings (if installed)
+# ============================================================
+set -uo pipefail
+
+# Find dotfiles directory
+if [[ -n "${DOTFILES_DIR:-}" ]]; then
+    DOTFILES_DIR="$DOTFILES_DIR"
+elif [[ -d "$HOME/workspace/dotfiles" ]]; then
+    DOTFILES_DIR="$HOME/workspace/dotfiles"
+elif [[ -d "/workspace/dotfiles" ]]; then
+    DOTFILES_DIR="/workspace/dotfiles"
+else
+    echo "Error: Could not find dotfiles directory"
+    exit 1
+fi
+
+# Source logging functions
+source "$DOTFILES_DIR/lib/_logging.sh"
+
+# Flags
+FIX_MODE=false
+VERBOSE=false
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --fix|-f)
+            FIX_MODE=true
+            shift
+            ;;
+        --verbose|-v)
+            VERBOSE=true
+            shift
+            ;;
+        --help|-h)
+            cat <<EOF
+dotfiles lint - Validate shell configuration syntax
+
+Usage:
+    dotfiles lint            Check all configs
+    dotfiles lint --fix      Auto-fix what's possible
+    dotfiles lint --verbose  Show detailed output
+
+Checks:
+    - ZSH syntax in zsh/zsh.d/*.zsh
+    - Bash syntax in bootstrap/*.sh, vault/*.sh
+    - Shellcheck warnings (if installed)
+
+EOF
+            exit 0
+            ;;
+        *)
+            warn "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
+ERRORS=0
+WARNINGS=0
+CHECKED=0
+
+echo ""
+echo -e "${BOLD}Dotfiles Configuration Linter${NC}"
+echo "=============================="
+echo ""
+
+# ============================================================
+# ZSH Syntax Check
+# ============================================================
+info "Checking ZSH syntax..."
+
+for file in "$DOTFILES_DIR"/zsh/zsh.d/*.zsh; do
+    if [[ -f "$file" ]]; then
+        ((CHECKED++))
+        if zsh -n "$file" 2>/dev/null; then
+            $VERBOSE && pass "  $(basename "$file")"
+        else
+            fail "  $(basename "$file") - syntax error"
+            ((ERRORS++))
+            if $VERBOSE; then
+                zsh -n "$file" 2>&1 | sed 's/^/    /'
+            fi
+        fi
+    fi
+done
+
+# Check main zshrc
+if [[ -f "$DOTFILES_DIR/zsh/zshrc" ]]; then
+    ((CHECKED++))
+    if zsh -n "$DOTFILES_DIR/zsh/zshrc" 2>/dev/null; then
+        $VERBOSE && pass "  zshrc"
+    else
+        fail "  zshrc - syntax error"
+        ((ERRORS++))
+    fi
+fi
+
+# ============================================================
+# Bash Syntax Check
+# ============================================================
+info "Checking Bash syntax..."
+
+BASH_FILES=(
+    "$DOTFILES_DIR"/bootstrap/*.sh
+    "$DOTFILES_DIR"/vault/*.sh
+    "$DOTFILES_DIR"/lib/*.sh
+)
+
+for file in "${BASH_FILES[@]}"; do
+    if [[ -f "$file" ]]; then
+        ((CHECKED++))
+        if bash -n "$file" 2>/dev/null; then
+            $VERBOSE && pass "  $(basename "$file")"
+        else
+            fail "  $(basename "$file") - syntax error"
+            ((ERRORS++))
+            if $VERBOSE; then
+                bash -n "$file" 2>&1 | sed 's/^/    /'
+            fi
+        fi
+    fi
+done
+
+# ============================================================
+# Shellcheck (if available)
+# ============================================================
+if command -v shellcheck &>/dev/null; then
+    info "Running shellcheck..."
+
+    for file in "$DOTFILES_DIR"/bootstrap/*.sh; do
+        if [[ -f "$file" ]]; then
+            output=$(shellcheck -S warning "$file" 2>&1)
+            if [[ -n "$output" ]]; then
+                warn "  $(basename "$file") - warnings"
+                ((WARNINGS++))
+                if $VERBOSE; then
+                    echo "$output" | sed 's/^/    /'
+                fi
+            else
+                $VERBOSE && pass "  $(basename "$file")"
+            fi
+        fi
+    done
+else
+    info "Shellcheck not installed (skipping advanced checks)"
+    echo "  Install with: brew install shellcheck"
+fi
+
+# ============================================================
+# Config File Validation
+# ============================================================
+info "Validating config files..."
+
+# Check Brewfile exists
+if [[ -f "$DOTFILES_DIR/Brewfile" ]]; then
+    ((CHECKED++))
+    $VERBOSE && pass "  Brewfile exists"
+else
+    warn "  Brewfile missing"
+    ((WARNINGS++))
+fi
+
+# Check p10k config
+if [[ -f "$DOTFILES_DIR/zsh/p10k.zsh" ]]; then
+    ((CHECKED++))
+    if zsh -n "$DOTFILES_DIR/zsh/p10k.zsh" 2>/dev/null; then
+        $VERBOSE && pass "  p10k.zsh"
+    else
+        fail "  p10k.zsh - syntax error"
+        ((ERRORS++))
+    fi
+fi
+
+# ============================================================
+# Fix Mode
+# ============================================================
+if $FIX_MODE; then
+    info "Attempting auto-fixes..."
+
+    # Fix script permissions
+    for file in "$DOTFILES_DIR"/bin/dotfiles-*; do
+        if [[ -f "$file" && ! -x "$file" ]]; then
+            chmod +x "$file"
+            pass "  Fixed permissions: $(basename "$file")"
+        fi
+    done
+
+    for file in "$DOTFILES_DIR"/bootstrap/*.sh "$DOTFILES_DIR"/vault/*.sh; do
+        if [[ -f "$file" && ! -x "$file" ]]; then
+            chmod +x "$file"
+            pass "  Fixed permissions: $(basename "$file")"
+        fi
+    done
+fi
+
+# ============================================================
+# Summary
+# ============================================================
+echo ""
+echo "=============================="
+echo -e "Files checked: ${BOLD}$CHECKED${NC}"
+
+if [[ $ERRORS -eq 0 && $WARNINGS -eq 0 ]]; then
+    pass "All checks passed!"
+    exit 0
+elif [[ $ERRORS -eq 0 ]]; then
+    warn "$WARNINGS warning(s) found"
+    exit 0
+else
+    fail "$ERRORS error(s), $WARNINGS warning(s)"
+    exit 1
+fi

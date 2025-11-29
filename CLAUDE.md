@@ -15,6 +15,8 @@ dotfiles doctor --fix    # Auto-fix permissions
 dotfiles drift           # Compare local vs Bitwarden vault
 dotfiles vault restore   # Restore secrets from Bitwarden
 dotfiles vault sync      # Sync local to Bitwarden
+dotfiles lint            # Validate shell config syntax
+dotfiles packages        # Check/install Brewfile packages
 dotfiles upgrade         # Pull latest and run bootstrap
 ```
 
