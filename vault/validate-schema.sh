@@ -44,9 +44,9 @@ else
     echo "  • Item is wrong type (should be Secure Note)"
     echo ""
     echo "To fix:"
-    echo "  1. Create missing items: vault/create-vault-item.sh"
-    echo "  2. Sync local changes: vault/sync-to-bitwarden.sh"
-    echo "  3. Verify item structure in Bitwarden web vault"
+    echo "  1. Create missing items: dotfiles vault create"
+    echo "  2. Sync local changes: dotfiles vault sync"
+    echo "  3. Verify item structure in vault web interface"
     echo ""
     exit 1
 fi

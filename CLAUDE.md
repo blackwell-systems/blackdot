@@ -126,7 +126,7 @@ These run automatically on `git commit`.
 ├── vault/                  # Multi-vault integration (Bitwarden, 1Password, pass)
 │   ├── _common.sh          # Single source of truth (IMPORTANT!)
 │   ├── restore-*.sh        # Restore scripts for each category
-│   └── sync-to-bitwarden.sh
+│   └── sync-to-vault.sh
 ├── zsh/                    # Shell configuration
 │   └── zsh.d/              # Modular zsh config (10 files)
 ├── macos/                  # macOS-specific configs

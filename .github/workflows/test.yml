@@ -79,7 +79,7 @@ jobs:
             vault/restore-env.sh
             vault/restore-git.sh
             vault/restore-ssh.sh
-            vault/sync-to-bitwarden.sh
+            vault/sync-to-vault.sh
           )
 
           ERRORS=0

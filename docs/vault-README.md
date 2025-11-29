@@ -47,7 +47,7 @@ All `dotfiles vault` commands work identically regardless of backend.
 | `restore-env.sh` | Restores env secrets | Called by bootstrap |
 | `restore-git.sh` | Restores gitconfig | Called by bootstrap |
 | `create-vault-item.sh` | Creates new vault items | `dotfiles vault create ITEM` |
-| `sync-to-bitwarden.sh` | Syncs local → vault | `dotfiles vault sync --all` |
+| `sync-to-vault.sh` | Syncs local → vault | `dotfiles vault sync --all` |
 | `validate-schema.sh` | Validates vault item schema | `dotfiles vault validate` |
 | `delete-vault-item.sh` | Deletes items from vault | `dotfiles vault delete ITEM` |
 | `check-vault-items.sh` | Pre-flight validation | `dotfiles vault check` |
@@ -188,7 +188,7 @@ When offline mode is enabled:
 │                                                                  │
 │   OPERATION LAYER                                                │
 │   ═════════════════════════════════════════════════════════════  │
-│   restore-*.sh, sync-to-bitwarden.sh, create/delete scripts     │
+│   restore-*.sh, sync-to-vault.sh, create/delete scripts         │
 │                     ↓                                            │
 │   _common.sh (data structures, validation, drift detection)     │
 │                     ↓                                            │
