@@ -101,9 +101,6 @@ dotfiles() {
         lint)
             "$HOME/workspace/dotfiles/bin/dotfiles-lint" "$@"
             ;;
-        doc-sync|docs)
-            "$HOME/workspace/dotfiles/bin/dotfiles-doc-sync" "$@"
-            ;;
         packages|pkg)
             "$HOME/workspace/dotfiles/bin/dotfiles-packages" "$@"
             ;;
@@ -132,7 +129,6 @@ dotfiles() {
             echo "  vault <cmd>       Secret vault operations (restore, sync, list...)"
             echo "  template, tmpl    Machine-specific config templates"
             echo "  lint              Validate shell config syntax"
-            echo "  doc-sync, docs    Check documentation sync (README vs docs/)"
             echo "  packages, pkg     Check/install Brewfile packages"
             echo "  init              First-time setup wizard"
             echo "  upgrade, update   Pull latest and run bootstrap"

@@ -115,21 +115,13 @@ if [ $SECRETS_FOUND -eq 1 ]; then
 fi
 
 # ============================================================
-# 4. Documentation sync check
+# 4. Documentation sync reminder
 # ============================================================
-echo "Checking documentation sync..."
-
 # Only check if README.md or docs/README.md were modified
 DOCS_MODIFIED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^(README\.md|docs/README\.md)$' || true)
 
 if [ -n "$DOCS_MODIFIED" ]; then
-    if [[ -x "bin/dotfiles-doc-sync" ]]; then
-        if ! bin/dotfiles-doc-sync; then
-            echo -e "${YELLOW}⚠ Documentation may be out of sync${NC}"
-            echo "  Run 'dotfiles doc-sync' for details"
-            # Warning only, don't block commit
-        fi
-    fi
+    echo -e "${YELLOW}Reminder: If you modified README.md, also update docs/README.md (and vice versa)${NC}"
 fi
 
 # ============================================================
