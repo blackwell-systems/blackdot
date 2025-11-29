@@ -12,9 +12,9 @@ For quick access to common commands and project structure:
 dotfiles status          # Visual dashboard
 dotfiles doctor          # Health check
 dotfiles doctor --fix    # Auto-fix permissions
-dotfiles drift           # Compare local vs Bitwarden vault
-dotfiles vault restore   # Restore secrets from Bitwarden
-dotfiles vault sync      # Sync local to Bitwarden
+dotfiles drift           # Compare local vs vault
+dotfiles vault restore   # Restore secrets from vault
+dotfiles vault sync      # Sync local to vault
 dotfiles lint            # Validate shell config syntax
 dotfiles packages        # Check/install Brewfile packages
 dotfiles template init   # Setup machine-specific configs
@@ -28,7 +28,7 @@ dotfiles upgrade         # Pull latest and run bootstrap
 dotfiles/
 ├── bootstrap/           # Platform setup scripts
 ├── bin/                 # CLI tools (doctor, drift, backup, etc.)
-├── vault/*.sh           # Bitwarden integration scripts
+├── vault/*.sh           # Multi-vault integration scripts
 ├── zsh/zsh.d/*.zsh      # Shell config (numbered load order: 00-99)
 ├── lib/                 # Shared libraries (_logging.sh, _templates.sh)
 ├── templates/           # Machine-specific config templates
@@ -123,7 +123,7 @@ These run automatically on `git commit`.
 ```
 .
 ├── bootstrap-*.sh          # Platform bootstrap scripts
-├── vault/                  # Bitwarden vault integration
+├── vault/                  # Multi-vault integration (Bitwarden, 1Password, pass)
 │   ├── _common.sh          # Single source of truth (IMPORTANT!)
 │   ├── restore-*.sh        # Restore scripts for each category
 │   └── sync-to-bitwarden.sh
@@ -140,7 +140,7 @@ These run automatically on `git commit`.
 **`vault/_common.sh`** - Contains central data structures:
 - `SSH_KEYS` - All SSH key mappings
 - `DOTFILES_ITEMS` - Protected dotfiles items
-- `SYNCABLE_ITEMS` - Items that can sync to Bitwarden
+- `SYNCABLE_ITEMS` - Items that can sync to vault
 
 **When adding new vault items:** Update `_common.sh` FIRST, then other scripts will automatically pick up changes.
 
@@ -260,7 +260,7 @@ Use conventional commits format:
 ```
 feat: Add drift detection for vault items
 
-docs: Clarify that Bitwarden vault is optional
+docs: Clarify that vault integration is optional
 
 fix: Handle missing SSH keys gracefully in restore script
 
@@ -308,7 +308,7 @@ Before completing work, verify:
 ## 📚 Key Concepts
 
 ### Vault System
-- Bitwarden-backed secret management
+- Multi-vault secret management (Bitwarden, 1Password, pass)
 - Bidirectional sync (restore from vault, push to vault)
 - Schema validation before operations
 - Protected items (require explicit confirmation to delete)

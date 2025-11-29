@@ -3,13 +3,13 @@
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Enterprise-grade dotfiles** with Bitwarden vault integration, machine-specific templates, portable Claude Code sessions, and automated health checks. Works across macOS, Linux, Windows, WSL2, and Docker.
+> **Enterprise-grade dotfiles** with multi-vault secret management (Bitwarden, 1Password, pass), machine-specific templates, portable Claude Code sessions, and automated health checks. Works across macOS, Linux, Windows, WSL2, and Docker.
 
 [![Version](https://img.shields.io/badge/Version-1.7.0-blue)](../CHANGELOG.md)
 
 **Version:** 1.7.0 | [Changelog](../CHANGELOG.md) | [Quick Start Guide](../README.md)
 
-This is the comprehensive reference documentation for the dotfiles system. It covers configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code portable sessions**, and a **Bitwarden-based vault bootstrap** for SSH keys, AWS credentials, and environment secrets across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
+This is the comprehensive reference documentation for the dotfiles system. It covers configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code portable sessions**, and a **multi-vault secret bootstrap** (supporting Bitwarden, 1Password, and pass) for SSH keys, AWS credentials, and environment secrets across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
 
 ### 🌟 Key Innovation: Portable Claude Code Sessions
 
@@ -31,14 +31,14 @@ Unlike most dotfiles, this system enables **true Claude Code session portability
 - [Bootstrapping Lima / Linux Guest](#bootstrapping-lima--linux-guest)
 - [Dotfiles Bootstrap Details](#dotfiles-bootstrap-details)
 - [Homebrew & Brewfile](#homebrew--brewfile)
-- [Vault / Bitwarden Bootstrap](#vault--bitwarden-bootstrap)
-- [Restoring from Bitwarden on Any Machine](#restoring-from-bitwarden-on-any-machine)
+- [Vault System Bootstrap](#vault-system-bootstrap)
+- [Restoring from Vault on Any Machine](#restoring-from-vault-on-any-machine)
 - [Scripts: What Each Restore Script Expects](#scripts-what-each-restore-script-expects)
 - [Validating Vault Items Before Restore](#validating-vault-items-before-restore)
-- [One-Time: Push Current Files into Bitwarden](#one-time-push-current-files-into-bitwarden-for-future-you)
-- [Rotating / Updating Secrets in Bitwarden](#rotating--updating-secrets-in-bitwarden)
+- [One-Time: Push Current Files into Vault](#one-time-push-current-files-into-vault-for-future-you)
+- [Rotating / Updating Secrets in Vault](#rotating--updating-secrets-in-vault)
 - [Adding New SSH Keys](#adding-new-ssh-keys)
-- [Syncing Local Changes to Bitwarden](#syncing-local-changes-to-bitwarden)
+- [Syncing Local Changes to Vault](#syncing-local-changes-to-vault)
 - [Maintenance Checklists](#maintenance-checklists)
 - [Using the Dotfiles Day-to-Day](#using-the-dotfiles-day-to-day)
 - [Health Check](#health-check)
@@ -77,9 +77,11 @@ cd ~/workspace/dotfiles
 # Or use interactive mode for guided setup:
 ./bootstrap/bootstrap-mac.sh --interactive
 
-# 3. Restore secrets from Bitwarden
-bw login
-export BW_SESSION="$(bw unlock --raw)"
+# 3. Restore secrets from vault
+# For Bitwarden:
+bw login && export BW_SESSION="$(bw unlock --raw)"
+# For 1Password: op signin
+# For pass: no login needed (uses GPG)
 ./vault/bootstrap-vault.sh
 
 # 4. Verify installation
@@ -89,7 +91,7 @@ dotfiles doctor
 **What gets installed:**
 - Zsh + Powerlevel10k + plugins (autosuggestions, syntax highlighting)
 - All Homebrew packages from `Brewfile`
-- SSH keys, AWS credentials, and environment secrets from Bitwarden
+- SSH keys, AWS credentials, and environment secrets from vault (Bitwarden/1Password/pass)
 - **Portable Claude Code sessions** via `/workspace` symlink
 - The `dotfiles` command for ongoing management
 
@@ -145,16 +147,17 @@ The dotfiles are organized as follows:
 │   └── snapshots/            # Setting snapshots for diff
 ├── vault
 │   ├── _common.sh            # Shared library (colors, logging, session, SSH_KEYS)
-│   ├── bootstrap-vault.sh    # Orchestrates all Bitwarden restores
-│   ├── check-vault-items.sh  # Validates required Bitwarden items exist
-│   ├── create-vault-item.sh  # Creates new Bitwarden secure notes
-│   ├── delete-vault-item.sh  # Deletes items from Bitwarden (with safety)
+│   ├── backends/             # Backend implementations (bitwarden, 1password, pass)
+│   ├── bootstrap-vault.sh    # Orchestrates all vault restores
+│   ├── check-vault-items.sh  # Validates required vault items exist
+│   ├── create-vault-item.sh  # Creates new vault secure notes
+│   ├── delete-vault-item.sh  # Deletes items from vault (with safety)
 │   ├── list-vault-items.sh   # Lists all vault items (debug/inventory)
-│   ├── sync-to-bitwarden.sh  # Syncs local changes back to Bitwarden
-│   ├── restore-ssh.sh        # Restores SSH keys and config from Bitwarden
+│   ├── sync-to-bitwarden.sh  # Syncs local changes back to vault
+│   ├── restore-ssh.sh        # Restores SSH keys and config from vault
 │   ├── restore-aws.sh        # Restores ~/.aws/config & ~/.aws/credentials
 │   ├── restore-env.sh        # Restores environment secrets to ~/.local
-│   ├── restore-git.sh        # Restores ~/.gitconfig from Bitwarden
+│   ├── restore-git.sh        # Restores ~/.gitconfig from vault
 │   ├── template-aws-config   # Reference template for AWS config
 │   ├── template-aws-credentials # Reference template for AWS credentials
 │   └── README.md             # Vault system documentation
@@ -171,7 +174,7 @@ Key pieces:
 - **zsh/p10k.zsh**: Powerlevel10k theme configuration
 - **ghostty/config**: Ghostty terminal configuration
 - **zellij/config.kdl**: Zellij multiplexer configuration
-- **vault/**: Bitwarden-based secure bootstrap for SSH, AWS, and environment secrets
+- **vault/**: Multi-vault secure bootstrap for SSH, AWS, and environment secrets (Bitwarden, 1Password, pass)
 - **claude/**: Claude Code configuration (settings, slash commands)
 - **Brewfile**: Shared Homebrew definition used by both macOS and Lima bootstrap scripts
 - **Claude Workspace Symlink** inside `bootstrap-dotfiles.sh` ensures that both macOS and Lima point to the shared workspace directory:
@@ -228,8 +231,9 @@ This dotfiles system is designed for extensibility across multiple platforms wit
 These work on **any platform** without modification:
 
 **✅ Vault System** (100% portable)
-- All `vault/*.sh` scripts
-- Just needs: `zsh`, `bw`, `jq`
+- All `vault/*.sh` scripts with multi-backend support
+- Backends: Bitwarden (`bw`), 1Password (`op`), pass (`pass/gpg`)
+- Just needs: `zsh`, vault CLI, `jq`
 - Works on Linux, macOS, BSD, WSL, Docker
 
 **✅ Health & Metrics** (100% portable)
@@ -364,7 +368,7 @@ Navigation aliases make this seamless:
 
 Secrets (SSH keys, AWS credentials) live in `~/.ssh` and `~/.aws` (user-specific), while work files live in `~/workspace` (portable). This separation means:
 
-- Secrets are restored per-machine via Bitwarden
+- Secrets are restored per-machine via vault (Bitwarden/1Password/pass)
 - Work files are either shared (Lima mount) or synced (git)
 - Scripts reference `$WORKSPACE` variable, not hardcoded paths
 
@@ -498,7 +502,10 @@ When setting up a new machine or VM, no username updates are needed. Everything 
 - **jq** (for JSON manipulation, installed via Brewfile)
 
 ### Optional (for vault features only)
-- **Bitwarden CLI** (`bw`) - For automated secret sync
+- **Vault CLI** - For automated secret sync (choose one):
+  - **Bitwarden CLI** (`bw`) - Default, full-featured, cloud-synced
+  - **1Password CLI** (`op`) - v2 CLI with biometric auth
+  - **pass** (`pass`) - GPG-based, git-synced
   - Skip with `--minimal` flag or just don't run `dotfiles vault` commands
   - Without vault: manually configure `~/.ssh`, `~/.aws`, `~/.gitconfig`
 
@@ -526,7 +533,7 @@ There are two big pillars:
 
    Goal: consistent Zsh + p10k + plugins + Ghostty config + Claude across host and Lima.
 
-2. **Vault / Secure secrets bootstrap (Bitwarden)**
+2. **Vault / Secure secrets bootstrap (Multi-vault)**
 
    Handled by:
 
@@ -535,7 +542,7 @@ There are two big pillars:
    - `vault/restore-aws.sh`
    - `vault/restore-env.sh`
 
-   Goal: restore **SSH keys**, **AWS config/credentials**, and **env secrets** from Bitwarden.
+   Goal: restore **SSH keys**, **AWS config/credentials**, and **env secrets** from your vault (Bitwarden, 1Password, or pass).
 
 ### Interactive Mode
 
@@ -585,11 +592,11 @@ Use `--help` to see all available options:
 │         │                    │                     │                        │
 │         ▼                    │                     ▼                        │
 │  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐                 │
-│  │   Brewfile   │     │  Bitwarden   │◀────│  Sync Back   │                 │
-│  │   (tools)    │     │   (vault)    │     │  (changes)   │                 │
+│  │   Brewfile   │     │ Multi-Vault  │◀────│  Sync Back   │                 │
+│  │   (tools)    │     │ (bw/op/pass) │     │  (changes)   │                 │
 │  │              │     │              │     │              │
 │  │ brew, zsh,   │     │ SSH keys,    │     │ sync-to-     │                 │
-│  │ plugins...   │     │ AWS, Git,    │     │ bitwarden.sh │                 │
+│  │ plugins...   │     │ AWS, Git,    │     │ vault.sh     │                 │
 │  └──────────────┘     │ env secrets  │     └──────────────┘                 │
 │                       └──────────────┘                                      │
 │                              │                                              │
@@ -602,7 +609,7 @@ Use `--help` to see all available options:
 │                                                                              │
 │   FLOW: Clone repo → Bootstrap → Validate vault → Restore → Health check   │
 │         ───────────────────────────────────────────────────────────────     │
-│         Edit configs locally → Sync back to Bitwarden → Restore elsewhere  │
+│         Edit configs locally → Sync back to vault → Restore elsewhere      │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -860,7 +867,7 @@ killall Dock
 
 ---
 
-## Vault / Bitwarden Bootstrap
+## Vault System Bootstrap
 
 Lives under:
 
@@ -870,29 +877,40 @@ Lives under:
 
 Restores:
 
-- **SSH keys**  
-- **AWS config & credentials**  
-- **Environment secrets**  
+- **SSH keys**
+- **AWS config & credentials**
+- **Environment secrets**
 
-via Bitwarden Secure Notes.
+via your preferred vault backend (Bitwarden, 1Password, or pass). Set `DOTFILES_VAULT_BACKEND` environment variable to choose your backend.
 
 Same flow on macOS and Lima.
 
 ---
 
-## Restoring from Bitwarden on Any Machine
+## Restoring from Vault on Any Machine
 
-Once the dotfiles are in place and `bw` is installed:
+Once the dotfiles are in place and your vault CLI is installed:
 
-1. **Ensure you are logged into Bitwarden CLI**
+1. **Login to your vault**
 
 ```bash
-bw login                     # if not already logged in
-export BW_SESSION="$(bw unlock --raw)"
-bw sync --session "$BW_SESSION"
+# Bitwarden (default)
+bw login && export BW_SESSION="$(bw unlock --raw)"
+
+# 1Password
+op signin
+
+# pass (uses GPG - no login needed)
 ```
 
-2. **Run the vault bootstrap**
+2. **Set backend (if not Bitwarden)**
+
+```bash
+# Add to ~/.zshrc or ~/.zshenv for persistence
+export DOTFILES_VAULT_BACKEND=1password  # or 'pass'
+```
+
+3. **Run the vault bootstrap**
 
 ```bash
 cd ~/workspace/dotfiles/vault
@@ -901,7 +919,9 @@ cd ~/workspace/dotfiles/vault
 
 `bootstrap-vault.sh` will:
 
-- Reuse `vault/.bw-session` if valid, or call `bw unlock --raw` and store the session.
+- Initialize the configured vault backend
+- Check/prompt for vault unlock
+- Cache session to `.vault-session` (secure permissions)
 - Call:
 
   - `restore-ssh.sh "$SESSION"`
@@ -920,7 +940,7 @@ After this finishes:
 
 ### `restore-ssh.sh`
 
-Reads Bitwarden **Secure Note** items:
+Reads vault **Secure Note** items:
 
 - `"SSH-GitHub-Enterprise"` → SSH key for work/enterprise account
 - `"SSH-GitHub-Personal"` → SSH key for personal account
@@ -940,7 +960,7 @@ The script reconstructs files and sets appropriate permissions (`600` for privat
 
 ### `restore-aws.sh`
 
-Expects two **Secure Note** items in Bitwarden:
+Expects two **Secure Note** items in your vault:
 
 - `"AWS-Config"` → contains complete `~/.aws/config`
 - `"AWS-Credentials"` → contains complete `~/.aws/credentials`
@@ -980,7 +1000,7 @@ The script writes to `~/.gitconfig` (backing up any existing file) and sets perm
 
 ## Validating Vault Items Before Restore
 
-Before running `bootstrap-vault.sh` on a new machine, you can verify all required Bitwarden items exist:
+Before running `bootstrap-vault.sh` on a new machine, you can verify all required vault items exist:
 
 ```bash
 ./vault/check-vault-items.sh
@@ -1009,23 +1029,35 @@ If items are missing, the script will tell you which ones and exit with an error
 
 ---
 
-## One-Time: Push Current Files into Bitwarden
+## One-Time: Push Current Files into Vault
 
-Run these commands **once** on a configured machine to populate Bitwarden, enabling future machines to restore via `bootstrap-vault.sh`.
+Run these commands **once** on a configured machine to populate your vault, enabling future machines to restore via `bootstrap-vault.sh`.
 
-This can also be done manually in the Bitwarden GUI. CLI commands are provided for automation and reproducibility.
+For Bitwarden, this can also be done manually in the GUI. CLI commands are provided for automation and reproducibility.
 
-### 1. Ensure `BW_SESSION` is set
+### 1. Ensure vault session is active
 
 ```bash
+# Bitwarden
 export BW_SESSION="$(bw unlock --raw)"
 bw sync --session "$BW_SESSION"
+
+# 1Password
+op signin
+
+# pass (no session needed)
 ```
 
 ---
 
 ### 2. Push `~/.aws/config` into `AWS-Config`
 
+**Using the unified vault command (recommended):**
+```bash
+dotfiles vault sync AWS-Config
+```
+
+**Or manually with Bitwarden CLI:**
 ```bash
 cd ~/workspace/dotfiles/vault
 
@@ -1107,7 +1139,7 @@ Each note will contain the **private key** (already passphrase-protected by Open
 }' | bw encode | bw create item --session "$BW_SESSION"
 ```
 
-> If you prefer, you can also create these as **Secure Notes** in the Bitwarden GUI and paste the contents of the private + public key directly into the Notes field. The restore script just looks at `notes`.
+> If you prefer, you can also create these as **Secure Notes** in your vault's GUI (Bitwarden web vault, 1Password app, etc.) and paste the contents of the private + public key directly into the Notes field. The restore script just looks at `notes`.
 
 ---
 
@@ -1168,7 +1200,7 @@ EOF
 chmod 600 ~/.local/env.secrets
 ```
 
-2. Then push it into Bitwarden:
+2. Then push it to vault (Bitwarden example):
 
 ```bash
 ENV_JSON=$(jq -Rs --arg name "Environment-Secrets" \
@@ -1180,7 +1212,7 @@ ENV_ENC=$(printf '%s' "$ENV_JSON" | bw encode)
 bw create item "$ENV_ENC" --session "$BW_SESSION"
 ```
 
-Now `restore-env.sh` will bring this back on any new machine and create `~/.local/load-env.sh` to load it.
+Now `restore-env.sh` will restore this on any new machine and create `~/.local/load-env.sh` to load it.
 
 ---
 
@@ -1207,7 +1239,7 @@ printf '%s' "$GIT_CONFIG_JSON" | bw encode | bw edit item "$GIT_CONFIG_ID" --ses
 
 ---
 
-## Rotating / Updating Secrets in Bitwarden
+## Rotating / Updating Secrets in Vault
 
 When you need to update existing secrets (rotated credentials, new API keys, etc.):
 
@@ -1256,7 +1288,7 @@ printf '%s' "$ENV_JSON" | bw encode | bw edit item "$ENV_ID" --session "$BW_SESS
 # Generate new key
 ssh-keygen -t ed25519 -C "your-email@example.com" -f ~/.ssh/id_ed25519_newkey
 
-# Update in Bitwarden (find the item ID first)
+# Update in vault (Bitwarden example - find the item ID first)
 KEY_ID=$(bw list items --search "SSH-KeyName" --session "$BW_SESSION" | jq -r '.[0].id')
 
 (
@@ -1283,7 +1315,7 @@ To add a new SSH identity to the vault system:
 ssh-keygen -t ed25519 -C "purpose@example.com" -f ~/.ssh/id_ed25519_newservice
 ```
 
-### 2. Push to Bitwarden
+### 2. Push to vault
 
 ```bash
 export BW_SESSION="$(bw unlock --raw)"
@@ -1313,7 +1345,7 @@ declare -A SSH_KEYS=(
 ```
 
 This automatically propagates to:
-- `restore-ssh.sh` (restores the key from Bitwarden)
+- `restore-ssh.sh` (restores the key from vault)
 - `bin/dotfiles-doctor` (validates key exists with correct permissions)
 
 ### 4. Add to SSH config
@@ -1325,12 +1357,12 @@ Host newservice.example.com
     User git
 ```
 
-### 5. Update SSH config in Bitwarden
+### 5. Update SSH config in vault
 
 After editing `~/.ssh/config`, sync it back:
 
 ```bash
-./vault/sync-to-bitwarden.sh SSH-Config
+dotfiles vault sync SSH-Config
 ```
 
 ### 6. Update zshrc for auto-add (optional)
@@ -1344,27 +1376,27 @@ _ssh_add_if_missing ~/.ssh/id_ed25519_newservice
 
 ---
 
-## Syncing Local Changes to Bitwarden
+## Syncing Local Changes to Vault
 
-When you modify local config files (`~/.ssh/config`, `~/.aws/config`, `~/.gitconfig`, etc.), sync them back to Bitwarden so other machines can restore the updates.
+When you modify local config files (`~/.ssh/config`, `~/.aws/config`, `~/.gitconfig`, etc.), sync them back to your vault so other machines can restore the updates.
 
 ### Preview changes (dry run)
 
 ```bash
-./vault/sync-to-bitwarden.sh --dry-run --all
+dotfiles vault sync --dry-run --all
 ```
 
 ### Sync specific items
 
 ```bash
-./vault/sync-to-bitwarden.sh SSH-Config           # Just SSH config
-./vault/sync-to-bitwarden.sh AWS-Config Git-Config  # Multiple items
+dotfiles vault sync SSH-Config           # Just SSH config
+dotfiles vault sync AWS-Config Git-Config  # Multiple items
 ```
 
 ### Sync all items
 
 ```bash
-./vault/sync-to-bitwarden.sh --all
+dotfiles vault sync --all
 ```
 
 ### Supported items
@@ -1386,22 +1418,23 @@ When you modify local config files (`~/.ssh/config`, `~/.aws/config`, `~/.gitcon
 Regular security maintenance schedule to keep your dotfiles and credentials secure:
 
 **Annual Tasks:**
-- [ ] **Rotate SSH keys** - Generate new SSH key pairs and update Bitwarden
+- [ ] **Rotate SSH keys** - Generate new SSH key pairs and update vault
   - Generate: `ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey`
   - Update GitHub/GitLab/etc. with new public key
-  - Sync to Bitwarden: `./vault/sync-to-bitwarden.sh SSH-GitHub-*`
+  - Sync to vault: `dotfiles vault sync`
   - Test connections: `ssh -T git@github.com`
-- [ ] **Update Bitwarden master password** - Use a strong, unique password
-  - Update in Bitwarden app or web vault
-  - Re-login on all machines: `bw logout && bw login`
+- [ ] **Update vault master password** - Use a strong, unique password
+  - Update in your vault app or web interface
+  - Re-login on all machines (e.g., `bw logout && bw login` for Bitwarden)
 
 **Quarterly Tasks:**
 - [ ] **Review AWS credentials** - Check for unused or expired credentials
   - Audit IAM access keys in AWS Console
   - Rotate if compromised or shared accidentally
-  - Update local files and sync: `./vault/sync-to-bitwarden.sh AWS-Credentials`
-- [ ] **Audit vault items** - Review all items stored in Bitwarden
-  - Run: `./vault/check-vault-items.sh -v` for detailed view
+  - Update local files and sync: `dotfiles vault sync AWS-Credentials`
+- [ ] **Audit vault items** - Review all items stored in your vault
+  - Run: `dotfiles vault list` for inventory
+  - Run: `dotfiles vault check` to validate required items
   - Remove obsolete credentials
   - Verify all required items exist
 
@@ -1409,15 +1442,15 @@ Regular security maintenance schedule to keep your dotfiles and credentials secu
 - [ ] **Check for dotfiles updates** - Keep dotfiles current with latest improvements
   - Run: `dotfiles-upgrade` or `git pull && ./bootstrap/bootstrap-*.sh`
   - Review CHANGELOG.md for breaking changes
-- [ ] **Run health check with drift detection** - Ensure local files match Bitwarden
+- [ ] **Run health check with drift detection** - Ensure local files match vault
   - Run: `dotfiles drift`
-  - Sync any differences: `./vault/sync-to-bitwarden.sh --all`
+  - Sync any differences: `dotfiles vault sync --all`
 
 **Best Practices:**
 - Never commit secrets to git (verify with `git diff` before committing)
 - Use different SSH keys for different services (work vs personal)
-- Enable 2FA on Bitwarden account
-- Regularly backup Bitwarden vault (export encrypted JSON)
+- Enable 2FA on your vault account
+- Regularly backup your vault (export encrypted JSON)
 - Review file permissions regularly: `dotfiles doctor --fix`
 
 ---
@@ -1427,10 +1460,10 @@ Regular security maintenance schedule to keep your dotfiles and credentials secu
 Complete checklist when adding a new SSH identity:
 
 - [ ] Generate key pair: `ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey`
-- [ ] Push to Bitwarden (see "Adding New SSH Keys" section above)
+- [ ] Push to vault (see "Adding New SSH Keys" section above)
 - [ ] **Add to `SSH_KEYS` array in `vault/_common.sh`** (propagates to restore + health check)
 - [ ] Update `~/.ssh/config` with Host entry
-- [ ] Sync SSH config: `./vault/sync-to-bitwarden.sh SSH-Config`
+- [ ] Sync SSH config: `dotfiles vault sync SSH-Config`
 - [ ] Update `zsh/zshrc` - add `_ssh_add_if_missing` line (optional, for ssh-agent)
 - [ ] Commit dotfiles changes
 
@@ -1439,25 +1472,25 @@ Complete checklist when adding a new SSH identity:
 When AWS credentials or config change:
 
 - [ ] Edit `~/.aws/config` and/or `~/.aws/credentials`
-- [ ] Sync to Bitwarden: `dotfiles vault sync AWS-Config AWS-Credentials`
+- [ ] Sync to vault: `dotfiles vault sync AWS-Config AWS-Credentials`
 - [ ] Verify on other machines: `dotfiles vault restore`
 
 ### Adding a New Environment Variable
 
 - [ ] Edit `~/.local/env.secrets`
-- [ ] Sync to Bitwarden: `dotfiles vault sync Environment-Secrets`
+- [ ] Sync to vault: `dotfiles vault sync Environment-Secrets`
 - [ ] Source on current shell: `source ~/.local/load-env.sh`
 
 ### Modifying SSH Config (add hosts, change options)
 
 - [ ] Edit `~/.ssh/config`
-- [ ] Sync to Bitwarden: `dotfiles vault sync SSH-Config`
+- [ ] Sync to vault: `dotfiles vault sync SSH-Config`
 - [ ] Restore on other machines: `dotfiles vault restore`
 
 ### Updating Git Config
 
 - [ ] Edit `~/.gitconfig`
-- [ ] Sync to Bitwarden: `dotfiles vault sync Git-Config`
+- [ ] Sync to vault: `dotfiles vault sync Git-Config`
 
 ### New Machine Setup
 
@@ -1465,7 +1498,7 @@ Complete checklist for a fresh machine:
 
 1. [ ] Clone dotfiles: `git clone ... ~/workspace/dotfiles`
 2. [ ] Run bootstrap: `./bootstrap/bootstrap-mac.sh` or `./bootstrap/bootstrap-linux.sh`
-3. [ ] Login to Bitwarden: `bw login`
+3. [ ] Login to vault: `bw login` / `op signin` / (pass uses GPG)
 4. [ ] Validate vault items: `dotfiles vault check`
 5. [ ] Restore secrets: `dotfiles vault restore`
 6. [ ] Run health check: `dotfiles doctor`
@@ -1558,11 +1591,12 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 
 **Vault:**
 
-- `dotfiles vault restore` → Restore all secrets from Bitwarden
-- `dotfiles vault sync` → Sync local files to Bitwarden
+- `dotfiles vault restore` → Restore all secrets from vault
+- `dotfiles vault sync` → Sync local files to vault
 - `dotfiles vault list` → List vault items
 - `dotfiles vault check` → Validate vault items exist
 - `dotfiles vault validate` → Validate vault item schema
+- Supports Bitwarden (default), 1Password, and pass backends
 
 **Dotfiles Management:**
 
@@ -1678,7 +1712,7 @@ The recommended way to manage and check your dotfiles:
 dotfiles status          # Quick visual dashboard (color-coded)
 dotfiles doctor          # Comprehensive health check
 dotfiles doctor --fix    # Auto-repair permission issues
-dotfiles drift           # Compare local files vs Bitwarden vault
+dotfiles drift           # Compare local files vs vault
 dotfiles lint            # Validate shell config syntax
 dotfiles lint --fix      # Auto-fix script permissions
 dotfiles packages        # Check Brewfile package status
@@ -1699,7 +1733,7 @@ Run the health check to verify your dotfiles installation:
 
 ```bash
 dotfiles doctor          # Recommended
-dotfiles drift           # Compare local vs Bitwarden
+dotfiles drift           # Compare local vs vault
 ```
 
 The script verifies:
@@ -1709,7 +1743,7 @@ The script verifies:
 - **Required commands**: brew, zsh, git, jq, bw
 - **SSH keys and config**: Existence and correct permissions (600 for private keys, 644 for public keys)
 - **AWS configuration**: Config and credentials files with correct permissions
-- **Bitwarden status**: Login and unlock state
+- **Vault status**: Login and unlock state for configured backend
 - **Shell configuration**: Default shell, zsh modules, Powerlevel10k
 - **Health Score**: 0-100 score based on check results
 
@@ -1719,24 +1753,24 @@ The script verifies:
 dotfiles doctor --fix
 ```
 
-**Drift detection**: Compare local files vs Bitwarden vault:
+**Drift detection**: Compare local files vs vault:
 
 ```bash
 dotfiles drift
 ```
 
-This checks if your local `~/.ssh/config`, `~/.aws/config`, `~/.gitconfig`, etc. differ from what's stored in Bitwarden. Useful for detecting unsync'd changes before switching machines.
+This checks if your local `~/.ssh/config`, `~/.aws/config`, `~/.gitconfig`, etc. differ from what's stored in your vault. Useful for detecting unsync'd changes before switching machines.
 
 Example drift output:
 
 ```
-=== Drift Detection (Local vs Bitwarden) ===
+=== Drift Detection (Local vs Vault) ===
 [OK] SSH-Config: in sync
 [OK] AWS-Config: in sync
-[WARN] Git-Config: LOCAL DIFFERS from Bitwarden
+[WARN] Git-Config: LOCAL DIFFERS from vault
 
-To sync local changes to Bitwarden:
-  ./vault/sync-to-bitwarden.sh --all
+To sync local changes to vault:
+  dotfiles vault sync --all
 ```
 
 Example output:
@@ -1935,33 +1969,39 @@ If not, rerun:
 ~/workspace/dotfiles/bootstrap-dotfiles.sh
 ```
 
-### Bitwarden CLI issues
+### Vault CLI issues
 
 **Session expired or invalid:**
 
 ```bash
+# Bitwarden
 bw logout
 bw login
 export BW_SESSION="$(bw unlock --raw)"
 bw sync --session "$BW_SESSION"
+
+# 1Password
+op signin
+
+# pass (no session - uses GPG)
 ```
 
 **"Cannot find item" errors:**
 
 ```bash
-# List all items to verify names
-bw list items --session "$BW_SESSION" | jq '.[].name'
+# Use dotfiles command to list items
+dotfiles vault list
 
-# Search for specific item
-bw list items --search "SSH-GitHub" --session "$BW_SESSION" | jq '.[] | {name, id}'
+# Or with Bitwarden CLI directly
+bw list items --session "$BW_SESSION" | jq '.[].name'
 ```
 
 **Session file issues:**
 
 ```bash
 # Remove cached session and re-authenticate
-rm -f ~/workspace/dotfiles/vault/.bw-session
-export BW_SESSION="$(bw unlock --raw)"
+rm -f ~/workspace/dotfiles/vault/.vault-session
+# Then re-login to your vault provider
 ```
 
 ### Powerlevel10k / icons missing or broken

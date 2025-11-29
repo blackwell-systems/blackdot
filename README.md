@@ -42,7 +42,7 @@
 
 | Capability           | This Repo                                      | Typical Dotfiles                 |
 |----------------------|-----------------------------------------------|----------------------------------|
-| **Secrets management** | Bitwarden vault with restore/sync             | Manual copy between machines     |
+| **Secrets management** | Multi-vault (Bitwarden, 1Password, pass)      | Manual copy between machines     |
 | **Health validation**  | 573-line checker with `--fix`                 | None                             |
 | **Drift detection**    | Compare local vs vault state                  | None                             |
 | **Schema validation**  | Validates SSH keys & config structure         | None                             |
@@ -59,7 +59,7 @@
 
 | Feature | This Repo | thoughtbot | holman | mathiasbynens | YADR |
 |---------|-----------|------------|--------|---------------|------|
-| **Secrets Management** | ✅ Bitwarden vault | ❌ Manual | ❌ Manual | ❌ Manual | ❌ Manual |
+| **Secrets Management** | ✅ Multi-vault (bw/op/pass) | ❌ Manual | ❌ Manual | ❌ Manual | ❌ Manual |
 | **Bidirectional Sync** | ✅ Local ↔ Vault | ❌ | ❌ | ❌ | ❌ |
 | **Cross-Platform** | ✅ macOS, Linux, Windows, WSL2, Docker | ⚠️ Limited | ⚠️ macOS only | ⚠️ macOS only | ⚠️ Limited |
 | **Claude Code Sessions** | ✅ Portable via `/workspace` | ❌ | ❌ | ❌ | ❌ |
@@ -83,19 +83,19 @@
 #### Key Differentiators
 
 **vs thoughtbot/dotfiles:**
-- ✨ **Secrets Management**: Bitwarden vault vs manual copying
+- ✨ **Secrets Management**: Multi-vault backends vs manual copying
 - ✨ **Cross-Platform**: Full Docker/WSL2/Lima support vs macOS/Linux only
 - ✨ **Health Monitoring**: Comprehensive checks vs none
 - ✨ **Testing**: Unit tests + CI vs basic install script
 
 **vs holman/dotfiles:**
 - ✨ **Active Development**: Regular updates vs archived (2018)
-- ✨ **Enterprise Ready**: Vault integration, team onboarding vs personal use
+- ✨ **Enterprise Ready**: Multi-vault support, team onboarding vs personal use
 - ✨ **Cross-Platform**: Multi-OS support vs macOS only
 - ✨ **Portability**: Claude Code sessions, /workspace symlink vs static paths
 
 **vs mathiasbynens/dotfiles:**
-- ✨ **Secrets Management**: Vault system vs exposed in git
+- ✨ **Secrets Management**: Multi-vault system vs exposed in git
 - ✨ **Health Validation**: Auto-fix capability vs none
 - ✨ **Cross-Platform**: Full Linux/WSL2 support vs macOS focus
 - ✨ **Testing**: Automated tests vs manual verification
@@ -103,32 +103,33 @@
 
 **vs YADR (Yet Another Dotfile Repo):**
 - ✨ **Lighter Weight**: Focused tooling vs kitchen sink approach
-- ✨ **Secrets Safety**: Vault-backed vs all in git
+- ✨ **Secrets Safety**: Multi-vault backends vs all in git
 - ✨ **Modern Stack**: eza, fzf, zoxide vs older tools
 - ✨ **Maintenance**: Active vs minimal updates
 - 🤝 **Similar**: Both aim for comprehensive setup
 
 #### What Makes This Unique
 
-1. **Only dotfiles with Bitwarden bidirectional sync** - Create, restore, validate vault items
+1. **Only dotfiles with multi-vault backend support** - Bitwarden, 1Password, or pass with unified API
 2. **Only dotfiles with Claude Code session portability** - `/workspace` symlink + auto-redirect
 3. **Only dotfiles with comprehensive health checks** - 573-line validator with auto-fix
 4. **Only dotfiles with drift detection** - Compare local vs vault state
 5. **Only dotfiles with schema validation** - Ensures SSH keys/configs are valid before restore
 6. **Only dotfiles with Docker bootstrap testing** - Reproducible CI/CD environments
+7. **Only dotfiles with machine-specific templates** - Auto-generate configs for work vs personal machines
 
 </details>
 
 ### What you get
 
-- **Vault-backed secrets**: SSH keys, AWS credentials, and configs live in Bitwarden—not scattered across machines or committed to git
+- **Vault-backed secrets**: SSH keys, AWS credentials, and configs live in your vault (Bitwarden, 1Password, or pass)—not scattered across machines or committed to git
 - **Self-healing dotfiles**: Health checks catch permission drift, broken symlinks, and missing vault items. Auto-fix with `--fix`
 - **Observable state**: Track health metrics over time, detect when things break
 - **Tested**: CI runs shellcheck, zsh syntax validation, and unit tests on every push
 
 ### What's optional
 
-Everything works on a single machine. Cross-platform sync, Claude session portability, and even Bitwarden itself are opt-in:
+Everything works on a single machine. Cross-platform sync, Claude session portability, and vault integration are opt-in:
 
 ```bash
 # Minimal install (no vault, no /workspace symlink, no Claude setup)
