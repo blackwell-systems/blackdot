@@ -2,7 +2,7 @@
 
 > **The first dotfiles designed for AI-assisted development.**
 
-This repository has native Claude Code integration that no other dotfiles solution provides.
+This repository includes native Claude Code integration for portable sessions across machines.
 
 ---
 
@@ -158,8 +158,6 @@ The `/workspace` symlink works regardless of how you access Claude.
 | CLAUDE.md guidelines | ✅ | ❌ | ❌ | ❌ |
 | Auto-redirect paths | ✅ | ❌ | ❌ | ❌ |
 | Session start validation | ✅ | ❌ | ❌ | ❌ |
-
-**No other dotfiles solution has ANY Claude Code integration.**
 
 ---
 
