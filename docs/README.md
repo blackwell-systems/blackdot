@@ -27,9 +27,6 @@ If you use Claude Code across multiple machines, this is the only dotfiles solut
 1. **Portable Sessions** – `/workspace` symlink ensures identical paths everywhere. Claude sessions sync seamlessly.
 2. **Auto-Redirect** – Work in `~/workspace/project`? Claude automatically uses `/workspace/project` for session continuity.
 3. **Multi-Backend Support** – Works with Claude via Anthropic Max, AWS Bedrock, or any provider.
-4. **Session Start Hooks** – Automatic git sync check prevents branch divergence during AI-assisted coding.
-
-No other dotfiles repo has ANY Claude Code integration. This is a first.
 
 ---
 
@@ -69,7 +66,7 @@ No other dotfiles repo has ANY Claude Code integration. This is a first.
 
 ### Why This Repo vs chezmoi?
 
-[chezmoi](https://chezmoi.io) is the most popular dotfiles manager. Here's how we compare:
+chezmoi is the most popular dotfiles manager. Here's how we compare:
 
 | Feature | This Repo | chezmoi |
 |---------|-----------|---------|
@@ -83,17 +80,6 @@ No other dotfiles repo has ANY Claude Code integration. This is a first.
 | **Cross-Platform** | ✅ 5 platforms + Docker | ✅ Excellent |
 | **Learning Curve** | ⚠️ Shell scripts | ⚠️ YAML + Go templates |
 | **Single Binary** | ❌ Requires zsh | ✅ Go binary |
-
-**Choose This Repo If:**
-- You use Claude Code and want portable sessions
-- You need secrets stored in Bitwarden, 1Password, or pass
-- You want health checks and auto-repair
-- You prefer shell scripts over YAML configuration
-
-**Choose chezmoi If:**
-- You want a single binary with no dependencies
-- You prefer declarative YAML configuration
-- You don't need vault integration or Claude Code support
 
 ### Detailed Comparison vs Popular Dotfiles
 
@@ -198,7 +184,7 @@ Inspired by: holman/dotfiles, thoughtbot/dotfiles, mathiasbynens/dotfiles
 ## Prerequisites
 
 **Required:**
-- A supported environment: macOS, Linux, WSL2, or Lima
+- A supported environment: macOS, Windows, Linux, WSL2, or Lima
 - Internet access (for installing packages)
 
 **Auto-installed (if missing):**
