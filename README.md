@@ -70,16 +70,16 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 
 | Feature | This Repo | chezmoi |
 |---------|-----------|---------|
-| **Secret Management** | ✅ 3 vault backends (bw/op/pass) with unified API | ⚠️ External tools only (no unified API) |
-| **Bidirectional Sync** | ✅ Local ↔ Vault | ⚠️ Templates only (one-way) |
-| **Claude Code Sessions** | ✅ **Native integration** | ❌ None |
+| **Secret Management** | 3 vault backends (bw/op/pass) with unified API | External tools only (no unified API) |
+| **Bidirectional Sync** | Local ↔ Vault | Templates only (one-way) |
+| **Claude Code Sessions** | Native integration | None |
 | **Health Checks** | Yes, with auto-fix | None |
-| **Drift Detection** | ✅ Local vs Vault comparison | ⚠️ `chezmoi diff` (files only) |
-| **Schema Validation** | ✅ SSH keys, configs | ❌ None |
-| **Machine Templates** | ✅ Custom engine | ✅ Go templates |
-| **Cross-Platform** | ✅ 5 platforms + Docker | ✅ Excellent |
-| **Learning Curve** | ⚠️ Shell scripts | ⚠️ YAML + Go templates |
-| **Single Binary** | ❌ Requires zsh | ✅ Go binary |
+| **Drift Detection** | Local vs Vault comparison | `chezmoi diff` (files only) |
+| **Schema Validation** | SSH keys, configs | None |
+| **Machine Templates** | Custom engine | Go templates |
+| **Cross-Platform** | 5 platforms + Docker | Excellent |
+| **Learning Curve** | Shell scripts | YAML + Go templates |
+| **Single Binary** | Requires zsh | Go binary |
 
 ### Detailed Comparison vs Popular Dotfiles
 
@@ -88,26 +88,24 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 
 | Feature | This Repo | thoughtbot | holman | mathiasbynens | YADR |
 |---------|-----------|------------|--------|---------------|------|
-| **Secrets Management** | ✅ Multi-vault (bw/op/pass) | ❌ Manual | ❌ Manual | ❌ Manual | ❌ Manual |
-| **Bidirectional Sync** | ✅ Local ↔ Vault | ❌ | ❌ | ❌ | ❌ |
-| **Cross-Platform** | ✅ macOS, Linux, Windows, WSL2, Docker | ⚠️ Limited | ⚠️ macOS only | ⚠️ macOS only | ⚠️ Limited |
-| **Claude Code Sessions** | ✅ Portable via `/workspace` | ❌ | ❌ | ❌ | ❌ |
+| **Secrets Management** | Multi-vault (bw/op/pass) | Manual | Manual | Manual | Manual |
+| **Bidirectional Sync** | Local ↔ Vault | No | No | No | No |
+| **Cross-Platform** | macOS, Linux, Windows, WSL2, Docker | Limited | macOS only | macOS only | Limited |
+| **Claude Code Sessions** | Portable via `/workspace` | No | No | No | No |
 | **Health Checks** | Yes, with auto-fix | No | No | No | No |
-| **Drift Detection** | ✅ Local vs Vault | ❌ | ❌ | ❌ | ❌ |
-| **Schema Validation** | ✅ SSH keys, configs | ❌ | ❌ | ❌ | ❌ |
-| **Unit Tests** | ✅ 80+ bats tests | ❌ | ❌ | ❌ | ❌ |
-| **CI/CD Integration** | ✅ GitHub Actions | ⚠️ Basic | ❌ | ❌ | ❌ |
-| **Modular Shell Config** | ✅ 10 modules | ❌ Monolithic | ❌ Monolithic | ❌ Monolithic | ⚠️ Partial |
-| **Optional Components** | ✅ SKIP_* flags | ❌ | ❌ | ❌ | ❌ |
-| **Docker Bootstrap** | ✅ Full Dockerfile | ❌ | ❌ | ❌ | ❌ |
-| **One-Line Installer** | ✅ Interactive mode | ⚠️ Basic | ❌ | ❌ | ✅ |
-| **Documentation Site** | ✅ Docsify (searchable) | ⚠️ README only | ⚠️ README only | ⚠️ README only | ⚠️ Wiki |
-| **Vault Item Templates** | ✅ With validation | ❌ | ❌ | ❌ | ❌ |
-| **Team Onboarding** | ✅ <5 min setup | ⚠️ ~30 min | ⚠️ ~30 min | ⚠️ ~30 min | ⚠️ ~45 min |
-| **macOS System Prefs** | ✅ 137 settings | ❌ | ✅ Extensive | ✅ Extensive | ❌ |
-| **Active Maintenance** | ✅ 2024 | ⚠️ Sporadic | ❌ Archived | ⚠️ Sporadic | ❌ Minimal |
-
-**Legend:** ✅ Full Support | ⚠️ Partial/Limited | ❌ Not Available
+| **Drift Detection** | Local vs Vault | No | No | No | No |
+| **Schema Validation** | SSH keys, configs | No | No | No | No |
+| **Unit Tests** | 80+ bats tests | No | No | No | No |
+| **CI/CD Integration** | GitHub Actions | Basic | No | No | No |
+| **Modular Shell Config** | 10 modules | Monolithic | Monolithic | Monolithic | Partial |
+| **Optional Components** | SKIP_* flags | No | No | No | No |
+| **Docker Bootstrap** | Full Dockerfile | No | No | No | No |
+| **One-Line Installer** | Interactive mode | Basic | No | No | Yes |
+| **Documentation Site** | Docsify (searchable) | README only | README only | README only | Wiki |
+| **Vault Item Templates** | With validation | No | No | No | No |
+| **Team Onboarding** | <5 min setup | ~30 min | ~30 min | ~30 min | ~45 min |
+| **macOS System Prefs** | 137 settings | No | Extensive | Extensive | No |
+| **Active Maintenance** | 2024 | Sporadic | Archived | Sporadic | Minimal |
 
 #### Key Differentiators
 
