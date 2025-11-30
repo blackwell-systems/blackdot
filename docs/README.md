@@ -18,7 +18,7 @@
 
 ---
 
-## 🤖 Why Claude Code Users Love This
+## Dotfiles for the AI-assisted development era
 
 > **"Start on Mac, continue on Linux, keep your conversation."**
 
@@ -35,7 +35,7 @@ If you use Claude Code across multiple machines, this is the only dotfiles solut
 ### Core (works everywhere)
 - **🔐 Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with Bitwarden, 1Password, or pass. One unlock, full environment.
 - **🤖 Claude Code integration** – Portable sessions across machines. Start coding on Mac, continue on Linux, same conversation.
-- **🏥 Self-healing configuration** – 446-line health checker with auto-fix. Drift detection catches local vs vault differences.
+- **🏥 Self-healing configuration** – Health checker with auto-fix. Drift detection catches local vs vault differences.
 - **📋 Machine-specific templates** – Generate configs tailored to each machine (work vs personal, macOS vs Linux).
 - **⚡ Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat—configured and ready.
 - **🔄 Idempotent design** – Run bootstrap repeatedly. Scripts converge to known-good state.
@@ -55,7 +55,7 @@ If you use Claude Code across multiple machines, this is the only dotfiles solut
 | Capability           | This Repo                                      | Typical Dotfiles                 |
 |----------------------|-----------------------------------------------|----------------------------------|
 | **Secrets management** | Multi-vault (Bitwarden, 1Password, pass)      | Manual copy between machines     |
-| **Health validation**  | 446-line checker with `--fix`                 | None                             |
+| **Health validation**  | Checker with `--fix`                          | None                             |
 | **Drift detection**    | Compare local vs vault state                  | None                             |
 | **Schema validation**  | Validates SSH keys & config structure         | None                             |
 | **Unit tests**         | 80+ bats-core tests                           | Rare                             |
@@ -73,7 +73,7 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 | **Secret Management** | ✅ 3 vault backends (bw/op/pass) with unified API | ⚠️ External tools only (no unified API) |
 | **Bidirectional Sync** | ✅ Local ↔ Vault | ⚠️ Templates only (one-way) |
 | **Claude Code Sessions** | ✅ **Native integration** | ❌ None |
-| **Health Checks** | ✅ 446-line checker + auto-fix | ❌ None |
+| **Health Checks** | Yes, with auto-fix | None |
 | **Drift Detection** | ✅ Local vs Vault comparison | ⚠️ `chezmoi diff` (files only) |
 | **Schema Validation** | ✅ SSH keys, configs | ❌ None |
 | **Machine Templates** | ✅ Custom engine | ✅ Go templates |
@@ -84,7 +84,7 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 ### Detailed Comparison vs Popular Dotfiles
 
 <details>
-<summary><b>📊 Feature Matrix: This Repo vs thoughtbot, holman, mathiasbynens, YADR</b></summary>
+<summary><b>Feature Matrix: This Repo vs thoughtbot, holman, mathiasbynens, YADR</b></summary>
 
 | Feature | This Repo | thoughtbot | holman | mathiasbynens | YADR |
 |---------|-----------|------------|--------|---------------|------|
@@ -92,7 +92,7 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 | **Bidirectional Sync** | ✅ Local ↔ Vault | ❌ | ❌ | ❌ | ❌ |
 | **Cross-Platform** | ✅ macOS, Linux, Windows, WSL2, Docker | ⚠️ Limited | ⚠️ macOS only | ⚠️ macOS only | ⚠️ Limited |
 | **Claude Code Sessions** | ✅ Portable via `/workspace` | ❌ | ❌ | ❌ | ❌ |
-| **Health Checks** | ✅ 446 lines + auto-fix | ❌ | ❌ | ❌ | ❌ |
+| **Health Checks** | Yes, with auto-fix | No | No | No | No |
 | **Drift Detection** | ✅ Local vs Vault | ❌ | ❌ | ❌ | ❌ |
 | **Schema Validation** | ✅ SSH keys, configs | ❌ | ❌ | ❌ | ❌ |
 | **Unit Tests** | ✅ 80+ bats tests | ❌ | ❌ | ❌ | ❌ |
@@ -112,36 +112,36 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 #### Key Differentiators
 
 **vs thoughtbot/dotfiles:**
-- ✨ **Secrets Management**: Multi-vault backends vs manual copying
-- ✨ **Cross-Platform**: Full Docker/WSL2/Lima support vs macOS/Linux only
-- ✨ **Health Monitoring**: Comprehensive checks vs none
-- ✨ **Testing**: Unit tests + CI vs basic install script
+- **Secrets Management**: Multi-vault backends vs manual copying
+- **Cross-Platform**: Full Docker/WSL2/Lima support vs macOS/Linux only
+- **Health Monitoring**: Comprehensive checks vs none
+- **Testing**: Unit tests + CI vs basic install script
 
 **vs holman/dotfiles:**
-- ✨ **Active Development**: Regular updates vs archived (2018)
-- ✨ **Enterprise Ready**: Multi-vault support, team onboarding vs personal use
-- ✨ **Cross-Platform**: Multi-OS support vs macOS only
-- ✨ **Portability**: Claude Code sessions, /workspace symlink vs static paths
+- **Active Development**: Regular updates vs archived (2018)
+- **Enterprise Ready**: Multi-vault support, team onboarding vs personal use
+- **Cross-Platform**: Multi-OS support vs macOS only
+- **Portability**: Claude Code sessions, /workspace symlink vs static paths
 
 **vs mathiasbynens/dotfiles:**
-- ✨ **Secrets Management**: Multi-vault system vs exposed in git
-- ✨ **Health Validation**: Auto-fix capability vs none
-- ✨ **Cross-Platform**: Full Linux/WSL2 support vs macOS focus
-- ✨ **Testing**: Automated tests vs manual verification
-- 🤝 **Similar**: Both have extensive macOS system preferences
+- **Secrets Management**: Multi-vault system vs exposed in git
+- **Health Validation**: Auto-fix capability vs none
+- **Cross-Platform**: Full Linux/WSL2 support vs macOS focus
+- **Testing**: Automated tests vs manual verification
+- **Similar**: Both have extensive macOS system preferences
 
 **vs YADR (Yet Another Dotfile Repo):**
-- ✨ **Lighter Weight**: Focused tooling vs kitchen sink approach
-- ✨ **Secrets Safety**: Multi-vault backends vs all in git
-- ✨ **Modern Stack**: eza, fzf, zoxide vs older tools
-- ✨ **Maintenance**: Active vs minimal updates
-- 🤝 **Similar**: Both aim for comprehensive setup
+- **Lighter Weight**: Focused tooling vs kitchen sink approach
+- **Secrets Safety**: Multi-vault backends vs all in git
+- **Modern Stack**: eza, fzf, zoxide vs older tools
+- **Maintenance**: Active vs minimal updates
+- **Similar**: Both aim for comprehensive setup
 
 #### What Makes This Unique
 
 1. **Only dotfiles with multi-vault backend support** - Bitwarden, 1Password, or pass with unified API
 2. **Only dotfiles with Claude Code session portability** - `/workspace` symlink + auto-redirect
-3. **Only dotfiles with comprehensive health checks** - 446-line validator with auto-fix
+3. **Only dotfiles with comprehensive health checks** - Validator with auto-fix
 4. **Only dotfiles with drift detection** - Compare local vs vault state
 5. **Only dotfiles with schema validation** - Ensures SSH keys/configs are valid before restore
 6. **Only dotfiles with Docker bootstrap testing** - Reproducible CI/CD environments
