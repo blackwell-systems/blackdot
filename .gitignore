@@ -30,3 +30,4 @@ coverage/
 # Template system
 templates/_variables.local.sh
 generated/
+*.backup

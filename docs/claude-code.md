@@ -153,11 +153,11 @@ The `/workspace` symlink works regardless of how you access Claude.
 
 | Feature | This Repo | chezmoi | yadm | dotbot |
 |---------|-----------|---------|------|--------|
-| Portable Claude sessions | ✅ | ❌ | ❌ | ❌ |
-| Git safety hooks | ✅ | ❌ | ❌ | ❌ |
-| CLAUDE.md guidelines | ✅ | ❌ | ❌ | ❌ |
-| Auto-redirect paths | ✅ | ❌ | ❌ | ❌ |
-| Session start validation | ✅ | ❌ | ❌ | ❌ |
+| Portable Claude sessions | Yes | No | No | No |
+| Git safety hooks | Yes | No | No | No |
+| CLAUDE.md guidelines | Yes | No | No | No |
+| Auto-redirect paths | Yes | No | No | No |
+| Session start validation | Yes | No | No | No |
 
 ---
 

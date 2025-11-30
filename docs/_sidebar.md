@@ -2,31 +2,24 @@
 
 - **Getting Started**
   - [Home](/)
-  - [Quick Start](/#quick-start)
-  - [Prerequisites](/#prerequisites)
-  - [Use Cases](/#use-cases)
+  - [One-Line Install](/#one-line-install)
+  - [Quick Start](/#quick-start-manual)
+  - [Platform Support](/#platform-support)
+
+- **Documentation**
+  - [Full Guide](README-FULL.md)
   - [Claude Code Integration](claude-code.md)
-
-- **Configuration**
-  - [What Gets Installed](/#what-gets-installed)
-  - [Key Concepts](/#key-concepts)
-  - [Common Tasks](/#common-tasks)
-  - [Project Structure](/#project-structure)
-
-- **Development**
-  - [Docker Bootstrap](/#development-testing)
-  - [Unit Tests](/#unit-tests)
-  - [Modular Shell Config](/#modular-shell-configuration)
-
-- **Detailed Documentation**
-  - [Full Documentation](README-FULL.md)
+  - [Template System](templates.md)
   - [Vault System](vault-README.md)
-  - [macOS Settings](macos-settings.md)
   - [Architecture](architecture.md)
+  - [macOS Settings](macos-settings.md)
+  - [Troubleshooting](troubleshooting.md)
+
+- **Comparisons**
+  - [Why This Repo vs chezmoi](https://github.com/blackwell-systems/dotfiles#why-this-repo-vs-chezmoi)
+  - [Feature Matrix](https://github.com/blackwell-systems/dotfiles#detailed-comparison-vs-popular-dotfiles)
 
 - **Reference**
-  - [Platform Support](/#platform-support)
-  - [Troubleshooting](troubleshooting.md)
   - [Contributing](CONTRIBUTING.md)
   - [Security](SECURITY.md)
   - [Changelog](CHANGELOG.md)
@@ -35,4 +28,3 @@
 - **Links**
   - [![GitHub](https://icongr.am/simple/github.svg?size=16&colored=false) GitHub Repo](https://github.com/blackwell-systems/dotfiles)
   - [![Issues](https://icongr.am/octicons/issue-opened.svg?size=16) Issues](https://github.com/blackwell-systems/dotfiles/issues)
-  - [![CI Status](https://img.shields.io/github/actions/workflow/status/blackwell-systems/dotfiles/test.yml?branch=main)](https://github.com/blackwell-systems/dotfiles/actions)
