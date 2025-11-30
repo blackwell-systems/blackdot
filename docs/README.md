@@ -33,13 +33,13 @@ If you use Claude Code across multiple machines, this is the only dotfiles solut
 ## Features
 
 ### Core (works everywhere)
-- **🔐 Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with Bitwarden, 1Password, or pass. One unlock, full environment.
-- **🤖 Claude Code integration** – Portable sessions across machines. Start coding on Mac, continue on Linux, same conversation.
-- **🏥 Self-healing configuration** – Health checker with auto-fix. Drift detection catches local vs vault differences.
-- **📋 Machine-specific templates** – Generate configs tailored to each machine (work vs personal, macOS vs Linux).
-- **⚡ Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat—configured and ready.
-- **🔄 Idempotent design** – Run bootstrap repeatedly. Scripts converge to known-good state.
-- **✅ Comprehensive testing** – 80+ tests ensure reliability across platforms.
+- **Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with Bitwarden, 1Password, or pass. One unlock, full environment.
+- **Claude Code integration** – Portable sessions across machines. Start coding on Mac, continue on Linux, same conversation.
+- **Self-healing configuration** – Health checker with auto-fix. Drift detection catches local vs vault differences.
+- **Machine-specific templates** – Generate configs tailored to each machine (work vs personal, macOS vs Linux).
+- **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat—configured and ready.
+- **Idempotent design** – Run bootstrap repeatedly. Scripts converge to known-good state.
+- **Comprehensive testing** – 80+ tests ensure reliability across platforms.
 
 ### Advanced (opt-in)
 - **Cross-platform portability** – Same dotfiles on macOS, Linux, Windows, WSL2, or Docker.
@@ -710,10 +710,10 @@ bats test/vault_common.bats
 ```
 
 **Current test coverage:**
-- ✅ vault/_common.sh data structure helpers (23 tests)
-- ✅ Logging functions (info, pass, warn, fail, debug)
-- ✅ Item path lookups and validation
-- ⏳ Future: vault restoration scripts
+- vault/_common.sh data structure helpers (23 tests)
+- Logging functions (info, pass, warn, fail, debug)
+- Item path lookups and validation
+- Future: vault restoration scripts
 
 Tests run automatically in GitHub Actions on every push.
 
@@ -747,13 +747,13 @@ To customize:
 
 | Platform | Status | Notes |
 |----------|--------|-------|
-| macOS (Apple Silicon) | ✅ Fully tested | Primary development environment |
-| macOS (Intel) | ✅ Fully tested | Auto-detects architecture |
-| Lima (Ubuntu 24.04) | ✅ Fully tested | Recommended Linux VM for macOS |
-| WSL2 (Windows) | ✅ Auto-detected | Uses Linux bootstrap |
-| Windows (Git Bash/MSYS2) | ✅ Native support | Uses Windows bootstrap |
-| Ubuntu/Debian | ✅ Compatible | Tested on Ubuntu 24.04 |
-| Arch/Fedora/BSD | ⚠️ Experimental | 15-30 min adaptation needed |
+| macOS (Apple Silicon) | Fully tested | Primary development environment |
+| macOS (Intel) | Fully tested | Auto-detects architecture |
+| Lima (Ubuntu 24.04) | Fully tested | Recommended Linux VM for macOS |
+| WSL2 (Windows) | Auto-detected | Uses Linux bootstrap |
+| Windows (Git Bash/MSYS2) | Native support | Uses Windows bootstrap |
+| Ubuntu/Debian | Compatible | Tested on Ubuntu 24.04 |
+| Arch/Fedora/BSD | Experimental | 15-30 min adaptation needed |
 
 ---
 
