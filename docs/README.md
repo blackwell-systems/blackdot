@@ -88,6 +88,8 @@ dotfiles init
 - Secret restoration
 - Health validation
 
+> **💡 Why `~/workspace`?** Bootstrap creates `/workspace → ~/workspace` symlink for **portable Claude Code sessions**. Use `/workspace/project` paths and your AI conversations sync across macOS, Linux, WSL—same session folder, same history. [Learn more](README-FULL.md#canonical-workspace-workspace)
+
 **Don't use a vault?** The wizard lets you skip vault setup entirely.
 
 ---
