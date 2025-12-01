@@ -906,7 +906,7 @@ The phases reference week numbers which may not be realistic. Focus on:
 
 **1. Enhance `dotfiles status`** (50-functions.zsh)
 
-Add one line showing active Claude profile:
+Add Claude profile status with gentle hint if dotclaude not installed:
 
 ```bash
 # In status() function
@@ -915,10 +915,24 @@ if command -v dotclaude &>/dev/null; then
   local profile=$(dotclaude active 2>/dev/null)
   if [[ -n "$profile" ]]; then
     s_profile="${g}◆${n}"; s_profile_info="$profile"
+  else
+    s_profile="${r}◇${n}"; s_profile_info="${d}no active profile${n}"
   fi
+elif command -v claude &>/dev/null; then
+  # Claude installed but no dotclaude - gentle hint
+  s_profile="${d}·${n}"; s_profile_info="${d}try: brew install dotclaude${n}"
 fi
-echo "  profile    $s_profile  $s_profile_info"
+
+# Only show if Claude-related tools present
+if [[ -n "$s_profile_info" ]]; then
+  echo "  profile    $s_profile  $s_profile_info"
+fi
 ```
+
+This way:
+- Users with dotclaude see their active profile
+- Users with Claude but no dotclaude see a gentle install hint
+- Users with neither see nothing (no noise)
 
 **2. Add `dotfiles doctor` section** (bin/dotfiles-doctor)
 
