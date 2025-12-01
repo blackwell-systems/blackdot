@@ -33,18 +33,20 @@ If you use Claude Code across multiple machines, this is the only dotfiles solut
 ## Features
 
 ### Core (works everywhere)
-- **Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with Bitwarden, 1Password, or pass. One unlock, full environment.
-- **Claude Code integration** – Portable sessions across machines. Start coding on Mac, continue on Linux, same conversation.
-- **Self-healing configuration** – Health checker with auto-fix. Drift detection catches local vs vault differences.
-- **Machine-specific templates** – Generate configs tailored to each machine (work vs personal, macOS vs Linux).
-- **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat—configured and ready.
-- **Idempotent design** – Run bootstrap repeatedly. Scripts converge to known-good state.
-- **Comprehensive testing** – 80+ tests ensure reliability across platforms.
+- **Interactive setup wizard** – `dotfiles init` guides you through platform detection, vault selection (Bitwarden/1Password/pass), and secret restoration. One command, complete setup.
+- **Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with your choice of Bitwarden, 1Password, or pass. Unified API across all backends.
+- **Claude Code integration** – Portable sessions across machines. Start coding on Mac, continue on Linux, same conversation. Auto-redirect keeps paths consistent.
+- **Self-healing configuration** – Health checker with `--fix` mode. Drift detection catches local vs vault differences before they cause problems.
+- **Machine-specific templates** – Generate configs tailored to each machine (work vs personal, macOS vs Linux). Variables, conditionals, loops.
+- **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat, yazi—configured and ready. Lazy-loaded for fast shell startup.
+- **Idempotent design** – Run bootstrap repeatedly. Scripts converge to known-good state. Safe to re-run anytime.
+- **Comprehensive testing** – 124 tests ensure reliability across platforms. Unit, integration, and error scenario coverage.
 
 ### Advanced (opt-in)
-- **Cross-platform portability** – Same dotfiles on macOS, Linux, Windows, WSL2, or Docker.
-- **Metrics and observability** – Track dotfiles health over time.
-- **Git safety hooks** – Defensive hooks block dangerous git commands (force push, hard reset). [Learn more](docs/claude-code.md)
+- **Cross-platform portability** – Same dotfiles on macOS, Linux, Windows, WSL2, or Docker. 90% shared code, 10% platform-specific.
+- **Metrics and observability** – Track dotfiles health over time. Visualize trends, catch regressions early.
+- **Git safety hooks** – Defensive hooks block dangerous git commands (force push, hard reset, secrets commits). [Learn more](docs/claude-code.md)
+- **Docker test environment** – Try the entire system in a disposable Alpine container before installing. 30-second trust verification.
 
 ---
 
