@@ -2,7 +2,7 @@
 
 > **Goal:** Integrate dotclaude with dotfiles as complementary products in the Blackwell Systems ecosystem while maintaining loose coupling and independence.
 
-**Version:** 2.0.0
+**Version:** 2.1.0
 **Status:** Approved
 **Last Updated:** 2025-12-01
 
@@ -31,7 +31,10 @@ This document outlines the **approved** integration strategy between **dotfiles*
 │                                 │     │                                 │
 │  dotfiles status    ───────────────────► shows Claude profile status   │
 │  dotfiles doctor    ───────────────────► checks Claude health          │
+│  dotfiles drift     ───────────────────► detects profile changes       │
 │  dotfiles vault restore ───────────────► restores profiles.json        │
+│  dotfiles packages  ───────────────────► suggests dotclaude install    │
+│  dotfiles init      ───────────────────► offers dotclaude setup        │
 │                                 │     │                                 │
 └─────────────────────────────────┘     └─────────────────────────────────┘
                                               ▲
@@ -60,6 +63,9 @@ This document outlines the **approved** integration strategy between **dotfiles*
 |------|---------|-------|
 | See overall health | `dotfiles status` | Shows Claude status too |
 | Validate setup | `dotfiles doctor` | Checks Claude too |
+| Check for drift | `dotfiles drift` | Detects profile changes vs vault |
+| Check packages | `dotfiles packages` | Suggests dotclaude if missing |
+| First-time setup | `dotfiles init` | Offers dotclaude installation |
 | Restore on new machine | `dotfiles vault restore` | Restores Claude profiles too |
 | **List Claude profiles** | `dotclaude list` | Direct - full access |
 | **Switch profiles** | `dotclaude switch work` | Direct - full access |
@@ -150,6 +156,60 @@ export CLAUDE_DEFAULT_BACKEND="max"
 
 dotclaude reads these environment variables natively. No intermediate config file needed.
 
+### 5. Drift detection includes profiles (bin/dotfiles-drift)
+
+```bash
+# Add to DRIFT_ITEMS
+typeset -A DRIFT_ITEMS=(
+    # ... existing items ...
+    ["Claude-Profiles"]="$HOME/.claude/profiles.json"
+)
+```
+
+This enables `dotfiles drift` to show when local profiles differ from vault.
+
+### 6. Packages checker suggests dotclaude (bin/dotfiles-packages)
+
+```bash
+# After checking Brewfile packages
+if command -v claude &>/dev/null && ! command -v dotclaude &>/dev/null; then
+  echo ""
+  info "Claude Code detected without dotclaude"
+  echo "     Manage profiles across machines with dotclaude:"
+  echo "     brew tap blackwell-systems/tap && brew install dotclaude"
+fi
+```
+
+Natural discovery point when users check their package status.
+
+### 7. Init wizard offers dotclaude setup (bin/dotfiles-init)
+
+```bash
+# After Step 3: Restore Secrets
+if command -v claude &>/dev/null; then
+  echo ""
+  step "Claude Code Setup"
+
+  if ! command -v dotclaude &>/dev/null; then
+    echo "Claude Code detected. dotclaude helps manage profiles across machines."
+    read -p "Install dotclaude? [Y/n]: " response
+    if [[ "${response:-Y}" =~ ^[Yy] ]]; then
+      brew tap blackwell-systems/tap && brew install dotclaude
+      success "dotclaude installed"
+    fi
+  else
+    local profile=$(dotclaude active 2>/dev/null)
+    if [[ -n "$profile" ]]; then
+      success "Active Claude profile: $profile"
+    else
+      info "No active Claude profile - run: dotclaude switch <profile>"
+    fi
+  fi
+fi
+```
+
+Seamless onboarding for new developers.
+
 ---
 
 ## Why This Works
@@ -161,6 +221,8 @@ dotclaude reads these environment variables natively. No intermediate config fil
 | **Graceful degradation** | Works fine if dotclaude isn't installed |
 | **One-command restore** | `dotfiles vault restore` gets complete environment |
 | **Invisible when working** | Users just run `claude` and it works |
+| **Multi-touchpoint discovery** | status, doctor, packages, init all suggest dotclaude |
+| **Drift awareness** | Users know when profiles need syncing |
 
 ---
 
@@ -210,13 +272,17 @@ dotclaude list
 
 ## Implementation Summary
 
-| Area | Approach |
-|------|----------|
-| CLI Pattern | No wrapper - dotclaude used directly |
-| Status | Enhanced to show Claude profile |
-| Doctor | Enhanced to validate Claude setup |
-| Vault | Store/restore `profiles.json` |
-| Template | Env vars in `99-local.zsh` |
+| # | Area | File | Approach |
+|---|------|------|----------|
+| 1 | Status | 50-functions.zsh | Show Claude profile, hint if missing |
+| 2 | Doctor | bin/dotfiles-doctor | Validate Claude setup |
+| 3 | Vault | vault/_common.sh | Store/restore `profiles.json` |
+| 4 | Template | 99-local.zsh.tmpl | Env vars for Claude backend |
+| 5 | Drift | bin/dotfiles-drift | Detect profile changes vs vault |
+| 6 | Packages | bin/dotfiles-packages | Suggest dotclaude if missing |
+| 7 | Init | bin/dotfiles-init | Offer dotclaude during setup |
+
+**CLI Pattern:** No wrapper - dotclaude used directly for all profile management.
 
 ---
 
