@@ -22,6 +22,7 @@ zsh_eval() {
   zsh -c "
     export DOTFILES_DIR='$DOTFILES_DIR'
     export TEMPLATES_DIR='$DOTFILES_DIR/templates'
+    source '$DOTFILES_DIR/lib/_logging.sh'
     source '$TEMPLATES_SH'
     $*
   "
@@ -38,6 +39,7 @@ render_string() {
   zsh -c "
     export DOTFILES_DIR='$DOTFILES_DIR'
     export TEMPLATES_DIR='$DOTFILES_DIR/templates'
+    source '$DOTFILES_DIR/lib/_logging.sh'
     source '$TEMPLATES_SH'
     $setup_code
     build_template_vars
