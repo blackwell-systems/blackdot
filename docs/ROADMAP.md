@@ -395,9 +395,9 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 | 1.4.0 | Bootstrap consolidation, pre-restore drift check |
 | 1.5.0 | Offline mode support |
 | 1.6.0 | CLI reorganization (bin/ directory) |
-| 1.7.0 | Root directory cleanup (bootstrap/, docs/) |
-| 1.8.0 | Native Windows support, git safety hooks, marketing refresh |
-| 1.9.0 | (Next) MCP server for Claude Code integration |
+| 1.7.0 | Root directory cleanup (bootstrap/, docs/) | ✓ Released |
+| 1.8.0 | (Planned) Native Windows support, git safety hooks, marketing refresh |
+| 1.9.0 | (Planned) MCP server for Claude Code integration |
 
 ---
 

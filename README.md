@@ -10,12 +10,12 @@
 [![ShellCheck](https://img.shields.io/badge/ShellCheck-Passing-brightgreen)](https://github.com/blackwell-systems/dotfiles/actions)
 [![Tests](https://img.shields.io/badge/Tests-80%2B-brightgreen)](test/)
 [![codecov](https://codecov.io/gh/blackwell-systems/dotfiles/branch/main/graph/badge.svg)](https://codecov.io/gh/blackwell-systems/dotfiles)
-[![Version](https://img.shields.io/badge/Version-1.8.0-informational)](https://github.com/blackwell-systems/dotfiles/releases)
+[![Version](https://img.shields.io/badge/Version-1.7.0-informational)](https://github.com/blackwell-systems/dotfiles/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > **The first dotfiles designed for AI-assisted development.** Multi-vault secrets, portable Claude Code sessions, machine-specific templates, and self-healing configuration. Start coding on macOS, continue on Linux—same secrets, same Claude session.
 
-**Version:** 1.8.0 | [Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
+**Version:** 1.7.0 | [Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
 
 ---
 
