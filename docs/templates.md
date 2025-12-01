@@ -256,6 +256,40 @@ Include content only if a variable is empty:
 {{/unless}}
 ```
 
+### Array Loops
+
+Use `{{#each}}` to iterate over arrays with named fields:
+
+```
+{{#each ssh_hosts}}
+Host {{ name }}
+    HostName {{ hostname }}
+    User {{ user }}
+    IdentityFile {{ identity }}
+{{#if extra }}    {{ extra }}
+{{/if}}
+{{/each}}
+```
+
+**Available arrays:**
+
+| Array | Fields | Defined In |
+|-------|--------|------------|
+| `ssh_hosts` | `name`, `hostname`, `user`, `identity`, `extra` | `_variables.local.sh` |
+
+**Defining arrays:**
+
+```zsh
+# In _variables.local.sh
+# Format: name|hostname|user|identity_file|extra_options
+SSH_HOSTS=(
+    "github|github.com|git|~/.ssh/id_ed25519|"
+    "work-server|server.company.com|deploy|~/.ssh/id_work|ProxyJump bastion"
+)
+```
+
+Conditionals work inside loops - use `{{#if extra }}` to include optional fields only when set.
+
 ### Available Variables
 
 #### Auto-Detected (set automatically)
