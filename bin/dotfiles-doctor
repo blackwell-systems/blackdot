@@ -357,7 +357,36 @@ else
 fi
 
 # ============================================================
-# Section 8: Template System
+# Section 8: Claude Code (Optional)
+# ============================================================
+if command -v claude &>/dev/null; then
+    section "Claude Code"
+    pass "Claude CLI installed"
+
+    if command -v dotclaude &>/dev/null; then
+        pass "dotclaude installed"
+        profile=$(dotclaude active 2>/dev/null)
+        if [[ -n "$profile" && "$profile" != "none" ]]; then
+            pass "Active profile: $profile"
+        else
+            warn "No active profile - run: dotclaude switch <profile>"
+        fi
+
+        # Check profiles.json exists for vault sync
+        if [[ -f "$HOME/.claude/profiles.json" ]]; then
+            pass "profiles.json exists (vault syncable)"
+        else
+            info "profiles.json not found - run: dotclaude activate <profile>"
+        fi
+    else
+        info "dotclaude not installed (optional)"
+        echo "     Manage Claude profiles across machines:"
+        echo "     curl -fsSL https://dotclaude.dev/install | bash"
+    fi
+fi
+
+# ============================================================
+# Section 9: Template System
 # ============================================================
 section "Template System"
 

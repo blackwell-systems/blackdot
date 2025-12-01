@@ -23,7 +23,6 @@
 
 - **Planning**
   - [Roadmap](ROADMAP.md)
-  - [dotclaude Integration](INTEGRATION-DOTCLAUDE.md)
   - [Template JSON Arrays](PLAN-TEMPLATE-JSON.md)
 
 - **Contributing**
