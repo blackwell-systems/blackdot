@@ -284,6 +284,13 @@ dotclaude list
 
 **CLI Pattern:** No wrapper - dotclaude used directly for all profile management.
 
+### dotclaude Installation Methods
+
+| Method | Command | Use Case |
+|--------|---------|----------|
+| **Curl** | `curl -fsSL https://dotclaude.dev/install \| bash` | Quick install, any system |
+| **Homebrew** | `brew install blackwell-systems/tap/dotclaude` | Managed updates, macOS/Linux |
+
 ---
 
 ## Alternative Approaches (Rejected)
