@@ -12,7 +12,7 @@ The following items have detailed planning documents and are ready for implement
 
 ### 1. dotclaude Integration
 
-**Status:** Approved - Ready for Implementation
+**Status:** In Progress - Prerequisites Complete
 **Document:** [INTEGRATION-DOTCLAUDE.md](INTEGRATION-DOTCLAUDE.md)
 
 Integrate dotfiles with [dotclaude](https://dotclaude.dev) (Claude Code profile management) as complementary products:
@@ -24,6 +24,14 @@ Integrate dotfiles with [dotclaude](https://dotclaude.dev) (Claude Code profile 
 - No wrapper commands - dotclaude used directly
 
 **Principle:** Loose coupling - each product remains fully independent.
+
+**Progress:**
+- ✅ dotclaude `active` command (machine-readable profile name)
+- ✅ dotclaude `sync_profiles_json()` (auto-generates `~/.claude/profiles.json`)
+- ✅ Auto-sync on `activate` and `create` commands
+- ⏳ dotfiles status integration
+- ⏳ dotfiles doctor integration
+- ⏳ dotfiles vault integration
 
 ---
 
