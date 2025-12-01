@@ -14,6 +14,7 @@
   - [Claude Code Integration](claude-code.md)
   - [Template System](templates.md)
   - [Vault System](vault-README.md)
+  - [Extending Vault Backends](extending-backends.md)
   - [macOS Settings](macos-settings.md)
 
 - **Architecture**
@@ -24,11 +25,15 @@
   - [Why This Repo vs chezmoi](https://github.com/blackwell-systems/dotfiles#why-this-repo-vs-chezmoi)
   - [Feature Matrix](https://github.com/blackwell-systems/dotfiles#detailed-comparison-vs-popular-dotfiles)
 
+- **Planning**
+  - [Roadmap](ROADMAP.md)
+  - [dotclaude Integration](INTEGRATION-DOTCLAUDE.md)
+  - [Template JSON Arrays](PLAN-TEMPLATE-JSON.md)
+
 - **Contributing**
   - [Contributing Guide](CONTRIBUTING.md)
   - [Security](SECURITY.md)
   - [Changelog](CHANGELOG.md)
-  - [Roadmap](ROADMAP.md)
 
 - **Links**
   - [![GitHub](https://icongr.am/simple/github.svg?size=16&colored=false) GitHub Repo](https://github.com/blackwell-systems/dotfiles)

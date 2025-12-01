@@ -19,7 +19,7 @@
 #   {{#if variable }}...{{/if}} - Conditional block (truthy check)
 #   {{#if var == "value" }}    - Conditional with comparison
 #   {{#unless variable }}      - Negative conditional
-#   {{#each array }}...{{/each}} - Array iteration (future)
+#   {{#each array }}...{{/each}} - Array iteration with named fields
 #
 # Variable Precedence (highest to lowest):
 #   1. Environment variables (DOTFILES_TMPL_*)
@@ -88,6 +88,23 @@ typeset -gA TMPL_AUTO=()       # Auto-detected values
 typeset -gA TMPL_DEFAULTS=()   # User defaults
 typeset -gA TMPL_WORK=()       # Work machine overrides
 typeset -gA TMPL_PERSONAL=()   # Personal machine overrides
+
+# ============================================================
+# Array Storage for {{#each}} loops
+# ============================================================
+# Arrays are stored as pipe-delimited strings with named fields
+# Format: "field1|field2|field3|..."
+# Schema defines field names for each array type
+typeset -gA TMPL_ARRAY_SCHEMAS=(
+    # SSH_HOSTS: name|hostname|user|identity|extra
+    [ssh_hosts]="name|hostname|user|identity|extra"
+    # Generic arrays use "item" as the field name
+    [_default]="item"
+)
+
+# Global array storage - populated from SSH_HOSTS, etc.
+typeset -ga TMPL_ARRAYS_ssh_hosts=()
+typeset -ga TMPL_ARRAYS_generic=()
 
 # ============================================================
 # Auto-Detection Functions
@@ -204,6 +221,15 @@ load_variable_files() {
     fi
 }
 
+# Load arrays for {{#each}} loops
+load_template_arrays() {
+    # SSH_HOSTS array (defined in _variables.sh or _variables.local.sh)
+    if (( ${#SSH_HOSTS[@]} > 0 )); then
+        TMPL_ARRAYS_ssh_hosts=("${SSH_HOSTS[@]}")
+        debug "Loaded SSH_HOSTS array: ${#TMPL_ARRAYS_ssh_hosts[@]} items"
+    fi
+}
+
 # Build the final variable map with proper precedence
 build_template_vars() {
     # Reset
@@ -249,6 +275,9 @@ build_template_vars() {
         TMPL_VARS[$key]="${(P)env_var}"
         debug "Env override: $key = ${(P)env_var}"
     done
+
+    # Load arrays for {{#each}} loops
+    load_template_arrays
 
     debug "Built ${#TMPL_VARS[@]} template variables"
 }
@@ -351,6 +380,127 @@ evaluate_condition() {
     local value="${TMPL_VARS[$var]:-}"
     debug "Truthy check: $var = '$value'"
     [[ -n "$value" && "$value" != "false" && "$value" != "0" ]]
+}
+
+# ============================================================
+# {{#each}} Loop Processing
+# ============================================================
+
+# Parse a pipe-delimited array item into field variables
+# Usage: parse_array_item "value1|value2|value3" "field1|field2|field3"
+# Sets: EACH_field1="value1", EACH_field2="value2", etc.
+parse_array_item() {
+    local item="$1"
+    local schema="$2"
+
+    # Split schema into field names
+    local -a fields
+    fields=("${(@s:|:)schema}")
+
+    # Split item into values
+    local -a values
+    values=("${(@s:|:)item}")
+
+    # Set EACH_* variables for each field
+    local i
+    for (( i = 1; i <= ${#fields[@]}; i++ )); do
+        local field="${fields[$i]}"
+        local value="${values[$i]:-}"
+        # Export to associative array for substitution
+        TMPL_EACH_VARS[$field]="$value"
+        debug "  EACH.$field = '$value'"
+    done
+}
+
+# Substitute {{#each}} item variables in a block
+# Replaces {{ fieldname }} with the current item's field value
+substitute_each_vars() {
+    local block="$1"
+
+    for field in "${(@k)TMPL_EACH_VARS}"; do
+        local value="${TMPL_EACH_VARS[$field]}"
+        # Replace {{ field }} and {{field}}
+        block="${block//\{\{ $field \}\}/$value}"
+        block="${block//\{\{$field\}\}/$value}"
+    done
+
+    echo "$block"
+}
+
+# Process {{#each array}}...{{/each}} blocks
+# Expands loops by iterating over array items
+process_each_loops() {
+    local content="$1"
+    local max_iterations=50
+    local iteration=0
+
+    # Process {{#each ...}}...{{/each}} blocks
+    while [[ "$content" == *'{{#each '* ]] && (( iteration++ < max_iterations )); do
+        # Find the first {{#each block
+        local before="${content%%\{\{#each *}"
+        local rest="${content#*\{\{#each }"
+
+        # Extract array name (everything until }})
+        local array_name="${rest%%\}\}*}"
+        array_name="${array_name## }"  # trim leading space
+        array_name="${array_name%% }"  # trim trailing space
+        rest="${rest#*\}\}}"
+
+        # Find matching {{/each}} (simple - no nesting support for now)
+        local block="${rest%%\{\{/each\}\}*}"
+        local after="${rest#*\{\{/each\}\}}"
+
+        debug "Processing {{#each $array_name}}"
+
+        # Get the array and schema
+        local -a items
+        local schema="${TMPL_ARRAY_SCHEMAS[$array_name]:-${TMPL_ARRAY_SCHEMAS[_default]}}"
+
+        # Load array based on name
+        case "$array_name" in
+            ssh_hosts)
+                items=("${TMPL_ARRAYS_ssh_hosts[@]}")
+                ;;
+            *)
+                # Try to find a matching array variable
+                local array_var="TMPL_ARRAYS_${array_name}"
+                if (( ${(P)#array_var} > 0 )); then
+                    items=("${(P@)array_var}")
+                else
+                    debug "Array not found: $array_name"
+                    items=()
+                fi
+                ;;
+        esac
+
+        # Build expanded content
+        local expanded=""
+        typeset -gA TMPL_EACH_VARS=()
+
+        if (( ${#items[@]} == 0 )); then
+            debug "  Array is empty, skipping block"
+        else
+            local item
+            for item in "${items[@]}"; do
+                debug "  Processing item: $item"
+
+                # Parse item into field variables
+                TMPL_EACH_VARS=()
+                parse_array_item "$item" "$schema"
+
+                # Substitute variables in this iteration's block
+                local rendered_block
+                rendered_block=$(substitute_each_vars "$block")
+
+                expanded+="$rendered_block"
+            done
+        fi
+
+        # Replace the entire {{#each}}...{{/each}} with expanded content
+        content="${before}${expanded}${after}"
+    done
+
+    echo "$content"
 }
 
 # Process conditional blocks in content
@@ -463,7 +613,10 @@ render_template() {
     local content
     content=$(<"$template_file")
 
-    # Process conditionals first
+    # Process {{#each}} loops first (expands arrays)
+    content=$(process_each_loops "$content")
+
+    # Process conditionals second (works inside expanded loops)
     content=$(process_conditionals "$content")
 
     # Variable substitution: {{ var }} and {{var}}
@@ -584,6 +737,14 @@ validate_template() {
     local endunless_count=$(grep -c '{{/unless}}' <<< "$content" || echo 0)
     if [[ "$unless_count" -ne "$endunless_count" ]]; then
         fail "Unmatched {{#unless}}/{{/unless}} blocks"
+        (( errors++ ))
+    fi
+
+    # Check for unmatched {{#each}} blocks
+    local each_count=$(grep -c '{{#each ' <<< "$content" || echo 0)
+    local endeach_count=$(grep -c '{{/each}}' <<< "$content" || echo 0)
+    if [[ "$each_count" -ne "$endeach_count" ]]; then
+        fail "Unmatched {{#each}}/{{/each}} blocks: $each_count opens, $endeach_count closes"
         (( errors++ ))
     fi
 

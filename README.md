@@ -13,7 +13,7 @@
 [![Version](https://img.shields.io/badge/Version-1.7.0-informational)](https://github.com/blackwell-systems/dotfiles/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **The first dotfiles designed for AI-assisted development.** Multi-vault secrets, portable Claude Code sessions, machine-specific templates, and self-healing configuration. Start coding on macOS, continue on Linux—same secrets, same Claude session.
+> **The first dotfiles designed for AI-assisted development.** Opinionated, batteries-included configuration for developers who use Claude Code across machines. Multi-vault secrets, portable sessions, machine-specific templates, and self-healing config.
 
 **Version:** 1.7.0 | [Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
 
@@ -154,6 +154,18 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 - **Self-healing dotfiles**: Health checks catch permission drift, broken symlinks, and missing vault items. Auto-fix with `--fix`
 - **Observable state**: Track health metrics over time, detect when things break
 - **Tested**: CI runs shellcheck, zsh syntax validation, and unit tests on every push
+
+### Modern, opinionated defaults
+
+| Choice | Default | Why |
+|--------|---------|-----|
+| Shell | Zsh + Powerlevel10k | Fast, extensible, great prompts |
+| Package manager | Homebrew | Works on macOS and Linux |
+| CLI tools | eza, fzf, ripgrep, bat | Modern replacements for ls, find, grep, cat |
+| Secrets | Vault-backed (not in git) | Security best practice |
+| Structure | Modular `zsh.d/` | Easier to maintain than monolithic |
+
+Override anything in `99-local.zsh` or fork to customize.
 
 ### What's optional
 
@@ -605,70 +617,54 @@ dotfiles/
 │   └── dotfiles-uninstall    # Clean removal
 │
 ├── vault/                     # Multi-backend secret management
-│   ├── _common.sh            # Shared config & validation functions
+│   ├── _common.sh            # Shared config & validation
 │   ├── backends/             # Vault backend implementations
-│   │   ├── bitwarden.sh      # Bitwarden CLI backend
-│   │   ├── 1password.sh      # 1Password CLI v2 backend
-│   │   └── pass.sh           # pass (GPG) backend
+│   │   ├── bitwarden.sh
+│   │   ├── 1password.sh
+│   │   └── pass.sh
 │   ├── bootstrap-vault.sh    # Orchestrator
 │   ├── restore-*.sh          # Restore SSH, AWS, Git, env
-│   ├── sync-to-vault.sh      # Sync local → vault
-│   ├── validate-schema.sh    # Validate vault item structure
-│   └── check-vault-items.sh  # Pre-flight validation
+│   └── sync-to-vault.sh      # Sync local → vault
 │
 ├── zsh/                       # Shell configuration
-│   ├── zshrc                 # Main loader (sources zsh.d/*.zsh)
+│   ├── zshrc                 # Main loader
 │   ├── p10k.zsh             # Powerlevel10k theme
 │   ├── completions/          # Tab completions
-│   │   └── _dotfiles        # dotfiles command completions
-│   └── zsh.d/               # Modular configuration
-│       ├── 00-init.zsh      # Initialization & OS detection
-│       ├── 10-plugins.zsh   # Plugin loading
-│       ├── 20-env.zsh       # Environment variables
-│       ├── 30-tools.zsh     # Modern CLI tools
-│       ├── 40-aliases.zsh   # Aliases
-│       ├── 50-functions.zsh # Shell functions
-│       ├── 60-aws.zsh       # AWS helpers
+│   └── zsh.d/               # Modular config (00-99)
+│       ├── 00-init.zsh      # Initialization
+│       ├── 40-aliases.zsh   # Aliases & dotfiles command
 │       ├── 70-claude.zsh    # Claude Code wrapper
-│       ├── 80-git.zsh       # Git shortcuts
-│       ├── 90-integrations.zsh # Tool integrations
-│       └── 99-local.zsh     # Machine-specific overrides (gitignored)
+│       └── 99-local.zsh     # Machine-specific (gitignored)
 │
 ├── lib/                       # Shared libraries
-│   ├── _logging.sh           # Colors and logging functions
-│   ├── _templates.sh         # Template engine
-│   └── _vault.sh             # Vault abstraction layer
+│   ├── _logging.sh           # Colors and logging
+│   └── _templates.sh         # Template engine
 │
 ├── templates/                 # Machine-specific templates
-│   ├── _variables.sh         # Default variable definitions
+│   ├── _variables.sh         # Default variables
 │   ├── _variables.local.sh   # Local overrides (gitignored)
-│   └── configs/              # Template files
-│       ├── gitconfig.tmpl    # Git configuration
-│       ├── 99-local.zsh.tmpl # Shell customization
-│       ├── ssh-config.tmpl   # SSH hosts
-│       └── claude.local.tmpl # Claude Code settings
+│   └── configs/*.tmpl        # Template files
 │
 ├── generated/                 # Rendered templates (gitignored)
 │
-├── bootstrap/                 # Bootstrap shared code
-│   └── _common.sh            # Shared bootstrap functions
+├── claude/                    # Claude Code integration
+│   ├── settings.json         # Permissions & preferences
+│   ├── hooks/                # Defensive git hooks
+│   └── commands/             # Custom slash commands
 │
 ├── test/                      # Test suites (bats-core)
-│   ├── vault_common.bats     # Unit tests for vault/_common.sh
-│   ├── cli_commands.bats     # Unit tests for CLI commands
-│   ├── integration.bats      # Integration tests with mock Bitwarden
-│   ├── error_scenarios.bats  # Error handling tests
-│   ├── mocks/bw              # Mock Bitwarden CLI
-│   └── run_tests.sh          # Test runner
+│   ├── *.bats               # Unit & integration tests
+│   └── mocks/               # Mock CLI tools
 │
-├── claude/                    # Claude Code integration
-│   └── settings.json         # Permissions & preferences
+├── macos/                     # macOS system preferences
+├── ghostty/                   # Ghostty terminal config
+├── zellij/                    # Zellij multiplexer config
+├── lima/                      # Lima VM configuration
 │
-├── macos/                     # macOS-specific
-│   └── apply-settings.sh     # System preferences
-│
-└── docs/                      # Documentation
-    └── README-FULL.md        # Complete documentation
+└── docs/                      # Documentation (Docsify)
+    ├── cli-reference.md      # All commands & flags
+    ├── README-FULL.md        # Complete guide
+    └── *.md                  # Topic guides
 ```
 
 ---
@@ -776,11 +772,13 @@ To customize:
 ## Documentation
 
 - **Quick overview:** this README
+- **[CLI Reference](docs/cli-reference.md)** - All commands, flags, and environment variables
 - **[Full Documentation](docs/README-FULL.md)** - Complete guide (1,900+ lines)
 - **[Template Guide](docs/templates.md)** - Machine-specific configuration templates
+- **[Claude Code Guide](docs/claude-code.md)** - Multi-backend setup and session portability
 - **[Architecture](docs/architecture.md)** - System diagrams and component overview
 - **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
-- **[Vault README](vault/README.md)** - Multi-vault backend details
+- **[Vault README](docs/vault-README.md)** - Multi-vault backend details
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contributor guide
 - **[SECURITY.md](SECURITY.md)** - Security policy
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
@@ -865,6 +863,10 @@ without prior written permission. See [BRAND.md](BRAND.md) for usage guidelines.
 ---
 
 ## Acknowledgments
+
+**AI & Development:**
+- [Anthropic](https://anthropic.com/) - Claude AI and Claude Code
+- [Claude Code](https://claude.ai/code) - AI-assisted development
 
 **Tools:**
 - [Bitwarden](https://bitwarden.com/) - Secret management
