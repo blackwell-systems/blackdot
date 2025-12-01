@@ -226,7 +226,95 @@ dotfiles/
 
 ---
 
-#### 7. MCP Server for Claude Code Integration
+## Planned Future Work
+
+The following items have detailed planning documents and are ready for implementation.
+
+---
+
+### 1. dotclaude Integration
+
+**Status:** Approved - Ready for Implementation
+**Document:** [INTEGRATION-DOTCLAUDE.md](INTEGRATION-DOTCLAUDE.md)
+
+Integrate dotfiles with [dotclaude](https://dotclaude.dev) (Claude Code profile management) as complementary products:
+
+- `dotfiles status` shows active Claude profile
+- `dotfiles doctor` validates Claude setup
+- `dotfiles vault restore` includes Claude profiles
+- `dotfiles init` offers dotclaude installation
+- No wrapper commands - dotclaude used directly
+
+**Principle:** Loose coupling - each product remains fully independent.
+
+---
+
+### 2. Template JSON Arrays
+
+**Status:** Planning Complete - Ready for Implementation
+**Document:** [PLAN-TEMPLATE-JSON.md](PLAN-TEMPLATE-JSON.md)
+
+Add JSON configuration support for template arrays (currently shell-only):
+
+**Current (awkward):**
+```zsh
+SSH_HOSTS=("github|github.com|git|~/.ssh/id_ed25519|")
+```
+
+**Proposed (clear):**
+```json
+{
+  "ssh_hosts": [
+    {"name": "github", "hostname": "github.com", "user": "git", "identity": "~/.ssh/id_ed25519"}
+  ]
+}
+```
+
+**Approach:** Hybrid - shell for variables (comments useful), JSON for arrays (structure clearer). No new dependencies (jq already required).
+
+---
+
+### 3. macOS CLI Integration
+
+**Status:** Concept - Not Started
+
+Currently, macOS settings are standalone scripts not exposed via the CLI:
+
+```
+macos/
+├── settings.sh           # 60+ defaults write commands
+├── apply-settings.sh     # Runner script
+└── discover-settings.sh  # Snapshot tool
+```
+
+**Proposed CLI:**
+```bash
+dotfiles macos apply              # Apply all settings
+dotfiles macos apply --dry-run    # Preview changes
+dotfiles macos apply dock         # Apply dock settings only
+dotfiles macos diff               # Compare current vs desired
+dotfiles macos list               # List categories
+```
+
+**Benefits:**
+- Consistent CLI experience
+- Category-based apply
+- Drift detection for macOS settings
+- Integration with `dotfiles doctor`
+
+**Considerations:**
+- macOS-only feature (needs graceful skip on Linux)
+- "Set once, forget" for most users - lower priority
+
+---
+
+## Other Ideas (Backlog)
+
+The following are concepts that may be implemented in the future.
+
+---
+
+#### 4. MCP Server for Claude Code Integration
 
 **Status:** Not started (Concept documented)
 
@@ -291,7 +379,7 @@ mcp-server-dotfiles/
 
 ---
 
-#### 8. Session Management Improvements
+#### 5. Session Management Improvements
 
 **Status:** Not started
 
@@ -335,7 +423,7 @@ is_session_expired() {
 
 ---
 
-#### 8. API/Function Reference Documentation
+#### 6. API/Function Reference Documentation
 
 **Status:** Not started
 
@@ -415,4 +503,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ---
 
-*Last updated: 2025-11-28*
+*Last updated: 2025-12-01*
