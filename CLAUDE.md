@@ -17,6 +17,7 @@ dotfiles vault restore   # Restore secrets from vault
 dotfiles vault sync      # Sync local to vault
 dotfiles lint            # Validate shell config syntax
 dotfiles packages        # Check/install Brewfile packages
+dotfiles metrics         # View health check history
 dotfiles template init   # Setup machine-specific configs
 dotfiles template render # Generate configs from templates
 dotfiles upgrade         # Pull latest and run bootstrap
