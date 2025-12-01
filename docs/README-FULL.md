@@ -67,24 +67,25 @@ Options:
 
 ```bash
 # 1. Clone repository
-git clone git@github.com:YOUR-USERNAME/dotfiles.git ~/workspace/dotfiles
+git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
-# 2. Run bootstrap (choose platform)
+# 2. Run interactive setup wizard
+dotfiles init
+```
+
+**That's it!** The wizard handles platform detection, vault selection, and secret restoration.
+
+**Alternative (non-interactive):**
+```bash
+# Run bootstrap only (no vault setup)
 ./bootstrap/bootstrap-mac.sh      # macOS
-./bootstrap/bootstrap-linux.sh    # Lima / Linux / WSL2
+./bootstrap/bootstrap-linux.sh    # Linux / WSL2
 
-# Or use interactive mode for guided setup:
-./bootstrap/bootstrap-mac.sh --interactive
+# Then manually configure secrets or run:
+dotfiles vault restore  # (requires vault CLI login first)
 
-# 3. Restore secrets from vault
-# For Bitwarden:
-bw login && export BW_SESSION="$(bw unlock --raw)"
-# For 1Password: op signin
-# For pass: no login needed (uses GPG)
-./vault/bootstrap-vault.sh
-
-# 4. Verify installation
+# Verify installation
 dotfiles doctor
 ```
 
