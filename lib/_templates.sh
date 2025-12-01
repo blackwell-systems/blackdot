@@ -427,6 +427,55 @@ substitute_each_vars() {
     echo "$block"
 }
 
+# Process conditionals inside a loop block using loop variables
+# This handles {{#if field}} where field is from the current loop item
+process_loop_conditionals() {
+    local content="$1"
+    local max_iterations=20
+    local iteration=0
+
+    # Process {{#if ...}}...{{/if}} blocks using loop variables
+    while [[ "$content" == *'{{#if '* ]] && (( iteration++ < max_iterations )); do
+        local before="${content%%\{\{#if *}"
+        local rest="${content#*\{\{#if }"
+        local condition="${rest%%\}\}*}"
+        rest="${rest#*\}\}}"
+
+        # Simple extraction - find matching {{/if}}
+        local block="${rest%%\{\{/if\}\}*}"
+        local after="${rest#*\{\{/if\}\}}"
+
+        # Handle {{#else}} within the block
+        local if_block="$block"
+        local else_block=""
+        if [[ "$block" == *'{{#else}}'* ]]; then
+            if_block="${block%%\{\{#else\}\}*}"
+            else_block="${block#*\{\{#else\}\}}"
+        fi
+
+        # Trim condition
+        condition="${condition## }"
+        condition="${condition%% }"
+
+        # Evaluate condition using loop variables (TMPL_EACH_VARS)
+        local var="${condition//[^a-zA-Z0-9_]/}"
+        local value="${TMPL_EACH_VARS[$var]:-}"
+        local condition_met=false
+
+        if [[ -n "$value" && "$value" != "false" && "$value" != "0" ]]; then
+            condition_met=true
+        fi
+
+        if $condition_met; then
+            content="${before}${if_block}${after}"
+        else
+            content="${before}${else_block}${after}"
+        fi
+    done
+
+    echo "$content"
+}
+
 # Process {{#each array}}...{{/each}} blocks
 # Expands loops by iterating over array items
 process_each_loops() {
@@ -491,6 +540,9 @@ process_each_loops() {
                 # Substitute variables in this iteration's block
                 local rendered_block
                 rendered_block=$(substitute_each_vars "$block")
+
+                # Process conditionals using loop variables (e.g., {{#if extra}})
+                rendered_block=$(process_loop_conditionals "$rendered_block")
 
                 expanded+="$rendered_block"
             done
@@ -557,12 +609,53 @@ process_conditionals() {
             fi
         done
 
-        # Handle {{#else}} within the block
+        # Handle {{#else}} within the block - must find {{#else}} at depth 0
         local if_block="$block"
         local else_block=""
         if [[ "$block" == *'{{#else}}'* ]]; then
-            if_block="${block%%\{\{#else\}\}*}"
-            else_block="${block#*\{\{#else\}\}}"
+            # Find {{#else}} at the same nesting level (depth 0)
+            local temp_block="$block"
+            local else_depth=0
+            local scanned=""
+
+            while [[ -n "$temp_block" ]]; do
+                # Get distances to each token
+                local dist_if=999999 dist_else=999999 dist_endif=999999
+                [[ "$temp_block" == *'{{#if '* ]] && dist_if=${#${temp_block%%\{\{#if *}}
+                [[ "$temp_block" == *'{{#else}}'* ]] && dist_else=${#${temp_block%%\{\{#else\}\}*}}
+                [[ "$temp_block" == *'{{/if}}'* ]] && dist_endif=${#${temp_block%%\{\{/if\}\}*}}
+
+                # Process the nearest token
+                if (( dist_if < dist_else && dist_if < dist_endif )); then
+                    # {{#if is next - increase depth
+                    scanned+="${temp_block:0:$dist_if}{{#if "
+                    temp_block="${temp_block#*\{\{#if }"
+                    local ncond="${temp_block%%\}\}*}"
+                    temp_block="${temp_block#*\}\}}"
+                    scanned+="${ncond}}}"
+                    (( else_depth++ ))
+                elif (( dist_else < dist_endif )); then
+                    # {{#else}} is next
+                    if (( else_depth == 0 )); then
+                        # Found our matching {{#else}}
+                        if_block="${scanned}${temp_block:0:$dist_else}"
+                        else_block="${temp_block#*\{\{#else\}\}}"
+                        break
+                    else
+                        # Nested {{#else}} - just include it
+                        scanned+="${temp_block:0:$dist_else}{{#else}}"
+                        temp_block="${temp_block#*\{\{#else\}\}}"
+                    fi
+                elif (( dist_endif < 999999 )); then
+                    # {{/if}} is next - decrease depth
+                    scanned+="${temp_block:0:$dist_endif}{{/if}}"
+                    temp_block="${temp_block#*\{\{/if\}\}}"
+                    (( else_depth-- ))
+                else
+                    # No more tokens - no {{#else}} at depth 0
+                    break
+                fi
+            done
         fi
 
         # Evaluate and substitute

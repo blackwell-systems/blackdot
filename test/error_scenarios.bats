@@ -39,6 +39,11 @@ teardown() {
 # ============================================================
 
 @test "error: handles permission denied on SSH directory" {
+    # Skip if running as root (root bypasses file permissions)
+    if [[ "$(id -u)" -eq 0 ]]; then
+        skip "Test requires non-root user (root bypasses permissions)"
+    fi
+
     # Create SSH directory with no write permission
     mkdir -p "$TEST_HOME/.ssh"
     chmod 000 "$TEST_HOME/.ssh"
@@ -70,6 +75,11 @@ teardown() {
 }
 
 @test "error: restore handles permission denied on target" {
+    # Skip if running as root (root bypasses file permissions)
+    if [[ "$(id -u)" -eq 0 ]]; then
+        skip "Test requires non-root user (root bypasses permissions)"
+    fi
+
     # Create read-only directory
     mkdir -p "$TEST_HOME/.config/readonly"
     chmod 555 "$TEST_HOME/.config/readonly"
