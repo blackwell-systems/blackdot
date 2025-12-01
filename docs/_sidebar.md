@@ -6,21 +6,26 @@
   - [Quick Start](/#quick-start-manual)
   - [Platform Support](/#platform-support)
 
-- **Documentation**
+- **Reference**
+  - [CLI Reference](cli-reference.md)
   - [Full Guide](README-FULL.md)
+
+- **Features**
   - [Claude Code Integration](claude-code.md)
   - [Template System](templates.md)
   - [Vault System](vault-README.md)
-  - [Architecture](architecture.md)
   - [macOS Settings](macos-settings.md)
+
+- **Architecture**
+  - [System Overview](architecture.md)
   - [Troubleshooting](troubleshooting.md)
 
 - **Comparisons**
   - [Why This Repo vs chezmoi](https://github.com/blackwell-systems/dotfiles#why-this-repo-vs-chezmoi)
   - [Feature Matrix](https://github.com/blackwell-systems/dotfiles#detailed-comparison-vs-popular-dotfiles)
 
-- **Reference**
-  - [Contributing](CONTRIBUTING.md)
+- **Contributing**
+  - [Contributing Guide](CONTRIBUTING.md)
   - [Security](SECURITY.md)
   - [Changelog](CHANGELOG.md)
   - [Roadmap](ROADMAP.md)
