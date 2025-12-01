@@ -74,6 +74,62 @@ This document outlines the **approved** integration strategy between **dotfiles*
 
 ---
 
+## Prerequisites: Required Changes to dotclaude
+
+Before integration, dotclaude needs these additions:
+
+### 1. Add `active` command
+
+**Purpose:** Return just the active profile name for machine-readable output
+
+**Implementation:**
+```bash
+# Add to dotclaude script
+cmd_active() {
+    if [ ! -f "$CLAUDE_DIR/.current-profile" ]; then
+        echo "none"
+        return 1
+    fi
+    cat "$CLAUDE_DIR/.current-profile"
+}
+
+# Add to dispatcher
+case "$command" in
+    # ... existing commands ...
+    active)
+        cmd_active "$@"
+        ;;
+esac
+```
+
+**Usage:**
+```bash
+dotclaude active           # → "work-bedrock"
+dotclaude active || echo "none"  # → "none" if no profile
+```
+
+**Why needed:** dotfiles status/doctor scripts need clean output to parse.
+
+### 2. Add `sync_profiles_json()` function
+
+**Purpose:** Auto-generate profiles.json after profile mutations
+
+**Implementation:** See "Implementation Strategy: Auto-Generated profiles.json" below
+
+**Why needed:** Enables vault sync without dual source of truth complexity
+
+### 3. Call `sync_profiles_json()` from mutation commands
+
+**Commands that need it:**
+- `cmd_create()` - After profile creation
+- `cmd_switch()` - After switching profiles
+- `cmd_delete()` - After profile deletion (if implemented)
+- `cmd_edit()` - After editing profile settings
+
+**Why needed:** Keeps profiles.json in sync with profile directories
+
+---
+
 ## Implementation Details
 
 ### 1. Enhance `dotfiles status` (50-functions.zsh)
