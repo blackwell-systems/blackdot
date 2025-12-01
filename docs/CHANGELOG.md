@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`{{#each}}` Template Loops** - Iterate over arrays with named fields
+  - Define `SSH_HOSTS` array in `_variables.local.sh`
+  - Use `{{#each ssh_hosts}}...{{/each}}` in templates
+  - Access fields: `{{ name }}`, `{{ hostname }}`, `{{ user }}`, `{{ identity }}`, `{{ extra }}`
+  - Conditionals work inside loops for optional fields
+  - ssh-config.tmpl now generates hosts from SSH_HOSTS array
+- **Template Tests** (`test/templates.bats`) - Unit tests for template engine
+- **Vault Backend Guide** (`docs/extending-backends.md`) - How to add new vault providers
+
 ### Planned
 - Blog posts on dotfiles architecture and Claude session portability
 - Open source vault system as standalone project
