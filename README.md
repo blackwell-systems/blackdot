@@ -374,7 +374,8 @@ See [Brewfile](Brewfile) for complete package list.
 
 ## Key Concepts
 
-### Workspace Architecture (Portable Sessions)
+<details>
+<summary><h3>Workspace Architecture (Portable Sessions)</h3></summary>
 
 Bootstrap creates `/workspace → ~/workspace` symlink for **portable Claude Code sessions** across machines.
 
@@ -402,9 +403,31 @@ cd ~/workspace/my-project  # Different path per OS
 
 [Full workspace documentation →](docs/README-FULL.md#canonical-workspace-workspace)
 
----
+</details>
 
-### Vault System (Multi-Backend)
+<details>
+<summary><h3>Claude Code Backends</h3></summary>
+
+Multiple backend support for different use cases:
+
+| Command | Backend | Use Case |
+|---------|---------|----------|
+| `claude` | Default | Uses Max subscription or direct API |
+| `claude-max` / `cm` | Anthropic Max | Personal/consumer subscription |
+| `claude-bedrock` / `cb` | AWS Bedrock | Enterprise, cost-controlled, SSO |
+
+**Setup for AWS Bedrock:**
+```bash
+cp ~/workspace/dotfiles/claude/claude.local.example ~/.claude.local
+vim ~/.claude.local  # Add AWS SSO profile
+```
+
+[Full Claude Code guide →](docs/claude-code.md)
+
+</details>
+
+<details>
+<summary><h3>Vault System (Multi-Backend)</h3></summary>
 
 Secrets are stored in your preferred vault and restored on new machines:
 
@@ -441,7 +464,10 @@ dotfiles drift
 - Git configuration (.gitconfig)
 - Environment variables (.local/env.secrets)
 
-### Template System (Machine-Specific Configs)
+</details>
+
+<details>
+<summary><h3>Template System (Machine-Specific Configs)</h3></summary>
 
 Generate configuration files tailored to each machine using templates:
 
@@ -480,73 +506,7 @@ dotfiles template diff       # Show what would change
 
 See [Template Guide](docs/templates.md) for full documentation.
 
-### Tips
-
-#### Claude Code Integration (optional)
-
-This repo includes a full Claude Code integration layer supporting multiple backends:
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                    User Commands                        │
-│   claude │ claude-max │ claude-bedrock │ claude-status │
-└────────────────────────┬────────────────────────────────┘
-                         │
-┌────────────────────────▼────────────────────────────────┐
-│              Session Portability Layer                  │
-│   ~/workspace/* → /workspace/* path normalization       │
-│   Enables cross-machine session continuity              │
-└────────────────────────┬────────────────────────────────┘
-                         │
-          ┌──────────────┴──────────────┐
-          ▼                             ▼
-┌─────────────────────┐     ┌─────────────────────┐
-│    Claude Max       │     │   AWS Bedrock       │
-│  (Direct Anthropic) │     │ (Enterprise/SSO)    │
-│                     │     │                     │
-│  - Consumer plan    │     │  - Cost controls    │
-│  - Simple auth      │     │  - SSO integration  │
-│  - No setup needed  │     │  - Usage tracking   │
-└─────────────────────┘     └─────────────────────┘
-```
-
-| Command | Backend | Use Case |
-|---------|---------|----------|
-| `claude` | Default | Uses Max subscription or direct API |
-| `claude-max` / `cm` | Anthropic Max | Personal/consumer subscription |
-| `claude-bedrock` / `cb` | AWS Bedrock | Enterprise, cost-controlled, SSO |
-| `claude-status` | — | Show current configuration |
-
-**Setup for AWS Bedrock:**
-
-```bash
-# Copy the example config
-cp ~/workspace/dotfiles/claude/claude.local.example ~/.claude.local
-
-# Edit with your AWS SSO profile
-vim ~/.claude.local
-```
-
-Example `~/.claude.local`:
-```bash
-export CLAUDE_BEDROCK_PROFILE="your-sso-profile"
-export CLAUDE_BEDROCK_REGION="us-west-2"
-```
-
-**Portable Sessions (multi-machine):**
-
-If you use Claude Code across multiple machines, the `/workspace` symlink keeps sessions in sync:
-
-```bash
-cd /workspace/my-project  # Same path on all machines
-claude                     # Same session everywhere
-```
-
-The bootstrap creates `/workspace → ~/workspace` automatically. If you're on a single machine, this works transparently—no action needed.
-
-**Why this matters:** Claude Code stores sessions by working directory path. Different machines have different home directories (`/Users/name` vs `/home/name`), creating different session IDs. The `/workspace` symlink normalizes this.
-
-**Auto-redirect:** The `claude` wrapper detects `~/workspace/*` paths and automatically switches to `/workspace/*`.
+</details>
 
 ### The `dotfiles` Command
 
