@@ -46,6 +46,7 @@ run_unit_tests() {
   local unit_tests=()
   [[ -f "$SCRIPT_DIR/vault_common.bats" ]] && unit_tests+=("$SCRIPT_DIR/vault_common.bats")
   [[ -f "$SCRIPT_DIR/cli_commands.bats" ]] && unit_tests+=("$SCRIPT_DIR/cli_commands.bats")
+  [[ -f "$SCRIPT_DIR/dotclaude_integration.bats" ]] && unit_tests+=("$SCRIPT_DIR/dotclaude_integration.bats")
 
   if [[ ${#unit_tests[@]} -eq 0 ]]; then
     echo "No unit tests found."
