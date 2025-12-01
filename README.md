@@ -155,19 +155,17 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 - **Observable state**: Track health metrics over time, detect when things break
 - **Tested**: CI runs shellcheck, zsh syntax validation, and unit tests on every push
 
-### Opinionated Choices
+### Opinionated Defaults
 
-This repo makes decisions so you don't have to:
-
-| Choice | This Repo | Why |
-|--------|-----------|-----|
+| Choice | Default | Why |
+|--------|---------|-----|
 | Shell | Zsh + Powerlevel10k | Fast, extensible, great prompts |
 | Package manager | Homebrew | Works on macOS and Linux |
 | CLI tools | eza, fzf, ripgrep, bat | Modern replacements for ls, find, grep, cat |
 | Secrets | Vault-backed (not in git) | Security best practice |
 | Structure | Modular `zsh.d/` | Easier to maintain than monolithic |
 
-Don't agree? Fork and customize—or use `99-local.zsh` to override anything.
+Override anything in `99-local.zsh` or fork to customize.
 
 ### What's optional
 
