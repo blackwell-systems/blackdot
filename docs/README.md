@@ -37,17 +37,24 @@ For detailed feature comparisons vs chezmoi, thoughtbot, holman, and other popul
 
 ## One-Line Install
 
+**Recommended (interactive setup):**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --interactive
 ```
 
-Or with options:
+This launches the setup wizard which:
+- Auto-detects your platform (macOS, Linux, WSL2)
+- Detects available vault CLIs (Bitwarden, 1Password, pass)
+- Prompts you to choose your vault (or skip)
+- Restores secrets and validates setup
+
+**Other install options:**
 
 ```bash
-# Interactive mode - prompts for configuration
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --interactive
+# Default (non-interactive)
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
 
-# Minimal mode - skip optional features (vault, Claude setup)
+# Minimal mode - skip vault and optional features
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
 ```
 
