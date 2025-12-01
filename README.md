@@ -155,7 +155,7 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 - **Observable state**: Track health metrics over time, detect when things break
 - **Tested**: CI runs shellcheck, zsh syntax validation, and unit tests on every push
 
-### Opinionated Defaults
+### Modern, opinionated defaults
 
 | Choice | Default | Why |
 |--------|---------|-----|
