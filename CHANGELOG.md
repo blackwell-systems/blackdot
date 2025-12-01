@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.2] - 2025-12-01
+
+### Added
+- **Test Drive Guide** (`docs/TESTDRIVE.md`) - Comprehensive Docker exploration guide
+  - Sample workflows for safe testing
+  - dotclaude integration examples
+  - FAQ and troubleshooting
+- Added "Try Before Installing" section to README with Docker instructions
+
+### Fixed
+- Improved template validation tests for better error handling
+
+## [1.8.1] - 2025-12-01
+
+### Fixed
+- Template tests now correctly source `_logging.sh` (fixes 3 failing tests)
+- Removed misleading codecov badge (shell coverage tracking is unreliable)
+
 ## [1.8.0] - 2025-12-01
 
 ### Added
