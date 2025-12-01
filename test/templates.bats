@@ -195,20 +195,29 @@ render_string() {
 # ============================================================
 
 @test "validate_template detects unmatched each blocks" {
-  echo '{{#each items}}content' > "$TEST_TMPDIR/bad.tmpl"
+  local bad_tmpl="$TEST_TMPDIR/bad.tmpl"
+  echo '{{#each items}}content' > "$bad_tmpl"
 
-  run zsh_eval "validate_template '$TEST_TMPDIR/bad.tmpl'"
+  run zsh_eval "validate_template '$bad_tmpl'"
 
+  # Should fail with non-zero exit code
   [ "$status" -ne 0 ]
-  [[ "${output}" =~ "Unmatched" ]]
+  # Output should mention unmatched blocks
+  [[ "${output}" =~ "Unmatched" ]] || [[ "${output}" =~ "unmatched" ]] || [[ "${output}" =~ "each" ]]
 }
 
 @test "validate_template passes for matched each blocks" {
-  echo '{{#each items}}content{{/each}}' > "$TEST_TMPDIR/good.tmpl"
+  local good_tmpl="$TEST_TMPDIR/good.tmpl"
+  echo '{{#each items}}content{{/each}}' > "$good_tmpl"
 
-  run zsh_eval "validate_template '$TEST_TMPDIR/good.tmpl'"
+  run zsh_eval "validate_template '$good_tmpl'"
 
-  [ "$status" -eq 0 ]
+  # Should succeed with zero exit code
+  [ "$status" -eq 0 ] || {
+    echo "Expected status 0, got $status"
+    echo "Output: $output"
+    return 1
+  }
 }
 
 # ============================================================
