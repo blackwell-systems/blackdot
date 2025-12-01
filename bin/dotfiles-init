@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 # ============================================================
-# FILE: dotfiles-init.sh
+# FILE: dotfiles-init
 # Interactive first-time setup wizard
 # Usage: dotfiles init
 # ============================================================
@@ -11,11 +11,10 @@ SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
 # DOTFILES_DIR is parent of bin/
 DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
 source "$DOTFILES_DIR/lib/_logging.sh"
+source "$DOTFILES_DIR/lib/_vault.sh"
 
 # Additional init-specific function
 step()  { echo -e "\n${BOLD}${CYAN}==> $1${NC}"; }
-
-DOTFILES_DIR="$HOME/workspace/dotfiles"
 
 echo ""
 echo -e "${BOLD}${CYAN}"
@@ -42,18 +41,32 @@ else
     pass "zshrc linked"
 fi
 
-if ! command -v bw &>/dev/null; then
-    warn "Bitwarden CLI not installed"
-    NEEDS_SETUP=true
-else
-    pass "Bitwarden CLI installed"
+# Detect available vault backends
+AVAILABLE_VAULTS=()
+if command -v bw &>/dev/null; then
+    AVAILABLE_VAULTS+=("bitwarden")
+fi
+if command -v op &>/dev/null; then
+    AVAILABLE_VAULTS+=("1password")
+fi
+if command -v pass &>/dev/null; then
+    AVAILABLE_VAULTS+=("pass")
 fi
 
-if [[ -z "${BW_SESSION:-}" ]]; then
-    warn "Bitwarden not unlocked"
+if [[ ${#AVAILABLE_VAULTS[@]} -eq 0 ]]; then
+    warn "No vault CLI installed (optional)"
     NEEDS_SETUP=true
 else
-    pass "Bitwarden session active"
+    # Use DOTFILES_VAULT_BACKEND if set, otherwise first available
+    SELECTED_BACKEND="${DOTFILES_VAULT_BACKEND:-${AVAILABLE_VAULTS[1]}}"
+
+    # Check if selected backend is logged in
+    if vault_check_login "$SELECTED_BACKEND" 2>/dev/null; then
+        pass "$SELECTED_BACKEND vault configured"
+    else
+        warn "$SELECTED_BACKEND vault not logged in"
+        NEEDS_SETUP=true
+    fi
 fi
 
 if ! $NEEDS_SETUP; then
@@ -75,9 +88,9 @@ if [[ ! -L "$HOME/.zshrc" ]]; then
     read -p "Continue? [Y/n]: " confirm
     if [[ "${confirm:-Y}" =~ ^[Yy]$ ]]; then
         if [[ "$(uname -s)" == "Darwin" ]]; then
-            "$DOTFILES_DIR/bootstrap-mac.sh"
+            "$DOTFILES_DIR/bootstrap/bootstrap-mac.sh"
         else
-            "$DOTFILES_DIR/bootstrap-linux.sh"
+            "$DOTFILES_DIR/bootstrap/bootstrap-linux.sh"
         fi
         pass "Bootstrap complete"
     else
@@ -87,56 +100,109 @@ else
     pass "Bootstrap already done"
 fi
 
-# Step 2: Bitwarden setup
-step "Step 2: Bitwarden Setup"
+# Step 2: Vault setup (backend-agnostic)
+step "Step 2: Vault Setup"
 
-if ! command -v bw &>/dev/null; then
-    echo "Bitwarden CLI is required for secret management."
+if [[ ${#AVAILABLE_VAULTS[@]} -eq 0 ]]; then
+    echo "No vault CLI detected. Vault features are optional."
     echo ""
-    echo "Install with:"
-    echo "  brew install bitwarden-cli"
+    echo "Supported vault backends:"
+    echo "  • Bitwarden:  brew install bitwarden-cli"
+    echo "  • 1Password:  brew install 1password-cli"
+    echo "  • pass:       brew install pass"
     echo ""
-    echo "Or skip if you don't use Bitwarden vault features."
-    read -p "Skip Bitwarden setup? [y/N]: " skip
-    if [[ "${skip:-N}" =~ ^[Yy]$ ]]; then
-        warn "Skipped Bitwarden setup"
+    read -p "Skip vault setup? [Y/n]: " skip
+    if [[ "${skip:-Y}" =~ ^[Yy]$ ]]; then
+        warn "Skipped vault setup - you can configure secrets manually"
+        VAULT_CONFIGURED=false
     else
-        echo "Please install Bitwarden CLI and run 'dotfiles init' again."
+        echo "Please install a vault CLI and run 'dotfiles init' again."
         exit 1
     fi
 else
-    # Check login status
-    if ! bw login --check &>/dev/null; then
-        echo "Please log in to Bitwarden:"
-        bw login
+    # Choose vault backend if multiple available
+    if [[ ${#AVAILABLE_VAULTS[@]} -gt 1 ]]; then
+        echo "Multiple vault backends detected:"
+        for i in {1..${#AVAILABLE_VAULTS[@]}}; do
+            echo "  $i) ${AVAILABLE_VAULTS[$i]}"
+        done
+        echo ""
+        read -p "Select backend [1]: " choice
+        choice=${choice:-1}
+        SELECTED_BACKEND="${AVAILABLE_VAULTS[$choice]}"
+    else
+        SELECTED_BACKEND="${AVAILABLE_VAULTS[1]}"
     fi
 
-    # Check unlock status
-    if [[ -z "${BW_SESSION:-}" ]]; then
-        echo ""
-        echo "Unlock your vault:"
-        echo "  export BW_SESSION=\"\$(bw unlock --raw)\""
-        echo ""
-        read -p "Run this now? [Y/n]: " confirm
-        if [[ "${confirm:-Y}" =~ ^[Yy]$ ]]; then
-            export BW_SESSION="$(bw unlock --raw)"
-            if [[ -n "$BW_SESSION" ]]; then
-                pass "Vault unlocked"
-                # Cache session
-                echo "$BW_SESSION" > "$DOTFILES_DIR/vault/.bw-session"
-                chmod 600 "$DOTFILES_DIR/vault/.bw-session"
+    # Export for other scripts
+    export DOTFILES_VAULT_BACKEND="$SELECTED_BACKEND"
+
+    echo "Using vault backend: $SELECTED_BACKEND"
+    echo ""
+
+    # Backend-specific login/unlock
+    case "$SELECTED_BACKEND" in
+        bitwarden)
+            if ! bw login --check &>/dev/null; then
+                echo "Log in to Bitwarden:"
+                bw login
             fi
-        fi
-    else
-        pass "Already unlocked"
-    fi
+
+            if ! vault_check_login "$SELECTED_BACKEND" 2>/dev/null; then
+                echo ""
+                echo "Unlock your vault:"
+                read -p "Run 'bw unlock' now? [Y/n]: " confirm
+                if [[ "${confirm:-Y}" =~ ^[Yy]$ ]]; then
+                    export BW_SESSION="$(bw unlock --raw)"
+                    if [[ -n "$BW_SESSION" ]]; then
+                        pass "Vault unlocked"
+                        # Cache session
+                        vault_save_session "$SELECTED_BACKEND" "$BW_SESSION"
+                        VAULT_CONFIGURED=true
+                    fi
+                fi
+            else
+                pass "Vault already unlocked"
+                VAULT_CONFIGURED=true
+            fi
+            ;;
+
+        1password)
+            if ! op account list &>/dev/null 2>&1; then
+                echo "Sign in to 1Password:"
+                op signin
+            fi
+
+            if op account list &>/dev/null 2>&1; then
+                pass "1Password authenticated"
+                VAULT_CONFIGURED=true
+            else
+                warn "1Password authentication failed"
+                VAULT_CONFIGURED=false
+            fi
+            ;;
+
+        pass)
+            # pass uses GPG agent, check if we can list passwords
+            if pass ls &>/dev/null 2>&1; then
+                pass "pass accessible (GPG agent active)"
+                VAULT_CONFIGURED=true
+            else
+                warn "pass not accessible - check GPG configuration"
+                echo "You may need to:"
+                echo "  • Import your GPG key"
+                echo "  • Initialize pass: pass init <gpg-key-id>"
+                VAULT_CONFIGURED=false
+            fi
+            ;;
+    esac
 fi
 
 # Step 3: Restore secrets
 step "Step 3: Restore Secrets"
 
-if [[ -n "${BW_SESSION:-}" ]]; then
-    echo "Would you like to restore secrets from Bitwarden?"
+if [[ "${VAULT_CONFIGURED:-false}" == "true" ]]; then
+    echo "Would you like to restore secrets from $SELECTED_BACKEND?"
     echo "This will restore: SSH keys, AWS credentials, Git config, etc."
     echo ""
     read -p "Restore secrets? [Y/n]: " confirm
@@ -147,7 +213,8 @@ if [[ -n "${BW_SESSION:-}" ]]; then
         warn "Skipped secret restore"
     fi
 else
-    warn "Skipped (Bitwarden not configured)"
+    warn "Skipped (vault not configured)"
+    echo "Configure secrets manually in: ~/.ssh, ~/.aws, ~/.gitconfig"
 fi
 
 # Step 4: Claude Code Setup (optional)
@@ -195,6 +262,8 @@ echo ""
 echo "Quick commands:"
 echo "  dotfiles status         - Visual dashboard"
 echo "  dotfiles doctor         - Health check"
-echo "  dotfiles vault restore  - Restore secrets"
+if [[ "${VAULT_CONFIGURED:-false}" == "true" ]]; then
+    echo "  dotfiles vault restore  - Restore secrets ($SELECTED_BACKEND)"
+fi
 echo "  dotfiles help           - All commands"
 echo ""
