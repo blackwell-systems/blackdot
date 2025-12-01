@@ -508,10 +508,8 @@ See [Template Guide](docs/templates.md) for full documentation.
 
 </details>
 
-### The `dotfiles` Command
-
 <details>
-<summary><b>All Commands</b></summary>
+<summary><h3>The `dotfiles` Command</h3></summary>
 
 A unified command for managing your dotfiles:
 
@@ -559,7 +557,8 @@ dotfiles help            # Show all commands
 
 </details>
 
-### Health Checks
+<details>
+<summary><h3>Health Checks</h3></summary>
 
 Validate your environment anytime:
 
@@ -576,6 +575,8 @@ dotfiles drift              # Compare local vs vault
 - AWS configuration and credentials
 - Vault login status
 - Drift detection (local vs vault)
+
+</details>
 
 ---
 
