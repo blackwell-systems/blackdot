@@ -866,19 +866,19 @@ export CLAUDE_DEFAULT_BACKEND="max"
 
 Then dotclaude reads these environment variables natively. No intermediate config file needed.
 
-### Concern 3: Vault Storage for Profiles is Overkill
+### Concern 3: Vault Storage for Profiles
 
-Storing `profiles.json` in vault adds complexity for minimal benefit:
-- Profiles aren't secrets—they're configuration
-- Vault sync requires unlocking, which adds friction
-- Profiles are machine-specific anyway
+**Initial concern:** Profiles aren't secrets, so vault seems like overkill.
 
-**Alternatives:**
-1. Keep profiles in `~/.claude/` (git-ignored, local only)
-2. Store in dotfiles repo under `claude/profiles/` (versioned)
-3. Generate from templates based on machine type
+**Counterpoint:** Vault storage enables one-command environment restoration. Without it, users must manually reconstruct their Claude profile configuration on each new machine—defeating the purpose of automated dotfiles setup.
 
-**Recommendation:** Remove vault integration for profiles. Keep vault for actual secrets.
+**Value of vault approach:**
+- `dotfiles vault restore` gets you a complete, working environment
+- No piecing together configs from multiple repos
+- Profiles can include API keys or backend credentials (which *are* secrets)
+- Consistent with how dotfiles handles other machine-specific config
+
+**Recommendation:** Keep vault integration for profiles. Store `profiles.json` alongside other syncable items. The vault is already unlocked during bootstrap, so there's no additional friction.
 
 ### Concern 4: Implementation Phases Have Timelines
 
@@ -894,7 +894,7 @@ The phases reference week numbers which may not be realistic. Focus on:
 | CLI Pattern | `dotfiles claude <cmd>` | `dotfiles profile <cmd>` (native feel) |
 | Implementation | Wrapper script | Alias in 40-aliases.zsh |
 | Template | Separate `.claude.profiles` | Env vars in `99-local.zsh` |
-| Vault | Store `profiles.json` | Remove (profiles aren't secrets) |
+| Vault | Store `profiles.json` | Keep (enables one-command restore) |
 
 ---
 
