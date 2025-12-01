@@ -62,11 +62,18 @@ Host {{ github_enterprise_host }}
 {{/if}}
 
 # -----------------------------------------------------------------------------
-# Custom Hosts
-# Define SSH_HOSTS in _variables.local.sh for additional hosts
+# Custom Hosts (from SSH_HOSTS array)
+# Define SSH_HOSTS in _variables.local.sh
 # Format: name|hostname|user|identity_file|extra_options
 # -----------------------------------------------------------------------------
-
+{{#each ssh_hosts}}
+Host {{ name }}
+    HostName {{ hostname }}
+    User {{ user }}
+    IdentityFile {{ identity }}
+{{#if extra }}    {{ extra }}
+{{/if}}
+{{/each}}
 # =============================================================================
 # Include local overrides (for hosts not managed by templates)
 # =============================================================================
