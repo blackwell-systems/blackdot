@@ -797,6 +797,107 @@ dotfiles claude status
 
 ---
 
+## Review Feedback & Refinements
+
+> **Review Date:** 2025-12-01
+> **Status:** Under Consideration
+
+### Concern 1: Nested Command Pattern Feels Subordinate
+
+The proposed `dotfiles claude status` pattern makes dotclaude feel like a subcommand rather than a unified experience:
+
+```bash
+# Current proposal - feels nested
+dotfiles claude status    # dotclaude is subordinate
+dotclaude status          # the "real" command
+```
+
+**Issue:** Users will ask "which one do I use?" This creates confusion, not unity.
+
+### Recommendation: Alias-Based Extension
+
+Instead of a wrapper script (`bin/dotfiles-claude`), extend the dotfiles CLI directly with native-feeling subcommands:
+
+```bash
+# In zsh/zsh.d/40-aliases.zsh
+dotfiles() {
+    case "$1" in
+        # Existing commands...
+
+        # Claude profile commands (delegate to dotclaude if installed)
+        profile|profiles|pswitch)
+            if command -v dotclaude &>/dev/null; then
+                case "$1" in
+                    profile)  dotclaude "${@:2}" ;;
+                    profiles) dotclaude list ;;
+                    pswitch)  dotclaude switch "${@:2}" ;;
+                esac
+            else
+                echo "dotclaude not installed. Install with:"
+                echo "  brew tap blackwell-systems/tap && brew install dotclaude"
+            fi
+            ;;
+    esac
+}
+```
+
+**Result:**
+```bash
+dotfiles profile list     # Feels native, not nested
+dotfiles pswitch work     # Quick profile switching
+dotfiles profiles         # List all profiles
+```
+
+### Concern 2: Template Integration Complexity
+
+The proposed `claude-profiles.tmpl` generating `~/.claude.profiles` adds unnecessary indirection.
+
+**Simpler approach:** Set environment variables directly in `99-local.zsh`:
+
+```bash
+# templates/configs/99-local.zsh.tmpl
+{{ if MACHINE_TYPE == "work" }}
+export CLAUDE_DEFAULT_BACKEND="bedrock"
+export CLAUDE_BEDROCK_PROFILE="{{ AWS_PROFILE_WORK }}"
+{{ else }}
+export CLAUDE_DEFAULT_BACKEND="max"
+{{ endif }}
+```
+
+Then dotclaude reads these environment variables natively. No intermediate config file needed.
+
+### Concern 3: Vault Storage for Profiles is Overkill
+
+Storing `profiles.json` in vault adds complexity for minimal benefit:
+- Profiles aren't secrets—they're configuration
+- Vault sync requires unlocking, which adds friction
+- Profiles are machine-specific anyway
+
+**Alternatives:**
+1. Keep profiles in `~/.claude/` (git-ignored, local only)
+2. Store in dotfiles repo under `claude/profiles/` (versioned)
+3. Generate from templates based on machine type
+
+**Recommendation:** Remove vault integration for profiles. Keep vault for actual secrets.
+
+### Concern 4: Implementation Phases Have Timelines
+
+The phases reference week numbers which may not be realistic. Focus on:
+- **What** needs to be done (concrete tasks)
+- **Dependencies** between tasks
+- Let scheduling happen organically
+
+### Summary: Recommended Refinements
+
+| Area | Current Plan | Recommendation |
+|------|--------------|----------------|
+| CLI Pattern | `dotfiles claude <cmd>` | `dotfiles profile <cmd>` (native feel) |
+| Implementation | Wrapper script | Alias in 40-aliases.zsh |
+| Template | Separate `.claude.profiles` | Env vars in `99-local.zsh` |
+| Vault | Store `profiles.json` | Remove (profiles aren't secrets) |
+
+---
+
 ## Alternative Approaches Considered
 
 ### Alternative 1: Plugin Architecture

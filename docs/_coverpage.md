@@ -14,6 +14,6 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 - macOS, Linux, Windows, WSL2, Docker
 
 [Get Started](#quick-start)
-[GitHub](https://github.com/blackwell-systems/dotfiles)
+[VIEW ON GITHUB](https://github.com/blackwell-systems/dotfiles)
 
 ![color](#1a1a1a)
