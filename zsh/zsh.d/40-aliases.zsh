@@ -107,6 +107,9 @@ dotfiles() {
         template|tmpl)
             "$HOME/workspace/dotfiles/bin/dotfiles-template" "$@"
             ;;
+        metrics)
+            "$HOME/workspace/dotfiles/bin/dotfiles-metrics" "$@"
+            ;;
         cd)
             cd "$HOME/workspace/dotfiles"
             ;;
@@ -130,6 +133,7 @@ dotfiles() {
             echo "  template, tmpl    Machine-specific config templates"
             echo "  lint              Validate shell config syntax"
             echo "  packages, pkg     Check/install Brewfile packages"
+            echo "  metrics           Visualize health check metrics over time"
             echo "  init              First-time setup wizard"
             echo "  upgrade, update   Pull latest and run bootstrap"
             echo "  uninstall         Remove dotfiles configuration"

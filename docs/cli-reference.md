@@ -35,6 +35,7 @@ The unified command for managing your dotfiles. All subcommands are accessed via
 | `template` | `tmpl` | Machine-specific config templates |
 | `lint` | - | Validate shell config syntax |
 | `packages` | `pkg` | Check/install Brewfile packages |
+| `metrics` | - | Visualize health check metrics over time |
 | `init` | - | First-time setup wizard |
 | `upgrade` | `update` | Pull latest and run bootstrap |
 | `uninstall` | - | Remove dotfiles configuration |
