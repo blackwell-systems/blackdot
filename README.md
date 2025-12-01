@@ -267,9 +267,14 @@ cd ~/workspace/dotfiles
 ./bootstrap/bootstrap-mac.sh      # macOS
 ./bootstrap/bootstrap-linux.sh    # Linux / WSL2 / Lima / Docker
 
-# 3. Restore secrets from vault
-bw login                    # or: op signin (1Password) / gpg for pass
-export BW_SESSION="$(bw unlock --raw)"  # Bitwarden only
+# 3. Restore secrets from vault (optional - pick your vault backend)
+# Bitwarden:
+bw login && export BW_SESSION="$(bw unlock --raw)"
+# 1Password:
+op signin
+# pass (GPG):
+# No session needed - uses GPG agent
+
 ./vault/bootstrap-vault.sh
 
 # 4. Verify
@@ -512,6 +517,9 @@ The bootstrap creates `/workspace → ~/workspace` automatically. If you're on a
 
 ### The `dotfiles` Command
 
+<details>
+<summary><b>All Commands</b></summary>
+
 A unified command for managing your dotfiles:
 
 ```bash
@@ -555,6 +563,8 @@ dotfiles cd              # Navigate to dotfiles directory
 dotfiles edit            # Open dotfiles in $EDITOR
 dotfiles help            # Show all commands
 ```
+
+</details>
 
 ### Health Checks
 
@@ -616,6 +626,9 @@ See [Maintenance Checklists](docs/README-FULL.md#maintenance-checklists) for mor
 
 ## Project Structure
 
+<details>
+<summary><b>Directory Layout</b></summary>
+
 ```
 dotfiles/
 ├── Brewfile                   # Package definitions
@@ -659,7 +672,8 @@ dotfiles/
 │
 ├── lib/                       # Shared libraries
 │   ├── _logging.sh           # Colors and logging
-│   └── _templates.sh         # Template engine
+│   ├── _templates.sh         # Template engine
+│   └── _vault.sh             # Vault abstraction layer
 │
 ├── templates/                 # Machine-specific templates
 │   ├── _variables.sh         # Default variables
@@ -675,6 +689,7 @@ dotfiles/
 │
 ├── test/                      # Test suites (bats-core)
 │   ├── *.bats               # Unit & integration tests
+│   ├── fixtures/            # Test data (vault items, etc.)
 │   └── mocks/               # Mock CLI tools
 │
 ├── macos/                     # macOS system preferences
@@ -687,6 +702,8 @@ dotfiles/
     ├── README-FULL.md        # Complete guide
     └── *.md                  # Topic guides
 ```
+
+</details>
 
 ---
 
