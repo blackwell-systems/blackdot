@@ -563,22 +563,6 @@ TMPL_AUTO[machine_type]="work"
 
 ---
 
-## Comparison with chezmoi
-
-| Feature | This System | chezmoi |
-|---------|-------------|---------|
-| Template syntax | `{{ var }}`, `{{#if}}` | Go templates |
-| Dependencies | None (pure shell) | Go binary |
-| Variable sources | Shell files, env vars | TOML/YAML/JSON |
-| Machine detection | Auto + override | Manual config |
-| Integration | Native to dotfiles | Standalone tool |
-| Learning curve | Low | Medium |
-| Flexibility | Focused | Extensive |
-
-This template system is designed specifically for this dotfiles repository, providing a simpler alternative to chezmoi while covering the most common use cases.
-
----
-
 ## Related Documentation
 
 - [Main README](README.md) - Overview
