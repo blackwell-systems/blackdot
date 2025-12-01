@@ -317,6 +317,7 @@ SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-mac.sh
 - `SKIP_WORKSPACE_SYMLINK=true` – Skip `/workspace` symlink creation (for single-machine setups)
 - `SKIP_CLAUDE_SETUP=true` – Skip `~/.claude` configuration symlink
 - `DOTFILES_OFFLINE=1` – Skip all vault operations (for air-gapped or offline environments)
+- `DOTFILES_SKIP_DRIFT_CHECK=1` – Skip drift check before vault restore (useful for CI/automation)
 
 All features are opt-in by default and can be disabled without breaking the rest of the setup.
 </details>
