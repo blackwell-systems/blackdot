@@ -348,8 +348,7 @@ All features are opt-in by default and can be disabled without breaking the rest
 
 ---
 
-<details>
-<summary><h2>What Gets Installed</h2></summary>
+## What Gets Installed
 
 ### Shell & Prompt
 - Zsh with Powerlevel10k theme
@@ -370,8 +369,6 @@ All features are opt-in by default and can be disabled without breaking the rest
 - Claude Code settings (shared workspace)
 
 See [Brewfile](Brewfile) for complete package list.
-
-</details>
 
 ---
 
@@ -583,8 +580,7 @@ dotfiles drift              # Compare local vs vault
 
 ---
 
-<details>
-<summary><h2>Common Tasks</h2></summary>
+## Common Tasks
 
 ### Update Dotfiles
 
@@ -619,8 +615,6 @@ dotfiles vault sync SSH-Config
 ```
 
 See [Maintenance Checklists](docs/README-FULL.md#maintenance-checklists) for more.
-
-</details>
 
 ---
 
@@ -707,8 +701,7 @@ dotfiles/
 
 ---
 
-<details>
-<summary><h2>Development & Testing</h2></summary>
+## Development & Testing
 
 ### Docker Bootstrap
 
@@ -735,7 +728,7 @@ The Dockerfile demonstrates:
 - CI/CD integration patterns
 - Reproducible development containers
 
-### Testing (124 tests)
+### Testing (80+ tests)
 
 Run tests with bats-core:
 
@@ -791,8 +784,6 @@ To customize:
 1. Copy `zsh/zsh.d/99-local.zsh.example` to `zsh/zsh.d/99-local.zsh`
 2. Add machine-specific aliases, environment variables, or PATH entries
 3. This file is gitignored and won't be overwritten on updates
-
-</details>
 
 ---
 
