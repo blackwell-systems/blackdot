@@ -71,19 +71,17 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
-# 2. Bootstrap
-./bootstrap/bootstrap-mac.sh      # macOS
-./bootstrap/bootstrap-linux.sh    # Linux / WSL2 / Docker
-
-# 3. Restore secrets from vault (optional)
-bw login && export BW_SESSION="$(bw unlock --raw)"
-./vault/bootstrap-vault.sh
-
-# 4. Verify
-dotfiles doctor
+# 2. Run interactive setup wizard
+dotfiles init
 ```
 
-**Don't use a vault?** Run with `--minimal` or skip step 3. Manually configure `~/.ssh`, `~/.aws`, `~/.gitconfig`.
+**That's it!** The wizard handles:
+- Platform detection and bootstrap
+- Vault selection (Bitwarden, 1Password, pass, or skip)
+- Secret restoration
+- Health validation
+
+**Don't use a vault?** The wizard lets you skip vault setup entirely.
 
 ---
 
