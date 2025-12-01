@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.3] - 2025-12-01
+
+### Added
+- **GitHub Sponsors Support** - Added `github: blackwell-systems` to FUNDING.yml
+- **Collapsible README Sections** - Made Acknowledgments, Troubleshooting, The dotfiles Command, and Project Structure collapsible for better readability
+- **DOTFILES_SKIP_DRIFT_CHECK** documentation - Added missing environment variable to Optional Components
+
+### Changed
+- **Vault-Agnostic `dotfiles init`** - Major refactor of interactive setup wizard
+  - Auto-detects all vault backends (Bitwarden, 1Password, pass)
+  - Prompts user to choose vault (never auto-selects)
+  - Option to skip vault setup entirely
+  - Backend-specific login/unlock flows
+  - Fixes Alpine/Linux issue where pass was auto-selected
+- **Integrated `install.sh` with `dotfiles init`** - `install.sh --interactive` now calls the wizard automatically
+- **Simplified Quick Start** - Reduced from 4 manual steps to 2 (clone → dotfiles init)
+- **Reordered README Sections** - End sections now: Acknowledgments → Trademarks → License
+- **Updated Project Structure** - Added lib/_vault.sh and test/fixtures/ subdirectory
+- **Removed Bitwarden Bias** - All documentation now vault-agnostic
+
+### Documentation
+- Updated README.md, docs/README.md, docs/README-FULL.md with simplified install flow
+- Updated docs/cli-reference.md with comprehensive `dotfiles init` documentation
+- All install documentation now consistently promotes 2-step flow
+
 ## [1.8.2] - 2025-12-01
 
 ### Added
