@@ -8,13 +8,13 @@
 [![Shell](https://img.shields.io/badge/Shell-Zsh-89e051?logo=zsh&logoColor=white)](https://www.zsh.org/)
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
 [![Tests](https://img.shields.io/badge/Tests-124-brightgreen)](test/)
-[![Version](https://img.shields.io/badge/Version-1.8.2-informational)](https://github.com/blackwell-systems/dotfiles/releases)
+[![Version](https://img.shields.io/github/v/release/blackwell-systems/dotfiles)](https://github.com/blackwell-systems/dotfiles/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
 
 > **The first dotfiles designed for AI-assisted development.** Opinionated, batteries-included configuration for developers who use Claude Code across machines. Multi-vault secrets, portable sessions, machine-specific templates, and self-healing config.
 
-**Version:** 1.8.2 | [Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
+[Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
 
 ---
 
@@ -219,7 +219,7 @@ To clone via SSH (recommended), you’ll also want an SSH key configured with Gi
 
 ## Try Before Installing
 
-Don't trust random install scripts? Test in an isolated Alpine container first:
+**Don't trust random install scripts?** Smart! Test the entire system in a disposable Alpine container (< 30 seconds):
 
 ```bash
 git clone https://github.com/blackwell-systems/dotfiles.git
@@ -228,29 +228,38 @@ docker build -f Dockerfile.lite -t dotfiles-lite .
 docker run -it --rm dotfiles-lite
 
 # Inside container - explore safely:
-dotfiles status
-dotfiles doctor
-dotfiles help
-exit  # Nothing persists
+dotfiles status      # See what's configured
+dotfiles doctor      # Run health checks
+dotfiles help        # View all commands
+exit                 # Container auto-deletes
 ```
 
-**→ [Full Test Drive Guide](docs/TESTDRIVE.md)** - Sample workflows, dotclaude integration, FAQs
+**Why Alpine?** Lightweight (5MB base), fast boot, isolated environment. Perfect for trust-but-verify.
+
+**→ [Full Test Drive Guide](docs/TESTDRIVE.md)** - Sample workflows, dotclaude integration, troubleshooting
 
 ---
 
 ## One-Line Install
 
+**Recommended (interactive setup):**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --interactive
 ```
 
-Or with options:
+This launches the setup wizard which:
+- Auto-detects your platform (macOS, Linux, WSL2)
+- Detects available vault CLIs (Bitwarden, 1Password, pass)
+- Prompts you to choose your vault (or skip)
+- Restores secrets and validates setup
+
+**Other install options:**
 
 ```bash
-# Interactive mode - prompts for configuration
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --interactive
+# Default (non-interactive)
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
 
-# Minimal mode - skip optional features
+# Minimal mode - skip vault and optional features
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
 ```
 
