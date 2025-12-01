@@ -2,6 +2,7 @@
 
 - **Getting Started**
   - [Home](/)
+  - [Test Drive (Docker)](TESTDRIVE.md)
   - [One-Line Install](/#one-line-install)
   - [Quick Start](/#quick-start-manual)
   - [Platform Support](/#platform-support)
