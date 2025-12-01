@@ -14,6 +14,7 @@
   - [Claude Code Integration](claude-code.md)
   - [Template System](templates.md)
   - [Vault System](vault-README.md)
+  - [Extending Vault Backends](extending-backends.md)
   - [macOS Settings](macos-settings.md)
 
 - **Architecture**
