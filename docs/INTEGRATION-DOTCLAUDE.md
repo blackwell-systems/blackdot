@@ -76,31 +76,13 @@ This document outlines the **approved** integration strategy between **dotfiles*
 
 ## Prerequisites: Required Changes to dotclaude
 
-Before integration, dotclaude needs these additions:
+> **Status: COMPLETED** (2025-12-01)
+>
+> All prerequisites have been implemented in dotclaude. See [dotclaude CHANGELOG](https://github.com/blackwell-systems/dotclaude/blob/main/CHANGELOG.md) for details.
 
-### 1. Add `active` command
+### 1. `active` command ✅
 
 **Purpose:** Return just the active profile name for machine-readable output
-
-**Implementation:**
-```bash
-# Add to dotclaude script
-cmd_active() {
-    if [ ! -f "$CLAUDE_DIR/.current-profile" ]; then
-        echo "none"
-        return 1
-    fi
-    cat "$CLAUDE_DIR/.current-profile"
-}
-
-# Add to dispatcher
-case "$command" in
-    # ... existing commands ...
-    active)
-        cmd_active "$@"
-        ;;
-esac
-```
 
 **Usage:**
 ```bash
@@ -108,25 +90,21 @@ dotclaude active           # → "work-bedrock"
 dotclaude active || echo "none"  # → "none" if no profile
 ```
 
-**Why needed:** dotfiles status/doctor scripts need clean output to parse.
+**Implementation:** `base/scripts/dotclaude:263-271`
 
-### 2. Add `sync_profiles_json()` function
+### 2. `sync_profiles_json()` function ✅
 
 **Purpose:** Auto-generate profiles.json after profile mutations
 
-**Implementation:** See "Implementation Strategy: Auto-Generated profiles.json" below
+**Implementation:** `base/scripts/dotclaude:158-210`
 
-**Why needed:** Enables vault sync without dual source of truth complexity
+### 3. Auto-sync on mutation commands ✅
 
-### 3. Call `sync_profiles_json()` from mutation commands
+**Commands updated:**
+- `cmd_activate()` - Syncs after profile activation
+- `cmd_create()` - Syncs after profile creation
 
-**Commands that need it:**
-- `cmd_create()` - After profile creation
-- `cmd_switch()` - After switching profiles
-- `cmd_delete()` - After profile deletion (if implemented)
-- `cmd_edit()` - After editing profile settings
-
-**Why needed:** Keeps profiles.json in sync with profile directories
+**Generated file:** `~/.claude/profiles.json`
 
 ---
 
@@ -204,115 +182,36 @@ This enables:
 - `dotfiles vault sync Claude-Profiles` - push profiles to vault
 - `dotfiles vault restore` - restore profiles on new machine (includes Claude profiles)
 
-#### Implementation Strategy: Auto-Generated profiles.json
+#### Implementation Strategy: Auto-Generated profiles.json ✅
 
-**Challenge:** dotclaude uses directory-based profiles (`~/code/dotclaude/profiles/*/`), not a single JSON file.
+> **Status: IMPLEMENTED** in dotclaude v0.2.1+
 
-**Solution:** Make profiles.json a **derived artifact** that's auto-generated from directories.
+**Architecture:** Directories = source of truth, JSON = derived artifact for vault sync
 
-**Key principle:** Directories = source of truth, JSON = cached view for vault sync
+**How it works:**
+1. `sync_profiles_json()` scans `$PROFILES_DIR/*` directories
+2. Reads backend from each profile's `settings.json`
+3. Writes `~/.claude/profiles.json` with active profile and metadata
+4. Called automatically from `cmd_activate()` and `cmd_create()`
 
-```bash
-# Add to dotclaude (new function)
-sync_profiles_json() {
-    local profiles_json="$CLAUDE_DIR/profiles.json"
-    local active
-
-    # Get active profile
-    if [ -f "$CLAUDE_DIR/.current-profile" ]; then
-        active=$(cat "$CLAUDE_DIR/.current-profile")
-    else
-        active="none"
-    fi
-
-    # Start JSON
-    echo "{" > "$profiles_json"
-    echo "  \"active\": \"$active\"," >> "$profiles_json"
-    echo "  \"profiles\": {" >> "$profiles_json"
-
-    # Scan profiles directory
-    local first=true
-    for profile_dir in "$PROFILES_DIR"/*; do
-        if [ -d "$profile_dir" ]; then
-            local name=$(basename "$profile_dir")
-
-            # Read backend from settings.json if exists
-            local backend="unknown"
-            if [ -f "$profile_dir/settings.json" ]; then
-                backend=$(jq -r '.backend // "unknown"' "$profile_dir/settings.json")
-            fi
-
-            # Add comma if not first
-            [ "$first" = false ] && echo "," >> "$profiles_json"
-            first=false
-
-            # Add profile entry
-            cat >> "$profiles_json" <<EOF
-    "$name": {
-      "backend": "$backend",
-      "created": "$(date -r "$profile_dir" +%Y-%m-%d 2>/dev/null || echo 'unknown')"
-    }
-EOF
-        fi
-    done
-
-    # Close JSON
-    echo "  }" >> "$profiles_json"
-    echo "}" >> "$profiles_json"
-}
-
-# Call after any profile modification
-cmd_create() {
-    # ... existing create logic ...
-    sync_profiles_json  # ← Add this
-}
-
-cmd_switch() {
-    # ... existing switch logic ...
-    sync_profiles_json  # ← Add this
-}
-
-cmd_delete() {
-    # ... existing delete logic ...
-    sync_profiles_json  # ← Add this
+**Generated format (Phase 1 - Current):**
+```json
+{
+  "active": "work-bedrock",
+  "profiles": {
+    "work-bedrock": {"backend": "bedrock", "created": "2025-11-30"},
+    "personal-max": {"backend": "max", "created": "2025-11-28"}
+  }
 }
 ```
 
-**Why this works:**
+**Benefits:**
 - ✅ No risk of mismatch (JSON always reflects directories)
 - ✅ Simple vault sync (single file, not directories)
 - ✅ Existing directory architecture preserved
-- ✅ ~30 lines of code, called from 3-4 commands
 - ✅ Drift detection works (compare JSON files)
 
-**Phased approach:**
-
-**Phase 1 (Minimal JSON):**
-```json
-{
-  "active": "work-bedrock",
-  "profiles": {
-    "work-bedrock": {"backend": "bedrock"},
-    "personal-max": {"backend": "max"}
-  }
-}
-```
-
-**Phase 2 (Full JSON - future):**
-```json
-{
-  "active": "work-bedrock",
-  "profiles": {
-    "work-bedrock": {
-      "backend": "bedrock",
-      "settings": { /* full settings.json */ },
-      "commands": { /* all command files */ }
-    }
-  }
-}
-```
-
-With Phase 2, `dotclaude restore` can recreate full profile directories from JSON for complete vault restore.
+**Phase 2 (Future):** Full JSON with settings and commands for complete vault restore via `dotclaude restore`.
 
 ### 4. Templates set environment variables (templates/configs/99-local.zsh.tmpl)
 
