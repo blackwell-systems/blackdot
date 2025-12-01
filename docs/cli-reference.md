@@ -210,7 +210,7 @@ dotfiles backup restore backup-20240115-143022  # Restore specific
 
 ### `dotfiles vault`
 
-Manage secrets stored in your vault (Bitwarden, 1Password, or pass).
+Manage secrets stored in your vault. Supports multiple backends with a unified interface.
 
 ```bash
 dotfiles vault <command> [OPTIONS]
@@ -228,6 +228,70 @@ dotfiles vault <command> [OPTIONS]
 | `create` | Create new vault item |
 | `delete` | Delete vault item |
 | `help` | Show help |
+
+---
+
+### Supported Backends
+
+The vault system supports three backends with identical functionality:
+
+| Backend | CLI Tool | Description |
+|---------|----------|-------------|
+| **Bitwarden** | `bw` | Default. Cloud-synced, full-featured |
+| **1Password** | `op` | v2 CLI with biometric auth on macOS |
+| **pass** | `pass` | GPG-based, git-synced, local-first |
+
+#### Switching Backends
+
+```bash
+# Set backend in ~/.zshrc or ~/.zshenv
+export DOTFILES_VAULT_BACKEND=bitwarden  # (default)
+export DOTFILES_VAULT_BACKEND=1password
+export DOTFILES_VAULT_BACKEND=pass
+```
+
+All `dotfiles vault` commands work identically regardless of backend.
+
+#### Backend Setup
+
+**Bitwarden (default):**
+```bash
+brew install bitwarden-cli
+bw login
+export BW_SESSION="$(bw unlock --raw)"
+```
+
+**1Password:**
+```bash
+brew install --cask 1password-cli
+op signin
+export DOTFILES_VAULT_BACKEND=1password
+export ONEPASSWORD_VAULT=Personal  # optional, default vault
+```
+
+**pass:**
+```bash
+brew install pass
+pass init <gpg-key-id>
+export DOTFILES_VAULT_BACKEND=pass
+export PASS_PREFIX=dotfiles  # optional, items stored as dotfiles/Git-Config
+```
+
+---
+
+### Managed Secrets
+
+The vault system manages these items:
+
+| Item Name | Local Path | Type |
+|-----------|------------|------|
+| `SSH-GitHub-Enterprise` | `~/.ssh/id_ed25519_enterprise_ghub` | SSH key |
+| `SSH-GitHub-Blackwell` | `~/.ssh/id_ed25519_blackwell` | SSH key |
+| `SSH-Config` | `~/.ssh/config` | Config file |
+| `AWS-Config` | `~/.aws/config` | Config file |
+| `AWS-Credentials` | `~/.aws/credentials` | Config file |
+| `Git-Config` | `~/.gitconfig` | Config file |
+| `Environment-Secrets` | `~/.local/env.secrets` | Config file (optional) |
 
 ---
 
