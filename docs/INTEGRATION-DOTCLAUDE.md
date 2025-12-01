@@ -148,6 +148,116 @@ This enables:
 - `dotfiles vault sync Claude-Profiles` - push profiles to vault
 - `dotfiles vault restore` - restore profiles on new machine (includes Claude profiles)
 
+#### Implementation Strategy: Auto-Generated profiles.json
+
+**Challenge:** dotclaude uses directory-based profiles (`~/code/dotclaude/profiles/*/`), not a single JSON file.
+
+**Solution:** Make profiles.json a **derived artifact** that's auto-generated from directories.
+
+**Key principle:** Directories = source of truth, JSON = cached view for vault sync
+
+```bash
+# Add to dotclaude (new function)
+sync_profiles_json() {
+    local profiles_json="$CLAUDE_DIR/profiles.json"
+    local active
+
+    # Get active profile
+    if [ -f "$CLAUDE_DIR/.current-profile" ]; then
+        active=$(cat "$CLAUDE_DIR/.current-profile")
+    else
+        active="none"
+    fi
+
+    # Start JSON
+    echo "{" > "$profiles_json"
+    echo "  \"active\": \"$active\"," >> "$profiles_json"
+    echo "  \"profiles\": {" >> "$profiles_json"
+
+    # Scan profiles directory
+    local first=true
+    for profile_dir in "$PROFILES_DIR"/*; do
+        if [ -d "$profile_dir" ]; then
+            local name=$(basename "$profile_dir")
+
+            # Read backend from settings.json if exists
+            local backend="unknown"
+            if [ -f "$profile_dir/settings.json" ]; then
+                backend=$(jq -r '.backend // "unknown"' "$profile_dir/settings.json")
+            fi
+
+            # Add comma if not first
+            [ "$first" = false ] && echo "," >> "$profiles_json"
+            first=false
+
+            # Add profile entry
+            cat >> "$profiles_json" <<EOF
+    "$name": {
+      "backend": "$backend",
+      "created": "$(date -r "$profile_dir" +%Y-%m-%d 2>/dev/null || echo 'unknown')"
+    }
+EOF
+        fi
+    done
+
+    # Close JSON
+    echo "  }" >> "$profiles_json"
+    echo "}" >> "$profiles_json"
+}
+
+# Call after any profile modification
+cmd_create() {
+    # ... existing create logic ...
+    sync_profiles_json  # ← Add this
+}
+
+cmd_switch() {
+    # ... existing switch logic ...
+    sync_profiles_json  # ← Add this
+}
+
+cmd_delete() {
+    # ... existing delete logic ...
+    sync_profiles_json  # ← Add this
+}
+```
+
+**Why this works:**
+- ✅ No risk of mismatch (JSON always reflects directories)
+- ✅ Simple vault sync (single file, not directories)
+- ✅ Existing directory architecture preserved
+- ✅ ~30 lines of code, called from 3-4 commands
+- ✅ Drift detection works (compare JSON files)
+
+**Phased approach:**
+
+**Phase 1 (Minimal JSON):**
+```json
+{
+  "active": "work-bedrock",
+  "profiles": {
+    "work-bedrock": {"backend": "bedrock"},
+    "personal-max": {"backend": "max"}
+  }
+}
+```
+
+**Phase 2 (Full JSON - future):**
+```json
+{
+  "active": "work-bedrock",
+  "profiles": {
+    "work-bedrock": {
+      "backend": "bedrock",
+      "settings": { /* full settings.json */ },
+      "commands": { /* all command files */ }
+    }
+  }
+}
+```
+
+With Phase 2, `dotclaude restore` can recreate full profile directories from JSON for complete vault restore.
+
 ### 4. Templates set environment variables (templates/configs/99-local.zsh.tmpl)
 
 ```bash
