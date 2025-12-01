@@ -61,6 +61,20 @@ status() {
     fi
   fi
 
+  # Claude profile (only show if Claude-related tools present)
+  local s_profile="${d}·${n}" s_profile_info=""
+  if command -v dotclaude &>/dev/null; then
+    local profile=$(dotclaude active 2>/dev/null)
+    if [[ -n "$profile" && "$profile" != "none" ]]; then
+      s_profile="${g}◆${n}"; s_profile_info="${g}$profile${n}"
+    else
+      s_profile="${r}◇${n}"; s_profile_info="${d}no active profile${n}"
+      fixes+=("profile: dotclaude switch <profile>")
+    fi
+  elif command -v claude &>/dev/null; then
+    s_profile="${d}·${n}"; s_profile_info="${d}try: dotclaude.dev${n}"
+  fi
+
   # City silhouette (inspired by Joan Stark)
   echo ""
   echo "                          .│"
@@ -80,6 +94,7 @@ status() {
   echo "  ssh        $s_ssh  $s_ssh_info"
   echo "  aws        $s_aws  $s_aws_info"
   [[ -n "$s_lima_info" ]] && echo "  lima       $s_lima  $s_lima_info"
+  [[ -n "$s_profile_info" ]] && echo "  profile    $s_profile  $s_profile_info"
   echo ""
 
   # Fixes if needed

@@ -150,8 +150,37 @@ else
     warn "Skipped (Bitwarden not configured)"
 fi
 
-# Step 4: Health check
-step "Step 4: Health Check"
+# Step 4: Claude Code Setup (optional)
+if command -v claude &>/dev/null; then
+    step "Step 4: Claude Code Setup"
+
+    if ! command -v dotclaude &>/dev/null; then
+        echo "Claude Code detected. dotclaude helps manage profiles across machines."
+        echo ""
+        read -p "Install dotclaude? [Y/n]: " response
+        if [[ "${response:-Y}" =~ ^[Yy]$ ]]; then
+            curl -fsSL https://dotclaude.dev/install | bash
+            if command -v dotclaude &>/dev/null; then
+                pass "dotclaude installed"
+            else
+                warn "Installation may require shell restart"
+            fi
+        else
+            info "Skipped - install later: curl -fsSL https://dotclaude.dev/install | bash"
+        fi
+    else
+        pass "dotclaude already installed"
+        local profile=$(dotclaude active 2>/dev/null)
+        if [[ -n "$profile" && "$profile" != "none" ]]; then
+            pass "Active Claude profile: $profile"
+        else
+            echo "Create a profile with: dotclaude create <name>"
+        fi
+    fi
+fi
+
+# Step 5: Health check
+step "Step 5: Health Check"
 
 echo "Running health check..."
 "$DOTFILES_DIR/bin/dotfiles-doctor" || true

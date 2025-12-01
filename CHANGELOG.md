@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2025-12-01
+
 ### Added
+- **dotclaude Integration** - Claude Code profile management across machines
+  - `dotfiles status` shows active Claude profile (if dotclaude installed)
+  - `dotfiles doctor` validates Claude/dotclaude setup with install hints
+  - `dotfiles vault` syncs `~/.claude/profiles.json` to vault
+  - `dotfiles drift` detects Claude profile changes vs vault
+  - `dotfiles packages` suggests dotclaude for Claude users
+  - `dotfiles init` offers dotclaude installation during setup wizard
+  - See [docs/claude-code.md](docs/claude-code.md#dotclaude-integration) for details
+- **Dockerfile.lite** - Lightweight Alpine container for CLI exploration
 - **`{{#each}}` Template Loops** - Iterate over arrays with named fields
   - Define `SSH_HOSTS` array in `_variables.local.sh`
   - Use `{{#each ssh_hosts}}...{{/each}}` in templates
@@ -24,10 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Template Engine: Nested `{{#else}}` handling** - Fixed stray `{{/if}}` tags in output
   - Properly matches `{{#else}}` at the correct nesting level
   - No longer grabs nested conditionals' else blocks
-
-### Planned
-- Blog posts on dotfiles architecture and Claude session portability
-- Open source vault system as standalone project
 
 ## [1.7.0] - 2025-11-29
 
