@@ -92,7 +92,7 @@ if command -v dotclaude &>/dev/null; then
   fi
 elif command -v claude &>/dev/null; then
   # Claude installed but no dotclaude - gentle hint
-  s_profile="${d}·${n}"; s_profile_info="${d}try: brew install dotclaude${n}"
+  s_profile="${d}·${n}"; s_profile_info="${d}try: dotclaude.dev/install${n}"
 fi
 
 # Only show if Claude-related tools present
@@ -125,7 +125,7 @@ if command -v claude &>/dev/null; then
   else
     info "dotclaude not installed (optional)"
     echo "     Manage Claude profiles across machines with dotclaude:"
-    echo "     brew tap blackwell-systems/tap && brew install dotclaude"
+    echo "     curl -fsSL https://dotclaude.dev/install | bash"
   fi
 fi
 ```
@@ -176,7 +176,7 @@ if command -v claude &>/dev/null && ! command -v dotclaude &>/dev/null; then
   echo ""
   info "Claude Code detected without dotclaude"
   echo "     Manage profiles across machines with dotclaude:"
-  echo "     brew tap blackwell-systems/tap && brew install dotclaude"
+  echo "     curl -fsSL https://dotclaude.dev/install | bash"
 fi
 ```
 
@@ -194,7 +194,7 @@ if command -v claude &>/dev/null; then
     echo "Claude Code detected. dotclaude helps manage profiles across machines."
     read -p "Install dotclaude? [Y/n]: " response
     if [[ "${response:-Y}" =~ ^[Yy] ]]; then
-      brew tap blackwell-systems/tap && brew install dotclaude
+      curl -fsSL https://dotclaude.dev/install | bash
       success "dotclaude installed"
     fi
   else
