@@ -35,7 +35,7 @@ If you use Claude Code across multiple machines, this is the only dotfiles solut
 ### Core (works everywhere)
 - **Interactive setup wizard** – `dotfiles init` guides you through platform detection, vault selection (Bitwarden/1Password/pass), and secret restoration. One command, complete setup.
 - **Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with your choice of Bitwarden, 1Password, or pass. Unified API across all backends.
-- **Claude Code integration** – Portable sessions across machines. Start coding on Mac, continue on Linux, same conversation. Auto-redirect keeps paths consistent.
+- **Claude Code integration** – Portable sessions across machines via `/workspace` symlink. Start on Mac, continue on Linux, same conversation. Auto-redirect from `~/workspace` keeps sessions synced.
 - **Self-healing configuration** – Health checker with `--fix` mode. Drift detection catches local vs vault differences before they cause problems.
 - **Machine-specific templates** – Generate configs tailored to each machine (work vs personal, macOS vs Linux). Variables, conditionals, loops.
 - **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat, yazi—configured and ready. Lazy-loaded for fast shell startup.
@@ -284,6 +284,8 @@ dotfiles init
 - Secret restoration
 - Health validation
 
+> **💡 Why `~/workspace`?** Bootstrap creates `/workspace → ~/workspace` symlink for **portable Claude Code sessions**. Use `/workspace/project` paths and your AI conversations sync across macOS, Linux, WSL—same session folder, same history. [Learn more](docs/README-FULL.md#canonical-workspace-workspace)
+
 <details>
 <summary><b>Don't use a vault manager?</b></summary>
 
@@ -371,6 +373,36 @@ See [Brewfile](Brewfile) for complete package list.
 ---
 
 ## Key Concepts
+
+### Workspace Architecture (Portable Sessions)
+
+Bootstrap creates `/workspace → ~/workspace` symlink for **portable Claude Code sessions** across machines.
+
+**The Problem:** Claude Code stores sessions by working directory path:
+- macOS: `/Users/name/project` → session `-Users-name-project-`
+- Linux: `/home/name/project` → session `-home-name-project-`
+- **Result:** Different machines = different session folders = lost conversation history
+
+**The Solution:** Use `/workspace/project` everywhere:
+```bash
+# ✅ Portable (use this)
+cd /workspace/my-project
+claude
+
+# Session stored as: ~/.claude/projects/-workspace-my-project-/
+# Same on ALL machines! Resume conversations anywhere.
+
+# ❌ Non-portable (avoid)
+cd ~/workspace/my-project  # Different path per OS
+```
+
+**Auto-redirect:** The `claude` wrapper detects `~/workspace/*` and automatically switches to `/workspace/*`.
+
+**Why it matters:** Work on Mac, continue on Linux, **same conversation, full history**. No other dotfiles system does this.
+
+[Full workspace documentation →](docs/README-FULL.md#canonical-workspace-workspace)
+
+---
 
 ### Vault System (Multi-Backend)
 
