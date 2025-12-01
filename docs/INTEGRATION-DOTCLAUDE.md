@@ -139,9 +139,14 @@ This gently suggests dotclaude to Claude users without being pushy.
 ["Claude-Profiles"]="$HOME/.claude/profiles.json"
 ```
 
+**Why profiles go in vault:**
+- Same restore convenience as SSH config, AWS config, Git config
+- Complete environment restore: `dotfiles vault restore` gets everything
+- Users don't have to manually recreate profiles on each machine
+
 This enables:
 - `dotfiles vault sync Claude-Profiles` - push profiles to vault
-- `dotfiles vault restore` - restore profiles on new machine
+- `dotfiles vault restore` - restore profiles on new machine (includes Claude profiles)
 
 ### 4. Templates set environment variables (templates/configs/99-local.zsh.tmpl)
 
