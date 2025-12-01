@@ -21,10 +21,6 @@
   - [System Overview](architecture.md)
   - [Troubleshooting](troubleshooting.md)
 
-- **Comparisons**
-  - [Why This Repo vs chezmoi](https://github.com/blackwell-systems/dotfiles#why-this-repo-vs-chezmoi)
-  - [Feature Matrix](https://github.com/blackwell-systems/dotfiles#detailed-comparison-vs-popular-dotfiles)
-
 - **Planning**
   - [Roadmap](ROADMAP.md)
   - [dotclaude Integration](INTEGRATION-DOTCLAUDE.md)
