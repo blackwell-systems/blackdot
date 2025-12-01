@@ -32,21 +32,125 @@ If you use Claude Code across multiple machines, this is the only dotfiles solut
 
 ## Features
 
-### Core (works everywhere)
-- **Interactive setup wizard** – `dotfiles init` guides you through platform detection, vault selection (Bitwarden/1Password/pass), and secret restoration. One command, complete setup.
-- **Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with your choice of Bitwarden, 1Password, or pass. Unified API across all backends.
-- **Claude Code integration** – Portable sessions across machines via `/workspace` symlink. Start on Mac, continue on Linux, same conversation. Auto-redirect from `~/workspace` keeps sessions synced.
-- **Self-healing configuration** – Health checker with `--fix` mode. Drift detection catches local vs vault differences before they cause problems.
-- **Machine-specific templates** – Generate configs tailored to each machine (work vs personal, macOS vs Linux). Variables, conditionals, loops.
-- **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat, yazi—configured and ready. Lazy-loaded for fast shell startup.
-- **Idempotent design** – Run bootstrap repeatedly. Scripts converge to known-good state. Safe to re-run anytime.
-- **Comprehensive testing** – 124 tests ensure reliability across platforms. Unit, integration, and error scenario coverage.
+<details>
+<summary>**Interactive Setup Wizard** - One command, complete setup</summary>
 
-### Advanced (opt-in)
-- **Cross-platform portability** – Same dotfiles on macOS, Linux, Windows, WSL2, or Docker. 90% shared code, 10% platform-specific.
-- **Metrics and observability** – Track dotfiles health over time. Visualize trends, catch regressions early.
-- **Git safety hooks** – Defensive hooks block dangerous git commands (force push, hard reset, secrets commits). [Learn more](docs/claude-code.md)
-- **Docker test environment** – Try the entire system in a disposable Alpine container before installing. 30-second trust verification.
+`dotfiles init` guides you through platform detection, vault selection (Bitwarden/1Password/pass), and secret restoration.
+</details>
+
+<details>
+<summary>**Multi-Vault Secrets** - Your vault, your way</summary>
+
+SSH keys, AWS credentials, Git config synced with your choice of Bitwarden, 1Password, or pass. Unified API across all backends.
+</details>
+
+<details>
+<summary>**Claude Code Integration** - Resume conversations anywhere</summary>
+
+Portable sessions via `/workspace` symlink. Start on Mac, continue on Linux, same conversation. Auto-redirect from `~/workspace` keeps sessions synced.
+</details>
+
+<details>
+<summary>**Self-Healing Configuration** - Never breaks</summary>
+
+Health checker with `--fix` mode. Drift detection catches local vs vault differences before they cause problems.
+</details>
+
+<details>
+<summary>**Machine-Specific Templates** - One config, many machines</summary>
+
+Generate configs tailored to each machine (work vs personal, macOS vs Linux). Variables, conditionals, loops. `dotfiles template init` guides setup.
+</details>
+
+<details>
+<summary>**Backup & Restore** - Time-travel for your dotfiles</summary>
+
+Timestamped backups with `dotfiles backup`. Interactive restore from any backup. Auto-cleanup keeps only 10 most recent.
+</details>
+
+<details>
+<summary>**Unified CLI Interface** - One command to rule them all</summary>
+
+Single `dotfiles` command with all functionality: `status`, `doctor`, `drift`, `backup`, `vault`, `template`, `packages`, `lint`, `upgrade`, and more.
+</details>
+
+<details>
+<summary>**Package Management** - Keep tools in sync</summary>
+
+`dotfiles packages` checks Brewfile status. `dotfiles packages --install` installs missing packages. Works across macOS and Linux.
+</details>
+
+<details>
+<summary>**Modern CLI Stack** - Batteries included</summary>
+
+eza, fzf, ripgrep, zoxide, bat, yazi—configured and ready. Lazy-loaded for fast shell startup.
+</details>
+
+<details>
+<summary>**Modular Shell Config** - Organized, not monolithic</summary>
+
+10 organized modules in `zsh.d/`: init, plugins, env, tools, aliases, functions, AWS, Claude, git, integrations. Easy to customize.
+</details>
+
+<details>
+<summary>**AWS Workflow Helpers** - SSO made simple</summary>
+
+`awsswitch` for interactive profile switching, `awsprofiles` to list all, `awswho` for current identity. Auto-login integration.
+</details>
+
+<details>
+<summary>**Tab Completions** - Type less, do more</summary>
+
+ZSH completions for `dotfiles`, AWS commands, vault operations. Context-aware suggestions.
+</details>
+
+<details>
+<summary>**Cross-Platform Portability** - 90% shared, 10% platform-specific</summary>
+
+Same dotfiles on macOS, Linux, Windows, WSL2, or Docker. Platform detection auto-adapts behavior.
+</details>
+
+<details>
+<summary>**Comprehensive Testing** - 124 tests and counting</summary>
+
+Unit, integration, and error scenario coverage. CI runs shellcheck, syntax validation, and all tests on every push.
+</details>
+
+<details>
+<summary>**Metrics & Observability** - Track health over time</summary>
+
+Automatic metrics collection with `dotfiles doctor`. Visualize trends, catch regressions early with `dotfiles metrics`.
+</details>
+
+<details>
+<summary>**Git Safety Hooks** - Prevent disasters</summary>
+
+Defensive hooks block dangerous commands (force push to main, hard reset, secrets commits). [Learn more](docs/claude-code.md)
+</details>
+
+<details>
+<summary>**Shell Linting** - Catch errors early</summary>
+
+`dotfiles lint` validates shell syntax. `dotfiles lint --fix` auto-fixes permissions. Pre-commit hooks prevent broken scripts.
+</details>
+
+<details>
+<summary>**Clean Uninstall** - Leave no trace</summary>
+
+`dotfiles uninstall` with `--dry-run` preview. Option to keep secrets while removing dotfiles.
+</details>
+
+<details>
+<summary>**Docker Test Environment** - Try before installing</summary>
+
+Test entire system in disposable Alpine container. 30-second trust verification before committing to installation.
+</details>
+
+<details>
+<summary>**Idempotent Design** - Safe to run anytime</summary>
+
+Run bootstrap repeatedly. Scripts converge to known-good state. No harm from re-running.
+</details>
 
 ---
 
