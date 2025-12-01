@@ -217,6 +217,27 @@ To clone via SSH (recommended), you’ll also want an SSH key configured with Gi
 
 ---
 
+## Try Before Installing
+
+Don't trust random install scripts? Test in an isolated Alpine container first:
+
+```bash
+git clone https://github.com/blackwell-systems/dotfiles.git
+cd dotfiles
+docker build -f Dockerfile.lite -t dotfiles-lite .
+docker run -it --rm dotfiles-lite
+
+# Inside container - explore safely:
+dotfiles status
+dotfiles doctor
+dotfiles help
+exit  # Nothing persists
+```
+
+**→ [Full Test Drive Guide](docs/TESTDRIVE.md)** - Sample workflows, dotclaude integration, FAQs
+
+---
+
 ## One-Line Install
 
 ```bash
