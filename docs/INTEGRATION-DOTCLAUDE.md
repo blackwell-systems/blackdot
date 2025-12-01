@@ -848,28 +848,6 @@ dotfiles pswitch work     # Quick profile switching
 dotfiles profiles         # List all profiles
 ```
 
-### Alternative: Unified Meta-Command
-
-For stronger brand unity, consider a meta-command for the ecosystem:
-
-```bash
-bws status          # Shows both dotfiles + dotclaude status
-bws profile work    # → dotclaude switch work
-bws doctor          # → dotfiles doctor (includes dotclaude checks)
-bws vault sync      # → dotfiles vault sync
-```
-
-**Pros:**
-- Single entry point for entire Blackwell ecosystem
-- Room for future products
-- Clear branding
-
-**Cons:**
-- Another command to learn
-- May confuse users who know `dotfiles` already
-
-**Decision:** Defer to v2.0 after validating alias approach.
-
 ### Concern 2: Template Integration Complexity
 
 The proposed `claude-profiles.tmpl` generating `~/.claude.profiles` adds unnecessary indirection.
@@ -917,7 +895,6 @@ The phases reference week numbers which may not be realistic. Focus on:
 | Implementation | Wrapper script | Alias in 40-aliases.zsh |
 | Template | Separate `.claude.profiles` | Env vars in `99-local.zsh` |
 | Vault | Store `profiles.json` | Remove (profiles aren't secrets) |
-| Meta-command | Not planned | Consider `bws` for v2.0 |
 
 ---
 
