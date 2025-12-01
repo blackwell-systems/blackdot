@@ -6,150 +6,14 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="description" content="Vault-backed dotfiles with Bitwarden integration, health checks, and cross-platform support.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-  <link rel="icon" type="image/png" href="assets/dotfiles_logo.png">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <link rel="stylesheet" href="https://blackwell-systems.github.io/blackwell-docs-theme/docsify.css">
   <style>
+    /* Theme color variables - customize these to change accent colors */
     :root {
       --theme-color: #4a9eff;
       --theme-color-dark: #2d7dd2;
-    }
-    .app-name-link img {
-      width: 2rem;
-    }
-
-    /* Cover page styling */
-    section.cover {
-      background: linear-gradient(to bottom right, #0d0d0d 0%, #1a1a1a 50%, #0f0f0f 100%) !important;
-    }
-    section.cover .cover-main {
-      max-width: 700px;
-    }
-    section.cover h1 {
-      font-weight: 300;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-    }
-    section.cover blockquote {
-      font-size: 1rem;
-      color: #888;
-      border: none;
-      font-style: normal;
-      letter-spacing: 0.05em;
-    }
-    section.cover pre {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 4px;
-      text-align: left;
-      max-width: 500px;
-      margin: 1.5rem auto;
-    }
-    section.cover ul {
-      text-align: left;
-      display: inline-block;
-      list-style: none;
-      padding: 0;
-      margin: 2rem 0;
-    }
-    section.cover ul li {
-      color: #999;
-      font-size: 0.9rem;
-      padding: 0.4rem 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', monospace;
-    }
-    section.cover ul li:last-child {
-      border-bottom: none;
-    }
-    section.cover ul li::before {
-      content: "→ ";
-      color: #444;
-      margin-right: 0.5rem;
-    }
-    /* Subdued buttons */
-    section.cover .cover-main > p:last-of-type a {
-      border: 1px solid rgba(255,255,255,0.15);
-      background: transparent;
-      color: #ccc;
-      padding: 0.6rem 1.8rem;
-      font-size: 0.85rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      transition: all 0.3s ease;
-      border-radius: 2px;
-    }
-    section.cover .cover-main > p:last-of-type a:hover {
-      border-color: rgba(255,255,255,0.4);
-      color: #fff;
-      background: rgba(255,255,255,0.05);
-    }
-    section.cover .cover-main > p:last-of-type a:first-child {
-      border-color: rgba(255,255,255,0.3);
-      color: #fff;
-    }
-
-    /* Mobile responsive */
-    @media screen and (max-width: 768px) {
-      section.cover {
-        padding: 0 1rem;
-      }
-      section.cover .cover-main {
-        max-width: 100%;
-        padding: 0 0.5rem;
-      }
-      section.cover .cover-main > p:first-child img {
-        max-width: 100px !important;
-      }
-      section.cover h1 {
-        font-size: 1.6rem;
-        letter-spacing: 0.05em;
-      }
-      section.cover blockquote {
-        font-size: 0.9rem;
-        padding: 0 0.5rem;
-      }
-      section.cover pre {
-        max-width: 100%;
-        font-size: 0.7rem;
-        padding: 0.8rem;
-        overflow-x: auto;
-        margin: 1rem auto;
-      }
-      section.cover ul {
-        margin: 1.5rem 0;
-        padding: 0 0.5rem;
-        max-width: 100%;
-      }
-      section.cover ul li {
-        font-size: 0.8rem;
-        padding: 0.35rem 0;
-      }
-      section.cover .cover-main > p:last-of-type {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        align-items: center;
-      }
-      section.cover .cover-main > p:last-of-type a {
-        padding: 0.5rem 1.5rem;
-        font-size: 0.75rem;
-        width: 80%;
-        text-align: center;
-      }
-    }
-
-    @media screen and (max-width: 480px) {
-      section.cover h1 {
-        font-size: 1.3rem;
-      }
-      section.cover pre {
-        font-size: 0.6rem;
-      }
-      section.cover ul li {
-        font-size: 0.75rem;
-      }
     }
   </style>
 </head>
@@ -158,7 +22,7 @@
   <script>
     window.$docsify = {
       name: '<img src="assets/dotfiles_logo.png" alt="Blackwell Systems">Dotfiles',
-      nameLink: '/',
+      nameLink: '#/',
       repo: 'blackwell-systems/dotfiles',
       loadSidebar: true,
       subMaxLevel: 3,
