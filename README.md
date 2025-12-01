@@ -808,6 +808,9 @@ To customize:
 
 ## Troubleshooting
 
+<details>
+<summary><b>Quick Fixes & Common Issues</b></summary>
+
 ### Quick Fixes
 
 ```bash
@@ -843,6 +846,8 @@ exec zsh                 # Reload shell
 
 See **[Troubleshooting Guide](docs/troubleshooting.md)** for complete solutions.
 
+</details>
+
 ---
 
 ## Contributing
@@ -870,6 +875,9 @@ See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community guidelines.
 
 ## Acknowledgments
 
+<details>
+<summary><b>Credits & Inspiration</b></summary>
+
 **AI & Development:**
 - [Anthropic](https://anthropic.com/) - Claude AI and Claude Code
 - [Claude Code](https://claude.ai/code) - AI-assisted development
@@ -884,6 +892,8 @@ See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community guidelines.
 - [holman/dotfiles](https://github.com/holman/dotfiles) - Topic-based organization
 - [thoughtbot/dotfiles](https://github.com/thoughtbot/dotfiles) - rcm tool
 - [mathiasbynens/dotfiles](https://github.com/mathiasbynens/dotfiles) - macOS defaults
+
+</details>
 
 ---
 
