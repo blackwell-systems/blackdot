@@ -57,14 +57,19 @@ if [[ ${#AVAILABLE_VAULTS[@]} -eq 0 ]]; then
     warn "No vault CLI installed (optional)"
     NEEDS_SETUP=true
 else
-    # Use DOTFILES_VAULT_BACKEND if set, otherwise first available
-    SELECTED_BACKEND="${DOTFILES_VAULT_BACKEND:-${AVAILABLE_VAULTS[1]}}"
-
-    # Check if selected backend is logged in
-    if vault_check_login "$SELECTED_BACKEND" 2>/dev/null; then
-        pass "$SELECTED_BACKEND vault configured"
+    # Check if DOTFILES_VAULT_BACKEND is explicitly set
+    if [[ -n "${DOTFILES_VAULT_BACKEND:-}" ]]; then
+        SELECTED_BACKEND="$DOTFILES_VAULT_BACKEND"
+        # Check if selected backend is logged in
+        if vault_check_login "$SELECTED_BACKEND" 2>/dev/null; then
+            pass "$SELECTED_BACKEND vault configured"
+        else
+            warn "$SELECTED_BACKEND vault not logged in"
+            NEEDS_SETUP=true
+        fi
     else
-        warn "$SELECTED_BACKEND vault not logged in"
+        # No backend explicitly set - will prompt during setup
+        warn "Vault backend not configured"
         NEEDS_SETUP=true
     fi
 fi
@@ -120,25 +125,30 @@ if [[ ${#AVAILABLE_VAULTS[@]} -eq 0 ]]; then
         exit 1
     fi
 else
-    # Choose vault backend if multiple available
-    if [[ ${#AVAILABLE_VAULTS[@]} -gt 1 ]]; then
-        echo "Multiple vault backends detected:"
-        for i in {1..${#AVAILABLE_VAULTS[@]}}; do
-            echo "  $i) ${AVAILABLE_VAULTS[$i]}"
-        done
-        echo ""
-        read -p "Select backend [1]: " choice
-        choice=${choice:-1}
-        SELECTED_BACKEND="${AVAILABLE_VAULTS[$choice]}"
-    else
-        SELECTED_BACKEND="${AVAILABLE_VAULTS[1]}"
-    fi
-
-    # Export for other scripts
-    export DOTFILES_VAULT_BACKEND="$SELECTED_BACKEND"
-
-    echo "Using vault backend: $SELECTED_BACKEND"
+    # Always prompt for vault backend choice (even if only one detected)
+    echo "Detected vault backends:"
+    for i in {1..${#AVAILABLE_VAULTS[@]}}; do
+        echo "  $i) ${AVAILABLE_VAULTS[$i]}"
+    done
+    echo "  $((${#AVAILABLE_VAULTS[@]} + 1))) Skip vault setup (configure secrets manually)"
     echo ""
+
+    read -p "Select vault backend [1]: " choice
+    choice=${choice:-1}
+
+    # Check if user chose to skip
+    if [[ $choice -eq $((${#AVAILABLE_VAULTS[@]} + 1)) ]]; then
+        warn "Skipped vault setup - you can configure secrets manually"
+        VAULT_CONFIGURED=false
+        # Jump to next step
+    else
+        SELECTED_BACKEND="${AVAILABLE_VAULTS[$choice]}"
+
+        # Export for other scripts
+        export DOTFILES_VAULT_BACKEND="$SELECTED_BACKEND"
+
+        echo "Using vault backend: $SELECTED_BACKEND"
+        echo ""
 
     # Backend-specific login/unlock
     case "$SELECTED_BACKEND" in
@@ -196,6 +206,7 @@ else
             fi
             ;;
     esac
+    fi
 fi
 
 # Step 3: Restore secrets
