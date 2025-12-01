@@ -802,51 +802,16 @@ dotfiles claude status
 > **Review Date:** 2025-12-01
 > **Status:** Under Consideration
 
-### Concern 1: Nested Command Pattern Feels Subordinate
+### Concern 1: Wrapper Commands Add Confusion
 
-The proposed `dotfiles claude status` pattern makes dotclaude feel like a subcommand rather than a unified experience:
+The original plan proposed `dotfiles claude status` as a wrapper around dotclaude. This creates confusion:
+- Users ask "which command do I use?"
+- Two ways to do the same thing
+- Adds cognitive load
 
-```bash
-# Current proposal - feels nested
-dotfiles claude status    # dotclaude is subordinate
-dotclaude status          # the "real" command
-```
+**Resolution:** Adopt "invisible integration" instead. No wrapper commands. Users run `dotclaude` directly for profile management. dotfiles just enhances its existing commands (`status`, `doctor`, `vault restore`) to be aware of Claude.
 
-**Issue:** Users will ask "which one do I use?" This creates confusion, not unity.
-
-### Recommendation: Alias-Based Extension
-
-Instead of a wrapper script (`bin/dotfiles-claude`), extend the dotfiles CLI directly with native-feeling subcommands:
-
-```bash
-# In zsh/zsh.d/40-aliases.zsh
-dotfiles() {
-    case "$1" in
-        # Existing commands...
-
-        # Claude profile commands (delegate to dotclaude if installed)
-        profile|profiles|pswitch)
-            if command -v dotclaude &>/dev/null; then
-                case "$1" in
-                    profile)  dotclaude "${@:2}" ;;
-                    profiles) dotclaude list ;;
-                    pswitch)  dotclaude switch "${@:2}" ;;
-                esac
-            else
-                echo "dotclaude not installed. Install with:"
-                echo "  brew tap blackwell-systems/tap && brew install dotclaude"
-            fi
-            ;;
-    esac
-}
-```
-
-**Result:**
-```bash
-dotfiles profile list     # Feels native, not nested
-dotfiles pswitch work     # Quick profile switching
-dotfiles profiles         # List all profiles
-```
+See **[Recommended Approach: Invisible Integration](#recommended-approach-invisible-integration)** below.
 
 ### Concern 2: Template Integration Complexity
 
@@ -887,14 +852,135 @@ The phases reference week numbers which may not be realistic. Focus on:
 - **Dependencies** between tasks
 - Let scheduling happen organically
 
-### Summary: Recommended Refinements
+---
 
-| Area | Current Plan | Recommendation |
-|------|--------------|----------------|
-| CLI Pattern | `dotfiles claude <cmd>` | `dotfiles profile <cmd>` (native feel) |
-| Implementation | Wrapper script | Alias in 40-aliases.zsh |
-| Template | Separate `.claude.profiles` | Env vars in `99-local.zsh` |
-| Vault | Store `profiles.json` | Keep (enables one-command restore) |
+## Recommended Approach: Invisible Integration
+
+> **Status:** Approved
+> **Principle:** The best integration is one users don't notice.
+
+### Architecture: Two Tools, Loosely Connected
+
+```
+┌─────────────────────────────────┐     ┌─────────────────────────────────┐
+│           dotfiles              │     │           dotclaude             │
+│  (shell config, secrets, etc)   │     │   (Claude profile management)   │
+├─────────────────────────────────┤     ├─────────────────────────────────┤
+│                                 │     │                                 │
+│  dotfiles status    ───────────────────► shows Claude profile status   │
+│  dotfiles doctor    ───────────────────► checks Claude health          │
+│  dotfiles vault restore ───────────────► restores profiles.json        │
+│                                 │     │                                 │
+└─────────────────────────────────┘     └─────────────────────────────────┘
+                                              ▲
+                                              │
+                                        User runs directly:
+
+                                        dotclaude list
+                                        dotclaude switch work
+                                        dotclaude create personal
+                                        dotclaude delete old-profile
+                                        (full functionality)
+```
+
+### Key Principles
+
+1. **dotclaude is NOT wrapped or hidden** - users run it directly for all profile management
+2. **dotfiles just "knows about" dotclaude** - shows status, validates health, syncs profiles
+3. **No new commands to learn** - existing dotfiles commands just become smarter
+4. **Full dotclaude access** - all dotclaude functionality remains via `dotclaude` command
+
+### What Users Actually Type
+
+| Task | Command | Notes |
+|------|---------|-------|
+| See overall health | `dotfiles status` | Shows Claude status too |
+| Validate setup | `dotfiles doctor` | Checks Claude too |
+| Restore on new machine | `dotfiles vault restore` | Restores Claude profiles too |
+| **List Claude profiles** | `dotclaude list` | Direct - full access |
+| **Switch profiles** | `dotclaude switch work` | Direct - full access |
+| **Create profile** | `dotclaude create foo` | Direct - full access |
+| **Any dotclaude feature** | `dotclaude <whatever>` | Direct - full access |
+
+### Implementation Details
+
+**1. Enhance `dotfiles status`** (50-functions.zsh)
+
+Add one line showing active Claude profile:
+
+```bash
+# In status() function
+local s_profile="${d}·${n}" s_profile_info=""
+if command -v dotclaude &>/dev/null; then
+  local profile=$(dotclaude active 2>/dev/null)
+  if [[ -n "$profile" ]]; then
+    s_profile="${g}◆${n}"; s_profile_info="$profile"
+  fi
+fi
+echo "  profile    $s_profile  $s_profile_info"
+```
+
+**2. Add `dotfiles doctor` section** (bin/dotfiles-doctor)
+
+```bash
+# Section: Claude Code (Optional)
+if command -v claude &>/dev/null; then
+  section "Claude Code"
+  pass "Claude CLI installed"
+
+  if command -v dotclaude &>/dev/null; then
+    pass "dotclaude installed"
+    local profile=$(dotclaude active 2>/dev/null)
+    if [[ -n "$profile" ]]; then
+      pass "Active profile: $profile"
+    else
+      warn "No active profile - run: dotclaude switch <profile>"
+    fi
+  else
+    info "dotclaude not installed (optional)"
+    echo "     Manage Claude profiles across machines with dotclaude:"
+    echo "     brew tap blackwell-systems/tap && brew install dotclaude"
+  fi
+fi
+```
+
+This gently suggests dotclaude to Claude users without being pushy - it's marked as "optional" with install instructions.
+
+**3. Vault includes profiles** (vault/_common.sh)
+
+```bash
+# Add to SYNCABLE_ITEMS
+["Claude-Profiles"]="$HOME/.claude/profiles.json"
+```
+
+**4. Templates set environment variables** (templates/configs/99-local.zsh.tmpl)
+
+```bash
+{{ if MACHINE_TYPE == "work" }}
+export CLAUDE_DEFAULT_BACKEND="bedrock"
+export CLAUDE_BEDROCK_PROFILE="{{ AWS_PROFILE_WORK }}"
+{{ else }}
+export CLAUDE_DEFAULT_BACKEND="max"
+{{ endif }}
+```
+
+### Why This Works
+
+- **Zero friction** - Users don't learn new commands
+- **Full power** - dotclaude remains fully accessible
+- **Graceful degradation** - Works fine if dotclaude isn't installed
+- **One-command restore** - `dotfiles vault restore` gets complete environment
+- **Invisible when working** - Users just run `claude` and it works
+
+### Summary
+
+| Area | Approach |
+|------|----------|
+| CLI Pattern | No wrapper - dotclaude used directly |
+| Status | Enhanced to show Claude profile |
+| Doctor | Enhanced to validate Claude setup |
+| Vault | Store/restore `profiles.json` |
+| Template | Env vars in `99-local.zsh` |
 
 ---
 
