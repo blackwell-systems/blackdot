@@ -16,6 +16,7 @@
 
 | Topic | Description |
 |-------|-------------|
+| [CLI Reference](cli-reference.md) | All commands, flags & environment variables |
 | [Full Documentation](README-FULL.md) | Complete 1,900+ line guide |
 | [Template System](templates.md) | Machine-specific configuration |
 | [Vault System](vault-README.md) | Multi-backend secret management |
