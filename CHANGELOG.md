@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Template CLI Help Improvements** - Better discoverability in `dotfiles template help`
+  - Added `list` command to help output (shows available templates with status)
+  - Added `{{#each}}` loop syntax to template syntax section
+  - Added DOCUMENTATION section with links to docs/templates.md and online guide
 - **Template JSON Arrays** - `{{#each}}` loops now support JSON configuration
   - New `templates/_arrays.local.json` for cleaner array definitions
   - `dotfiles template arrays` command to view/manage arrays
