@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.4] - 2025-12-02
+
+### Added
+- **dotclaude Integration Documentation** - Comprehensive integration guide (`docs/DOTCLAUDE-INTEGRATION.md`)
+  - Architecture diagrams showing system boundaries and data flow
+  - Division of responsibilities (dotclaude: profiles, dotfiles: secrets)
+  - Usage workflows for multi-client, OSS vs work, multi-machine, and secrets rotation
+  - Configuration, troubleshooting, and security best practices
+- **Mermaid Diagram Support** - Dark mode compatible diagrams throughout documentation
+  - Configured dark theme for better contrast in docs
+  - Converted ASCII diagrams to Mermaid in README-FULL
+  - Architecture diagrams for multi-platform, workspace, and organizational structure
+
+### Changed
+- **Installation Command Pattern** - Replaced confusing `bash -s --` pattern with familiar download-first approach
+  - All documentation now uses: `curl -fsSL ... -o install.sh && bash install.sh --interactive`
+  - Updated install.sh header comments and --help text
+  - Consistent pattern across README, docs, and CLI reference
+- **Badge Reorganization** - Improved visual hierarchy in README
+  - Moved Zsh badge to row 1 (after Blackwell Systems)
+  - Removed duplicate Tests count badge
+  - Added dotclaude integration badge
+- **Comparison Tables** - Made collapsible for better readability
+  - "Quick Comparison: This Repo vs Typical Dotfiles" now collapsible
+  - "Why This Repo vs chezmoi?" now collapsible
+- **README-FULL Modernization** - Updated architecture diagrams and removed outdated claims
+  - Removed "Key Innovation: Portable Claude Code Sessions" marketing language
+  - Simplified diagrams for better resolution and readability
+  - Directory structure now collapsible with full ASCII tree
+
+### Documentation
+- Added dotclaude integration links throughout documentation ecosystem
+- Added comprehensive badge set to README-FULL
+- Cross-linked dotfiles and dotclaude documentation sites
+- Improved feature presentation with code blocks and collapsible sections
+- Updated coverpage formatting and Development & Testing section
+
 ## [1.8.3] - 2025-12-01
 
 ### Added
