@@ -34,16 +34,18 @@ ENV WORKSPACE=/root/workspace
 
 WORKDIR /root/workspace/dotfiles
 
-# Copy core components (not full bootstrap)
+# Copy core components
 COPY bin/ /root/workspace/dotfiles/bin/
 COPY lib/ /root/workspace/dotfiles/lib/
 COPY vault/ /root/workspace/dotfiles/vault/
 COPY zsh/ /root/workspace/dotfiles/zsh/
 COPY templates/ /root/workspace/dotfiles/templates/
+COPY bootstrap/ /root/workspace/dotfiles/bootstrap/
 
-# Make bin scripts executable
+# Make scripts executable
 RUN chmod +x /root/workspace/dotfiles/bin/* && \
-    chmod +x /root/workspace/dotfiles/vault/*.sh
+    chmod +x /root/workspace/dotfiles/vault/*.sh && \
+    chmod +x /root/workspace/dotfiles/bootstrap/*.sh
 
 # Setup zsh with dotfiles functions
 RUN mkdir -p /root/.config/dotfiles /root/.ssh /root/.aws && \
