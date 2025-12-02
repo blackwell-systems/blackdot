@@ -138,6 +138,49 @@ docker run -it --rm dotfiles-full
 
 ---
 
+## Testing with Mock Vault (pass backend)
+
+Test vault functionality without real credentials using the mock vault setup. This creates a fake GPG key and populates a `pass` (password-store) with test credentials.
+
+> **Note:** The mock vault only works with the `pass` backend. For Bitwarden or 1Password testing, you'll need real vault access.
+
+```bash
+# Start lite container
+docker run -it --rm dotfiles-lite
+
+# Inside container: setup mock vault with fake credentials
+./test/mocks/setup-mock-vault.sh --no-pass  # Creates fake GPG key + pass store
+
+# Switch to pass backend
+export DOTFILES_VAULT_BACKEND=pass
+
+# Test vault commands
+dotfiles vault check
+dotfiles vault restore --preview
+dotfiles drift
+```
+
+**What it creates:**
+
+| Item | Description |
+|------|-------------|
+| `SSH-GitHub-Enterprise` | Mock SSH private key |
+| `SSH-GitHub-Blackwell` | Mock SSH private key |
+| `SSH-Config` | Sample SSH configuration |
+| `AWS-Config` | Mock AWS config (profiles) |
+| `AWS-Credentials` | Fake AWS credentials |
+| `Git-Config` | Sample git configuration |
+| `Environment-Secrets` | Mock env vars (API keys) |
+| `Claude-Profiles` | Sample Claude profiles JSON |
+
+**Options:**
+- `--no-pass` - No GPG passphrase (for automated testing)
+- `--clean` - Remove existing mock vault first
+
+**All credentials are FAKE and for testing only!**
+
+---
+
 ## Tips
 
 ### Mount local dotfiles for testing changes

@@ -20,6 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Dockerfile.medium` (~400MB) - Ubuntu with Homebrew for full dotfiles functionality
   - Added Powerlevel10k shell theme to lite container
   - New `docs/docker.md` documenting all container options
+  - Welcome messages on container startup with quick start instructions
+- **Mock Vault for Testing** - Test vault commands without real credentials
+  - `test/mocks/setup-mock-vault.sh` creates fake GPG key + pass store
+  - Populates all expected vault items with mock credentials
+  - Works with `pass` backend (`export DOTFILES_VAULT_BACKEND=pass`)
+  - Options: `--no-pass` (no passphrase), `--clean` (reset)
 - **Minimal Mode Documentation** - Clarified what `--minimal` skips and how to enable features later
 
 ### Fixed
