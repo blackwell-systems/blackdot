@@ -189,6 +189,8 @@ dotfiles() {
             echo "  edit              Open dotfiles in editor"
             echo "  help              Show this help"
             echo ""
+            echo "Run 'dotfiles <command> --help' for detailed options."
+            echo ""
             echo "Examples:"
             echo "  dotfiles setup               # Interactive setup wizard"
             echo "  dotfiles setup --status      # Show setup progress"
