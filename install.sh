@@ -5,9 +5,9 @@
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
 #
-# Or with options:
-#   curl -fsSL ... | bash -s -- --interactive
-#   curl -fsSL ... | bash -s -- --minimal
+# Or with options (download first):
+#   curl -fsSL ... -o install.sh && bash install.sh --interactive
+#   curl -fsSL ... -o install.sh && bash install.sh --minimal
 #
 # ============================================================
 set -euo pipefail
@@ -53,7 +53,9 @@ while [[ $# -gt 0 ]]; do
         --help|-h)
             echo "Dotfiles Installer"
             echo ""
-            echo "Usage: curl -fsSL <url> | bash -s -- [OPTIONS]"
+            echo "Usage:"
+            echo "  curl -fsSL <url> | bash                         # Default install"
+            echo "  curl -fsSL <url> -o install.sh && bash install.sh [OPTIONS]"
             echo ""
             echo "Options:"
             echo "  --interactive, -i    Prompt for configuration options"

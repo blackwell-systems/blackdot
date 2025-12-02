@@ -753,17 +753,14 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 # Default install (one-liner)
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
 
-# With options (download first, then run)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh -o install.sh
-
-# Interactive mode
-bash install.sh --interactive
+# Interactive mode (download first)
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh -o install.sh && bash install.sh --interactive
 
 # Minimal mode (no vault, no Claude)
-bash install.sh --minimal
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh -o install.sh && bash install.sh --minimal
 
 # Clone via SSH
-bash install.sh --ssh
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh -o install.sh && bash install.sh --ssh
 ```
 
 ---
