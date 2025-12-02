@@ -98,7 +98,7 @@ dotfiles/
 │   ├── dotfiles-drift      # Vault comparison
 │   ├── dotfiles-diff       # Preview changes
 │   ├── dotfiles-backup     # Backup/restore
-│   ├── dotfiles-init       # Setup wizard
+│   ├── dotfiles-setup      # Setup wizard
 │   ├── dotfiles-uninstall  # Clean removal
 │   └── dotfiles-metrics    # Show metrics
 │
@@ -121,7 +121,7 @@ dotfiles/
 │
 ├── vault/
 │   ├── _common.sh          # Shared definitions
-│   ├── bootstrap-vault.sh  # Restore secrets
+│   ├── restore.sh          # Restore secrets
 │   ├── sync-to-vault.sh
 │   └── restore-*.sh        # Category restores
 │

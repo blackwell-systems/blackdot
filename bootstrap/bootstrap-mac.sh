@@ -84,7 +84,8 @@ link_dotfiles
 # Done
 # ============================================================
 echo "=== macOS bootstrap complete ==="
-echo "Next:"
-echo "  - Open Ghostty and confirm Meslo Nerd Font is selected."
-echo "  - Clone your repos into ~/workspace (whitepapers, patent-pool, etc.)."
-echo "  - Use 'cd /workspace/...' for Claude (optional: enables cross-machine sessions)."
+echo ""
+echo "Next step:"
+echo "  dotfiles setup"
+echo ""
+echo "This will configure your vault backend and restore secrets."

@@ -122,7 +122,7 @@ Commands with ASCII art banner via `awstools`:
 │   ├── dotfiles-drift    # Drift detection (use: dotfiles drift)
 │   ├── dotfiles-backup   # Backup/restore
 │   ├── dotfiles-diff     # Preview changes
-│   ├── dotfiles-init     # Setup wizard
+│   ├── dotfiles-setup    # Setup wizard
 │   └── dotfiles-uninstall # Clean removal
 ├── claude/               # Claude Code settings + commands
 ├── docs/                 # Documentation (incl. this file)
