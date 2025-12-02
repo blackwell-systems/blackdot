@@ -63,7 +63,7 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 ```
 
 Options:
-- `--minimal` - Skip optional features (vault, Claude setup)
+- `--minimal` - Shell config only (skips `/workspace` symlink, vault setup, Claude integration). Run `dotfiles setup` later to enable.
 - `--ssh` - Clone using SSH instead of HTTPS
 
 After installation, run `dotfiles setup` for interactive configuration.

@@ -518,11 +518,27 @@ The install script clones the repository and runs bootstrap. Then `dotfiles setu
 
 Progress is saved—resume anytime if interrupted.
 
-**Minimal mode** (skip vault and optional features):
+**Minimal mode** (shell config only, no secrets integration):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
 ```
+
+<details>
+<summary><b>What minimal mode skips</b></summary>
+
+| Feature | Skipped | How to add later |
+|---------|---------|------------------|
+| `/workspace` symlink | Yes | `sudo ln -s ~/workspace /workspace` |
+| Claude Code integration | Yes | `dotfiles setup` (select Claude phase) |
+| Vault setup wizard | Yes | `dotfiles setup` |
+| Secret restoration | Yes | `dotfiles vault restore` |
+
+**You still get:** Zsh + Powerlevel10k, all CLI tools (eza, fzf, ripgrep, etc.), aliases, functions, and the `dotfiles` command.
+
+**To enable full features later:** Simply run `dotfiles setup` anytime.
+
+</details>
 
 ---
 
