@@ -55,6 +55,7 @@ ${CYAN}COMMANDS${NC}
     vars              List all template variables and values
     edit              Open _variables.local.sh in editor
     link              Create symlinks from generated files to destinations
+    arrays            Manage JSON/shell arrays for {{#each}} loops
     help              Show this help message
 
 ${CYAN}OPTIONS${NC}
@@ -62,6 +63,10 @@ ${CYAN}OPTIONS${NC}
     --force, -f       Force re-render even if up to date
     --verbose, -v     Show detailed output
     --quiet, -q       Minimal output
+
+${CYAN}ARRAYS OPTIONS${NC}
+    --export-json, -e Export shell arrays to JSON format
+    --validate, -v    Validate JSON arrays file syntax
 
 ${CYAN}EXAMPLES${NC}
     # First-time setup
@@ -79,6 +84,15 @@ ${CYAN}EXAMPLES${NC}
     # Override a variable for one render
     DOTFILES_TMPL_GIT_EMAIL="other@example.com" dotfiles template render
 
+    # View loaded arrays (from JSON or shell)
+    dotfiles template arrays
+
+    # Export shell arrays to JSON format
+    dotfiles template arrays --export-json
+
+    # Validate JSON arrays file
+    dotfiles template arrays --validate
+
 ${CYAN}TEMPLATE SYNTAX${NC}
     {{ variable }}              Variable substitution
     {{#if variable }}...{{/if}} Conditional block
@@ -88,6 +102,7 @@ ${CYAN}TEMPLATE SYNTAX${NC}
 ${CYAN}FILES${NC}
     templates/_variables.sh         Default variable definitions
     templates/_variables.local.sh   Machine-specific overrides (gitignored)
+    templates/_arrays.local.json    JSON arrays for {{#each}} loops (gitignored)
     templates/configs/*.tmpl        Template files
     generated/*                     Rendered output (gitignored)
 
@@ -337,6 +352,51 @@ cmd_list() {
     done
 }
 
+# Show/manage arrays
+cmd_arrays() {
+    local export_json=false
+    local validate=false
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --export-json|-e) export_json=true ;;
+            --validate|-v) validate=true ;;
+            *) ;;
+        esac
+        shift
+    done
+
+    if [[ "$export_json" == "true" ]]; then
+        # Export current shell arrays to JSON
+        export_arrays_to_json
+        return
+    fi
+
+    if [[ "$validate" == "true" ]]; then
+        local json_file="$TEMPLATES_DIR/_arrays.local.json"
+        if [[ ! -f "$json_file" ]]; then
+            info "No JSON arrays file found: $json_file"
+            return 0
+        fi
+        if jq -e '.' "$json_file" &>/dev/null; then
+            pass "Valid JSON: $json_file"
+            # Show structure
+            jq -r 'keys[]' "$json_file" | while read -r key; do
+                local count=$(jq -r ".$key | length" "$json_file")
+                print "  • $key: $count items"
+            done
+            return 0
+        else
+            fail "Invalid JSON: $json_file"
+            jq '.' "$json_file" 2>&1 | head -5
+            return 1
+        fi
+    fi
+
+    # Default: list arrays
+    list_template_arrays
+}
+
 # ============================================================
 # Main
 # ============================================================
@@ -368,6 +428,9 @@ main() {
             ;;
         list|ls)
             cmd_list "$@"
+            ;;
+        arrays)
+            cmd_arrays "$@"
             ;;
         help|-h|--help)
             usage

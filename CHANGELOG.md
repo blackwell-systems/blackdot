@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Template JSON Arrays** - `{{#each}}` loops now support JSON configuration
+  - New `templates/_arrays.local.json` for cleaner array definitions
+  - `dotfiles template arrays` command to view/manage arrays
+  - `dotfiles template arrays --export-json` exports shell arrays to JSON format
+  - `dotfiles template arrays --validate` validates JSON syntax
+  - Falls back to shell arrays if no JSON file present
+- **Docker Container Taxonomy** - Multiple container sizes for different needs
+  - `Dockerfile.extralite` (~50MB) - Ultra-minimal for quick exploration
+  - `Dockerfile.lite` (~250MB) - Lightweight with vault CLI support (Bitwarden, 1Password, pass)
+  - `Dockerfile.medium` (~400MB) - Ubuntu with Homebrew for full dotfiles functionality
+  - Added Powerlevel10k shell theme to lite container
+  - New `docs/docker.md` documenting all container options
+- **Minimal Mode Documentation** - Clarified what `--minimal` skips and how to enable features later
+
+### Fixed
+- **Bitwarden CLI in Alpine** - Switched to standalone binary to fix ESM compatibility issues
+- **Container bootstrap directory** - Fixed missing bootstrap/ in Docker containers
+
 ## [2.0.1] - 2025-12-02
 
 ### Added

@@ -45,6 +45,8 @@ dotfiles/
 │   ├── _variables.sh           # Default variable definitions
 │   ├── _variables.local.sh     # Your machine-specific overrides (gitignored)
 │   ├── _variables.local.sh.example  # Example to copy from
+│   ├── _arrays.local.json      # JSON arrays for {{#each}} loops (gitignored)
+│   ├── _arrays.local.json.example  # Example JSON arrays
 │   └── configs/                # Template files
 │       ├── gitconfig.tmpl      # → ~/.gitconfig
 │       ├── 99-local.zsh.tmpl   # → zsh/zsh.d/99-local.zsh
@@ -194,6 +196,33 @@ Available Templates
   ssh-config                ✗ not generated
 ```
 
+### `dotfiles template arrays`
+
+Manage JSON/shell arrays for `{{#each}}` loops:
+
+```bash
+# View loaded arrays and their source
+dotfiles template arrays
+
+# Validate JSON arrays file syntax
+dotfiles template arrays --validate
+
+# Export shell arrays to JSON format
+dotfiles template arrays --export-json
+```
+
+Output example:
+```
+Template Arrays
+──────────────────────────────────────
+Source: json (templates/_arrays.local.json)
+
+ssh_hosts (3 items):
+  • github | github.com | git | ~/.ssh/id_ed25519
+  • gitlab | gitlab.com | git | ~/.ssh/id_ed25519
+  • work-server | server.company.com | deploy | ~/.ssh/id_work | ProxyJump bastion
+```
+
 ---
 
 ## Template Syntax
@@ -289,6 +318,59 @@ SSH_HOSTS=(
 ```
 
 Conditionals work inside loops - use `{{#if extra }}` to include optional fields only when set.
+
+### JSON Arrays (Recommended)
+
+For cleaner array definitions, use JSON format instead of shell arrays:
+
+**Create `templates/_arrays.local.json`:**
+
+```json
+{
+  "ssh_hosts": [
+    {
+      "name": "github",
+      "hostname": "github.com",
+      "user": "git",
+      "identity": "~/.ssh/id_ed25519"
+    },
+    {
+      "name": "gitlab",
+      "hostname": "gitlab.com",
+      "user": "git",
+      "identity": "~/.ssh/id_ed25519"
+    },
+    {
+      "name": "work-server",
+      "hostname": "server.company.com",
+      "user": "deploy",
+      "identity": "~/.ssh/id_work",
+      "extra": "ProxyJump bastion"
+    }
+  ]
+}
+```
+
+**Benefits of JSON arrays:**
+- Easier to read and maintain
+- No shell escaping issues
+- Can be validated with standard JSON tools
+- Optional fields can be omitted entirely
+
+**Managing arrays:**
+
+```bash
+# View loaded arrays (shows source: JSON or shell)
+dotfiles template arrays
+
+# Validate JSON syntax
+dotfiles template arrays --validate
+
+# Export existing shell arrays to JSON format
+dotfiles template arrays --export-json
+```
+
+The template system automatically prefers JSON arrays if `_arrays.local.json` exists and `jq` is available. Falls back to shell arrays otherwise.
 
 ### Available Variables
 
