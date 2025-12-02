@@ -36,7 +36,8 @@ The unified command for managing your dotfiles. All subcommands are accessed via
 | `lint` | - | Validate shell config syntax |
 | `packages` | `pkg` | Check/install Brewfile packages |
 | `metrics` | - | Visualize health check metrics over time |
-| `init` | - | First-time setup wizard |
+| `setup` | - | Interactive setup wizard |
+| `macos` | - | macOS system settings (macOS only) |
 | `upgrade` | `update` | Pull latest and run bootstrap |
 | `uninstall` | - | Remove dotfiles configuration |
 | `cd` | - | Change to dotfiles directory |
@@ -619,25 +620,33 @@ dotfiles update          # Alias
 
 ---
 
-### `dotfiles init`
+### `dotfiles setup`
 
-Interactive first-time setup wizard. **Use this after cloning the repository** for guided setup.
+Interactive setup wizard with persistent state. **Use this after bootstrap** for guided configuration.
 
 ```bash
-dotfiles init
+dotfiles setup [OPTIONS]
 ```
 
-**What it does:**
-1. **Checks current state** - Detects if already initialized
-2. **Runs bootstrap** - Creates symlinks, installs packages
-3. **Vault selection** - Auto-detects installed vault CLIs (Bitwarden, 1Password, pass)
-   - Prompts you to choose which vault to use
-   - Option to skip vault entirely (manual secret config)
-   - Never auto-selects - you always choose
-4. **Vault authentication** - Guides login/unlock for selected backend
-5. **Secret restoration** - Restores SSH keys, AWS creds, Git config from vault
-6. **Claude Code setup** - Optionally installs dotclaude for profile management
-7. **Health check** - Verifies everything is configured correctly
+**Options:**
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--status` | `-s` | Show current setup progress only |
+| `--reset` | `-r` | Reset state and re-run from beginning |
+| `--help` | `-h` | Show help |
+
+**Setup phases:**
+1. **Symlinks** - Creates shell configuration symlinks
+2. **Packages** - Installs Homebrew packages from Brewfile
+3. **Vault** - Selects and authenticates vault backend
+4. **Secrets** - Restores SSH keys, AWS creds, Git config
+5. **Claude Code** - Optionally installs dotclaude for profile management
+
+**Features:**
+- **Progress persistence** - Saves state to `~/.config/dotfiles/`
+- **Resume support** - Continue where you left off if interrupted
+- **State inference** - Detects existing installations automatically
 
 **Vault backend support:**
 - **Bitwarden** (`bw`) - Handles login + unlock flow
@@ -645,8 +654,13 @@ dotfiles init
 - **pass** - Checks GPG agent access
 - **None** - Skip vault, configure secrets manually
 
-**Environment variables:**
-- `DOTFILES_VAULT_BACKEND` - Pre-select backend (skips prompt)
+**Examples:**
+
+```bash
+dotfiles setup              # Run interactive wizard
+dotfiles setup --status     # Check progress
+dotfiles setup --reset      # Start over
+```
 
 ---
 
@@ -702,6 +716,104 @@ dotfiles metrics --all        # All entries
 
 ---
 
+## macOS Commands
+
+### `dotfiles macos`
+
+Manage macOS system preferences (macOS only).
+
+```bash
+dotfiles macos <command>
+```
+
+**Subcommands:**
+
+| Command | Description |
+|---------|-------------|
+| `apply` | Apply settings from `macos/settings.sh` |
+| `preview` | Dry-run mode - show what would be changed |
+| `discover` | Capture current macOS settings |
+| `help` | Show help |
+
+---
+
+### `dotfiles macos apply`
+
+Apply macOS system preferences from `settings.sh`.
+
+```bash
+dotfiles macos apply [OPTIONS]
+```
+
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `--backup` | Backup current settings before applying |
+
+**Settings applied:**
+- Trackpad (tap to click, tracking speed, three-finger drag)
+- Keyboard (fast key repeat, disable auto-correct)
+- Dock (auto-hide, size, no recent apps)
+- Finder (show extensions, hidden files, path bar)
+- Screenshots (location, format, no shadow)
+- Security (password on wake, disable crash reporter)
+
+**Example:**
+
+```bash
+dotfiles macos apply          # Apply all settings
+dotfiles macos apply --backup # Backup first, then apply
+```
+
+---
+
+### `dotfiles macos preview`
+
+Show what settings would be changed without making changes.
+
+```bash
+dotfiles macos preview
+```
+
+Same as `dotfiles macos apply --dry-run`.
+
+---
+
+### `dotfiles macos discover`
+
+Discover and capture current macOS settings.
+
+```bash
+dotfiles macos discover [OPTIONS]
+```
+
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `--snapshot` | Take a snapshot of current settings |
+| `--diff` | Compare current settings to last snapshot |
+| `--generate` | Generate `settings.sh` from current preferences |
+| `--domain <name>` | Show settings for specific domain |
+| `--list-domains` | List all preference domains |
+| `--all` | Dump all tracked domains |
+
+**Examples:**
+
+```bash
+# Discover workflow
+dotfiles macos discover --snapshot   # Take snapshot
+# Make changes in System Preferences
+dotfiles macos discover --diff       # See what changed
+dotfiles macos discover --generate   # Generate settings.sh
+
+# Inspect specific domain
+dotfiles macos discover --domain com.apple.dock
+```
+
+---
+
 ## Navigation Commands
 
 ### `dotfiles cd`
@@ -742,19 +854,19 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 
 | Option | Short | Description |
 |--------|-------|-------------|
-| `--interactive` | `-i` | Prompt for configuration options |
 | `--minimal` | `-m` | Skip optional features (vault, Claude setup) |
 | `--ssh` | - | Clone using SSH instead of HTTPS |
 | `--help` | `-h` | Show help |
+
+**After installation:**
+
+Run `dotfiles setup` for interactive configuration of vault, secrets, and Claude Code.
 
 **Examples:**
 
 ```bash
 # Default install (one-liner)
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
-
-# Interactive mode (download first)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh -o install.sh && bash install.sh --interactive
 
 # Minimal mode (no vault, no Claude)
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh -o install.sh && bash install.sh --minimal
@@ -915,6 +1027,64 @@ Most commands follow these conventions:
 | `vault/.vault-session` | Cached vault session |
 | `templates/_variables.local.sh` | Local template overrides |
 | `generated/` | Rendered templates |
+| `~/.config/dotfiles/state.ini` | Setup wizard phase completion state |
+| `~/.config/dotfiles/config.ini` | User configuration (vault backend, etc.) |
+
+---
+
+## State Management
+
+The `dotfiles setup` wizard uses persistent state files to track progress. See [State Management](state-management.md) for full documentation.
+
+### State Files
+
+#### `~/.config/dotfiles/state.ini`
+
+Tracks which setup phases have been completed:
+
+```ini
+[phases]
+symlinks = complete
+packages = complete
+vault = complete
+secrets = complete
+claude = complete
+```
+
+**Phases:**
+- `symlinks` - Shell configuration symlinks created
+- `packages` - Homebrew packages installed
+- `vault` - Vault backend selected and authenticated
+- `secrets` - Secrets restored from vault
+- `claude` - Claude Code integration configured
+
+#### `~/.config/dotfiles/config.ini`
+
+Stores user configuration:
+
+```ini
+[vault]
+backend = bitwarden
+```
+
+**Settings:**
+- `vault.backend` - Preferred vault backend (`bitwarden`, `1password`, `pass`, or `none`)
+
+### State Commands
+
+```bash
+dotfiles setup --status    # Show current setup state
+dotfiles setup --reset     # Reset state and re-run setup
+```
+
+### State Inference
+
+If state files don't exist, `dotfiles setup` infers state from the filesystem:
+- Symlinks: Checks if `~/.zshrc` points to dotfiles
+- Packages: Checks if Homebrew is installed
+- Vault: Checks for vault CLI and credentials
+- Secrets: Checks for `~/.ssh/config`, `~/.gitconfig`
+- Claude: Checks if Claude CLI is installed
 
 ---
 
@@ -1239,5 +1409,6 @@ dotfiles-upgrade
 - [Full Documentation](README-FULL.md) - Complete guide
 - [Vault System](vault-README.md) - Multi-backend secret management
 - [Template System](templates.md) - Machine-specific configuration
+- [State Management](state-management.md) - Setup wizard state and resume
 - [Claude Code Integration](claude-code.md) - Portable sessions & safety hooks
 - [Troubleshooting](troubleshooting.md) - Common issues and solutions

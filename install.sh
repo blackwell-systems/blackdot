@@ -5,9 +5,10 @@
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
 #
-# Or with options (download first):
-#   curl -fsSL ... -o install.sh && bash install.sh --interactive
-#   curl -fsSL ... -o install.sh && bash install.sh --minimal
+# After installation, run 'dotfiles setup' to configure vault and secrets.
+#
+# Options:
+#   --minimal    Skip optional features (vault, Claude setup)
 #
 # ============================================================
 set -euo pipefail
@@ -32,16 +33,11 @@ REPO_SSH="git@github.com:blackwell-systems/dotfiles.git"
 INSTALL_DIR="$HOME/workspace/dotfiles"
 
 # Parse arguments
-INTERACTIVE=false
 MINIMAL=false
 USE_SSH=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --interactive|-i)
-            INTERACTIVE=true
-            shift
-            ;;
         --minimal|-m)
             MINIMAL=true
             shift
@@ -58,10 +54,11 @@ while [[ $# -gt 0 ]]; do
             echo "  curl -fsSL <url> -o install.sh && bash install.sh [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  --interactive, -i    Prompt for configuration options"
             echo "  --minimal, -m        Skip optional features (vault, Claude setup)"
             echo "  --ssh                Clone using SSH instead of HTTPS"
             echo "  --help, -h           Show this help"
+            echo ""
+            echo "After installation, run 'dotfiles setup' to configure your environment."
             exit 0
             ;;
         *)
@@ -149,37 +146,19 @@ fi
 
 cd "$INSTALL_DIR"
 
-# Build bootstrap arguments
-BOOTSTRAP_ARGS=""
-
 if $MINIMAL; then
     export SKIP_WORKSPACE_SYMLINK=true
     export SKIP_CLAUDE_SETUP=true
     info "Minimal mode: skipping optional features"
 fi
 
-if $INTERACTIVE; then
-    BOOTSTRAP_ARGS="--interactive"
-fi
-
 # Run bootstrap
 info "Running bootstrap script..."
 echo ""
 
-# Note: BOOTSTRAP_ARGS is intentionally unquoted to allow word splitting for multiple flags
-# shellcheck disable=SC2086
-./"$BOOTSTRAP_SCRIPT" $BOOTSTRAP_ARGS
+./"$BOOTSTRAP_SCRIPT"
 
-# If interactive mode, run the setup wizard
-if $INTERACTIVE && ! $MINIMAL; then
-    echo ""
-    info "Running interactive setup wizard..."
-    echo ""
-    ./bin/dotfiles-init
-    exit 0
-fi
-
-# Success message (non-interactive mode)
+# Success message
 echo ""
 echo -e "${GREEN}${BOLD}╔════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}${BOLD}║              Installation Complete!                        ║${NC}"
@@ -187,18 +166,12 @@ echo -e "${GREEN}${BOLD}╚═════════════════�
 echo ""
 
 if ! $MINIMAL; then
-    echo "Next steps:"
+    echo "Next step:"
     echo ""
-    echo "  1. Complete setup with the interactive wizard:"
-    echo -e "     ${CYAN}dotfiles init${NC}"
+    echo "  Run the setup wizard to configure vault and restore secrets:"
+    echo -e "     ${CYAN}dotfiles setup${NC}"
     echo ""
-    echo "  Or manually restore secrets from vault:"
-    echo -e "     ${CYAN}# Bitwarden: bw login && export BW_SESSION=\"\$(bw unlock --raw)\"${NC}"
-    echo -e "     ${CYAN}# 1Password: op signin${NC}"
-    echo -e "     ${CYAN}# pass: (uses GPG, no login needed)${NC}"
-    echo -e "     ${CYAN}dotfiles vault restore${NC}"
-    echo ""
-    echo "  2. Verify installation:"
+    echo "  Then verify installation:"
     echo -e "     ${CYAN}dotfiles doctor${NC}"
 else
     echo "Next steps (minimal mode):"

@@ -112,25 +112,18 @@ fi
 # ============================================================
 echo "=== Linux bootstrap complete ($PLATFORM_NAME) ==="
 echo ""
-echo "Next steps:"
-echo "  - Open a new shell to use zsh + Powerlevel10k"
-echo "  - Use 'cd /workspace/...' for Claude (optional: enables cross-machine sessions)"
+echo "Next step:"
+echo "  dotfiles setup"
+echo ""
+echo "This will configure your vault backend and restore secrets."
 echo ""
 
 if $IS_WSL; then
-    echo "WSL-specific:"
+    echo "WSL-specific tips:"
     echo "  - Windows clipboard works via clip.exe (already configured in zshrc)"
     echo "  - Access Windows files: /mnt/c/Users/..."
-    echo "  - Open files in Windows: explorer.exe . (or use wslview)"
-    echo ""
 elif $IS_LIMA; then
-    echo "Lima-specific:"
+    echo "Lima-specific tips:"
     echo "  - macOS home mounted at ~/workspace (writable)"
-    echo "  - Files are shared between macOS and Lima"
     echo "  - Use lima-dev/lima-start/lima-stop aliases from macOS"
-    echo ""
 fi
-
-echo "To restore secrets from Bitwarden:"
-echo "  bw login && export BW_SESSION=\"\$(bw unlock --raw)\""
-echo "  dotfiles vault restore"

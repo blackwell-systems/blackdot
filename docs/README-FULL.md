@@ -63,9 +63,10 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 ```
 
 Options:
-- `--interactive` - Prompt for configuration choices
 - `--minimal` - Skip optional features (vault, Claude setup)
 - `--ssh` - Clone using SSH instead of HTTPS
+
+After installation, run `dotfiles setup` for interactive configuration.
 
 ### Manual Install
 
@@ -74,11 +75,15 @@ Options:
 git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
-# 2. Run interactive setup wizard
-dotfiles init
+# 2. Run platform bootstrap
+./bootstrap/bootstrap-mac.sh   # macOS
+./bootstrap/bootstrap-linux.sh # Linux/WSL
+
+# 3. Run interactive setup wizard
+dotfiles setup
 ```
 
-**That's it!** The wizard handles platform detection, vault selection, and secret restoration.
+**That's it!** The wizard handles platform detection, vault selection, and secret restoration. Progress is saved—resume anytime if interrupted.
 
 **Alternative (non-interactive):**
 ```bash
@@ -131,8 +136,8 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 ├── .gitignore                          # Excludes .bw-session, secrets, temp files
 │
 ├── bootstrap/                          # Platform bootstrap scripts
-│   ├── bootstrap-mac.sh                # macOS-specific bootstrap (--interactive)
-│   ├── bootstrap-linux.sh              # Linux-specific bootstrap (--interactive)
+│   ├── bootstrap-mac.sh                # macOS-specific bootstrap
+│   ├── bootstrap-linux.sh              # Linux-specific bootstrap
 │   ├── bootstrap-dotfiles.sh           # Shared symlink bootstrap
 │   └── _common.sh                      # Shared bootstrap functions
 │
@@ -142,7 +147,7 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 │   ├── dotfiles-diff                   # Preview changes before applying
 │   ├── dotfiles-doctor                 # Health check validation
 │   ├── dotfiles-drift                  # Detect config drift from repo
-│   ├── dotfiles-init                   # Interactive setup wizard
+│   ├── dotfiles-setup                  # Interactive setup wizard
 │   ├── dotfiles-lint                   # Lint shell scripts for errors
 │   ├── dotfiles-metrics                # Collect system metrics
 │   ├── dotfiles-packages               # List/validate installed packages
@@ -162,6 +167,12 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 │
 ├── ghostty/                            # Ghostty terminal configuration
 │   └── config                          # Ghostty settings
+│
+├── lib/                                # Shared libraries
+│   ├── _logging.sh                     # Logging functions (info, pass, warn, fail)
+│   ├── _state.sh                       # Setup wizard state management
+│   ├── _vault.sh                       # Multi-backend vault abstraction
+│   └── _templates.sh                   # Template engine
 │
 ├── lima/                               # Lima VM configuration
 │   └── lima.yaml                       # Lima VM definition (host-side)
@@ -183,7 +194,7 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 │   │   ├── bitwarden.sh                # Bitwarden CLI integration
 │   │   ├── 1password.sh                # 1Password CLI integration
 │   │   └── pass.sh                     # pass (GPG) integration
-│   ├── bootstrap-vault.sh              # Orchestrates all vault restores
+│   ├── restore.sh                      # Orchestrates all vault restores
 │   ├── check-vault-items.sh            # Validates required vault items exist
 │   ├── create-vault-item.sh            # Creates new vault secure notes
 │   ├── delete-vault-item.sh            # Deletes items from vault (with safety)
@@ -632,38 +643,42 @@ There are two big pillars:
 
    Handled by:
 
-   - `vault/bootstrap-vault.sh`
+   - `vault/restore.sh`
    - `vault/restore-ssh.sh`
    - `vault/restore-aws.sh`
    - `vault/restore-env.sh`
 
    Goal: restore **SSH keys**, **AWS config/credentials**, and **env secrets** from your vault (Bitwarden, 1Password, or pass).
 
-### Interactive Mode
+### Setup Wizard
 
-Both bootstrap scripts support an interactive mode that guides you through configuration choices:
+After bootstrap, run the interactive setup wizard for full configuration:
 
 ```bash
-./bootstrap/bootstrap-mac.sh --interactive
-./bootstrap/bootstrap-linux.sh --interactive
+dotfiles setup
 ```
 
-Interactive mode prompts for:
-- **Workspace symlink**: Enable `/workspace` symlink for portable Claude sessions?
-- **Claude setup**: Configure Claude Code integration?
+The wizard handles:
+- **Symlinks**: Shell configuration files
+- **Packages**: Homebrew packages from Brewfile
+- **Vault**: Select and authenticate vault backend (Bitwarden, 1Password, pass)
+- **Secrets**: Restore SSH keys, AWS credentials, Git config
+- **Claude Code**: Optional dotclaude installation
 
-You can also use environment variables instead:
+**Progress is saved** to `~/.config/dotfiles/`. If interrupted, run `dotfiles setup` again to resume. See [State Management](state-management.md) for details on state files and persistence.
+
+You can skip optional features using environment variables:
 
 ```bash
-# Skip optional features
+# Skip optional features during bootstrap
 SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
 ```
 
-Use `--help` to see all available options:
+Use `--help` to see available options:
 
 ```bash
+dotfiles setup --help
 ./bootstrap/bootstrap-mac.sh --help
-./bootstrap/bootstrap-linux.sh --help
 ```
 
 ### Architecture Diagram
@@ -674,7 +689,7 @@ flowchart TB
 
     subgraph setup["Setup Phase"]
         bootstrap["Bootstrap<br/><small>bootstrap-mac/linux.sh</small><br/>Install packages, tools, shell"]
-        restore["Restore Secrets<br/><small>bootstrap-vault.sh</small><br/>SSH, AWS, Git, env"]
+        restore["Restore Secrets<br/><small>restore.sh</small><br/>SSH, AWS, Git, env"]
         verify["Health Check<br/><small>dotfiles doctor</small><br/>Verify installation"]
     end
 
@@ -1054,10 +1069,10 @@ export DOTFILES_VAULT_BACKEND=1password  # or 'pass'
 
 ```bash
 cd ~/workspace/dotfiles/vault
-./bootstrap-vault.sh
+./restore.sh
 ```
 
-`bootstrap-vault.sh` will:
+`restore.sh` will:
 
 - Initialize the configured vault backend
 - Check/prompt for vault unlock
@@ -1140,7 +1155,7 @@ The script writes to `~/.gitconfig` (backing up any existing file) and sets perm
 
 ## Validating Vault Items Before Restore
 
-Before running `bootstrap-vault.sh` on a new machine, you can verify all required vault items exist:
+Before running `restore.sh` on a new machine, you can verify all required vault items exist:
 
 ```bash
 ./vault/check-vault-items.sh
@@ -1162,7 +1177,7 @@ Example output:
 
 ========================================
 All required vault items present!
-You can safely run: ./bootstrap-vault.sh
+You can safely run: ./restore.sh
 ```
 
 If items are missing, the script will tell you which ones and exit with an error.
@@ -1171,7 +1186,7 @@ If items are missing, the script will tell you which ones and exit with an error
 
 ## One-Time: Push Current Files into Vault
 
-Run these commands **once** on a configured machine to populate your vault, enabling future machines to restore via `bootstrap-vault.sh`.
+Run these commands **once** on a configured machine to populate your vault, enabling future machines to restore via `restore.sh`.
 
 For Bitwarden, this can also be done manually in the GUI. CLI commands are provided for automation and reproducibility.
 
@@ -2079,7 +2094,7 @@ brew install shellcheck
 shellcheck bootstrap-*.sh vault/*.sh dotfiles-*.sh
 
 # Check specific script
-shellcheck vault/bootstrap-vault.sh
+shellcheck vault/restore.sh
 ```
 
 ### Status Badges
@@ -2258,7 +2273,7 @@ source ~/.local/load-env.sh
 echo $SOME_EXPECTED_VAR
 
 # If missing, re-run vault restore
-./vault/bootstrap-vault.sh
+./vault/restore.sh
 ```
 
 ---

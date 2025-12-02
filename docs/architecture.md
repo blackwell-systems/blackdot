@@ -49,9 +49,10 @@ graph LR
     B --> E[vault]
     B --> F[backup]
     B --> G[diff]
-    B --> H[init]
+    B --> H[setup]
     B --> I[upgrade]
     B --> J[uninstall]
+    B --> K[macos]
 
     E --> E1[restore]
     E --> E2[sync]
@@ -98,7 +99,7 @@ dotfiles/
 │   ├── dotfiles-drift      # Vault comparison
 │   ├── dotfiles-diff       # Preview changes
 │   ├── dotfiles-backup     # Backup/restore
-│   ├── dotfiles-init       # Setup wizard
+│   ├── dotfiles-setup      # Setup wizard
 │   ├── dotfiles-uninstall  # Clean removal
 │   └── dotfiles-metrics    # Show metrics
 │
@@ -119,9 +120,15 @@ dotfiles/
 │       ├── 80-tools.zsh
 │       └── 90-local.zsh
 │
+├── lib/                    # Shared libraries
+│   ├── _logging.sh         # Logging functions
+│   ├── _state.sh           # Setup state management
+│   ├── _vault.sh           # Vault abstraction layer
+│   └── _templates.sh       # Template engine
+│
 ├── vault/
 │   ├── _common.sh          # Shared definitions
-│   ├── bootstrap-vault.sh  # Restore secrets
+│   ├── restore.sh          # Restore secrets
 │   ├── sync-to-vault.sh
 │   └── restore-*.sh        # Category restores
 │
@@ -271,7 +278,7 @@ graph TB
 | Flow | Source | Destination | Command |
 |------|--------|-------------|---------|
 | Install | GitHub | Local | `curl ... \| bash` |
-| Bootstrap | Scripts | System | `dotfiles init` |
+| Bootstrap | Scripts | System | `dotfiles setup` |
 | Restore | Bitwarden | Local | `dotfiles vault restore` |
 | Sync | Local | Bitwarden | `dotfiles vault sync` |
 | Backup | Config | Archive | `dotfiles backup` |

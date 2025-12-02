@@ -35,10 +35,10 @@ If you use Claude Code across multiple machines, this is the only dotfiles solut
 <summary><b>Interactive Setup Wizard</b> - One command, complete setup</summary>
 
 ```bash
-dotfiles init  # Guides you through everything
+dotfiles setup  # Guides you through everything
 ```
 
-Auto-detects your platform (macOS, Linux, WSL2), detects available vault CLIs (Bitwarden, 1Password, pass), prompts you to choose. Option to skip vault entirely for minimal setups. One command handles bootstrap, vault selection, secret restoration, and health validation.
+Auto-detects your platform (macOS, Linux, WSL2), detects available vault CLIs (Bitwarden, 1Password, pass), prompts you to choose. Option to skip vault entirely for minimal setups. One command handles bootstrap, vault selection, secret restoration, and health validation. Progress is saved—resume anytime if interrupted.
 </details>
 
 <details>
@@ -506,24 +506,21 @@ exit                 # Container auto-deletes
 
 ## One-Line Install
 
-**Recommended (interactive setup):**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --interactive
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
 ```
 
-This launches the setup wizard which:
-- Auto-detects your platform (macOS, Linux, WSL2)
-- Detects available vault CLIs (Bitwarden, 1Password, pass)
-- Prompts you to choose your vault (or skip)
-- Restores secrets and validates setup
+The install script clones the repository and runs bootstrap. Then `dotfiles setup` guides you through:
+- Platform detection and configuration
+- Vault selection (Bitwarden, 1Password, pass, or skip)
+- Secret restoration (SSH keys, AWS, Git config)
+- Claude Code integration
 
-**Other install options:**
+Progress is saved—resume anytime if interrupted.
+
+**Minimal mode** (skip vault and optional features):
 
 ```bash
-# Default (non-interactive)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
-
-# Minimal mode - skip vault and optional features
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
 ```
 
@@ -536,8 +533,12 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
-# 2. Run interactive setup wizard
-dotfiles init
+# 2. Run platform bootstrap
+./bootstrap/bootstrap-mac.sh   # macOS
+./bootstrap/bootstrap-linux.sh # Linux/WSL
+
+# 3. Run interactive setup wizard
+dotfiles setup
 ```
 
 **That's it!** The wizard handles:
@@ -796,7 +797,7 @@ dotfiles vault list      # List vault items
 dotfiles vault check     # Validate vault items exist
 
 # Setup & Maintenance
-dotfiles init            # First-time setup wizard
+dotfiles setup           # Interactive setup wizard (with resume)
 dotfiles upgrade         # Pull latest, run bootstrap, verify
 dotfiles uninstall       # Clean removal (with --dry-run option)
 dotfiles lint            # Validate shell config syntax
@@ -902,7 +903,7 @@ dotfiles/
 │   ├── dotfiles-drift        # Drift detection
 │   ├── dotfiles-backup       # Backup/restore
 │   ├── dotfiles-diff         # Preview changes
-│   ├── dotfiles-init         # Setup wizard
+│   ├── dotfiles-setup        # Setup wizard
 │   ├── dotfiles-metrics      # Metrics visualization
 │   └── dotfiles-uninstall    # Clean removal
 │
@@ -912,7 +913,7 @@ dotfiles/
 │   │   ├── bitwarden.sh
 │   │   ├── 1password.sh
 │   │   └── pass.sh
-│   ├── bootstrap-vault.sh    # Orchestrator
+│   ├── restore.sh            # Orchestrator
 │   ├── restore-*.sh          # Restore SSH, AWS, Git, env
 │   └── sync-to-vault.sh      # Sync local → vault
 │
@@ -928,6 +929,7 @@ dotfiles/
 │
 ├── lib/                       # Shared libraries
 │   ├── _logging.sh           # Colors and logging
+│   ├── _state.sh             # Setup wizard state management
 │   ├── _templates.sh         # Template engine
 │   └── _vault.sh             # Vault abstraction layer
 │
@@ -1075,6 +1077,7 @@ To customize:
 - **[Full Documentation](docs/README-FULL.md)** - Complete guide (1,900+ lines)
 - **[Vault README](docs/vault-README.md)** - Multi-vault backend details
 - **[Template Guide](docs/templates.md)** - Machine-specific configuration templates
+- **[State Management](docs/state-management.md)** - Setup wizard state, resume, and preferences
 - **[Claude Code Guide](docs/claude-code.md)** - Multi-backend setup and session portability
 - **[dotclaude Integration](docs/DOTCLAUDE-INTEGRATION.md)** - Profile management with dotclaude
 - **[Architecture](docs/architecture.md)** - System diagrams and component overview

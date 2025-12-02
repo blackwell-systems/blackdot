@@ -38,6 +38,7 @@ if [[ -t 1 ]]; then
     MAGENTA='\033[0;35m'
     CYAN='\033[0;36m'
     BOLD='\033[1m'
+    DIM='\033[2m'
     NC='\033[0m'  # No Color
 else
     RED=''
@@ -47,11 +48,12 @@ else
     MAGENTA=''
     CYAN=''
     BOLD=''
+    DIM=''
     NC=''
 fi
 
 # Export for subshells
-export RED GREEN YELLOW BLUE MAGENTA CYAN BOLD NC
+export RED GREEN YELLOW BLUE MAGENTA CYAN BOLD DIM NC
 
 # ============================================================
 # Logging Functions

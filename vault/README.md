@@ -41,7 +41,7 @@ All `dotfiles vault` commands work identically regardless of backend.
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| `bootstrap-vault.sh` | Orchestrates all restores | `dotfiles vault restore` |
+| `restore.sh` | Orchestrates all restores | `dotfiles vault restore` |
 | `restore-ssh.sh` | Restores SSH keys + config | Called by bootstrap |
 | `restore-aws.sh` | Restores AWS config/creds | Called by bootstrap |
 | `restore-env.sh` | Restores env secrets | Called by bootstrap |
@@ -123,7 +123,7 @@ export DOTFILES_VAULT_BACKEND=pass
 
 ## Scripts
 
-### `bootstrap-vault.sh`
+### `restore.sh`
 
 **Main entry point** - orchestrates all secret restoration.
 
@@ -458,7 +458,7 @@ dotfiles vault check
 
 The `.vault-session` file caches your vault session token:
 
-- Created by `bootstrap-vault.sh` with `600` permissions
+- Created by `restore.sh` with `600` permissions
 - Reused if still valid (avoids repeated unlock prompts)
 - Safe to delete - will prompt for unlock again
 

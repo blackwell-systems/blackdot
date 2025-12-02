@@ -265,11 +265,11 @@ teardown() {
 }
 
 # ============================================================
-# Init Wizard Tests (Non-Interactive)
+# Setup Wizard Tests (Non-Interactive)
 # ============================================================
 
-@test "init: script exists and has valid syntax" {
-    run bash -n "$DOTFILES_DIR/bin/dotfiles-init"
+@test "setup: script exists and has valid syntax" {
+    run zsh -n "$DOTFILES_DIR/bin/dotfiles-setup"
 
     [ "$status" -eq 0 ]
 }

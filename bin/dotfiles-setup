@@ -1,0 +1,494 @@
+#!/usr/bin/env zsh
+# ============================================================
+# FILE: bin/dotfiles-setup
+# Unified interactive setup wizard for dotfiles
+# Usage: dotfiles setup [--reset] [--status]
+# ============================================================
+set -uo pipefail
+
+# Determine script location
+SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Source libraries
+source "$DOTFILES_DIR/lib/_logging.sh"
+source "$DOTFILES_DIR/lib/_state.sh"
+source "$DOTFILES_DIR/lib/_vault.sh"
+
+# ============================================================
+# Configuration
+# ============================================================
+
+FORCE_RESET=false
+STATUS_ONLY=false
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --reset|-r)
+            FORCE_RESET=true
+            shift
+            ;;
+        --status|-s)
+            STATUS_ONLY=true
+            shift
+            ;;
+        --help|-h)
+            cat << 'EOF'
+Dotfiles Setup - Unified configuration wizard
+
+Usage: dotfiles setup [OPTIONS]
+
+Options:
+  --status, -s    Show current setup status only
+  --reset, -r     Reset state and re-run setup from beginning
+  --help, -h      Show this help
+
+The setup wizard will:
+  1. Check current configuration status
+  2. Guide you through any pending setup steps
+  3. Save your preferences for future sessions
+
+Your progress is saved automatically. If interrupted, just
+run 'dotfiles setup' again to continue where you left off.
+EOF
+            exit 0
+            ;;
+        *)
+            warn "Unknown option: $1"
+            shift
+            ;;
+    esac
+done
+
+# ============================================================
+# Display Functions
+# ============================================================
+
+show_banner() {
+    echo ""
+    echo -e "${BOLD}${CYAN}"
+    cat << 'EOF'
+    ____        __  _____ __
+   / __ \____  / /_/ __(_) /__  _____
+  / / / / __ \/ __/ /_/ / / _ \/ ___/
+ / /_/ / /_/ / /_/ __/ / /  __(__  )
+/_____/\____/\__/_/ /_/_/\___/____/
+
+              Setup Wizard
+EOF
+    echo -e "${NC}"
+}
+
+show_status() {
+    echo ""
+    echo -e "${BOLD}Current Status:${NC}"
+    echo "───────────────"
+
+    local phases=("symlinks" "packages" "vault" "secrets" "claude")
+    local labels=("Symlinks" "Packages" "Vault" "Secrets" "Claude")
+    local details=("Shell config linked" "Homebrew packages" "Vault backend" "SSH keys, AWS, Git" "Claude Code integration")
+
+    for i in {1..${#phases[@]}}; do
+        local phase="${phases[$i]}"
+        local label="${labels[$i]}"
+        local detail="${details[$i]}"
+
+        if state_completed "$phase"; then
+            echo -e "  ${GREEN}[✓]${NC} $label ${DIM}($detail)${NC}"
+        else
+            echo -e "  ${YELLOW}[ ]${NC} $label ${DIM}($detail)${NC}"
+        fi
+    done
+
+    # Show vault backend if configured
+    local backend=$(config_get "vault" "backend" "")
+    if [[ -n "$backend" ]]; then
+        echo ""
+        echo -e "  ${DIM}Vault backend: $backend${NC}"
+    fi
+
+    echo ""
+}
+
+# ============================================================
+# Setup Phases
+# ============================================================
+
+phase_symlinks() {
+    echo ""
+    echo -e "${BOLD}${CYAN}STEP 1: Symlinks${NC}"
+    echo "─────────────────"
+
+    if state_completed "symlinks"; then
+        pass "Symlinks already configured"
+        return 0
+    fi
+
+    echo "This will link your shell configuration files."
+    echo ""
+    echo "Files to link:"
+    echo "  ~/.zshrc     → $DOTFILES_DIR/zsh/zshrc"
+    echo "  ~/.p10k.zsh  → $DOTFILES_DIR/zsh/p10k.zsh"
+    echo ""
+
+    echo -n "Create symlinks? [Y/n]: "
+    read confirm
+    if [[ "${confirm:-Y}" =~ ^[Nn]$ ]]; then
+        warn "Skipped symlinks"
+        return 1
+    fi
+
+    # Run symlink creation
+    if [[ -f "$DOTFILES_DIR/bootstrap/bootstrap-dotfiles.sh" ]]; then
+        "$DOTFILES_DIR/bootstrap/bootstrap-dotfiles.sh"
+        state_complete "symlinks"
+        pass "Symlinks created"
+    else
+        fail "bootstrap-dotfiles.sh not found"
+        return 1
+    fi
+}
+
+phase_packages() {
+    echo ""
+    echo -e "${BOLD}${CYAN}STEP 2: Packages${NC}"
+    echo "─────────────────"
+
+    if state_completed "packages"; then
+        pass "Packages already installed"
+        return 0
+    fi
+
+    # Check if Homebrew is available
+    if ! command -v brew &>/dev/null; then
+        warn "Homebrew not installed - skipping package installation"
+        echo "Install Homebrew and run 'dotfiles packages' later."
+        return 0
+    fi
+
+    echo "This will install packages from Brewfile."
+    echo ""
+
+    echo -n "Install packages? [Y/n]: "
+    read confirm
+    if [[ "${confirm:-Y}" =~ ^[Nn]$ ]]; then
+        warn "Skipped packages"
+        return 0
+    fi
+
+    info "Running brew bundle..."
+    if (cd "$DOTFILES_DIR" && brew bundle --no-lock); then
+        state_complete "packages"
+        pass "Packages installed"
+    else
+        warn "Some packages may have failed - continuing"
+        state_complete "packages"
+    fi
+}
+
+phase_vault() {
+    echo ""
+    echo -e "${BOLD}${CYAN}STEP 3: Vault Configuration${NC}"
+    echo "────────────────────────────"
+
+    if state_completed "vault"; then
+        local backend=$(config_get "vault" "backend" "")
+        if [[ -n "$backend" ]]; then
+            pass "Vault already configured ($backend)"
+        else
+            pass "Vault already configured"
+        fi
+        return 0
+    fi
+
+    # Detect available vault backends
+    local available=()
+    if command -v bw &>/dev/null; then
+        available+=("bitwarden")
+    fi
+    if command -v op &>/dev/null; then
+        available+=("1password")
+    fi
+    if command -v pass &>/dev/null; then
+        available+=("pass")
+    fi
+
+    if [[ ${#available[@]} -eq 0 ]]; then
+        echo "No vault CLI detected. Vault features are optional."
+        echo ""
+        echo "Supported vault backends:"
+        echo "  • Bitwarden:  brew install bitwarden-cli"
+        echo "  • 1Password:  brew install 1password-cli"
+        echo "  • pass:       brew install pass"
+        echo ""
+        echo -n "Skip vault setup? [Y/n]: "
+        read skip
+        if [[ "${skip:-Y}" =~ ^[Yy]$ ]]; then
+            warn "Skipped vault setup"
+            config_set "vault" "backend" "none"
+            state_complete "vault"
+            return 0
+        else
+            echo "Please install a vault CLI and run 'dotfiles setup' again."
+            return 1
+        fi
+    fi
+
+    echo "Available vault backends:"
+    for i in {1..${#available[@]}}; do
+        echo "  $i) ${available[$i]}"
+    done
+    echo "  $((${#available[@]} + 1))) Skip (configure secrets manually)"
+    echo ""
+
+    echo -n "Select vault backend [1]: "
+    read choice
+    choice=${choice:-1}
+
+    # Check if user chose to skip
+    if [[ $choice -eq $((${#available[@]} + 1)) ]]; then
+        warn "Skipped vault setup"
+        config_set "vault" "backend" "none"
+        state_complete "vault"
+        return 0
+    fi
+
+    local selected="${available[$choice]}"
+    if [[ -z "$selected" ]]; then
+        fail "Invalid selection"
+        return 1
+    fi
+
+    # Save preference
+    config_set "vault" "backend" "$selected"
+    export DOTFILES_VAULT_BACKEND="$selected"
+
+    info "Using vault backend: $selected"
+    echo ""
+
+    # Backend-specific login
+    case "$selected" in
+        bitwarden)
+            if ! bw login --check &>/dev/null; then
+                echo "Log in to Bitwarden:"
+                bw login || { fail "Bitwarden login failed"; return 1; }
+            fi
+
+            if ! bw unlock --check &>/dev/null 2>&1; then
+                echo ""
+                echo "Unlock your vault:"
+                local session=$(bw unlock --raw)
+                if [[ -n "$session" ]]; then
+                    export BW_SESSION="$session"
+                    # Cache session
+                    echo "$session" > "$DOTFILES_DIR/vault/.vault-session"
+                    chmod 600 "$DOTFILES_DIR/vault/.vault-session"
+                    pass "Vault unlocked"
+                else
+                    fail "Failed to unlock vault"
+                    return 1
+                fi
+            else
+                pass "Vault already unlocked"
+            fi
+            ;;
+
+        1password)
+            if ! op account list &>/dev/null 2>&1; then
+                echo "Sign in to 1Password:"
+                eval $(op signin) || { fail "1Password signin failed"; return 1; }
+            fi
+            pass "1Password authenticated"
+            ;;
+
+        pass)
+            # Note: 'pass' is both a command and our logging function
+            # Use command pass to call the actual pass CLI
+            if command pass ls &>/dev/null 2>&1; then
+                pass "pass accessible (GPG agent active)"
+            else
+                warn "pass not accessible - check GPG configuration"
+                echo "You may need to:"
+                echo "  • Import your GPG key"
+                echo "  • Initialize pass: pass init <gpg-key-id>"
+                return 1
+            fi
+            ;;
+    esac
+
+    state_complete "vault"
+    pass "Vault configured"
+}
+
+phase_secrets() {
+    echo ""
+    echo -e "${BOLD}${CYAN}STEP 4: Restore Secrets${NC}"
+    echo "────────────────────────"
+
+    if state_completed "secrets"; then
+        pass "Secrets already restored"
+        return 0
+    fi
+
+    local backend=$(config_get "vault" "backend" "none")
+    if [[ "$backend" == "none" ]]; then
+        warn "Vault not configured - skipping secret restore"
+        echo "Configure secrets manually in ~/.ssh, ~/.aws, ~/.gitconfig"
+        return 0
+    fi
+
+    echo "This will restore secrets from $backend:"
+    echo "  • SSH keys"
+    echo "  • AWS credentials"
+    echo "  • Git configuration"
+    echo "  • Environment secrets"
+    echo ""
+
+    echo -n "Restore secrets? [Y/n]: "
+    read confirm
+    if [[ "${confirm:-Y}" =~ ^[Nn]$ ]]; then
+        warn "Skipped secret restore"
+        return 0
+    fi
+
+    # Run vault restore
+    if [[ -f "$DOTFILES_DIR/vault/restore.sh" ]]; then
+        if "$DOTFILES_DIR/vault/restore.sh"; then
+            state_complete "secrets"
+            pass "Secrets restored"
+        else
+            fail "Secret restore failed"
+            return 1
+        fi
+    else
+        fail "vault/restore.sh not found"
+        return 1
+    fi
+}
+
+phase_claude() {
+    echo ""
+    echo -e "${BOLD}${CYAN}STEP 5: Claude Code (Optional)${NC}"
+    echo "───────────────────────────────"
+
+    if state_completed "claude"; then
+        pass "Claude Code already configured"
+        return 0
+    fi
+
+    # Check if Claude is installed
+    if ! command -v claude &>/dev/null; then
+        info "Claude Code not detected - skipping"
+        state_complete "claude"
+        return 0
+    fi
+
+    # Check if dotclaude is installed
+    if command -v dotclaude &>/dev/null; then
+        pass "dotclaude already installed"
+        state_complete "claude"
+        return 0
+    fi
+
+    echo "Claude Code detected. dotclaude helps manage profiles across machines."
+    echo ""
+    echo -n "Install dotclaude? [Y/n]: "
+    read response
+
+    if [[ "${response:-Y}" =~ ^[Yy]$ ]]; then
+        info "Installing dotclaude..."
+        if curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh | bash; then
+            pass "dotclaude installed"
+        else
+            warn "dotclaude installation failed - continuing"
+        fi
+    else
+        info "Skipped dotclaude installation"
+    fi
+
+    state_complete "claude"
+}
+
+# ============================================================
+# Main Flow
+# ============================================================
+
+main() {
+    # Initialize state
+    state_init
+
+    # Infer state for existing installations
+    state_infer
+
+    # Handle --status flag
+    if $STATUS_ONLY; then
+        show_status
+        exit 0
+    fi
+
+    # Handle --reset flag
+    if $FORCE_RESET; then
+        echo -n "Reset all setup progress? [y/N]: "
+        read confirm
+        if [[ "${confirm:-N}" =~ ^[Yy]$ ]]; then
+            for phase in symlinks packages vault secrets claude; do
+                state_reset "$phase"
+            done
+            pass "State reset"
+        else
+            info "Reset cancelled"
+            exit 0
+        fi
+    fi
+
+    show_banner
+    show_status
+
+    # Check if setup is needed
+    if ! state_needs_setup; then
+        echo -e "${GREEN}${BOLD}All setup complete!${NC}"
+        echo ""
+        echo "Run 'dotfiles doctor' to verify health."
+        echo "Run 'dotfiles setup --reset' to reconfigure."
+        exit 0
+    fi
+
+    echo "Let's complete your setup..."
+    echo ""
+
+    # Run each phase
+    local phases=("symlinks" "packages" "vault" "secrets" "claude")
+    local phase_funcs=("phase_symlinks" "phase_packages" "phase_vault" "phase_secrets" "phase_claude")
+
+    for i in {1..${#phases[@]}}; do
+        local phase="${phases[$i]}"
+        local func="${phase_funcs[$i]}"
+
+        if ! state_completed "$phase"; then
+            $func || true  # Continue even if phase fails
+        fi
+    done
+
+    # Final status
+    echo ""
+    echo "═══════════════════════════════════════════════════════"
+    show_status
+
+    if ! state_needs_setup; then
+        echo -e "${GREEN}${BOLD}Setup complete!${NC}"
+        echo ""
+        echo "Quick commands:"
+        echo "  dotfiles status   - Visual dashboard"
+        echo "  dotfiles doctor   - Health check"
+        echo "  dotfiles help     - All commands"
+    else
+        echo -e "${YELLOW}Some steps were skipped or failed.${NC}"
+        echo "Run 'dotfiles setup' again to continue."
+    fi
+
+    echo ""
+}
+
+# Run main
+main "$@"

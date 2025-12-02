@@ -249,7 +249,7 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
 │  dotfiles drift     ───────────────────► detects profile changes       │
 │  dotfiles vault restore ───────────────► restores profiles.json        │
 │  dotfiles packages  ───────────────────► suggests dotclaude install    │
-│  dotfiles init      ───────────────────► offers dotclaude setup        │
+│  dotfiles setup     ───────────────────► offers dotclaude setup        │
 │                                 │     │                                 │
 └─────────────────────────────────┘     └─────────────────────────────────┘
                                               ▲
@@ -271,7 +271,7 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
 | `dotfiles vault restore` | Restores Claude profiles.json |
 | `dotfiles drift` | Detects profile changes vs vault |
 | `dotfiles packages` | Suggests dotclaude for Claude users |
-| `dotfiles init` | Offers dotclaude installation |
+| `dotfiles setup` | Offers dotclaude installation |
 
 ### How It Works
 
