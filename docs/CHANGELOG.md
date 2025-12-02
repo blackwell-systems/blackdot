@@ -26,9 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `dotfiles macos discover` - Capture current settings
 - **Vault Restore Preview** - `dotfiles vault restore --preview` shows what would be restored without making changes
 - **Documentation Updates**
+  - New `docs/state-management.md` - Dedicated state system documentation
   - State Management section in `docs/cli-reference.md` with INI file format examples
   - `dotfiles macos` command reference with all subcommands and options
   - Updated all references from `dotfiles init` to `dotfiles setup`
+  - Added `macos` command to architecture diagram
 
 ### Changed
 - **Renamed `bootstrap-vault.sh` to `restore.sh`** - Clearer naming for vault orchestrator
