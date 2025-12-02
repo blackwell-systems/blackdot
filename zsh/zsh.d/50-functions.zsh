@@ -75,11 +75,16 @@ status() {
     s_profile="${d}·${n}"; s_profile_info="${d}try: dotclaude${n}"
   fi
 
-  # City silhouette header
+  # City silhouette (inspired by Joan Stark)
   echo ""
-  echo "  ${d}▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄${n}"
-  echo "  ${d}█░░ ${n}${g}dotfiles${n}${d} ░░░░░░░░░░░░░░░░░░░░░░░░░█${n}"
-  echo "  ${d}▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀${n}"
+  echo "${d}                          .│${n}"
+  echo "${d}                          │ │            ._____${n}"
+  echo "${d}              ___         │ │            │     │${n}"
+  echo "${d}    _    _.-\"   \"-._      │ │    _.--\"│  │     │${n}"
+  echo "${d} .-\"│  _.│    │    │ │   ._-\"  │  │     │${n}"
+  echo "${d} │  │ │  │  │  │ │   -.__ │    │     │${n}"
+  echo "${d} │  │ \"-\"    \"    \"\"    \"-\"  \"-.\"   \"\`     │____${n}"
+  echo "${d}▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔${n}"
   echo ""
 
   # Diagnostic details
