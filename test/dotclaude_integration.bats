@@ -79,8 +79,8 @@ EOF
 # ============================================================
 
 @test "doctor: no Claude section when claude not installed" {
-  # No mock claude created
-  run "$DOTFILES_DIR/bin/dotfiles-doctor" --quick
+  # Override PATH to exclude real claude - only include essential paths
+  PATH="/usr/bin:/bin" run "$DOTFILES_DIR/bin/dotfiles-doctor" --quick
 
   # Should not contain Claude section
   [[ ! "${output}" =~ "Claude Code" ]]

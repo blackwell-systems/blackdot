@@ -8,9 +8,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Unified Setup Wizard** (`dotfiles setup`) - New interactive setup with persistent state
+  - Five-phase setup: symlinks → packages → vault → secrets → claude
+  - Progress persistence in `~/.config/dotfiles/state.ini`
+  - Resume support: continue where you left off if interrupted
+  - State inference: auto-detects existing installations from filesystem
+  - Visual status dashboard with checkmarks (`dotfiles setup --status`)
+  - Reset capability (`dotfiles setup --reset`)
+- **State Management Library** (`lib/_state.sh`) - Pure zsh INI file parsing
+  - Functions: `state_init`, `state_completed`, `state_complete`, `state_needs_setup`
+  - Config API: `config_get`, `config_set` for persistent preferences
+  - State inference: `state_infer` detects symlinks, packages, vault, secrets, Claude
+- **macOS Settings Command** (`dotfiles macos`) - Expose macOS settings management
+  - `dotfiles macos apply` - Apply settings from settings.sh
+  - `dotfiles macos preview` - Dry-run mode
+  - `dotfiles macos discover` - Capture current settings
 - **Vault Restore Preview** - `dotfiles vault restore --preview` shows what would be restored without making changes
 
 ### Changed
+- **Renamed `bootstrap-vault.sh` to `restore.sh`** - Clearer naming for vault orchestrator
+- **Removed `dotfiles init`** - Replaced by `dotfiles setup` with better state management
+- **Vault Backend Persistence** - Backend choice now saved to config file
+  - Priority: config file → environment variable → default (bitwarden)
+  - Persists across sessions without needing to export env var
+- **Simplified `install.sh`** - Removed `--interactive` flag
+  - Bootstrap scripts now tell user to run `dotfiles setup`
+  - Cleaner separation: install.sh handles clone/bootstrap, setup handles configuration
 - **dotfiles-drift Multi-Backend Support** - Now works with all vault backends (Bitwarden, 1Password, pass)
   - Uses `lib/_vault.sh` abstraction instead of hardcoded Bitwarden commands
   - Dynamic backend name in messages
@@ -24,10 +47,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `process_loop_conditionals()` function to evaluate loop variables
 - **Template Engine: Nested `{{#else}}`** - Fixed stray `{{/if}}` tags in output
   - Properly matches `{{#else}}` at correct nesting depth
-- **dotfiles-init Zsh Compatibility** - Fixed `read -p` bash syntax not working in zsh
-  - Changed to zsh-compatible `echo -n "prompt"; read var` pattern
-- **bootstrap-vault.sh Multi-Backend** - Now displays correct backend name instead of hardcoded "Bitwarden"
-  - Uses `vault_name()` for dynamic backend display
+- **`pass` Function Name Collision** - Fixed conflict in `dotfiles-setup` between pass CLI and logging function
+  - Uses `command pass` to explicitly call the CLI
+- **Test: Doctor Claude Detection** - Fixed test failing when real claude installed
+  - Test now isolates PATH to exclude system claude
 
 ## [1.8.4] - 2025-12-02
 
