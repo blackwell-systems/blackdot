@@ -1071,7 +1071,6 @@ To customize:
 
 **📚 [Complete Documentation Site](https://blackwell-systems.github.io/dotfiles/)**
 
-- **Quick overview:** this README
 - **[CLI Reference](docs/cli-reference.md)** - All commands, flags, and environment variables
 - **[Full Documentation](docs/README-FULL.md)** - Complete guide (1,900+ lines)
 - **[Template Guide](docs/templates.md)** - Machine-specific configuration templates
