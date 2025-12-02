@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Vault Restore Preview** - `dotfiles vault restore --preview` shows what would be restored without making changes
+
+### Changed
+- **dotfiles-drift Multi-Backend Support** - Now works with all vault backends (Bitwarden, 1Password, pass)
+  - Uses `lib/_vault.sh` abstraction instead of hardcoded Bitwarden commands
+  - Dynamic backend name in messages
+  - Backend-specific login hints
+- **dotclaude Install URL** - Updated to GitHub raw URL (`raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh`)
+- **Status Dashboard** - Simplified ASCII art header (dimmed city skyline, no embedded indicators)
+- **Post-Install Prompt** - Made `exec zsh` prompt more prominent with yellow highlight
+
+### Fixed
+- **Template Engine: `{{#if}}` inside `{{#each}}`** - Conditionals now work correctly inside loops
+  - Added `process_loop_conditionals()` function to evaluate loop variables
+- **Template Engine: Nested `{{#else}}`** - Fixed stray `{{/if}}` tags in output
+  - Properly matches `{{#else}}` at correct nesting depth
+
 ## [1.8.4] - 2025-12-02
 
 ### Added

@@ -14,6 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Access fields: `{{ name }}`, `{{ hostname }}`, `{{ user }}`, `{{ identity }}`, `{{ extra }}`
   - Conditionals work inside loops for optional fields
   - ssh-config.tmpl now generates hosts from SSH_HOSTS array
+- **Vault Restore Preview** - `dotfiles vault restore --preview` shows what would be restored without making changes
+- **Template Tests** (`test/templates.bats`) - Unit tests for template engine
+- **Vault Backend Guide** (`docs/extending-backends.md`) - How to add new vault providers
+
+### Changed
+- **dotfiles-drift Multi-Backend Support** - Now works with all vault backends (Bitwarden, 1Password, pass)
+  - Uses `lib/_vault.sh` abstraction instead of hardcoded Bitwarden commands
+  - Dynamic backend name in messages
+  - Backend-specific login hints
+- **dotclaude Install URL** - Updated to GitHub raw URL
+- **Status Dashboard** - Simplified ASCII art header (dimmed city skyline, no embedded indicators)
+- **Post-Install Prompt** - Made `exec zsh` prompt more prominent with yellow highlight
 
 ### Fixed
 - **Template Engine: `{{#if}}` inside `{{#each}}`** - Conditionals now work correctly inside loops
@@ -22,8 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Template Engine: Nested `{{#else}}` handling** - Fixed stray `{{/if}}` tags in output
   - Properly matches `{{#else}}` at the correct nesting level
   - No longer grabs nested conditionals' else blocks
-- **Template Tests** (`test/templates.bats`) - Unit tests for template engine
-- **Vault Backend Guide** (`docs/extending-backends.md`) - How to add new vault providers
 
 ### Planned
 - Blog posts on dotfiles architecture and Claude session portability
