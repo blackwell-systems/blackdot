@@ -1,11 +1,11 @@
 #!/usr/bin/env zsh
 # ============================================================
-# FILE: vault/bootstrap-vault.sh
+# FILE: vault/restore.sh
 # Orchestrates vault-based restoration of secrets (supports multiple backends)
 # Usage:
-#   ./bootstrap-vault.sh              # Restore with drift check
-#   ./bootstrap-vault.sh --force      # Restore without drift check
-#   DOTFILES_OFFLINE=1 ./bootstrap-vault.sh  # Skip vault operations
+#   ./restore.sh              # Restore with drift check
+#   ./restore.sh --force      # Restore without drift check
+#   DOTFILES_OFFLINE=1 ./restore.sh  # Skip vault operations
 # ============================================================
 set -euo pipefail
 
