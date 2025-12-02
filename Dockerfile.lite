@@ -1,7 +1,7 @@
 # Lightweight dotfiles exploration container
 # For CLI testing with vault support (no Homebrew)
 #
-# Image size: ~200MB | Build time: ~60s
+# Image size: ~250MB | Build time: ~90s
 
 FROM alpine:3.19
 
@@ -19,6 +19,9 @@ RUN apk add --no-cache \
     pass \
     libgcc \
     libstdc++
+
+# Install Powerlevel10k
+RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /root/.powerlevel10k
 
 # Install Bitwarden CLI (standalone binary - avoids Node.js ESM issues)
 RUN curl -sSL "https://github.com/bitwarden/clients/releases/download/cli-v2024.7.2/bw-linux-2024.7.2.zip" -o /tmp/bw.zip && \
@@ -50,9 +53,12 @@ RUN chmod +x /root/workspace/dotfiles/bin/* && \
     chmod +x /root/workspace/dotfiles/vault/*.sh && \
     chmod +x /root/workspace/dotfiles/bootstrap/*.sh
 
-# Setup zsh with dotfiles functions
+# Setup zsh with Powerlevel10k and dotfiles functions
 RUN mkdir -p /root/.config/dotfiles /root/.ssh /root/.aws && \
+    ln -sf /root/workspace/dotfiles/zsh/p10k.zsh /root/.p10k.zsh && \
     echo 'export WORKSPACE=/root/workspace' > /root/.zshrc && \
+    echo 'source /root/.powerlevel10k/powerlevel10k.zsh-theme' >> /root/.zshrc && \
+    echo '[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh' >> /root/.zshrc && \
     echo 'source /root/workspace/dotfiles/zsh/zsh.d/40-aliases.zsh' >> /root/.zshrc && \
     echo 'source /root/workspace/dotfiles/zsh/zsh.d/50-functions.zsh' >> /root/.zshrc
 
