@@ -4,103 +4,90 @@ This document outlines planned improvements and future work for the dotfiles sys
 
 ---
 
-## Planned Future Work
+## Recently Completed (v2.0)
 
-The following items have detailed planning documents and are ready for implementation.
+### Unified Setup Wizard ✅
+
+**Status:** Complete (v2.0.0)
+
+Single command `dotfiles setup` with:
+- Five-phase setup: symlinks → packages → vault → secrets → claude
+- Persistent state in `~/.config/dotfiles/state.ini`
+- Resume support if interrupted
+- State inference from existing installations
+
+### macOS CLI Integration ✅
+
+**Status:** Complete (v2.0.0)
+
+```bash
+dotfiles macos apply              # Apply all settings
+dotfiles macos preview            # Dry-run mode
+dotfiles macos discover           # Capture current settings
+```
 
 ---
 
-### 1. Template JSON Arrays
+## Recently Completed (v2.0.x)
 
-**Status:** Planning Complete - Ready for Implementation
-**Document:** [PLAN-TEMPLATE-JSON.md](PLAN-TEMPLATE-JSON.md)
+### Template JSON Arrays ✅
 
-Add JSON configuration support for template arrays (currently shell-only):
+**Status:** Complete (v2.0.x)
 
-**Current (awkward):**
-```zsh
-SSH_HOSTS=("github|github.com|git|~/.ssh/id_ed25519|")
-```
-
-**Proposed (clear):**
-```json
-{
-  "ssh_hosts": [
-    {"name": "github", "hostname": "github.com", "user": "git", "identity": "~/.ssh/id_ed25519"}
-  ]
-}
-```
-
-**Approach:** Hybrid - shell for variables (comments useful), JSON for arrays (structure clearer). No new dependencies (jq already required).
+JSON configuration support for template arrays:
+- `templates/_arrays.local.json` for cleaner SSH host definitions
+- `dotfiles template arrays` command to view/manage
+- Falls back to shell arrays if no JSON file
+- Export existing shell arrays to JSON with `--export-json`
 
 ---
 
-### 2. macOS CLI Integration
+## Backlog
+
+### 1. Interactive Template Setup
+
+**Status:** Consideration
+
+Add an interactive mode to `dotfiles template init` that prompts for common variables:
+
+```bash
+dotfiles template init --interactive
+# or make init more interactive by default
+```
+
+**Potential prompts:**
+- Git name and email
+- Machine type (work/personal)
+- GitHub username
+- AWS profile
+
+**Tradeoffs:**
+- **Pro:** Lower barrier for first-time users, no need to understand shell syntax
+- **Pro:** Consistent with `dotfiles setup` wizard pattern
+- **Con:** Current `init` already opens editor with well-commented example
+- **Con:** Most dotfiles users are comfortable editing files
+
+**Decision:** Consider implementing as lightweight prompts for essentials only, then open editor for advanced customization.
+
+---
+
+### 3. MCP Server for Claude Code Integration
 
 **Status:** Concept - Not Started
 
-Currently, macOS settings are standalone scripts not exposed via the CLI:
-
-```
-macos/
-├── settings.sh           # 60+ defaults write commands
-├── apply-settings.sh     # Runner script
-└── discover-settings.sh  # Snapshot tool
-```
-
-**Proposed CLI:**
-```bash
-dotfiles macos apply              # Apply all settings
-dotfiles macos apply --dry-run    # Preview changes
-dotfiles macos apply dock         # Apply dock settings only
-dotfiles macos diff               # Compare current vs desired
-dotfiles macos list               # List categories
-```
-
-**Benefits:**
-- Consistent CLI experience
-- Category-based apply
-- Drift detection for macOS settings
-- Integration with `dotfiles doctor`
-
-**Considerations:**
-- macOS-only feature (needs graceful skip on Linux)
-- "Set once, forget" for most users - lower priority
-
----
-
-## Other Ideas (Backlog)
-
-The following are concepts that may be implemented in the future.
-
----
-
-#### 3. MCP Server for Claude Code Integration
-
-**Status:** Not started (Concept documented)
-
-**What:** Create an MCP (Model Context Protocol) server that allows Claude Code to directly interact with dotfiles operations.
+Create an MCP (Model Context Protocol) server that allows Claude Code to directly interact with dotfiles operations.
 
 **Why:** Currently, Claude interacts with dotfiles via shell commands. An MCP server would provide:
 - **Native tool integration** - Claude sees `dotfiles_health_check`, `dotfiles_vault_sync` as first-class tools
 - **Structured responses** - JSON responses instead of parsing shell output
 - **Proactive actions** - Claude could auto-fix issues during coding sessions
-- **Real-time status** - Claude knows dotfiles health without running commands
 
 **Proposed MCP Tools:**
 ```typescript
-// Health & Status
 dotfiles_health_check()     // Returns structured health report
 dotfiles_status()           // Quick status with issues count
-dotfiles_drift_check()      // Check vault drift
-
-// Vault Operations
 dotfiles_vault_restore()    // Restore secrets (with drift check)
 dotfiles_vault_sync(item?)  // Sync specific or all items
-dotfiles_vault_list()       // List vault items
-
-// Configuration
-dotfiles_template_render()  // Generate machine-specific configs
 dotfiles_doctor_fix()       // Auto-repair issues
 ```
 
@@ -108,28 +95,26 @@ dotfiles_doctor_fix()       // Auto-repair issues
 
 ---
 
-#### 4. Session Management Improvements
+### 4. Session Management Improvements
 
-**Status:** Not started
+**Status:** Not Started
 
-**What:** Improve Bitwarden session handling.
-
-**Current issues:**
+Improve Bitwarden session handling:
 - Sessions cached in `.bw-session` file
 - No automatic cleanup of stale sessions
 - No session validation retry logic
 
 ---
 
-#### 5. API/Function Reference Documentation
+### 5. API/Function Reference Documentation
 
-**Status:** Not started
+**Status:** Not Started
 
-**What:** Generate documentation for all exported functions.
-
-**Affected files:**
+Generate documentation for all exported functions:
 - `vault/_common.sh` - 27 functions
 - `lib/_logging.sh` - 8 functions
+- `lib/_state.sh` - 10+ functions
+- `lib/_vault.sh` - 15+ functions
 - `zsh/zsh.d/50-functions.zsh` - 15+ functions
 
 ---
@@ -165,8 +150,9 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 | 1.5.0 | Offline mode support |
 | 1.6.0 | CLI reorganization (bin/ directory) |
 | 1.7.0 | Root directory cleanup |
-| 1.8.0 | (Planned) Windows support, git safety hooks |
-| 1.9.0 | (Planned) MCP server integration |
+| 1.8.0 | Windows support, git safety hooks, dotclaude integration |
+| **2.0.0** | **Unified setup wizard, state management, macOS CLI** |
+| 2.0.1 | CLI help improvements, Docker container enhancements |
 
 ---
 
@@ -184,4 +170,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ---
 
-*Last updated: 2025-12-01*
+*Last updated: 2025-12-02*

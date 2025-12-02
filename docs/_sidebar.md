@@ -24,7 +24,6 @@
   - [Troubleshooting](troubleshooting.md)
 
 - **Planning**
-  - [Unified Setup Plan](UNIFIED-SETUP-PLAN.md)
   - [Roadmap](ROADMAP.md)
   - [Template JSON Arrays](PLAN-TEMPLATE-JSON.md)
 

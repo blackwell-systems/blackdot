@@ -36,7 +36,24 @@ RUN chmod +x /root/workspace/dotfiles/bin/* && \
 RUN mkdir -p /root/.config/dotfiles /root/.ssh /root/.aws && \
     echo 'export WORKSPACE=/root/workspace' > /root/.zshrc && \
     echo 'source /root/workspace/dotfiles/zsh/zsh.d/40-aliases.zsh' >> /root/.zshrc && \
-    echo 'source /root/workspace/dotfiles/zsh/zsh.d/50-functions.zsh' >> /root/.zshrc
+    echo 'source /root/workspace/dotfiles/zsh/zsh.d/50-functions.zsh' >> /root/.zshrc && \
+    echo '' >> /root/.zshrc && \
+    echo '# Welcome message for container' >> /root/.zshrc && \
+    echo 'if [[ -z "$_WELCOME_SHOWN" ]]; then' >> /root/.zshrc && \
+    echo '    echo ""' >> /root/.zshrc && \
+    echo '    echo "\\033[0;36m═══════════════════════════════════════════════════════════\\033[0m"' >> /root/.zshrc && \
+    echo '    echo "\\033[0;36m  Dotfiles Test Container (extralite)\\033[0m"' >> /root/.zshrc && \
+    echo '    echo "\\033[0;36m═══════════════════════════════════════════════════════════\\033[0m"' >> /root/.zshrc && \
+    echo '    echo ""' >> /root/.zshrc && \
+    echo '    echo "\\033[1mQuick Start:\\033[0m"' >> /root/.zshrc && \
+    echo '    echo "  dotfiles help          # Show available commands"' >> /root/.zshrc && \
+    echo '    echo "  dotfiles doctor        # Run health checks"' >> /root/.zshrc && \
+    echo '    echo "  dotfiles status        # Show dashboard"' >> /root/.zshrc && \
+    echo '    echo ""' >> /root/.zshrc && \
+    echo '    echo "\\033[2mNote: No vault CLIs in extralite. Use lite container for vault testing.\\033[0m"' >> /root/.zshrc && \
+    echo '    echo ""' >> /root/.zshrc && \
+    echo '    export _WELCOME_SHOWN=1' >> /root/.zshrc && \
+    echo 'fi' >> /root/.zshrc
 
 # Create /workspace symlink for portable paths
 RUN ln -s /root/workspace /workspace
