@@ -1,0 +1,58 @@
+# Extra-lightweight dotfiles exploration container
+# For quick CLI testing (no vault tools)
+#
+# Image size: ~50MB | Build time: ~10s
+
+FROM alpine:3.19
+
+RUN apk add --no-cache \
+    bash \
+    zsh \
+    git \
+    jq \
+    coreutils \
+    util-linux \
+    curl
+
+ENV HOME=/root
+ENV WORKSPACE=/root/workspace
+
+WORKDIR /root/workspace/dotfiles
+
+# Copy core components
+COPY bin/ /root/workspace/dotfiles/bin/
+COPY lib/ /root/workspace/dotfiles/lib/
+COPY vault/ /root/workspace/dotfiles/vault/
+COPY zsh/ /root/workspace/dotfiles/zsh/
+COPY templates/ /root/workspace/dotfiles/templates/
+COPY bootstrap/ /root/workspace/dotfiles/bootstrap/
+
+# Make scripts executable
+RUN chmod +x /root/workspace/dotfiles/bin/* && \
+    chmod +x /root/workspace/dotfiles/vault/*.sh && \
+    chmod +x /root/workspace/dotfiles/bootstrap/*.sh
+
+# Setup zsh with dotfiles functions
+RUN mkdir -p /root/.config/dotfiles /root/.ssh /root/.aws && \
+    echo 'export WORKSPACE=/root/workspace' > /root/.zshrc && \
+    echo 'source /root/workspace/dotfiles/zsh/zsh.d/40-aliases.zsh' >> /root/.zshrc && \
+    echo 'source /root/workspace/dotfiles/zsh/zsh.d/50-functions.zsh' >> /root/.zshrc
+
+# Create /workspace symlink for portable paths
+RUN ln -s /root/workspace /workspace
+
+CMD ["zsh"]
+
+# =============================================================================
+# Usage:
+#   docker build -f Dockerfile.extralite -t dotfiles-extralite .
+#   docker run -it --rm dotfiles-extralite
+#
+# This is the fastest container for quick exploration.
+# No vault CLIs - use Dockerfile.lite for vault testing.
+#
+# Explore:
+#   dotfiles help
+#   dotfiles status
+#   dotfiles doctor
+# =============================================================================
