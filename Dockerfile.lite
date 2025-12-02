@@ -14,14 +14,17 @@ RUN apk add --no-cache \
     coreutils \
     util-linux \
     curl \
+    unzip \
     gnupg \
     pass \
-    nodejs \
-    npm
+    libgcc \
+    libstdc++
 
-# Install Bitwarden CLI
-RUN npm install -g @bitwarden/cli && \
-    npm cache clean --force
+# Install Bitwarden CLI (standalone binary - avoids Node.js ESM issues)
+RUN curl -sSL "https://github.com/bitwarden/clients/releases/download/cli-v2024.7.2/bw-linux-2024.7.2.zip" -o /tmp/bw.zip && \
+    unzip /tmp/bw.zip -d /usr/local/bin && \
+    rm /tmp/bw.zip && \
+    chmod +x /usr/local/bin/bw
 
 # Install 1Password CLI (standalone binary)
 RUN curl -sSL "https://cache.agilebits.com/dist/1P/op2/pkg/v2.30.0/op_linux_amd64_v2.30.0.zip" -o /tmp/op.zip && \
