@@ -77,11 +77,11 @@ teardown() {
 }
 
 # ============================================================
-# bin/dotfiles-init Tests
+# bin/dotfiles-setup Tests
 # ============================================================
 
-@test "init script exists and is executable" {
-  [ -x "$DOTFILES_DIR/bin/dotfiles-init" ]
+@test "setup script exists and is executable" {
+  [ -x "$DOTFILES_DIR/bin/dotfiles-setup" ]
 }
 
 # ============================================================

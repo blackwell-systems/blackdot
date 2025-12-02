@@ -303,7 +303,9 @@ phase_vault() {
             ;;
 
         pass)
-            if pass ls &>/dev/null 2>&1; then
+            # Note: 'pass' is both a command and our logging function
+            # Use command pass to call the actual pass CLI
+            if command pass ls &>/dev/null 2>&1; then
                 pass "pass accessible (GPG agent active)"
             else
                 warn "pass not accessible - check GPG configuration"
@@ -351,8 +353,8 @@ phase_secrets() {
     fi
 
     # Run vault restore
-    if [[ -f "$DOTFILES_DIR/vault/bootstrap-vault.sh" ]]; then
-        if "$DOTFILES_DIR/vault/bootstrap-vault.sh"; then
+    if [[ -f "$DOTFILES_DIR/vault/restore.sh" ]]; then
+        if "$DOTFILES_DIR/vault/restore.sh"; then
             state_complete "secrets"
             pass "Secrets restored"
         else
@@ -360,7 +362,7 @@ phase_secrets() {
             return 1
         fi
     else
-        fail "vault/bootstrap-vault.sh not found"
+        fail "vault/restore.sh not found"
         return 1
     fi
 }

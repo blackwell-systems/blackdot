@@ -41,7 +41,7 @@ All `dotfiles vault` commands work identically regardless of backend.
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| `bootstrap-vault.sh` | Orchestrates all restores | `dotfiles vault restore` |
+| `restore.sh` | Orchestrates all restores | `dotfiles vault restore` |
 | `restore-ssh.sh` | Restores SSH keys + config | Called by bootstrap |
 | `restore-aws.sh` | Restores AWS config/creds | Called by bootstrap |
 | `restore-env.sh` | Restores env secrets | Called by bootstrap |

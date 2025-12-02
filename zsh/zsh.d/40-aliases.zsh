@@ -34,13 +34,53 @@ dotfiles() {
             "$HOME/workspace/dotfiles/bin/dotfiles-backup" "$@"
             ;;
 
+        # macOS settings (macOS only)
+        macos)
+            if [[ "$(uname -s)" != "Darwin" ]]; then
+                echo "macOS settings only available on macOS"
+                return 1
+            fi
+            local subcmd="${1:-help}"
+            shift 2>/dev/null || true
+            case "$subcmd" in
+                apply)
+                    "$HOME/workspace/dotfiles/macos/apply-settings.sh" "$@"
+                    ;;
+                preview|dry-run)
+                    "$HOME/workspace/dotfiles/macos/apply-settings.sh" --dry-run
+                    ;;
+                discover)
+                    "$HOME/workspace/dotfiles/macos/discover-settings.sh" "$@"
+                    ;;
+                help|--help|-h|"")
+                    echo "dotfiles macos - macOS system settings"
+                    echo ""
+                    echo "Usage: dotfiles macos <command>"
+                    echo ""
+                    echo "Commands:"
+                    echo "  apply       Apply settings from settings.sh"
+                    echo "  preview     Show settings that would be applied (dry-run)"
+                    echo "  discover    Discover/capture current macOS settings"
+                    echo ""
+                    echo "Examples:"
+                    echo "  dotfiles macos preview    # See what would change"
+                    echo "  dotfiles macos apply      # Apply settings"
+                    ;;
+                *)
+                    echo "Unknown macos command: $subcmd"
+                    echo "Run 'dotfiles macos help' for usage"
+                    return 1
+                    ;;
+            esac
+            ;;
+
         # Vault operations
         vault)
             local subcmd="${1:-help}"
             shift 2>/dev/null || true
             case "$subcmd" in
                 restore)
-                    "$VAULT_DIR/bootstrap-vault.sh" "$@"
+                    "$VAULT_DIR/restore.sh" "$@"
                     ;;
                 sync)
                     "$VAULT_DIR/sync-to-vault.sh" "$@"
@@ -98,12 +138,6 @@ dotfiles() {
         setup)
             "$HOME/workspace/dotfiles/bin/dotfiles-setup" "$@"
             ;;
-        init)
-            # Deprecated - redirect to setup
-            echo -e "\033[0;33m[DEPRECATED]\033[0m 'dotfiles init' is deprecated. Use 'dotfiles setup' instead."
-            echo ""
-            "$HOME/workspace/dotfiles/bin/dotfiles-setup" "$@"
-            ;;
         uninstall)
             "$HOME/workspace/dotfiles/bin/dotfiles-uninstall" "$@"
             ;;
@@ -144,6 +178,7 @@ dotfiles() {
             echo "  backup            Backup and restore configuration"
             echo "  vault <cmd>       Secret vault operations (restore, sync, list...)"
             echo "  secrets <cmd>     Alias for vault commands"
+            echo "  macos <cmd>       macOS system settings (macOS only)"
             echo "  template, tmpl    Machine-specific config templates"
             echo "  lint              Validate shell config syntax"
             echo "  packages, pkg     Check/install Brewfile packages"
