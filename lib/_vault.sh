@@ -13,10 +13,7 @@ _VAULT_LOADED=1
 # Configuration
 # ============================================================
 
-# Default to Bitwarden for backward compatibility
-DOTFILES_VAULT_BACKEND="${DOTFILES_VAULT_BACKEND:-bitwarden}"
-
-# Determine paths
+# Determine paths first
 if [[ -z "${DOTFILES_DIR:-}" ]]; then
     # Try to determine DOTFILES_DIR from script location
     if [[ -n "${0:a:h}" ]]; then
@@ -28,6 +25,35 @@ fi
 
 VAULT_BACKENDS_DIR="${VAULT_BACKENDS_DIR:-$DOTFILES_DIR/vault/backends}"
 VAULT_SESSION_FILE="${VAULT_SESSION_FILE:-$DOTFILES_DIR/vault/.vault-session}"
+
+# Load state library if available (for config file support)
+if [[ -f "$DOTFILES_DIR/lib/_state.sh" ]]; then
+    source "$DOTFILES_DIR/lib/_state.sh"
+fi
+
+# Get vault backend: config file > env var > default
+_get_configured_backend() {
+    # 1. Check config file (if state library loaded)
+    if type config_get >/dev/null 2>&1; then
+        local from_config=$(config_get "vault" "backend" "")
+        if [[ -n "$from_config" ]]; then
+            echo "$from_config"
+            return 0
+        fi
+    fi
+
+    # 2. Check environment variable
+    if [[ -n "${DOTFILES_VAULT_BACKEND:-}" ]]; then
+        echo "$DOTFILES_VAULT_BACKEND"
+        return 0
+    fi
+
+    # 3. Default to bitwarden
+    echo "bitwarden"
+}
+
+# Set the backend (backward compatible)
+DOTFILES_VAULT_BACKEND="$(_get_configured_backend)"
 
 # ============================================================
 # Logging (use lib/_logging.sh if available, else define)
