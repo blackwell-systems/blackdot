@@ -33,16 +33,11 @@ REPO_SSH="git@github.com:blackwell-systems/dotfiles.git"
 INSTALL_DIR="$HOME/workspace/dotfiles"
 
 # Parse arguments
-INTERACTIVE=false
 MINIMAL=false
 USE_SSH=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --interactive|-i)
-            INTERACTIVE=true
-            shift
-            ;;
         --minimal|-m)
             MINIMAL=true
             shift
@@ -151,37 +146,19 @@ fi
 
 cd "$INSTALL_DIR"
 
-# Build bootstrap arguments
-BOOTSTRAP_ARGS=""
-
 if $MINIMAL; then
     export SKIP_WORKSPACE_SYMLINK=true
     export SKIP_CLAUDE_SETUP=true
     info "Minimal mode: skipping optional features"
 fi
 
-if $INTERACTIVE; then
-    BOOTSTRAP_ARGS="--interactive"
-fi
-
 # Run bootstrap
 info "Running bootstrap script..."
 echo ""
 
-# Note: BOOTSTRAP_ARGS is intentionally unquoted to allow word splitting for multiple flags
-# shellcheck disable=SC2086
-./"$BOOTSTRAP_SCRIPT" $BOOTSTRAP_ARGS
+./"$BOOTSTRAP_SCRIPT"
 
-# If interactive mode, run the setup wizard
-if $INTERACTIVE && ! $MINIMAL; then
-    echo ""
-    info "Running setup wizard..."
-    echo ""
-    ./bin/dotfiles-setup
-    exit 0
-fi
-
-# Success message (non-interactive mode)
+# Success message
 echo ""
 echo -e "${GREEN}${BOLD}╔════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}${BOLD}║              Installation Complete!                        ║${NC}"

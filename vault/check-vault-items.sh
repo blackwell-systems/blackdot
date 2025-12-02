@@ -102,7 +102,7 @@ echo ""
 echo "========================================"
 if [[ $MISSING -eq 0 ]]; then
     echo -e "${GREEN}All required vault items present!${NC}"
-    echo "You can safely run: ./bootstrap-vault.sh"
+    echo "You can safely run: ./restore.sh"
     exit 0
 else
     echo -e "${RED}Missing $MISSING required item(s)${NC}"
