@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 # ============================================================
 # FILE: vault/bootstrap-vault.sh
-# Orchestrates Bitwarden-based restoration of secrets
+# Orchestrates vault-based restoration of secrets (supports multiple backends)
 # Usage:
 #   ./bootstrap-vault.sh              # Restore with drift check
 #   ./bootstrap-vault.sh --force      # Restore without drift check
@@ -26,7 +26,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --help|-h)
-            echo "Restore secrets from Bitwarden vault"
+            echo "Restore secrets from vault"
             echo ""
             echo "Usage: $0 [OPTIONS]"
             echo ""
@@ -52,7 +52,7 @@ done
 # ============================================================
 if is_offline; then
     echo "=== Offline mode enabled ==="
-    warn "DOTFILES_OFFLINE=1 - Skipping Bitwarden vault operations"
+    warn "DOTFILES_OFFLINE=1 - Skipping vault operations"
     echo ""
     echo "Vault restore skipped. Your existing local files are unchanged."
     echo ""
@@ -62,12 +62,14 @@ if is_offline; then
     exit 0
 fi
 
-echo "=== Bitwarden vault bootstrap starting ==="
-echo "Vault directory: $VAULT_DIR"
-
 # Verify prerequisites
 require_bw
 require_logged_in
+
+# Get backend name for display
+BACKEND_NAME=$(vault_name)
+echo "=== $BACKEND_NAME vault bootstrap starting ==="
+echo "Vault directory: $VAULT_DIR"
 
 # Get session and sync
 SESSION=$(get_session)
@@ -145,5 +147,5 @@ echo "--- Restoring Git config ---"
 "$VAULT_DIR/restore-git.sh" "$SESSION"
 
 echo ""
-echo "=== Bitwarden bootstrap complete ==="
+echo "=== $BACKEND_NAME bootstrap complete ==="
 echo "SSH keys, AWS profiles, environment secrets, and Git config are now restored."

@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `process_loop_conditionals()` function to evaluate loop variables
 - **Template Engine: Nested `{{#else}}`** - Fixed stray `{{/if}}` tags in output
   - Properly matches `{{#else}}` at correct nesting depth
+- **dotfiles-init Zsh Compatibility** - Fixed `read -p` bash syntax not working in zsh
+  - Changed to zsh-compatible `echo -n "prompt"; read var` pattern
+- **bootstrap-vault.sh Multi-Backend** - Now displays correct backend name instead of hardcoded "Bitwarden"
+  - Uses `vault_name()` for dynamic backend display
 
 ## [1.8.4] - 2025-12-02
 
