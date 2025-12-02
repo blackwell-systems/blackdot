@@ -1069,7 +1069,7 @@ To customize:
 
 ---
 
-## Documentation
+**📚 [Complete Documentation Site](https://blackwell-systems.github.io/dotfiles/)**
 
 - **Quick overview:** this README
 - **[CLI Reference](docs/cli-reference.md)** - All commands, flags, and environment variables
