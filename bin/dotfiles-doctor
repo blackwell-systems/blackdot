@@ -381,7 +381,7 @@ if command -v claude &>/dev/null; then
     else
         info "dotclaude not installed (optional)"
         echo "     Manage Claude profiles across machines:"
-        echo "     curl -fsSL https://dotclaude.dev/install | bash"
+        echo "     See: github.com/blackwell-systems/dotclaude"
     fi
 fi
 

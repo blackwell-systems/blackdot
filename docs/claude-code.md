@@ -234,7 +234,7 @@ WORKSPACE="$HOME/.workspace" ./bootstrap-mac.sh
 
 ## dotclaude Integration
 
-This repo integrates with [dotclaude](https://dotclaude.dev) for Claude Code profile management across machines.
+This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotclaude) for Claude Code profile management across machines.
 
 ### Architecture: Two Tools, Loosely Connected
 
@@ -295,7 +295,7 @@ The `profiles.json` format:
 
 ```bash
 # Install dotclaude (if not already)
-curl -fsSL https://dotclaude.dev/install | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh | bash
 
 # Create and activate a profile
 dotclaude create my-project
@@ -331,7 +331,7 @@ dotclaude list
 ### Without dotclaude
 
 If you use Claude Code without dotclaude:
-- `dotfiles status` shows a gentle hint: `try: dotclaude.dev`
+- `dotfiles status` shows a gentle hint: `try: dotclaude`
 - `dotfiles doctor` suggests installation with instructions
 - `dotfiles packages` mentions dotclaude availability
 - No impact on other dotfiles functionality - completely optional
