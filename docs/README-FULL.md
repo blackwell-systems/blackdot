@@ -63,9 +63,10 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 ```
 
 Options:
-- `--interactive` - Prompt for configuration choices
 - `--minimal` - Skip optional features (vault, Claude setup)
 - `--ssh` - Clone using SSH instead of HTTPS
+
+After installation, run `dotfiles setup` for interactive configuration.
 
 ### Manual Install
 
@@ -74,11 +75,15 @@ Options:
 git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
-# 2. Run interactive setup wizard
-dotfiles init
+# 2. Run platform bootstrap
+./bootstrap/bootstrap-mac.sh   # macOS
+./bootstrap/bootstrap-linux.sh # Linux/WSL
+
+# 3. Run interactive setup wizard
+dotfiles setup
 ```
 
-**That's it!** The wizard handles platform detection, vault selection, and secret restoration.
+**That's it!** The wizard handles platform detection, vault selection, and secret restoration. Progress is saved—resume anytime if interrupted.
 
 **Alternative (non-interactive):**
 ```bash
@@ -131,8 +136,8 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 ├── .gitignore                          # Excludes .bw-session, secrets, temp files
 │
 ├── bootstrap/                          # Platform bootstrap scripts
-│   ├── bootstrap-mac.sh                # macOS-specific bootstrap (--interactive)
-│   ├── bootstrap-linux.sh              # Linux-specific bootstrap (--interactive)
+│   ├── bootstrap-mac.sh                # macOS-specific bootstrap
+│   ├── bootstrap-linux.sh              # Linux-specific bootstrap
 │   ├── bootstrap-dotfiles.sh           # Shared symlink bootstrap
 │   └── _common.sh                      # Shared bootstrap functions
 │
@@ -639,31 +644,35 @@ There are two big pillars:
 
    Goal: restore **SSH keys**, **AWS config/credentials**, and **env secrets** from your vault (Bitwarden, 1Password, or pass).
 
-### Interactive Mode
+### Setup Wizard
 
-Both bootstrap scripts support an interactive mode that guides you through configuration choices:
+After bootstrap, run the interactive setup wizard for full configuration:
 
 ```bash
-./bootstrap/bootstrap-mac.sh --interactive
-./bootstrap/bootstrap-linux.sh --interactive
+dotfiles setup
 ```
 
-Interactive mode prompts for:
-- **Workspace symlink**: Enable `/workspace` symlink for portable Claude sessions?
-- **Claude setup**: Configure Claude Code integration?
+The wizard handles:
+- **Symlinks**: Shell configuration files
+- **Packages**: Homebrew packages from Brewfile
+- **Vault**: Select and authenticate vault backend (Bitwarden, 1Password, pass)
+- **Secrets**: Restore SSH keys, AWS credentials, Git config
+- **Claude Code**: Optional dotclaude installation
 
-You can also use environment variables instead:
+**Progress is saved** to `~/.config/dotfiles/`. If interrupted, run `dotfiles setup` again to resume.
+
+You can skip optional features using environment variables:
 
 ```bash
-# Skip optional features
+# Skip optional features during bootstrap
 SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
 ```
 
-Use `--help` to see all available options:
+Use `--help` to see available options:
 
 ```bash
+dotfiles setup --help
 ./bootstrap/bootstrap-mac.sh --help
-./bootstrap/bootstrap-linux.sh --help
 ```
 
 ### Architecture Diagram

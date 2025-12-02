@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Unified Setup Wizard** (`dotfiles setup`) - New interactive setup with persistent state
   - Five-phase setup: symlinks → packages → vault → secrets → claude
-  - Progress persistence in `~/.config/dotfiles/state.ini`
+  - Progress persistence in `~/.config/dotfiles/state.ini` and `~/.config/dotfiles/config.ini`
   - Resume support: continue where you left off if interrupted
   - State inference: auto-detects existing installations from filesystem
   - Visual status dashboard with checkmarks (`dotfiles setup --status`)
@@ -19,11 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Functions: `state_init`, `state_completed`, `state_complete`, `state_needs_setup`
   - Config API: `config_get`, `config_set` for persistent preferences
   - State inference: `state_infer` detects symlinks, packages, vault, secrets, Claude
+  - Files: `~/.config/dotfiles/state.ini` (phase completion), `~/.config/dotfiles/config.ini` (user prefs)
 - **macOS Settings Command** (`dotfiles macos`) - Expose macOS settings management
   - `dotfiles macos apply` - Apply settings from settings.sh
   - `dotfiles macos preview` - Dry-run mode
   - `dotfiles macos discover` - Capture current settings
 - **Vault Restore Preview** - `dotfiles vault restore --preview` shows what would be restored without making changes
+- **Documentation Updates**
+  - State Management section in `docs/cli-reference.md` with INI file format examples
+  - `dotfiles macos` command reference with all subcommands and options
+  - Updated all references from `dotfiles init` to `dotfiles setup`
 
 ### Changed
 - **Renamed `bootstrap-vault.sh` to `restore.sh`** - Clearer naming for vault orchestrator
