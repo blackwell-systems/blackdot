@@ -33,123 +33,123 @@ If you use Claude Code across multiple machines, this is the only dotfiles solut
 ## Features
 
 <details>
-<summary><b>Interactive Setup Wizard</b> - One command, complete setup</summary>
+<summary><b>Interactive Setup Wizard</b> - `dotfiles init` guides you through platform detection, vault selection (Bitwarden/1Password/pass), and secret restoration. Auto-detects available vault CLIs and prompts you to choose. Option to skip vault entirely for minimal setups.</summary>
 
-`dotfiles init` guides you through platform detection, vault selection (Bitwarden/1Password/pass), and secret restoration.
+One command handles everything: bootstrap, vault selection, secret restoration, and health validation. Works identically across macOS, Linux, WSL2, and Docker.
 </details>
 
 <details>
-<summary><b>Multi-Vault Secrets</b> - Your vault, your way</summary>
+<summary><b>Multi-Vault Secrets</b> - SSH keys, AWS credentials, Git config synced with your choice of Bitwarden, 1Password, or pass. Unified API across all backends means switching vaults is just one environment variable. Bidirectional sync: local changes push to vault, new machines restore from vault.</summary>
 
-SSH keys, AWS credentials, Git config synced with your choice of Bitwarden, 1Password, or pass. Unified API across all backends.
+Supports multiple SSH identities, AWS profiles, and environment secrets. Schema validation prevents corrupt vault items. Drift detection warns before overwriting local changes.
 </details>
 
 <details>
-<summary><b>Claude Code Integration</b> - Resume conversations anywhere</summary>
+<summary><b>Claude Code Integration</b> - Portable sessions via `/workspace` symlink let you start on Mac, continue on Linux, same conversation. Auto-redirect from `~/workspace` keeps sessions synced. Multiple backend support: Anthropic Max (consumer) or AWS Bedrock (enterprise SSO).</summary>
 
-Portable sessions via `/workspace` symlink. Start on Mac, continue on Linux, same conversation. Auto-redirect from `~/workspace` keeps sessions synced.
+No other dotfiles system does this. The `/workspace` symlink creates identical absolute paths across platforms, so Claude Code session folders match everywhere. Resume conversations with full history intact.
 </details>
 
 <details>
-<summary><b>Self-Healing Configuration</b> - Never breaks</summary>
+<summary><b>Self-Healing Configuration</b> - Health checker with `--fix` mode auto-repairs permission issues, broken symlinks, and missing dependencies. Drift detection compares local files vs vault before restore, preventing accidental overwrites. Runs comprehensive checks on symlinks, SSH keys, AWS config, vault status, and shell setup.</summary>
 
-Health checker with `--fix` mode. Drift detection catches local vs vault differences before they cause problems.
+`dotfiles doctor` validates everything. `dotfiles doctor --fix` repairs issues automatically. `dotfiles drift` catches unsync'd changes before switching machines.
 </details>
 
 <details>
-<summary><b>Machine-Specific Templates</b> - One config, many machines</summary>
+<summary><b>Machine-Specific Templates</b> - Generate configs tailored to each machine (work vs personal, macOS vs Linux). Variables, conditionals, loops in template files. `dotfiles template init` sets up machine-specific values, `dotfiles template render` generates configs, `dotfiles template link` symlinks to destinations.</summary>
 
-Generate configs tailored to each machine (work vs personal, macOS vs Linux). Variables, conditionals, loops. `dotfiles template init` guides setup.
+One `.gitconfig.tmpl` becomes many `.gitconfig` files with different emails, signing keys, and settings per machine. Templates support auto-detected variables (hostname, OS, user) and custom overrides.
 </details>
 
 <details>
-<summary><b>Backup & Restore</b> - Time-travel for your dotfiles</summary>
+<summary><b>Backup & Restore</b> - Timestamped tar.gz backups with `dotfiles backup`. Interactive restore from any backup with preview. Auto-cleanup keeps only 10 most recent. Includes all dotfiles, configs, and optional secrets.</summary>
 
-Timestamped backups with `dotfiles backup`. Interactive restore from any backup. Auto-cleanup keeps only 10 most recent.
+`dotfiles backup --list` shows available backups. `dotfiles backup restore` lets you pick from history. Backs up to `~/.dotfiles-backups/` with YYYY-MM-DD-HHMMSS timestamps.
 </details>
 
 <details>
-<summary><b>Unified CLI Interface</b> - One command to rule them all</summary>
+<summary><b>Unified CLI Interface</b> - Single `dotfiles` command with all functionality: `status`, `doctor`, `drift`, `backup`, `vault`, `template`, `packages`, `lint`, `upgrade`. Consistent flags across subcommands. Full tab completion for commands, flags, and context-aware arguments.</summary>
 
-Single `dotfiles` command with all functionality: `status`, `doctor`, `drift`, `backup`, `vault`, `template`, `packages`, `lint`, `upgrade`, and more.
+No more hunting for scripts. Everything is `dotfiles <subcommand>`. Run `dotfiles help` for complete command list.
 </details>
 
 <details>
-<summary><b>Package Management</b> - Keep tools in sync</summary>
+<summary><b>Package Management</b> - `dotfiles packages` checks Brewfile status and shows what's missing. `dotfiles packages --install` installs missing packages. Works across macOS (Homebrew) and Linux (Linuxbrew). Unified Brewfile means same tools everywhere.</summary>
 
-`dotfiles packages` checks Brewfile status. `dotfiles packages --install` installs missing packages. Works across macOS and Linux.
+See exactly which Brewfile packages are installed, missing, or outdated. One command to install all missing packages. Supports conditional packages (macOS-only casks, Linux-only tools).
 </details>
 
 <details>
-<summary><b>Modern CLI Stack</b> - Batteries included</summary>
+<summary><b>Modern CLI Stack</b> - eza (ls), fzf (fuzzy find), ripgrep (grep), zoxide (smart cd), bat (cat), yazi (file manager), glow (markdown), dust (du)—all configured and ready. Lazy-loaded for fast shell startup (< 100ms). Unified keybindings: Ctrl+R history search, Ctrl+T file picker, Alt+C directory jump.</summary>
 
-eza, fzf, ripgrep, zoxide, bat, yazi—configured and ready. Lazy-loaded for fast shell startup.
+Modern tools are faster and more user-friendly than their Unix predecessors. All installed via Brewfile, configured in `zsh.d/30-tools.zsh`. Lazy loading means they only initialize when first used.
 </details>
 
 <details>
-<summary><b>Modular Shell Config</b> - Organized, not monolithic</summary>
+<summary><b>Modular Shell Config</b> - 10 organized modules in `zsh.d/`: init, plugins, env, tools, aliases, functions, AWS, Claude, git, integrations. Each module handles one concern. Machine-specific overrides in `99-local.zsh` (gitignored). Easy to enable/disable modules, customize per-machine.</summary>
 
-10 organized modules in `zsh.d/`: init, plugins, env, tools, aliases, functions, AWS, Claude, git, integrations. Easy to customize.
+No more 1000-line monolithic `.zshrc`. Each module is < 150 lines, focused, testable. Want to change AWS behavior? Edit `60-aws.zsh`. Want machine-specific aliases? Add to `99-local.zsh`.
 </details>
 
 <details>
-<summary><b>AWS Workflow Helpers</b> - SSO made simple</summary>
+<summary><b>AWS Workflow Helpers</b> - `awsswitch` for interactive profile switching with fzf, `awsprofiles` to list all, `awswho` for current identity (account, user, ARN). Auto-login integration: `awsswitch` detects expired SSO and runs `aws sso login` automatically. Role assumption with `awsassume`, clear temporary creds with `awsclear`.</summary>
 
-`awsswitch` for interactive profile switching, `awsprofiles` to list all, `awswho` for current identity. Auto-login integration.
+Tired of `export AWS_PROFILE=...` and `aws sso login`? `awsswitch` does both in one command. Fuzzy search profiles, auto-login if expired, shows current identity. Makes multi-account AWS workflows painless.
 </details>
 
 <details>
-<summary><b>Tab Completions</b> - Type less, do more</summary>
+<summary><b>Tab Completions</b> - ZSH completions for `dotfiles` (all subcommands and flags), AWS commands (`awsswitch`, `awsset`, `awslogin`), vault operations (`bw-sync` with item names). Context-aware suggestions (e.g., `dotfiles vault sync <TAB>` shows vault item names). Auto-loaded on shell startup.</summary>
 
-ZSH completions for `dotfiles`, AWS commands, vault operations. Context-aware suggestions.
+Type `dotfiles <TAB>` to see all subcommands. Type `dotfiles doctor <TAB>` to see flags. Type `awsswitch <TAB>` to see AWS profiles. Never memorize commands again.
 </details>
 
 <details>
-<summary><b>Cross-Platform Portability</b> - 90% shared, 10% platform-specific</summary>
+<summary><b>Cross-Platform Portability</b> - 90% shared code, 10% platform-specific. Same dotfiles on macOS, Linux, Windows (Git Bash/MSYS2), WSL2, Lima, Docker. Platform detection auto-adapts behavior (e.g., macOS uses `pbcopy`, Linux uses `xclip`/`wl-copy`). Brewfile works on both macOS (Homebrew) and Linux (Linuxbrew).</summary>
 
-Same dotfiles on macOS, Linux, Windows, WSL2, or Docker. Platform detection auto-adapts behavior.
+One codebase, many platforms. Bootstrap scripts detect platform and run appropriate setup. Vault system, health checks, CLI tools—all platform-independent. Adding a new platform takes ~30 lines.
 </details>
 
 <details>
-<summary><b>Comprehensive Testing</b> - 124 tests and counting</summary>
+<summary><b>Comprehensive Testing</b> - 124 tests covering unit tests (vault functions, CLI commands), integration tests (mock Bitwarden, backup/restore cycles), and error scenarios (permissions, missing files, edge cases). CI runs shellcheck (bash linting), zsh syntax validation, and all test suites on every push. Code coverage tracked via kcov + Codecov.</summary>
 
-Unit, integration, and error scenario coverage. CI runs shellcheck, syntax validation, and all tests on every push.
+Tests live in `test/` directory using bats-core framework. Run `./test/run_tests.sh` locally. CI validates on both macOS and Linux. Mock Bitwarden CLI in `test/mocks/bw` for reproducible integration tests.
 </details>
 
 <details>
-<summary><b>Metrics & Observability</b> - Track health over time</summary>
+<summary><b>Metrics & Observability</b> - Automatic metrics collection with `dotfiles doctor` writes to `~/.dotfiles-metrics.jsonl`. Each entry records timestamp, hostname, OS, errors, warnings, fixes, health score (0-100), git branch/commit. `dotfiles metrics` visualizes trends with ASCII graphs. Track dotfiles health over time, catch regressions early.</summary>
 
-Automatic metrics collection with `dotfiles doctor`. Visualize trends, catch regressions early with `dotfiles metrics`.
+See your dotfiles health history. Are warnings increasing? Are you fixing issues or ignoring them? Metrics show average health score, total errors/warnings, perfect run percentage, recent trends.
 </details>
 
 <details>
-<summary><b>Git Safety Hooks</b> - Prevent disasters</summary>
+<summary><b>Git Safety Hooks</b> - Defensive pre-commit hooks block dangerous commands (force push to main, hard reset, committing secrets like `.env` files). Pre-push hooks prevent unintended force pushes. Optional pre-commit integration for Claude Code projects. Configurable per-repository in `.git/hooks/`.</summary>
 
-Defensive hooks block dangerous commands (force push to main, hard reset, secrets commits). [Learn more](docs/claude-code.md)
+Prevent accidents before they happen. Hooks catch `git push --force origin main`, `git reset --hard` without confirmation, accidentally committing AWS credentials. See [docs/claude-code.md](docs/claude-code.md) for setup details.
 </details>
 
 <details>
-<summary><b>Shell Linting</b> - Catch errors early</summary>
+<summary><b>Shell Linting</b> - `dotfiles lint` validates shell syntax for all scripts (bootstrap, vault, bin). `dotfiles lint --fix` auto-fixes permissions (makes scripts executable). Pre-commit hooks prevent broken scripts from being committed. CI runs shellcheck on every push with strict settings.</summary>
 
-`dotfiles lint` validates shell syntax. `dotfiles lint --fix` auto-fixes permissions. Pre-commit hooks prevent broken scripts.
+Catch shell errors before runtime. Shellcheck finds bugs like unquoted variables, incorrect `[ ]` vs `[[ ]]` usage, unsafe `eval` usage, missing error handling. Linting runs locally and in CI.
 </details>
 
 <details>
-<summary><b>Clean Uninstall</b> - Leave no trace</summary>
+<summary><b>Clean Uninstall</b> - `dotfiles uninstall` removes all dotfiles, symlinks, and configurations. `--dry-run` previews what would be removed. `--keep-secrets` option removes dotfiles but preserves SSH keys, AWS credentials, and vault data. Interactive confirmation prevents accidents.</summary>
 
-`dotfiles uninstall` with `--dry-run` preview. Option to keep secrets while removing dotfiles.
+Want to start fresh or switch to different dotfiles? Uninstall script removes everything cleanly. Dry-run mode shows exactly what files/symlinks would be deleted. Keep-secrets mode lets you remove dotfiles without losing credentials.
 </details>
 
 <details>
-<summary><b>Docker Test Environment</b> - Try before installing</summary>
+<summary><b>Docker Test Environment</b> - Test entire system in disposable Alpine container (< 5MB base image). `docker run` with `Dockerfile.lite` for quick exploration. Full `Dockerfile` for Ubuntu-based testing with vault integration. 30-second trust verification before installing on real system.</summary>
 
-Test entire system in disposable Alpine container. 30-second trust verification before committing to installation.
+Don't trust random install scripts? Test in Docker first. Alpine container boots in seconds, lets you try `dotfiles status`, `dotfiles doctor`, explore commands. Container auto-deletes on exit. See [docs/TESTDRIVE.md](docs/TESTDRIVE.md) for guide.
 </details>
 
 <details>
-<summary><b>Idempotent Design</b> - Safe to run anytime</summary>
+<summary><b>Idempotent Design</b> - Run bootstrap repeatedly without harm. Scripts converge to known-good state using conditional checks (e.g., only create symlink if not already correct). Safe to re-run after updates, failed installs, or manual changes. No destructive operations without confirmation.</summary>
 
-Run bootstrap repeatedly. Scripts converge to known-good state. No harm from re-running.
+Bootstrap scripts check current state before making changes. Already symlinked? Skip. Already installed? Skip. Wrong symlink target? Fix it. Makes dotfiles maintenance worry-free—just run bootstrap again.
 </details>
 
 ---
