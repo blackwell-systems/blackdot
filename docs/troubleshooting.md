@@ -41,11 +41,12 @@ dotfiles doctor --fix
 
 **Solution:**
 ```bash
-# Skip vault entirely
+# Option 1: Skip vault during install
 ./install.sh --minimal
 
-# Or use interactive mode to skip
-./install.sh --interactive
+# Option 2: Run setup wizard and choose "skip" when prompted for vault
+./install.sh
+dotfiles setup   # Choose "Skip" when asked about vault backend
 ```
 
 ### Homebrew not found (macOS)
