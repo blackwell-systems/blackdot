@@ -14,10 +14,15 @@ source "$(dirname "$0")/_common.sh"
 
 # Parse arguments
 FORCE=false
+PREVIEW=false
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --force|-f)
             FORCE=true
+            shift
+            ;;
+        --preview|--dry-run|-n)
+            PREVIEW=true
             shift
             ;;
         --help|-h)
@@ -26,8 +31,9 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  --force, -f    Skip drift check and overwrite local changes"
-            echo "  --help, -h     Show this help"
+            echo "  --force, -f       Skip drift check and overwrite local changes"
+            echo "  --preview, -n     Show what would be restored without making changes"
+            echo "  --help, -h        Show this help"
             echo ""
             echo "Environment variables:"
             echo "  DOTFILES_OFFLINE=1            Run in offline mode (skip vault operations)"
@@ -78,6 +84,45 @@ if ! skip_drift_check && [[ "$FORCE" != "true" ]]; then
         echo "To force restore: dotfiles vault restore --force"
         exit 1
     fi
+fi
+
+# ============================================================
+# Preview mode - show what would be restored
+# ============================================================
+if [[ "$PREVIEW" == "true" ]]; then
+    echo ""
+    echo "=== Preview Mode - No changes will be made ==="
+    echo ""
+
+    echo "Would restore the following:"
+    echo ""
+
+    # SSH keys
+    echo "SSH Keys:"
+    for key_item in "${(@k)SSH_KEYS}"; do
+        local key_path="${SSH_KEYS[$key_item]}"
+        if [[ -f "$key_path" ]]; then
+            echo "  $key_item → $key_path (exists, would overwrite)"
+        else
+            echo "  $key_item → $key_path (new)"
+        fi
+    done
+    echo ""
+
+    # Dotfiles items
+    echo "Dotfiles:"
+    for item in "${(@k)DOTFILES_ITEMS}"; do
+        local path="${DOTFILES_ITEMS[$item]}"
+        if [[ -e "$path" ]]; then
+            echo "  $item → $path (exists, would overwrite)"
+        else
+            echo "  $item → $path (new)"
+        fi
+    done
+    echo ""
+
+    echo "Run without --preview to perform restore."
+    exit 0
 fi
 
 # ============================================================

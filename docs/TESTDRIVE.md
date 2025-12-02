@@ -95,7 +95,7 @@ Want to see the Claude Code integration? Install dotclaude in the container:
 
 ```zsh
 # Install dotclaude
-curl -fsSL https://dotclaude.dev/install | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh | bash
 
 # Reload shell to get dotclaude in PATH
 exec zsh

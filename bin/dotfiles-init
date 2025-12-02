@@ -237,14 +237,14 @@ if command -v claude &>/dev/null; then
         echo ""
         read -p "Install dotclaude? [Y/n]: " response
         if [[ "${response:-Y}" =~ ^[Yy]$ ]]; then
-            curl -fsSL https://dotclaude.dev/install | bash
+            curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh | bash
             if command -v dotclaude &>/dev/null; then
                 pass "dotclaude installed"
             else
                 warn "Installation may require shell restart"
             fi
         else
-            info "Skipped - install later: curl -fsSL https://dotclaude.dev/install | bash"
+            info "Skipped - install later: github.com/blackwell-systems/dotclaude"
         fi
     else
         pass "dotclaude already installed"
@@ -267,9 +267,6 @@ echo "Running health check..."
 step "Setup Complete!"
 
 echo ""
-echo "Your dotfiles are configured. Start a new shell or run:"
-echo "  exec zsh"
-echo ""
 echo "Quick commands:"
 echo "  dotfiles status         - Visual dashboard"
 echo "  dotfiles doctor         - Health check"
@@ -277,4 +274,6 @@ if [[ "${VAULT_CONFIGURED:-false}" == "true" ]]; then
     echo "  dotfiles vault restore  - Restore secrets ($SELECTED_BACKEND)"
 fi
 echo "  dotfiles help           - All commands"
+echo ""
+echo -e "${YELLOW}${BOLD}>>> Run 'exec zsh' to start using your new shell <<<${NC}"
 echo ""

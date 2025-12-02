@@ -72,19 +72,14 @@ status() {
       fixes+=("profile: dotclaude switch <profile>")
     fi
   elif command -v claude &>/dev/null; then
-    s_profile="${d}·${n}"; s_profile_info="${d}try: dotclaude.dev${n}"
+    s_profile="${d}·${n}"; s_profile_info="${d}try: dotclaude${n}"
   fi
 
-  # City silhouette (inspired by Joan Stark)
+  # City silhouette header
   echo ""
-  echo "                          .│"
-  echo "                          │${s_aws}│            ._____"
-  echo "              ___         │ │            │${s_workspace}    │"
-  echo "    _    _.-\"   \"-._      │ │    _.--\"│  │     │"
-  echo " .-\"│  _.│ ${s_zshrc}│${s_claude}│ │   ._-\"  │  │  ${s_lima}  │"
-  echo " │  │ │  │  │  │ │   -.__ │    │     │"
-  echo " │${s_ssh}│ \"-\"    \"    \"\"    \"-\"  \"-.\"   \"\`     │____"
-  echo "▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔"
+  echo "  ${d}▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄${n}"
+  echo "  ${d}█░░ ${n}${g}dotfiles${n}${d} ░░░░░░░░░░░░░░░░░░░░░░░░░█${n}"
+  echo "  ${d}▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀${n}"
   echo ""
 
   # Diagnostic details
