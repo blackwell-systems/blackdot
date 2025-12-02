@@ -52,6 +52,7 @@ graph LR
     B --> H[setup]
     B --> I[upgrade]
     B --> J[uninstall]
+    B --> K[macos]
 
     E --> E1[restore]
     E --> E2[sync]
