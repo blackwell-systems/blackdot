@@ -223,7 +223,7 @@ When modifying zsh config:
    - Root `README.md` (Prerequisites or Optional Components section)
    - `docs/README.md`
    - `docs/README-FULL.md`
-3. Update `install.sh` if it should work with `--minimal` or `--interactive`
+3. Update `install.sh` if it should work with `--minimal`
 
 ---
 

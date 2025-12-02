@@ -49,7 +49,7 @@ graph LR
     B --> E[vault]
     B --> F[backup]
     B --> G[diff]
-    B --> H[init]
+    B --> H[setup]
     B --> I[upgrade]
     B --> J[uninstall]
 
@@ -271,7 +271,7 @@ graph TB
 | Flow | Source | Destination | Command |
 |------|--------|-------------|---------|
 | Install | GitHub | Local | `curl ... \| bash` |
-| Bootstrap | Scripts | System | `dotfiles init` |
+| Bootstrap | Scripts | System | `dotfiles setup` |
 | Restore | Bitwarden | Local | `dotfiles vault restore` |
 | Sync | Local | Bitwarden | `dotfiles vault sync` |
 | Backup | Config | Archive | `dotfiles backup` |
