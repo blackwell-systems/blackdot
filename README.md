@@ -308,7 +308,8 @@ Bootstrap scripts check current state before changes. Already symlinked? Skip. A
 
 ## How This Compares
 
-### Quick Comparison
+<details>
+<summary><b>Quick Comparison: This Repo vs Typical Dotfiles</b></summary>
 
 | Capability           | This Repo                                      | Typical Dotfiles                 |
 |----------------------|-----------------------------------------------|----------------------------------|
@@ -322,7 +323,10 @@ Bootstrap scripts check current state before changes. Already symlinked? Skip. A
 | **Optional components** | `SKIP_*` env flags                           | All-or-nothing                   |
 | **Cross-platform**     | macOS, Linux, Windows, WSL2, Docker           | Usually single-platform          |
 
-### Why This Repo vs chezmoi?
+</details>
+
+<details>
+<summary><b>Why This Repo vs chezmoi?</b></summary>
 
 chezmoi is the most popular dotfiles manager. Here's how we compare:
 
@@ -338,6 +342,8 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 | **Cross-Platform** | 5 platforms + Docker | Excellent |
 | **Learning Curve** | Shell scripts | YAML + Go templates |
 | **Single Binary** | Requires zsh | Go binary |
+
+</details>
 
 ### Detailed Comparison vs Popular Dotfiles
 
