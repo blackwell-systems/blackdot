@@ -88,9 +88,21 @@ dotfiles() {
             esac
             ;;
 
+        # Secrets (alias for vault)
+        secrets)
+            # Alias for vault commands with clearer terminology
+            dotfiles vault "$@"
+            ;;
+
         # Setup & Maintenance
+        setup)
+            "$HOME/workspace/dotfiles/bin/dotfiles-setup" "$@"
+            ;;
         init)
-            "$HOME/workspace/dotfiles/bin/dotfiles-init" "$@"
+            # Deprecated - redirect to setup
+            echo -e "\033[0;33m[DEPRECATED]\033[0m 'dotfiles init' is deprecated. Use 'dotfiles setup' instead."
+            echo ""
+            "$HOME/workspace/dotfiles/bin/dotfiles-setup" "$@"
             ;;
         uninstall)
             "$HOME/workspace/dotfiles/bin/dotfiles-uninstall" "$@"
@@ -124,17 +136,18 @@ dotfiles() {
             echo "Usage: dotfiles <command> [options]"
             echo ""
             echo "Commands:"
+            echo "  setup             Interactive setup wizard (recommended)"
             echo "  status, s         Quick visual dashboard"
             echo "  doctor, health    Run comprehensive health check"
             echo "  drift             Compare local files vs vault"
             echo "  diff              Preview changes before sync/restore"
             echo "  backup            Backup and restore configuration"
             echo "  vault <cmd>       Secret vault operations (restore, sync, list...)"
+            echo "  secrets <cmd>     Alias for vault commands"
             echo "  template, tmpl    Machine-specific config templates"
             echo "  lint              Validate shell config syntax"
             echo "  packages, pkg     Check/install Brewfile packages"
             echo "  metrics           Visualize health check metrics over time"
-            echo "  init              First-time setup wizard"
             echo "  upgrade, update   Pull latest and run bootstrap"
             echo "  uninstall         Remove dotfiles configuration"
             echo "  cd                Change to dotfiles directory"
@@ -142,15 +155,12 @@ dotfiles() {
             echo "  help              Show this help"
             echo ""
             echo "Examples:"
+            echo "  dotfiles setup               # Interactive setup wizard"
+            echo "  dotfiles setup --status      # Show setup progress"
             echo "  dotfiles status              # Visual dashboard"
             echo "  dotfiles doctor --fix        # Health check with auto-fix"
-            echo "  dotfiles lint --fix          # Check syntax, fix permissions"
-            echo "  dotfiles packages --check    # Show missing packages"
-            echo "  dotfiles packages --install  # Install from Brewfile"
-            echo "  dotfiles template init       # Setup machine-specific config"
-            echo "  dotfiles template render     # Generate configs from templates"
             echo "  dotfiles vault restore       # Restore secrets from vault"
-            echo "  dotfiles vault sync --all    # Sync local to vault"
+            echo "  dotfiles secrets sync --all  # Sync local to vault"
             ;;
         *)
             echo "Unknown command: $cmd"

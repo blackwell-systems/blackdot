@@ -5,9 +5,10 @@
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
 #
-# Or with options (download first):
-#   curl -fsSL ... -o install.sh && bash install.sh --interactive
-#   curl -fsSL ... -o install.sh && bash install.sh --minimal
+# After installation, run 'dotfiles setup' to configure vault and secrets.
+#
+# Options:
+#   --minimal    Skip optional features (vault, Claude setup)
 #
 # ============================================================
 set -euo pipefail
@@ -58,10 +59,11 @@ while [[ $# -gt 0 ]]; do
             echo "  curl -fsSL <url> -o install.sh && bash install.sh [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  --interactive, -i    Prompt for configuration options"
             echo "  --minimal, -m        Skip optional features (vault, Claude setup)"
             echo "  --ssh                Clone using SSH instead of HTTPS"
             echo "  --help, -h           Show this help"
+            echo ""
+            echo "After installation, run 'dotfiles setup' to configure your environment."
             exit 0
             ;;
         *)
@@ -173,9 +175,9 @@ echo ""
 # If interactive mode, run the setup wizard
 if $INTERACTIVE && ! $MINIMAL; then
     echo ""
-    info "Running interactive setup wizard..."
+    info "Running setup wizard..."
     echo ""
-    ./bin/dotfiles-init
+    ./bin/dotfiles-setup
     exit 0
 fi
 
@@ -187,18 +189,12 @@ echo -e "${GREEN}${BOLD}╚═════════════════�
 echo ""
 
 if ! $MINIMAL; then
-    echo "Next steps:"
+    echo "Next step:"
     echo ""
-    echo "  1. Complete setup with the interactive wizard:"
-    echo -e "     ${CYAN}dotfiles init${NC}"
+    echo "  Run the setup wizard to configure vault and restore secrets:"
+    echo -e "     ${CYAN}dotfiles setup${NC}"
     echo ""
-    echo "  Or manually restore secrets from vault:"
-    echo -e "     ${CYAN}# Bitwarden: bw login && export BW_SESSION=\"\$(bw unlock --raw)\"${NC}"
-    echo -e "     ${CYAN}# 1Password: op signin${NC}"
-    echo -e "     ${CYAN}# pass: (uses GPG, no login needed)${NC}"
-    echo -e "     ${CYAN}dotfiles vault restore${NC}"
-    echo ""
-    echo "  2. Verify installation:"
+    echo "  Then verify installation:"
     echo -e "     ${CYAN}dotfiles doctor${NC}"
 else
     echo "Next steps (minimal mode):"
