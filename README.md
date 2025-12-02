@@ -33,121 +33,121 @@ If you use Claude Code across multiple machines, this is the only dotfiles solut
 ## Features
 
 <details>
-<summary>**Interactive Setup Wizard** - One command, complete setup</summary>
+<summary><b>Interactive Setup Wizard</b> - One command, complete setup</summary>
 
 `dotfiles init` guides you through platform detection, vault selection (Bitwarden/1Password/pass), and secret restoration.
 </details>
 
 <details>
-<summary>**Multi-Vault Secrets** - Your vault, your way</summary>
+<summary><b>Multi-Vault Secrets</b> - Your vault, your way</summary>
 
 SSH keys, AWS credentials, Git config synced with your choice of Bitwarden, 1Password, or pass. Unified API across all backends.
 </details>
 
 <details>
-<summary>**Claude Code Integration** - Resume conversations anywhere</summary>
+<summary><b>Claude Code Integration</b> - Resume conversations anywhere</summary>
 
 Portable sessions via `/workspace` symlink. Start on Mac, continue on Linux, same conversation. Auto-redirect from `~/workspace` keeps sessions synced.
 </details>
 
 <details>
-<summary>**Self-Healing Configuration** - Never breaks</summary>
+<summary><b>Self-Healing Configuration</b> - Never breaks</summary>
 
 Health checker with `--fix` mode. Drift detection catches local vs vault differences before they cause problems.
 </details>
 
 <details>
-<summary>**Machine-Specific Templates** - One config, many machines</summary>
+<summary><b>Machine-Specific Templates</b> - One config, many machines</summary>
 
 Generate configs tailored to each machine (work vs personal, macOS vs Linux). Variables, conditionals, loops. `dotfiles template init` guides setup.
 </details>
 
 <details>
-<summary>**Backup & Restore** - Time-travel for your dotfiles</summary>
+<summary><b>Backup & Restore</b> - Time-travel for your dotfiles</summary>
 
 Timestamped backups with `dotfiles backup`. Interactive restore from any backup. Auto-cleanup keeps only 10 most recent.
 </details>
 
 <details>
-<summary>**Unified CLI Interface** - One command to rule them all</summary>
+<summary><b>Unified CLI Interface</b> - One command to rule them all</summary>
 
 Single `dotfiles` command with all functionality: `status`, `doctor`, `drift`, `backup`, `vault`, `template`, `packages`, `lint`, `upgrade`, and more.
 </details>
 
 <details>
-<summary>**Package Management** - Keep tools in sync</summary>
+<summary><b>Package Management</b> - Keep tools in sync</summary>
 
 `dotfiles packages` checks Brewfile status. `dotfiles packages --install` installs missing packages. Works across macOS and Linux.
 </details>
 
 <details>
-<summary>**Modern CLI Stack** - Batteries included</summary>
+<summary><b>Modern CLI Stack</b> - Batteries included</summary>
 
 eza, fzf, ripgrep, zoxide, bat, yazi—configured and ready. Lazy-loaded for fast shell startup.
 </details>
 
 <details>
-<summary>**Modular Shell Config** - Organized, not monolithic</summary>
+<summary><b>Modular Shell Config</b> - Organized, not monolithic</summary>
 
 10 organized modules in `zsh.d/`: init, plugins, env, tools, aliases, functions, AWS, Claude, git, integrations. Easy to customize.
 </details>
 
 <details>
-<summary>**AWS Workflow Helpers** - SSO made simple</summary>
+<summary><b>AWS Workflow Helpers</b> - SSO made simple</summary>
 
 `awsswitch` for interactive profile switching, `awsprofiles` to list all, `awswho` for current identity. Auto-login integration.
 </details>
 
 <details>
-<summary>**Tab Completions** - Type less, do more</summary>
+<summary><b>Tab Completions</b> - Type less, do more</summary>
 
 ZSH completions for `dotfiles`, AWS commands, vault operations. Context-aware suggestions.
 </details>
 
 <details>
-<summary>**Cross-Platform Portability** - 90% shared, 10% platform-specific</summary>
+<summary><b>Cross-Platform Portability</b> - 90% shared, 10% platform-specific</summary>
 
 Same dotfiles on macOS, Linux, Windows, WSL2, or Docker. Platform detection auto-adapts behavior.
 </details>
 
 <details>
-<summary>**Comprehensive Testing** - 124 tests and counting</summary>
+<summary><b>Comprehensive Testing</b> - 124 tests and counting</summary>
 
 Unit, integration, and error scenario coverage. CI runs shellcheck, syntax validation, and all tests on every push.
 </details>
 
 <details>
-<summary>**Metrics & Observability** - Track health over time</summary>
+<summary><b>Metrics & Observability</b> - Track health over time</summary>
 
 Automatic metrics collection with `dotfiles doctor`. Visualize trends, catch regressions early with `dotfiles metrics`.
 </details>
 
 <details>
-<summary>**Git Safety Hooks** - Prevent disasters</summary>
+<summary><b>Git Safety Hooks</b> - Prevent disasters</summary>
 
 Defensive hooks block dangerous commands (force push to main, hard reset, secrets commits). [Learn more](docs/claude-code.md)
 </details>
 
 <details>
-<summary>**Shell Linting** - Catch errors early</summary>
+<summary><b>Shell Linting</b> - Catch errors early</summary>
 
 `dotfiles lint` validates shell syntax. `dotfiles lint --fix` auto-fixes permissions. Pre-commit hooks prevent broken scripts.
 </details>
 
 <details>
-<summary>**Clean Uninstall** - Leave no trace</summary>
+<summary><b>Clean Uninstall</b> - Leave no trace</summary>
 
 `dotfiles uninstall` with `--dry-run` preview. Option to keep secrets while removing dotfiles.
 </details>
 
 <details>
-<summary>**Docker Test Environment** - Try before installing</summary>
+<summary><b>Docker Test Environment</b> - Try before installing</summary>
 
 Test entire system in disposable Alpine container. 30-second trust verification before committing to installation.
 </details>
 
 <details>
-<summary>**Idempotent Design** - Safe to run anytime</summary>
+<summary><b>Idempotent Design</b> - Safe to run anytime</summary>
 
 Run bootstrap repeatedly. Scripts converge to known-good state. No harm from re-running.
 </details>
