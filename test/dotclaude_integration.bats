@@ -102,7 +102,7 @@ EOF
   run "$DOTFILES_DIR/bin/dotfiles-doctor" --quick
 
   [[ "${output}" =~ "dotclaude not installed" ]]
-  [[ "${output}" =~ "dotclaude.dev" ]]
+  [[ "${output}" =~ "github.com/blackwell-systems/dotclaude" ]]
 }
 
 @test "doctor: shows active profile when dotclaude installed" {
@@ -213,8 +213,8 @@ EOF
   [ "$status" -eq 0 ]
 }
 
-@test "init: uses dotclaude.dev install URL" {
-  run grep -q "dotclaude.dev/install" "$DOTFILES_DIR/bin/dotfiles-init"
+@test "init: uses GitHub install URL" {
+  run grep -q "raw.githubusercontent.com/blackwell-systems/dotclaude" "$DOTFILES_DIR/bin/dotfiles-init"
   [ "$status" -eq 0 ]
 }
 
