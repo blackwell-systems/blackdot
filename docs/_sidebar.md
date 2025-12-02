@@ -1,7 +1,7 @@
 <!-- docs/_sidebar.md -->
 
 - **Getting Started**
-  - [Home](/)
+  - [Dotfiles](/)
   - [Test Drive (Docker)](TESTDRIVE.md)
   - [One-Line Install](/#one-line-install)
   - [Quick Start](/#quick-start-manual)
