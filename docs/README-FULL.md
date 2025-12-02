@@ -2,6 +2,7 @@
 
 [![Blackwell Systems™](https://raw.githubusercontent.com/blackwell-systems/blackwell-docs-theme/main/badge-trademark.svg)](https://github.com/blackwell-systems)
 [![Claude Code](https://img.shields.io/badge/Built_for-Claude_Code-8A2BE2?logo=anthropic)](https://claude.ai/claude-code)
+[![dotclaude](https://img.shields.io/badge/Integrates-dotclaude-8A2BE2?logo=anthropic)](https://github.com/blackwell-systems/dotclaude)
 [![Secrets](https://img.shields.io/badge/Secrets-Multi--Vault-ff4081)](https://github.com/blackwell-systems/dotfiles#vault--secrets)
 [![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)](https://github.com/blackwell-systems/dotfiles)
 
@@ -500,6 +501,33 @@ claude                    # New session every time
 
 **Best Practice**: Make it a habit - always `cd /workspace/...` for Claude Code sessions.
 
+#### Integration with dotclaude
+
+For profile management, this system integrates with [dotclaude](https://github.com/blackwell-systems/dotclaude):
+
+- **dotclaude**: Manages Claude profiles (CLAUDE.md, agents, settings.json)
+- **dotfiles**: Manages secrets (SSH, AWS, Git), shell, and `/workspace` paths
+
+Both systems coordinate seamlessly:
+
+```bash
+# Switch Claude context with dotclaude
+dotclaude activate client-work
+
+# Secrets managed by dotfiles
+dotfiles vault restore client-*
+
+# Both respect /workspace for portable sessions
+cd /workspace/my-project && claude
+```
+
+**Division of responsibilities:**
+- dotclaude handles Claude configuration per context (OSS, work, client)
+- dotfiles handles secrets and cross-platform consistency
+- Both use `/workspace` paths for session portability
+
+See [DOTCLAUDE-INTEGRATION.md](DOTCLAUDE-INTEGRATION.md) for complete integration guide.
+
 ### Visual Overview
 
 ```mermaid
@@ -687,6 +715,44 @@ flowchart TB
     style flow1 fill:#2d3748,stroke:#4a5568,color:#e2e8f0
     style flow2 fill:#2d3748,stroke:#4a5568,color:#e2e8f0
 ```
+
+### dotclaude Integration
+
+When used with [dotclaude](https://github.com/blackwell-systems/dotclaude), both systems work together seamlessly:
+
+```mermaid
+flowchart LR
+    subgraph dotclaude["dotclaude System"]
+        profiles["Claude Profiles<br/>• CLAUDE.md<br/>• agents/<br/>• settings.json"]
+    end
+
+    subgraph dotfiles["dotfiles System"]
+        secrets["Secrets<br/>• SSH keys<br/>• AWS creds<br/>• Git config"]
+        shell["Shell & Tools<br/>• Zsh<br/>• Brewfile"]
+    end
+
+    subgraph shared["Shared"]
+        workspace["/workspace/<br/>Portable paths"]
+        claude_dir["~/.claude/<br/>Claude state"]
+    end
+
+    profiles --> claude_dir
+    secrets -.->|"available to"| profiles
+    shell --> workspace
+    claude_dir --> workspace
+
+    style dotclaude fill:#8A2BE2,stroke:#9333EA,color:#e2e8f0
+    style dotfiles fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style shared fill:#22543d,stroke:#2f855a,color:#e2e8f0
+    style workspace fill:#2f855a,stroke:#48bb78,color:#e2e8f0
+```
+
+**How they work together:**
+- **dotclaude**: Manages Claude configuration per context (OSS, client, work)
+- **dotfiles**: Manages secrets and cross-platform consistency
+- **Both**: Use `/workspace` for session portability across machines
+
+See [DOTCLAUDE-INTEGRATION.md](DOTCLAUDE-INTEGRATION.md) for complete integration guide.
 
 ---
 
