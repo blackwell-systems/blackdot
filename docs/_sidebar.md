@@ -2,7 +2,7 @@
 
 - **Getting Started**
   - [Dotfiles](/)
-  - [Test Drive (Docker)](TESTDRIVE.md)
+  - [Docker Containers](docker.md)
   - [One-Line Install](/#one-line-install)
   - [Quick Start](/#quick-start-manual)
   - [Platform Support](/#platform-support)

@@ -1,11 +1,10 @@
-# Lightweight dotfiles exploration container
-# For CLI testing with vault support (no Homebrew)
+# Extra-lightweight dotfiles exploration container
+# For quick CLI testing (no vault tools)
 #
-# Image size: ~200MB | Build time: ~60s
+# Image size: ~50MB | Build time: ~10s
 
 FROM alpine:3.19
 
-# Core tools + vault dependencies
 RUN apk add --no-cache \
     bash \
     zsh \
@@ -13,21 +12,7 @@ RUN apk add --no-cache \
     jq \
     coreutils \
     util-linux \
-    curl \
-    gnupg \
-    pass \
-    nodejs \
-    npm
-
-# Install Bitwarden CLI
-RUN npm install -g @bitwarden/cli && \
-    npm cache clean --force
-
-# Install 1Password CLI (standalone binary)
-RUN curl -sSL "https://cache.agilebits.com/dist/1P/op2/pkg/v2.30.0/op_linux_amd64_v2.30.0.zip" -o /tmp/op.zip && \
-    unzip /tmp/op.zip -d /usr/local/bin && \
-    rm /tmp/op.zip && \
-    chmod +x /usr/local/bin/op
+    curl
 
 ENV HOME=/root
 ENV WORKSPACE=/root/workspace
@@ -60,22 +45,14 @@ CMD ["zsh"]
 
 # =============================================================================
 # Usage:
-#   docker build -f Dockerfile.lite -t dotfiles-lite .
-#   docker run -it --rm dotfiles-lite
+#   docker build -f Dockerfile.extralite -t dotfiles-extralite .
+#   docker run -it --rm dotfiles-extralite
 #
-# With Bitwarden:
-#   docker run -it --rm -e BW_SESSION="$BW_SESSION" dotfiles-lite
-#
-# With 1Password:
-#   docker run -it --rm dotfiles-lite
-#   # Then: eval $(op signin)
-#
-# With pass (mount GPG keys):
-#   docker run -it --rm -v ~/.gnupg:/root/.gnupg:ro dotfiles-lite
+# This is the fastest container for quick exploration.
+# No vault CLIs - use Dockerfile.lite for vault testing.
 #
 # Explore:
 #   dotfiles help
-#   dotfiles doctor
-#   dotfiles vault check
 #   dotfiles status
+#   dotfiles doctor
 # =============================================================================

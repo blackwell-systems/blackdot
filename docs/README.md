@@ -54,11 +54,13 @@ The wizard guides you through:
 - Secret restoration (SSH keys, AWS credentials, Git config)
 - Claude Code integration
 
-**Minimal mode** (skip vault and optional features):
+**Minimal mode** (shell config only, no secrets integration):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
 ```
+
+Skips: `/workspace` symlink, vault setup, Claude integration. You still get Zsh, CLI tools, and aliases. Run `dotfiles setup` later to enable full features.
 
 ---
 
