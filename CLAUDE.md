@@ -31,7 +31,7 @@ dotfiles/
 ├── bin/                 # CLI tools (doctor, drift, backup, etc.)
 ├── vault/*.sh           # Multi-vault integration scripts
 ├── zsh/zsh.d/*.zsh      # Shell config (numbered load order: 00-99)
-├── lib/                 # Shared libraries (_logging.sh, _templates.sh)
+├── lib/                 # Shared libraries (_logging.sh, _state.sh, _vault.sh, _templates.sh)
 ├── templates/           # Machine-specific config templates
 │   ├── configs/*.tmpl   # Template files (gitconfig, ssh-config, etc.)
 │   └── _variables*.sh   # Variable definitions
@@ -50,6 +50,10 @@ dotfiles/
 | `zsh/zsh.d/50-functions.zsh` | Shell functions including `status` |
 | `vault/_common.sh` | Shared vault functions, SSH_KEYS config |
 | `bin/dotfiles-doctor` | Health check implementation |
+| `bin/dotfiles-setup` | Interactive setup wizard |
+| `lib/_logging.sh` | Shared logging functions (info, pass, warn, fail) |
+| `lib/_state.sh` | State management for setup wizard |
+| `lib/_vault.sh` | Multi-backend vault abstraction layer |
 | `lib/_templates.sh` | Template engine for machine-specific configs |
 | `templates/_variables.sh` | Default template variable definitions |
 | `bin/dotfiles-template` | Template CLI tool |
