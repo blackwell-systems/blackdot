@@ -902,7 +902,7 @@ dotfiles/
 │   ├── dotfiles-drift        # Drift detection
 │   ├── dotfiles-backup       # Backup/restore
 │   ├── dotfiles-diff         # Preview changes
-│   ├── dotfiles-init         # Setup wizard
+│   ├── dotfiles-setup        # Setup wizard
 │   ├── dotfiles-metrics      # Metrics visualization
 │   └── dotfiles-uninstall    # Clean removal
 │
@@ -912,7 +912,7 @@ dotfiles/
 │   │   ├── bitwarden.sh
 │   │   ├── 1password.sh
 │   │   └── pass.sh
-│   ├── bootstrap-vault.sh    # Orchestrator
+│   ├── restore.sh            # Orchestrator
 │   ├── restore-*.sh          # Restore SSH, AWS, Git, env
 │   └── sync-to-vault.sh      # Sync local → vault
 │

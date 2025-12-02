@@ -142,7 +142,7 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 │   ├── dotfiles-diff                   # Preview changes before applying
 │   ├── dotfiles-doctor                 # Health check validation
 │   ├── dotfiles-drift                  # Detect config drift from repo
-│   ├── dotfiles-init                   # Interactive setup wizard
+│   ├── dotfiles-setup                  # Interactive setup wizard
 │   ├── dotfiles-lint                   # Lint shell scripts for errors
 │   ├── dotfiles-metrics                # Collect system metrics
 │   ├── dotfiles-packages               # List/validate installed packages
@@ -183,7 +183,7 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 │   │   ├── bitwarden.sh                # Bitwarden CLI integration
 │   │   ├── 1password.sh                # 1Password CLI integration
 │   │   └── pass.sh                     # pass (GPG) integration
-│   ├── bootstrap-vault.sh              # Orchestrates all vault restores
+│   ├── restore.sh                      # Orchestrates all vault restores
 │   ├── check-vault-items.sh            # Validates required vault items exist
 │   ├── create-vault-item.sh            # Creates new vault secure notes
 │   ├── delete-vault-item.sh            # Deletes items from vault (with safety)
@@ -632,7 +632,7 @@ There are two big pillars:
 
    Handled by:
 
-   - `vault/bootstrap-vault.sh`
+   - `vault/restore.sh`
    - `vault/restore-ssh.sh`
    - `vault/restore-aws.sh`
    - `vault/restore-env.sh`
@@ -674,7 +674,7 @@ flowchart TB
 
     subgraph setup["Setup Phase"]
         bootstrap["Bootstrap<br/><small>bootstrap-mac/linux.sh</small><br/>Install packages, tools, shell"]
-        restore["Restore Secrets<br/><small>bootstrap-vault.sh</small><br/>SSH, AWS, Git, env"]
+        restore["Restore Secrets<br/><small>restore.sh</small><br/>SSH, AWS, Git, env"]
         verify["Health Check<br/><small>dotfiles doctor</small><br/>Verify installation"]
     end
 
@@ -1054,10 +1054,10 @@ export DOTFILES_VAULT_BACKEND=1password  # or 'pass'
 
 ```bash
 cd ~/workspace/dotfiles/vault
-./bootstrap-vault.sh
+./restore.sh
 ```
 
-`bootstrap-vault.sh` will:
+`restore.sh` will:
 
 - Initialize the configured vault backend
 - Check/prompt for vault unlock
@@ -1140,7 +1140,7 @@ The script writes to `~/.gitconfig` (backing up any existing file) and sets perm
 
 ## Validating Vault Items Before Restore
 
-Before running `bootstrap-vault.sh` on a new machine, you can verify all required vault items exist:
+Before running `restore.sh` on a new machine, you can verify all required vault items exist:
 
 ```bash
 ./vault/check-vault-items.sh
@@ -1162,7 +1162,7 @@ Example output:
 
 ========================================
 All required vault items present!
-You can safely run: ./bootstrap-vault.sh
+You can safely run: ./restore.sh
 ```
 
 If items are missing, the script will tell you which ones and exit with an error.
@@ -1171,7 +1171,7 @@ If items are missing, the script will tell you which ones and exit with an error
 
 ## One-Time: Push Current Files into Vault
 
-Run these commands **once** on a configured machine to populate your vault, enabling future machines to restore via `bootstrap-vault.sh`.
+Run these commands **once** on a configured machine to populate your vault, enabling future machines to restore via `restore.sh`.
 
 For Bitwarden, this can also be done manually in the GUI. CLI commands are provided for automation and reproducibility.
 
@@ -2079,7 +2079,7 @@ brew install shellcheck
 shellcheck bootstrap-*.sh vault/*.sh dotfiles-*.sh
 
 # Check specific script
-shellcheck vault/bootstrap-vault.sh
+shellcheck vault/restore.sh
 ```
 
 ### Status Badges
@@ -2258,7 +2258,7 @@ source ~/.local/load-env.sh
 echo $SOME_EXPECTED_VAR
 
 # If missing, re-run vault restore
-./vault/bootstrap-vault.sh
+./vault/restore.sh
 ```
 
 ---

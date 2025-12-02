@@ -196,25 +196,25 @@ EOF
 }
 
 # ============================================================
-# dotfiles-init execution tests
+# dotfiles-setup execution tests
 # ============================================================
 
-@test "init: script exists and is executable" {
-  [ -x "$DOTFILES_DIR/bin/dotfiles-init" ]
+@test "setup: script exists and is executable" {
+  [ -x "$DOTFILES_DIR/bin/dotfiles-setup" ]
 }
 
-@test "init: contains Claude Code setup step" {
-  run grep -q "Claude Code Setup" "$DOTFILES_DIR/bin/dotfiles-init"
+@test "setup: contains Claude Code setup step" {
+  run grep -q "Claude Code" "$DOTFILES_DIR/bin/dotfiles-setup"
   [ "$status" -eq 0 ]
 }
 
-@test "init: offers dotclaude installation" {
-  run grep -q "Install dotclaude" "$DOTFILES_DIR/bin/dotfiles-init"
+@test "setup: offers dotclaude installation" {
+  run grep -q "dotclaude" "$DOTFILES_DIR/bin/dotfiles-setup"
   [ "$status" -eq 0 ]
 }
 
-@test "init: uses GitHub install URL" {
-  run grep -q "raw.githubusercontent.com/blackwell-systems/dotclaude" "$DOTFILES_DIR/bin/dotfiles-init"
+@test "setup: uses GitHub install URL for dotclaude" {
+  run grep -q "raw.githubusercontent.com/blackwell-systems/dotclaude" "$DOTFILES_DIR/bin/dotfiles-setup"
   [ "$status" -eq 0 ]
 }
 
