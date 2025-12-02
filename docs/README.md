@@ -37,24 +37,25 @@ For detailed feature comparisons vs chezmoi, thoughtbot, holman, and other popul
 
 ## One-Line Install
 
-**Recommended (interactive setup):**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --interactive
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
 ```
 
-This launches the setup wizard which:
-- Auto-detects your platform (macOS, Linux, WSL2)
-- Detects available vault CLIs (Bitwarden, 1Password, pass)
-- Prompts you to choose your vault (or skip)
-- Restores secrets and validates setup
-
-**Other install options:**
+After installation, run the setup wizard:
 
 ```bash
-# Default (non-interactive)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+dotfiles setup
+```
 
-# Minimal mode - skip vault and optional features
+The wizard guides you through:
+- Platform detection and bootstrap
+- Vault selection (Bitwarden, 1Password, pass, or skip)
+- Secret restoration (SSH keys, AWS credentials, Git config)
+- Claude Code integration
+
+**Minimal mode** (skip vault and optional features):
+
+```bash
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
 ```
 
@@ -78,15 +79,19 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
-# 2. Run interactive setup wizard
-dotfiles init
+# 2. Run platform bootstrap
+./bootstrap/bootstrap-mac.sh   # macOS
+./bootstrap/bootstrap-linux.sh # Linux/WSL
+
+# 3. Run setup wizard
+dotfiles setup
 ```
 
 **That's it!** The wizard handles:
-- Platform detection and bootstrap
 - Vault selection (Bitwarden, 1Password, pass, or skip)
-- Secret restoration
-- Health validation
+- Secret restoration (SSH keys, AWS, Git config)
+- Claude Code integration
+- Progress is saved—resume anytime with `dotfiles setup`
 
 > **💡 Why `~/workspace`?** Bootstrap creates `/workspace → ~/workspace` symlink for **portable Claude Code sessions**. Use `/workspace/project` paths and your AI conversations sync across macOS, Linux, WSL—same session folder, same history. [Learn more](README-FULL.md#canonical-workspace-workspace)
 

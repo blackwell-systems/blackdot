@@ -36,7 +36,7 @@ The unified command for managing your dotfiles. All subcommands are accessed via
 | `lint` | - | Validate shell config syntax |
 | `packages` | `pkg` | Check/install Brewfile packages |
 | `metrics` | - | Visualize health check metrics over time |
-| `init` | - | First-time setup wizard |
+| `setup` | - | Interactive setup wizard |
 | `upgrade` | `update` | Pull latest and run bootstrap |
 | `uninstall` | - | Remove dotfiles configuration |
 | `cd` | - | Change to dotfiles directory |
@@ -619,25 +619,33 @@ dotfiles update          # Alias
 
 ---
 
-### `dotfiles init`
+### `dotfiles setup`
 
-Interactive first-time setup wizard. **Use this after cloning the repository** for guided setup.
+Interactive setup wizard with persistent state. **Use this after bootstrap** for guided configuration.
 
 ```bash
-dotfiles init
+dotfiles setup [OPTIONS]
 ```
 
-**What it does:**
-1. **Checks current state** - Detects if already initialized
-2. **Runs bootstrap** - Creates symlinks, installs packages
-3. **Vault selection** - Auto-detects installed vault CLIs (Bitwarden, 1Password, pass)
-   - Prompts you to choose which vault to use
-   - Option to skip vault entirely (manual secret config)
-   - Never auto-selects - you always choose
-4. **Vault authentication** - Guides login/unlock for selected backend
-5. **Secret restoration** - Restores SSH keys, AWS creds, Git config from vault
-6. **Claude Code setup** - Optionally installs dotclaude for profile management
-7. **Health check** - Verifies everything is configured correctly
+**Options:**
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--status` | `-s` | Show current setup progress only |
+| `--reset` | `-r` | Reset state and re-run from beginning |
+| `--help` | `-h` | Show help |
+
+**Setup phases:**
+1. **Symlinks** - Creates shell configuration symlinks
+2. **Packages** - Installs Homebrew packages from Brewfile
+3. **Vault** - Selects and authenticates vault backend
+4. **Secrets** - Restores SSH keys, AWS creds, Git config
+5. **Claude Code** - Optionally installs dotclaude for profile management
+
+**Features:**
+- **Progress persistence** - Saves state to `~/.config/dotfiles/`
+- **Resume support** - Continue where you left off if interrupted
+- **State inference** - Detects existing installations automatically
 
 **Vault backend support:**
 - **Bitwarden** (`bw`) - Handles login + unlock flow
@@ -645,8 +653,13 @@ dotfiles init
 - **pass** - Checks GPG agent access
 - **None** - Skip vault, configure secrets manually
 
-**Environment variables:**
-- `DOTFILES_VAULT_BACKEND` - Pre-select backend (skips prompt)
+**Examples:**
+
+```bash
+dotfiles setup              # Run interactive wizard
+dotfiles setup --status     # Check progress
+dotfiles setup --reset      # Start over
+```
 
 ---
 
@@ -742,19 +755,19 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 
 | Option | Short | Description |
 |--------|-------|-------------|
-| `--interactive` | `-i` | Prompt for configuration options |
 | `--minimal` | `-m` | Skip optional features (vault, Claude setup) |
 | `--ssh` | - | Clone using SSH instead of HTTPS |
 | `--help` | `-h` | Show help |
+
+**After installation:**
+
+Run `dotfiles setup` for interactive configuration of vault, secrets, and Claude Code.
 
 **Examples:**
 
 ```bash
 # Default install (one-liner)
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
-
-# Interactive mode (download first)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh -o install.sh && bash install.sh --interactive
 
 # Minimal mode (no vault, no Claude)
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh -o install.sh && bash install.sh --minimal

@@ -8,24 +8,150 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Unified Setup Wizard** (`dotfiles setup`) - New interactive setup with persistent state
+  - Five-phase setup: symlinks → packages → vault → secrets → claude
+  - Progress persistence in `~/.config/dotfiles/state.ini`
+  - Resume support: continue where you left off if interrupted
+  - State inference: auto-detects existing installations from filesystem
+  - Visual status dashboard with checkmarks (`dotfiles setup --status`)
+  - Reset capability (`dotfiles setup --reset`)
+- **State Management Library** (`lib/_state.sh`) - Pure zsh INI file parsing
+  - Functions: `state_init`, `state_completed`, `state_complete`, `state_needs_setup`
+  - Config API: `config_get`, `config_set` for persistent preferences
+  - State inference: `state_infer` detects symlinks, packages, vault, secrets, Claude
+- **macOS Settings Command** (`dotfiles macos`) - Expose macOS settings management
+  - `dotfiles macos apply` - Apply settings from settings.sh
+  - `dotfiles macos preview` - Dry-run mode
+  - `dotfiles macos discover` - Capture current settings
+- **Vault Restore Preview** - `dotfiles vault restore --preview` shows what would be restored without making changes
+
+### Changed
+- **Renamed `bootstrap-vault.sh` to `restore.sh`** - Clearer naming for vault orchestrator
+- **Removed `dotfiles init`** - Replaced by `dotfiles setup` with better state management
+- **Vault Backend Persistence** - Backend choice now saved to config file
+  - Priority: config file → environment variable → default (bitwarden)
+  - Persists across sessions without needing to export env var
+- **Simplified `install.sh`** - Removed `--interactive` flag
+  - Bootstrap scripts now tell user to run `dotfiles setup`
+  - Cleaner separation: install.sh handles clone/bootstrap, setup handles configuration
+- **dotfiles-drift Multi-Backend Support** - Now works with all vault backends (Bitwarden, 1Password, pass)
+  - Uses `lib/_vault.sh` abstraction instead of hardcoded Bitwarden commands
+  - Dynamic backend name in messages
+  - Backend-specific login hints
+- **dotclaude Install URL** - Updated to GitHub raw URL (`raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh`)
+- **Status Dashboard** - Simplified ASCII art header (dimmed city skyline, no embedded indicators)
+- **Post-Install Prompt** - Made `exec zsh` prompt more prominent with yellow highlight
+
+### Fixed
+- **Template Engine: `{{#if}}` inside `{{#each}}`** - Conditionals now work correctly inside loops
+  - Added `process_loop_conditionals()` function to evaluate loop variables
+- **Template Engine: Nested `{{#else}}`** - Fixed stray `{{/if}}` tags in output
+  - Properly matches `{{#else}}` at correct nesting depth
+- **`pass` Function Name Collision** - Fixed conflict in `dotfiles-setup` between pass CLI and logging function
+  - Uses `command pass` to explicitly call the CLI
+- **Test: Doctor Claude Detection** - Fixed test failing when real claude installed
+  - Test now isolates PATH to exclude system claude
+
+## [1.8.4] - 2025-12-02
+
+### Added
+- **dotclaude Integration Documentation** - Comprehensive integration guide (`docs/DOTCLAUDE-INTEGRATION.md`)
+  - Architecture diagrams showing system boundaries and data flow
+  - Division of responsibilities (dotclaude: profiles, dotfiles: secrets)
+  - Usage workflows for multi-client, OSS vs work, multi-machine, and secrets rotation
+  - Configuration, troubleshooting, and security best practices
+- **Mermaid Diagram Support** - Dark mode compatible diagrams throughout documentation
+  - Configured dark theme for better contrast in docs
+  - Converted ASCII diagrams to Mermaid in README-FULL
+  - Architecture diagrams for multi-platform, workspace, and organizational structure
+
+### Changed
+- **Installation Command Pattern** - Replaced confusing `bash -s --` pattern with familiar download-first approach
+  - All documentation now uses: `curl -fsSL ... -o install.sh && bash install.sh --interactive`
+  - Updated install.sh header comments and --help text
+  - Consistent pattern across README, docs, and CLI reference
+- **Badge Reorganization** - Improved visual hierarchy in README
+  - Moved Zsh badge to row 1 (after Blackwell Systems)
+  - Removed duplicate Tests count badge
+  - Added dotclaude integration badge
+- **Comparison Tables** - Made collapsible for better readability
+  - "Quick Comparison: This Repo vs Typical Dotfiles" now collapsible
+  - "Why This Repo vs chezmoi?" now collapsible
+- **README-FULL Modernization** - Updated architecture diagrams and removed outdated claims
+  - Removed "Key Innovation: Portable Claude Code Sessions" marketing language
+  - Simplified diagrams for better resolution and readability
+  - Directory structure now collapsible with full ASCII tree
+
+### Documentation
+- Added dotclaude integration links throughout documentation ecosystem
+- Added comprehensive badge set to README-FULL
+- Cross-linked dotfiles and dotclaude documentation sites
+- Improved feature presentation with code blocks and collapsible sections
+- Updated coverpage formatting and Development & Testing section
+
+## [1.8.3] - 2025-12-01
+
+### Added
+- **GitHub Sponsors Support** - Added `github: blackwell-systems` to FUNDING.yml
+- **Collapsible README Sections** - Made Acknowledgments, Troubleshooting, The dotfiles Command, and Project Structure collapsible for better readability
+- **DOTFILES_SKIP_DRIFT_CHECK** documentation - Added missing environment variable to Optional Components
+
+### Changed
+- **Vault-Agnostic `dotfiles init`** - Major refactor of interactive setup wizard
+  - Auto-detects all vault backends (Bitwarden, 1Password, pass)
+  - Prompts user to choose vault (never auto-selects)
+  - Option to skip vault setup entirely
+  - Backend-specific login/unlock flows
+  - Fixes Alpine/Linux issue where pass was auto-selected
+- **Integrated `install.sh` with `dotfiles init`** - `install.sh --interactive` now calls the wizard automatically
+- **Simplified Quick Start** - Reduced from 4 manual steps to 2 (clone → dotfiles init)
+- **Reordered README Sections** - End sections now: Acknowledgments → Trademarks → License
+- **Updated Project Structure** - Added lib/_vault.sh and test/fixtures/ subdirectory
+- **Removed Bitwarden Bias** - All documentation now vault-agnostic
+
+### Documentation
+- Updated README.md, docs/README.md, docs/README-FULL.md with simplified install flow
+- Updated docs/cli-reference.md with comprehensive `dotfiles init` documentation
+- All install documentation now consistently promotes 2-step flow
+
+## [1.8.2] - 2025-12-01
+
+### Added
+- **Test Drive Guide** (`docs/TESTDRIVE.md`) - Comprehensive Docker exploration guide
+  - Sample workflows for safe testing
+  - dotclaude integration examples
+  - FAQ and troubleshooting
+- Added "Try Before Installing" section to README with Docker instructions
+
+### Fixed
+- Improved template validation tests for better error handling
+
+## [1.8.1] - 2025-12-01
+
+### Fixed
+- Template tests now correctly source `_logging.sh` (fixes 3 failing tests)
+- Removed misleading codecov badge (shell coverage tracking is unreliable)
+
+## [1.8.0] - 2025-12-01
+
+### Added
+- **dotclaude Integration** - Claude Code profile management across machines
+  - `dotfiles status` shows active Claude profile (if dotclaude installed)
+  - `dotfiles doctor` validates Claude/dotclaude setup with install hints
+  - `dotfiles vault` syncs `~/.claude/profiles.json` to vault
+  - `dotfiles drift` detects Claude profile changes vs vault
+  - `dotfiles packages` suggests dotclaude for Claude users
+  - `dotfiles init` offers dotclaude installation during setup wizard
+  - See [docs/claude-code.md](docs/claude-code.md#dotclaude-integration) for details
+- **Dockerfile.lite** - Lightweight Alpine container for CLI exploration
 - **`{{#each}}` Template Loops** - Iterate over arrays with named fields
   - Define `SSH_HOSTS` array in `_variables.local.sh`
   - Use `{{#each ssh_hosts}}...{{/each}}` in templates
   - Access fields: `{{ name }}`, `{{ hostname }}`, `{{ user }}`, `{{ identity }}`, `{{ extra }}`
   - Conditionals work inside loops for optional fields
   - ssh-config.tmpl now generates hosts from SSH_HOSTS array
-- **Vault Restore Preview** - `dotfiles vault restore --preview` shows what would be restored without making changes
 - **Template Tests** (`test/templates.bats`) - Unit tests for template engine
 - **Vault Backend Guide** (`docs/extending-backends.md`) - How to add new vault providers
-
-### Changed
-- **dotfiles-drift Multi-Backend Support** - Now works with all vault backends (Bitwarden, 1Password, pass)
-  - Uses `lib/_vault.sh` abstraction instead of hardcoded Bitwarden commands
-  - Dynamic backend name in messages
-  - Backend-specific login hints
-- **dotclaude Install URL** - Updated to GitHub raw URL
-- **Status Dashboard** - Simplified ASCII art header (dimmed city skyline, no embedded indicators)
-- **Post-Install Prompt** - Made `exec zsh` prompt more prominent with yellow highlight
 
 ### Fixed
 - **Template Engine: `{{#if}}` inside `{{#each}}`** - Conditionals now work correctly inside loops
@@ -34,15 +160,327 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Template Engine: Nested `{{#else}}` handling** - Fixed stray `{{/if}}` tags in output
   - Properly matches `{{#else}}` at the correct nesting level
   - No longer grabs nested conditionals' else blocks
-- **dotfiles-init Zsh Compatibility** - Fixed `read -p` bash syntax not working in zsh
-  - Changed to zsh-compatible `echo -n "prompt"; read var` pattern
-- **bootstrap-vault.sh Multi-Backend** - Now displays correct backend name instead of hardcoded "Bitwarden"
-  - Uses `vault_name()` for dynamic backend display
 
-### Planned
-- Blog posts on dotfiles architecture and Claude session portability
-- Open source vault system as standalone project
-- Additional ZSH completions for more commands
+## [1.7.0] - 2025-11-29
+
+### Added - Multi-Vault Backend Support
+
+#### Vault Abstraction Layer
+- **Multi-vault support** - Choose your preferred secret management backend:
+  - **Bitwarden** (`bw`) - Default, full-featured, cloud-synced
+  - **1Password** (`op`) - v2 CLI with biometric auth
+  - **pass** (`pass`) - GPG-based, git-synced, local-first
+- **`lib/_vault.sh`** - Unified vault API with pluggable backends
+- **`vault/backends/`** - Backend implementations
+  - `bitwarden.sh` - Bitwarden CLI backend
+  - `1password.sh` - 1Password CLI v2 backend
+  - `pass.sh` - pass (GPG) backend
+  - `_interface.md` - Interface specification for backend implementations
+- **`DOTFILES_VAULT_BACKEND`** - Environment variable to select backend (defaults to `bitwarden`)
+
+#### Backward Compatibility
+- Legacy `bw_*` functions still work (aliased to new `vault_*` API)
+- Existing vault items and workflows unchanged
+- Session caching unified across backends (`.vault-session`)
+
+### Added - Root Directory Cleanup
+
+#### Consolidated bootstrap/ Directory
+- **Moved bootstrap scripts to `bootstrap/`** for cleaner repository root
+  - `bootstrap/bootstrap-mac.sh` - macOS setup
+  - `bootstrap/bootstrap-linux.sh` - Linux/WSL2/Lima setup
+  - `bootstrap/bootstrap-dotfiles.sh` - Symlink creation
+  - `bootstrap/_common.sh` - Shared bootstrap functions (already here)
+
+#### Relocated Configuration Files
+- **Moved `codecov.yml` to `.github/`** - CI configuration with other GitHub files
+- **Moved `claude.local.example` to `claude/`** - Example config with Claude settings
+- **Moved `NOTES.md` and `BRAND.md` to `docs/`** - Documentation in docs directory
+
+### Removed
+- **`VERSION` file** - Redundant with CHANGELOG.md as source of truth
+- **`bootstrap-lima.sh` symlink** - Deprecated alias for bootstrap-linux.sh
+
+### Changed
+- Bootstrap scripts updated to find DOTFILES_DIR from parent directory
+- `install.sh` updated with new bootstrap script paths
+- `Dockerfile` updated with new bootstrap script path
+- All CI workflow paths updated for new locations
+- Updated all documentation with new paths and project structure
+
+### Documentation
+- Updated project structure in README.md, docs/README.md, CLAUDE.md
+- Updated Quick Start instructions with new bootstrap paths
+- Updated claude.local.example path references
+
+## [1.6.0] - 2025-11-28
+
+### Added - CLI Reorganization
+
+#### bin/ Directory Structure
+- **Moved CLI scripts to `bin/`** for cleaner repository root
+  - `dotfiles-doctor` - Health validation
+  - `dotfiles-drift` - Drift detection
+  - `dotfiles-backup` - Backup/restore
+  - `dotfiles-diff` - Preview changes
+  - `dotfiles-init` - Setup wizard
+  - `dotfiles-metrics` - Metrics visualization (renamed from show-metrics.sh)
+  - `dotfiles-uninstall` - Clean removal (renamed from uninstall.sh)
+
+### Changed
+- Scripts now source `lib/_logging.sh` from `$DOTFILES_DIR/lib/` (parent of bin/)
+- `zsh/zsh.d/40-aliases.zsh` updated to reference `bin/` paths
+- All test files updated with new paths
+- CI/CD workflow updated with new paths
+- Removed `.sh` extensions from CLI scripts for cleaner invocation
+
+### Documentation
+- Updated project structure in README.md and docs/README.md
+- Updated ROADMAP.md to mark CLI reorganization as completed
+- Updated CHANGELOG.md with v1.6.0 entry
+
+## [1.5.0] - 2025-11-28
+
+### Added - Offline Mode Support
+
+#### Offline Mode
+- **`DOTFILES_OFFLINE=1`** - Skip all Bitwarden vault operations gracefully
+  - `is_offline()` - Check if offline mode is enabled
+  - `require_online()` - Helper to skip vault operations in offline mode
+  - `require_bw()` and `require_logged_in()` - Skip checks in offline mode
+
+#### Use Cases
+- Air-gapped environments without Bitwarden access
+- Bitwarden service outages
+- Development/testing without vault connectivity
+- CI/CD pipelines without secrets
+
+### Changed
+- `vault/bootstrap-vault.sh` - Exits gracefully with helpful message in offline mode
+- `vault/sync-to-bitwarden.sh` - Skips sync with explanation in offline mode
+- Updated all documentation with offline mode usage
+
+### Documentation
+- Added offline mode to README.md and docs/README.md environment flags
+- Added "Air-gapped/Offline" use case to both READMEs
+- Updated vault documentation with offline mode examples
+- Updated ROADMAP.md - marked offline mode as completed
+
+## [1.4.0] - 2025-11-28
+
+### Added - Bootstrap Consolidation & Safety Features
+
+#### Bootstrap Shared Library
+- **`bootstrap/_common.sh`** - Shared bootstrap functions
+  - `parse_bootstrap_args()` - Argument parsing (--interactive, --help)
+  - `prompt_yes_no()` - Interactive yes/no prompts
+  - `run_interactive_config()` - Interactive setup wizard
+  - `setup_workspace_layout()` - ~/workspace directory creation
+  - `setup_workspace_symlink()` - /workspace symlink setup
+  - `link_dotfiles()` - Dotfiles symlinking
+  - `run_brew_bundle()` - Homebrew bundle installation
+  - `add_brew_to_zprofile()` - Homebrew PATH setup
+
+#### Pre-Restore Drift Check
+- **Safety feature** - Prevents accidental data loss during `dotfiles vault restore`
+  - Detects when local files have changed since last vault sync
+  - Warns user and suggests options: sync first, force restore, or review diff
+  - `check_item_drift()` - Check single item for drift
+  - `check_pre_restore_drift()` - Check all syncable items
+  - `skip_drift_check()` - Check DOTFILES_SKIP_DRIFT_CHECK env var
+  - `--force` flag to skip drift check when needed
+
+### Changed
+- `bootstrap-mac.sh` - Now sources `bootstrap/_common.sh` for shared functions
+- `bootstrap-linux.sh` - Now sources `bootstrap/_common.sh` for shared functions
+- `vault/bootstrap-vault.sh` - Added drift check before restore
+- Help text updated for `dotfiles vault restore --force`
+- Reduced code duplication by ~60% in bootstrap scripts
+
+### Documentation
+- Updated `docs/ROADMAP.md` with completed v1.4.0 improvements
+- Updated README.md and docs/README.md with new vault restore options
+- Added bootstrap/ directory to project structure documentation
+
+## [1.3.0] - 2025-11-28
+
+### Added - Shared Library & Error Tests
+
+#### Shared Logging Library
+- **`lib/_logging.sh`** - Centralized logging and color functions
+  - Color definitions (RED, GREEN, YELLOW, BLUE, CYAN, MAGENTA, BOLD, NC)
+  - Logging functions: `info()`, `pass()`, `warn()`, `fail()`, `dry()`, `debug()`
+  - Helper functions: `section()`, `separator()`, `confirm()`
+  - Guard against multiple sourcing
+  - Works with both bash and zsh
+
+#### Error Scenario Tests
+- **`test/error_scenarios.bats`** - 20+ error handling tests
+  - Permission denied scenarios
+  - Missing file/directory handling
+  - Invalid data (corrupted backups, invalid JSON)
+  - Vault/session error states
+  - Edge cases (empty directories, special characters, symlink loops)
+  - CLI argument validation
+  - Concurrent operation safety
+
+### Changed
+- Scripts now use shared `lib/_logging.sh` instead of inline definitions:
+  - `dotfiles-backup.sh`
+  - `dotfiles-diff.sh`
+  - `dotfiles-drift.sh`
+  - `dotfiles-init.sh`
+  - `show-metrics.sh`
+  - `uninstall.sh`
+  - `bootstrap-mac.sh`
+  - `bootstrap-linux.sh`
+- CI/CD workflow now includes error scenario tests
+- Test runner supports `error` mode: `./run_tests.sh error`
+- Documentation updated with Windows platform support
+
+### Documentation
+- **`docs/ROADMAP.md`** - Future improvements roadmap
+  - Prioritized improvement list
+  - Design decisions documentation
+  - Contributing guidelines for roadmap items
+
+## [1.2.2] - 2025-11-28
+
+### Added - Code Coverage
+
+#### Codecov Integration
+- **`codecov.yml`** - Codecov configuration file
+  - 60% target coverage for project
+  - 50% target coverage for patches
+  - Ignores test files, docs, and configs from coverage
+  - PR comments with coverage diffs
+  - Flags for unit and integration tests
+
+#### CI/CD Coverage Job
+- **`.github/workflows/test.yml`** - Added coverage job
+  - kcov for shell script coverage collection
+  - Separate unit and integration coverage runs
+  - Merged coverage reports
+  - Automatic upload to Codecov
+  - Coverage badge in README
+
+### Changed
+- Added Codecov badge to README.md and docs/README.md
+
+## [1.2.1] - 2025-11-28
+
+### Added - Integration Tests
+
+#### Mock Bitwarden CLI
+- **`test/mocks/bw`** - Mock Bitwarden CLI for testing
+  - Simulates all bw commands (status, get, list, create, etc.)
+  - Configurable vault state (locked/unlocked)
+  - Uses file-based mock data for predictable results
+
+#### Test Fixtures
+- **`test/fixtures/vault-items/`** - Sample vault items
+  - SSH-Config, Git-Config, AWS-Config, AWS-Credentials
+  - Environment-Secrets
+  - Realistic JSON structure matching real Bitwarden items
+
+#### Integration Test Suite
+- **`test/integration.bats`** - 20+ integration tests
+  - Mock bw CLI validation tests
+  - Backup create/list/restore cycle tests
+  - Diff preview tests
+  - Uninstall dry-run tests
+  - Error handling tests
+  - End-to-end workflow tests
+
+### Changed
+- **`test/run_tests.sh`** - Enhanced test runner
+  - Supports `unit`, `integration`, or `all` modes
+  - Separate execution of unit vs integration tests
+  - Colored output with clear status
+
+- **`.github/workflows/test.yml`** - Added integration test job
+  - Separate CI job for integration tests
+  - Mock bw CLI setup in CI environment
+
+## [1.2.0] - 2025-11-28
+
+### Added - CLI Commands
+
+#### Unified `dotfiles` Command Expansion
+- **`dotfiles diff`** - Preview changes before sync or restore
+  - `dotfiles diff --sync` - Show what would be synced to vault
+  - `dotfiles diff --restore` - Show what restore would change
+  - Unified diff output with color coding
+
+- **`dotfiles backup`** - Backup and restore configuration
+  - Creates timestamped tar.gz archives in `~/.dotfiles-backups/`
+  - `dotfiles backup` - Create new backup
+  - `dotfiles backup --list` - List available backups
+  - `dotfiles backup restore` - Interactive restore from backup
+  - Auto-cleanup keeps only 10 most recent backups
+
+- **`dotfiles init`** - First-time setup wizard
+  - Interactive walkthrough for new installations
+  - Guides through bootstrap, Bitwarden setup, secret restoration
+  - ASCII art banner and step-by-step progress
+
+- **`dotfiles uninstall`** - Clean removal script
+  - `dotfiles uninstall --dry-run` - Preview what would be removed
+  - `dotfiles uninstall --keep-secrets` - Remove dotfiles but keep SSH/AWS/Git
+  - Safe removal with confirmation prompts
+
+#### Tab Completion
+- **`_dotfiles` completion** - Full tab completion for dotfiles command
+  - All subcommands with descriptions
+  - Vault subcommands with item names
+  - Flag completions for all options
+
+### Added - New Scripts
+- `dotfiles-backup.sh` - Backup and restore functionality
+- `dotfiles-diff.sh` - Preview changes before sync/restore
+- `dotfiles-init.sh` - First-time setup wizard
+- `uninstall.sh` - Clean removal script
+
+### Added - Documentation
+- **Architecture page** (`docs/architecture.md`)
+  - Mermaid diagrams for system overview
+  - Component architecture diagrams
+  - ZSH module load order diagram
+  - Vault system sequence diagram
+  - Data flow summary table
+
+- **Troubleshooting guide** (`docs/troubleshooting.md`)
+  - Quick diagnostics section
+  - Installation issues and fixes
+  - Shell issues (prompt, completions)
+  - Bitwarden/vault issues
+  - Permission fixes
+  - Platform-specific issues
+  - Backup/restore issues
+
+### Added - CI/CD
+- **Release workflow** (`.github/workflows/release.yml`)
+  - Automated releases on git tag push
+  - Changelog generation from commits
+  - Archive creation (tar.gz and zip)
+  - SHA256 checksums
+  - GitHub release with notes
+
+- **Enhanced test coverage**
+  - `test/cli_commands.bats` - Tests for all CLI scripts
+  - Syntax validation for all new scripts
+  - Help flag tests for all commands
+
+### Changed
+- Updated `40-aliases.zsh` with new commands (diff, backup, init, uninstall)
+- Updated test workflow to validate new scripts
+- Updated documentation with new commands and features
+- Expanded `dotfiles help` output with all new commands
+
+### Infrastructure
+- New scripts made executable with proper permissions
+- Tab completion file added to `zsh/completions/`
+- Documentation sidebar updated with new pages
 
 ## [1.1.0] - 2025-11-27
 
