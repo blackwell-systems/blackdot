@@ -1,0 +1,90 @@
+# Medium dotfiles container with Homebrew
+# Full dotfiles functionality without heavy packages
+#
+# Image size: ~400MB | Build time: ~3-5 min
+
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV HOME=/root
+ENV WORKSPACE=/root/workspace
+
+# Minimal prerequisites for Homebrew
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        curl \
+        file \
+        git \
+        procps \
+        ca-certificates \
+        locales \
+        sudo \
+        unzip \
+    && rm -rf /var/lib/apt/lists/* \
+    && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+
+ENV LANG=en_US.UTF-8
+
+# Install Homebrew
+RUN NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && \
+    echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /root/.bashrc && \
+    echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /root/.zshrc
+
+ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
+
+# Install core tools via Homebrew (minimal set for dotfiles functionality)
+RUN brew install \
+    zsh \
+    jq \
+    bitwarden-cli \
+    gnupg \
+    pass
+
+# Install 1Password CLI
+RUN brew install --cask 1password-cli 2>/dev/null || \
+    (curl -sSL "https://cache.agilebits.com/dist/1P/op2/pkg/v2.30.0/op_linux_amd64_v2.30.0.zip" -o /tmp/op.zip && \
+     unzip /tmp/op.zip -d /usr/local/bin && rm /tmp/op.zip)
+
+WORKDIR /root/workspace/dotfiles
+
+# Copy dotfiles
+COPY . /root/workspace/dotfiles/
+
+# Make scripts executable
+RUN chmod +x /root/workspace/dotfiles/bin/* && \
+    chmod +x /root/workspace/dotfiles/vault/*.sh && \
+    chmod +x /root/workspace/dotfiles/bootstrap/*.sh
+
+# Setup minimal zsh config (don't run full bootstrap)
+RUN mkdir -p /root/.config/dotfiles /root/.ssh /root/.aws && \
+    ln -sf /root/workspace/dotfiles/zsh/zshrc /root/.zshrc && \
+    ln -s /root/workspace /workspace
+
+# Set zsh as default shell
+RUN chsh -s $(which zsh) root
+
+CMD ["zsh"]
+
+# =============================================================================
+# Usage:
+#   docker build -f Dockerfile.medium -t dotfiles-medium .
+#   docker run -it --rm dotfiles-medium
+#
+# This container has:
+#   - Homebrew (can install any brew package)
+#   - Bitwarden CLI, 1Password CLI, pass/GPG
+#   - Full dotfiles CLI functionality
+#   - /workspace symlink for portable paths
+#
+# It does NOT have (to keep size down):
+#   - eza, fzf, ripgrep, bat, etc. (install via: brew install eza fzf ripgrep)
+#   - Powerlevel10k theme (install via: brew install powerlevel10k)
+#   - Full Brewfile packages
+#
+# To get full setup:
+#   brew bundle --file=/root/workspace/dotfiles/Brewfile
+#
+# Or run bootstrap:
+#   ./bootstrap/bootstrap-linux.sh
+# =============================================================================

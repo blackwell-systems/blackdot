@@ -1,8 +1,11 @@
 # Lightweight dotfiles exploration container
-# For quick CLI testing without full bootstrap
+# For CLI testing with vault support (no Homebrew)
+#
+# Image size: ~200MB | Build time: ~60s
 
 FROM alpine:3.19
 
+# Core tools + vault dependencies
 RUN apk add --no-cache \
     bash \
     zsh \
@@ -10,7 +13,21 @@ RUN apk add --no-cache \
     jq \
     coreutils \
     util-linux \
-    curl
+    curl \
+    gnupg \
+    pass \
+    nodejs \
+    npm
+
+# Install Bitwarden CLI
+RUN npm install -g @bitwarden/cli && \
+    npm cache clean --force
+
+# Install 1Password CLI (standalone binary)
+RUN curl -sSL "https://cache.agilebits.com/dist/1P/op2/pkg/v2.30.0/op_linux_amd64_v2.30.0.zip" -o /tmp/op.zip && \
+    unzip /tmp/op.zip -d /usr/local/bin && \
+    rm /tmp/op.zip && \
+    chmod +x /usr/local/bin/op
 
 ENV HOME=/root
 ENV WORKSPACE=/root/workspace
@@ -25,21 +42,38 @@ COPY zsh/ /root/workspace/dotfiles/zsh/
 COPY templates/ /root/workspace/dotfiles/templates/
 
 # Make bin scripts executable
-RUN chmod +x /root/workspace/dotfiles/bin/*
+RUN chmod +x /root/workspace/dotfiles/bin/* && \
+    chmod +x /root/workspace/dotfiles/vault/*.sh
 
-# Setup zsh to load dotfiles functions
-RUN mkdir -p /root/.config && \
+# Setup zsh with dotfiles functions
+RUN mkdir -p /root/.config/dotfiles /root/.ssh /root/.aws && \
     echo 'export WORKSPACE=/root/workspace' > /root/.zshrc && \
     echo 'source /root/workspace/dotfiles/zsh/zsh.d/40-aliases.zsh' >> /root/.zshrc && \
     echo 'source /root/workspace/dotfiles/zsh/zsh.d/50-functions.zsh' >> /root/.zshrc
 
+# Create /workspace symlink for portable paths
+RUN ln -s /root/workspace /workspace
+
 CMD ["zsh"]
 
+# =============================================================================
 # Usage:
 #   docker build -f Dockerfile.lite -t dotfiles-lite .
 #   docker run -it --rm dotfiles-lite
 #
-# Then explore:
+# With Bitwarden:
+#   docker run -it --rm -e BW_SESSION="$BW_SESSION" dotfiles-lite
+#
+# With 1Password:
+#   docker run -it --rm dotfiles-lite
+#   # Then: eval $(op signin)
+#
+# With pass (mount GPG keys):
+#   docker run -it --rm -v ~/.gnupg:/root/.gnupg:ro dotfiles-lite
+#
+# Explore:
 #   dotfiles help
 #   dotfiles doctor
+#   dotfiles vault check
 #   dotfiles status
+# =============================================================================
