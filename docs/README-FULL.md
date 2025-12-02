@@ -659,7 +659,7 @@ The wizard handles:
 - **Secrets**: Restore SSH keys, AWS credentials, Git config
 - **Claude Code**: Optional dotclaude installation
 
-**Progress is saved** to `~/.config/dotfiles/`. If interrupted, run `dotfiles setup` again to resume.
+**Progress is saved** to `~/.config/dotfiles/`. If interrupted, run `dotfiles setup` again to resume. See [State Management](state-management.md) for details on state files and persistence.
 
 You can skip optional features using environment variables:
 

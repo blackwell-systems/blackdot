@@ -1076,6 +1076,7 @@ To customize:
 - **[Full Documentation](docs/README-FULL.md)** - Complete guide (1,900+ lines)
 - **[Vault README](docs/vault-README.md)** - Multi-vault backend details
 - **[Template Guide](docs/templates.md)** - Machine-specific configuration templates
+- **[State Management](docs/state-management.md)** - Setup wizard state, resume, and preferences
 - **[Claude Code Guide](docs/claude-code.md)** - Multi-backend setup and session portability
 - **[dotclaude Integration](docs/DOTCLAUDE-INTEGRATION.md)** - Profile management with dotclaude
 - **[Architecture](docs/architecture.md)** - System diagrams and component overview
