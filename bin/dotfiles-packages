@@ -227,5 +227,5 @@ if command -v claude &>/dev/null && ! command -v dotclaude &>/dev/null; then
     echo ""
     info "Claude Code detected without dotclaude"
     echo "     Manage profiles across machines with dotclaude:"
-    echo "     curl -fsSL https://dotclaude.dev/install | bash"
+    echo "     See: github.com/blackwell-systems/dotclaude"
 fi
