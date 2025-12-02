@@ -28,36 +28,50 @@ dotfiles macos discover           # Capture current settings
 
 ---
 
-## Next Up
+## Recently Completed (v2.0.x)
 
-### 1. Template JSON Arrays
+### Template JSON Arrays ✅
 
-**Status:** Planning Complete - Ready for Implementation
-**Document:** [PLAN-TEMPLATE-JSON.md](PLAN-TEMPLATE-JSON.md)
+**Status:** Complete (v2.0.x)
 
-Add JSON configuration support for template arrays (currently shell-only):
-
-**Current (awkward):**
-```zsh
-SSH_HOSTS=("github|github.com|git|~/.ssh/id_ed25519|")
-```
-
-**Proposed (clear):**
-```json
-{
-  "ssh_hosts": [
-    {"name": "github", "hostname": "github.com", "user": "git", "identity": "~/.ssh/id_ed25519"}
-  ]
-}
-```
-
-**Approach:** Hybrid - shell for variables (comments useful), JSON for arrays (structure clearer). No new dependencies (jq already required).
+JSON configuration support for template arrays:
+- `templates/_arrays.local.json` for cleaner SSH host definitions
+- `dotfiles template arrays` command to view/manage
+- Falls back to shell arrays if no JSON file
+- Export existing shell arrays to JSON with `--export-json`
 
 ---
 
 ## Backlog
 
-### 2. MCP Server for Claude Code Integration
+### 1. Interactive Template Setup
+
+**Status:** Consideration
+
+Add an interactive mode to `dotfiles template init` that prompts for common variables:
+
+```bash
+dotfiles template init --interactive
+# or make init more interactive by default
+```
+
+**Potential prompts:**
+- Git name and email
+- Machine type (work/personal)
+- GitHub username
+- AWS profile
+
+**Tradeoffs:**
+- **Pro:** Lower barrier for first-time users, no need to understand shell syntax
+- **Pro:** Consistent with `dotfiles setup` wizard pattern
+- **Con:** Current `init` already opens editor with well-commented example
+- **Con:** Most dotfiles users are comfortable editing files
+
+**Decision:** Consider implementing as lightweight prompts for essentials only, then open editor for advanced customization.
+
+---
+
+### 3. MCP Server for Claude Code Integration
 
 **Status:** Concept - Not Started
 
@@ -81,7 +95,7 @@ dotfiles_doctor_fix()       // Auto-repair issues
 
 ---
 
-### 3. Session Management Improvements
+### 4. Session Management Improvements
 
 **Status:** Not Started
 
@@ -92,7 +106,7 @@ Improve Bitwarden session handling:
 
 ---
 
-### 4. API/Function Reference Documentation
+### 5. API/Function Reference Documentation
 
 **Status:** Not Started
 
