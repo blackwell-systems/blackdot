@@ -5,7 +5,7 @@
 > Dotfiles for the AI-assisted development era
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --interactive
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
 ```
 
 - **One command setup** - Interactive wizard guides you through
