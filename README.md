@@ -1073,12 +1073,12 @@ To customize:
 
 - **[CLI Reference](docs/cli-reference.md)** - All commands, flags, and environment variables
 - **[Full Documentation](docs/README-FULL.md)** - Complete guide (1,900+ lines)
+- **[Vault README](docs/vault-README.md)** - Multi-vault backend details
 - **[Template Guide](docs/templates.md)** - Machine-specific configuration templates
 - **[Claude Code Guide](docs/claude-code.md)** - Multi-backend setup and session portability
 - **[dotclaude Integration](docs/DOTCLAUDE-INTEGRATION.md)** - Profile management with dotclaude
 - **[Architecture](docs/architecture.md)** - System diagrams and component overview
 - **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
-- **[Vault README](docs/vault-README.md)** - Multi-vault backend details
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contributor guide
 - **[SECURITY.md](SECURITY.md)** - Security policy
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
