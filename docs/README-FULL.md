@@ -263,23 +263,23 @@ flowchart TB
 
 These work on **any platform** without modification:
 
-**✅ Vault System** (100% portable)
+**Vault System** (100% portable)
 - All `vault/*.sh` scripts with multi-backend support
 - Backends: Bitwarden (`bw`), 1Password (`op`), pass (`pass/gpg`)
 - Just needs: `zsh`, vault CLI, `jq`
 - Works on Linux, macOS, BSD, WSL, Docker
 
-**✅ Health & Metrics** (100% portable)
+**Health & Metrics** (100% portable)
 - `bin/dotfiles-doctor` / `bin/dotfiles-drift`
 - `bin/dotfiles-metrics`
 - Cross-platform file permissions handling
 
-**✅ Shell Configuration** (OS-aware)
+**Shell Configuration** (OS-aware)
 - `zshrc` with OS detection
 - Conditional loading for macOS/Linux
 - Portable modern CLI tools (eza, fzf, etc.)
 
-**✅ Package Management** (cross-platform)
+**Package Management** (cross-platform)
 - `Brewfile` works on macOS + Linux (Linuxbrew)
 - Conditional sections (`on_macos`, `on_linux`)
 
@@ -380,34 +380,34 @@ This enables:
 The workspace provides a consistent hierarchy:
 
 ```mermaid
-graph TB
+graph LR
     workspace["~/workspace/"]
 
-    claude[".claude/<br/><small>Shared Claude state (symlink from ~/.claude)</small>"]
-    history[".zsh_history<br/><small>Shared shell history across platforms</small>"]
-    notes[".notes.md<br/><small>Quick notes via note/notes commands</small>"]
-    dotfiles["dotfiles/<br/><small>This repository</small>"]
-    code["code/<br/><small>Active projects</small>"]
-    whitepapers["whitepapers/<br/><small>Documentation, specs</small>"]
-    patents["patent-pool/<br/><small>IP work</small>"]
+    subgraph state["Shared State"]
+        claude[".claude/"]
+        history[".zsh_history"]
+    end
 
-    workspace --> claude
-    workspace --> history
-    workspace --> notes
-    workspace --> dotfiles
-    workspace --> code
-    workspace --> whitepapers
-    workspace --> patents
+    subgraph work["Work Files"]
+        dotfiles["dotfiles/"]
+        code["code/"]
+        docs["whitepapers/"]
+    end
+
+    workspace --> state
+    workspace --> work
 
     style workspace fill:#2d3748,stroke:#4a5568,color:#e2e8f0
-    style claude fill:#1a365d,stroke:#2c5282,color:#e2e8f0
-    style history fill:#1a365d,stroke:#2c5282,color:#e2e8f0
-    style notes fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style state fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style work fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style claude fill:#2f855a,stroke:#48bb78,color:#e2e8f0
     style dotfiles fill:#2c5282,stroke:#4299e1,color:#e2e8f0
-    style code fill:#1a365d,stroke:#2c5282,color:#e2e8f0
-    style whitepapers fill:#1a365d,stroke:#2c5282,color:#e2e8f0
-    style patents fill:#1a365d,stroke:#2c5282,color:#e2e8f0
 ```
+
+**Structure breakdown:**
+- **Shared State**: `.claude/` (Claude sessions), `.zsh_history` (shell history)
+- **Work Files**: `dotfiles/` (this repo), `code/` (projects), `whitepapers/` (docs)
+- **Navigation**: `cws` → workspace, `ccode` → code/, `dotfiles` → dotfiles/
 
 **Shared shell history**: Command history is stored in `~/workspace/.zsh_history` and syncs between macOS and Lima sessions.
 
@@ -496,57 +496,46 @@ claude                    # New session every time
 ### Visual Overview
 
 ```mermaid
-flowchart LR
-    subgraph host["<b>Host Machine</b><br/>/Users/username/<br/>(macOS)"]
-        host_home["~/<br/>━━━━━"]
-        host_ssh[".ssh/<br/><small>Per-machine secrets</small>"]
-        host_aws[".aws/<br/><small>Per-machine secrets</small>"]
-        host_git[".gitconfig<br/><small>Per-machine</small>"]
-        host_workspace["workspace/<br/><small>Shared files</small>"]
-
-        host_home --> host_ssh
-        host_home --> host_aws
-        host_home --> host_git
-        host_home --> host_workspace
+flowchart TB
+    subgraph host["Host: /Users/username/ (macOS)"]
+        h_secrets["Secrets<br/>(.ssh, .aws, .gitconfig)<br/><small>Per-machine</small>"]
+        h_workspace["~/workspace/<br/><small>Shared files</small>"]
     end
 
-    subgraph guest["<b>Guest VM / Remote</b><br/>/home/username/<br/>(Linux/Lima/WSL)"]
-        guest_home["~/<br/>━━━━━"]
-        guest_ssh[".ssh/<br/><small>Per-machine secrets</small>"]
-        guest_aws[".aws/<br/><small>Per-machine secrets</small>"]
-        guest_git[".gitconfig<br/><small>Per-machine</small>"]
-        guest_workspace["workspace/<br/><small>Mounted/synced</small>"]
-
-        guest_home --> guest_ssh
-        guest_home --> guest_aws
-        guest_home --> guest_git
-        guest_home --> guest_workspace
+    subgraph guest["Guest: /home/username/ (Lima/WSL)"]
+        g_secrets["Secrets<br/>(.ssh, .aws, .gitconfig)<br/><small>Per-machine</small>"]
+        g_workspace["~/workspace/<br/><small>Mounted from host</small>"]
     end
 
-    subgraph workspace_content["<b>~/workspace/ Content</b><br/>(Shared across platforms)"]
-        ws_dotfiles["dotfiles/<br/><small>This repo</small>"]
-        ws_code["code/<br/><small>Projects</small>"]
-        ws_claude[".claude/<br/><small>Symlinked from ~/.claude</small>"]
-        ws_more["..."]
+    subgraph shared["Shared: ~/workspace/ Content"]
+        direction LR
+        dotfiles["dotfiles/"]
+        code["code/"]
+        claude[".claude/"]
     end
 
-    host_workspace <-->|"Same files"| guest_workspace
-    host_workspace -.->|contains| workspace_content
-    guest_workspace -.->|contains| workspace_content
+    h_workspace <-->|same files| g_workspace
+    h_workspace -.-> shared
+    g_workspace -.-> shared
 
-    host_ssh <-.->|"vault sync"| guest_ssh
-    host_aws <-.->|"vault sync"| guest_aws
+    h_secrets <-.->|vault sync| g_secrets
 
-    insight["<b>KEY INSIGHT: /workspace Path Portability</b><br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>/workspace → ~/workspace (symlink)<br/>• cd /workspace/dotfiles && claude → -workspace-dotfiles/<br/>• Same session folder across ALL machines<br/>• Portable Claude Code history"]
+    symlink["/workspace → ~/workspace<br/><small>Ensures identical paths across all machines</small>"]
 
     style host fill:#1a365d,stroke:#2c5282,color:#e2e8f0
     style guest fill:#1a365d,stroke:#2c5282,color:#e2e8f0
-    style workspace_content fill:#2c5282,stroke:#4299e1,color:#e2e8f0
-    style insight fill:#22543d,stroke:#2f855a,color:#e2e8f0
-    style host_workspace fill:#2c5282,stroke:#4299e1,color:#e2e8f0
-    style guest_workspace fill:#2c5282,stroke:#4299e1,color:#e2e8f0
-    style ws_claude fill:#2f855a,stroke:#48bb78,color:#e2e8f0
+    style shared fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style symlink fill:#22543d,stroke:#2f855a,color:#e2e8f0
+    style h_workspace fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style g_workspace fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style claude fill:#2f855a,stroke:#48bb78,color:#e2e8f0
 ```
+
+**Key concept:**
+- **Host & Guest** share `~/workspace/` (mounted/synced)
+- **Secrets** (.ssh, .aws, .gitconfig) are per-machine, synced via vault
+- **`/workspace` symlink** ensures identical paths: `cd /workspace/dotfiles` works everywhere
+- **Claude Code sessions** are portable across machines via shared `.claude/` state
 
 ### Why This Matters
 
