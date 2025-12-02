@@ -90,7 +90,8 @@ step "Step 1: Bootstrap"
 
 if [[ ! -L "$HOME/.zshrc" ]]; then
     echo "Running bootstrap to create symlinks..."
-    read -p "Continue? [Y/n]: " confirm
+    echo -n "Continue? [Y/n]: "
+    read confirm
     if [[ "${confirm:-Y}" =~ ^[Yy]$ ]]; then
         if [[ "$(uname -s)" == "Darwin" ]]; then
             "$DOTFILES_DIR/bootstrap/bootstrap-mac.sh"
@@ -116,7 +117,8 @@ if [[ ${#AVAILABLE_VAULTS[@]} -eq 0 ]]; then
     echo "  • 1Password:  brew install 1password-cli"
     echo "  • pass:       brew install pass"
     echo ""
-    read -p "Skip vault setup? [Y/n]: " skip
+    echo -n "Skip vault setup? [Y/n]: "
+    read skip
     if [[ "${skip:-Y}" =~ ^[Yy]$ ]]; then
         warn "Skipped vault setup - you can configure secrets manually"
         VAULT_CONFIGURED=false
@@ -133,7 +135,8 @@ else
     echo "  $((${#AVAILABLE_VAULTS[@]} + 1))) Skip vault setup (configure secrets manually)"
     echo ""
 
-    read -p "Select vault backend [1]: " choice
+    echo -n "Select vault backend [1]: "
+    read choice
     choice=${choice:-1}
 
     # Check if user chose to skip
@@ -161,7 +164,8 @@ else
             if ! vault_check_login "$SELECTED_BACKEND" 2>/dev/null; then
                 echo ""
                 echo "Unlock your vault:"
-                read -p "Run 'bw unlock' now? [Y/n]: " confirm
+                echo -n "Run 'bw unlock' now? [Y/n]: "
+                read confirm
                 if [[ "${confirm:-Y}" =~ ^[Yy]$ ]]; then
                     export BW_SESSION="$(bw unlock --raw)"
                     if [[ -n "$BW_SESSION" ]]; then
@@ -216,7 +220,8 @@ if [[ "${VAULT_CONFIGURED:-false}" == "true" ]]; then
     echo "Would you like to restore secrets from $SELECTED_BACKEND?"
     echo "This will restore: SSH keys, AWS credentials, Git config, etc."
     echo ""
-    read -p "Restore secrets? [Y/n]: " confirm
+    echo -n "Restore secrets? [Y/n]: "
+    read confirm
     if [[ "${confirm:-Y}" =~ ^[Yy]$ ]]; then
         "$DOTFILES_DIR/vault/bootstrap-vault.sh"
         pass "Secrets restored"
@@ -235,7 +240,8 @@ if command -v claude &>/dev/null; then
     if ! command -v dotclaude &>/dev/null; then
         echo "Claude Code detected. dotclaude helps manage profiles across machines."
         echo ""
-        read -p "Install dotclaude? [Y/n]: " response
+        echo -n "Install dotclaude? [Y/n]: "
+        read response
         if [[ "${response:-Y}" =~ ^[Yy]$ ]]; then
             curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh | bash
             if command -v dotclaude &>/dev/null; then
