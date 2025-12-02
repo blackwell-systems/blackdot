@@ -9,11 +9,7 @@
 
 [Changelog](../CHANGELOG.md) | [Quick Start Guide](../README.md)
 
-This is the comprehensive reference documentation for the dotfiles system. It covers configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code portable sessions**, and a **multi-vault secret bootstrap** (supporting Bitwarden, 1Password, and pass) for SSH keys, AWS credentials, and environment secrets across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
-
-### 🌟 Key Innovation: Portable Claude Code Sessions
-
-Unlike most dotfiles, this system enables **true Claude Code session portability** across machines. Work on macOS, continue in Lima, finish in WSL - **same conversation, full history**. Achieved through the `/workspace` symlink architecture detailed below.
+This is the comprehensive reference documentation for the dotfiles system. It covers configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code**, and a **multi-vault secret bootstrap** (supporting Bitwarden, 1Password, and pass) for SSH keys, AWS credentials, and environment secrets across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
 
 ---
 
@@ -93,7 +89,7 @@ dotfiles doctor
 - Zsh + Powerlevel10k + plugins (autosuggestions, syntax highlighting)
 - All Homebrew packages from `Brewfile`
 - SSH keys, AWS credentials, and environment secrets from vault (Bitwarden/1Password/pass)
-- **Portable Claude Code sessions** via `/workspace` symlink
+- Claude Code configuration via `/workspace` symlink
 - The `dotfiles` command for ongoing management
 
 ### 💡 Critical: Use `/workspace` for Claude Code
@@ -115,58 +111,80 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 
 The dotfiles are organized as follows:
 
-```text
-~/workspace/dotfiles
-├── install.sh                # One-line installer (curl | bash)
-├── bootstrap/                # Platform bootstrap scripts
-│   ├── bootstrap-mac.sh      # macOS-specific bootstrap (--interactive supported)
-│   ├── bootstrap-linux.sh    # Linux-specific bootstrap (--interactive supported)
-│   ├── bootstrap-dotfiles.sh # Shared symlink bootstrap
-│   └── _common.sh            # Shared bootstrap functions
-├── bin/                      # CLI tools
-│   ├── dotfiles-doctor       # Health check (use: dotfiles doctor)
-│   ├── dotfiles-drift        # Drift detection (use: dotfiles drift)
-│   ├── dotfiles-backup       # Backup/restore
-│   ├── dotfiles-diff         # Preview changes
-│   ├── dotfiles-init         # Setup wizard
-│   └── dotfiles-uninstall    # Clean removal
-├── Brewfile                  # Unified Homebrew bundle (macOS + Lima)
-├── CHANGELOG.md              # Version history
-├── .gitignore                # Excludes .bw-session, editor files
-├── claude
-│   ├── settings.json         # Claude Code settings (permissions, preferences)
-│   └── commands/             # Custom slash commands
-│       └── health.md         # /health - run dotfiles health check
-├── ghostty
-│   └── config                # Ghostty terminal config
-├── lima
-│   └── lima.yaml             # Lima VM config (host-side)
-├── macos
-│   ├── apply-settings.sh     # Apply macOS system settings
-│   ├── discover-settings.sh  # Capture/diff macOS settings
-│   ├── settings.sh           # The actual settings to apply
-│   └── snapshots/            # Setting snapshots for diff
-├── vault
-│   ├── _common.sh            # Shared library (colors, logging, session, SSH_KEYS)
-│   ├── backends/             # Backend implementations (bitwarden, 1password, pass)
-│   ├── bootstrap-vault.sh    # Orchestrates all vault restores
-│   ├── check-vault-items.sh  # Validates required vault items exist
-│   ├── create-vault-item.sh  # Creates new vault secure notes
-│   ├── delete-vault-item.sh  # Deletes items from vault (with safety)
-│   ├── list-vault-items.sh   # Lists all vault items (debug/inventory)
-│   ├── sync-to-vault.sh      # Syncs local changes back to vault
-│   ├── restore-ssh.sh        # Restores SSH keys and config from vault
-│   ├── restore-aws.sh        # Restores ~/.aws/config & ~/.aws/credentials
-│   ├── restore-env.sh        # Restores environment secrets to ~/.local
-│   ├── restore-git.sh        # Restores ~/.gitconfig from vault
-│   ├── template-aws-config   # Reference template for AWS config
-│   ├── template-aws-credentials # Reference template for AWS credentials
-│   └── README.md             # Vault system documentation
-├── zellij
-│   └── config.kdl            # Zellij multiplexer config
-└── zsh
-    ├── p10k.zsh              # Powerlevel10k theme config
-    └── zshrc                 # Main Zsh configuration
+```mermaid
+graph TB
+    root["~/workspace/dotfiles"]
+
+    subgraph core["Core Files"]
+        install["install.sh<br/><small>One-line installer</small>"]
+        brewfile["Brewfile<br/><small>Homebrew packages</small>"]
+        changelog["CHANGELOG.md"]
+    end
+
+    subgraph bootstrap_g["bootstrap/"]
+        bootstrap_mac["bootstrap-mac.sh<br/><small>macOS bootstrap</small>"]
+        bootstrap_linux["bootstrap-linux.sh<br/><small>Linux bootstrap</small>"]
+        bootstrap_dotfiles["bootstrap-dotfiles.sh<br/><small>Symlink setup</small>"]
+        bootstrap_common["_common.sh<br/><small>Shared functions</small>"]
+    end
+
+    subgraph bin_g["bin/"]
+        bin_doctor["dotfiles-doctor<br/><small>Health check</small>"]
+        bin_drift["dotfiles-drift<br/><small>Drift detection</small>"]
+        bin_init["dotfiles-init<br/><small>Setup wizard</small>"]
+        bin_more["+ backup, diff, lint,<br/>metrics, packages,<br/>template, uninstall"]
+    end
+
+    subgraph vault_g["vault/"]
+        vault_bootstrap["bootstrap-vault.sh<br/><small>Orchestrates restores</small>"]
+        vault_backends["backends/<br/><small>bw/1password/pass</small>"]
+        vault_restore_ssh["restore-ssh.sh"]
+        vault_restore_aws["restore-aws.sh"]
+        vault_restore_env["restore-env.sh"]
+        vault_restore_git["restore-git.sh"]
+        vault_sync["sync-to-vault.sh"]
+    end
+
+    subgraph shell["Shell Configuration"]
+        zsh_dir["zsh/<br/><small>zshrc, p10k.zsh</small>"]
+        ghostty_dir["ghostty/<br/><small>config</small>"]
+        zellij_dir["zellij/<br/><small>config.kdl</small>"]
+    end
+
+    subgraph claude_g["claude/"]
+        claude_settings["settings.json<br/><small>Permissions, hooks</small>"]
+        claude_commands["commands/<br/><small>/health slash command</small>"]
+    end
+
+    subgraph macos_g["macos/"]
+        macos_apply["apply-settings.sh"]
+        macos_discover["discover-settings.sh"]
+        macos_settings["settings.sh"]
+        macos_snapshots["snapshots/"]
+    end
+
+    subgraph lima_g["lima/"]
+        lima_yaml["lima.yaml<br/><small>VM config</small>"]
+    end
+
+    root --> core
+    root --> bootstrap_g
+    root --> bin_g
+    root --> vault_g
+    root --> shell
+    root --> claude_g
+    root --> macos_g
+    root --> lima_g
+
+    style root fill:#2d3748,stroke:#4a5568,color:#e2e8f0
+    style core fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style bootstrap_g fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style bin_g fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style vault_g fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style shell fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style claude_g fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style macos_g fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style lima_g fill:#1a365d,stroke:#2c5282,color:#e2e8f0
 ```
 
 Key pieces:
@@ -574,45 +592,52 @@ Use `--help` to see all available options:
 
 ### Architecture Diagram
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         DOTFILES ARCHITECTURE                                │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│   NEW MACHINE                                                                │
-│       │                                                                      │
-│       ▼                                                                      │
-│  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐                 │
-│  │  Bootstrap   │────▶│   Restore    │────▶│   Verify     │                 │
-│  │  (packages)  │     │  (secrets)   │     │  (health)    │                 │
-│  │              │     │              │     │              │                 │
-│  │ bootstrap-   │     │ bootstrap-   │     │ check-       │                 │
-│  │ mac/lima.sh  │     │ vault.sh     │     │ health.sh    │                 │
-│  └──────────────┘     └──────────────┘     └──────────────┘                 │
-│         │                    ▲                     │                        │
-│         │                    │                     │                        │
-│         ▼                    │                     ▼                        │
-│  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐                 │
-│  │   Brewfile   │     │ Multi-Vault  │◀────│  Sync Back   │                 │
-│  │   (tools)    │     │ (bw/op/pass) │     │  (changes)   │                 │
-│  │              │     │              │     │              │
-│  │ brew, zsh,   │     │ SSH keys,    │     │ sync-to-     │                 │
-│  │ plugins...   │     │ AWS, Git,    │     │ vault.sh     │                 │
-│  └──────────────┘     │ env secrets  │     └──────────────┘                 │
-│                       └──────────────┘                                      │
-│                              │                                              │
-│                              ▼                                              │
-│                    ┌──────────────────┐                                     │
-│                    │ check-vault-     │                                     │
-│                    │ items.sh         │                                     │
-│                    │ (pre-flight)     │                                     │
-│                    └──────────────────┘                                     │
-│                                                                              │
-│   FLOW: Clone repo → Bootstrap → Validate vault → Restore → Health check   │
-│         ───────────────────────────────────────────────────────────────     │
-│         Edit configs locally → Sync back to vault → Restore elsewhere      │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    machine["New Machine"]
+
+    subgraph setup["Setup Phase"]
+        bootstrap["Bootstrap<br/><small>bootstrap-mac/linux.sh</small><br/>Install packages, tools, shell"]
+        restore["Restore Secrets<br/><small>bootstrap-vault.sh</small><br/>SSH, AWS, Git, env"]
+        verify["Health Check<br/><small>dotfiles doctor</small><br/>Verify installation"]
+    end
+
+    subgraph tools["Package Sources"]
+        brewfile["Brewfile<br/><small>brew, zsh, plugins...</small>"]
+    end
+
+    subgraph vault["Multi-Vault Backend"]
+        vault_storage["Vault Storage<br/><small>Bitwarden / 1Password / pass</small><br/>• SSH keys<br/>• AWS credentials<br/>• Git config<br/>• Environment secrets"]
+        vault_check["check-vault-items.sh<br/><small>Pre-flight validation</small>"]
+    end
+
+    subgraph sync["Maintenance"]
+        sync_back["sync-to-vault.sh<br/><small>Push local changes back</small>"]
+    end
+
+    machine --> bootstrap
+    bootstrap --> restore
+    restore --> verify
+
+    bootstrap -.->|installs| brewfile
+    restore -->|pulls from| vault_storage
+    vault_storage -->|validates| vault_check
+    verify -->|after changes| sync_back
+    sync_back -->|updates| vault_storage
+
+    flow1["<b>New Machine Flow:</b><br/>Clone repo → Bootstrap → Validate vault → Restore → Health check"]
+    flow2["<b>Maintenance Flow:</b><br/>Edit configs locally → Sync to vault → Restore elsewhere"]
+
+    style machine fill:#2d3748,stroke:#4a5568,color:#e2e8f0
+    style setup fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style tools fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style vault fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style sync fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style bootstrap fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style restore fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style verify fill:#22543d,stroke:#2f855a,color:#e2e8f0
+    style flow1 fill:#2d3748,stroke:#4a5568,color:#e2e8f0
+    style flow2 fill:#2d3748,stroke:#4a5568,color:#e2e8f0
 ```
 
 ---
