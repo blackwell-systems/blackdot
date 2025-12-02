@@ -1,14 +1,13 @@
 # Dotfiles & Vault Setup
 
 [![Blackwell Systems™](https://raw.githubusercontent.com/blackwell-systems/blackwell-docs-theme/main/badge-trademark.svg)](https://github.com/blackwell-systems)
-[![Claude Code](https://img.shields.io/badge/Built_for-Claude_Code-8A2BE2?logo=anthropic)](https://claude.ai/claude-code)
-[![Secrets](https://img.shields.io/badge/Secrets-Multi--Vault-ff4081)](https://github.com/blackwell-systems/dotfiles#vault--secrets)
-[![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)](https://github.com/blackwell-systems/dotfiles)
-
 [![Shell](https://img.shields.io/badge/Shell-Zsh-89e051?logo=zsh&logoColor=white)](https://www.zsh.org/)
-[![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
-[![Tests](https://img.shields.io/badge/Tests-124-brightgreen)](test/)
+[![Claude Code](https://img.shields.io/badge/Built_for-Claude_Code-8A2BE2?logo=anthropic)](https://claude.ai/claude-code)
+[![dotclaude](https://img.shields.io/badge/Integrates-dotclaude-8A2BE2?logo=anthropic)](https://github.com/blackwell-systems/dotclaude)
+[![Secrets](https://img.shields.io/badge/Secrets-Multi--Vault-ff4081)](https://github.com/blackwell-systems/dotfiles#vault--secrets)
 [![Version](https://img.shields.io/github/v/release/blackwell-systems/dotfiles)](https://github.com/blackwell-systems/dotfiles/releases)
+[![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)](https://github.com/blackwell-systems/dotfiles)
+[![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
 
@@ -67,6 +66,23 @@ cd /workspace/my-project && claude
 ```
 
 The `/workspace` symlink creates identical paths across platforms. Claude Code session folders match everywhere. Start on Mac, continue on Linux, full history intact. Multiple backends: Anthropic Max (consumer) or AWS Bedrock (enterprise SSO). No other dotfiles does this.
+</details>
+
+<details>
+<summary><b>dotclaude Integration</b> - Profile management meets secrets management</summary>
+
+```bash
+# Switch Claude contexts while keeping secrets synced
+dotclaude activate client-work
+dotfiles vault restore     # Secrets follow your profile
+
+# Profiles managed by dotclaude, secrets by dotfiles
+# Both use /workspace for portability
+```
+
+Seamless integration with [dotclaude](https://github.com/blackwell-systems/dotclaude). dotclaude manages Claude profiles (CLAUDE.md, agents, standards). dotfiles manages secrets (SSH, AWS, Git). Switch between OSS, client, and work contexts while vault secrets stay synced. Both respect `/workspace` paths for portable sessions.
+
+[Integration Guide](docs/DOTCLAUDE-INTEGRATION.md)
 </details>
 
 <details>
@@ -292,7 +308,8 @@ Bootstrap scripts check current state before changes. Already symlinked? Skip. A
 
 ## How This Compares
 
-### Quick Comparison
+<details>
+<summary><b>Quick Comparison: This Repo vs Typical Dotfiles</b></summary>
 
 | Capability           | This Repo                                      | Typical Dotfiles                 |
 |----------------------|-----------------------------------------------|----------------------------------|
@@ -306,7 +323,10 @@ Bootstrap scripts check current state before changes. Already symlinked? Skip. A
 | **Optional components** | `SKIP_*` env flags                           | All-or-nothing                   |
 | **Cross-platform**     | macOS, Linux, Windows, WSL2, Docker           | Usually single-platform          |
 
-### Why This Repo vs chezmoi?
+</details>
+
+<details>
+<summary><b>Why This Repo vs chezmoi?</b></summary>
 
 chezmoi is the most popular dotfiles manager. Here's how we compare:
 
@@ -322,6 +342,8 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 | **Cross-Platform** | 5 platforms + Docker | Excellent |
 | **Learning Curve** | Shell scripts | YAML + Go templates |
 | **Single Binary** | Requires zsh | Go binary |
+
+</details>
 
 ### Detailed Comparison vs Popular Dotfiles
 
@@ -1047,16 +1069,16 @@ To customize:
 
 ---
 
-## Documentation
+**📚 [Complete Documentation Site](https://blackwell-systems.github.io/dotfiles/)**
 
-- **Quick overview:** this README
 - **[CLI Reference](docs/cli-reference.md)** - All commands, flags, and environment variables
 - **[Full Documentation](docs/README-FULL.md)** - Complete guide (1,900+ lines)
+- **[Vault README](docs/vault-README.md)** - Multi-vault backend details
 - **[Template Guide](docs/templates.md)** - Machine-specific configuration templates
 - **[Claude Code Guide](docs/claude-code.md)** - Multi-backend setup and session portability
+- **[dotclaude Integration](docs/DOTCLAUDE-INTEGRATION.md)** - Profile management with dotclaude
 - **[Architecture](docs/architecture.md)** - System diagrams and component overview
 - **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
-- **[Vault README](docs/vault-README.md)** - Multi-vault backend details
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contributor guide
 - **[SECURITY.md](SECURITY.md)** - Security policy
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history

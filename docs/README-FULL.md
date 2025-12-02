@@ -1,19 +1,23 @@
 # Dotfiles & Vault Setup - Full Documentation
 
+[![Blackwell Systems™](https://raw.githubusercontent.com/blackwell-systems/blackwell-docs-theme/main/badge-trademark.svg)](https://github.com/blackwell-systems)
+[![Claude Code](https://img.shields.io/badge/Built_for-Claude_Code-8A2BE2?logo=anthropic)](https://claude.ai/claude-code)
+[![dotclaude](https://img.shields.io/badge/Integrates-dotclaude-8A2BE2?logo=anthropic)](https://github.com/blackwell-systems/dotclaude)
+[![Secrets](https://img.shields.io/badge/Secrets-Multi--Vault-ff4081)](https://github.com/blackwell-systems/dotfiles#vault--secrets)
+[![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)](https://github.com/blackwell-systems/dotfiles)
+
+[![Shell](https://img.shields.io/badge/Shell-Zsh-89e051?logo=zsh&logoColor=white)](https://www.zsh.org/)
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-124-brightgreen)](../test/)
+[![Version](https://img.shields.io/github/v/release/blackwell-systems/dotfiles)](https://github.com/blackwell-systems/dotfiles/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
+[![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
 
 > **Enterprise-grade dotfiles** with multi-vault secret management (Bitwarden, 1Password, pass), machine-specific templates, portable Claude Code sessions, and automated health checks. Works across macOS, Linux, Windows, WSL2, and Docker.
 
-[![Version](https://img.shields.io/github/v/release/blackwell-systems/dotfiles)](https://github.com/blackwell-systems/dotfiles/releases)
-
 [Changelog](../CHANGELOG.md) | [Quick Start Guide](../README.md)
 
-This is the comprehensive reference documentation for the dotfiles system. It covers configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code portable sessions**, and a **multi-vault secret bootstrap** (supporting Bitwarden, 1Password, and pass) for SSH keys, AWS credentials, and environment secrets across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
-
-### 🌟 Key Innovation: Portable Claude Code Sessions
-
-Unlike most dotfiles, this system enables **true Claude Code session portability** across machines. Work on macOS, continue in Lima, finish in WSL - **same conversation, full history**. Achieved through the `/workspace` symlink architecture detailed below.
+This is the comprehensive reference documentation for the dotfiles system. It covers configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code**, and a **multi-vault secret bootstrap** (supporting Bitwarden, 1Password, and pass) for SSH keys, AWS credentials, and environment secrets across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
 
 ---
 
@@ -93,7 +97,7 @@ dotfiles doctor
 - Zsh + Powerlevel10k + plugins (autosuggestions, syntax highlighting)
 - All Homebrew packages from `Brewfile`
 - SSH keys, AWS credentials, and environment secrets from vault (Bitwarden/1Password/pass)
-- **Portable Claude Code sessions** via `/workspace` symlink
+- Claude Code configuration via `/workspace` symlink
 - The `dotfiles` command for ongoing management
 
 ### 💡 Critical: Use `/workspace` for Claude Code
@@ -113,61 +117,104 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 
 ## Directory Structure
 
-The dotfiles are organized as follows:
+<details>
+<summary><b>Click to expand full directory tree</b> (zoomable)</summary>
 
-```text
-~/workspace/dotfiles
-├── install.sh                # One-line installer (curl | bash)
-├── bootstrap/                # Platform bootstrap scripts
-│   ├── bootstrap-mac.sh      # macOS-specific bootstrap (--interactive supported)
-│   ├── bootstrap-linux.sh    # Linux-specific bootstrap (--interactive supported)
-│   ├── bootstrap-dotfiles.sh # Shared symlink bootstrap
-│   └── _common.sh            # Shared bootstrap functions
-├── bin/                      # CLI tools
-│   ├── dotfiles-doctor       # Health check (use: dotfiles doctor)
-│   ├── dotfiles-drift        # Drift detection (use: dotfiles drift)
-│   ├── dotfiles-backup       # Backup/restore
-│   ├── dotfiles-diff         # Preview changes
-│   ├── dotfiles-init         # Setup wizard
-│   └── dotfiles-uninstall    # Clean removal
-├── Brewfile                  # Unified Homebrew bundle (macOS + Lima)
-├── CHANGELOG.md              # Version history
-├── .gitignore                # Excludes .bw-session, editor files
-├── claude
-│   ├── settings.json         # Claude Code settings (permissions, preferences)
-│   └── commands/             # Custom slash commands
-│       └── health.md         # /health - run dotfiles health check
-├── ghostty
-│   └── config                # Ghostty terminal config
-├── lima
-│   └── lima.yaml             # Lima VM config (host-side)
-├── macos
-│   ├── apply-settings.sh     # Apply macOS system settings
-│   ├── discover-settings.sh  # Capture/diff macOS settings
-│   ├── settings.sh           # The actual settings to apply
-│   └── snapshots/            # Setting snapshots for diff
-├── vault
-│   ├── _common.sh            # Shared library (colors, logging, session, SSH_KEYS)
-│   ├── backends/             # Backend implementations (bitwarden, 1password, pass)
-│   ├── bootstrap-vault.sh    # Orchestrates all vault restores
-│   ├── check-vault-items.sh  # Validates required vault items exist
-│   ├── create-vault-item.sh  # Creates new vault secure notes
-│   ├── delete-vault-item.sh  # Deletes items from vault (with safety)
-│   ├── list-vault-items.sh   # Lists all vault items (debug/inventory)
-│   ├── sync-to-vault.sh      # Syncs local changes back to vault
-│   ├── restore-ssh.sh        # Restores SSH keys and config from vault
-│   ├── restore-aws.sh        # Restores ~/.aws/config & ~/.aws/credentials
-│   ├── restore-env.sh        # Restores environment secrets to ~/.local
-│   ├── restore-git.sh        # Restores ~/.gitconfig from vault
-│   ├── template-aws-config   # Reference template for AWS config
-│   ├── template-aws-credentials # Reference template for AWS credentials
-│   └── README.md             # Vault system documentation
-├── zellij
-│   └── config.kdl            # Zellij multiplexer config
-└── zsh
-    ├── p10k.zsh              # Powerlevel10k theme config
-    └── zshrc                 # Main Zsh configuration
 ```
+~/workspace/dotfiles/
+│
+├── install.sh                          # One-line installer (curl | bash)
+├── Brewfile                            # Unified Homebrew bundle (macOS + Lima)
+├── CHANGELOG.md                        # Version history
+├── LICENSE                             # MIT License
+├── README.md                           # Main documentation
+├── .gitignore                          # Excludes .bw-session, secrets, temp files
+│
+├── bootstrap/                          # Platform bootstrap scripts
+│   ├── bootstrap-mac.sh                # macOS-specific bootstrap (--interactive)
+│   ├── bootstrap-linux.sh              # Linux-specific bootstrap (--interactive)
+│   ├── bootstrap-dotfiles.sh           # Shared symlink bootstrap
+│   └── _common.sh                      # Shared bootstrap functions
+│
+├── bin/                                # CLI management tools
+│   ├── dotfiles                        # Main CLI entry point (symlinked to PATH)
+│   ├── dotfiles-backup                 # Backup/restore dotfiles
+│   ├── dotfiles-diff                   # Preview changes before applying
+│   ├── dotfiles-doctor                 # Health check validation
+│   ├── dotfiles-drift                  # Detect config drift from repo
+│   ├── dotfiles-init                   # Interactive setup wizard
+│   ├── dotfiles-lint                   # Lint shell scripts for errors
+│   ├── dotfiles-metrics                # Collect system metrics
+│   ├── dotfiles-packages               # List/validate installed packages
+│   ├── dotfiles-template               # Generate machine-specific templates
+│   └── dotfiles-uninstall              # Clean removal of dotfiles
+│
+├── claude/                             # Claude Code configuration
+│   ├── settings.json                   # Claude settings (permissions, hooks)
+│   └── commands/                       # Custom slash commands
+│       └── health.md                   # /health - run dotfiles health check
+│
+├── docs/                               # Documentation
+│   ├── README.md                       # Docs index
+│   ├── README-FULL.md                  # Comprehensive guide (this file)
+│   ├── VAULT.md                        # Vault system documentation
+│   └── TROUBLESHOOTING.md              # Common issues and solutions
+│
+├── ghostty/                            # Ghostty terminal configuration
+│   └── config                          # Ghostty settings
+│
+├── lima/                               # Lima VM configuration
+│   └── lima.yaml                       # Lima VM definition (host-side)
+│
+├── macos/                              # macOS-specific settings
+│   ├── apply-settings.sh               # Apply macOS system preferences
+│   ├── discover-settings.sh            # Capture/diff macOS settings
+│   ├── settings.sh                     # Actual settings to apply
+│   └── snapshots/                      # Setting snapshots for comparison
+│
+├── tests/                              # Test suite
+│   ├── test-bootstrap.sh               # Bootstrap script tests
+│   ├── test-vault.sh                   # Vault system tests
+│   └── test-symlinks.sh                # Symlink validation tests
+│
+├── vault/                              # Multi-vault secret management
+│   ├── _common.sh                      # Shared library (colors, logging, SSH_KEYS)
+│   ├── backends/                       # Vault backend implementations
+│   │   ├── bitwarden.sh                # Bitwarden CLI integration
+│   │   ├── 1password.sh                # 1Password CLI integration
+│   │   └── pass.sh                     # pass (GPG) integration
+│   ├── bootstrap-vault.sh              # Orchestrates all vault restores
+│   ├── check-vault-items.sh            # Validates required vault items exist
+│   ├── create-vault-item.sh            # Creates new vault secure notes
+│   ├── delete-vault-item.sh            # Deletes items from vault (with safety)
+│   ├── list-vault-items.sh             # Lists all vault items (debug/inventory)
+│   ├── sync-to-vault.sh                # Syncs local changes back to vault
+│   ├── validate-schema.sh              # Validates vault item schemas
+│   ├── restore-ssh.sh                  # Restores SSH keys and config
+│   ├── restore-aws.sh                  # Restores ~/.aws/config & credentials
+│   ├── restore-env.sh                  # Restores environment secrets
+│   ├── restore-git.sh                  # Restores ~/.gitconfig
+│   ├── template-aws-config             # Reference template for AWS config
+│   ├── template-aws-credentials        # Reference template for AWS credentials
+│   └── README.md                       # Vault documentation
+│
+├── zellij/                             # Zellij multiplexer configuration
+│   └── config.kdl                      # Zellij keybindings and layout
+│
+└── zsh/                                # Zsh shell configuration
+    ├── zshrc                           # Main Zsh config (~820 lines)
+    └── p10k.zsh                        # Powerlevel10k theme configuration
+
+Deployed files (after bootstrap):
+~/.zshrc                 → ~/workspace/dotfiles/zsh/zshrc (symlink)
+~/.p10k.zsh              → ~/workspace/dotfiles/zsh/p10k.zsh (symlink)
+~/.config/ghostty/config → ~/workspace/dotfiles/ghostty/config (symlink)
+~/.config/zellij/        → ~/workspace/dotfiles/zellij/ (symlink)
+~/.claude/               → ~/workspace/.claude/ (symlink)
+~/bin/dotfiles           → ~/workspace/dotfiles/bin/dotfiles (symlink in PATH)
+```
+
+</details>
 
 Key pieces:
 
@@ -208,46 +255,39 @@ This dotfiles system is designed for extensibility across multiple platforms wit
 
 ### Architecture Layers
 
-```
-┌──────────────────────────────────────────────┐
-│  Platform-Specific Bootstrap (10% of code)   │
-│  • Package manager setup (apt/brew/pacman)   │
-│  • System-specific configuration             │
-│  • GUI tool installation                     │
-└──────────────┬───────────────────────────────┘
-               │
-               ▼
-┌──────────────────────────────────────────────┐
-│  Shared Dotfiles Layer (90% of code)         │
-│  • Symlink management (bootstrap-dotfiles)   │
-│  • Shell configuration (zshrc)               │
-│  • Vault system (all scripts)                │
-│  • Health checks & metrics                   │
-│  • Tab completions                           │
-└──────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    platform["<b>Platform-Specific Bootstrap</b><br/>(10% of code)<br/>━━━━━━━━━━━━━━━━━━━━━<br/>• Package manager setup (apt/brew/pacman)<br/>• System-specific configuration<br/>• GUI tool installation"]
+
+    shared["<b>Shared Dotfiles Layer</b><br/>(90% of code)<br/>━━━━━━━━━━━━━━━━━━━━━<br/>• Symlink management (bootstrap-dotfiles)<br/>• Shell configuration (zshrc)<br/>• Vault system (all scripts)<br/>• Health checks & metrics<br/>• Tab completions"]
+
+    platform --> shared
+
+    style platform fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style shared fill:#1a365d,stroke:#2c5282,color:#e2e8f0
 ```
 
 ### Platform-Independent Components
 
 These work on **any platform** without modification:
 
-**✅ Vault System** (100% portable)
+**Vault System** (100% portable)
 - All `vault/*.sh` scripts with multi-backend support
 - Backends: Bitwarden (`bw`), 1Password (`op`), pass (`pass/gpg`)
 - Just needs: `zsh`, vault CLI, `jq`
 - Works on Linux, macOS, BSD, WSL, Docker
 
-**✅ Health & Metrics** (100% portable)
+**Health & Metrics** (100% portable)
 - `bin/dotfiles-doctor` / `bin/dotfiles-drift`
 - `bin/dotfiles-metrics`
 - Cross-platform file permissions handling
 
-**✅ Shell Configuration** (OS-aware)
+**Shell Configuration** (OS-aware)
 - `zshrc` with OS detection
 - Conditional loading for macOS/Linux
 - Portable modern CLI tools (eza, fzf, etc.)
 
-**✅ Package Management** (cross-platform)
+**Package Management** (cross-platform)
 - `Brewfile` works on macOS + Linux (Linuxbrew)
 - Conditional sections (`on_macos`, `on_linux`)
 
@@ -347,16 +387,35 @@ This enables:
 
 The workspace provides a consistent hierarchy:
 
+```mermaid
+graph LR
+    workspace["~/workspace/"]
+
+    subgraph state["Shared State"]
+        claude[".claude/"]
+        history[".zsh_history"]
+    end
+
+    subgraph work["Work Files"]
+        dotfiles["dotfiles/"]
+        code["code/"]
+        docs["whitepapers/"]
+    end
+
+    workspace --> state
+    workspace --> work
+
+    style workspace fill:#2d3748,stroke:#4a5568,color:#e2e8f0
+    style state fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style work fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style claude fill:#2f855a,stroke:#48bb78,color:#e2e8f0
+    style dotfiles fill:#2c5282,stroke:#4299e1,color:#e2e8f0
 ```
-~/workspace/
-├── .claude/           # Shared Claude CLI state (symlinked from ~/.claude)
-├── .zsh_history       # Shared shell history across platforms
-├── .notes.md          # Quick notes captured via note/notes commands
-├── dotfiles/          # This repository
-├── code/              # Active projects
-├── whitepapers/       # Documentation, specs
-└── patent-pool/       # IP work
-```
+
+**Structure breakdown:**
+- **Shared State**: `.claude/` (Claude sessions), `.zsh_history` (shell history)
+- **Work Files**: `dotfiles/` (this repo), `code/` (projects), `whitepapers/` (docs)
+- **Navigation**: `cws` → workspace, `ccode` → code/, `dotfiles` → dotfiles/
 
 **Shared shell history**: Command history is stored in `~/workspace/.zsh_history` and syncs between macOS and Lima sessions.
 
@@ -442,41 +501,76 @@ claude                    # New session every time
 
 **Best Practice**: Make it a habit - always `cd /workspace/...` for Claude Code sessions.
 
+#### Integration with dotclaude
+
+For profile management, this system integrates with [dotclaude](https://github.com/blackwell-systems/dotclaude):
+
+- **dotclaude**: Manages Claude profiles (CLAUDE.md, agents, settings.json)
+- **dotfiles**: Manages secrets (SSH, AWS, Git), shell, and `/workspace` paths
+
+Both systems coordinate seamlessly:
+
+```bash
+# Switch Claude context with dotclaude
+dotclaude activate client-work
+
+# Secrets managed by dotfiles
+dotfiles vault restore client-*
+
+# Both respect /workspace for portable sessions
+cd /workspace/my-project && claude
+```
+
+**Division of responsibilities:**
+- dotclaude handles Claude configuration per context (OSS, work, client)
+- dotfiles handles secrets and cross-platform consistency
+- Both use `/workspace` paths for session portability
+
+See [DOTCLAUDE-INTEGRATION.md](DOTCLAUDE-INTEGRATION.md) for complete integration guide.
+
 ### Visual Overview
 
+```mermaid
+flowchart TB
+    subgraph host["Host: /Users/username/ (macOS)"]
+        h_secrets["Secrets<br/>(.ssh, .aws, .gitconfig)<br/><small>Per-machine</small>"]
+        h_workspace["~/workspace/<br/><small>Shared files</small>"]
+    end
+
+    subgraph guest["Guest: /home/username/ (Lima/WSL)"]
+        g_secrets["Secrets<br/>(.ssh, .aws, .gitconfig)<br/><small>Per-machine</small>"]
+        g_workspace["~/workspace/<br/><small>Mounted from host</small>"]
+    end
+
+    subgraph shared["Shared: ~/workspace/ Content"]
+        direction LR
+        dotfiles["dotfiles/"]
+        code["code/"]
+        claude[".claude/"]
+    end
+
+    h_workspace <-->|same files| g_workspace
+    h_workspace -.-> shared
+    g_workspace -.-> shared
+
+    h_secrets <-.->|vault sync| g_secrets
+
+    symlink["/workspace → ~/workspace<br/><small>Ensures identical paths across all machines</small>"]
+
+    style host fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style guest fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style shared fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style symlink fill:#22543d,stroke:#2f855a,color:#e2e8f0
+    style h_workspace fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style g_workspace fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style claude fill:#2f855a,stroke:#48bb78,color:#e2e8f0
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                     CANONICAL WORKSPACE ARCHITECTURE                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│   Host Machine                       Guest VM / Remote                       │
-│   ══════════════                     ═══════════════════                     │
-│   /Users/username/                   /home/username/                         │
-│   (macOS example)                    (Linux/Lima/WSL example)                │
-│          │                                  │                                │
-│          ├── .ssh/        ←── secrets ──→   ├── .ssh/                        │
-│          ├── .aws/        (per-machine)     ├── .aws/                        │
-│          ├── .gitconfig                     ├── .gitconfig                   │
-│          │                                  │                                │
-│          └── workspace/ ←────────────────→  └── workspace/ (mounted/synced)  │
-│                 │                                  │                         │
-│                 ├── dotfiles/    ════════════     (same files)               │
-│                 ├── code/                                                    │
-│                 ├── .claude/  ←─── symlinked from ~/.claude                  │
-│                 └── ...                                                      │
-│                                                                              │
-│   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │  KEY INSIGHT: /workspace is the canonical path for Claude Code      │   │
-│   │                                                                      │   │
-│   │  /workspace → ~/workspace (symlink created by bootstrap scripts)    │   │
-│   │                                                                      │   │
-│   │  • cd /workspace/dotfiles && claude  → -workspace-dotfiles/         │   │
-│   │  • Same session folder across ALL machines                          │   │
-│   │  • Portable session history across platforms                        │   │
-│   └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+
+**Key concept:**
+- **Host & Guest** share `~/workspace/` (mounted/synced)
+- **Secrets** (.ssh, .aws, .gitconfig) are per-machine, synced via vault
+- **`/workspace` symlink** ensures identical paths: `cd /workspace/dotfiles` works everywhere
+- **Claude Code sessions** are portable across machines via shared `.claude/` state
 
 ### Why This Matters
 
@@ -574,46 +668,91 @@ Use `--help` to see all available options:
 
 ### Architecture Diagram
 
+```mermaid
+flowchart TB
+    machine["New Machine"]
+
+    subgraph setup["Setup Phase"]
+        bootstrap["Bootstrap<br/><small>bootstrap-mac/linux.sh</small><br/>Install packages, tools, shell"]
+        restore["Restore Secrets<br/><small>bootstrap-vault.sh</small><br/>SSH, AWS, Git, env"]
+        verify["Health Check<br/><small>dotfiles doctor</small><br/>Verify installation"]
+    end
+
+    subgraph tools["Package Sources"]
+        brewfile["Brewfile<br/><small>brew, zsh, plugins...</small>"]
+    end
+
+    subgraph vault["Multi-Vault Backend"]
+        vault_storage["Vault Storage<br/><small>Bitwarden / 1Password / pass</small><br/>• SSH keys<br/>• AWS credentials<br/>• Git config<br/>• Environment secrets"]
+        vault_check["check-vault-items.sh<br/><small>Pre-flight validation</small>"]
+    end
+
+    subgraph sync["Maintenance"]
+        sync_back["sync-to-vault.sh<br/><small>Push local changes back</small>"]
+    end
+
+    machine --> bootstrap
+    bootstrap --> restore
+    restore --> verify
+
+    bootstrap -.->|installs| brewfile
+    restore -->|pulls from| vault_storage
+    vault_storage -->|validates| vault_check
+    verify -->|after changes| sync_back
+    sync_back -->|updates| vault_storage
+
+    flow1["<b>New Machine Flow:</b><br/>Clone repo → Bootstrap → Validate vault → Restore → Health check"]
+    flow2["<b>Maintenance Flow:</b><br/>Edit configs locally → Sync to vault → Restore elsewhere"]
+
+    style machine fill:#2d3748,stroke:#4a5568,color:#e2e8f0
+    style setup fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style tools fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style vault fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style sync fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style bootstrap fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style restore fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style verify fill:#22543d,stroke:#2f855a,color:#e2e8f0
+    style flow1 fill:#2d3748,stroke:#4a5568,color:#e2e8f0
+    style flow2 fill:#2d3748,stroke:#4a5568,color:#e2e8f0
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         DOTFILES ARCHITECTURE                                │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│   NEW MACHINE                                                                │
-│       │                                                                      │
-│       ▼                                                                      │
-│  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐                 │
-│  │  Bootstrap   │────▶│   Restore    │────▶│   Verify     │                 │
-│  │  (packages)  │     │  (secrets)   │     │  (health)    │                 │
-│  │              │     │              │     │              │                 │
-│  │ bootstrap-   │     │ bootstrap-   │     │ check-       │                 │
-│  │ mac/lima.sh  │     │ vault.sh     │     │ health.sh    │                 │
-│  └──────────────┘     └──────────────┘     └──────────────┘                 │
-│         │                    ▲                     │                        │
-│         │                    │                     │                        │
-│         ▼                    │                     ▼                        │
-│  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐                 │
-│  │   Brewfile   │     │ Multi-Vault  │◀────│  Sync Back   │                 │
-│  │   (tools)    │     │ (bw/op/pass) │     │  (changes)   │                 │
-│  │              │     │              │     │              │
-│  │ brew, zsh,   │     │ SSH keys,    │     │ sync-to-     │                 │
-│  │ plugins...   │     │ AWS, Git,    │     │ vault.sh     │                 │
-│  └──────────────┘     │ env secrets  │     └──────────────┘                 │
-│                       └──────────────┘                                      │
-│                              │                                              │
-│                              ▼                                              │
-│                    ┌──────────────────┐                                     │
-│                    │ check-vault-     │                                     │
-│                    │ items.sh         │                                     │
-│                    │ (pre-flight)     │                                     │
-│                    └──────────────────┘                                     │
-│                                                                              │
-│   FLOW: Clone repo → Bootstrap → Validate vault → Restore → Health check   │
-│         ───────────────────────────────────────────────────────────────     │
-│         Edit configs locally → Sync back to vault → Restore elsewhere      │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+
+### dotclaude Integration
+
+When used with [dotclaude](https://github.com/blackwell-systems/dotclaude), both systems work together seamlessly:
+
+```mermaid
+flowchart LR
+    subgraph dotclaude["dotclaude System"]
+        profiles["Claude Profiles<br/>• CLAUDE.md<br/>• agents/<br/>• settings.json"]
+    end
+
+    subgraph dotfiles["dotfiles System"]
+        secrets["Secrets<br/>• SSH keys<br/>• AWS creds<br/>• Git config"]
+        shell["Shell & Tools<br/>• Zsh<br/>• Brewfile"]
+    end
+
+    subgraph shared["Shared"]
+        workspace["/workspace/<br/>Portable paths"]
+        claude_dir["~/.claude/<br/>Claude state"]
+    end
+
+    profiles --> claude_dir
+    secrets -.->|"available to"| profiles
+    shell --> workspace
+    claude_dir --> workspace
+
+    style dotclaude fill:#8A2BE2,stroke:#9333EA,color:#e2e8f0
+    style dotfiles fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style shared fill:#22543d,stroke:#2f855a,color:#e2e8f0
+    style workspace fill:#2f855a,stroke:#48bb78,color:#e2e8f0
 ```
+
+**How they work together:**
+- **dotclaude**: Manages Claude configuration per context (OSS, client, work)
+- **dotfiles**: Manages secrets and cross-platform consistency
+- **Both**: Use `/workspace` for session portability across machines
+
+See [DOTCLAUDE-INTEGRATION.md](DOTCLAUDE-INTEGRATION.md) for complete integration guide.
 
 ---
 
