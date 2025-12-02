@@ -66,11 +66,11 @@ jobs:
             bin/dotfiles-drift
             bin/dotfiles-backup
             bin/dotfiles-diff
-            bin/dotfiles-init
+            bin/dotfiles-setup
             bin/dotfiles-metrics
             bin/dotfiles-uninstall
             vault/_common.sh
-            vault/bootstrap-vault.sh
+            vault/restore.sh
             vault/check-vault-items.sh
             vault/create-vault-item.sh
             vault/delete-vault-item.sh
@@ -303,13 +303,13 @@ jobs:
             "zsh/p10k.zsh"
             "zsh/completions/_dotfiles"
             "vault/_common.sh"
-            "vault/bootstrap-vault.sh"
+            "vault/restore.sh"
             "vault/README.md"
             "bin/dotfiles-doctor"
             "bin/dotfiles-drift"
             "bin/dotfiles-backup"
             "bin/dotfiles-diff"
-            "bin/dotfiles-init"
+            "bin/dotfiles-setup"
             "bin/dotfiles-uninstall"
             ".gitignore"
           )
@@ -374,7 +374,7 @@ jobs:
           zsh -n bin/dotfiles-drift || exit 1
           zsh -n bin/dotfiles-backup || exit 1
           zsh -n bin/dotfiles-diff || exit 1
-          zsh -n bin/dotfiles-init || exit 1
+          zsh -n bin/dotfiles-setup || exit 1
           zsh -n bin/dotfiles-uninstall || exit 1
 
           echo "✅ All scripts have valid syntax on macOS"
@@ -415,7 +415,7 @@ jobs:
           zsh -n bin/dotfiles-drift || exit 1
           zsh -n bin/dotfiles-backup || exit 1
           zsh -n bin/dotfiles-diff || exit 1
-          zsh -n bin/dotfiles-init || exit 1
+          zsh -n bin/dotfiles-setup || exit 1
           zsh -n bin/dotfiles-uninstall || exit 1
 
           echo "✅ All scripts have valid syntax on Linux"
