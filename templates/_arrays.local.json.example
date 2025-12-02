@@ -1,0 +1,23 @@
+{
+  "ssh_hosts": [
+    {
+      "name": "github",
+      "hostname": "github.com",
+      "user": "git",
+      "identity": "~/.ssh/id_ed25519"
+    },
+    {
+      "name": "gitlab",
+      "hostname": "gitlab.com",
+      "user": "git",
+      "identity": "~/.ssh/id_ed25519"
+    },
+    {
+      "name": "work-server",
+      "hostname": "server.company.com",
+      "user": "deploy",
+      "identity": "~/.ssh/id_work",
+      "extra": "ProxyJump bastion"
+    }
+  ]
+}

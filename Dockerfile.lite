@@ -1,7 +1,7 @@
 # Lightweight dotfiles exploration container
 # For CLI testing with vault support (no Homebrew)
 #
-# Image size: ~200MB | Build time: ~60s
+# Image size: ~250MB | Build time: ~90s
 
 FROM alpine:3.19
 
@@ -14,14 +14,20 @@ RUN apk add --no-cache \
     coreutils \
     util-linux \
     curl \
+    unzip \
     gnupg \
     pass \
-    nodejs \
-    npm
+    libgcc \
+    libstdc++
 
-# Install Bitwarden CLI
-RUN npm install -g @bitwarden/cli && \
-    npm cache clean --force
+# Install Powerlevel10k
+RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /root/.powerlevel10k
+
+# Install Bitwarden CLI (standalone binary - avoids Node.js ESM issues)
+RUN curl -sSL "https://github.com/bitwarden/clients/releases/download/cli-v2024.7.2/bw-linux-2024.7.2.zip" -o /tmp/bw.zip && \
+    unzip /tmp/bw.zip -d /usr/local/bin && \
+    rm /tmp/bw.zip && \
+    chmod +x /usr/local/bin/bw
 
 # Install 1Password CLI (standalone binary)
 RUN curl -sSL "https://cache.agilebits.com/dist/1P/op2/pkg/v2.30.0/op_linux_amd64_v2.30.0.zip" -o /tmp/op.zip && \
@@ -41,17 +47,42 @@ COPY vault/ /root/workspace/dotfiles/vault/
 COPY zsh/ /root/workspace/dotfiles/zsh/
 COPY templates/ /root/workspace/dotfiles/templates/
 COPY bootstrap/ /root/workspace/dotfiles/bootstrap/
+COPY test/mocks/ /root/workspace/dotfiles/test/mocks/
 
 # Make scripts executable
 RUN chmod +x /root/workspace/dotfiles/bin/* && \
     chmod +x /root/workspace/dotfiles/vault/*.sh && \
-    chmod +x /root/workspace/dotfiles/bootstrap/*.sh
+    chmod +x /root/workspace/dotfiles/bootstrap/*.sh && \
+    chmod +x /root/workspace/dotfiles/test/mocks/*.sh
 
-# Setup zsh with dotfiles functions
+# Setup zsh with Powerlevel10k and dotfiles functions
 RUN mkdir -p /root/.config/dotfiles /root/.ssh /root/.aws && \
+    ln -sf /root/workspace/dotfiles/zsh/p10k.zsh /root/.p10k.zsh && \
     echo 'export WORKSPACE=/root/workspace' > /root/.zshrc && \
+    echo 'source /root/.powerlevel10k/powerlevel10k.zsh-theme' >> /root/.zshrc && \
+    echo '[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh' >> /root/.zshrc && \
     echo 'source /root/workspace/dotfiles/zsh/zsh.d/40-aliases.zsh' >> /root/.zshrc && \
-    echo 'source /root/workspace/dotfiles/zsh/zsh.d/50-functions.zsh' >> /root/.zshrc
+    echo 'source /root/workspace/dotfiles/zsh/zsh.d/50-functions.zsh' >> /root/.zshrc && \
+    echo '' >> /root/.zshrc && \
+    echo '# Welcome message for container' >> /root/.zshrc && \
+    echo 'if [[ -z "$_WELCOME_SHOWN" ]]; then' >> /root/.zshrc && \
+    echo '    echo ""' >> /root/.zshrc && \
+    echo '    echo "\\033[0;36m═══════════════════════════════════════════════════════════\\033[0m"' >> /root/.zshrc && \
+    echo '    echo "\\033[0;36m  Dotfiles Test Container (lite)\\033[0m"' >> /root/.zshrc && \
+    echo '    echo "\\033[0;36m═══════════════════════════════════════════════════════════\\033[0m"' >> /root/.zshrc && \
+    echo '    echo ""' >> /root/.zshrc && \
+    echo '    echo "\\033[1mQuick Start:\\033[0m"' >> /root/.zshrc && \
+    echo '    echo "  dotfiles help          # Show available commands"' >> /root/.zshrc && \
+    echo '    echo "  dotfiles doctor        # Run health checks"' >> /root/.zshrc && \
+    echo '    echo "  dotfiles status        # Show dashboard"' >> /root/.zshrc && \
+    echo '    echo ""' >> /root/.zshrc && \
+    echo '    echo "\\033[1mTest Vault with Mock Credentials (pass backend):\\033[0m"' >> /root/.zshrc && \
+    echo '    echo "  ./test/mocks/setup-mock-vault.sh --no-pass  # Creates fake GPG key + pass store"' >> /root/.zshrc && \
+    echo '    echo "  export DOTFILES_VAULT_BACKEND=pass          # Switch to pass backend"' >> /root/.zshrc && \
+    echo '    echo "  dotfiles vault check                        # Test vault commands"' >> /root/.zshrc && \
+    echo '    echo ""' >> /root/.zshrc && \
+    echo '    export _WELCOME_SHOWN=1' >> /root/.zshrc && \
+    echo 'fi' >> /root/.zshrc
 
 # Create /workspace symlink for portable paths
 RUN ln -s /root/workspace /workspace
@@ -72,6 +103,13 @@ CMD ["zsh"]
 #
 # With pass (mount GPG keys):
 #   docker run -it --rm -v ~/.gnupg:/root/.gnupg:ro dotfiles-lite
+#
+# With Mock Vault (for testing):
+#   docker run -it --rm dotfiles-lite
+#   # Then inside container:
+#   ./test/mocks/setup-mock-vault.sh --no-pass
+#   export DOTFILES_VAULT_BACKEND=pass
+#   dotfiles vault check
 #
 # Explore:
 #   dotfiles help
