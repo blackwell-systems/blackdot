@@ -76,7 +76,7 @@ if ! command -v info >/dev/null 2>&1; then
     warn()  { print "${YELLOW}[WARN]${NC} $1"; }
     fail()  { print "${RED}[FAIL]${NC} $1"; }
     dry()   { print "${CYAN}[DRY-RUN]${NC} $1"; }
-    debug() { [[ "${DEBUG:-}" == "1" ]] && print "${DIM}[DEBUG] $1${NC}"; }
+    debug() { [[ "${DEBUG:-}" == "1" ]] && print "${DIM}[DEBUG] $1${NC}" || true; }
 fi
 
 # ============================================================
@@ -222,11 +222,108 @@ load_variable_files() {
 }
 
 # Load arrays for {{#each}} loops
+# Priority: JSON file > Shell arrays
 load_template_arrays() {
-    # SSH_HOSTS array (defined in _variables.sh or _variables.local.sh)
+    local json_file="${TEMPLATES_DIR}/_arrays.local.json"
+    local loaded_from=""
+
+    # Priority 1: JSON file (if exists and jq available)
+    if [[ -f "$json_file" ]] && command -v jq &>/dev/null; then
+        # Validate JSON syntax first
+        if ! jq -e '.' "$json_file" &>/dev/null; then
+            warn "Invalid JSON in $json_file - falling back to shell arrays"
+        else
+            debug "Loading arrays from JSON: $json_file"
+            loaded_from="json"
+
+            # Load ssh_hosts array
+            if jq -e '.ssh_hosts' "$json_file" &>/dev/null; then
+                local items
+                # Convert JSON array to pipe-delimited format matching shell schema
+                items=$(jq -r '.ssh_hosts[] | "\(.name)|\(.hostname)|\(.user)|\(.identity // "")|\(.extra // "")"' "$json_file" 2>/dev/null)
+                if [[ -n "$items" ]]; then
+                    TMPL_ARRAYS_ssh_hosts=("${(@f)items}")
+                    debug "Loaded ${#TMPL_ARRAYS_ssh_hosts[@]} SSH hosts from JSON"
+                fi
+            fi
+        fi
+    fi
+
+    # Priority 2: Shell arrays (fallback if JSON not used)
+    if [[ -z "$loaded_from" ]]; then
+        # Check if SSH_HOSTS is declared and has items (${+var} checks if set)
+        if (( ${+SSH_HOSTS} )) && (( ${#SSH_HOSTS[@]} > 0 )); then
+            TMPL_ARRAYS_ssh_hosts=("${SSH_HOSTS[@]}")
+            debug "Loaded ${#TMPL_ARRAYS_ssh_hosts[@]} SSH hosts from shell"
+            loaded_from="shell"
+        fi
+    fi
+
+    # Store source for reporting
+    typeset -g TMPL_ARRAYS_SOURCE="$loaded_from"
+}
+
+# Export shell arrays to JSON format
+export_arrays_to_json() {
+    # Load shell arrays first
+    load_variable_files
+
+    local output=""
+    output+="{\n"
+
+    # Export ssh_hosts
     if (( ${#SSH_HOSTS[@]} > 0 )); then
-        TMPL_ARRAYS_ssh_hosts=("${SSH_HOSTS[@]}")
-        debug "Loaded SSH_HOSTS array: ${#TMPL_ARRAYS_ssh_hosts[@]} items"
+        output+='  "ssh_hosts": [\n'
+        local first=true
+        for item in "${SSH_HOSTS[@]}"; do
+            local -a fields
+            fields=("${(@s:|:)item}")
+
+            [[ "$first" == "true" ]] || output+=",\n"
+            first=false
+
+            output+="    {\n"
+            output+="      \"name\": \"${fields[1]}\",\n"
+            output+="      \"hostname\": \"${fields[2]}\",\n"
+            output+="      \"user\": \"${fields[3]}\""
+            [[ -n "${fields[4]:-}" ]] && output+=",\n      \"identity\": \"${fields[4]}\""
+            [[ -n "${fields[5]:-}" ]] && output+=",\n      \"extra\": \"${fields[5]}\""
+            output+="\n    }"
+        done
+        output+="\n  ]\n"
+    else
+        output+='  "ssh_hosts": []\n'
+    fi
+
+    output+="}"
+
+    print "$output"
+}
+
+# List loaded arrays
+list_template_arrays() {
+    load_template_arrays  # Only load arrays, not full variable build
+
+    print "${BOLD}Template Arrays${NC}"
+    print "──────────────────────────────────────"
+
+    local source="${TMPL_ARRAYS_SOURCE:-none}"
+    print "Source: ${CYAN}${source}${NC}"
+    print ""
+
+    # SSH Hosts
+    print "${CYAN}ssh_hosts${NC} (${#TMPL_ARRAYS_ssh_hosts[@]} items):"
+    if (( ${#TMPL_ARRAYS_ssh_hosts[@]} > 0 )); then
+        for item in "${TMPL_ARRAYS_ssh_hosts[@]}"; do
+            local -a fields
+            fields=("${(@s:|:)item}")
+            printf "  • %-15s → %s@%s" "${fields[1]}" "${fields[3]}" "${fields[2]}"
+            [[ -n "${fields[4]:-}" ]] && printf " (key: %s)" "${fields[4]:t}"
+            [[ -n "${fields[5]:-}" ]] && printf " [%s]" "${fields[5]}"
+            print ""
+        done
+    else
+        print "  ${DIM}(empty)${NC}"
     fi
 }
 
