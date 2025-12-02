@@ -941,7 +941,8 @@ dotfiles/
 
 ---
 
-## Development & Testing
+<details>
+<summary><b>Development & Testing</b> - Docker environments and 124 comprehensive tests</summary>
 
 ### Docker Bootstrap
 
@@ -968,7 +969,7 @@ The Dockerfile demonstrates:
 - CI/CD integration patterns
 - Reproducible development containers
 
-### Testing (80+ tests)
+### Testing (124 tests)
 
 Run tests with bats-core:
 
@@ -986,13 +987,16 @@ Run tests with bats-core:
 ./test/run_tests.sh all          # All tests (default)
 ```
 
-**Test suites:**
+**Test coverage:**
 
 | Suite | Tests | Description |
 |-------|-------|-------------|
-| Unit | 39 | vault/_common.sh functions, CLI commands |
-| Integration | 21 | Mock Bitwarden, backup/restore cycles |
-| Error Scenarios | 20+ | Permission errors, missing files, edge cases |
+| dotclaude integration | 32 | Claude profile management, sync, drift detection |
+| Vault functions | 23 | vault/_common.sh, multi-backend operations |
+| Error scenarios | 22 | Permission errors, missing files, edge cases |
+| Integration tests | 21 | Mock Bitwarden, backup/restore cycles |
+| CLI commands | 16 | Health check, drift, backup, init scripts |
+| Templates | 10 | Template engine, conditionals, loops |
 
 **CI/CD validates on every push:**
 - ShellCheck for bash scripts
@@ -1024,6 +1028,8 @@ To customize:
 1. Copy `zsh/zsh.d/99-local.zsh.example` to `zsh/zsh.d/99-local.zsh`
 2. Add machine-specific aliases, environment variables, or PATH entries
 3. This file is gitignored and won't be overwritten on updates
+
+</details>
 
 ---
 
