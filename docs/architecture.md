@@ -120,6 +120,12 @@ dotfiles/
 │       ├── 80-tools.zsh
 │       └── 90-local.zsh
 │
+├── lib/                    # Shared libraries
+│   ├── _logging.sh         # Logging functions
+│   ├── _state.sh           # Setup state management
+│   ├── _vault.sh           # Vault abstraction layer
+│   └── _templates.sh       # Template engine
+│
 ├── vault/
 │   ├── _common.sh          # Shared definitions
 │   ├── restore.sh          # Restore secrets
