@@ -168,6 +168,12 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 ├── ghostty/                            # Ghostty terminal configuration
 │   └── config                          # Ghostty settings
 │
+├── lib/                                # Shared libraries
+│   ├── _logging.sh                     # Logging functions (info, pass, warn, fail)
+│   ├── _state.sh                       # Setup wizard state management
+│   ├── _vault.sh                       # Multi-backend vault abstraction
+│   └── _templates.sh                   # Template engine
+│
 ├── lima/                               # Lima VM configuration
 │   └── lima.yaml                       # Lima VM definition (host-side)
 │

@@ -929,6 +929,7 @@ dotfiles/
 │
 ├── lib/                       # Shared libraries
 │   ├── _logging.sh           # Colors and logging
+│   ├── _state.sh             # Setup wizard state management
 │   ├── _templates.sh         # Template engine
 │   └── _vault.sh             # Vault abstraction layer
 │
