@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2025-12-02
+
+### Added
+- **Help hint for subcommand options** - Main `dotfiles help` now shows: "Run 'dotfiles <command> --help' for detailed options"
+- **State Management in Quick Navigation** - Added link to `state-management.md` in docsify homepage
+
+## [2.0.0] - 2025-12-02
+
+### Breaking Changes
+- **Removed `dotfiles init` command** - Now use `dotfiles setup` instead
+- **Removed `install.sh --interactive` flag** - Bootstrap now prompts to run `dotfiles setup`
+- **Renamed `vault/bootstrap-vault.sh`** to `vault/restore.sh` for clarity
+
 ### Added
 - **Unified Setup Wizard** (`dotfiles setup`) - New interactive setup with persistent state
   - Five-phase setup: symlinks → packages → vault → secrets → claude

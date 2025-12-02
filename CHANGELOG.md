@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2025-12-02
+
+### Added
+- **Help hint for subcommand options** - Main `dotfiles help` now shows: "Run 'dotfiles <command> --help' for detailed options"
+- **State Management in Quick Navigation** - Added link to `state-management.md` in docsify homepage
+
 ## [2.0.0] - 2025-12-02
 
 ### Breaking Changes
