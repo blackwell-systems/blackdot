@@ -35,6 +35,31 @@ RUN git clone "$DOTFILES_REPO" /home/developer/workspace/dotfiles
 WORKDIR /home/developer/workspace/dotfiles
 RUN ./bootstrap/bootstrap-linux.sh
 
+# Make mock scripts executable
+RUN chmod +x /home/developer/workspace/dotfiles/test/mocks/*.sh 2>/dev/null || true
+
+# Add welcome message
+RUN echo '' >> /home/developer/.zshrc && \
+    echo '# Welcome message for container' >> /home/developer/.zshrc && \
+    echo 'if [[ -z "$_WELCOME_SHOWN" ]]; then' >> /home/developer/.zshrc && \
+    echo '    echo ""' >> /home/developer/.zshrc && \
+    echo '    echo "\\033[0;36m═══════════════════════════════════════════════════════════\\033[0m"' >> /home/developer/.zshrc && \
+    echo '    echo "\\033[0;36m  Dotfiles Test Container (full)\\033[0m"' >> /home/developer/.zshrc && \
+    echo '    echo "\\033[0;36m═══════════════════════════════════════════════════════════\\033[0m"' >> /home/developer/.zshrc && \
+    echo '    echo ""' >> /home/developer/.zshrc && \
+    echo '    echo "\\033[1mQuick Start:\\033[0m"' >> /home/developer/.zshrc && \
+    echo '    echo "  dotfiles help          # Show available commands"' >> /home/developer/.zshrc && \
+    echo '    echo "  dotfiles doctor        # Run health checks"' >> /home/developer/.zshrc && \
+    echo '    echo "  dotfiles status        # Show dashboard"' >> /home/developer/.zshrc && \
+    echo '    echo ""' >> /home/developer/.zshrc && \
+    echo '    echo "\\033[1mTest Vault with Mock Credentials (pass backend):\\033[0m"' >> /home/developer/.zshrc && \
+    echo '    echo "  ./test/mocks/setup-mock-vault.sh --no-pass  # Creates fake GPG key + pass store"' >> /home/developer/.zshrc && \
+    echo '    echo "  export DOTFILES_VAULT_BACKEND=pass          # Switch to pass backend"' >> /home/developer/.zshrc && \
+    echo '    echo "  dotfiles vault check                        # Test vault commands"' >> /home/developer/.zshrc && \
+    echo '    echo ""' >> /home/developer/.zshrc && \
+    echo '    export _WELCOME_SHOWN=1' >> /home/developer/.zshrc && \
+    echo 'fi' >> /home/developer/.zshrc
+
 # Optional: Restore secrets from Bitwarden
 # Requires BW_SESSION to be passed at runtime:
 #   docker run -e BW_SESSION="$BW_SESSION" dotfiles-dev
