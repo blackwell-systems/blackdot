@@ -1034,7 +1034,7 @@ Most commands follow these conventions:
 
 ## State Management
 
-The `dotfiles setup` wizard uses persistent state files to track progress.
+The `dotfiles setup` wizard uses persistent state files to track progress. See [State Management](state-management.md) for full documentation.
 
 ### State Files
 
@@ -1409,5 +1409,6 @@ dotfiles-upgrade
 - [Full Documentation](README-FULL.md) - Complete guide
 - [Vault System](vault-README.md) - Multi-backend secret management
 - [Template System](templates.md) - Machine-specific configuration
+- [State Management](state-management.md) - Setup wizard state and resume
 - [Claude Code Integration](claude-code.md) - Portable sessions & safety hooks
 - [Troubleshooting](troubleshooting.md) - Common issues and solutions
