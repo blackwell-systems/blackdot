@@ -1,7 +1,8 @@
 #!/usr/bin/env zsh
 # ============================================================
 # FILE: dotfiles-drift.sh
-# Compare local configuration files against Bitwarden vault
+# Compare local configuration files against vault
+# Works with any configured vault backend (Bitwarden, 1Password, pass)
 # Usage: ./dotfiles-drift.sh
 #        dotfiles drift
 # ============================================================
@@ -12,27 +13,41 @@ SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
 # DOTFILES_DIR is parent of bin/
 DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
 source "$DOTFILES_DIR/lib/_logging.sh"
+source "$DOTFILES_DIR/lib/_vault.sh"
 
-section "Drift Detection (Local vs Bitwarden)"
-
-# Get Bitwarden session
-VAULT_DIR="$HOME/workspace/dotfiles/vault"
-SESSION="${BW_SESSION:-}"
-
-if [[ -z "$SESSION" && -f "$VAULT_DIR/.bw-session" ]]; then
-    SESSION="$(cat "$VAULT_DIR/.bw-session")"
-fi
-
-if [[ -z "$SESSION" ]] || ! bw unlock --check --session "$SESSION" >/dev/null 2>&1; then
-    warn "Bitwarden not unlocked - cannot check drift"
-    echo ""
-    info "Run: export BW_SESSION=\"\$(bw unlock --raw)\""
+# Initialize vault backend
+if ! vault_init; then
+    fail "Failed to initialize vault backend"
     exit 1
 fi
 
+BACKEND_NAME=$(vault_name)
+section "Drift Detection (Local vs $BACKEND_NAME)"
+
+# Check if logged in
+if ! vault_login_check; then
+    warn "$BACKEND_NAME not unlocked - cannot check drift"
+    echo ""
+    case "$DOTFILES_VAULT_BACKEND" in
+        bitwarden)
+            info "Run: export BW_SESSION=\"\$(bw unlock --raw)\""
+            ;;
+        1password)
+            info "Run: eval \$(op signin)"
+            ;;
+        pass)
+            info "Ensure GPG agent is running"
+            ;;
+    esac
+    exit 1
+fi
+
+# Get session
+SESSION=$(vault_get_session)
+
 # Sync first
-info "Syncing Bitwarden vault..."
-bw sync --session "$SESSION" >/dev/null 2>&1
+info "Syncing $BACKEND_NAME vault..."
+vault_sync "$SESSION" >/dev/null 2>&1 || true
 
 # Items to check for drift
 typeset -A DRIFT_ITEMS=(
@@ -56,11 +71,11 @@ for item_name in "${(@k)DRIFT_ITEMS}"; do
         continue
     fi
 
-    # Get Bitwarden content
-    bw_content=$(bw get notes "$item_name" --session "$SESSION" 2>/dev/null || echo "")
+    # Get vault content using abstraction
+    vault_content=$(vault_get_notes "$item_name" "$SESSION" 2>/dev/null || echo "")
 
-    if [[ -z "$bw_content" ]]; then
-        info "$item_name: not found in Bitwarden"
+    if [[ -z "$vault_content" ]]; then
+        info "$item_name: not found in $BACKEND_NAME"
         continue
     fi
 
@@ -68,10 +83,10 @@ for item_name in "${(@k)DRIFT_ITEMS}"; do
 
     # Compare
     local_content=$(cat "$local_file")
-    if [[ "$bw_content" == "$local_content" ]]; then
+    if [[ "$vault_content" == "$local_content" ]]; then
         pass "$item_name: in sync"
     else
-        warn "$item_name: LOCAL DIFFERS from Bitwarden"
+        warn "$item_name: LOCAL DIFFERS from $BACKEND_NAME"
         ((DRIFT_COUNT++))
     fi
 done
@@ -83,10 +98,10 @@ if [[ $DRIFT_COUNT -eq 0 ]]; then
 else
     echo -e "${YELLOW}$DRIFT_COUNT of $CHECKED_COUNT items have drifted${NC}"
     echo ""
-    info "To sync local changes to Bitwarden:"
+    info "To sync local changes to $BACKEND_NAME:"
     echo "  dotfiles vault sync --all"
     echo ""
-    info "To restore from Bitwarden (overwrite local):"
+    info "To restore from $BACKEND_NAME (overwrite local):"
     echo "  dotfiles vault restore"
 fi
 echo "========================================"
