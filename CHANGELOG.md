@@ -7,7 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.3] - 2025-12-01
+
 ### Added
+- **GitHub Sponsors Support** - Added `github: blackwell-systems` to FUNDING.yml
+- **Collapsible README Sections** - Made Acknowledgments, Troubleshooting, The dotfiles Command, and Project Structure collapsible for better readability
+- **DOTFILES_SKIP_DRIFT_CHECK** documentation - Added missing environment variable to Optional Components
+
+### Changed
+- **Vault-Agnostic `dotfiles init`** - Major refactor of interactive setup wizard
+  - Auto-detects all vault backends (Bitwarden, 1Password, pass)
+  - Prompts user to choose vault (never auto-selects)
+  - Option to skip vault setup entirely
+  - Backend-specific login/unlock flows
+  - Fixes Alpine/Linux issue where pass was auto-selected
+- **Integrated `install.sh` with `dotfiles init`** - `install.sh --interactive` now calls the wizard automatically
+- **Simplified Quick Start** - Reduced from 4 manual steps to 2 (clone → dotfiles init)
+- **Reordered README Sections** - End sections now: Acknowledgments → Trademarks → License
+- **Updated Project Structure** - Added lib/_vault.sh and test/fixtures/ subdirectory
+- **Removed Bitwarden Bias** - All documentation now vault-agnostic
+
+### Documentation
+- Updated README.md, docs/README.md, docs/README-FULL.md with simplified install flow
+- Updated docs/cli-reference.md with comprehensive `dotfiles init` documentation
+- All install documentation now consistently promotes 2-step flow
+
+## [1.8.2] - 2025-12-01
+
+### Added
+- **Test Drive Guide** (`docs/TESTDRIVE.md`) - Comprehensive Docker exploration guide
+  - Sample workflows for safe testing
+  - dotclaude integration examples
+  - FAQ and troubleshooting
+- Added "Try Before Installing" section to README with Docker instructions
+
+### Fixed
+- Improved template validation tests for better error handling
+
+## [1.8.1] - 2025-12-01
+
+### Fixed
+- Template tests now correctly source `_logging.sh` (fixes 3 failing tests)
+- Removed misleading codecov badge (shell coverage tracking is unreliable)
+
+## [1.8.0] - 2025-12-01
+
+### Added
+- **dotclaude Integration** - Claude Code profile management across machines
+  - `dotfiles status` shows active Claude profile (if dotclaude installed)
+  - `dotfiles doctor` validates Claude/dotclaude setup with install hints
+  - `dotfiles vault` syncs `~/.claude/profiles.json` to vault
+  - `dotfiles drift` detects Claude profile changes vs vault
+  - `dotfiles packages` suggests dotclaude for Claude users
+  - `dotfiles init` offers dotclaude installation during setup wizard
+  - See [docs/claude-code.md](docs/claude-code.md#dotclaude-integration) for details
+- **Dockerfile.lite** - Lightweight Alpine container for CLI exploration
 - **`{{#each}}` Template Loops** - Iterate over arrays with named fields
   - Define `SSH_HOSTS` array in `_variables.local.sh`
   - Use `{{#each ssh_hosts}}...{{/each}}` in templates
@@ -24,10 +78,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Template Engine: Nested `{{#else}}` handling** - Fixed stray `{{/if}}` tags in output
   - Properly matches `{{#else}}` at the correct nesting level
   - No longer grabs nested conditionals' else blocks
-
-### Planned
-- Blog posts on dotfiles architecture and Claude session portability
-- Open source vault system as standalone project
 
 ## [1.7.0] - 2025-11-29
 

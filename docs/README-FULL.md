@@ -5,9 +5,9 @@
 
 > **Enterprise-grade dotfiles** with multi-vault secret management (Bitwarden, 1Password, pass), machine-specific templates, portable Claude Code sessions, and automated health checks. Works across macOS, Linux, Windows, WSL2, and Docker.
 
-[![Version](https://img.shields.io/badge/Version-1.7.0-blue)](../CHANGELOG.md)
+[![Version](https://img.shields.io/github/v/release/blackwell-systems/dotfiles)](https://github.com/blackwell-systems/dotfiles/releases)
 
-**Version:** 1.7.0 | [Changelog](../CHANGELOG.md) | [Quick Start Guide](../README.md)
+[Changelog](../CHANGELOG.md) | [Quick Start Guide](../README.md)
 
 This is the comprehensive reference documentation for the dotfiles system. It covers configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code portable sessions**, and a **multi-vault secret bootstrap** (supporting Bitwarden, 1Password, and pass) for SSH keys, AWS credentials, and environment secrets across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
 
@@ -67,24 +67,25 @@ Options:
 
 ```bash
 # 1. Clone repository
-git clone git@github.com:YOUR-USERNAME/dotfiles.git ~/workspace/dotfiles
+git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
-# 2. Run bootstrap (choose platform)
+# 2. Run interactive setup wizard
+dotfiles init
+```
+
+**That's it!** The wizard handles platform detection, vault selection, and secret restoration.
+
+**Alternative (non-interactive):**
+```bash
+# Run bootstrap only (no vault setup)
 ./bootstrap/bootstrap-mac.sh      # macOS
-./bootstrap/bootstrap-linux.sh    # Lima / Linux / WSL2
+./bootstrap/bootstrap-linux.sh    # Linux / WSL2
 
-# Or use interactive mode for guided setup:
-./bootstrap/bootstrap-mac.sh --interactive
+# Then manually configure secrets or run:
+dotfiles vault restore  # (requires vault CLI login first)
 
-# 3. Restore secrets from vault
-# For Bitwarden:
-bw login && export BW_SESSION="$(bw unlock --raw)"
-# For 1Password: op signin
-# For pass: no login needed (uses GPG)
-./vault/bootstrap-vault.sh
-
-# 4. Verify installation
+# Verify installation
 dotfiles doctor
 ```
 

@@ -10,24 +10,7 @@ The following items have detailed planning documents and are ready for implement
 
 ---
 
-### 1. dotclaude Integration
-
-**Status:** Approved - Ready for Implementation
-**Document:** [INTEGRATION-DOTCLAUDE.md](INTEGRATION-DOTCLAUDE.md)
-
-Integrate dotfiles with [dotclaude](https://dotclaude.dev) (Claude Code profile management) as complementary products:
-
-- `dotfiles status` shows active Claude profile
-- `dotfiles doctor` validates Claude setup
-- `dotfiles vault restore` includes Claude profiles
-- `dotfiles init` offers dotclaude installation
-- No wrapper commands - dotclaude used directly
-
-**Principle:** Loose coupling - each product remains fully independent.
-
----
-
-### 2. Template JSON Arrays
+### 1. Template JSON Arrays
 
 **Status:** Planning Complete - Ready for Implementation
 **Document:** [PLAN-TEMPLATE-JSON.md](PLAN-TEMPLATE-JSON.md)
@@ -52,7 +35,7 @@ SSH_HOSTS=("github|github.com|git|~/.ssh/id_ed25519|")
 
 ---
 
-### 3. macOS CLI Integration
+### 2. macOS CLI Integration
 
 **Status:** Concept - Not Started
 
@@ -92,7 +75,7 @@ The following are concepts that may be implemented in the future.
 
 ---
 
-#### 4. MCP Server for Claude Code Integration
+#### 3. MCP Server for Claude Code Integration
 
 **Status:** Not started (Concept documented)
 
@@ -125,7 +108,7 @@ dotfiles_doctor_fix()       // Auto-repair issues
 
 ---
 
-#### 5. Session Management Improvements
+#### 4. Session Management Improvements
 
 **Status:** Not started
 
@@ -138,7 +121,7 @@ dotfiles_doctor_fix()       // Auto-repair issues
 
 ---
 
-#### 6. API/Function Reference Documentation
+#### 5. API/Function Reference Documentation
 
 **Status:** Not started
 

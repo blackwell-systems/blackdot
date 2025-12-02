@@ -111,6 +111,35 @@
   <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-docker.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-markdown.min.js"></script>
 
+  <!-- Mermaid diagrams -->
+  <script src="//cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-mermaid@2/dist/docsify-mermaid.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#1a1a1a',
+        primaryColor: '#4a9eff',
+        primaryTextColor: '#e0e0e0',
+        primaryBorderColor: '#4a9eff',
+        lineColor: '#6eb5ff',
+        secondaryColor: '#2d7dd2',
+        tertiaryColor: '#3a3a3a',
+        edgeLabelBackground: '#2a2a2a',
+        textColor: '#e0e0e0',
+        mainBkg: '#2a2a2a',
+        secondBkg: '#3a3a3a',
+        border1: '#4a9eff',
+        border2: '#6eb5ff',
+        arrowheadColor: '#6eb5ff',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        fontSize: '16px'
+      }
+    });
+  </script>
+
   <!-- External link icon -->
   <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/external-script.min.js"></script>
 </body>

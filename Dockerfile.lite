@@ -1,0 +1,45 @@
+# Lightweight dotfiles exploration container
+# For quick CLI testing without full bootstrap
+
+FROM alpine:3.19
+
+RUN apk add --no-cache \
+    bash \
+    zsh \
+    git \
+    jq \
+    coreutils \
+    util-linux \
+    curl
+
+ENV HOME=/root
+ENV WORKSPACE=/root/workspace
+
+WORKDIR /root/workspace/dotfiles
+
+# Copy core components (not full bootstrap)
+COPY bin/ /root/workspace/dotfiles/bin/
+COPY lib/ /root/workspace/dotfiles/lib/
+COPY vault/ /root/workspace/dotfiles/vault/
+COPY zsh/ /root/workspace/dotfiles/zsh/
+COPY templates/ /root/workspace/dotfiles/templates/
+
+# Make bin scripts executable
+RUN chmod +x /root/workspace/dotfiles/bin/*
+
+# Setup zsh to load dotfiles functions
+RUN mkdir -p /root/.config && \
+    echo 'export WORKSPACE=/root/workspace' > /root/.zshrc && \
+    echo 'source /root/workspace/dotfiles/zsh/zsh.d/40-aliases.zsh' >> /root/.zshrc && \
+    echo 'source /root/workspace/dotfiles/zsh/zsh.d/50-functions.zsh' >> /root/.zshrc
+
+CMD ["zsh"]
+
+# Usage:
+#   docker build -f Dockerfile.lite -t dotfiles-lite .
+#   docker run -it --rm dotfiles-lite
+#
+# Then explore:
+#   dotfiles help
+#   dotfiles doctor
+#   dotfiles status

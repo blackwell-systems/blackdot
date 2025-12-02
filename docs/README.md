@@ -7,15 +7,14 @@
 
 [![Shell](https://img.shields.io/badge/Shell-Zsh-89e051?logo=zsh&logoColor=white)](https://www.zsh.org/)
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
-[![Tests](https://img.shields.io/badge/Tests-80%2B-brightgreen)](test/)
-[![codecov](https://codecov.io/gh/blackwell-systems/dotfiles/branch/main/graph/badge.svg)](https://codecov.io/gh/blackwell-systems/dotfiles)
-[![Version](https://img.shields.io/badge/Version-1.7.0-informational)](https://github.com/blackwell-systems/dotfiles/releases)
+[![Tests](https://img.shields.io/badge/Tests-124-brightgreen)](test/)
+[![Version](https://img.shields.io/github/v/release/blackwell-systems/dotfiles)](https://github.com/blackwell-systems/dotfiles/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
 
 > **The first dotfiles designed for AI-assisted development.** Multi-vault secrets, portable Claude Code sessions, machine-specific templates, and self-healing configuration.
 
-**Version:** 1.7.0 | [Changelog](https://github.com/blackwell-systems/dotfiles/blob/main/CHANGELOG.md) | [GitHub](https://github.com/blackwell-systems/dotfiles)
+[Changelog](https://github.com/blackwell-systems/dotfiles/blob/main/CHANGELOG.md) | [GitHub](https://github.com/blackwell-systems/dotfiles)
 
 ---
 
@@ -38,17 +37,24 @@ For detailed feature comparisons vs chezmoi, thoughtbot, holman, and other popul
 
 ## One-Line Install
 
+**Recommended (interactive setup):**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --interactive
 ```
 
-Or with options:
+This launches the setup wizard which:
+- Auto-detects your platform (macOS, Linux, WSL2)
+- Detects available vault CLIs (Bitwarden, 1Password, pass)
+- Prompts you to choose your vault (or skip)
+- Restores secrets and validates setup
+
+**Other install options:**
 
 ```bash
-# Interactive mode - prompts for configuration
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --interactive
+# Default (non-interactive)
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
 
-# Minimal mode - skip optional features (vault, Claude setup)
+# Minimal mode - skip vault and optional features
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
 ```
 
@@ -72,19 +78,19 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
-# 2. Bootstrap
-./bootstrap/bootstrap-mac.sh      # macOS
-./bootstrap/bootstrap-linux.sh    # Linux / WSL2 / Docker
-
-# 3. Restore secrets from vault (optional)
-bw login && export BW_SESSION="$(bw unlock --raw)"
-./vault/bootstrap-vault.sh
-
-# 4. Verify
-dotfiles doctor
+# 2. Run interactive setup wizard
+dotfiles init
 ```
 
-**Don't use a vault?** Run with `--minimal` or skip step 3. Manually configure `~/.ssh`, `~/.aws`, `~/.gitconfig`.
+**That's it!** The wizard handles:
+- Platform detection and bootstrap
+- Vault selection (Bitwarden, 1Password, pass, or skip)
+- Secret restoration
+- Health validation
+
+> **💡 Why `~/workspace`?** Bootstrap creates `/workspace → ~/workspace` symlink for **portable Claude Code sessions**. Use `/workspace/project` paths and your AI conversations sync across macOS, Linux, WSL—same session folder, same history. [Learn more](README-FULL.md#canonical-workspace-workspace)
+
+**Don't use a vault?** The wizard lets you skip vault setup entirely.
 
 ---
 

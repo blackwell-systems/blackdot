@@ -168,7 +168,16 @@ echo ""
 # shellcheck disable=SC2086
 ./"$BOOTSTRAP_SCRIPT" $BOOTSTRAP_ARGS
 
-# Success message
+# If interactive mode, run the setup wizard
+if $INTERACTIVE && ! $MINIMAL; then
+    echo ""
+    info "Running interactive setup wizard..."
+    echo ""
+    ./bin/dotfiles-init
+    exit 0
+fi
+
+# Success message (non-interactive mode)
 echo ""
 echo -e "${GREEN}${BOLD}╔════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}${BOLD}║              Installation Complete!                        ║${NC}"
@@ -181,7 +190,10 @@ echo -e "     ${CYAN}exec zsh${NC}"
 echo ""
 
 if ! $MINIMAL; then
-    echo "  2. (Optional) Restore secrets from vault:"
+    echo "  2. Complete setup with the interactive wizard:"
+    echo -e "     ${CYAN}dotfiles init${NC}"
+    echo ""
+    echo "  Or manually restore secrets from vault:"
     echo -e "     ${CYAN}# Bitwarden: bw login && export BW_SESSION=\"\$(bw unlock --raw)\"${NC}"
     echo -e "     ${CYAN}# 1Password: op signin${NC}"
     echo -e "     ${CYAN}# pass: (uses GPG, no login needed)${NC}"

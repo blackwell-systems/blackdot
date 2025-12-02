@@ -1,7 +1,8 @@
 <!-- docs/_sidebar.md -->
 
 - **Getting Started**
-  - [Home](/)
+  - [Dotfiles](/)
+  - [Test Drive (Docker)](TESTDRIVE.md)
   - [One-Line Install](/#one-line-install)
   - [Quick Start](/#quick-start-manual)
   - [Platform Support](/#platform-support)
@@ -23,7 +24,6 @@
 
 - **Planning**
   - [Roadmap](ROADMAP.md)
-  - [dotclaude Integration](INTEGRATION-DOTCLAUDE.md)
   - [Template JSON Arrays](PLAN-TEMPLATE-JSON.md)
 
 - **Contributing**

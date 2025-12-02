@@ -621,18 +621,32 @@ dotfiles update          # Alias
 
 ### `dotfiles init`
 
-Interactive first-time setup wizard.
+Interactive first-time setup wizard. **Use this after cloning the repository** for guided setup.
 
 ```bash
 dotfiles init
 ```
 
-**Steps:**
-1. Checks current state
-2. Runs bootstrap if needed
-3. Configures vault (Bitwarden/1Password/pass)
-4. Restores secrets from vault
-5. Runs health check
+**What it does:**
+1. **Checks current state** - Detects if already initialized
+2. **Runs bootstrap** - Creates symlinks, installs packages
+3. **Vault selection** - Auto-detects installed vault CLIs (Bitwarden, 1Password, pass)
+   - Prompts you to choose which vault to use
+   - Option to skip vault entirely (manual secret config)
+   - Never auto-selects - you always choose
+4. **Vault authentication** - Guides login/unlock for selected backend
+5. **Secret restoration** - Restores SSH keys, AWS creds, Git config from vault
+6. **Claude Code setup** - Optionally installs dotclaude for profile management
+7. **Health check** - Verifies everything is configured correctly
+
+**Vault backend support:**
+- **Bitwarden** (`bw`) - Handles login + unlock flow
+- **1Password** (`op`) - Handles signin flow
+- **pass** - Checks GPG agent access
+- **None** - Skip vault, configure secrets manually
+
+**Environment variables:**
+- `DOTFILES_VAULT_BACKEND` - Pre-select backend (skips prompt)
 
 ---
 

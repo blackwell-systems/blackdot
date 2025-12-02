@@ -106,6 +106,7 @@ typeset -A SYNCABLE_ITEMS=(
     ["AWS-Credentials"]="$HOME/.aws/credentials"
     ["Git-Config"]="$HOME/.gitconfig"
     ["Environment-Secrets"]="$HOME/.local/env.secrets"
+    ["Claude-Profiles"]="$HOME/.claude/profiles.json"
 )
 
 # Get required items list

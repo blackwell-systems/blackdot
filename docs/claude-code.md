@@ -232,6 +232,112 @@ WORKSPACE="$HOME/.workspace" ./bootstrap-mac.sh
 
 ---
 
+## dotclaude Integration
+
+This repo integrates with [dotclaude](https://dotclaude.dev) for Claude Code profile management across machines.
+
+### Architecture: Two Tools, Loosely Connected
+
+```
+┌─────────────────────────────────┐     ┌─────────────────────────────────┐
+│           dotfiles              │     │           dotclaude             │
+│  (shell config, secrets, etc)   │     │   (Claude profile management)   │
+├─────────────────────────────────┤     ├─────────────────────────────────┤
+│                                 │     │                                 │
+│  dotfiles status    ───────────────────► shows Claude profile status   │
+│  dotfiles doctor    ───────────────────► checks Claude health          │
+│  dotfiles drift     ───────────────────► detects profile changes       │
+│  dotfiles vault restore ───────────────► restores profiles.json        │
+│  dotfiles packages  ───────────────────► suggests dotclaude install    │
+│  dotfiles init      ───────────────────► offers dotclaude setup        │
+│                                 │     │                                 │
+└─────────────────────────────────┘     └─────────────────────────────────┘
+                                              ▲
+                                              │
+                                        User runs directly:
+                                        dotclaude list
+                                        dotclaude switch work
+                                        dotclaude create personal
+```
+
+**Key principle:** dotclaude is NOT wrapped or hidden. Users run it directly for all profile management. dotfiles just "knows about" dotclaude to enhance existing commands.
+
+### What's Integrated
+
+| Command | Claude Integration |
+|---------|-------------------|
+| `dotfiles status` | Shows active Claude profile |
+| `dotfiles doctor` | Validates Claude/dotclaude setup |
+| `dotfiles vault restore` | Restores Claude profiles.json |
+| `dotfiles drift` | Detects profile changes vs vault |
+| `dotfiles packages` | Suggests dotclaude for Claude users |
+| `dotfiles init` | Offers dotclaude installation |
+
+### How It Works
+
+1. **dotclaude** manages profiles in `~/code/dotclaude/profiles/`
+2. **dotclaude** auto-generates `~/.claude/profiles.json` on activate/create
+3. **dotfiles vault** syncs `profiles.json` to your password manager
+4. **dotfiles vault restore** restores it on new machines
+
+The `profiles.json` format:
+```json
+{
+  "active": "work-bedrock",
+  "profiles": {
+    "work-bedrock": {"backend": "bedrock", "created": "2025-11-30"},
+    "personal-max": {"backend": "max", "created": "2025-11-28"}
+  }
+}
+```
+
+### Quick Setup
+
+```bash
+# Install dotclaude (if not already)
+curl -fsSL https://dotclaude.dev/install | bash
+
+# Create and activate a profile
+dotclaude create my-project
+dotclaude activate my-project
+
+# Sync to vault
+dotfiles vault sync Claude-Profiles
+
+# On new machine, restore everything including Claude profiles
+dotfiles vault restore
+```
+
+### New Developer Onboarding
+
+```bash
+# One command gets everything
+curl -fsSL .../install.sh | bash
+
+# Unlock vault and restore secrets (including Claude profiles)
+bw login
+export BW_SESSION="$(bw unlock --raw)"
+dotfiles vault restore
+
+# Verify setup
+dotfiles doctor
+# All systems green, including Claude
+
+# Ready to work
+dotclaude list
+# Shows restored profiles
+```
+
+### Without dotclaude
+
+If you use Claude Code without dotclaude:
+- `dotfiles status` shows a gentle hint: `try: dotclaude.dev`
+- `dotfiles doctor` suggests installation with instructions
+- `dotfiles packages` mentions dotclaude availability
+- No impact on other dotfiles functionality - completely optional
+
+---
+
 ## Future: MCP Server Integration
 
 We're exploring deeper Claude integration via [Model Context Protocol (MCP)](https://modelcontextprotocol.io/). See [Roadmap](ROADMAP.md#mcp-server-concept) for details.
