@@ -421,5 +421,5 @@ Before completing work, verify:
 
 ---
 
-**Last Updated:** 2025-11-29
-**Version:** 1.8.1
+**Last Updated:** 2025-12-02
+**Version:** 2.0.1
