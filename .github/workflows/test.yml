@@ -115,10 +115,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bats
 
-      - name: Install zsh (required for vault scripts)
+      - name: Install zsh and jq (required for vault scripts)
         run: |
-          echo "📦 Installing zsh..."
-          sudo apt-get install -y zsh
+          echo "📦 Installing zsh and jq..."
+          sudo apt-get install -y zsh jq
 
       - name: Make mock bw executable
         run: chmod +x test/mocks/bw
@@ -145,10 +145,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bats
 
-      - name: Install zsh
+      - name: Install zsh and jq
         run: |
-          echo "📦 Installing zsh..."
-          sudo apt-get install -y zsh
+          echo "📦 Installing zsh and jq..."
+          sudo apt-get install -y zsh jq
 
       - name: Make scripts executable
         run: |
@@ -177,10 +177,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bats
 
-      - name: Install zsh
+      - name: Install zsh and jq
         run: |
-          echo "📦 Installing zsh..."
-          sudo apt-get install -y zsh
+          echo "📦 Installing zsh and jq..."
+          sudo apt-get install -y zsh jq
 
       - name: Make scripts executable
         run: |
@@ -207,7 +207,7 @@ jobs:
         run: |
           echo "📦 Installing dependencies..."
           sudo apt-get update
-          sudo apt-get install -y bats zsh
+          sudo apt-get install -y bats zsh jq
 
       - name: Install kcov
         run: |
@@ -404,8 +404,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install zsh
-        run: sudo apt-get update && sudo apt-get install -y zsh
+      - name: Install zsh and jq
+        run: sudo apt-get update && sudo apt-get install -y zsh jq
 
       - name: Test Linux script syntax
         run: |
