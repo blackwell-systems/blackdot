@@ -344,7 +344,7 @@ jobs:
               --exclude-dir=.git \
               --exclude-dir=.github \
               --exclude-dir=vault \
-              --exclude-dir=test/mocks \
+              --exclude-dir=mocks \
               --exclude="*.md" \
               --exclude=".pre-commit-hook.sample" \
               . ; then
