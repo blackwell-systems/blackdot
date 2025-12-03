@@ -87,6 +87,7 @@ if is_offline; then
 fi
 
 # Verify prerequisites
+require_vault_config || exit 1
 require_bw
 require_jq
 

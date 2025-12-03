@@ -43,6 +43,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Check prerequisites
+require_vault_config || exit 1
 require_bw
 require_jq
 
