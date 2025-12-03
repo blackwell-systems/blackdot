@@ -55,6 +55,7 @@ ${CYAN}COMMANDS${NC}
     vars              List all template variables and values
     edit              Open _variables.local.sh in editor
     link              Create symlinks from generated files to destinations
+    list              Show available templates and their status
     arrays            Manage JSON/shell arrays for {{#each}} loops
     help              Show this help message
 
@@ -98,6 +99,7 @@ ${CYAN}TEMPLATE SYNTAX${NC}
     {{#if variable }}...{{/if}} Conditional block
     {{#if var == "value" }}     Conditional with comparison
     {{#unless variable }}       Negative conditional
+    {{#each array }}...{{/each}} Loop over array items
 
 ${CYAN}FILES${NC}
     templates/_variables.sh         Default variable definitions
@@ -105,6 +107,10 @@ ${CYAN}FILES${NC}
     templates/_arrays.local.json    JSON arrays for {{#each}} loops (gitignored)
     templates/configs/*.tmpl        Template files
     generated/*                     Rendered output (gitignored)
+
+${CYAN}DOCUMENTATION${NC}
+    Full guide: docs/templates.md
+    Online:     https://blackwell-systems.github.io/dotfiles/#/templates
 
 EOF
 }
