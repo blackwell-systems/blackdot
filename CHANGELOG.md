@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2025-12-03
+
 ### Added
 - **Smart Secrets Onboarding** - Intelligent first-time setup for users with existing secrets
   - Detects local secrets (SSH keys, AWS creds, Git config) vs vault items
@@ -49,6 +51,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Bitwarden CLI in Alpine** - Switched to standalone binary to fix ESM compatibility issues
 - **Container bootstrap directory** - Fixed missing bootstrap/ in Docker containers
+- **Test Suite Compatibility** - Fixed all 76 tests to work with config-based vault items
+  - Made `VAULT_CONFIG_FILE` environment variable override-able for tests
+  - Installed `jq` in all CI test jobs (was missing)
+  - Used absolute paths `/usr/bin/sort` and `/usr/bin/jq` to fix PATH issues in `zsh -c` contexts
+  - Fixed zsh PATH variable corruption: renamed `path` → `item_path` in DOTFILES_ITEMS loop
+  - Tests now pass: 76/76 (100% pass rate)
 
 ## [2.0.1] - 2025-12-02
 
