@@ -51,6 +51,17 @@ dotfiles vault restore       # Pull secrets on new machine
 ```
 
 Unified API across Bitwarden, 1Password, and pass. Syncs SSH keys, AWS credentials, Git config, environment secrets. Bidirectional: local changes push to vault, new machines restore from vault. Schema validation prevents corrupt items. Drift detection warns before overwrites.
+
+**What credentials can I store?**
+
+All credential types are stored as vault items (secure notes):
+
+- **SSH Keys** - Private/public key pairs with optional passphrases, SSH config file
+- **Cloud Credentials** - AWS config and credentials (extensible to GCP, Azure)
+- **Development Tools** - Git configuration (name, email, signing keys), environment secrets (API keys, tokens)
+- **AI Tools** - Claude Code profiles (optional)
+
+[Complete list and vault item formats →](vault/README.md#vault-items-complete-list)
 </details>
 
 <details>
