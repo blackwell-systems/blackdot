@@ -127,7 +127,8 @@ dotfiles/
 │   └── _templates.sh       # Template engine
 │
 ├── vault/
-│   ├── _common.sh          # Shared definitions
+│   ├── _common.sh          # Config loader & validation
+│   ├── vault-items.example.json # Example config template
 │   ├── restore.sh          # Restore secrets
 │   ├── sync-to-vault.sh
 │   └── restore-*.sh        # Category restores
@@ -173,7 +174,19 @@ flowchart LR
 
 ## Vault System
 
-The vault system provides bidirectional sync with Bitwarden:
+The vault system provides bidirectional sync with multiple backends (Bitwarden, 1Password, pass).
+
+### Configuration
+
+Vault items are defined in a user-editable config file:
+
+```
+~/.config/dotfiles/vault-items.json
+```
+
+This defines SSH keys, config files, and syncable items. See `vault/vault-items.example.json` for the template.
+
+### Data Flow
 
 ```mermaid
 sequenceDiagram
