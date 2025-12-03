@@ -336,25 +336,28 @@ jobs:
           echo "🔍 Scanning for potential secrets..."
 
           # Check for common secret patterns (excluding allowed patterns)
-          # Exclude: .git, .github, markdown docs, vault directory, and pre-commit hook sample
+          # Exclude: .git, .github, markdown docs, vault directory, pre-commit hook sample, and test mocks
           # The vault directory contains documentation and templates with example key formats
           # The .pre-commit-hook.sample contains regex patterns to DETECT secrets (not actual secrets)
+          # The test/mocks directory contains intentionally fake credentials for testing
           if grep -r -E "(ssh-rsa|ssh-ed25519|BEGIN.*PRIVATE KEY)" \
               --exclude-dir=.git \
               --exclude-dir=.github \
               --exclude-dir=vault \
+              --exclude-dir=test/mocks \
               --exclude="*.md" \
               --exclude=".pre-commit-hook.sample" \
               . ; then
             echo "❌ Found potential secrets in repository!"
             echo "⚠️  Note: vault/ directory is excluded (contains templates/docs)"
+            echo "⚠️  Note: test/mocks/ directory is excluded (contains fake test credentials)"
             echo "⚠️  Note: .pre-commit-hook.sample is excluded (contains detection patterns)"
             echo "⚠️  If these are false positives, update the workflow exclude list"
             exit 1
           fi
 
           echo "✅ No secrets detected in repository"
-          echo "ℹ️  Note: vault/ directory and .pre-commit-hook.sample excluded from scan"
+          echo "ℹ️  Note: vault/, test/mocks/, and .pre-commit-hook.sample excluded from scan"
 
   test-mac-compatibility:
     name: macOS Compatibility Check
