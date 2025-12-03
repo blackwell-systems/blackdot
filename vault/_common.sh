@@ -54,14 +54,106 @@ debug() { [[ "${DEBUG:-}" == "1" ]] && print "${DIM}[DEBUG] $1${NC}"; }
 source "$DOTFILES_DIR/lib/_vault.sh"
 
 # ============================================================
-# Single source of truth: SSH Keys
-# Format: "vault_item" => "private_key_path"
-# To add a new SSH key, add it here and it propagates everywhere
+# Vault Items Configuration
 # ============================================================
-typeset -A SSH_KEYS=(
-    ["SSH-GitHub-Enterprise"]="$HOME/.ssh/id_ed25519_enterprise_ghub"
-    ["SSH-GitHub-Blackwell"]="$HOME/.ssh/id_ed25519_blackwell"
-)
+# Configuration is loaded from ~/.config/dotfiles/vault-items.json
+# Copy vault/vault-items.example.json to get started
+#
+# To customize vault items, edit your config file:
+#   ~/.config/dotfiles/vault-items.json
+# ============================================================
+
+VAULT_CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/vault-items.json"
+VAULT_CONFIG_EXAMPLE="$VAULT_DIR/vault-items.example.json"
+
+# Initialize empty arrays (populated by load_vault_config)
+typeset -gA SSH_KEYS=()
+typeset -gA DOTFILES_ITEMS=()
+typeset -gA SYNCABLE_ITEMS=()
+typeset -ga AWS_EXPECTED_PROFILES=()
+
+# Load vault configuration from JSON file
+load_vault_config() {
+    # Check if config file exists
+    if [[ ! -f "$VAULT_CONFIG_FILE" ]]; then
+        return 1
+    fi
+
+    # Check if jq is available
+    if ! command -v jq &>/dev/null; then
+        warn "jq not installed - cannot load vault config"
+        return 1
+    fi
+
+    # Validate JSON syntax
+    if ! jq -e '.' "$VAULT_CONFIG_FILE" &>/dev/null; then
+        fail "Invalid JSON in $VAULT_CONFIG_FILE"
+        return 1
+    fi
+
+    # Load SSH_KEYS
+    typeset -gA SSH_KEYS=()
+    while IFS='=' read -r key value; do
+        [[ -n "$key" ]] && SSH_KEYS[$key]="${value//\~/$HOME}"
+    done < <(jq -r '.ssh_keys // {} | to_entries[] | "\(.key)=\(.value)"' "$VAULT_CONFIG_FILE" 2>/dev/null)
+
+    # Load DOTFILES_ITEMS
+    typeset -gA DOTFILES_ITEMS=()
+    while IFS='|' read -r name path required type; do
+        [[ -n "$name" ]] && DOTFILES_ITEMS[$name]="${path//\~/$HOME}:$required:$type"
+    done < <(jq -r '.vault_items // {} | to_entries[] | "\(.key)|\(.value.path)|\(.value.required // false | if . then "required" else "optional" end)|\(.value.type)"' "$VAULT_CONFIG_FILE" 2>/dev/null)
+
+    # Load SYNCABLE_ITEMS
+    typeset -gA SYNCABLE_ITEMS=()
+    while IFS='=' read -r key value; do
+        [[ -n "$key" ]] && SYNCABLE_ITEMS[$key]="${value//\~/$HOME}"
+    done < <(jq -r '.syncable_items // {} | to_entries[] | "\(.key)=\(.value)"' "$VAULT_CONFIG_FILE" 2>/dev/null)
+
+    # Load AWS_EXPECTED_PROFILES
+    typeset -ga AWS_EXPECTED_PROFILES=()
+    while IFS= read -r profile; do
+        [[ -n "$profile" ]] && AWS_EXPECTED_PROFILES+=("$profile")
+    done < <(jq -r '.aws_expected_profiles // [] | .[]' "$VAULT_CONFIG_FILE" 2>/dev/null)
+
+    debug "Loaded vault config from $VAULT_CONFIG_FILE"
+    debug "  SSH_KEYS: ${#SSH_KEYS[@]} items"
+    debug "  DOTFILES_ITEMS: ${#DOTFILES_ITEMS[@]} items"
+    debug "  SYNCABLE_ITEMS: ${#SYNCABLE_ITEMS[@]} items"
+    debug "  AWS_EXPECTED_PROFILES: ${#AWS_EXPECTED_PROFILES[@]} profiles"
+
+    return 0
+}
+
+# Check if vault config exists
+vault_config_exists() {
+    [[ -f "$VAULT_CONFIG_FILE" ]]
+}
+
+# Require vault config to exist
+require_vault_config() {
+    if ! vault_config_exists; then
+        fail "Vault config not found: $VAULT_CONFIG_FILE"
+        echo ""
+        echo "To configure vault items, either:"
+        echo "  1. Run 'dotfiles setup' to create config interactively"
+        echo "  2. Copy the example config:"
+        echo "     mkdir -p ~/.config/dotfiles"
+        echo "     cp $VAULT_CONFIG_EXAMPLE $VAULT_CONFIG_FILE"
+        echo "     \$EDITOR $VAULT_CONFIG_FILE"
+        echo ""
+        return 1
+    fi
+
+    if ! load_vault_config; then
+        fail "Failed to load vault config"
+        return 1
+    fi
+
+    return 0
+}
+
+# Load config on source (silent - won't fail if missing)
+load_vault_config 2>/dev/null || true
 
 # Get list of SSH key file paths (for ssh-agent loading)
 get_ssh_key_paths() {
@@ -76,38 +168,6 @@ get_ssh_key_items() {
         echo "$item"
     done | sort
 }
-
-# ============================================================
-# Single source of truth: AWS Profiles (for health check)
-# Add profiles here that should be validated
-# ============================================================
-AWS_EXPECTED_PROFILES=(
-    "default"
-)
-
-# ============================================================
-# Single source of truth: Dotfiles items and their mappings
-# Format: "local_path:required|optional:type"
-# ============================================================
-typeset -A DOTFILES_ITEMS=(
-    ["SSH-GitHub-Enterprise"]="$HOME/.ssh/id_ed25519_enterprise_ghub:required:sshkey"
-    ["SSH-GitHub-Blackwell"]="$HOME/.ssh/id_ed25519_blackwell:required:sshkey"
-    ["SSH-Config"]="$HOME/.ssh/config:required:file"
-    ["AWS-Config"]="$HOME/.aws/config:required:file"
-    ["AWS-Credentials"]="$HOME/.aws/credentials:required:file"
-    ["Git-Config"]="$HOME/.gitconfig:required:file"
-    ["Environment-Secrets"]="$HOME/.local/env.secrets:optional:file"
-)
-
-# Items that can be synced (file-based, not SSH keys)
-typeset -A SYNCABLE_ITEMS=(
-    ["SSH-Config"]="$HOME/.ssh/config"
-    ["AWS-Config"]="$HOME/.aws/config"
-    ["AWS-Credentials"]="$HOME/.aws/credentials"
-    ["Git-Config"]="$HOME/.gitconfig"
-    ["Environment-Secrets"]="$HOME/.local/env.secrets"
-    ["Claude-Profiles"]="$HOME/.claude/profiles.json"
-)
 
 # Get required items list
 get_required_items() {
