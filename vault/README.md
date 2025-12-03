@@ -7,6 +7,7 @@ This directory contains scripts for **bidirectional secret management** with mul
 - **Utility scripts** for validation, debugging, deletion, and inventory
 - **Shared library** (`_common.sh`) with reusable functions
 - **Backend abstraction** supporting Bitwarden, 1Password, and pass
+- **User configuration** (`~/.config/dotfiles/vault-items.json`) - customize your vault items
 
 ---
 

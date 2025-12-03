@@ -62,6 +62,9 @@ if is_offline; then
     exit 0
 fi
 
+# Require vault config to be present
+require_vault_config || exit 1
+
 # Verify prerequisites
 require_bw
 require_logged_in

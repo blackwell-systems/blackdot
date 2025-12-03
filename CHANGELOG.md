@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Vault Items Configuration File** - User-editable JSON config for vault items
+  - `~/.config/dotfiles/vault-items.json` defines SSH keys, vault items, syncable items
+  - No more hardcoded organization-specific values in source code
+  - `vault/vault-items.example.json` provides template to customize
+  - `dotfiles setup` creates config automatically during wizard
+  - `require_vault_config()` ensures config exists before vault operations
 - **Template CLI Help Improvements** - Better discoverability in `dotfiles template help`
   - Added `list` command to help output (shows available templates with status)
   - Added `{{#each}}` loop syntax to template syntax section

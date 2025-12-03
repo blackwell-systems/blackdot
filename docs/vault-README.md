@@ -121,6 +121,89 @@ export DOTFILES_VAULT_BACKEND=pass
 
 ---
 
+## Configuration File
+
+Vault items are defined in a user-editable JSON configuration file. This allows you to customize which secrets to manage without editing source code.
+
+### Location
+
+```
+~/.config/dotfiles/vault-items.json
+```
+
+### Getting Started
+
+```bash
+# Copy the example configuration
+mkdir -p ~/.config/dotfiles
+cp vault/vault-items.example.json ~/.config/dotfiles/vault-items.json
+
+# Edit to match your vault items
+$EDITOR ~/.config/dotfiles/vault-items.json
+```
+
+Or use the setup wizard which creates this automatically:
+```bash
+dotfiles setup
+```
+
+### Configuration Structure
+
+```json
+{
+  "ssh_keys": {
+    "SSH-GitHub": "~/.ssh/id_ed25519_github",
+    "SSH-Work": "~/.ssh/id_ed25519_work"
+  },
+  "vault_items": {
+    "SSH-GitHub": {
+      "path": "~/.ssh/id_ed25519_github",
+      "required": true,
+      "type": "sshkey"
+    },
+    "SSH-Config": {
+      "path": "~/.ssh/config",
+      "required": true,
+      "type": "file"
+    },
+    "AWS-Config": {
+      "path": "~/.aws/config",
+      "required": true,
+      "type": "file"
+    }
+  },
+  "syncable_items": {
+    "SSH-Config": "~/.ssh/config",
+    "AWS-Config": "~/.aws/config",
+    "AWS-Credentials": "~/.aws/credentials"
+  },
+  "aws_expected_profiles": [
+    "default"
+  ]
+}
+```
+
+### Sections
+
+| Section | Purpose |
+|---------|---------|
+| `ssh_keys` | Maps vault item names to local SSH key paths |
+| `vault_items` | All managed items with metadata (path, required, type) |
+| `syncable_items` | Items that can sync bidirectionally |
+| `aws_expected_profiles` | AWS profiles validated by `dotfiles doctor` |
+
+### Item Types
+
+- `sshkey` - SSH key pair (private + public key in vault notes)
+- `file` - Plain text config file
+
+### Required vs Optional
+
+- `required: true` - `dotfiles vault check` will fail if missing
+- `required: false` - Restored if present, skipped if not
+
+---
+
 ### Pre-Restore Safety Check
 
 The restore command automatically checks if your local files have changed since the last vault sync. This prevents accidental data loss:
@@ -190,7 +273,9 @@ When offline mode is enabled:
 │   ═════════════════════════════════════════════════════════════  │
 │   restore-*.sh, sync-to-vault.sh, create/delete scripts         │
 │                     ↓                                            │
-│   _common.sh (data structures, validation, drift detection)     │
+│   _common.sh (validation, drift detection, config loader)       │
+│                     ↓                                            │
+│   ~/.config/dotfiles/vault-items.json (user configuration)      │
 │                     ↓                                            │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │

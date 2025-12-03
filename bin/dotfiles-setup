@@ -267,6 +267,43 @@ phase_vault() {
     info "Using vault backend: $selected"
     echo ""
 
+    # Check/create vault items configuration
+    local vault_config="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/vault-items.json"
+    local vault_example="$DOTFILES_DIR/vault/vault-items.example.json"
+
+    if [[ ! -f "$vault_config" ]]; then
+        echo "Vault items configuration needed."
+        echo ""
+        echo "This config defines which secrets to manage:"
+        echo "  • SSH keys (names and paths)"
+        echo "  • Config files (AWS, Git, etc.)"
+        echo ""
+
+        # Create config directory
+        mkdir -p "$(dirname "$vault_config")"
+
+        # Copy example
+        if [[ -f "$vault_example" ]]; then
+            cp "$vault_example" "$vault_config"
+            pass "Created $vault_config"
+            echo ""
+            echo "Please customize your vault items configuration."
+            echo "Edit the file to match your vault item names and paths."
+            echo ""
+            echo -n "Open editor now? [Y/n]: "
+            read edit_now
+            if [[ "${edit_now:-Y}" =~ ^[Yy]$ ]]; then
+                ${EDITOR:-vim} "$vault_config"
+            fi
+        else
+            fail "Example config not found: $vault_example"
+            return 1
+        fi
+    else
+        pass "Vault items config exists"
+    fi
+    echo ""
+
     # Backend-specific login
     case "$selected" in
         bitwarden)

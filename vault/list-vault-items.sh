@@ -13,6 +13,7 @@ VERBOSE=false
 [[ "${1:-}" == "--verbose" || "${1:-}" == "-v" ]] && VERBOSE=true
 
 # Check prerequisites
+require_vault_config || exit 1
 require_bw
 require_jq
 

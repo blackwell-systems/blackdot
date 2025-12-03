@@ -16,7 +16,8 @@ if [[ -z "$SESSION" ]]; then
     exit 1
 fi
 
-# Verify jq is available
+# Require vault config and jq
+require_vault_config || exit 1
 require_jq
 
 SSH_DIR="$HOME/.ssh"
