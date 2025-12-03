@@ -189,11 +189,30 @@ get_optional_items() {
     printf '%s\n' "${items[@]}" | sort
 }
 
-# Get local path for an item
+# Get local path for an item (checks all config sources)
 get_item_path() {
     local item="$1"
+
+    # Check DOTFILES_ITEMS first (has full metadata)
     local spec="${DOTFILES_ITEMS[$item]:-}"
-    [[ -n "$spec" ]] && echo "${spec%%:*}"
+    if [[ -n "$spec" ]]; then
+        echo "${spec%%:*}"
+        return 0
+    fi
+
+    # Check SYNCABLE_ITEMS
+    if [[ -n "${SYNCABLE_ITEMS[$item]:-}" ]]; then
+        echo "${SYNCABLE_ITEMS[$item]}"
+        return 0
+    fi
+
+    # Check SSH_KEYS
+    if [[ -n "${SSH_KEYS[$item]:-}" ]]; then
+        echo "${SSH_KEYS[$item]}"
+        return 0
+    fi
+
+    return 1
 }
 
 # Check if item is a protected dotfiles item

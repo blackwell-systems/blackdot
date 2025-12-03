@@ -24,20 +24,17 @@ OPTIONS:
     --help, -h       Show this help
 
 ARGUMENTS:
-    ITEM-NAME        Name for the Bitwarden item (e.g., "Git-Config")
-    FILE-PATH        Path to local file (optional if ITEM-NAME is a known dotfile)
+    ITEM-NAME        Name for the vault item (must match vault-items.json)
+    FILE-PATH        Path to local file (optional if ITEM-NAME is in config)
 
-KNOWN DOTFILE ITEMS:
-    SSH-Config          → ~/.ssh/config
-    AWS-Config          → ~/.aws/config
-    AWS-Credentials     → ~/.aws/credentials
-    Git-Config          → ~/.gitconfig
-    Environment-Secrets → ~/.local/env.secrets
+CONFIGURATION:
+    Item paths are loaded from ~/.config/dotfiles/vault-items.json
+    Run without arguments to see configured items.
 
 EXAMPLES:
-    $(basename "$0") Git-Config                    # Uses known path ~/.gitconfig
-    $(basename "$0") Git-Config ~/.gitconfig       # Explicit path
-    $(basename "$0") My-Custom-Note ~/my-file.txt  # Custom item
+    $(basename "$0") Git-Config                    # Uses path from config
+    $(basename "$0") SSH-Config                    # Uses path from config
+    $(basename "$0") My-Custom ~/path/to/file.txt  # Explicit path for unlisted item
     $(basename "$0") --dry-run Git-Config          # Preview creation
     $(basename "$0") --force Git-Config            # Overwrite existing
 
