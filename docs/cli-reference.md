@@ -223,6 +223,7 @@ dotfiles vault <command> [OPTIONS]
 |---------|-------------|
 | `restore` | Restore all secrets from vault |
 | `sync` | Sync local files to vault |
+| `setup` | Interactive onboarding wizard for new vault items |
 | `list` | List vault items |
 | `check` | Validate vault items exist |
 | `validate` | Validate vault item schema |
