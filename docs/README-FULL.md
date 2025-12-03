@@ -48,6 +48,7 @@ This is the comprehensive reference documentation for the dotfiles system. It co
 - [Health Check](#health-check)
   - [The dotfiles Command](#the-dotfiles-command)
 - [Metrics & Observability](#metrics--observability)
+- [Docker Test Environments](#docker-test-environments)
 - [CI/CD & Testing](#cicd--testing)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
@@ -667,6 +668,23 @@ The wizard handles:
 
 **Progress is saved** to `~/.config/dotfiles/`. If interrupted, run `dotfiles setup` again to resume. See [State Management](state-management.md) for details on state files and persistence.
 
+### Smart Secrets Onboarding
+
+For first-time vault setup or adding new secrets, use the interactive onboarding wizard:
+
+```bash
+dotfiles vault setup
+```
+
+This wizard:
+- Detects existing local secrets (SSH keys, AWS config, Git config)
+- Offers to create vault items for each detected secret
+- Validates vault item schema before creation
+- Creates `~/.config/dotfiles/vault-items.json` configuration file
+- Works with any vault backend (Bitwarden, 1Password, pass)
+
+Perfect for new machines or first-time vault users who haven't yet populated their vault.
+
 You can skip optional features using environment variables:
 
 ```bash
@@ -1039,6 +1057,23 @@ Restores:
 via your preferred vault backend (Bitwarden, 1Password, or pass). Set `DOTFILES_VAULT_BACKEND` environment variable to choose your backend.
 
 Same flow on macOS and Lima.
+
+### Vault Configuration File
+
+Vault items are defined in a user-editable JSON configuration file:
+
+```
+~/.config/dotfiles/vault-items.json
+```
+
+This allows you to customize which secrets to manage without editing source code. The file is created automatically by `dotfiles vault setup` or you can copy from the example:
+
+```bash
+mkdir -p ~/.config/dotfiles
+cp vault/vault-items.example.json ~/.config/dotfiles/vault-items.json
+```
+
+See [Vault README](vault-README.md#configuration-file) for the full schema and customization options.
 
 ---
 
@@ -1748,6 +1783,7 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 
 - `dotfiles vault restore` → Restore all secrets from vault
 - `dotfiles vault sync` → Sync local files to vault
+- `dotfiles vault setup` → Interactive onboarding wizard for new vault items
 - `dotfiles vault list` → List vault items
 - `dotfiles vault check` → Validate vault items exist
 - `dotfiles vault validate` → Validate vault item schema
@@ -2032,6 +2068,45 @@ dotfiles doctor && show-metrics.sh --graph
 # Auto-fix and track
 dotfiles doctor --fix && show-metrics.sh
 ```
+
+---
+
+## Docker Test Environments
+
+Test dotfiles in isolated containers before installing on your system. Four container sizes are available depending on your testing needs:
+
+| Container | Base | Size | Use Case |
+|-----------|------|------|----------|
+| `extralite` | Alpine | ~50MB | Quick CLI exploration |
+| `lite` | Alpine | ~200MB | Vault command testing (includes bw, op, pass) |
+| `medium` | Ubuntu | ~400MB | Full CLI + Homebrew |
+| `full` | Ubuntu | ~800MB+ | Complete environment with all packages |
+
+### Quick Start
+
+```bash
+# Build and run lite container
+docker build -f Dockerfile.lite -t dotfiles-lite .
+docker run -it --rm dotfiles-lite
+
+# Inside container
+dotfiles status
+dotfiles doctor
+```
+
+### Mock Vault for Testing
+
+Test vault functionality without real credentials using the mock vault setup:
+
+```bash
+# Inside lite container
+./test/mocks/setup-mock-vault.sh --no-pass
+export DOTFILES_VAULT_BACKEND=pass
+dotfiles vault check
+dotfiles vault restore --preview
+```
+
+See [Docker Guide](docker.md) for complete container details and testing workflows.
 
 ---
 
