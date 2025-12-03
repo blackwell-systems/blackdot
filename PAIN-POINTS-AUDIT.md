@@ -1,1492 +1,733 @@
-# Dotfiles Pain Points Analysis
+# Dotfiles Pain Points Analysis (Revised)
 
 **Date:** 2025-12-03
+**Revision:** 2.0 (Updated after code verification)
 **Scope:** Comprehensive analysis of user experience pain points in the dotfiles system
-**Methodology:** Code review, workflow analysis, edge case identification
+**Methodology:** Code review, workflow analysis, feature verification, edge case identification
 
 ---
 
 ## Executive Summary
 
-The dotfiles system demonstrates robust engineering with a flexible vault abstraction and multi-backend support. However, several pain points exist around user experience, error handling, and system approachability for users with varying technical backgrounds.
+**Finding:** The dotfiles system is **significantly more mature** than initially assessed. Many features previously identified as "missing" are actually fully implemented with robust error handling, interactive wizards, and comprehensive tooling.
 
-**Critical Finding:** The system would benefit most from becoming more self-documenting, with interactive guidance and comprehensive error reporting.
+**What's Working Well:**
+- ✅ Comprehensive health checks (`dotfiles-doctor`)
+- ✅ Interactive setup wizard with progress tracking (`dotfiles-setup`)
+- ✅ Drift detection between local and vault (`dotfiles-drift`)
+- ✅ Vault backend auto-detection and abstraction
+- ✅ Session management with caching
+- ✅ Detailed error handling with recovery instructions
+- ✅ Modular architecture with clean separation of concerns
+
+**Actual Pain Points Found:**
+The real issues are more subtle than initially thought - mainly around edge case handling, documentation discoverability, and a few UX polish opportunities.
 
 ---
 
-## 1. Installation & Setup Pain Points
+## Verification Results
 
-### 1.1 Platform Complexity
+### Features Previously Thought Missing (But Actually Exist)
 
-**Issue:** Multiple bootstrap scripts for different platforms (macOS, Linux, WSL2, Windows)
+| Feature | Status | Implementation |
+|---------|--------|----------------|
+| Dependency validation | ✅ Implemented | `install.sh` checks git, platform; `dotfiles-doctor` validates all deps |
+| Comprehensive error handling | ✅ Implemented | `lib/_logging.sh` + vault scripts have context-rich errors |
+| Vault backend auto-detection | ✅ Implemented | `dotfiles-setup` detects bw/op/pass automatically |
+| Interactive setup wizard | ✅ Implemented | `bin/dotfiles-setup` with phase tracking, resume capability |
+| Drift detection | ✅ Implemented | `bin/dotfiles-drift` compares local vs vault |
+| Session management | ✅ Implemented | `lib/_vault.sh` with caching, auto-detection |
+| Health checks | ✅ Implemented | `bin/dotfiles-doctor` with --fix mode |
+| Pre-flight checks | ✅ Implemented | Install validates prerequisites upfront |
 
-**Impact:**
-- Higher maintenance overhead
-- Potential inconsistent setup across platforms
-- Confusing for users to determine which script to run
-- Code duplication across platform-specific scripts
+---
 
-**Current State:**
-- Separate bootstrap files for each platform
-- Some platform detection exists but not unified
-- Documentation describes different paths for different platforms
+## Actual Pain Points (After Verification)
 
-**Solutions:**
-- Standardize bootstrap scripts with unified entry point
-- Use a unified configuration management tool
-- Implement more robust platform detection and handling
-- Create single bootstrap script that delegates to platform-specific modules
+### 1. Diff Visualization in Drift Detection
 
+**Status:** ⚠️ Partially Implemented
+
+**What Exists:**
+- `dotfiles-drift` detects which files differ
+- Reports count of drifted items
+- Provides sync/restore commands
+
+**What's Missing:**
+- Doesn't show actual diff content
+- Can't see what changed line-by-line
+- No interactive choice to keep local or vault version
+
+**Current Output:**
+```bash
+! SSH-Config: LOCAL DIFFERS from Bitwarden
+```
+
+**Desired Output:**
+```bash
+! SSH-Config: LOCAL DIFFERS from Bitwarden
+
+  Show diff? (y/n): y
+
+  --- Vault (Bitwarden)
+  +++ Local (~/.ssh/config)
+  @@ -1,3 +1,4 @@
+   Host github.com
+     User git
+     IdentityFile ~/.ssh/github
+  +  Port 443  # Added for firewall bypass
+
+  Actions:
+    1) Keep local changes (update vault)
+    2) Restore from vault (discard local)
+    3) Skip this file
+
+  Choice [1]: _
+```
+
+**Impact:** Medium - Users currently need to manually inspect files to see what changed
+**Effort:** Low - Add `diff` command integration to `dotfiles-drift`
 **Priority:** Medium
-**Effort:** High
 
 ---
 
-### 1.2 Dependency Management
+### 2. Documentation Links in Error Messages
 
-**Issue:** Semi-manual dependency installation with limited automatic prerequisites setup
+**Status:** ⚠️ Partially Implemented
 
-**Pain Points:**
-- No comprehensive dependency check before operations
-- Limited automatic prerequisites setup
-- Manual intervention often required for basic dependencies
-- `jq` requirement with only brew install suggestion
-- SSH key management relies on manual steps
-- No comprehensive package dependency validation
+**What Exists:**
+- Excellent error context in vault operations
+- Recovery suggestions provided
+- Color-coded error severity
 
-**Current State:**
+**What's Missing:**
+- No direct links to documentation
+- Users must hunt for relevant docs
+- No searchable error codes
+
+**Current Error:**
 ```bash
-# Example: jq check is basic
-if ! command -v jq &> /dev/null; then
-    echo "jq is required. Install with: brew install jq"
-    exit 1
-fi
+[ERROR] Failed to unlock vault
+  Run: export BW_SESSION="$(bw unlock --raw)"
 ```
 
-**Problems:**
-- Only checks at failure point, not upfront
-- No auto-install capability
-- Platform-specific install instructions scattered
-- Missing dependencies discovered late in process
-
-**Recommended Improvements:**
-
-1. **Create comprehensive dependency detection script:**
+**Enhanced Error:**
 ```bash
-#!/bin/bash
-# check-dependencies.sh
-declare -A DEPS=(
-    ["jq"]="JSON processor - brew install jq / apt install jq"
-    ["git"]="Version control - brew install git / apt install git"
-    ["ssh"]="SSH client - usually pre-installed"
-    ["curl"]="HTTP client - brew install curl / apt install curl"
-)
+[ERROR] Failed to unlock vault (E101)
 
-missing=()
-for cmd in "${!DEPS[@]}"; do
-    if ! command -v "$cmd" &> /dev/null; then
-        missing+=("$cmd: ${DEPS[$cmd]}")
-    fi
-done
+  The Bitwarden vault could not be unlocked. This usually means:
+    - Vault is locked (most common)
+    - Bitwarden CLI not logged in
+    - Network connection issues
 
-if [ ${#missing[@]} -gt 0 ]; then
-    echo "Missing dependencies:"
-    printf '  - %s\n' "${missing[@]}"
-    echo ""
-    echo "Install missing dependencies? (y/n)"
-    read -r response
-    if [[ "$response" =~ ^[Yy]$ ]]; then
-        # Auto-install based on platform
-        install-dependencies
-    fi
-fi
+  Try:
+    1. Unlock vault: export BW_SESSION="$(bw unlock --raw)"
+    2. Login first: bw login
+    3. Check status: bw status
+
+  Docs: https://blackwell-systems.github.io/dotfiles/#/vault-README?id=troubleshooting
+  Error code: E101 (search docs for this code)
 ```
 
-2. **Add platform-specific package manager support:**
-   - Detect package manager (brew, apt, yum, pacman)
-   - Provide automated installation with user confirmation
-   - Fall back to manual instructions if auto-install not available
-
-3. **Implement pre-flight checks:**
-   - Run comprehensive checks before any operation
-   - Report all issues at once (not one at a time)
-   - Provide copy-paste commands to fix issues
-
-**Priority:** High (affects onboarding significantly)
-**Effort:** Medium
-**Quick Win:** Yes
+**Impact:** Medium - Improves discoverability and self-service
+**Effort:** Low - Add documentation links to error functions
+**Priority:** Medium
 
 ---
 
-### 1.3 Silent Failures
+### 3. Dependency Auto-Install
 
-**Issue:** Operations that can fail without clear error messages or may leave system in inconsistent state
+**Status:** ⚠️ Partially Implemented
 
-**Potential Silent Failure Points:**
+**What Exists:**
+- `install.sh` validates dependencies
+- `dotfiles-doctor` checks for missing tools
+- Clear instructions provided (e.g., "brew install jq")
 
-1. **Git clone operations**
-   - Network failures not always reported clearly
-   - Authentication failures unclear
-   - Partial clones leave broken state
+**What's Missing:**
+- No auto-install option
+- User must manually run install commands
+- No single command to "fix all dependencies"
 
-2. **Vault backend initialization**
-   - Backend login failures
-   - Invalid credentials
-   - Network issues with remote vaults
-
-3. **SSH key restoration**
-   - Permission issues
-   - Invalid key format
-   - Directory creation failures
-
-4. **Configuration file symlinking**
-   - Permission denied
-   - File already exists
-   - Parent directory doesn't exist
-
-**Current Error Handling:**
+**Current Flow:**
 ```bash
-# Example: basic error checking
-if ! ln -sf "$source" "$target"; then
-    echo "Failed to symlink $source"
-fi
+./install.sh
+[ERROR] jq not found - install with: brew install jq
+[ERROR] gh not found - install with: brew install gh
+
+# User must manually:
+brew install jq
+brew install gh
+./install.sh  # Try again
 ```
 
-**Problems:**
-- Doesn't explain WHY it failed
-- Doesn't suggest remediation
-- Continues execution despite failure
-- No rollback mechanism
-
-**Solutions:**
-
-1. **Enhanced error reporting:**
+**Enhanced Flow:**
 ```bash
-link_file() {
-    local source=$1
-    local target=$2
+./install.sh
 
-    # Pre-flight checks
-    if [[ ! -e "$source" ]]; then
-        error "Source file does not exist: $source"
-        return 1
-    fi
+Checking dependencies...
+  ✓ zsh
+  ✓ git
+  ✗ jq
+  ✗ gh
 
-    if [[ -e "$target" && ! -L "$target" ]]; then
-        warning "Target exists and is not a symlink: $target"
-        echo "Options:"
-        echo "  1) Back up and replace"
-        echo "  2) Skip"
-        echo "  3) Abort"
-        read -r choice
-        # Handle choice...
-    fi
+Missing dependencies can be installed automatically.
+Install missing dependencies? (y/n): y
 
-    if ! ln -sf "$source" "$target" 2>/dev/null; then
-        local parent=$(dirname "$target")
-        if [[ ! -d "$parent" ]]; then
-            error "Parent directory does not exist: $parent"
-            echo "Create it? (y/n)"
-            # Handle response...
-        elif [[ ! -w "$parent" ]]; then
-            error "No write permission to: $parent"
-            echo "Run with sudo or fix permissions"
-        else
-            error "Unknown symlink failure: $source -> $target"
-        fi
-        return 1
-    fi
+Installing jq... ✓
+Installing gh... ✓
 
-    success "Linked: $target -> $source"
-}
+All dependencies satisfied. Continuing installation...
 ```
 
-2. **Operation logging:**
-   - Log all operations to `~/.dotfiles/logs/`
-   - Include timestamps, operations, success/failure
-   - Provide troubleshooting context in logs
-
-3. **Transaction-like operations:**
-   - Track all changes made during operation
-   - Provide rollback capability if operation fails midway
-   - Validate system state before and after
-
-**Priority:** High
-**Effort:** Medium-High
-**Quick Win:** Partial (improved error messages are quick win)
+**Impact:** Medium - Reduces friction during setup
+**Effort:** Medium - Need to handle multiple package managers (brew, apt, yum)
+**Priority:** Low (workarounds exist, instructions are clear)
 
 ---
 
-## 2. Configuration Complexity
+### 4. Vault Backend Migration Path
 
-### 2.1 Vault Backend Abstraction
+**Status:** ❌ Not Implemented
 
-**Strengths:**
-- Supports multiple vault backends (Bitwarden, 1Password, pass)
-- Flexible backend switching
-- Good abstraction layer
+**What Exists:**
+- Easy to switch backends in config
+- All backends use same interface
+- Vault agnostic item structure
 
-**Pain Points:**
+**What's Missing:**
+- No migration command to move data between backends
+- No export/import functionality
+- Must manually recreate vault items if switching
 
-1. **Requires manual backend configuration**
-   - User must edit config files
-   - No interactive setup
-   - Easy to misconfigure
-
-2. **Lacks automated backend detection/recommendation**
-   - Doesn't detect installed vault tools
-   - No recommendations based on platform
-   - No comparison of backends for users to choose
-
-3. **Backend-specific setup not fully streamlined**
-   - Different setup steps for each backend
-   - Documentation scattered across vault README
-   - Easy to miss steps
-
-**Current State:**
-```yaml
-# vault.yaml
-backend: bitwarden  # User must manually set this
-bitwarden:
-  session_cache: true
-  # Other settings...
-```
-
-**Problems:**
-- New users don't know which backend to choose
-- No validation that backend is properly configured
-- Missing backend tools discovered late
-
-**Recommended Improvements:**
-
-1. **Interactive backend selection wizard:**
+**Current Process (Manual):**
 ```bash
-dotfiles vault init
-
-# Output:
-Vault Backend Setup
-===================
-
-Detected vault tools on your system:
-  ✓ Bitwarden CLI (bw) - version 2024.10.0
-  ✗ 1Password CLI (op) - not installed
-  ✗ pass - not installed
-
-Recommendations:
-  1) Bitwarden (recommended) - Already installed, cloud-sync
-  2) 1Password - Excellent UX, cloud-sync (requires installation)
-  3) pass - Simple, local-only, GnuPG-based
-
-Select backend (1-3): _
+# To switch from Bitwarden to 1Password:
+# 1. Manually export items from Bitwarden
+# 2. Manually create items in 1Password
+# 3. Update config.yaml
+# 4. Test restore
 ```
 
-2. **Automated backend compatibility checks:**
-```bash
-dotfiles vault doctor
-
-# Checks:
-# - Backend tool installed and accessible
-# - Backend properly configured
-# - Can authenticate
-# - Can read/write test item
-# - Session caching working
-```
-
-3. **Simplified backend migration:**
+**Desired Command:**
 ```bash
 dotfiles vault migrate --from bitwarden --to 1password
 
 # Would:
-# - Export items from current backend
-# - Import to new backend
-# - Update configuration
-# - Verify migration
+# 1. Export all items from Bitwarden
+# 2. Create equivalent items in 1Password
+# 3. Update configuration
+# 4. Verify migration
+# 5. Backup old config
+
+Migrating vault items...
+  Exporting from Bitwarden (7 items)... ✓
+  Creating in 1Password:
+    SSH-Config... ✓
+    AWS-Credentials... ✓
+    Git-Config... ✓
+    Environment-Secrets... ✓
+    Claude-Profiles... ✓
+    GitHub-SSH-Key... ✓
+    Work-SSH-Key... ✓
+
+  Updating config.yaml... ✓
+  Testing restore... ✓
+
+Migration complete!
+Backup of old config: ~/.dotfiles/backups/config-bitwarden-20251203.yaml
 ```
 
+**Impact:** Low - Most users stick with one backend
+**Effort:** High - Need to implement export/import for each backend
+**Priority:** Low
+
+---
+
+### 5. Silent Failures in Symlinking
+
+**Status:** ⚠️ Partially Implemented
+
+**What Exists:**
+- Symlink creation is logged
+- Basic error checking exists
+- Doctor checks for broken symlinks
+
+**What's Missing:**
+- Symlink failures can be silent if output is piped
+- No rollback if partial symlinking succeeds
+- No dry-run mode to preview changes
+
+**Current Behavior:**
+```bash
+dotfiles setup
+# Symlinks created...
+# Some may fail silently
+# User doesn't know which failed
+```
+
+**Enhanced Behavior:**
+```bash
+dotfiles setup --dry-run
+
+Preview of changes:
+  Symlinks to create:
+    ~/.zshrc -> ~/workspace/dotfiles/zsh/.zshrc
+    ~/.gitconfig -> ~/workspace/dotfiles/git/.gitconfig
+    ~/.aws/config -> ~/workspace/dotfiles/aws/config
+
+  Conflicts detected:
+    ~/.zshrc exists (not a symlink)
+      Action: Will backup to ~/.zshrc.backup
+
+Proceed? (y/n): y
+
+Creating symlinks...
+  ~/.zshrc -> ~/workspace/dotfiles/zsh/.zshrc ✓
+  ~/.gitconfig -> ~/workspace/dotfiles/git/.gitconfig ✓
+  ✗ ~/.aws/config FAILED (permission denied)
+
+Error: Failed to create 1 of 3 symlinks
+Changes rolled back.
+
+Fix permissions: chmod 755 ~/.aws
+Then run: dotfiles setup --resume
+```
+
+**Impact:** Medium - Silent failures are confusing
+**Effort:** Medium - Add transaction-like behavior, dry-run mode
 **Priority:** Medium
-**Effort:** High
-**Quick Win:** Backend detection wizard (medium effort)
 
 ---
 
-### 2.2 Secrets Management
+### 6. Offline Mode Limitations
 
-**Issues:**
-1. Manual vault login required
-2. No built-in secrets rotation mechanism
-3. Limited validation of secrets schema
-4. No automated secrets lifecycle management
-5. Manual SSH key and configuration management
-6. Limited validation of secret contents
+**Status:** ⚠️ Partially Implemented
 
-**Specific Pain Points:**
-
-**A. Vault Session Management:**
-```bash
-# Current: User must manually login
-bw login
-dotfiles vault restore
-
-# Problem: Session expires, unclear when
-# Problem: No auto-login or session refresh
-```
-
-**B. Secret Schema Validation:**
-```bash
-# Current: No validation of vault item structure
-# If item missing expected fields, fails at use time
-# No upfront validation of vault contents
-```
-
-**C. No Secrets Rotation:**
-```bash
-# No workflow for:
-# - Rotating SSH keys
-# - Updating passwords
-# - Regenerating tokens
-# - Audit trail of changes
-```
-
-**Solutions:**
-
-1. **Automated session management:**
-```bash
-vault_ensure_session() {
-    if ! bw status | jq -e '.status == "unlocked"' > /dev/null; then
-        echo "Vault locked. Unlocking..."
-        bw unlock
-        # Cache session token
-    fi
-}
-```
-
-2. **Secret schema validation:**
-```yaml
-# secrets-schema.yaml
-ssh_keys:
-  required_fields:
-    - private_key
-    - public_key
-  optional_fields:
-    - passphrase
-  validation:
-    private_key: "must start with -----BEGIN"
-```
-
-3. **Secrets rotation workflow:**
-```bash
-dotfiles vault rotate ssh-key --name github
-
-# Would:
-# 1. Generate new SSH key pair
-# 2. Update vault item
-# 3. Display new public key for adding to GitHub
-# 4. Optionally backup old key
-# 5. Update local ~/.ssh/config
-```
-
-4. **Secrets audit log:**
-```bash
-dotfiles vault audit
-
-# Shows:
-# - When each secret was last rotated
-# - Secrets older than X days (warning)
-# - Failed restore attempts
-# - Drift detection results
-```
-
-**Priority:** Medium
-**Effort:** High
-**Quick Win:** Session management (low effort)
-
----
-
-## 3. Error Handling & User Experience
-
-### 3.1 Limited Error Visibility
-
-**Current Limitations:**
-
-1. **Basic color-coded logging:**
-```bash
-log_info()  { echo -e "${BLUE}[INFO]${NC} $*"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $*"; }
-log_success() { echo -e "${GREEN}[SUCCESS]${NC} $*"; }
-```
-
-**Problems:**
-- No context about what operation was being performed
-- No suggestions for resolution
-- No link to documentation
-- No breadcrumb trail for debugging
-
-2. **Minimal context in error messages:**
-```bash
-# Example error:
-[ERROR] Failed to restore SSH key
-
-# User questions:
-# - Which SSH key?
-# - Why did it fail?
-# - What should I do?
-# - Where can I get help?
-```
-
-3. **No comprehensive error reporting mechanism:**
-- Errors not logged to file
-- No error aggregation
-- No "dotfiles doctor" equivalent
-- Can't review what went wrong after the fact
-
-**Recommended Improvements:**
-
-1. **Enhanced error context:**
-```bash
-error() {
-    local message=$1
-    local operation=${CURRENT_OPERATION:-"unknown operation"}
-    local item=${CURRENT_ITEM:-""}
-    local docs_link=$2
-
-    echo -e "${RED}[ERROR]${NC} $message"
-    echo "  During: $operation"
-    [[ -n "$item" ]] && echo "  Item: $item"
-    echo "  Timestamp: $(date -Iseconds)"
-    echo ""
-    echo "Suggestions:"
-    suggest_fix "$message"
-    echo ""
-    [[ -n "$docs_link" ]] && echo "See: $docs_link"
-
-    # Log to file
-    log_to_file "ERROR" "$operation" "$item" "$message"
-}
-```
-
-2. **Detailed error logging:**
-```bash
-# Log structure: ~/.dotfiles/logs/dotfiles.log
-# 2025-12-03T10:30:45Z [ERROR] restore_ssh_key github-personal "Permission denied"
-#   Stack: main -> vault restore -> restore_ssh_key
-#   Context: vault_backend=bitwarden, target=~/.ssh/github
-#   System: Darwin 23.0.0, bash 5.2.15
-```
-
-3. **Interactive troubleshooting:**
-```bash
-dotfiles troubleshoot
-
-# Runs diagnostics:
-# ✓ Vault backend accessible
-# ✓ Session authenticated
-# ✗ SSH directory permissions (700 expected, 755 found)
-#   Fix: chmod 700 ~/.ssh
-# ✗ Missing jq dependency
-#   Fix: brew install jq
-#
-# Run automatic fixes? (y/n)
-```
-
-**Priority:** High
-**Effort:** Medium
-**Quick Win:** Yes (error context enhancement is quick)
-
----
-
-### 3.2 Drift Detection Limitations
-
-**Current Mechanism:**
-- Basic content comparison for config files
-- Warns about local changes before vault restore
-- Limited to specific syncable items
-
-**Problems:**
-
-1. **Binary comparison only:**
-```bash
-# Current: Just checks if files differ
-if ! diff -q "$local" "$vault" > /dev/null; then
-    echo "Local changes detected"
-fi
-```
-
-**Issues:**
-- Doesn't show WHAT changed
-- Can't selectively merge changes
-- All-or-nothing restore
-
-2. **Limited item coverage:**
-- Only checks configured syncable items
-- Doesn't detect new local files
-- Doesn't detect deleted vault items
-- No tracking of intentional local customizations
-
-3. **No conflict resolution workflow:**
-```bash
-# When drift detected:
-Local changes detected in ~/.gitconfig
-Options:
-  1) Overwrite with vault version
-  2) Keep local version
-  3) Skip
-
-# Missing:
-  4) View diff
-  5) Merge changes
-  6) Edit manually
-```
-
-**Recommended Improvements:**
-
-1. **Granular drift detection:**
-```bash
-dotfiles vault drift
-
-# Output:
-~/.gitconfig
-  Modified lines:
-    - [user]
-    -   email = old@example.com
-    + [user]
-    +   email = new@example.com
-
-  Options:
-    1) Restore from vault (old@example.com)
-    2) Update vault with local (new@example.com)
-    3) Edit manually
-    4) Skip
-```
-
-2. **Three-way merge support:**
-```bash
-# Track:
-# - Last known vault state
-# - Current vault state
-# - Current local state
-#
-# Detect:
-# - Changes made locally
-# - Changes made in vault
-# - Conflicts
-
-dotfiles vault merge ~/.gitconfig
-# Opens merge tool for conflicts
-```
-
-3. **Whitelist for local customizations:**
-```yaml
-# drift-config.yaml
-ignore_patterns:
-  - "~/.gitconfig:user.email"  # Allow local email override
-  - "~/.bashrc:# LOCAL CUSTOMIZATIONS"  # Allow marked section
-```
-
-**Priority:** Medium
-**Effort:** High
-**Quick Win:** Showing diffs (low effort)
-
----
-
-## 4. Documentation Gaps
-
-### 4.1 Documentation vs Implementation Discrepancies
-
-**Observations:**
-
-1. **README provides high-level overview**
-   - Good for understanding concepts
-   - Light on specific workflows
-   - Examples may not match current implementation
-
-2. **Vault README is comprehensive**
-   - Good technical documentation
-   - Somewhat dense for new users
-   - Could benefit from quickstart section
-
-3. **Actual implementation has nuanced behaviors not fully captured in docs**
-   - Edge cases not documented
-   - Failure modes not described
-   - Recovery procedures missing
-
-**Specific Gaps:**
-
-**A. Installation Documentation:**
-```markdown
-# README says:
-git clone https://github.com/blackwell-systems/dotfiles
-cd dotfiles
-./install.sh
-
-# Missing:
-- Prerequisites check
-- Platform-specific notes
-- What to do if install fails
-- Expected output
-- Next steps after install
-```
-
-**B. Vault Documentation:**
-```markdown
-# Vault README covers:
-- Backend configuration
-- Item structure
-- Restore/save commands
-
-# Missing:
-- Complete end-to-end workflow example
-- Troubleshooting common issues
-- Backend comparison matrix
-- Migration between backends
-```
-
-**C. Error Documentation:**
-```markdown
-# When error occurs, no reference to:
-- Error code meanings
-- Common causes
-- Resolution steps
-- Where to get help
-```
-
-**Recommendations:**
-
-1. **Continuously update documentation:**
-   - Keep examples in sync with code
-   - Test all documented commands
-   - Mark deprecated patterns
-   - Version documentation with code
-
-2. **Add inline code documentation:**
-```bash
-# Current:
-restore_ssh_key() {
-    local name=$1
-    # Implementation...
-}
-
-# Improved:
-# restore_ssh_key - Restore SSH key from vault to ~/.ssh/
-#
-# Arguments:
-#   $1 - Name of vault item containing SSH key
-#
-# Vault item structure:
-#   fields:
-#     private_key: SSH private key content (required)
-#     public_key: SSH public key content (optional)
-#     passphrase: Key passphrase (optional)
-#
-# Returns:
-#   0 on success
-#   1 on failure (vault item not found, invalid format, permission error)
-#
-# Examples:
-#   restore_ssh_key "github-work"
-#   restore_ssh_key "id_rsa"
-#
-restore_ssh_key() {
-    local name=$1
-    # Implementation...
-}
-```
-
-3. **Create comprehensive workflow guides:**
-   - Day 1: Getting started
-   - Common tasks (add secret, rotate key, sync machine)
-   - Troubleshooting guide
-   - Advanced customization
-
-**Priority:** Medium
-**Effort:** Medium (ongoing)
-**Quick Win:** Quickstart guide (low effort)
-
----
-
-### 4.2 Missing Use Cases
-
-**Undocumented Scenarios:**
-
-1. **Multi-machine synchronization workflow:**
-```bash
-# Scenario: User has 3 machines
-# - Work laptop (macOS)
-# - Home desktop (Linux)
-# - Cloud server (Ubuntu)
-#
-# Questions:
-# - How to keep them in sync?
-# - What's the workflow for making changes?
-# - How to handle machine-specific configs?
-# - What about secrets that differ per machine?
-
-# Missing documentation on:
-dotfiles vault sync-from work-laptop
-dotfiles vault sync-to home-desktop
-dotfiles config set-local machine.name "home-desktop"
-```
-
-2. **Handling compromised vault items:**
-```bash
-# Scenario: SSH key leaked
-#
-# Questions:
-# - How to rotate quickly?
-# - How to audit which machines had the key?
-# - How to revoke from services?
-# - How to verify new key deployed everywhere?
-
-# Missing documentation on:
-dotfiles vault audit-access ssh-key-github
-dotfiles vault rotate ssh-key-github --revoke-old
-dotfiles vault verify ssh-key-github --all-machines
-```
-
-3. **Recovery procedures for failed restorations:**
-```bash
-# Scenario: Restore operation failed midway
-#
-# Questions:
-# - Is system in consistent state?
-# - Which items were restored?
-# - Which failed?
-# - How to resume/retry?
-# - How to rollback?
-
-# Missing documentation on:
-dotfiles vault status  # Show current state
-dotfiles vault resume  # Resume incomplete operation
-dotfiles vault rollback  # Undo partial restore
-```
-
-4. **Team usage patterns:**
-```bash
-# Scenario: Team shares certain configs
-#
-# Questions:
-# - How to share team vault items?
-# - How to prevent overwriting personal items?
-# - How to handle role-specific configs?
-# - How to audit team vault access?
-
-# Missing documentation on:
-dotfiles vault import --from team-vault --prefix team/
-dotfiles config merge team-defaults personal-overrides
-```
-
-**Solutions:**
-
-1. **Expand documentation with real-world scenarios:**
-   - Create "cookbook" style documentation
-   - Show complete workflows start to finish
-   - Include expected output at each step
-   - Cover error cases and recovery
-
-2. **Create troubleshooting guides:**
-```markdown
-# docs/troubleshooting.md
-
-## Common Issues
-
-### Issue: "Vault session expired"
-**Symptom:** Commands fail with "Unauthorized"
-**Cause:** Vault session token expired
-**Solution:**
-1. Re-authenticate: `bw login` (Bitwarden) or `op signin` (1Password)
-2. Resume operation: `dotfiles vault restore`
-
-### Issue: "SSH key permission denied"
-**Symptom:** SSH key restored but SSH still asks for password
-**Cause:** Incorrect file permissions on private key
-**Solution:**
-1. Check permissions: `ls -la ~/.ssh/id_rsa`
-2. Fix permissions: `chmod 600 ~/.ssh/id_rsa`
-3. Verify: `ssh -T git@github.com`
-```
-
-3. **Implement clear recovery mechanisms:**
-```bash
-# Track operation state
-dotfiles vault restore
-  Step 1/5: Validate vault session... ✓
-  Step 2/5: Fetch vault items... ✓
-  Step 3/5: Restore SSH keys... ✗ Failed
-
-# State saved to ~/.dotfiles/state/last-operation.json
-# Resume with: dotfiles vault resume
-# Rollback with: dotfiles vault rollback
-```
-
-**Priority:** High (for usability)
-**Effort:** Medium
-**Quick Win:** Troubleshooting guide (low effort)
-
----
-
-## 5. Edge Cases & Failure Modes
-
-### 5.1 Vault Unavailability
-
-**Current Handling:**
-- Offline mode support
-- Graceful degradation when vault is inaccessible
+**What Exists:**
+- Vault operations handle offline gracefully
 - Session caching reduces vault dependencies
+- Clear error messages when vault unreachable
 
-**Improvements Needed:**
+**What's Missing:**
+- No explicit offline mode flag
+- Can't query what's available offline
+- No indication of cache age/staleness
 
-1. **More robust network error handling:**
+**Current Behavior:**
 ```bash
-# Current: Basic timeout
-bw list items --timeout 5
+# With no internet
+dotfiles vault restore
 
-# Problems:
-# - No retry logic
-# - No exponential backoff
-# - Fails immediately on network blip
-# - No offline mode detection
-
-# Improved:
-vault_fetch_items() {
-    local retries=3
-    local timeout=5
-    local backoff=2
-
-    for i in $(seq 1 $retries); do
-        if bw list items --timeout $timeout; then
-            return 0
-        fi
-
-        if [[ $i -lt $retries ]]; then
-            log_warning "Fetch failed, retrying in ${backoff}s... ($i/$retries)"
-            sleep $backoff
-            timeout=$((timeout * 2))
-        fi
-    done
-
-    log_error "Vault unavailable after $retries attempts"
-
-    # Check for offline mode
-    if has_offline_cache; then
-        log_info "Continuing in offline mode"
-        return 0
-    fi
-
-    return 1
-}
+[ERROR] Could not connect to Bitwarden
+  Network error: connection timeout
 ```
 
-2. **Better fallback mechanisms:**
+**Enhanced Behavior:**
 ```bash
-# Offline mode capabilities:
 dotfiles vault status --offline
-# Shows:
-# - Last sync time
-# - Available items in cache
-# - Items requiring vault access
-# - Estimated cache freshness
+
+Offline Mode Status
+═══════════════════
+  Cached items: 5 of 7 (SSH-Config, AWS-Config, Git-Config, Environment-Secrets, Claude-Profiles)
+  Last sync: 2 days ago
+  Missing: GitHub-SSH-Key, Work-SSH-Key
+
+  Available operations:
+    ✓ Restore cached items
+    ✓ View cached content
+    ✗ Update vault
+    ✗ Fetch new items
+
+  Cache expires in: 5 days
 
 dotfiles vault restore --offline
-# Restores from cache
-# Warns about potentially stale items
-# Marks items for verification when online
+
+Restoring from cache (offline mode)...
+  ⚠ Using cached data from 2 days ago
+  ✓ SSH-Config restored
+  ✓ AWS-Config restored
+  ✗ GitHub-SSH-Key not in cache
+
+  4 of 5 items restored
+  Run 'dotfiles vault sync' when online
 ```
 
-3. **Comprehensive offline workflow documentation:**
-```markdown
-## Offline Mode
-
-Dotfiles supports limited offline operation using cached vault data.
-
-### Enabling Offline Cache
-```bash
-# Enable persistent cache
-dotfiles config set vault.offline_cache true
-
-# Set cache duration (default: 24h)
-dotfiles config set vault.cache_ttl 86400
-```
-
-### Working Offline
-```bash
-# Before going offline, sync everything
-dotfiles vault sync --full
-
-# Offline operations:
-dotfiles vault restore --offline  # Use cached data
-dotfiles vault list --offline     # Show cached items
-dotfiles vault status             # Check cache status
-
-# When back online:
-dotfiles vault sync  # Update vault with any local changes
-```
-
-### Limitations
-- Cannot add new vault items offline
-- Cached data may be stale
-- Certain operations require vault access
-```
-
-**Priority:** Medium
-**Effort:** Medium
-**Quick Win:** Better error messages for network issues (low effort)
+**Impact:** Medium - Better offline workflows
+**Effort:** Medium - Add cache metadata tracking
+**Priority:** Low
 
 ---
 
-### 5.2 Permission & Security Considerations
+## What's Working Well (Keep These)
 
-**Current Approach:**
-- Basic file permission management (600 for sensitive files)
-- Session caching with limited scope
-- SSH key permissions enforced
+### 1. Doctor Command
+**Implementation:** `bin/dotfiles-doctor`
 
-**Potential Enhancements:**
+**Features:**
+- Comprehensive health checks (Version, Core Components, Required Commands, SSH, AWS, Vault, Shell, Claude, Templates)
+- Auto-fix mode (`--fix`) for permission issues
+- Quick mode (`--quick`) for fast checks
+- Detailed version information
+- Update checks
 
-1. **More granular permission management:**
+**Example:**
 ```bash
-# Current: Fixed permissions
-chmod 600 "$ssh_key"
+dotfiles doctor
 
-# Enhanced: Configurable permission policies
-# permissions.yaml
-files:
-  ssh_keys:
-    mode: 0600
-    owner: current_user
-    group: staff  # macOS
+── Version & Updates ──
+✓ Current version: v2.4.0
+✓ On latest version
 
-  configs:
-    mode: 0644
-    owner: current_user
+── Core Components ──
+✓ ~/workspace/dotfiles symlink exists
+✓ ~/.zshrc links to ~/workspace/dotfiles/zsh/.zshrc
+✓ /workspace symlink exists
 
-  scripts:
-    mode: 0755
-    owner: current_user
+── Required Commands ──
+✓ zsh (zsh 5.9)
+✓ git (git version 2.42.0)
+✓ brew (Homebrew 4.1.20)
+✓ jq (jq-1.7)
+✓ bw (Bitwarden CLI)
 
-# Verify and fix permissions:
-dotfiles security check-permissions
-dotfiles security fix-permissions
+── SSH Configuration ──
+✓ ~/.ssh directory permissions (700)
+✓ ~/.ssh/config exists
+✓ Private keys found: 2
+✓ All private keys have correct permissions (600)
+
+Summary: 15 checks passed, 0 failed, 2 warnings
 ```
 
-2. **Enhanced encryption for local caches:**
-```bash
-# Current: Plain text cache (relies on OS encryption)
-# Risk: If system compromised, cache is readable
-
-# Enhanced: Encrypt cache with user password
-dotfiles vault cache-init
-
-# Enter master password for local cache: ****
-# Cache will be encrypted at rest
-# Password required on first access after reboot
-
-# Cache location: ~/.dotfiles/cache/
-# - vault-cache.enc (encrypted with user password)
-# - session.enc (encrypted session tokens)
-```
-
-3. **Periodic security audits:**
-```bash
-dotfiles security audit
-
-# Checks:
-# ✓ Vault items encrypted at rest
-# ✓ SSH key permissions correct (600)
-# ✗ WARNING: Session tokens older than 7 days
-#   Recommendation: Run 'dotfiles vault refresh-session'
-# ✓ Cache encryption enabled
-# ✗ WARNING: Unencrypted backup found at ~/dotfiles.backup/
-#   Recommendation: Remove or encrypt backup
-# ✓ No secrets in shell history
-# ✗ WARNING: Old cache data (30 days old)
-#   Recommendation: Clear cache or sync
-
-# Auto-fix issues? (y/n)
-```
-
-4. **Security best practices documentation:**
-```markdown
-## Security Best Practices
-
-### Vault Sessions
-- Don't store session tokens permanently
-- Use session timeout (default: 1 hour)
-- Lock vault when stepping away
-- Re-authenticate for sensitive operations
-
-### SSH Keys
-- Use strong passphrases
-- Rotate keys regularly (every 6-12 months)
-- Use different keys for different services
-- Remove old keys from authorized_keys
-
-### Cache Security
-- Enable cache encryption
-- Clear cache on untrusted machines
-- Don't sync cache between machines
-- Use short TTL on shared machines
-
-### Backup Security
-- Encrypt backups
-- Store backups securely (encrypted volume)
-- Don't commit unencrypted backups to git
-- Regularly test backup restoration
-```
-
-**Priority:** Medium-High (security is critical)
-**Effort:** High
-**Quick Win:** Permission check script (low effort)
+**Status:** Excellent ✅
 
 ---
 
-## 6. Maintenance & Updates
+### 2. Interactive Setup Wizard
+**Implementation:** `bin/dotfiles-setup`
 
-### 6.1 Update Complexity
+**Features:**
+- Tracks setup progress with state management
+- Supports resume after interruption
+- Phase-based setup (Symlinks → Packages → Vault → Secrets → Claude)
+- Status display shows completion
+- Reset option to start over
+- Auto-detects vault backend preferences
 
-**Current Limitations:**
-
-1. **Manual update process:**
+**Example:**
 ```bash
-# Current workflow:
-cd ~/dotfiles
-git pull
-./install.sh  # May or may not be needed
+dotfiles setup
 
-# Problems:
-# - User must remember to update
-# - No notification of updates
-# - Breaking changes discovered at use time
-# - No versioning of configurations
+    ____        __  _____ __
+   / __ \____  / /_/ __(_) /__  _____
+  / / / / __ \/ __/ /_/ / / _ \/ ___/
+ / /_/ / /_/ / /_/ __/ / /  __(__  )
+/_____/\____/\__/_/ /_/_/\___/____/
+
+              Setup Wizard
+
+Current Status:
+───────────────
+  [✓] Symlinks (Shell config linked)
+  [✓] Packages (Homebrew packages)
+  [ ] Vault (Vault backend)
+  [ ] Secrets (SSH keys, AWS, Git)
+  [ ] Claude (Claude Code integration)
+
+Continue with Vault setup? (y/n):
 ```
 
-2. **No built-in migration strategy:**
-```yaml
-# If config format changes:
-# Old format:
-backend: bitwarden
-
-# New format:
-vault:
-  backend: bitwarden
-  version: 2
-
-# No automatic migration
-# User must manually update config
-```
-
-3. **Compatibility issues:**
-```bash
-# Scenario: Update changes CLI interface
-# Old: dotfiles vault restore
-# New: dotfiles vault sync restore
-
-# Problems:
-# - Breaks user scripts
-# - No deprecation warnings
-# - No compatibility layer
-```
-
-**Recommended Improvements:**
-
-1. **Automated update mechanism:**
-```bash
-# Check for updates
-dotfiles update check
-
-# Output:
-Update available: v2.1.0 -> v2.2.0
-
-Changes:
-  - New: SSH key rotation command
-  - Changed: vault restore --offline flag
-  - Fixed: Permission issues on WSL2
-  - Breaking: Deprecated vault-sync command
-
-Release notes: https://github.com/.../releases/v2.2.0
-
-Update now? (y/n)
-
-# Perform update
-dotfiles update apply
-
-# Steps:
-# 1. Backup current configuration
-# 2. Pull latest code
-# 3. Run migrations
-# 4. Verify installation
-# 5. Show what changed
-```
-
-2. **Versioned configuration migration:**
-```bash
-# Config version tracking
-# config.yaml
-version: 2
-vault:
-  backend: bitwarden
-
-# On load, check version
-if [[ $config_version -lt $required_version ]]; then
-    log_warning "Configuration outdated (v$config_version < v$required_version)"
-    log_info "Running migration..."
-
-    migrate_config $config_version $required_version
-fi
-
-# migrations/
-# - v1_to_v2.sh
-# - v2_to_v3.sh
-
-# Migration example:
-migrate_v1_to_v2() {
-    # Convert old format to new
-    local old_config=$1
-    local new_config=$2
-
-    # Extract backend
-    local backend=$(yq '.backend' "$old_config")
-
-    # Create new structure
-    yq -i ".vault.backend = \"$backend\"" "$new_config"
-    yq -i ".version = 2" "$new_config"
-
-    log_success "Migrated config from v1 to v2"
-}
-```
-
-3. **Compatibility checks between versions:**
-```bash
-# Before major version update
-dotfiles update check-compatibility
-
-# Output:
-Compatibility Check: v2.1.0 -> v3.0.0
-
-Breaking Changes:
-  ✗ Command renamed: vault-sync -> vault sync
-    Impact: Your scripts using 'dotfiles vault-sync' will break
-    Migration: Update scripts to use 'dotfiles vault sync'
-
-  ✗ Config format changed: vault.yaml structure
-    Impact: Current config is v2, new version requires v3
-    Migration: Automatic migration available
-
-  ✓ No breaking changes in vault item structure
-
-Warnings:
-  ⚠ Command deprecated: vault restore --force
-    Replacement: Use --overwrite instead
-    Timeline: --force will be removed in v4.0.0
-
-Proceed with update? (y/n)
-```
-
-4. **Update rollback capability:**
-```bash
-# Before update, create restore point
-dotfiles update apply
-  Creating restore point... ✓
-  Backing up configuration... ✓
-  Updating code... ✓
-  Running migrations... ✓
-  Verifying installation... ✓
-
-# If something goes wrong
-dotfiles update rollback
-
-# Or rollback to specific version
-dotfiles update rollback --to v2.1.0
-```
-
-**Priority:** Medium
-**Effort:** High
-**Quick Win:** Update check command (medium effort)
+**Status:** Excellent ✅
 
 ---
 
-## Quick Wins
+### 3. Drift Detection
+**Implementation:** `bin/dotfiles-drift`
 
-These improvements provide high impact with relatively low effort:
+**Features:**
+- Compares local files against vault
+- Checks multiple config files (SSH, AWS, Git, Environment, Claude)
+- Shows sync status
+- Provides sync and restore commands
+- Supports multiple vault backends
 
-### 1. Comprehensive Dependency Validation Script
-**Effort:** Low
-**Impact:** High
-**Description:** Create a single script that checks all dependencies upfront and provides installation instructions or auto-install.
-
+**Example:**
 ```bash
-#!/bin/bash
-# check-deps.sh
-dotfiles doctor deps
+dotfiles drift
+
+── Drift Detection (Local vs Bitwarden) ──
+
+✓ SSH-Config: in sync
+✓ AWS-Config: in sync
+! Git-Config: LOCAL DIFFERS from Bitwarden
+✓ Environment-Secrets: in sync
+✓ Claude-Profiles: in sync
+
+════════════════════════════════════════
+1 of 5 items have drifted
+
+ℹ To sync local changes to Bitwarden:
+  dotfiles vault sync --all
+
+ℹ To restore from Bitwarden (overwrite local):
+  dotfiles vault restore
+════════════════════════════════════════
 ```
+
+**Status:** Good ✅ (could add diff display)
 
 ---
 
-### 2. Interactive Vault Backend Setup Wizard
-**Effort:** Medium
-**Impact:** High
-**Description:** Guide users through vault backend selection and configuration.
+### 4. Vault Backend Abstraction
+**Implementation:** `lib/_vault.sh` + `vault/backends/`
 
+**Features:**
+- Unified interface for multiple backends (Bitwarden, 1Password, pass)
+- Auto-detection of installed CLI tools
+- Session management with caching
+- Offline capabilities
+- Backend-agnostic item structure
+
+**Supported Operations:**
 ```bash
-dotfiles vault init
-# Interactive prompts for backend selection and setup
+vault_init          # Initialize backend
+vault_login_check   # Check if authenticated
+vault_get_session   # Get session token
+vault_sync          # Sync vault data
+vault_get_notes     # Retrieve item content
+vault_list_items    # List all items
 ```
+
+**Status:** Excellent ✅
 
 ---
 
-### 3. Enhanced Error Logging with Resolution Suggestions
-**Effort:** Low
-**Impact:** High
-**Description:** Improve error messages with context, suggestions, and documentation links.
+### 5. Comprehensive Logging
+**Implementation:** `lib/_logging.sh`
 
+**Features:**
+- Color-coded messages (pass/fail/warn/info)
+- Consistent formatting across all scripts
+- Section headers for organization
+- DIM styling for supplementary info
+
+**Functions:**
 ```bash
-error_with_help() {
-    echo "[ERROR] $message"
-    echo "Suggestions: $suggestions"
-    echo "Docs: $link"
-}
+pass "Operation succeeded"    # Green ✓
+fail "Operation failed"        # Red ✗
+warn "Warning message"         # Yellow !
+info "Informational message"   # Blue ℹ
+section "Section Header"       # Cyan bold
 ```
+
+**Status:** Excellent ✅
 
 ---
 
-### 4. Drift Detection with Diff Display
+## Revised Quick Wins
+
+Based on code verification, here are **actual** quick wins (not already implemented):
+
+### 1. Add Diff Display to Drift Detection
 **Effort:** Low
 **Impact:** Medium
-**Description:** Show actual diffs when local changes detected, not just "file changed".
+**Files:** `bin/dotfiles-drift`
 
+Add `--show-diff` flag to display actual changes:
 ```bash
-dotfiles vault drift --show-diff
+dotfiles drift --show-diff
 ```
 
 ---
 
-### 5. Automated Pre-flight Checks
+### 2. Add Documentation Links to Errors
 **Effort:** Low
-**Impact:** High
-**Description:** Run comprehensive checks before any operation.
+**Impact:** Medium
+**Files:** `lib/_logging.sh`, vault scripts
 
+Add doc links to common errors:
 ```bash
-preflight_checks() {
-    check_dependencies
-    check_vault_session
-    check_permissions
-    check_config_valid
-}
+fail "Vault unlock failed" "https://blackwell-systems.github.io/dotfiles/#/vault-README?id=troubleshooting"
+```
+
+---
+
+### 3. Add Dry-Run Mode to Setup
+**Effort:** Low
+**Impact:** Medium
+**Files:** `bin/dotfiles-setup`
+
+Preview changes before applying:
+```bash
+dotfiles setup --dry-run
+```
+
+---
+
+### 4. Add Offline Status Command
+**Effort:** Low
+**Impact:** Low
+**Files:** `lib/_vault.sh`
+
+Show cache status:
+```bash
+dotfiles vault status --offline
+```
+
+---
+
+### 5. Add Error Codes
+**Effort:** Low
+**Impact:** Low
+**Files:** `lib/_logging.sh`
+
+Add unique error codes for searchability:
+```bash
+[ERROR] Vault unlock failed (E101)
 ```
 
 ---
 
 ## Long-Term Improvements
 
-These improvements require significant effort but provide substantial value:
-
-### 1. Plugin-based Vault Backend System
+### 1. Vault Migration Tool
 **Effort:** High
-**Impact:** High
-**Description:** Modular backend system allowing community-contributed vault backends.
-
-**Benefits:**
-- Easy to add new vault backends
-- Community contributions
-- Better separation of concerns
-- Easier testing
-
-**Structure:**
-```
-backends/
-  bitwarden/
-    plugin.sh
-    config.schema.yaml
-    README.md
-  onepassword/
-    plugin.sh
-    config.schema.yaml
-    README.md
-  custom/  # User can add their own
-    myvault/
-      plugin.sh
-      config.schema.yaml
-```
+**Impact:** Low
+**Why:** Backend switching is rare, but when needed, manual process is tedious
 
 ---
 
-### 2. Comprehensive Secrets Management CLI
+### 2. Three-Way Merge for Drift
 **Effort:** High
-**Impact:** High
-**Description:** Full-featured secrets management with rotation, audit, validation.
-
-**Features:**
-- Interactive secret editor
-- Secrets rotation workflows
-- Audit logging
-- Schema validation
-- Secrets sharing (team mode)
-- Compliance checks
-
-```bash
-dotfiles secrets edit github-ssh-key
-dotfiles secrets rotate --all --older-than 90days
-dotfiles secrets audit --format report
-dotfiles secrets validate --schema ssh-key
-```
+**Impact:** Medium
+**Why:** Current diff is binary (vault or local), merge would allow selective changes
 
 ---
 
-### 3. Cross-platform Configuration Synchronization Engine
-**Effort:** High
-**Impact:** High
-**Description:** Intelligent sync that handles platform differences and conflicts.
-
-**Features:**
-- Three-way merge
-- Platform-specific overrides
-- Conflict resolution UI
-- Sync history/versioning
-- Selective sync (don't sync everything)
-
-```bash
-dotfiles sync init
-dotfiles sync pull --from work-laptop
-dotfiles sync resolve-conflicts
-dotfiles sync push --to all
-```
-
----
-
-### 4. Interactive Dotfiles Doctor with Guided Troubleshooting
-**Effort:** Medium-High
-**Impact:** High
-**Description:** Comprehensive diagnostics with step-by-step fixes.
-
-**Features:**
-- Automated problem detection
-- Guided resolution steps
-- One-click fixes
-- Knowledge base integration
-- Learning from common issues
-
-```bash
-dotfiles doctor
-
-# Runs 50+ checks:
-# - Dependencies
-# - Vault connectivity
-# - File permissions
-# - Config validity
-# - SSH keys
-# - Drift detection
-# - Security audit
-
-# For each issue:
-# - Explains problem
-# - Shows impact
-# - Suggests fix
-# - Offers to auto-fix
-```
-
----
-
-### 5. Automated Security Scanning
+### 3. Dependency Auto-Install
 **Effort:** Medium
-**Impact:** High
-**Description:** Continuous security monitoring and recommendations.
-
-**Features:**
-- Scan for leaked secrets
-- Check for insecure permissions
-- Audit vault access
-- Detect stale credentials
-- Compliance checking
-
-```bash
-dotfiles security scan
-
-# Checks:
-# - No secrets in git history
-# - No secrets in shell history
-# - Proper file permissions
-# - Strong key passphrases
-# - Recent credential rotation
-# - No unencrypted backups
-
-dotfiles security scan --continuous
-# Runs in background, alerts on issues
-```
+**Impact:** Medium
+**Why:** Would streamline setup, but current instructions are clear
 
 ---
 
-## Implementation Priority
+### 4. Enhanced Offline Mode
+**Effort:** Medium
+**Impact:** Low
+**Why:** Current offline handling is adequate, enhancement is polish
 
-### Phase 1: Foundation (Quick Wins)
-**Timeline:** 1-2 weeks
-**Focus:** Immediate usability improvements
+---
 
-1. Dependency validation script
-2. Enhanced error messages
-3. Pre-flight checks
-4. Basic drift diff display
-5. Troubleshooting documentation
+### 5. Rollback Capability
+**Effort:** High
+**Impact:** Low
+**Why:** Would add safety, but failures are rare and recoverable
 
-### Phase 2: Core Improvements
-**Timeline:** 4-6 weeks
-**Focus:** Major pain points
+---
 
-1. Interactive vault setup wizard
-2. Automated update mechanism
-3. Config version migration system
-4. Better offline mode
-5. Comprehensive doctor command
+## What Was Wrong in Original Analysis
 
-### Phase 3: Advanced Features
-**Timeline:** 8-12 weeks
-**Focus:** Power user and team features
+### Incorrect Assessments:
 
-1. Plugin-based backend system
-2. Advanced secrets management
-3. Three-way sync engine
-4. Security scanning
-5. Team collaboration features
+1. **"Dependency validation missing"** ❌
+   **Reality:** Fully implemented in install.sh and dotfiles-doctor
+
+2. **"No interactive setup wizard"** ❌
+   **Reality:** dotfiles-setup is comprehensive with progress tracking
+
+3. **"Vault backend manual configuration"** ❌
+   **Reality:** Auto-detection works well, setup wizard guides selection
+
+4. **"No drift detection"** ❌
+   **Reality:** dotfiles-drift is fully functional
+
+5. **"Limited error handling"** ❌
+   **Reality:** Extensive error context and recovery instructions
+
+6. **"No pre-flight checks"** ❌
+   **Reality:** install.sh validates before proceeding
+
+### What Led to Errors:
+
+1. **Didn't read actual implementation code first**
+   - Made assumptions based on common patterns
+   - Should have verified before documenting
+
+2. **Focused on "what could be better" vs "what's missing"**
+   - Proposed enhancements to already-excellent features
+   - Should have distinguished "missing" from "could improve"
+
+3. **Didn't check bin/ directory thoroughly**
+   - Missed comprehensive tooling suite
+   - Should have catalogued all scripts first
+
+---
+
+## Corrected Priority Assessment
+
+### High Priority (Actual Gaps)
+1. ❌ None identified - system is mature
+
+### Medium Priority (Polish Opportunities)
+1. Add diff visualization to drift detection
+2. Add documentation links to errors
+3. Add dry-run mode to setup
+4. Better symlink failure handling
+
+### Low Priority (Nice to Have)
+1. Dependency auto-install
+2. Vault backend migration
+3. Offline status command
+4. Error code system
 
 ---
 
 ## Metrics for Success
 
-### User Experience Metrics
-- Time to first successful dotfiles setup (target: < 5 minutes)
-- Percentage of successful installations without errors (target: > 95%)
-- Number of support requests related to setup (target: < 1 per week)
+### Current State (Verified)
+- ✅ Doctor command with 15+ health checks
+- ✅ Interactive setup with phase tracking
+- ✅ Drift detection for 5+ config types
+- ✅ 3 vault backends supported
+- ✅ Session caching implemented
+- ✅ Comprehensive error handling
+- ✅ Extensive logging infrastructure
 
-### Technical Metrics
-- Test coverage (target: > 80%)
-- Number of silent failures (target: 0)
-- Average error resolution time (target: < 2 minutes with doctor)
-
-### Documentation Metrics
-- Documentation completeness (all commands documented)
-- Documentation accuracy (examples tested automatically)
-- Time to find answer in docs (target: < 1 minute)
+### Desired Improvements
+- Add diff display (medium impact)
+- Add doc links (medium impact)
+- Add dry-run mode (low impact)
+- Polish edge cases (low impact)
 
 ---
 
 ## Conclusion
 
-The dotfiles system is well-architected with strong fundamentals. The primary opportunities for improvement are in:
+**Revised Assessment:** The dotfiles system is a **mature, well-engineered project** with excellent tooling, comprehensive error handling, and thoughtful user experience design.
 
-1. **User Experience:** Making the system more approachable and forgiving
-2. **Error Handling:** Providing better feedback when things go wrong
-3. **Documentation:** Bridging gaps between docs and implementation
-4. **Automation:** Reducing manual steps and cognitive load
+**Key Strengths:**
+- Modular architecture
+- Multiple vault backend support
+- Interactive setup wizard
+- Comprehensive health checks
+- Strong error handling
+- Consistent logging
 
-**Recommended Starting Point:**
-Begin with Phase 1 Quick Wins, focusing on dependency validation and error message improvements. These provide immediate value and build momentum for larger improvements.
+**Actual Pain Points:**
+- Very minor - mostly polish opportunities
+- Diff visualization in drift detection
+- Documentation links in errors
+- A few edge cases in symlinking
 
-**Next Steps:**
-1. Review and prioritize recommendations
-2. Create detailed implementation plan
-3. Set up metrics tracking
-4. Begin Phase 1 implementation
-5. Gather user feedback continuously
+**Recommendation:**
+Focus on the 5 revised quick wins for polish, but recognize the system is already production-ready and handles most user needs excellently.
+
+The original pain points document significantly underestimated the maturity of this codebase. This revised version accurately reflects the actual state of the implementation.
 
 ---
 
-**Document Version:** 1.0
+**Document Version:** 2.0 (Corrected)
 **Last Updated:** 2025-12-03
 **Maintainer:** Blackwell Systems
+**Status:** Verified against actual codebase implementation
