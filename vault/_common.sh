@@ -107,9 +107,10 @@ load_vault_config() {
     done < <($JQ_CMD -r '.ssh_keys // {} | to_entries[] | "\(.key)=\(.value)"' "$VAULT_CONFIG_FILE" 2>/dev/null)
 
     # Load DOTFILES_ITEMS
+    # NOTE: Variable must be named 'item_path' not 'path' to avoid zsh PATH conflict
     typeset -gA DOTFILES_ITEMS=()
-    while IFS='|' read -r name path required type; do
-        [[ -n "$name" ]] && DOTFILES_ITEMS[$name]="${path//\~/$HOME}:$required:$type"
+    while IFS='|' read -r name item_path required item_type; do
+        [[ -n "$name" ]] && DOTFILES_ITEMS[$name]="${item_path//\~/$HOME}:$required:$item_type"
     done < <($JQ_CMD -r '.vault_items // {} | to_entries[] | "\(.key)|\(.value.path)|\(.value.required // false | if . then "required" else "optional" end)|\(.value.type)"' "$VAULT_CONFIG_FILE" 2>/dev/null)
 
     # Load SYNCABLE_ITEMS (use process substitution like SSH_KEYS)
