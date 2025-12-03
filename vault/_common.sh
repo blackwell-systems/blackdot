@@ -92,6 +92,7 @@ load_vault_config() {
     else
         JQ_CMD="/usr/bin/jq"
     fi
+    debug "Using JQ_CMD: $JQ_CMD"
 
     # Validate JSON syntax
     if ! $JQ_CMD -e '.' "$VAULT_CONFIG_FILE" &>/dev/null; then
@@ -111,13 +112,13 @@ load_vault_config() {
         [[ -n "$name" ]] && DOTFILES_ITEMS[$name]="${path//\~/$HOME}:$required:$type"
     done < <($JQ_CMD -r '.vault_items // {} | to_entries[] | "\(.key)|\(.value.path)|\(.value.required // false | if . then "required" else "optional" end)|\(.value.type)"' "$VAULT_CONFIG_FILE" 2>/dev/null)
 
-    # Load SYNCABLE_ITEMS
+    # Load SYNCABLE_ITEMS (use process substitution like SSH_KEYS)
     typeset -gA SYNCABLE_ITEMS=()
     while IFS='=' read -r key value; do
         [[ -n "$key" ]] && SYNCABLE_ITEMS[$key]="${value//\~/$HOME}"
     done < <($JQ_CMD -r '.syncable_items // {} | to_entries[] | "\(.key)=\(.value)"' "$VAULT_CONFIG_FILE" 2>/dev/null)
 
-    # Load AWS_EXPECTED_PROFILES
+    # Load AWS_EXPECTED_PROFILES (use process substitution like SSH_KEYS)
     typeset -ga AWS_EXPECTED_PROFILES=()
     while IFS= read -r profile; do
         [[ -n "$profile" ]] && AWS_EXPECTED_PROFILES+=("$profile")
