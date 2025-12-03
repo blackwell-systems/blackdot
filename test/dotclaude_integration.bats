@@ -146,12 +146,13 @@ EOF
 }
 
 @test "vault: Claude-Profiles in SYNCABLE_ITEMS" {
-  run grep -q "Claude-Profiles" "$DOTFILES_DIR/vault/_common.sh"
+  # After refactor, vault items are in vault-items.example.json
+  run grep -q "Claude-Profiles" "$DOTFILES_DIR/vault/vault-items.example.json"
   [ "$status" -eq 0 ]
 }
 
 @test "vault: Claude-Profiles points to profiles.json" {
-  run grep "Claude-Profiles.*profiles.json" "$DOTFILES_DIR/vault/_common.sh"
+  run grep "Claude-Profiles.*profiles.json" "$DOTFILES_DIR/vault/vault-items.example.json"
   [ "$status" -eq 0 ]
 }
 

@@ -63,7 +63,7 @@ source "$DOTFILES_DIR/lib/_vault.sh"
 #   ~/.config/dotfiles/vault-items.json
 # ============================================================
 
-VAULT_CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/vault-items.json"
+VAULT_CONFIG_FILE="${VAULT_CONFIG_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/vault-items.json}"
 VAULT_CONFIG_EXAMPLE="$VAULT_DIR/vault-items.example.json"
 
 # Initialize empty arrays (populated by load_vault_config)
