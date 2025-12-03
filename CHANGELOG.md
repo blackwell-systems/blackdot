@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Smart Secrets Onboarding** - Intelligent first-time setup for users with existing secrets
+  - Detects local secrets (SSH keys, AWS creds, Git config) vs vault items
+  - Categorizes as "local only", "vault only", or "synced"
+  - Offers to PUSH local secrets to vault for new users migrating their setup
+  - Offers to RESTORE from vault for users on new machines
+  - Shows sync status for items that exist in both locations
+  - `create-vault-item.sh` supports custom file paths for non-standard locations
+  - Dramatically improves onboarding for users who already have local credentials
 - **Vault Items Configuration File** - User-editable JSON config for vault items
   - `~/.config/dotfiles/vault-items.json` defines SSH keys, vault items, syncable items
   - No more hardcoded organization-specific values in source code

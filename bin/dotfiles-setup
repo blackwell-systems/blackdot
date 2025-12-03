@@ -360,48 +360,189 @@ phase_vault() {
 
 phase_secrets() {
     echo ""
-    echo -e "${BOLD}${CYAN}STEP 4: Restore Secrets${NC}"
-    echo "────────────────────────"
+    echo -e "${BOLD}${CYAN}STEP 4: Secrets Management${NC}"
+    echo "───────────────────────────"
 
     if state_completed "secrets"; then
-        pass "Secrets already restored"
+        pass "Secrets already configured"
         return 0
     fi
 
     local backend=$(config_get "vault" "backend" "none")
     if [[ "$backend" == "none" ]]; then
-        warn "Vault not configured - skipping secret restore"
+        warn "Vault not configured - skipping secrets"
         echo "Configure secrets manually in ~/.ssh, ~/.aws, ~/.gitconfig"
+        state_complete "secrets"
         return 0
     fi
 
-    echo "This will restore secrets from $backend:"
-    echo "  • SSH keys"
-    echo "  • AWS credentials"
-    echo "  • Git configuration"
-    echo "  • Environment secrets"
-    echo ""
+    # Source vault common to get SYNCABLE_ITEMS
+    source "$DOTFILES_DIR/vault/_common.sh"
 
-    echo -n "Restore secrets? [Y/n]: "
-    read confirm
-    if [[ "${confirm:-Y}" =~ ^[Nn]$ ]]; then
-        warn "Skipped secret restore"
-        return 0
-    fi
-
-    # Run vault restore
-    if [[ -f "$DOTFILES_DIR/vault/restore.sh" ]]; then
-        if "$DOTFILES_DIR/vault/restore.sh"; then
-            state_complete "secrets"
-            pass "Secrets restored"
-        else
-            fail "Secret restore failed"
-            return 1
-        fi
-    else
-        fail "vault/restore.sh not found"
+    # Require vault config
+    if ! require_vault_config; then
+        fail "Cannot manage secrets without vault config"
         return 1
     fi
+
+    # Detect local secrets and vault state
+    local local_exists=()
+    local vault_exists=()
+    local local_only=()
+    local vault_only=()
+    local both_exist=()
+
+    echo "Scanning secrets..."
+    echo ""
+
+    # Get vault session
+    local session
+    session=$(get_session 2>/dev/null) || true
+
+    # Check each syncable item
+    for item_name in "${(@k)SYNCABLE_ITEMS}"; do
+        local local_path="${SYNCABLE_ITEMS[$item_name]}"
+        local has_local=false
+        local has_vault=false
+
+        # Check local file
+        if [[ -f "$local_path" ]]; then
+            has_local=true
+            local_exists+=("$item_name")
+        fi
+
+        # Check vault (if session available)
+        if [[ -n "$session" ]] && vault_item_exists "$item_name" "$session" 2>/dev/null; then
+            has_vault=true
+            vault_exists+=("$item_name")
+        fi
+
+        # Categorize
+        if $has_local && ! $has_vault; then
+            local_only+=("$item_name")
+        elif ! $has_local && $has_vault; then
+            vault_only+=("$item_name")
+        elif $has_local && $has_vault; then
+            both_exist+=("$item_name")
+        fi
+    done
+
+    # Also check SSH keys
+    for item_name in "${(@k)SSH_KEYS}"; do
+        local local_path="${SSH_KEYS[$item_name]}"
+        local has_local=false
+        local has_vault=false
+
+        if [[ -f "$local_path" ]]; then
+            has_local=true
+        fi
+
+        if [[ -n "$session" ]] && vault_item_exists "$item_name" "$session" 2>/dev/null; then
+            has_vault=true
+        fi
+
+        if $has_local && ! $has_vault; then
+            local_only+=("$item_name")
+        elif ! $has_local && $has_vault; then
+            vault_only+=("$item_name")
+        elif $has_local && $has_vault; then
+            both_exist+=("$item_name")
+        fi
+    done
+
+    # Display status
+    echo -e "${BOLD}Secrets Status:${NC}"
+    echo ""
+
+    if [[ ${#local_only[@]} -gt 0 ]]; then
+        echo -e "  ${YELLOW}Local only (not in vault):${NC}"
+        for item in "${local_only[@]}"; do
+            local path="${SYNCABLE_ITEMS[$item]:-${SSH_KEYS[$item]:-}}"
+            echo "    • $item → $path"
+        done
+        echo ""
+    fi
+
+    if [[ ${#vault_only[@]} -gt 0 ]]; then
+        echo -e "  ${CYAN}Vault only (can restore):${NC}"
+        for item in "${vault_only[@]}"; do
+            echo "    • $item"
+        done
+        echo ""
+    fi
+
+    if [[ ${#both_exist[@]} -gt 0 ]]; then
+        echo -e "  ${GREEN}Synced (local + vault):${NC}"
+        for item in "${both_exist[@]}"; do
+            echo "    • $item"
+        done
+        echo ""
+    fi
+
+    # Offer to PUSH local secrets to vault
+    if [[ ${#local_only[@]} -gt 0 ]]; then
+        echo -e "${BOLD}${YELLOW}Found ${#local_only[@]} local secret(s) not in vault.${NC}"
+        echo "Push these to $backend so you can restore on other machines."
+        echo ""
+        echo -n "Push local secrets to vault? [Y/n]: "
+        read push_confirm
+        if [[ "${push_confirm:-Y}" =~ ^[Yy]$ ]]; then
+            echo ""
+            local push_success=0
+            local push_fail=0
+            for item in "${local_only[@]}"; do
+                echo -n "  Creating $item... "
+                if "$DOTFILES_DIR/vault/create-vault-item.sh" "$item" 2>/dev/null; then
+                    echo -e "${GREEN}done${NC}"
+                    ((push_success++))
+                else
+                    echo -e "${RED}failed${NC}"
+                    ((push_fail++))
+                fi
+            done
+            echo ""
+            if [[ $push_success -gt 0 ]]; then
+                pass "Pushed $push_success secret(s) to vault"
+            fi
+            if [[ $push_fail -gt 0 ]]; then
+                warn "$push_fail secret(s) failed to push"
+            fi
+        else
+            info "Skipped pushing local secrets"
+        fi
+        echo ""
+    fi
+
+    # Offer to RESTORE from vault
+    if [[ ${#vault_only[@]} -gt 0 ]]; then
+        echo -e "${BOLD}${CYAN}Found ${#vault_only[@]} secret(s) in vault to restore.${NC}"
+        echo ""
+        echo -n "Restore secrets from vault? [Y/n]: "
+        read restore_confirm
+        if [[ "${restore_confirm:-Y}" =~ ^[Yy]$ ]]; then
+            if "$DOTFILES_DIR/vault/restore.sh" --force; then
+                pass "Secrets restored from vault"
+            else
+                warn "Some secrets may have failed to restore"
+            fi
+        else
+            info "Skipped restoring from vault"
+        fi
+        echo ""
+    fi
+
+    # If nothing to do
+    if [[ ${#local_only[@]} -eq 0 && ${#vault_only[@]} -eq 0 ]]; then
+        if [[ ${#both_exist[@]} -gt 0 ]]; then
+            pass "All secrets are already synced"
+        else
+            info "No secrets configured yet"
+            echo "Add secrets to your local machine, then run 'dotfiles vault sync --all'"
+        fi
+    fi
+
+    state_complete "secrets"
+    pass "Secrets phase complete"
 }
 
 phase_claude() {
