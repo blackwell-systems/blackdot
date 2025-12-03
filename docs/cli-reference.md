@@ -280,14 +280,33 @@ export PASS_PREFIX=dotfiles  # optional, items stored as dotfiles/Git-Config
 
 ---
 
-### Managed Secrets
+### Configuration File
 
-The vault system manages these items:
+Vault items are defined in a user-editable JSON config:
+
+```
+~/.config/dotfiles/vault-items.json
+```
+
+**Setup:**
+```bash
+# Copy example and customize
+mkdir -p ~/.config/dotfiles
+cp vault/vault-items.example.json ~/.config/dotfiles/vault-items.json
+$EDITOR ~/.config/dotfiles/vault-items.json
+
+# Or use the setup wizard
+dotfiles setup
+```
+
+### Example Managed Items
+
+Define your items in the config file. Example structure:
 
 | Item Name | Local Path | Type |
 |-----------|------------|------|
-| `SSH-GitHub-Enterprise` | `~/.ssh/id_ed25519_enterprise_ghub` | SSH key |
-| `SSH-GitHub-Blackwell` | `~/.ssh/id_ed25519_blackwell` | SSH key |
+| `SSH-GitHub` | `~/.ssh/id_ed25519_github` | SSH key |
+| `SSH-Work` | `~/.ssh/id_ed25519_work` | SSH key |
 | `SSH-Config` | `~/.ssh/config` | Config file |
 | `AWS-Config` | `~/.aws/config` | Config file |
 | `AWS-Credentials` | `~/.aws/credentials` | Config file |
