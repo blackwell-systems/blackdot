@@ -28,6 +28,7 @@
 | [State Management](state-management.md) | Setup wizard state, resume & preferences |
 | [Vault System](vault-README.md) | Multi-backend secret management |
 | [Claude Code Integration](claude-code.md) | Portable sessions & git safety hooks |
+| [Docker Containers](docker.md) | Test environments & mock vault |
 | [Architecture](architecture.md) | System diagrams |
 | [Troubleshooting](troubleshooting.md) | Common issues & solutions |
 | [macOS Settings](macos-settings.md) | 137+ system preferences |
@@ -67,11 +68,12 @@ Skips: `/workspace` symlink, vault setup, Claude integration. You still get Zsh,
 ## Core Features
 
 - **Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with Bitwarden, 1Password, or pass
+- **Smart secrets onboarding** – Interactive `dotfiles vault setup` detects local secrets and creates vault items
 - **Claude Code integration** – Portable sessions across machines via `/workspace` symlink
 - **Self-healing configuration** – Health checker with auto-fix, drift detection
 - **Machine-specific templates** – Generate configs tailored to each machine
 - **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat—configured and ready
-- **Cross-platform** – macOS, Linux, Windows, WSL2, Docker
+- **Cross-platform** – macOS, Linux, Windows, WSL2, Docker with [4 container sizes](docker.md)
 
 ---
 
@@ -114,6 +116,7 @@ dotfiles drift           # Compare local vs vault
 # Vault Operations
 dotfiles vault restore   # Restore secrets
 dotfiles vault sync      # Sync local to vault
+dotfiles vault setup     # Interactive onboarding
 
 # Templates
 dotfiles template init   # Setup wizard

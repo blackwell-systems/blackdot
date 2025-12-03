@@ -42,6 +42,23 @@ Auto-detects your platform (macOS, Linux, WSL2), detects available vault CLIs (B
 </details>
 
 <details>
+<summary><b>Smart Secrets Onboarding</b> - Guided vault item setup</summary>
+
+```bash
+dotfiles vault setup  # Interactive vault configuration
+```
+
+First-time vault setup wizard that:
+- Detects existing local secrets (SSH keys, AWS config, Git config)
+- Offers to create vault items for each detected secret
+- Validates vault item schema before creation
+- Creates `~/.config/dotfiles/vault-items.json` config file
+- Works with any vault backend (Bitwarden, 1Password, pass)
+
+Perfect for new machines or first-time vault users.
+</details>
+
+<details>
 <summary><b>Multi-Vault Secrets</b> - Choose your vault backend</summary>
 
 ```bash
@@ -306,7 +323,16 @@ dotfiles doctor
 exit  # Auto-deletes
 ```
 
-Test in disposable Alpine container (< 5MB). 30-second trust verification before installing on real system. [Test drive guide](docs/TESTDRIVE.md)
+Test in disposable containers with the right level of features for your needs:
+
+| Container | Size | Use Case |
+|-----------|------|----------|
+| `extralite` | ~50MB | Quick CLI exploration |
+| `lite` | ~200MB | Vault command testing |
+| `medium` | ~400MB | Full CLI + Homebrew |
+| `full` | ~800MB+ | Complete environment |
+
+See [Docker Guide](docs/docker.md) for container details and mock vault setup for testing without real credentials.
 </details>
 
 <details>
@@ -754,6 +780,10 @@ dotfiles drift
 - Git configuration (.gitconfig)
 - Environment variables (.local/env.secrets)
 
+**Configuration file:**
+
+Vault items are defined in `~/.config/dotfiles/vault-items.json`, making it easy to customize which secrets to manage without editing source code. See [Vault README](docs/vault-README.md#configuration-file) for schema details.
+
 </details>
 
 <details>
@@ -820,6 +850,7 @@ dotfiles backup restore  # Restore from backup
 dotfiles vault restore   # Restore secrets (checks for local drift first)
 dotfiles vault restore --force  # Skip drift check, overwrite local
 dotfiles vault sync      # Sync local files to vault
+dotfiles vault setup     # Interactive vault item onboarding
 dotfiles vault list      # List vault items
 dotfiles vault check     # Validate vault items exist
 
