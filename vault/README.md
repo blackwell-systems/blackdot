@@ -391,6 +391,7 @@ All items must be **Secure Notes** (or equivalent) with content in the **notes**
 | `AWS-Credentials` | Yes | Full `~/.aws/credentials` contents |
 | `Git-Config` | Yes | Full `~/.gitconfig` contents |
 | `Environment-Secrets` | No | `KEY=value` pairs for env vars |
+| `Claude-Profiles` | No | Claude Code profiles JSON |
 
 ---
 
