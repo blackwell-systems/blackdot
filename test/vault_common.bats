@@ -80,12 +80,12 @@ teardown() {
 
 # Helper function to invoke zsh functions with test config
 zsh_eval() {
-  zsh -c "export VAULT_CONFIG_FILE='$VAULT_CONFIG_FILE'; source '$COMMON_SH'; $*"
+  zsh -c "export PATH='/usr/local/bin:/usr/bin:/bin'; export VAULT_CONFIG_FILE='$VAULT_CONFIG_FILE'; source '$COMMON_SH'; $*"
 }
 
 # Helper function to get zsh variable value with test config
 zsh_var() {
-  zsh -c "export VAULT_CONFIG_FILE='$VAULT_CONFIG_FILE'; source '$COMMON_SH'; echo \"\${$1}\""
+  zsh -c "export PATH='/usr/local/bin:/usr/bin:/bin'; export VAULT_CONFIG_FILE='$VAULT_CONFIG_FILE'; source '$COMMON_SH'; echo \"\${$1}\""
 }
 
 # ============================================================

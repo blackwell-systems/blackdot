@@ -80,13 +80,21 @@ load_vault_config() {
     fi
 
     # Check if jq is available
-    if ! command -v jq &>/dev/null; then
+    if ! command -v jq &>/dev/null && [[ ! -x /usr/bin/jq ]]; then
         warn "jq not installed - cannot load vault config"
         return 1
     fi
 
+    # Use full path to jq if command not in PATH
+    local JQ_CMD
+    if command -v jq &>/dev/null; then
+        JQ_CMD="jq"
+    else
+        JQ_CMD="/usr/bin/jq"
+    fi
+
     # Validate JSON syntax
-    if ! jq -e '.' "$VAULT_CONFIG_FILE" &>/dev/null; then
+    if ! $JQ_CMD -e '.' "$VAULT_CONFIG_FILE" &>/dev/null; then
         fail "Invalid JSON in $VAULT_CONFIG_FILE"
         return 1
     fi
@@ -95,25 +103,25 @@ load_vault_config() {
     typeset -gA SSH_KEYS=()
     while IFS='=' read -r key value; do
         [[ -n "$key" ]] && SSH_KEYS[$key]="${value//\~/$HOME}"
-    done < <(jq -r '.ssh_keys // {} | to_entries[] | "\(.key)=\(.value)"' "$VAULT_CONFIG_FILE" 2>/dev/null)
+    done < <($JQ_CMD -r '.ssh_keys // {} | to_entries[] | "\(.key)=\(.value)"' "$VAULT_CONFIG_FILE" 2>/dev/null)
 
     # Load DOTFILES_ITEMS
     typeset -gA DOTFILES_ITEMS=()
     while IFS='|' read -r name path required type; do
         [[ -n "$name" ]] && DOTFILES_ITEMS[$name]="${path//\~/$HOME}:$required:$type"
-    done < <(jq -r '.vault_items // {} | to_entries[] | "\(.key)|\(.value.path)|\(.value.required // false | if . then "required" else "optional" end)|\(.value.type)"' "$VAULT_CONFIG_FILE" 2>/dev/null)
+    done < <($JQ_CMD -r '.vault_items // {} | to_entries[] | "\(.key)|\(.value.path)|\(.value.required // false | if . then "required" else "optional" end)|\(.value.type)"' "$VAULT_CONFIG_FILE" 2>/dev/null)
 
     # Load SYNCABLE_ITEMS
     typeset -gA SYNCABLE_ITEMS=()
     while IFS='=' read -r key value; do
         [[ -n "$key" ]] && SYNCABLE_ITEMS[$key]="${value//\~/$HOME}"
-    done < <(jq -r '.syncable_items // {} | to_entries[] | "\(.key)=\(.value)"' "$VAULT_CONFIG_FILE" 2>/dev/null)
+    done < <($JQ_CMD -r '.syncable_items // {} | to_entries[] | "\(.key)=\(.value)"' "$VAULT_CONFIG_FILE" 2>/dev/null)
 
     # Load AWS_EXPECTED_PROFILES
     typeset -ga AWS_EXPECTED_PROFILES=()
     while IFS= read -r profile; do
         [[ -n "$profile" ]] && AWS_EXPECTED_PROFILES+=("$profile")
-    done < <(jq -r '.aws_expected_profiles // [] | .[]' "$VAULT_CONFIG_FILE" 2>/dev/null)
+    done < <($JQ_CMD -r '.aws_expected_profiles // [] | .[]' "$VAULT_CONFIG_FILE" 2>/dev/null)
 
     debug "Loaded vault config from $VAULT_CONFIG_FILE"
     debug "  SSH_KEYS: ${#SSH_KEYS[@]} items"
@@ -159,14 +167,14 @@ load_vault_config 2>/dev/null || true
 get_ssh_key_paths() {
     for key_path in "${SSH_KEYS[@]}"; do
         echo "$key_path"
-    done | sort
+    done | /usr/bin/sort
 }
 
 # Get list of SSH key vault item names
 get_ssh_key_items() {
     for item in "${(@k)SSH_KEYS}"; do
         echo "$item"
-    done | sort
+    done | /usr/bin/sort
 }
 
 # Get required items list
@@ -176,7 +184,7 @@ get_required_items() {
         local spec="${DOTFILES_ITEMS[$item]}"
         [[ "$spec" == *":required:"* ]] && items+=("$item")
     done
-    printf '%s\n' "${items[@]}" | sort
+    printf '%s\n' "${items[@]}" | /usr/bin/sort
 }
 
 # Get optional items list
@@ -186,7 +194,7 @@ get_optional_items() {
         local spec="${DOTFILES_ITEMS[$item]}"
         [[ "$spec" == *":optional:"* ]] && items+=("$item")
     done
-    printf '%s\n' "${items[@]}" | sort
+    printf '%s\n' "${items[@]}" | /usr/bin/sort
 }
 
 # Get local path for an item (checks all config sources)
