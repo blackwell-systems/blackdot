@@ -114,6 +114,7 @@
   <!-- Mermaid diagrams -->
   <script src="//cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-mermaid@2/dist/docsify-mermaid.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
   <script>
     mermaid.initialize({
       startOnLoad: true,
@@ -137,6 +138,32 @@
         fontFamily: 'system-ui, -apple-system, sans-serif',
         fontSize: '16px'
       }
+    });
+
+    // Enable pan and zoom for Mermaid diagrams
+    window.$docsify.plugins = window.$docsify.plugins || [];
+    window.$docsify.plugins.push(function(hook) {
+      hook.doneEach(function() {
+        setTimeout(function() {
+          document.querySelectorAll('.mermaid svg').forEach(function(svg) {
+            if (svg.dataset.panZoomEnabled) return;
+            svg.dataset.panZoomEnabled = 'true';
+            svg.style.maxWidth = 'none';
+            svg.style.cursor = 'grab';
+            try {
+              svgPanZoom(svg, {
+                zoomEnabled: true,
+                controlIconsEnabled: true,
+                fit: true,
+                center: true,
+                minZoom: 0.5,
+                maxZoom: 5,
+                zoomScaleSensitivity: 0.3
+              });
+            } catch(e) { console.log('Pan-zoom error:', e); }
+          });
+        }, 500);
+      });
     });
   </script>
 
