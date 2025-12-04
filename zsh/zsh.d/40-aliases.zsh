@@ -93,17 +93,7 @@ dotfiles() {
                     "$VAULT_DIR/sync-to-vault.sh" "$@"
                     ;;
                 status)
-                    # Show vault sync status
-                    echo "${CYAN}[INFO]${NC} Vault Status"
-                    echo ""
-                    echo "Checking vault sync status..."
-                    echo ""
-                    echo "Quick checks:"
-                    echo "  ${GREEN}dotfiles drift${NC}        # Compare local vs vault"
-                    echo "  ${GREEN}dotfiles vault list${NC}   # List all vault items"
-                    echo "  ${GREEN}dotfiles vault check${NC}  # Validate items exist"
-                    echo ""
-                    echo "${DIM}Full status command coming soon${NC}"
+                    "$VAULT_DIR/status.sh" "$@"
                     ;;
 
                 # Management commands

@@ -12,6 +12,11 @@ set -euo pipefail
 # Source common functions
 source "$(dirname "$0")/_common.sh"
 
+# Source config functions for timestamp tracking
+SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+source "$DOTFILES_DIR/lib/_config.sh"
+
 # Parse arguments
 FORCE=false
 PREVIEW=false
@@ -196,3 +201,9 @@ echo "--- Restoring Git config ---"
 echo ""
 echo "=== $BACKEND_NAME bootstrap complete ==="
 echo "SSH keys, AWS profiles, environment secrets, and Git config are now restored."
+
+# Track last pull timestamp
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date +"%Y-%m-%dT%H:%M:%S" 2>/dev/null || echo "")
+if [[ -n "$TIMESTAMP" ]]; then
+    config_set "vault.last_pull" "$TIMESTAMP" 2>/dev/null || true
+fi
