@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **v3.0 Breaking Changes Design** - Comprehensive redesign proposal (DESIGN-v3.md)
+  - Git-inspired command names: setup, scan, pull, push (replaces init, discover, restore, sync)
+  - Config format migration: INI → JSON (consistent with vault-items.json, native jq support)
+  - Mandatory auto-backup before all destructive operations
+  - Package tier selection in setup wizard (minimal/enhanced/full)
+  - Enhanced error messages with fix commands and documentation links
+  - Health score interpretation with auto-fix command
+  - Simplified vault schema (eliminates duplication)
+  - 4-week implementation timeline with auto-migration strategy
+  - See DESIGN-v3.md for full details
+
+- **Pain-Point Analysis Refactoring** - Updated pain-point-analysis.md with v3.0 solutions
+  - All 23 pain points now include v3.0 solutions
+  - Cross-referenced with DESIGN-v3.md sections
+  - v2.3 solutions documented alongside v3.0 enhancements
+  - Updated executive summary with v3.0 vision
+  - Phased implementation roadmap (4 weeks)
+  - Success criteria and next steps
+
 ### Fixed
 - **Vault Command Clarity** - Improved help text to clarify relationship between init and discover
   - Added workflow section showing: First time → init, Re-scan → discover
