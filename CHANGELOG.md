@@ -149,6 +149,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Success criteria and next steps
 
 ### Fixed
+- **Critical Bug Fixes** - Comprehensive code audit identified and fixed 4 critical/high severity issues
+  - **Progress bar division by zero** (CRITICAL): Added guards to prevent crash if total=0 or current>total
+    - `show_progress()` now validates inputs and clamps values to safe ranges
+    - Prevents overflow when current step exceeds total steps
+    - File: `bin/dotfiles-setup` lines 75-95
+  - **Lost package installation exit status** (CRITICAL): Fixed exit code capture in brew bundle
+    - Changed from `$?` (captures while loop status) to `${pipestatus[1]}` (captures brew status)
+    - Prevents false "success" reports when package installation actually failed
+    - File: `bin/dotfiles-setup` line 370
+  - **Missing schema validation in setup wizard** (HIGH): Added validation to vault configuration phase
+    - Setup wizard now validates `vault-items.json` immediately after creation/editing
+    - Interactive fix flow: detects errors → opens editor → re-validates → confirms before continuing
+    - Prevents proceeding with invalid config that would fail mysteriously during vault operations
+    - File: `bin/dotfiles-setup` lines 513-544
+  - **Test environment stderr pollution** (HIGH): Fixed unit test failure in CI
+    - Config initialization messages were leaking into test output (4 lines instead of expected 2)
+    - Suppressed stderr during _common.sh sourcing in test helper functions
+    - File: `test/vault_common.bats` line 83
+  - All 119 tests now pass reliably in both local and CI environments
+
 - **v3.0 Consistency Audit** - Eliminated all v2.x command and config references (23 instances)
   - Updated 7 vault scripts to use v3.0 commands (setup/scan/pull/push)
   - Updated 9 documentation files with correct v3.0 command examples
