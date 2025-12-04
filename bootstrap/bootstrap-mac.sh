@@ -42,20 +42,25 @@ fi
 # ============================================================
 if ! command -v brew >/dev/null 2>&1; then
     install_homebrew
-fi
 
-# Try Apple Silicon path first, then Intel path
-if [[ -d /opt/homebrew ]]; then
-    add_brew_to_zprofile "/opt/homebrew"
-elif [[ -d /usr/local/Homebrew ]]; then
-    add_brew_to_zprofile "/usr/local"
-fi
+    # After fresh installation, detect which Homebrew was installed
+    # Apple Silicon: /opt/homebrew, Intel: /usr/local
+    if [[ -d /opt/homebrew/bin ]]; then
+        BREW_PREFIX="/opt/homebrew"
+    elif [[ -d /usr/local/bin/brew ]]; then
+        BREW_PREFIX="/usr/local"
+    fi
 
-# Make sure brew is on PATH for this session
-if command -v brew >/dev/null 2>&1; then
-    eval "$(brew shellenv)"
+    # Add to .zprofile and activate for this session
+    if [[ -n "${BREW_PREFIX:-}" ]]; then
+        add_brew_to_zprofile "$BREW_PREFIX"
+        eval "$("$BREW_PREFIX/bin/brew" shellenv)"
+    else
+        echo "WARNING: Homebrew installation location not found."
+    fi
 else
-    echo "WARNING: Homebrew not found in PATH after installation."
+    # Homebrew already installed - just activate for this session
+    eval "$(brew shellenv)"
 fi
 
 # ============================================================
