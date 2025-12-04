@@ -10,7 +10,8 @@
 
 # Dotfiles directory (derive from this file's location)
 # ${(%):-%x} gives the path to the current file being sourced
-export DOTFILES_DIR="${${(%):-%x}:A:h:h}"
+# :h:h:h goes up 3 levels: zsh.d → zsh → dotfiles
+export DOTFILES_DIR="${${(%):-%x}:A:h:h:h}"
 
 # Shared workspace (macOS + Lima both use ~/workspace now)
 export WORKSPACE="$HOME/workspace"
