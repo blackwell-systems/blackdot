@@ -8,6 +8,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Structured Error Handling Library** (Pain Point #6) - Actionable error messages
+  - `lib/_errors.sh` - Comprehensive error handling with 15 pre-built error functions
+  - Structured format: What / Why / Impact / Fix / Help URL
+  - Error functions: error_vault_locked, error_missing_dep, error_git_not_configured, etc.
+  - All errors include specific fix commands and documentation links
+  - Multiline fix command support with color-coded output
+  - Export functions for use in subshells
+
+- **Health Score Interpretation** (Pain Point #7) - Understand your dotfiles health
+  - Color-coded health status: 🟢 Healthy (80-100), 🟡 Minor (60-79), 🟠 Needs Work (40-59), 🔴 Critical (0-39)
+  - "Quick Fixes" section lists each failed check with exact fix command
+  - Tracks failures and warnings with associated fixes
+  - Shows potential score improvement: "95/100 if all issues fixed"
+  - Auto-fix suggestions for permission-related issues
+  - Celebrates perfect scores with emoji and encouragement
+  - Enhanced `bin/dotfiles-doctor` with comprehensive summary section
+
+- **Vault Status Command** (Pain Point #12) - Full visibility into vault sync state
+  - `dotfiles vault status` - Comprehensive vault status dashboard
+  - Shows backend configuration (type, login status, unlock status)
+  - Lists all vault items with counts (config items, SSH keys)
+  - Sync history with human-readable timestamps ("2h ago", "3d ago")
+  - Comprehensive drift detection comparing 6 key config files
+  - Actionable recommendations based on drift status
+  - Beautiful formatted output with sections and emojis
+  - Timestamp tracking: saves vault.last_pull and vault.last_push to config.json
+  - ISO 8601 format timestamps in UTC
+
+- **Template System Documentation** (Pain Point #10) - Hidden gem now visible
+  - Massively enhanced template documentation in main README (8 lines → 132 lines)
+  - 3 real-world examples: Git config, SSH config, environment variables
+  - Clear problem/solution framing for multi-machine use cases
+  - Quick start 5-step workflow
+  - Auto-detected variables documentation (HOSTNAME, OS, USER, etc.)
+  - Use cases: work vs personal, multi-cloud, team onboarding
+  - Template syntax examples with conditionals and loops
+
 - **v3.0 Command Namespace** - Git-inspired command names (BREAKING CHANGE)
   - NEW commands: `vault setup`, `vault scan`, `vault pull`, `vault push`, `vault status`
   - Git-inspired naming: pull/push instead of restore/sync
