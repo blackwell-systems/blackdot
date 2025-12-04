@@ -85,9 +85,9 @@ show_status() {
     echo -e "${BOLD}Current Status:${NC}"
     echo "───────────────"
 
-    local phases=("symlinks" "packages" "vault" "secrets" "claude")
-    local labels=("Symlinks" "Packages" "Vault" "Secrets" "Claude")
-    local details=("Shell config linked" "Homebrew packages" "Vault backend" "SSH keys, AWS, Git" "Claude Code integration")
+    local phases=("symlinks" "packages" "vault" "secrets" "claude" "template")
+    local labels=("Symlinks" "Packages" "Vault" "Secrets" "Claude" "Templates")
+    local details=("Shell config linked" "Homebrew packages" "Vault backend" "SSH keys, AWS, Git" "Claude Code integration" "Machine-specific configs")
 
     for i in {1..${#phases[@]}}; do
         local phase="${phases[$i]}"
@@ -588,6 +588,47 @@ phase_claude() {
     state_complete "claude"
 }
 
+phase_template() {
+    echo ""
+    echo -e "${BOLD}${CYAN}STEP 6: Machine-Specific Templates (Optional)${NC}"
+    echo "───────────────────────────────────────────────"
+
+    if state_completed "template"; then
+        pass "Templates already configured"
+        return 0
+    fi
+
+    echo "Templates let you customize configs per machine (gitconfig, ssh-config, etc.)."
+    echo ""
+    echo "Examples:"
+    echo "  • Work vs personal git email"
+    echo "  • Different SSH keys per machine"
+    echo "  • Machine-specific environment variables"
+    echo ""
+    echo -n "Setup machine-specific config templates? [y/N]: "
+    read response
+
+    if [[ "${response}" =~ ^[Yy]$ ]]; then
+        info "Initializing template system..."
+        echo ""
+
+        # Run template init interactively
+        if "$DOTFILES_DIR/bin/dotfiles-template" init; then
+            pass "Templates configured"
+            echo ""
+            info "Run 'dotfiles template render' to generate configs from your templates"
+        else
+            warn "Template initialization skipped or failed"
+        fi
+    else
+        info "Skipped template setup"
+        echo ""
+        info "You can enable templates later with: dotfiles template init"
+    fi
+
+    state_complete "template"
+}
+
 # ============================================================
 # Main Flow
 # ============================================================
@@ -610,7 +651,7 @@ main() {
         echo -n "Reset all setup progress? [y/N]: "
         read confirm
         if [[ "${confirm:-N}" =~ ^[Yy]$ ]]; then
-            for phase in symlinks packages vault secrets claude; do
+            for phase in symlinks packages vault secrets claude template; do
                 state_reset "$phase"
             done
             pass "State reset"
@@ -636,8 +677,8 @@ main() {
     echo ""
 
     # Run each phase
-    local phases=("symlinks" "packages" "vault" "secrets" "claude")
-    local phase_funcs=("phase_symlinks" "phase_packages" "phase_vault" "phase_secrets" "phase_claude")
+    local phases=("symlinks" "packages" "vault" "secrets" "claude" "template")
+    local phase_funcs=("phase_symlinks" "phase_packages" "phase_vault" "phase_secrets" "phase_claude" "phase_template")
 
     for i in {1..${#phases[@]}}; do
         local phase="${phases[$i]}"
