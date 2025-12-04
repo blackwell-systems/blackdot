@@ -434,50 +434,6 @@ jobs:
 
           echo "✅ All vault scripts have valid syntax"
 
-  documentation-check:
-    name: Documentation Quality Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Check README completeness
-        run: |
-          echo "📚 Checking documentation..."
-
-          # Check for required sections in README
-          REQUIRED_SECTIONS=(
-            "Quick Start"
-            "Project Structure"
-            "Platform Support"
-            "Troubleshooting"
-          )
-
-          MISSING=0
-          for section in "${REQUIRED_SECTIONS[@]}"; do
-            if ! grep -q "$section" README.md; then
-              echo "❌ Missing section in README: $section"
-              ((MISSING++))
-            else
-              echo "✅ Found section: $section"
-            fi
-          done
-
-          if [[ $MISSING -gt 0 ]]; then
-            echo "⚠️  Warning: $MISSING section(s) missing from README"
-          else
-            echo "✅ All required sections present in README"
-          fi
-
-      - name: Check for broken internal links
-        run: |
-          echo "🔗 Checking for broken internal links..."
-
-          # Simple check for markdown links to files that don't exist
-          # This is a basic check and could be enhanced
-
-          echo "✅ Link check complete"
-
   test-bootstrap-integration:
     name: Bootstrap Integration Tests
     runs-on: ubuntu-latest

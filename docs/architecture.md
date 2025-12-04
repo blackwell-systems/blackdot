@@ -35,6 +35,80 @@ graph TB
     GH --> BOOTSTRAP
 ```
 
+## Modular Architecture
+
+**Everything is optional except shell config.** The system is designed to be fully modular, allowing users to pick only the components they need.
+
+### Core vs. Optional Components
+
+| Component | Type | Skip Method | Details |
+|-----------|------|-------------|---------|
+| **Shell Config** | **REQUIRED** | Cannot skip | ZSH configuration, plugins, prompt |
+| **Homebrew + Packages** | Optional | `--minimal` flag | 80+ CLI tools (fzf, ripgrep, bat, etc.) |
+| **Vault System** | Optional | Select "Skip" in wizard or `--minimal` | Multi-backend secrets (Bitwarden/1Password/pass) |
+| **/workspace Symlink** | Optional | `SKIP_WORKSPACE_SYMLINK=true` | For portable Claude sessions |
+| **Claude Integration** | Optional | `SKIP_CLAUDE_SETUP=true` or `--minimal` | dotclaude + hooks + settings |
+| **Template Engine** | Optional | Don't run `dotfiles template` | Machine-specific configs |
+
+### Install Modes
+
+```bash
+# Full install - Everything (recommended for Claude Code users)
+curl -fsSL [...]/install.sh | bash && dotfiles setup
+
+# Minimal install - Shell config only
+curl -fsSL [...]/install.sh | bash -s -- --minimal
+
+# Custom install - Use environment variables
+SKIP_WORKSPACE_SYMLINK=true ./bootstrap/bootstrap-mac.sh
+SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
+```
+
+### Environment Variables
+
+All optional components can be controlled via environment variables:
+
+| Variable | Effect | Use Case |
+|----------|--------|----------|
+| `--minimal` | Skip Homebrew, vault, Claude, /workspace | Minimal shell-only install |
+| `BREWFILE_TIER=minimal` | Install only essentials (~15 packages) | CI/CD, servers, containers |
+| `BREWFILE_TIER=enhanced` | Modern tools without containers (~40 packages) | Developer workstations |
+| `BREWFILE_TIER=full` | Everything including Docker/Node (~80 packages) | Full-stack development |
+| `SKIP_WORKSPACE_SYMLINK=true` | Skip `/workspace` symlink | Single-machine setups |
+| `SKIP_CLAUDE_SETUP=true` | Skip Claude Code integration | Non-Claude workflows |
+| `DOTFILES_OFFLINE=1` | Skip all vault operations | Air-gapped/offline environments |
+| `DOTFILES_SKIP_DRIFT_CHECK=1` | Skip drift detection | CI/automation pipelines |
+
+### Component Dependencies
+
+```mermaid
+graph TD
+    SHELL[Shell Config<br/>REQUIRED]
+    BREW[Homebrew + Packages<br/>optional]
+    VAULT[Vault System<br/>optional]
+    WORKSPACE[/workspace Symlink<br/>optional]
+    CLAUDE[Claude Integration<br/>optional]
+    TEMPLATE[Template Engine<br/>optional]
+
+    SHELL -.->|uses if present| BREW
+    SHELL -.->|uses if present| VAULT
+    CLAUDE -.->|uses if present| WORKSPACE
+    TEMPLATE -.->|independent| SHELL
+
+    style SHELL fill:#4CAF50
+    style BREW fill:#FFC107
+    style VAULT fill:#FFC107
+    style WORKSPACE fill:#FFC107
+    style CLAUDE fill:#FFC107
+    style TEMPLATE fill:#FFC107
+```
+
+**Key Design Principles:**
+- **No hard dependencies** - Optional components gracefully degrade if missing
+- **Enable later** - Started minimal? Run `dotfiles setup` to add features
+- **Progressive disclosure** - Setup wizard guides you through choices
+- **Safe defaults** - Full install gives best experience, minimal still works
+
 ## Component Architecture
 
 ### CLI Entry Point

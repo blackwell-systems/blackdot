@@ -4,6 +4,38 @@ Complete reference for all dotfiles commands, options, and environment variables
 
 ---
 
+## Modular Design
+
+**Everything is optional except shell config.** The dotfiles system is fully modular - use only what you need.
+
+### Install Options
+
+```bash
+# Full install (recommended for Claude Code users)
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
+
+# Minimal: Just shell config (no Homebrew, vault, Claude, /workspace)
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
+
+# Custom: Use environment variables to skip specific components
+SKIP_WORKSPACE_SYMLINK=true ./bootstrap/bootstrap-mac.sh
+SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
+```
+
+### What's Optional?
+
+| Component | Skip With | Documented In |
+|-----------|-----------|---------------|
+| **Homebrew + Packages** | `--minimal` flag | [Installation](#installation) |
+| **Vault System** | `--minimal` or select "Skip" in wizard | [Environment Variables](#vault-operations) |
+| **/workspace Symlink** | `SKIP_WORKSPACE_SYMLINK=true` | [Environment Variables](#bootstrap--installation) |
+| **Claude Integration** | `SKIP_CLAUDE_SETUP=true` or `--minimal` | [Environment Variables](#bootstrap--installation) |
+| **Template Engine** | Don't run `dotfiles template` | [Template Commands](#template-commands) |
+
+**See [Environment Variables](#environment-variables) for complete list of SKIP flags.**
+
+---
+
 ## Quick Reference
 
 ```bash
@@ -905,6 +937,9 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 |----------|--------|-------------|
 | `SKIP_WORKSPACE_SYMLINK` | `true` | Skip `/workspace` symlink creation |
 | `SKIP_CLAUDE_SETUP` | `true` | Skip Claude Code configuration |
+| `BREWFILE_TIER` | `minimal` | Install only essentials (~15 packages: git, zsh, jq, shell plugins) |
+| `BREWFILE_TIER` | `enhanced` | Modern CLI tools without containers (~40 packages: fzf, ripgrep, bat, eza) |
+| `BREWFILE_TIER` | `full` | Everything including Docker/Node (~80 packages) [default] |
 
 **Examples:**
 
@@ -915,8 +950,14 @@ SKIP_WORKSPACE_SYMLINK=true ./bootstrap/bootstrap-mac.sh
 # Skip Claude integration
 SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
 
+# Use minimal Brewfile tier (essentials only)
+BREWFILE_TIER=minimal ./bootstrap/bootstrap-mac.sh
+
+# Use enhanced tier (modern tools, no containers)
+BREWFILE_TIER=enhanced ./bootstrap/bootstrap-linux.sh
+
 # Combine flags
-SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-mac.sh
+BREWFILE_TIER=enhanced SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-mac.sh
 ```
 
 ---
