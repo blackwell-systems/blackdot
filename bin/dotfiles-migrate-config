@@ -35,6 +35,14 @@ check_migration_needed() {
             version=$(config_get "version" "0")
             if [[ "$version" == "3" ]]; then
                 info "Config is already v3.0 (JSON format)"
+
+                # Clean up leftover .ini file if it exists (from pre-cleanup migrations)
+                if [[ -f "$OLD_CONFIG" ]]; then
+                    mv "$OLD_CONFIG" "$OLD_CONFIG.v2-backup"
+                    info "Cleaned up leftover config.ini → config.ini.v2-backup"
+                    echo ""
+                fi
+
                 return 1
             fi
         fi
