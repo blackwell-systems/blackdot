@@ -202,7 +202,6 @@ dotfiles-update() {
 
 # One-command upgrade flow with health check
 dotfiles-upgrade() {
-    local DOTFILES_DIR="$HOME/workspace/dotfiles"
     echo "🚀 Upgrading dotfiles..."
 
     # Pull latest changes
@@ -231,7 +230,7 @@ dotfiles-upgrade() {
 
 # Check for dotfiles updates (once per day)
 _check_dotfiles_updates() {
-    local dotfiles_dir="$HOME/workspace/dotfiles"
+    local dotfiles_dir="$DOTFILES_DIR"
     local cache_file="$HOME/.dotfiles-update-check"
 
     # Skip if checked recently (within last day)

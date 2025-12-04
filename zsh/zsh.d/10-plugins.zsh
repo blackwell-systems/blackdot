@@ -8,7 +8,7 @@
 # COMPLETIONS
 # =========================
 # Load custom completions from dotfiles
-DOTFILES_COMPLETIONS="$HOME/workspace/dotfiles/zsh/completions"
+DOTFILES_COMPLETIONS="$DOTFILES_DIR/zsh/completions"
 if [[ -d "$DOTFILES_COMPLETIONS" ]]; then
   fpath=($DOTFILES_COMPLETIONS $fpath)
 fi

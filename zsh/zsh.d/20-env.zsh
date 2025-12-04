@@ -8,6 +8,10 @@
 # SHARED ENV / TOOLING
 # =========================
 
+# Dotfiles directory (derive from this file's location)
+# ${(%):-%x} gives the path to the current file being sourced
+export DOTFILES_DIR="${${(%):-%x}:A:h:h}"
+
 # Shared workspace (macOS + Lima both use ~/workspace now)
 export WORKSPACE="$HOME/workspace"
 
