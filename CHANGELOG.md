@@ -36,6 +36,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Accessible via `dotfiles vault init` or `dotfiles vault init --force`
 
 ### Improved
+- **Installation Flow** - Smoother onboarding experience
+  - install.sh now prompts "Run setup wizard now? [Y/n]" after installation
+  - Automatically loads new shell and runs setup if user confirms
+  - No more manual "exec zsh" → "dotfiles setup" dance
+  - Minimal mode shows numbered steps for manual configuration
+
+- **Setup Completion** - Context-aware next steps after wizard completes
+  - Shows dynamic recommendations based on what was configured
+  - Vault configured → Suggests `dotfiles vault restore`
+  - Templates configured → Suggests `dotfiles template render`
+  - Always shows `dotfiles doctor` for health check
+  - Helpful commands and documentation links
+
+- **Shell Feature Discovery** - Highlights new ZSH features post-setup
+  - Setup completion now shows useful shell aliases and tools
+  - Enhanced ls commands (ll, la, lt) with eza
+  - Git shortcuts (gst, gd, gco, etc.)
+  - Fuzzy search with fzf (Ctrl+R)
+  - Smart directory navigation with zoxide (z command)
+  - Terminal file manager with yazi (y command)
+  - Helps users discover what they just installed
+
 - **Vault Setup UX** - Better experience for configuring and skipping vault
   - Setup wizard now asks "Reconfigure vault?" if already configured
   - Distinguishes between "skipped" vs "configured" in status display

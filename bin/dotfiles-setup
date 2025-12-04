@@ -717,12 +717,58 @@ main() {
     show_status
 
     if ! state_needs_setup; then
-        echo -e "${GREEN}${BOLD}Setup complete!${NC}"
         echo ""
-        echo "Quick commands:"
-        echo "  dotfiles status   - Visual dashboard"
-        echo "  dotfiles doctor   - Health check"
-        echo "  dotfiles help     - All commands"
+        echo -e "${GREEN}${BOLD}╔════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${GREEN}${BOLD}║              Setup Complete!                               ║${NC}"
+        echo -e "${GREEN}${BOLD}╚════════════════════════════════════════════════════════════╝${NC}"
+        echo ""
+
+        # Show dynamic next steps based on configuration
+        local vault_backend=$(config_get "vault" "backend" "")
+        local template_configured=false
+        if [[ -f "$DOTFILES_DIR/templates/_variables.local.sh" ]]; then
+            template_configured=true
+        fi
+
+        echo "Next steps based on your configuration:"
+        echo ""
+
+        # Vault-specific next steps
+        if [[ -n "$vault_backend" ]] && [[ "$vault_backend" != "none" ]]; then
+            echo -e "  ${CYAN}✓ Vault configured${NC} ($vault_backend)"
+            echo -e "    ${DIM}→${NC} ${BOLD}dotfiles vault restore${NC}    ${DIM}# Restore your secrets${NC}"
+            echo ""
+        fi
+
+        # Template-specific next steps
+        if $template_configured; then
+            echo -e "  ${CYAN}✓ Templates configured${NC}"
+            echo -e "    ${DIM}→${NC} ${BOLD}dotfiles template render${NC}   ${DIM}# Generate configs${NC}"
+            echo ""
+        fi
+
+        # Always show health check
+        echo -e "  ${BLUE}ℹ Health check:${NC}"
+        echo -e "    ${DIM}→${NC} ${BOLD}dotfiles doctor${NC}             ${DIM}# Verify everything works${NC}"
+        echo ""
+
+        # Show helpful commands
+        echo -e "  ${BLUE}ℹ Explore commands:${NC}"
+        echo -e "    ${DIM}→${NC} ${BOLD}dotfiles status${NC}             ${DIM}# Visual dashboard${NC}"
+        echo -e "    ${DIM}→${NC} ${BOLD}dotfiles help${NC}               ${DIM}# See all commands${NC}"
+        echo ""
+
+        # ZSH features and aliases
+        echo -e "  ${BLUE}ℹ Your new shell features:${NC}"
+        echo -e "    ${DIM}→${NC} ${BOLD}ll, la, lt${NC}                ${DIM}# Enhanced ls (eza with icons)${NC}"
+        echo -e "    ${DIM}→${NC} ${BOLD}gst, gd, gco${NC}              ${DIM}# Git shortcuts${NC}"
+        echo -e "    ${DIM}→${NC} ${BOLD}Ctrl+R${NC}                    ${DIM}# Fuzzy history search (fzf)${NC}"
+        echo -e "    ${DIM}→${NC} ${BOLD}z [directory]${NC}             ${DIM}# Smart cd (learns your habits)${NC}"
+        echo -e "    ${DIM}→${NC} ${BOLD}y${NC}                         ${DIM}# Terminal file manager (yazi)${NC}"
+        echo ""
+
+        # Documentation link
+        echo -e "  ${DIM}📚 Docs: ${BLUE}https://github.com/blackwell-systems/dotfiles/docs${NC}"
     else
         echo -e "${YELLOW}Some steps were skipped or failed.${NC}"
         echo "Run 'dotfiles setup' again to continue."
