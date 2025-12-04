@@ -764,7 +764,7 @@ EOF
         echo "     ${CYAN}\$EDITOR $VAULT_CONFIG_FILE${NC}"
         echo ""
         echo "  3. Sync to vault:"
-        echo "     ${CYAN}dotfiles vault sync --all${NC}"
+        echo "     ${CYAN}dotfiles vault push --all${NC}"
         echo ""
     fi
 }

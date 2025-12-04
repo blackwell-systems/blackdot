@@ -1152,48 +1152,52 @@ Most commands follow these conventions:
 | `vault/.vault-session` | Cached vault session |
 | `templates/_variables.local.sh` | Local template overrides |
 | `generated/` | Rendered templates |
-| `~/.config/dotfiles/state.ini` | Setup wizard phase completion state |
-| `~/.config/dotfiles/config.ini` | User configuration (vault backend, etc.) |
+| `~/.config/dotfiles/config.json` | All configuration and state (v3.0 JSON format) |
+| `~/.config/dotfiles/vault-items.json` | Vault items schema (v3.0 format) |
 
 ---
 
 ## State Management
 
-The `dotfiles setup` wizard uses persistent state files to track progress. See [State Management](state-management.md) for full documentation.
+The `dotfiles setup` wizard uses persistent state in JSON format (v3.0). See [State Management](state-management.md) for full documentation.
 
-### State Files
+### Configuration File (v3.0)
 
-#### `~/.config/dotfiles/state.ini`
+#### `~/.config/dotfiles/config.json`
 
-Tracks which setup phases have been completed:
+All state and configuration in a single JSON file:
 
-```ini
-[phases]
-symlinks = complete
-packages = complete
-vault = complete
-secrets = complete
-claude = complete
+```json
+{
+  "version": 3,
+  "vault": {
+    "backend": "bitwarden",
+    "auto_sync": false,
+    "auto_backup": true
+  },
+  "setup": {
+    "completed": ["symlinks", "packages", "vault", "secrets"],
+    "current_tier": "enhanced"
+  },
+  "paths": {
+    "dotfiles_dir": "~/workspace/dotfiles",
+    "config_dir": "~/.config/dotfiles"
+  }
+}
 ```
 
-**Phases:**
+**Key Sections:**
+- `setup.completed[]` - Array of completed setup phases
+- `vault.backend` - Preferred vault backend (`bitwarden`, `1password`, `pass`)
+- `paths.dotfiles_dir` - Custom dotfiles installation directory (v3.0)
+
+**Completed Phases:**
 - `symlinks` - Shell configuration symlinks created
 - `packages` - Homebrew packages installed
 - `vault` - Vault backend selected and authenticated
 - `secrets` - Secrets restored from vault
 - `claude` - Claude Code integration configured
-
-#### `~/.config/dotfiles/config.ini`
-
-Stores user configuration:
-
-```ini
-[vault]
-backend = bitwarden
-```
-
-**Settings:**
-- `vault.backend` - Preferred vault backend (`bitwarden`, `1password`, `pass`, or `none`)
+- `template` - Machine-specific templates configured
 
 ### State Commands
 

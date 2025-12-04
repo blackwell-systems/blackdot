@@ -58,7 +58,7 @@ if is_offline; then
     echo ""
     echo "To restore from vault later:"
     echo "  unset DOTFILES_OFFLINE"
-    echo "  dotfiles vault restore"
+    echo "  dotfiles vault pull"
     exit 0
 fi
 
@@ -86,7 +86,7 @@ if ! skip_drift_check && [[ "$FORCE" != "true" ]]; then
     echo ""
     if ! check_pre_restore_drift "$SESSION" "$FORCE"; then
         echo ""
-        echo "To force restore: dotfiles vault restore --force"
+        echo "To force restore: dotfiles vault pull --force"
         exit 1
     fi
 fi

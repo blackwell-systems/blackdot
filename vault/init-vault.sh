@@ -20,24 +20,20 @@ if [[ "${1:-}" == "--force" ]]; then
     FORCE=true
 fi
 
-# Load config management
-CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
-CONFIG_FILE="$CONFIG_DIR/config.ini"
+# Load config management (v3.0: use centralized JSON config)
+source "$DOTFILES_DIR/lib/_config.sh"
 
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
+
+# Wrapper functions for backward compatibility
 config_get() {
     local section="$1"
     local key="$2"
     local default="${3:-}"
 
-    if [[ -f "$CONFIG_FILE" ]]; then
-        awk -F= -v section="$section" -v key="$key" -v default="$default" '
-            /^\[.*\]$/ { in_section = ($0 == "["section"]") }
-            in_section && $1 == key { print $2; found=1; exit }
-            END { if (!found) print default }
-        ' "$CONFIG_FILE"
-    else
-        echo "$default"
-    fi
+    # Convert to nested key format for v3.0
+    local nested_key="${section}.${key}"
+    command config_get "$nested_key" "$default"
 }
 
 config_set() {
@@ -47,7 +43,12 @@ config_set() {
 
     mkdir -p "$CONFIG_DIR"
 
-    if [[ ! -f "$CONFIG_FILE" ]]; then
+    # Convert to nested key format for v3.0
+    local nested_key="${section}.${key}"
+    command config_set "$nested_key" "$value"
+
+    # Keep INI compatibility (no-op for v3.0)
+    if [[ ! -f "$CONFIG_DIR/config.json" ]]; then
         echo "# Dotfiles Configuration" > "$CONFIG_FILE"
     fi
 
@@ -114,10 +115,10 @@ if [[ ${#available[@]} -eq 0 ]]; then
         warn "Vault setup skipped"
         config_set "vault" "backend" "none"
         echo ""
-        info "Run 'dotfiles vault init' anytime to configure vault"
+        info "Run 'dotfiles vault setup' anytime to configure vault"
         exit 0
     else
-        fail "Please install a vault CLI and run 'dotfiles vault init' again"
+        fail "Please install a vault CLI and run 'dotfiles vault setup' again"
         exit 1
     fi
 fi
@@ -138,7 +139,7 @@ if [[ $choice -eq $((${#available[@]} + 1)) ]]; then
     warn "Vault setup skipped"
     config_set "vault" "backend" "none"
     echo ""
-    info "Run 'dotfiles vault init' anytime to configure vault"
+    info "Run 'dotfiles vault setup' anytime to configure vault"
     exit 0
 fi
 
@@ -238,6 +239,6 @@ pass "Vault configuration complete!"
 echo ""
 echo "Next steps:"
 echo "  1. Review vault items: $EDITOR $vault_config"
-echo "  2. Restore secrets:    dotfiles vault restore"
+echo "  2. Restore secrets:    dotfiles vault pull"
 echo "  3. List vault items:   dotfiles vault list"
 echo ""

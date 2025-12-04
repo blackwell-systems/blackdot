@@ -12,7 +12,7 @@ This document outlines planned improvements and future work for the dotfiles sys
 
 Single command `dotfiles setup` with:
 - Five-phase setup: symlinks → packages → vault → secrets → claude
-- Persistent state in `~/.config/dotfiles/state.ini`
+- Persistent state in `~/.config/dotfiles/config.json` (v3.0 JSON format)
 - Resume support if interrupted
 - State inference from existing installations
 

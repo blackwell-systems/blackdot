@@ -574,7 +574,7 @@ check_pre_restore_drift() {
         fi
 
         echo -e "${YELLOW}Options:${NC}"
-        echo "  1. Run 'dotfiles vault sync' first to save local changes"
+        echo "  1. Run 'dotfiles vault push' first to save local changes"
         echo "  2. Run restore with --force to overwrite local changes"
         echo "  3. Run 'dotfiles drift' to see detailed differences"
         echo ""
@@ -587,7 +587,7 @@ check_pre_restore_drift() {
 }
 
 # Environment variable to skip drift check (for automation)
-# Usage: DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
+# Usage: DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull
 skip_drift_check() {
     [[ "${DOTFILES_SKIP_DRIFT_CHECK:-0}" == "1" ]]
 }

@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `dotfiles macos apply` - Apply settings from settings.sh
   - `dotfiles macos preview` - Dry-run mode
   - `dotfiles macos discover` - Capture current settings
-- **Vault Restore Preview** - `dotfiles vault restore --preview` shows what would be restored without making changes
+- **Vault Restore Preview** - `dotfiles vault pull --preview` shows what would be restored without making changes
 - **Documentation Updates**
   - New `docs/state-management.md` - Dedicated state system documentation
   - State Management section in `docs/cli-reference.md` with INI file format examples
@@ -302,7 +302,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `add_brew_to_zprofile()` - Homebrew PATH setup
 
 #### Pre-Restore Drift Check
-- **Safety feature** - Prevents accidental data loss during `dotfiles vault restore`
+- **Safety feature** - Prevents accidental data loss during `dotfiles vault pull`
   - Detects when local files have changed since last vault sync
   - Warns user and suggests options: sync first, force restore, or review diff
   - `check_item_drift()` - Check single item for drift
@@ -314,7 +314,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `bootstrap-mac.sh` - Now sources `bootstrap/_common.sh` for shared functions
 - `bootstrap-linux.sh` - Now sources `bootstrap/_common.sh` for shared functions
 - `vault/bootstrap-vault.sh` - Added drift check before restore
-- Help text updated for `dotfiles vault restore --force`
+- Help text updated for `dotfiles vault pull --force`
 - Reduced code duplication by ~60% in bootstrap scripts
 
 ### Documentation

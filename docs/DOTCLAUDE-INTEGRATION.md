@@ -122,11 +122,11 @@ dotfiles vault create          # Interactive prompts
 
 # Switch contexts
 dotclaude activate client-acme
-dotfiles vault restore acme-*   # Restore Acme secrets
+dotfiles vault pull acme-*   # Restore Acme secrets
 
 # Later: switch to Beta
 dotclaude activate client-beta
-dotfiles vault restore beta-*   # Restore Beta secrets
+dotfiles vault pull beta-*   # Restore Beta secrets
 ```
 
 **Result**: Profile standards change, secrets change, both synced across machines.
@@ -143,7 +143,7 @@ dotclaude activate oss-projects
 # - Community-friendly tone
 
 # OSS secrets (dotfiles)
-dotfiles vault restore oss-*
+dotfiles vault pull oss-*
 # - Personal SSH key
 # - Personal AWS (for demos)
 # - GitHub personal account Git config
@@ -155,7 +155,7 @@ dotclaude activate work-employer
 # - Corporate tone
 
 # Work secrets (dotfiles)
-dotfiles vault restore work-*
+dotfiles vault pull work-*
 # - Corporate SSH key
 # - Corporate AWS
 # - GitLab work account Git config
@@ -170,13 +170,13 @@ dotfiles vault restore work-*
 ```bash
 # On macOS
 dotclaude activate my-project
-dotfiles vault restore
+dotfiles vault pull
 cd /workspace/my-project && claude
 # ... work, exit ...
 
 # In Lima VM
 dotclaude activate my-project  # Same profile name
-dotfiles vault restore         # Same secrets
+dotfiles vault pull         # Same secrets
 cd /workspace/my-project && claude
 # SAME conversation continues!
 ```
@@ -199,7 +199,7 @@ cd ~/workspace/dotclaude-profiles
 git pull
 
 # 4. Restore secrets
-dotfiles vault restore
+dotfiles vault pull
 
 # 5. Activate profile
 dotclaude activate my-preferred-profile
@@ -231,11 +231,11 @@ cd /workspace/oss/contrib && claude
 ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey
 
 # Update vault
-dotfiles vault sync ssh
+dotfiles vault push ssh
 
 # Propagate to other machines
 # (on other machine)
-dotfiles vault restore ssh
+dotfiles vault pull ssh
 ```
 
 ## Configuration
@@ -290,10 +290,10 @@ The systems coordinate via:
 **Solution**: dotclaude only manages Claude config. Secrets are separate:
 ```bash
 dotclaude activate new-profile    # Changes Claude context
-dotfiles vault restore new-*      # Manually restore new secrets
+dotfiles vault pull new-*      # Manually restore new secrets
 ```
 
-**Future enhancement**: Hook in dotclaude to auto-run `dotfiles vault restore`
+**Future enhancement**: Hook in dotclaude to auto-run `dotfiles vault pull`
 
 ### Issue: /workspace Paths Don't Work
 
@@ -325,7 +325,7 @@ dotfiles doctor --fix
 
 ### Issue: Vault Items Not Found After Profile Switch
 
-**Symptom**: `dotfiles vault restore` fails after switching profile
+**Symptom**: `dotfiles vault pull` fails after switching profile
 
 **Cause**: Vault item names don't match profile names
 
@@ -337,7 +337,7 @@ profile-name-aws-creds
 profile-name-git-config
 
 # Restore by pattern:
-dotfiles vault restore "profile-name-*"
+dotfiles vault pull "profile-name-*"
 ```
 
 ## Advanced Integration
@@ -453,7 +453,7 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 # Your existing ~/.claude profiles stay intact
 
 # Add secret management
-dotfiles vault sync --all    # Push current secrets to vault
+dotfiles vault push --all    # Push current secrets to vault
 ```
 
 ## Best Practices
@@ -485,7 +485,7 @@ dotfiles vault sync --all    # Push current secrets to vault
 5. **Document custom workflows**: Add notes to profile READMEs
    ```bash
    # In ~/workspace/dotclaude-profiles/profiles/client-acme/README.md
-   # Requires: dotfiles vault restore client-acme-*
+   # Requires: dotfiles vault pull client-acme-*
    ```
 
 ## Further Reading
