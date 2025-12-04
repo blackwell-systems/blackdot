@@ -41,9 +41,7 @@ fi
 # 2. Homebrew (macOS-specific paths)
 # ============================================================
 if ! command -v brew >/dev/null 2>&1; then
-    echo "Installing Homebrew..."
-    /bin/bash -c \
-        "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    install_homebrew
 fi
 
 # Try Apple Silicon path first, then Intel path

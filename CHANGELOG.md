@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Provides clear feedback about what was fixed vs what needs manual attention
   - Fixes #UX: "why should it fail just because something is installed already"
 
+- **Homebrew Installation Resilience** - Retry logic for network failures
+  - Homebrew installation now retries up to 3 times with exponential backoff (2s, 4s, 8s)
+  - Provides helpful error messages on failure (network issues, rate limiting, requirements)
+  - Offers option to continue without Homebrew or abort (user choice)
+  - Prevents bootstrap failure due to temporary network hiccups
+  - Applies to both macOS and Linux (Linuxbrew) installations
+
 ## [2.2.0] - 2025-12-03
 
 ### Added

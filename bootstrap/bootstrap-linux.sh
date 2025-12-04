@@ -59,9 +59,7 @@ fi
 BREW_LINUX_PATH="/home/linuxbrew/.linuxbrew"
 
 if ! command -v brew >/dev/null 2>&1; then
-    echo "Installing Linuxbrew..."
-    /bin/bash -c \
-        "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    install_homebrew
 fi
 
 # Ensure brew shellenv is in .zprofile
