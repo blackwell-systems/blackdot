@@ -60,45 +60,64 @@ All `dotfiles vault` commands work identically regardless of backend.
 
 All vault operations are accessed via the unified `dotfiles vault` command:
 
+**v3.0 Commands (Recommended):**
+
 ```bash
 # Setup & Configuration
-dotfiles vault init             # Configure vault backend (includes auto-discovery)
-dotfiles vault discover         # Re-scan for new secrets (updates existing config)
+dotfiles vault setup            # Setup vault backend (first-time setup)
+dotfiles vault scan             # Re-scan for new secrets (updates config)
+                                # --dry-run: Preview without saving
 
-# Restore & Backup
-dotfiles vault restore          # Restore all secrets (auto-creates backup first)
-dotfiles vault restore --force  # Skip drift check, overwrite local changes
-dotfiles vault backup           # Manual backup of current secrets
+# Pull & Push (git-inspired)
+dotfiles vault pull             # Pull secrets FROM vault to local
+dotfiles vault pull --force     # Skip drift check, overwrite local
+dotfiles vault push [item]      # Push secrets TO vault
+dotfiles vault push --all       # Push all items
+dotfiles vault status           # Show sync status (coming soon)
 
-# Sync & Manage
-dotfiles vault sync             # Sync local changes to vault
-dotfiles vault sync --all       # Sync all items
-dotfiles vault create           # Create new vault item
-dotfiles vault delete           # Delete vault item
-
-# Validation & Info
+# Management
 dotfiles vault list             # List all vault items
 dotfiles vault check            # Validate required items exist
 dotfiles vault validate         # Validate vault item schema
+dotfiles vault create           # Create new vault item
+dotfiles vault delete           # Delete vault item
+
+# Backup & Safety (moved to top-level)
+dotfiles backup                 # Create backup of current config
+dotfiles backup list            # List all backups
+dotfiles backup restore <name>  # Restore specific backup
+dotfiles rollback               # Instant rollback to last backup
+```
+
+**Legacy v2.x Commands (Deprecated):**
+
+> ⚠️  These commands still work but show deprecation warnings. They will be removed in v3.1.
+
+```bash
+dotfiles vault init      → use: dotfiles vault setup
+dotfiles vault discover  → use: dotfiles vault scan
+dotfiles vault restore   → use: dotfiles vault pull
+dotfiles vault sync      → use: dotfiles vault push
+dotfiles vault backup    → use: dotfiles backup (top-level)
 ```
 
 **Typical Workflows:**
 
 ```bash
 # First-time setup
-dotfiles vault init             # Choose backend, auto-discover secrets
-dotfiles vault sync --all       # Push discovered secrets to vault
+dotfiles vault setup            # Choose backend, auto-discover secrets
+dotfiles vault push --all       # Push discovered secrets to vault
 
 # New machine
-dotfiles vault restore          # Pull secrets from vault (auto-backup first)
+dotfiles vault pull             # Pull secrets from vault (auto-backup first)
 
 # Daily use
-dotfiles vault sync Git-Config  # Sync specific item after local change
-dotfiles vault discover         # Re-scan when you add new SSH keys
+dotfiles vault push Git-Config  # Push specific item after local change
+dotfiles vault scan             # Re-scan when you add new SSH keys
 
 # Safety
-dotfiles vault backup           # Create manual backup anytime
-dotfiles backup restore <name>  # Rollback from backup if needed
+dotfiles backup                 # Create manual backup anytime
+dotfiles rollback               # Instant rollback to last backup
 ```
 
 ---
