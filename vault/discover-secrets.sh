@@ -75,7 +75,7 @@ normalize_ssh_key_name() {
         # Has service name: id_ed25519_github
         name="${match[1]}"
         name="${(C)name}"  # Capitalize first letter
-    elif [[ "$filename" =~ id_ed25519|id_rsa|id_ecdsa ]]; then
+    elif [[ "$filename" =~ (id_ed25519|id_rsa|id_ecdsa) ]]; then
         # Generic key name
         name="Personal"
     else
