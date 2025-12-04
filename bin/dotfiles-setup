@@ -178,7 +178,7 @@ phase_packages() {
     fi
 
     info "Running brew bundle..."
-    if (cd "$DOTFILES_DIR" && brew bundle --no-lock); then
+    if (cd "$DOTFILES_DIR" && brew bundle); then
         state_complete "packages"
         pass "Packages installed"
     else
