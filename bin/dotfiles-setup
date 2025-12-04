@@ -72,9 +72,27 @@ show_progress() {
     local total=$2
     local step_name="$3"
 
+    # Guard against division by zero
+    if [[ $total -eq 0 ]]; then
+        warn "Invalid progress: total=0"
+        return 1
+    fi
+
+    # Guard against overflow (current > total)
+    if [[ $current -gt $total ]]; then
+        current=$total
+    fi
+
     local percent=$((current * 100 / total))
     local filled=$((current * 20 / total))
+
+    # Clamp filled to max 20 (in case of rounding issues)
+    [[ $filled -gt 20 ]] && filled=20
+
     local empty=$((20 - filled))
+
+    # Ensure empty is never negative
+    [[ $empty -lt 0 ]] && empty=0
 
     # Build progress bar
     local bar=""
@@ -347,8 +365,9 @@ phase_packages() {
         fi
     done
 
-    # Check exit status
-    local brew_status=$?
+    # Check exit status from brew bundle (not the while loop)
+    # In zsh, pipestatus[1] gives the first command's exit code
+    local brew_status=${pipestatus[1]}
     if [[ $brew_status -eq 0 ]]; then
         state_complete "packages"
         pass "Packages installed successfully (${selected_tier} tier)"
@@ -489,6 +508,39 @@ phase_vault() {
         fi
     else
         pass "Vault items config exists"
+    fi
+
+    # Validate vault configuration schema
+    echo ""
+    info "Validating vault configuration schema..."
+    if ! vault_validate_schema "$vault_config"; then
+        echo ""
+        fail "Vault configuration is invalid"
+        echo ""
+        echo -n "Open editor to fix now? [Y/n]: "
+        read fix_now
+        if [[ "${fix_now:-Y}" =~ ^[Yy]$ ]]; then
+            ${EDITOR:-vim} "$vault_config"
+            echo ""
+            info "Re-validating after edit..."
+            if ! vault_validate_schema "$vault_config"; then
+                fail "Configuration is still invalid"
+                echo ""
+                echo "Please run 'dotfiles vault validate' to check errors"
+                echo "Or run 'dotfiles setup' again when ready"
+                return 1
+            fi
+        else
+            warn "Skipping vault configuration - you can fix it later with 'dotfiles vault validate'"
+            echo ""
+            echo -n "Continue without vault? [y/N]: "
+            read continue_anyway
+            if [[ ! "${continue_anyway}" =~ ^[Yy]$ ]]; then
+                return 1
+            fi
+        fi
+    else
+        pass "Vault configuration is valid"
     fi
 
     # Backend-specific login
