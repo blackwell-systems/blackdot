@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.3.0] - 2025-12-04
 
 ### Fixed
+- **Dynamic Path Resolution** - Fixed hardcoded paths in zsh configuration
+  - All `dotfiles` commands now work regardless of installation location
+  - Introduced `$DOTFILES_DIR` environment variable (auto-detected from config location)
+  - Replaced all hardcoded `$HOME/workspace/dotfiles` paths with `$DOTFILES_DIR`
+  - Fixes issue where commands would fail if dotfiles weren't at exact expected path
+  - Affects: `40-aliases.zsh`, `50-functions.zsh`, `10-plugins.zsh`, `20-env.zsh`
+  - Critical for users who clone dotfiles to custom locations
+
 - **Vault Backend Permissions** - Fixed missing execute permissions on vault backends
   - `vault/backends/bitwarden.sh`, `1password.sh`, `pass.sh` now executable
   - Resolves potential execution failures when directly invoking backends
