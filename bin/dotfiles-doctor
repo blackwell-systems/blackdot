@@ -563,7 +563,7 @@ if [[ $CHECKS_FAILED -gt 0 || $CHECKS_WARNED -gt 0 ]]; then
 
     # Show warnings with fixes (limit to first 3 to avoid clutter)
     if [[ $CHECKS_WARNED -gt 0 ]]; then
-        local warn_count=0
+        warn_count=0
         for i in "${!WARNING_CHECKS[@]}"; do
             [[ $warn_count -ge 3 ]] && break
             check="${WARNING_CHECKS[$i]}"
@@ -576,7 +576,7 @@ if [[ $CHECKS_FAILED -gt 0 || $CHECKS_WARNED -gt 0 ]]; then
         done
 
         if [[ ${#WARNING_CHECKS[@]} -gt 3 ]]; then
-            local remaining=$((${#WARNING_CHECKS[@]} - 3))
+            remaining=$((${#WARNING_CHECKS[@]} - 3))
             echo -e "    ${DIM}... and $remaining more warning(s)${NC}"
         fi
         echo ""
@@ -584,7 +584,7 @@ if [[ $CHECKS_FAILED -gt 0 || $CHECKS_WARNED -gt 0 ]]; then
 
     # Auto-fix suggestion
     if [[ ! $FIX_MODE ]]; then
-        local fixable=0
+        fixable=0
         # Count how many issues are auto-fixable (permissions)
         for check in "${FAILED_CHECKS[@]}"; do
             if [[ "$check" == *"permissions"* ]]; then
