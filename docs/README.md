@@ -27,7 +27,7 @@
 | [Template System](templates.md) | Machine-specific configuration |
 | [State Management](state-management.md) | Setup wizard state, resume & preferences |
 | [Vault System](vault-README.md) | Multi-backend secret management |
-| [Claude Code Integration](claude-code.md) | Portable sessions & git safety hooks |
+| [Claude Code + dotclaude](claude-code.md) | Portable sessions, profile sync, git safety hooks |
 | [Docker Containers](docker.md) | Test environments & mock vault |
 | [Architecture](architecture.md) | System diagrams |
 | [Troubleshooting](troubleshooting.md) | Common issues & solutions |
@@ -69,11 +69,38 @@ Skips: `/workspace` symlink, vault setup, Claude integration. You still get Zsh,
 
 - **Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with Bitwarden, 1Password, or pass
 - **Smart secrets onboarding** – Interactive `dotfiles vault setup` detects local secrets and creates vault items
-- **Claude Code integration** – Portable sessions across machines via `/workspace` symlink
+- **Claude Code + dotclaude** – Portable sessions, profile management, git safety hooks, vault-synced Claude profiles
 - **Self-healing configuration** – Health checker with auto-fix, drift detection
 - **Machine-specific templates** – Generate configs tailored to each machine
 - **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat—configured and ready
 - **Cross-platform** – macOS, Linux, Windows, WSL2, Docker with [4 container sizes](docker.md)
+
+---
+
+## Claude Code + dotclaude Integration
+
+**The first dotfiles project designed for AI-assisted development.** This is what sets us apart from chezmoi, yadm, and every other dotfiles manager.
+
+| Feature | What It Does |
+|---------|--------------|
+| **Portable sessions** | `/workspace` symlink lets Claude conversations continue across machines |
+| **[dotclaude](https://github.com/blackwell-systems/dotclaude) profiles** | Manage multiple Claude contexts (work, personal, client projects) |
+| **Vault-synced profiles** | `dotfiles vault restore` brings your Claude profiles to new machines |
+| **Git safety hooks** | PreToolUse hook blocks dangerous commands like `git push --force` |
+| **Session validation** | SessionStart hook auto-checks branch sync status |
+| **Multi-backend support** | Works with Anthropic Max, AWS Bedrock, Google Vertex AI |
+
+```bash
+# Quick setup with dotclaude
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh | bash
+dotclaude create my-project
+dotclaude activate my-project
+dotfiles vault sync Claude-Profiles  # Sync to vault for other machines
+```
+
+**Without dotclaude?** No problem—portable sessions and git safety hooks work standalone. `dotfiles doctor` will gently suggest dotclaude if you're a Claude Code user.
+
+See [Claude Code + dotclaude Integration](claude-code.md) for the full guide including architecture diagrams.
 
 ---
 
@@ -164,8 +191,8 @@ See [Full Documentation](README-FULL.md) for complete project structure and deta
 ## Next Steps
 
 - **[Full Documentation](README-FULL.md)** – Complete guide with all details
+- **[Claude Code + dotclaude](claude-code.md)** – Portable sessions, profiles & safety hooks
 - **[Template System](templates.md)** – Configure per-machine settings
-- **[Claude Code Integration](claude-code.md)** – Portable sessions & safety hooks
 - **[Troubleshooting](troubleshooting.md)** – Solutions to common issues
 
 ---
