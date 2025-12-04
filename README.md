@@ -16,7 +16,7 @@
 
 ---
 
-## 🚀 One-Line Install
+## One-Line Install
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
@@ -65,7 +65,7 @@ STEP 4: Secrets Management
 ────────────────────────────────────────────────────────────────
 Scanning secrets...
 
-  🔍 Local only (not in vault):
+  Local only (not in vault):
     • SSH-GitHub-Enterprise → ~/.ssh/id_ed25519_enterprise_ghub
     • SSH-GitHub-Personal → ~/.ssh/id_ed25519_personal
     • AWS-Config → ~/.aws/config
@@ -131,13 +131,13 @@ See [Docker Guide](docs/docker.md) for container options.
 
 The only dotfiles solution that:
 
-1. **🔄 Portable Claude Sessions** – `/workspace` symlink ensures identical paths everywhere. Your Claude conversations sync seamlessly across macOS, Linux, and WSL2.
+1. **Portable Claude Sessions** – `/workspace` symlink ensures identical paths everywhere. Your Claude conversations sync seamlessly across macOS, Linux, and WSL2.
 
-2. **🔐 Smart Secrets Onboarding** – Detects existing credentials (SSH keys, AWS, Git) and offers to vault them automatically. New machines restore everything with one command.
+2. **Smart Secrets Onboarding** – Detects existing credentials (SSH keys, AWS, Git) and offers to vault them automatically. New machines restore everything with one command.
 
-3. **🗄️ Multi-Vault Backend** – Works with Bitwarden, 1Password, or pass. Unified API across all backends. Bidirectional sync with drift detection.
+3. **Multi-Vault Backend** – Works with Bitwarden, 1Password, or pass. Unified API across all backends. Bidirectional sync with drift detection.
 
-4. **🩺 Self-Healing Configuration** – `dotfiles doctor --fix` automatically repairs permissions, broken symlinks, and misconfigurations.
+4. **Self-Healing Configuration** – `dotfiles doctor --fix` automatically repairs permissions, broken symlinks, and misconfigurations.
 
 **Not using Claude Code?** It's still the most robust dotfiles for multi-machine developer workflows with vault-backed secrets.
 
@@ -146,9 +146,9 @@ The only dotfiles solution that:
 ## Features
 
 <details>
-<summary><b>📦 View All Features (18)</b></summary>
+<summary><b>View All Features (18)</b></summary>
 
-### 🎯 Core Features
+### Core Features
 
 <details>
 <summary><b>Interactive Setup Wizard</b> - One command, complete setup</summary>
@@ -223,7 +223,7 @@ The `/workspace` symlink creates identical paths across platforms. Claude Code s
 
 </details>
 
-### 🛡️ Safety & Reliability
+### Safety & Reliability
 
 <details>
 <summary><b>Self-Healing Configuration</b> - Never breaks</summary>
@@ -276,7 +276,7 @@ CI runs shellcheck, zsh validation, all tests on every push. Code coverage via k
 
 </details>
 
-### ⚙️ Advanced Features
+### Advanced Features
 
 <details>
 <summary><b>Machine-Specific Templates</b> - One config, many machines</summary>
@@ -329,7 +329,7 @@ Timestamped tar.gz archives in `~/.dotfiles-backups/`. Includes all dotfiles, co
 
 </details>
 
-### 🔧 Tools & Utilities
+### Tools & Utilities
 
 <details>
 <summary><b>Unified CLI Interface</b> - Everything under one command</summary>
@@ -394,7 +394,7 @@ Shows which Brewfile packages are installed, missing, or outdated. Works across 
 
 </details>
 
-### 🧩 Additional Features
+### Additional Features
 
 <details>
 <summary><b>Modular Shell Config</b> - Organized, not monolithic</summary>
@@ -471,11 +471,11 @@ Bootstrap scripts check current state before changes. Already symlinked? Skip. A
 
 **Perfect for:**
 
-- **🤖 Claude Code users** working across macOS, Linux, and WSL2 with session portability
-- **👥 Team onboarding** - New developer setup in < 5 minutes with vault-backed credentials
-- **☁️ Multi-cloud workflows** - AWS SSO, multiple profiles, automatic credential rotation
-- **🔐 Security-conscious developers** - Multi-vault backends, schema validation, drift detection
-- **🚀 CI/CD environments** - Docker containers, offline mode, state management
+- **Claude Code users** working across macOS, Linux, and WSL2 with session portability
+- **Team onboarding** - New developer setup in < 5 minutes with vault-backed credentials
+- **Multi-cloud workflows** - AWS SSO, multiple profiles, automatic credential rotation
+- **Security-conscious developers** - Multi-vault backends, schema validation, drift detection
+- **CI/CD environments** - Docker containers, offline mode, state management
 
 **Also great for:**
 
@@ -583,15 +583,15 @@ See [Brewfile](Brewfile) for complete package list.
 
 ## Documentation
 
-- 📖 **[Complete Guide](docs/README-FULL.md)** - Everything in detail (2,300+ lines)
-- 🔐 **[Vault System](docs/vault-README.md)** - Multi-backend secrets management
-- 🎨 **[Templates](docs/templates.md)** - Machine-specific configuration
-- 🏗️ **[Architecture](docs/architecture.md)** - System design and components
-- 💻 **[CLI Reference](docs/cli-reference.md)** - All commands and flags
-- 🐛 **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
-- 🧪 **[Test Drive Guide](docs/TESTDRIVE.md)** - Try in Docker before installing
-- 🤝 **[dotclaude Integration](docs/DOTCLAUDE-INTEGRATION.md)** - Profile management
-- 📊 **[State Management](docs/state-management.md)** - Setup wizard internals
+- **[Complete Guide](docs/README-FULL.md)** - Everything in detail (2,300+ lines)
+- **[Vault System](docs/vault-README.md)** - Multi-backend secrets management
+- **[Templates](docs/templates.md)** - Machine-specific configuration
+- **[Architecture](docs/architecture.md)** - System design and components
+- **[CLI Reference](docs/cli-reference.md)** - All commands and flags
+- **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
+- **[Test Drive Guide](docs/TESTDRIVE.md)** - Try in Docker before installing
+- **[dotclaude Integration](docs/DOTCLAUDE-INTEGRATION.md)** - Profile management
+- **[State Management](docs/state-management.md)** - Setup wizard internals
 
 **GitHub Pages:** [https://blackwell-systems.github.io/dotfiles/](https://blackwell-systems.github.io/dotfiles/)
 
