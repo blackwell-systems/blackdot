@@ -22,6 +22,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Prevents bootstrap failure due to temporary network hiccups
   - Applies to both macOS and Linux (Linuxbrew) installations
 
+- **Brew Bundle Compatibility** - Removed deprecated `--no-lock` flag
+  - Fixes "invalid option: --no-lock" error in setup wizard
+  - Compatible with Homebrew 5.0+ which removed this flag
+  - Setup wizard now works correctly on latest Homebrew versions
+
+### Improved
+- **macOS /workspace Symlink Handling** - Better guidance for read-only filesystem
+  - Detects macOS read-only root filesystem (Catalina+)
+  - Provides clear instructions for using synthetic.conf (Apple-approved method)
+  - Shows exact commands to create persistent root-level symlink
+  - Explains that ~/workspace still works without /workspace symlink
+  - No longer shows confusing "fix manually" command that won't work on modern macOS
+
 ## [2.2.0] - 2025-12-03
 
 ### Added
