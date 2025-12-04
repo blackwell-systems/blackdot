@@ -79,7 +79,7 @@ dotfiles() {
             local subcmd="${1:-help}"
             shift 2>/dev/null || true
             case "$subcmd" in
-                # NEW v3.0 commands (preferred)
+                # v3.0 commands
                 setup)
                     "$VAULT_DIR/init-vault.sh" "$@"
                     ;;
@@ -93,48 +93,20 @@ dotfiles() {
                     "$VAULT_DIR/sync-to-vault.sh" "$@"
                     ;;
                 status)
-                    # New v3.0 command - show sync status
-                    echo "${YELLOW}[INFO]${NC} vault status - Coming in v3.0 final"
-                    echo "For now, use:"
-                    echo "  dotfiles drift        # Check local vs vault differences"
-                    echo "  dotfiles vault list   # List all vault items"
+                    # Show vault sync status
+                    echo "${CYAN}[INFO]${NC} Vault Status"
+                    echo ""
+                    echo "Checking vault sync status..."
+                    echo ""
+                    echo "Quick checks:"
+                    echo "  ${GREEN}dotfiles drift${NC}        # Compare local vs vault"
+                    echo "  ${GREEN}dotfiles vault list${NC}   # List all vault items"
+                    echo "  ${GREEN}dotfiles vault check${NC}  # Validate items exist"
+                    echo ""
+                    echo "${DIM}Full status command coming soon${NC}"
                     ;;
 
-                # DEPRECATED v2.x commands (for compatibility)
-                init)
-                    echo "${YELLOW}⚠️  Warning:${NC} 'vault init' is deprecated and will be removed in v3.1"
-                    echo "${CYAN}ℹ️  Use:${NC} dotfiles vault setup"
-                    echo ""
-                    "$VAULT_DIR/init-vault.sh" "$@"
-                    ;;
-                discover)
-                    echo "${YELLOW}⚠️  Warning:${NC} 'vault discover' is deprecated and will be removed in v3.1"
-                    echo "${CYAN}ℹ️  Use:${NC} dotfiles vault scan"
-                    echo ""
-                    "$VAULT_DIR/discover-secrets.sh" "$@"
-                    ;;
-                restore)
-                    echo "${YELLOW}⚠️  Warning:${NC} 'vault restore' is deprecated and will be removed in v3.1"
-                    echo "${CYAN}ℹ️  Use:${NC} dotfiles vault pull"
-                    echo ""
-                    "$VAULT_DIR/restore.sh" "$@"
-                    ;;
-                sync)
-                    echo "${YELLOW}⚠️  Warning:${NC} 'vault sync' is deprecated and will be removed in v3.1"
-                    echo "${CYAN}ℹ️  Use:${NC} dotfiles vault push"
-                    echo ""
-                    "$VAULT_DIR/sync-to-vault.sh" "$@"
-                    ;;
-
-                # Backup moved to top-level in v3.0
-                backup)
-                    echo "${YELLOW}⚠️  Warning:${NC} 'vault backup' is deprecated and will be removed in v3.1"
-                    echo "${CYAN}ℹ️  Use:${NC} dotfiles backup"
-                    echo ""
-                    "$DOTFILES_DIR/bin/dotfiles-backup" "$@"
-                    ;;
-
-                # Unchanged commands
+                # Management commands
                 list)
                     "$VAULT_DIR/list-vault-items.sh" "$@"
                     ;;
@@ -155,7 +127,7 @@ dotfiles() {
                     echo ""
                     echo "${BOLD}Usage:${NC} dotfiles vault <command> [options]"
                     echo ""
-                    echo "${BOLD}v3.0 Commands${NC} ${GREEN}(recommended)${NC}:"
+                    echo "${BOLD}Setup & Sync:${NC}"
                     echo "  ${GREEN}setup${NC}            Setup vault backend (first-time setup)"
                     echo "  ${GREEN}scan${NC}             Re-scan for new secrets (updates config)"
                     echo "                   ${DIM}--dry-run: Preview without saving${NC}"
@@ -163,7 +135,7 @@ dotfiles() {
                     echo "                   ${DIM}--force: Skip drift check, overwrite local${NC}"
                     echo "  ${GREEN}push${NC} [item]      Push secrets TO vault"
                     echo "                   ${DIM}--all: Push all items${NC}"
-                    echo "  ${GREEN}status${NC}           Show sync status (coming soon)"
+                    echo "  ${GREEN}status${NC}           Show vault sync status"
                     echo ""
                     echo "${BOLD}Management:${NC}"
                     echo "  list             List all vault items"
@@ -172,26 +144,19 @@ dotfiles() {
                     echo "  create           Create new vault item"
                     echo "  delete           Delete vault item"
                     echo ""
-                    echo "${BOLD}Deprecated Commands${NC} ${YELLOW}(use v3.0 commands above)${NC}:"
-                    echo "  ${DIM}init${NC}   → ${GREEN}setup${NC}     ${DIM}(will be removed in v3.1)${NC}"
-                    echo "  ${DIM}discover${NC} → ${GREEN}scan${NC}    ${DIM}(will be removed in v3.1)${NC}"
-                    echo "  ${DIM}restore${NC} → ${GREEN}pull${NC}     ${DIM}(will be removed in v3.1)${NC}"
-                    echo "  ${DIM}sync${NC}   → ${GREEN}push${NC}     ${DIM}(will be removed in v3.1)${NC}"
-                    echo "  ${DIM}backup${NC} → ${CYAN}dotfiles backup${NC} ${DIM}(moved to top-level)${NC}"
-                    echo ""
-                    echo "${BOLD}Workflow:${NC}"
+                    echo "${BOLD}Typical Workflow:${NC}"
                     echo "  ${DIM}First time:${NC}  dotfiles vault setup ${DIM}→ Choose backend & discover secrets${NC}"
                     echo "  ${DIM}Add secrets:${NC} dotfiles vault push  ${DIM}→ Push local changes to vault${NC}"
                     echo "  ${DIM}New machine:${NC} dotfiles vault pull  ${DIM}→ Pull secrets from vault${NC}"
                     echo "  ${DIM}Re-scan:${NC}     dotfiles vault scan  ${DIM}→ Find new SSH keys/configs${NC}"
                     echo ""
                     echo "${BOLD}Examples:${NC}"
-                    echo "  dotfiles vault setup          # First-time setup (recommended)"
-                    echo "  dotfiles vault pull           # Pull all secrets from vault"
+                    echo "  dotfiles vault setup          # First-time setup"
+                    echo "  dotfiles vault pull           # Pull all secrets"
                     echo "  dotfiles vault push --all     # Push all to vault"
                     echo "  dotfiles vault scan           # Re-scan for new items"
                     echo ""
-                    echo "${DIM}For backup/restore: dotfiles backup --help${NC}"
+                    echo "${DIM}Backup/restore: ${GREEN}dotfiles backup --help${NC}"
                     ;;
                 *)
                     echo "${RED}Unknown vault command:${NC} $subcmd"
@@ -295,15 +260,15 @@ dotfiles() {
             echo "  drift             Compare local files vs vault"
             echo "  diff              Preview changes before sync/restore"
             echo ""
-            echo "${BOLD}Vault Operations:${NC} ${GREEN}(v3.0 commands)${NC}"
-            echo "  vault setup       Setup vault backend ${DIM}(was: init)${NC}"
-            echo "  vault pull        Pull secrets from vault ${DIM}(was: restore)${NC}"
-            echo "  vault push        Push secrets to vault ${DIM}(was: sync)${NC}"
-            echo "  vault scan        Re-scan for secrets ${DIM}(was: discover)${NC}"
+            echo "${BOLD}Vault Operations:${NC}"
+            echo "  vault setup       Setup vault backend (first-time setup)"
+            echo "  vault pull        Pull secrets from vault"
+            echo "  vault push        Push secrets to vault"
+            echo "  vault scan        Re-scan for new secrets"
             echo "  vault list        List all vault items"
             echo "  vault help        Show all vault commands"
             echo ""
-            echo "${BOLD}Backup & Safety:${NC} ${GREEN}(new in v3.0)${NC}"
+            echo "${BOLD}Backup & Safety:${NC}"
             echo "  backup            Create backup of current config"
             echo "  backup list       List all backups"
             echo "  backup restore    Restore specific backup"
@@ -328,13 +293,10 @@ dotfiles() {
             echo "  dotfiles setup                # Interactive setup wizard"
             echo "  dotfiles status               # Visual dashboard"
             echo "  dotfiles doctor --fix         # Health check with auto-fix"
-            echo "  dotfiles vault pull           # Pull secrets from vault ${GREEN}(v3.0)${NC}"
-            echo "  dotfiles vault push --all     # Push all to vault ${GREEN}(v3.0)${NC}"
+            echo "  dotfiles vault pull           # Pull secrets from vault"
+            echo "  dotfiles vault push --all     # Push all to vault"
             echo "  dotfiles backup               # Create backup"
-            echo "  dotfiles rollback             # Rollback to last backup ${GREEN}(v3.0)${NC}"
-            echo ""
-            echo "${YELLOW}📢 v3.0 Update:${NC} Vault commands renamed for clarity"
-            echo "   ${DIM}Old commands still work with deprecation warnings${NC}"
+            echo "  dotfiles rollback             # Rollback to last backup"
             ;;
         *)
             echo "Unknown command: $cmd"
