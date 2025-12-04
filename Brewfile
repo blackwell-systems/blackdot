@@ -1,5 +1,18 @@
 # ============================================================
-# Shared Homebrew / Linuxbrew packages (macOS + Lima)
+# Brewfile - Full install (everything)
+# ============================================================
+# Use this for: Full-featured workstations, complete toolkit
+# Install: brew bundle (uses this file by default)
+#
+# OTHER TIERS:
+#   Brewfile.minimal  - Essentials only (~15 packages)
+#   Brewfile.enhanced - Modern tools without containers (~40 packages)
+#   Brewfile          - Everything including Docker/Node (~80 packages)
+#
+# Choose a tier:
+#   brew bundle --file=Brewfile.minimal
+#   brew bundle --file=Brewfile.enhanced
+#   brew bundle  # Uses this file (full)
 # ============================================================
 
 # Core CLI tools

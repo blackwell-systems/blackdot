@@ -60,6 +60,9 @@ show_bootstrap_help() {
     echo "Environment variables:"
     echo "  SKIP_WORKSPACE_SYMLINK=true   Skip /workspace symlink creation"
     echo "  SKIP_CLAUDE_SETUP=true        Skip Claude Code configuration"
+    echo "  BREWFILE_TIER=minimal         Use Brewfile.minimal (essentials only)"
+    echo "  BREWFILE_TIER=enhanced        Use Brewfile.enhanced (modern tools, no containers)"
+    echo "  BREWFILE_TIER=full            Use Brewfile (everything) [default]"
 }
 
 # ============================================================
@@ -183,11 +186,30 @@ render_templates() {
 # Brew bundle (shared between macOS and Linux)
 # ============================================================
 run_brew_bundle() {
-    if [[ -f "$DOTFILES_DIR/Brewfile" ]]; then
+    # Determine which Brewfile to use based on BREWFILE_TIER
+    local brewfile="$DOTFILES_DIR/Brewfile"
+    local tier="${BREWFILE_TIER:-full}"
+
+    case "$tier" in
+        minimal)
+            brewfile="$DOTFILES_DIR/Brewfile.minimal"
+            echo "Using minimal tier (essentials only)..."
+            ;;
+        enhanced)
+            brewfile="$DOTFILES_DIR/Brewfile.enhanced"
+            echo "Using enhanced tier (modern tools, no containers)..."
+            ;;
+        full|*)
+            brewfile="$DOTFILES_DIR/Brewfile"
+            echo "Using full tier (everything)..."
+            ;;
+    esac
+
+    if [[ -f "$brewfile" ]]; then
         echo "Running brew bundle ($PLATFORM_NAME)..."
-        brew bundle --file="$DOTFILES_DIR/Brewfile"
+        brew bundle --file="$brewfile"
     else
-        echo "No Brewfile found at $DOTFILES_DIR/Brewfile, skipping brew bundle."
+        echo "No Brewfile found at $brewfile, skipping brew bundle."
     fi
 }
 
