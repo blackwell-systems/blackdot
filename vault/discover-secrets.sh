@@ -537,11 +537,13 @@ Standard locations scanned:
   • ~/.npmrc, ~/.pypirc, ~/.docker/config.json (other secrets)
 
 Merge behavior (when config exists):
-  ✓ Preserves manual additions (items not auto-discovered)
-  ✓ Preserves manual customizations (e.g., required: false)
-  ✓ Updates paths for discovered items
-  ✓ Creates automatic backup before merge
-  ✗ Use --force to skip merge and overwrite completely
+  Interactive prompt offers three choices:
+    [m] Merge - Preserves manual additions & customizations (recommended, default)
+    [r] Replace - Use only discovered items (discards manual changes)
+    [c] Cancel - Exit without making changes
+
+  Use --force to skip prompt and replace directly
+  Use --dry-run to preview without prompt
 
 Custom paths:
   Use --ssh-path and --config-path to scan non-standard locations.
@@ -579,23 +581,54 @@ EOF
 
     if [[ -f "$VAULT_CONFIG_FILE" ]]; then
         config_existed=true
-        info "Existing config found: $VAULT_CONFIG_FILE"
+        warn "Existing config found: $VAULT_CONFIG_FILE"
+        echo ""
 
         if $force; then
             warn "Force mode: overwriting without merge"
             final_json="$discovered_json"
-        else
-            # Attempt to merge
+        elif $dry_run; then
+            # In dry-run, default to merge for preview
             local existing_json=$(read_existing_config)
             if [[ -n "$existing_json" ]]; then
-                info "Merging with existing config (preserves manual additions)..."
                 final_json=$(merge_configs "$discovered_json" "$existing_json")
-
-                if [[ "$final_json" == "$discovered_json" ]] && command -v jq >/dev/null 2>&1; then
-                    # Merge returned same as discovered (no existing items to preserve)
-                    info "No manual items to preserve"
-                fi
             fi
+        else
+            # Prompt user for action
+            echo "Choose action:"
+            echo "  ${GREEN}[m]${NC} Merge - Preserve manual additions & customizations (recommended)"
+            echo "  ${YELLOW}[r]${NC} Replace - Use only discovered items (discards manual changes)"
+            echo "  ${DIM}[c]${NC} Cancel - Exit without changes"
+            echo ""
+            echo -n "Choice [m/r/c]: "
+            read -r choice
+
+            case "${choice:-m}" in
+                m|M|merge|"")
+                    # Attempt to merge
+                    local existing_json=$(read_existing_config)
+                    if [[ -n "$existing_json" ]]; then
+                        info "Merging with existing config (preserves manual additions)..."
+                        final_json=$(merge_configs "$discovered_json" "$existing_json")
+
+                        if [[ "$final_json" == "$discovered_json" ]] && command -v jq >/dev/null 2>&1; then
+                            info "No manual items to preserve"
+                        fi
+                    fi
+                    ;;
+                r|R|replace)
+                    warn "Replacing config with discovered items only"
+                    final_json="$discovered_json"
+                    ;;
+                c|C|cancel)
+                    info "Discovery cancelled"
+                    exit 0
+                    ;;
+                *)
+                    fail "Invalid choice: $choice"
+                    exit 1
+                    ;;
+            esac
         fi
     fi
 
