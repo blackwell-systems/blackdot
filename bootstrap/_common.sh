@@ -205,11 +205,102 @@ run_brew_bundle() {
             ;;
     esac
 
-    if [[ -f "$brewfile" ]]; then
-        echo "Running brew bundle ($PLATFORM_NAME)..."
-        brew bundle --file="$brewfile"
-    else
+    if [[ ! -f "$brewfile" ]]; then
         echo "No Brewfile found at $brewfile, skipping brew bundle."
+        return 0
+    fi
+
+    echo "Running brew bundle ($PLATFORM_NAME)..."
+
+    # Run brew bundle, but don't fail the entire bootstrap if there are issues
+    if ! brew bundle --file="$brewfile"; then
+        warn "Brew bundle completed with warnings"
+
+        # Auto-fix common link conflicts (e.g., npm-installed packages conflicting with brew)
+        info "Checking for link conflicts..."
+
+        # Try to fix unlinked packages from the Brewfile
+        # Parse the Brewfile and try to link each formula
+        local failed_links=()
+        while IFS= read -r line; do
+            # Extract formula names from 'brew "formula-name"' lines
+            if [[ "$line" =~ ^brew[[:space:]]+\"([^\"]+)\" ]]; then
+                local formula="${BASH_REMATCH[1]}"
+                # Check if it's installed but not linked
+                if brew list --formula "$formula" &>/dev/null; then
+                    if ! brew --prefix "$formula" &>/dev/null; then
+                        info "Attempting to link $formula..."
+                        if brew link --overwrite "$formula" 2>/dev/null; then
+                            pass "Linked $formula"
+                        else
+                            warn "Could not link $formula (non-critical)"
+                            failed_links+=("$formula")
+                        fi
+                    fi
+                fi
+            fi
+        done < "$brewfile"
+
+        if [[ ${#failed_links[@]} -gt 0 ]]; then
+            warn "Some packages could not be linked: ${failed_links[*]}"
+            info "You can manually fix with: brew link --overwrite <package>"
+        fi
+
+        pass "Package installation completed"
+        info "Run 'brew doctor' if you encounter issues"
+    else
+        pass "All packages installed successfully"
+    fi
+}
+
+# ============================================================
+# Homebrew installation with retry logic
+# ============================================================
+install_homebrew() {
+    local max_retries=3
+    local retry_delay=2
+    local attempt=1
+
+    info "Installing Homebrew..."
+
+    while [[ $attempt -le $max_retries ]]; do
+        if [[ $attempt -gt 1 ]]; then
+            warn "Retry attempt $attempt of $max_retries (waiting ${retry_delay}s)..."
+            sleep "$retry_delay"
+            retry_delay=$((retry_delay * 2))
+        fi
+
+        # Try to install Homebrew
+        if /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" 2>&1; then
+            pass "Homebrew installed successfully"
+            return 0
+        fi
+
+        attempt=$((attempt + 1))
+    done
+
+    # Failed after all retries
+    fail "Failed to install Homebrew after $max_retries attempts"
+    warn "This could be due to:"
+    warn "  - Network connectivity issues"
+    warn "  - GitHub rate limiting"
+    warn "  - System requirements not met"
+    echo ""
+    warn "You can:"
+    warn "  1. Check your internet connection and try again"
+    warn "  2. Install Homebrew manually: https://brew.sh"
+    warn "  3. Continue without Homebrew (not recommended)"
+    echo ""
+
+    # Ask if they want to continue without Homebrew
+    echo -n "Continue without Homebrew? [y/N]: "
+    read -r response
+    if [[ "$response" =~ ^[Yy]$ ]]; then
+        warn "Continuing without Homebrew (package installation will be skipped)"
+        return 0
+    else
+        fail "Bootstrap aborted. Please install Homebrew and try again."
+        exit 1
     fi
 }
 
