@@ -594,34 +594,31 @@ EOF
                 final_json=$(merge_configs "$discovered_json" "$existing_json")
             fi
         else
-            # Prompt user for action
-            echo "Choose action:"
-            echo "  ${GREEN}[m]${NC} Merge - Preserve manual additions & customizations (recommended)"
-            echo "  ${YELLOW}[r]${NC} Replace - Use only discovered items (discards manual changes)"
-            echo "  ${DIM}[c]${NC} Cancel - Exit without changes"
-            echo ""
-            echo -n "Choice [m/r/c]: "
-            read -r choice
+            # Prompt user for action (loop to allow preview)
+            local user_choice=""
+            while [[ -z "$user_choice" ]]; do
+                echo "Choose action:"
+                echo "  ${GREEN}[m]${NC} Merge - Preserve manual additions & customizations (recommended)"
+                echo "  ${YELLOW}[r]${NC} Replace - Use only discovered items (discards manual changes)"
+                echo "  ${BLUE}[p]${NC} Preview - Show what merge would look like (no changes)"
+                echo "  ${DIM}[c]${NC} Cancel - Exit without changes"
+                echo ""
+                echo -n "Choice [m/r/p/c]: "
+                read -r choice
 
-            case "${choice:-m}" in
-                m|M|merge|"")
-                    # Attempt to merge
-                    local existing_json=$(read_existing_config)
-                    if [[ -n "$existing_json" ]]; then
-                        info "Merging with existing config (preserves manual additions)..."
-                        final_json=$(merge_configs "$discovered_json" "$existing_json")
+                case "${choice:-m}" in
+                    p|P|preview)
+                        # Show merge preview without applying
+                        local existing_json=$(read_existing_config)
+                        if [[ -n "$existing_json" ]]; then
+                            local preview_json=$(merge_configs "$discovered_json" "$existing_json")
 
-                        if [[ "$final_json" == "$discovered_json" ]] && command -v jq >/dev/null 2>&1; then
-                            info "No manual items to preserve"
-                        else
-                            # Show merge preview
                             echo ""
                             echo -e "${CYAN}=== Merge Preview ===${NC}"
 
                             if command -v jq >/dev/null 2>&1; then
-                                # Count changes
                                 local old_items=$(echo "$existing_json" | jq '.vault_items | length')
-                                local new_items=$(echo "$final_json" | jq '.vault_items | length')
+                                local new_items=$(echo "$preview_json" | jq '.vault_items | length')
                                 local discovered_count=$(echo "$discovered_json" | jq '.vault_items | length')
 
                                 echo ""
@@ -631,7 +628,6 @@ EOF
                                 echo "  • Merged total: $new_items"
                                 echo ""
 
-                                # Show what's preserved (in old but not discovered)
                                 local preserved=$(echo "$existing_json" "$discovered_json" | jq -s '
                                     .[0].vault_items // {} | keys as $old |
                                     .[1].vault_items // {} | keys as $new |
@@ -645,7 +641,6 @@ EOF
                                     echo ""
                                 fi
 
-                                # Show what's new (in discovered but not in old)
                                 local added=$(echo "$existing_json" "$discovered_json" | jq -s '
                                     .[0].vault_items // {} | keys as $old |
                                     .[1].vault_items // {} | keys as $new |
@@ -658,31 +653,45 @@ EOF
                                     echo "$added" | jq -r '.[] | "  • " + .'
                                     echo ""
                                 fi
+                            else
+                                echo "Preview requires jq. Install with: brew install jq"
                             fi
 
                             echo -e "${CYAN}=====================${NC}"
                             echo ""
-                            echo -n "Apply this merge? [y/N]: "
-                            read -r confirm
-
-                            if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-                                info "Merge cancelled"
-                                exit 0
-                            fi
                         fi
+                        # Loop back to menu
+                        ;;
+                    m|M|merge|"")
+                        user_choice="merge"
+                        ;;
+                    r|R|replace)
+                        user_choice="replace"
+                        ;;
+                    c|C|cancel)
+                        info "Discovery cancelled"
+                        exit 0
+                        ;;
+                    *)
+                        fail "Invalid choice: $choice"
+                        echo ""
+                        ;;
+                esac
+            done
+
+            # Now apply the user's choice
+            case "$user_choice" in
+                merge)
+                    # Apply merge
+                    local existing_json=$(read_existing_config)
+                    if [[ -n "$existing_json" ]]; then
+                        info "Applying merge..."
+                        final_json=$(merge_configs "$discovered_json" "$existing_json")
                     fi
                     ;;
-                r|R|replace)
+                replace)
                     warn "Replacing config with discovered items only"
                     final_json="$discovered_json"
-                    ;;
-                c|C|cancel)
-                    info "Discovery cancelled"
-                    exit 0
-                    ;;
-                *)
-                    fail "Invalid choice: $choice"
-                    exit 1
                     ;;
             esac
         fi
