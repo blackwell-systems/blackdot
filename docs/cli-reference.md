@@ -1001,9 +1001,11 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 |----------|--------|-------------|
 | `SKIP_WORKSPACE_SYMLINK` | `true` | Skip `/workspace` symlink creation |
 | `SKIP_CLAUDE_SETUP` | `true` | Skip Claude Code configuration |
-| `BREWFILE_TIER` | `minimal` | Install only essentials (~15 packages: git, zsh, jq, shell plugins) |
-| `BREWFILE_TIER` | `enhanced` | Modern CLI tools without containers (~40 packages: fzf, ripgrep, bat, eza) |
-| `BREWFILE_TIER` | `full` | Everything including Docker/Node (~80 packages) [default] |
+| `BREWFILE_TIER` | `minimal` | Install only essentials (18 packages, ~2 min) |
+| `BREWFILE_TIER` | `enhanced` | Modern CLI tools without containers (43 packages, ~5 min) **← RECOMMENDED** |
+| `BREWFILE_TIER` | `full` | Everything including Docker/Node (61 packages, ~10 min) [default] |
+
+**Note:** The `dotfiles setup` wizard now presents tier selection interactively. These environment variables are for advanced/automated setups.
 
 **Examples:**
 
