@@ -427,18 +427,134 @@ CI runs shellcheck, zsh validation, all tests on every push. Code coverage via k
 
 ```bash
 dotfiles template init    # Setup machine variables
-dotfiles template render  # Generate configs
-dotfiles template link    # Symlink to destinations
+dotfiles template render  # Generate configs from templates
+dotfiles template link    # Symlink generated configs to destinations
 ```
 
-One `.gitconfig.tmpl` becomes many `.gitconfig` files with different emails, signing keys, settings per machine. Supports variables, conditionals, loops. Auto-detected values (hostname, OS, user) with custom overrides.
+**The Problem:** You have work laptop, personal desktop, home server. Each needs different:
+- Git email (`work@company.com` vs `personal@gmail.com`)
+- SSH config (different keys per machine)
+- Environment variables (dev vs prod API keys)
+- Shell aliases (work-specific commands)
 
-**Template syntax:**
-- `{{ variable }}` - Variable substitution
-- `{{#if os == "macos"}}...{{/if}}` - Conditionals
-- `{{#each ssh_hosts}}...{{/each}}` - Loops
+**The Solution:** One template file → Multiple machine-specific configs
 
-[Template Guide](docs/templates.md)
+### Real-World Examples
+
+**Example 1: Git Config Per Machine**
+
+Template file: `templates/configs/gitconfig.tmpl`
+```ini
+[user]
+    name = {{ GIT_USER_NAME }}
+    email = {{ GIT_EMAIL }}
+{{#if GIT_SIGNING_KEY}}
+    signingkey = {{ GIT_SIGNING_KEY }}
+{{/if}}
+
+[core]
+    editor = {{ EDITOR | default="vim" }}
+
+{{#if IS_WORK_MACHINE}}
+[includeIf "gitdir:~/work/"]
+    path = ~/.gitconfig-work
+{{/if}}
+```
+
+Variables file: `templates/_variables_work-laptop.sh`
+```bash
+export GIT_USER_NAME="John Doe"
+export GIT_EMAIL="john.doe@company.com"
+export GIT_SIGNING_KEY="ABC123DEF456"
+export IS_WORK_MACHINE="true"
+export EDITOR="code"
+```
+
+Result: `generated/gitconfig` (different per machine)
+
+**Example 2: SSH Config With Per-Machine Keys**
+
+Template: `templates/configs/ssh-config.tmpl`
+```
+{{#each SSH_HOSTS}}
+Host {{ this.name }}
+    HostName {{ this.hostname }}
+    User {{ this.user }}
+    IdentityFile {{ this.key }}
+{{/each}}
+```
+
+Variables: `templates/_variables_personal.sh`
+```bash
+export SSH_HOSTS='[
+    {"name": "github", "hostname": "github.com", "user": "git", "key": "~/.ssh/id_ed25519_personal"},
+    {"name": "homelab", "hostname": "192.168.1.100", "user": "admin", "key": "~/.ssh/id_rsa_homelab"}
+]'
+```
+
+**Example 3: Machine-Specific Environment Variables**
+
+Template: `templates/configs/env.secrets.tmpl`
+```bash
+# API Keys (different per environment)
+export OPENAI_API_KEY="{{ OPENAI_API_KEY }}"
+export ANTHROPIC_API_KEY="{{ ANTHROPIC_API_KEY }}"
+
+{{#if IS_WORK_MACHINE}}
+# Work-specific secrets
+export COMPANY_VPN_TOKEN="{{ COMPANY_VPN_TOKEN }}"
+export AWS_PROFILE="work"
+{{else}}
+# Personal secrets
+export AWS_PROFILE="personal"
+{{/if}}
+```
+
+### Quick Start
+
+```bash
+# 1. Initialize template system (creates _variables.local.sh)
+dotfiles template init
+
+# 2. Edit your variables
+vim ~/.config/dotfiles/templates/_variables.local.sh
+
+# 3. Generate configs from templates
+dotfiles template render
+
+# 4. Link generated configs to their destinations
+dotfiles template link
+
+# 5. Check for stale templates (template newer than generated file)
+dotfiles doctor  # Shows: "3 templates need re-rendering"
+```
+
+### Auto-Detected Variables
+
+Available in all templates without manual definition:
+- `{{ HOSTNAME }}` - Machine hostname
+- `{{ OS }}` - `macos`, `linux`, or `windows`
+- `{{ USER }}` - Current username
+- `{{ HOME }}` - Home directory path
+- `{{ WORKSPACE }}` - Workspace directory
+
+### Use Cases
+
+**Work vs Personal:**
+- Different git emails, SSH keys, AWS profiles
+- Work machine has VPN config, personal doesn't
+- Different editor settings
+
+**Multi-Cloud:**
+- Dev machine: staging AWS keys
+- Prod machine: production AWS keys (via separate template variables)
+
+**Team Onboarding:**
+- New developer clones dotfiles
+- Runs `dotfiles template init` with their name/email
+- All configs generate with their info
+
+[Complete Template Guide →](docs/templates.md)
 
 </details>
 
