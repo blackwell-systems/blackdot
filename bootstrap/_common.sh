@@ -254,6 +254,57 @@ run_brew_bundle() {
 }
 
 # ============================================================
+# Homebrew installation with retry logic
+# ============================================================
+install_homebrew() {
+    local max_retries=3
+    local retry_delay=2
+    local attempt=1
+
+    info "Installing Homebrew..."
+
+    while [[ $attempt -le $max_retries ]]; do
+        if [[ $attempt -gt 1 ]]; then
+            warn "Retry attempt $attempt of $max_retries (waiting ${retry_delay}s)..."
+            sleep "$retry_delay"
+            retry_delay=$((retry_delay * 2))
+        fi
+
+        # Try to install Homebrew
+        if /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" 2>&1; then
+            pass "Homebrew installed successfully"
+            return 0
+        fi
+
+        attempt=$((attempt + 1))
+    done
+
+    # Failed after all retries
+    fail "Failed to install Homebrew after $max_retries attempts"
+    warn "This could be due to:"
+    warn "  - Network connectivity issues"
+    warn "  - GitHub rate limiting"
+    warn "  - System requirements not met"
+    echo ""
+    warn "You can:"
+    warn "  1. Check your internet connection and try again"
+    warn "  2. Install Homebrew manually: https://brew.sh"
+    warn "  3. Continue without Homebrew (not recommended)"
+    echo ""
+
+    # Ask if they want to continue without Homebrew
+    echo -n "Continue without Homebrew? [y/N]: "
+    read -r response
+    if [[ "$response" =~ ^[Yy]$ ]]; then
+        warn "Continuing without Homebrew (package installation will be skipped)"
+        return 0
+    else
+        fail "Bootstrap aborted. Please install Homebrew and try again."
+        exit 1
+    fi
+}
+
+# ============================================================
 # Homebrew shellenv setup
 # ============================================================
 add_brew_to_zprofile() {
