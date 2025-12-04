@@ -95,18 +95,21 @@ show_status() {
         local detail="${details[$i]}"
 
         if state_completed "$phase"; then
-            echo -e "  ${GREEN}[✓]${NC} $label ${DIM}($detail)${NC}"
+            # Special handling for vault to show if skipped
+            if [[ "$phase" == "vault" ]]; then
+                local backend=$(config_get "vault" "backend" "")
+                if [[ "$backend" == "none" ]]; then
+                    echo -e "  ${YELLOW}[⊘]${NC} $label ${DIM}(Skipped - run 'dotfiles vault init')${NC}"
+                else
+                    echo -e "  ${GREEN}[✓]${NC} $label ${DIM}($detail: ${backend:-unknown})${NC}"
+                fi
+            else
+                echo -e "  ${GREEN}[✓]${NC} $label ${DIM}($detail)${NC}"
+            fi
         else
             echo -e "  ${YELLOW}[ ]${NC} $label ${DIM}($detail)${NC}"
         fi
     done
-
-    # Show vault backend if configured
-    local backend=$(config_get "vault" "backend" "")
-    if [[ -n "$backend" ]]; then
-        echo ""
-        echo -e "  ${DIM}Vault backend: $backend${NC}"
-    fi
 
     echo ""
 }
@@ -194,12 +197,27 @@ phase_vault() {
 
     if state_completed "vault"; then
         local backend=$(config_get "vault" "backend" "")
-        if [[ -n "$backend" ]]; then
+        if [[ -n "$backend" ]] && [[ "$backend" != "none" ]]; then
             pass "Vault already configured ($backend)"
+        elif [[ "$backend" == "none" ]]; then
+            warn "Vault was skipped previously"
         else
             pass "Vault already configured"
         fi
-        return 0
+
+        echo ""
+        echo -n "Reconfigure vault? [y/N]: "
+        read reconfigure
+        if [[ "${reconfigure}" =~ ^[Yy]$ ]]; then
+            info "Reconfiguring vault..."
+            state_reset "vault"
+            # Fall through to configuration below
+        else
+            if [[ "$backend" == "none" ]]; then
+                info "Run 'dotfiles vault init' anytime to configure vault"
+            fi
+            return 0
+        fi
     fi
 
     # Detect available vault backends
@@ -228,6 +246,8 @@ phase_vault() {
             warn "Skipped vault setup"
             config_set "vault" "backend" "none"
             state_complete "vault"
+            echo ""
+            info "Run 'dotfiles vault init' anytime to configure vault"
             return 0
         else
             echo "Please install a vault CLI and run 'dotfiles setup' again."
@@ -251,6 +271,8 @@ phase_vault() {
         warn "Skipped vault setup"
         config_set "vault" "backend" "none"
         state_complete "vault"
+        echo ""
+        info "Run 'dotfiles vault init' anytime to configure vault"
         return 0
     fi
 
@@ -695,12 +717,87 @@ main() {
     show_status
 
     if ! state_needs_setup; then
-        echo -e "${GREEN}${BOLD}Setup complete!${NC}"
         echo ""
-        echo "Quick commands:"
-        echo "  dotfiles status   - Visual dashboard"
-        echo "  dotfiles doctor   - Health check"
-        echo "  dotfiles help     - All commands"
+        echo -e "${GREEN}${BOLD}╔════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${GREEN}${BOLD}║              Setup Complete!                               ║${NC}"
+        echo -e "${GREEN}${BOLD}╚════════════════════════════════════════════════════════════╝${NC}"
+        echo ""
+
+        # Show dynamic next steps based on configuration
+        local vault_backend=$(config_get "vault" "backend" "")
+        local template_configured=false
+        if [[ -f "$DOTFILES_DIR/templates/_variables.local.sh" ]]; then
+            template_configured=true
+        fi
+
+        echo "Next steps based on your configuration:"
+        echo ""
+
+        # Vault-specific next steps
+        if [[ -n "$vault_backend" ]] && [[ "$vault_backend" != "none" ]]; then
+            echo -e "  ${CYAN}✓ Vault configured${NC} ($vault_backend)"
+            echo -e "    ${DIM}→${NC} ${BOLD}dotfiles vault restore${NC}    ${DIM}# Restore your secrets${NC}"
+            echo ""
+        fi
+
+        # Template-specific next steps
+        if $template_configured; then
+            echo -e "  ${CYAN}✓ Templates configured${NC}"
+            echo -e "    ${DIM}→${NC} ${BOLD}dotfiles template render${NC}   ${DIM}# Generate configs${NC}"
+            echo ""
+        fi
+
+        # Always show health check
+        echo -e "  ${BLUE}ℹ Health check:${NC}"
+        echo -e "    ${DIM}→${NC} ${BOLD}dotfiles doctor${NC}             ${DIM}# Verify everything works${NC}"
+        echo ""
+
+        # Show helpful commands
+        echo -e "  ${BLUE}ℹ Explore commands:${NC}"
+        echo -e "    ${DIM}→${NC} ${BOLD}dotfiles status${NC}             ${DIM}# Visual dashboard${NC}"
+        echo -e "    ${DIM}→${NC} ${BOLD}dotfiles help${NC}               ${DIM}# See all commands${NC}"
+        echo ""
+
+        # ZSH features and aliases (show only what's available)
+        local has_features=false
+        local feature_lines=()
+
+        # Check for modern CLI tools
+        if command -v eza &>/dev/null; then
+            feature_lines+=("    ${DIM}→${NC} ${BOLD}ll, la, lt${NC}                ${DIM}# Enhanced ls (eza with icons)${NC}")
+            has_features=true
+        fi
+
+        # Git shortcuts are always available (defined in zsh config)
+        if command -v git &>/dev/null; then
+            feature_lines+=("    ${DIM}→${NC} ${BOLD}gst, gd, gco${NC}              ${DIM}# Git shortcuts${NC}")
+            has_features=true
+        fi
+
+        if command -v fzf &>/dev/null; then
+            feature_lines+=("    ${DIM}→${NC} ${BOLD}Ctrl+R${NC}                    ${DIM}# Fuzzy history search (fzf)${NC}")
+            has_features=true
+        fi
+
+        if command -v zoxide &>/dev/null; then
+            feature_lines+=("    ${DIM}→${NC} ${BOLD}z [directory]${NC}             ${DIM}# Smart cd (learns your habits)${NC}")
+            has_features=true
+        fi
+
+        if command -v yazi &>/dev/null; then
+            feature_lines+=("    ${DIM}→${NC} ${BOLD}y${NC}                         ${DIM}# Terminal file manager (yazi)${NC}")
+            has_features=true
+        fi
+
+        # Only show section if we have features to display
+        if $has_features; then
+            echo -e "  ${BLUE}ℹ Your new shell features:${NC}"
+            printf '%s\n' "${feature_lines[@]}"
+            echo ""
+        fi
+
+        # Documentation link
+        echo -e "  ${DIM}📚 Docs: ${BLUE}https://github.com/blackwell-systems/dotfiles/docs${NC}"
     else
         echo -e "${YELLOW}Some steps were skipped or failed.${NC}"
         echo "Run 'dotfiles setup' again to continue."

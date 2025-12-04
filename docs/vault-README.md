@@ -41,6 +41,7 @@ All `dotfiles vault` commands work identically regardless of backend.
 
 | Script | Purpose | Command |
 |--------|---------|---------|
+| `init-vault.sh` | Configure vault backend | `dotfiles vault init` |
 | `restore.sh` | Orchestrates all restores | `dotfiles vault restore` |
 | `restore-ssh.sh` | Restores SSH keys + config | Called by bootstrap |
 | `restore-aws.sh` | Restores AWS config/creds | Called by bootstrap |
@@ -59,6 +60,7 @@ All `dotfiles vault` commands work identically regardless of backend.
 All vault operations are accessed via the unified `dotfiles vault` command:
 
 ```bash
+dotfiles vault init             # Configure or reconfigure vault backend
 dotfiles vault restore          # Restore all secrets (checks for local drift first)
 dotfiles vault restore --force  # Skip drift check, overwrite local changes
 dotfiles vault sync             # Sync local changes to vault
