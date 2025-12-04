@@ -149,6 +149,9 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 │   ├── dotfiles-doctor                 # Health check validation
 │   ├── dotfiles-drift                  # Detect config drift from repo
 │   ├── dotfiles-setup                  # Interactive setup wizard
+│   ├── dotfiles-migrate                # v3.0 migration orchestrator (INI→JSON, v2→v3)
+│   ├── dotfiles-migrate-config         # Config migration (INI→JSON)
+│   ├── dotfiles-migrate-vault-schema   # Vault schema migration (v2→v3)
 │   ├── dotfiles-lint                   # Lint shell scripts for errors
 │   ├── dotfiles-metrics                # Collect system metrics
 │   ├── dotfiles-packages               # List/validate installed packages
@@ -171,6 +174,7 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 │
 ├── lib/                                # Shared libraries
 │   ├── _logging.sh                     # Logging functions (info, pass, warn, fail)
+│   ├── _config.sh                      # JSON config abstraction (v3.0)
 │   ├── _state.sh                       # Setup wizard state management
 │   ├── _vault.sh                       # Multi-backend vault abstraction
 │   └── _templates.sh                   # Template engine

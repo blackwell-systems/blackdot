@@ -66,6 +66,7 @@ The unified command for managing your dotfiles. All subcommands are accessed via
 | `vault` | - | Secret vault operations |
 | `template` | `tmpl` | Machine-specific config templates |
 | `lint` | - | Validate shell config syntax |
+| `migrate` | - | Migrate config to v3.0 (INI→JSON, vault v2→v3) |
 | `packages` | `pkg` | Check/install Brewfile packages |
 | `metrics` | - | Visualize health check metrics over time |
 | `setup` | - | Interactive setup wizard |
@@ -236,6 +237,67 @@ dotfiles backup restore backup-20240115-143022  # Restore specific
 - Backups stored in `~/.dotfiles-backups/`
 - Maximum 10 backups retained (oldest auto-deleted)
 - Each backup includes a manifest with metadata
+
+---
+
+### `dotfiles migrate`
+
+**v3.0 Migration Tool** - Migrate configuration from v2.x to v3.0 format.
+
+```bash
+dotfiles migrate [OPTIONS]
+```
+
+**What it migrates:**
+
+1. **Config Format (INI → JSON)**
+   - `~/.config/dotfiles/config.ini` → `config.json`
+   - Preserves vault backend setting
+   - Converts setup state to `setup.completed[]` array
+   - Auto-detects `paths.dotfiles_dir`
+
+2. **Vault Schema (v2 → v3)**
+   - `~/.config/dotfiles/vault-items.json` schema upgrade
+   - Consolidates `ssh_keys`, `vault_items`, `syncable_items` into single `secrets[]` array
+   - Eliminates duplication
+   - Adds per-item `sync`, `backup`, `required` control
+
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `-y`, `--yes` | Skip confirmation prompt |
+| `-h`, `--help` | Show help |
+
+**Examples:**
+
+```bash
+dotfiles migrate              # Interactive migration with confirmation
+dotfiles migrate --yes        # Skip confirmation, migrate immediately
+```
+
+**Safety:**
+
+- Creates timestamped backups before migration:
+  ```
+  ~/.config/dotfiles/backups/pre-v3-migration-YYYYMMDD_HHMMSS/
+  ├── config.ini
+  ├── config.json (if exists)
+  └── vault-items.json
+  ```
+- Idempotent - safe to run multiple times
+- Automatically detects if migration is needed
+- Skips if already v3.0 format
+
+**When to use:**
+
+- Upgrading from v2.x to v3.0
+- After pulling latest v3.0 changes
+- If you see deprecation warnings about INI format
+
+**See also:**
+- [State Management](state-management.md#migrating-from-v2x) - Config format details
+- [Vault System](vault-README.md#v30-migration) - Vault schema changes
 
 ---
 
