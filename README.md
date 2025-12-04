@@ -10,7 +10,7 @@
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **The first dotfiles designed for AI-assisted development.** Opinionated, batteries-included configuration for developers who use Claude Code across machines. Multi-vault secrets, portable sessions, machine-specific templates, and self-healing config.
+> **The first dotfiles designed for AI-assisted development.** Modular, batteries-included configuration for developers who use Claude Code across machines. Pick what you need: multi-vault secrets, portable sessions, machine-specific templates, and self-healing config. Everything is optional except shell config.
 
 [Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
 
@@ -18,11 +18,21 @@
 
 ## One-Line Install
 
+Choose your install level:
+
 ```bash
+# Full: Everything (recommended for Claude Code users)
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
+
+# Minimal: Just shell config (skip Homebrew, vault, Claude, /workspace)
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
+
+# Custom: Pick components in the interactive wizard
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
+# (wizard lets you skip vault, Claude, packages, etc.)
 ```
 
-### What This Does
+### What "Full Install" Does
 
 **For users with existing credentials (SSH keys, AWS config, Git config):**
 
@@ -103,7 +113,8 @@ Quick commands:
 ```
 
 **What you get:**
-- **Homebrew + 80+ packages** (eza, fzf, ripgrep, bat, jq, aws-cli, etc.)
+- **Fully modular** - Everything optional except shell config. Use `--minimal` for just ZSH, or pick exactly what you need
+- **Homebrew + 80+ packages** (eza, fzf, ripgrep, bat, jq, aws-cli, etc.) - or skip with `--minimal`
 - **Smart credential onboarding** - Detects existing SSH/AWS/Git, offers to vault them
 - **Bidirectional vault sync** - Push local → vault, restore vault → local
 - **Portable Claude sessions** - `/workspace` paths work across all machines
@@ -120,6 +131,70 @@ docker run -it --rm ghcr.io/blackwell-systems/dotfiles:lite
 ```
 
 See [Docker Guide](docs/docker.md) for container options.
+
+---
+
+## Pick What You Want
+
+**Everything is optional except shell config.** Use only the parts you need.
+
+### Quick Install Options
+
+```bash
+# Full install (recommended for Claude Code users)
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
+
+# Minimal: Shell config only (no vault, no Claude integration, no packages)
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
+
+# Custom: Skip specific components with environment variables
+SKIP_WORKSPACE_SYMLINK=true ./bootstrap/bootstrap-mac.sh  # Shell + packages, no /workspace
+SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh     # Everything except Claude
+```
+
+### Component Matrix
+
+| Component | What It Does | How to Skip | Still Works Without It? |
+|-----------|--------------|-------------|-------------------------|
+| **Shell Config** | ZSH + plugins, prompt, aliases | **Cannot skip** (core) | N/A (required) |
+| **Homebrew + Packages** | 80+ CLI tools (fzf, ripgrep, bat, etc.) | `--minimal` flag | Yes - install tools manually |
+| **Vault System** | Multi-backend secrets (Bitwarden/1Password/pass) | Select "Skip" in wizard or `--minimal` | Yes - manage secrets manually |
+| **Portable Sessions** | `/workspace` symlink for Claude sync | `SKIP_WORKSPACE_SYMLINK=true` | Yes - use OS-specific paths |
+| **Claude Integration** | dotclaude + hooks + settings | `SKIP_CLAUDE_SETUP=true` or `--minimal` | Yes - works without Claude |
+| **Template Engine** | Machine-specific configs | Don't run `dotfiles template` | Yes - use static configs |
+
+### Modular By Design
+
+**Enable features later if you change your mind:**
+
+```bash
+# Started with --minimal? Add vault later:
+dotfiles setup                    # Run wizard, select vault backend
+
+# Want portable sessions now?
+sudo ln -sfn ~/workspace /workspace
+
+# Install missing packages:
+dotfiles packages --install       # Uses Brewfile
+
+# Setup templates:
+dotfiles template init            # Configure machine variables
+dotfiles template render          # Generate configs
+```
+
+**Use in offline/air-gapped environments:**
+
+```bash
+DOTFILES_OFFLINE=1 ./bootstrap/bootstrap-linux.sh    # Skips all vault operations
+DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore   # No drift check (for CI/automation)
+```
+
+**All setup wizard steps are optional.** The wizard detects your choices and adjusts:
+- No vault CLI? Offers to skip vault entirely
+- Vault configured but want to skip secrets? Just say no
+- Don't want Claude integration? Skip that step
+
+**Philosophy:** Start minimal, add what you need, when you need it.
 
 ---
 
