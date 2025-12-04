@@ -14,6 +14,43 @@ State management provides:
 - **Resume Support** - Continue where you left off if interrupted
 - **Preference Persistence** - Save choices like vault backend across sessions
 - **State Inference** - Auto-detect existing installations from filesystem
+- **Visual Progress Indicators** (v3.0+) - Unicode progress bars show current step and completion percentage
+
+---
+
+## Visual Progress Indicators (v3.0+)
+
+The setup wizard displays real-time visual feedback as you progress through setup:
+
+```
+╔═══════════════════════════════════════════════════════════════╗
+║ Step 3 of 6: Vault Configuration
+╠═══════════════════════════════════════════════════════════════╣
+║ ██████████░░░░░░░░░░ 50%
+╚═══════════════════════════════════════════════════════════════╝
+```
+
+**Progress bar features:**
+- **Step counter** - Shows "Step X of Y: [Phase Name]"
+- **Visual bar** - 20-character bar using █ (completed) and ░ (remaining)
+- **Percentage** - Exact completion percentage
+- **Overview** - All steps shown at the beginning of setup
+
+**Implementation details:**
+- Division by zero protection (guards against total=0)
+- Overflow protection (clamps current ≤ total)
+- Works in all terminal emulators with Unicode support
+- Progress bar updates before each major phase
+
+**Example flow:**
+```
+Step 1 of 6: Symlinks          ████░░░░░░░░░░░░░░░░  17%
+Step 2 of 6: Packages          ████████░░░░░░░░░░░░  33%
+Step 3 of 6: Vault Config      ████████████░░░░░░░░  50%
+Step 4 of 6: Secrets           ████████████████░░░░  67%
+Step 5 of 6: Claude Code       ████████████████████  83%
+Step 6 of 6: Templates         ████████████████████ 100%
+```
 
 ---
 

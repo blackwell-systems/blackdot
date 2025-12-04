@@ -680,6 +680,25 @@ The wizard handles:
 - **Vault**: Select and authenticate vault backend (Bitwarden, 1Password, pass)
 - **Secrets**: Restore SSH keys, AWS credentials, Git config
 - **Claude Code**: Optional dotclaude installation
+- **Templates**: Machine-specific configuration (optional)
+
+**Visual Progress Tracking (v3.0+):**
+
+The setup wizard displays a Unicode progress bar showing your current step:
+
+```
+╔═══════════════════════════════════════════════════════════════╗
+║ Step 3 of 6: Vault Configuration
+╠═══════════════════════════════════════════════════════════════╣
+║ ██████████░░░░░░░░░░ 50%
+╚═══════════════════════════════════════════════════════════════╝
+```
+
+The wizard shows:
+- **Overview of all steps** at the beginning
+- **Current step name and number** (e.g., "Step 3 of 6: Vault Configuration")
+- **Visual progress bar** using Unicode characters (█ for completed, ░ for remaining)
+- **Percentage complete** to track overall progress
 
 **Progress is saved** to `~/.config/dotfiles/`. If interrupted, run `dotfiles setup` again to resume. See [State Management](state-management.md) for details on state files and persistence.
 
@@ -1092,12 +1111,46 @@ dotfiles vault scan  # Or run discovery directly
 
 Auto-discovery scans standard locations (`~/.ssh/`, `~/.aws/`, `~/.gitconfig`, etc.) and generates `vault-items.json` automatically with smart naming.
 
+**Schema Validation (v3.0+):**
+
+Before syncing to your vault, validate your configuration to catch errors early:
+
+```bash
+dotfiles vault validate
+```
+
+The validator checks:
+- ✅ Valid JSON syntax
+- ✅ Required fields present (path, required, type)
+- ✅ Valid type values ("file" or "sshkey")
+- ✅ Item naming conventions (must start with capital letter)
+
+**Validation is automatic** before `dotfiles vault push` and `dotfiles vault pull` operations. If validation fails, the wizard offers to open your editor to fix errors interactively.
+
+Example output:
+
+```
+════════════════════════════════════════════════════════════
+  Vault Configuration Schema Validation
+════════════════════════════════════════════════════════════
+
+Validating: /home/user/.config/dotfiles/vault-items.json
+
+Configuration summary:
+  • 5 vault items configured
+  • 2 SSH keys configured
+  • 3 syncable items configured
+
+✓ vault-items.json schema is valid
+```
+
 **Manual Setup:**
 
 ```bash
 mkdir -p ~/.config/dotfiles
 cp vault/vault-items.example.json ~/.config/dotfiles/vault-items.json
 # Edit to match your setup
+dotfiles vault validate  # Verify your changes
 ```
 
 See [Vault README](vault-README.md#configuration-file) for the full schema and customization options.

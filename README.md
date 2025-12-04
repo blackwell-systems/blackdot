@@ -153,6 +153,39 @@ See [Docker Guide](docs/docker.md) for container options.
 
 ---
 
+## Upgrading from v2.x to v3.0
+
+If you're upgrading from v2.x, the migration tool handles everything automatically:
+
+```bash
+cd ~/workspace/dotfiles  # or wherever your dotfiles are
+git pull
+dotfiles migrate
+```
+
+**What gets migrated:**
+- **Config format:** `config.ini` → `config.json`
+- **Vault schema:** v2 → v3 (consolidated structure with per-item controls)
+- **Command history:** Preserved across migration
+
+**Migration is safe:**
+- ✅ Automatic timestamped backups in `~/.config/dotfiles/backups/`
+- ✅ Idempotent (run multiple times safely)
+- ✅ Shows before/after comparison
+- ✅ Rollback with `dotfiles rollback` if needed
+
+**New commands available after migration:**
+```bash
+dotfiles vault validate  # Validate vault-items.json schema
+dotfiles migrate         # Migrate from v2.x to v3.0
+dotfiles vault status    # Enhanced with sync history + drift detection
+dotfiles doctor          # Enhanced with health score interpretation
+```
+
+[Detailed Migration Guide & Testing →](docs/vault-README.md#v30-migration)
+
+---
+
 ## Claude Code + dotclaude
 
 **These dotfiles integrate with [dotclaude](https://github.com/blackwell-systems/dotclaude)** - a profile manager for Claude Code that syncs your AI assistant configurations across machines.
