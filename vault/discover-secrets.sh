@@ -472,7 +472,7 @@ merge_configs() {
         .aws_expected_profiles = (
             (($existing.aws_expected_profiles // []) + ($discovered.aws_expected_profiles // [])) | unique
         )
-    ' <(echo "$discovered_json") <(echo "$existing_json") 2>/dev/null)
+    ' <(printf '%s' "$discovered_json") <(printf '%s' "$existing_json") 2>/dev/null)
 
     if [[ -z "$merged" ]]; then
         warn "Merge failed, using discovered items only"
@@ -632,7 +632,7 @@ EOF
                                     .[0].vault_items // {} | keys as $old |
                                     .[1].vault_items // {} | keys as $new |
                                     $old - $new
-                                ' <(echo "$existing_json") <(echo "$discovered_json"))
+                                ' <(printf '%s' "$existing_json") <(printf '%s' "$discovered_json"))
                                 local preserved_count=$(echo "$preserved" | jq 'length')
 
                                 if [[ "$preserved_count" -gt 0 ]]; then
@@ -645,7 +645,7 @@ EOF
                                     .[0].vault_items // {} | keys as $old |
                                     .[1].vault_items // {} | keys as $new |
                                     $new - $old
-                                ' <(echo "$existing_json") <(echo "$discovered_json"))
+                                ' <(printf '%s' "$existing_json") <(printf '%s' "$discovered_json"))
                                 local added_count=$(echo "$added" | jq 'length')
 
                                 if [[ "$added_count" -gt 0 ]]; then
