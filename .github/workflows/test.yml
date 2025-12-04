@@ -493,11 +493,20 @@ jobs:
         run: |
           echo "🔍 Validating all shell scripts can be parsed..."
 
-          # Test all .sh files can be parsed
+          # Install zsh for ZSH script validation
+          apt-get update -qq && apt-get install -y -qq zsh
+
+          # Test all .sh files can be parsed with appropriate shell
           for script in *.sh vault/*.sh; do
             if [[ -f "$script" ]]; then
               echo "Checking: $script"
-              bash -n "$script" || exit 1
+              # Check shebang to determine which shell to use
+              shebang=$(head -n1 "$script")
+              if [[ "$shebang" == *"zsh"* ]]; then
+                zsh -n "$script" || exit 1
+              else
+                bash -n "$script" || exit 1
+              fi
             fi
           done
 
