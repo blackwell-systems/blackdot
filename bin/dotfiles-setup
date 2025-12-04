@@ -758,14 +758,43 @@ main() {
         echo -e "    ${DIM}→${NC} ${BOLD}dotfiles help${NC}               ${DIM}# See all commands${NC}"
         echo ""
 
-        # ZSH features and aliases
-        echo -e "  ${BLUE}ℹ Your new shell features:${NC}"
-        echo -e "    ${DIM}→${NC} ${BOLD}ll, la, lt${NC}                ${DIM}# Enhanced ls (eza with icons)${NC}"
-        echo -e "    ${DIM}→${NC} ${BOLD}gst, gd, gco${NC}              ${DIM}# Git shortcuts${NC}"
-        echo -e "    ${DIM}→${NC} ${BOLD}Ctrl+R${NC}                    ${DIM}# Fuzzy history search (fzf)${NC}"
-        echo -e "    ${DIM}→${NC} ${BOLD}z [directory]${NC}             ${DIM}# Smart cd (learns your habits)${NC}"
-        echo -e "    ${DIM}→${NC} ${BOLD}y${NC}                         ${DIM}# Terminal file manager (yazi)${NC}"
-        echo ""
+        # ZSH features and aliases (show only what's available)
+        local has_features=false
+        local feature_lines=()
+
+        # Check for modern CLI tools
+        if command -v eza &>/dev/null; then
+            feature_lines+=("    ${DIM}→${NC} ${BOLD}ll, la, lt${NC}                ${DIM}# Enhanced ls (eza with icons)${NC}")
+            has_features=true
+        fi
+
+        # Git shortcuts are always available (defined in zsh config)
+        if command -v git &>/dev/null; then
+            feature_lines+=("    ${DIM}→${NC} ${BOLD}gst, gd, gco${NC}              ${DIM}# Git shortcuts${NC}")
+            has_features=true
+        fi
+
+        if command -v fzf &>/dev/null; then
+            feature_lines+=("    ${DIM}→${NC} ${BOLD}Ctrl+R${NC}                    ${DIM}# Fuzzy history search (fzf)${NC}")
+            has_features=true
+        fi
+
+        if command -v zoxide &>/dev/null; then
+            feature_lines+=("    ${DIM}→${NC} ${BOLD}z [directory]${NC}             ${DIM}# Smart cd (learns your habits)${NC}")
+            has_features=true
+        fi
+
+        if command -v yazi &>/dev/null; then
+            feature_lines+=("    ${DIM}→${NC} ${BOLD}y${NC}                         ${DIM}# Terminal file manager (yazi)${NC}")
+            has_features=true
+        fi
+
+        # Only show section if we have features to display
+        if $has_features; then
+            echo -e "  ${BLUE}ℹ Your new shell features:${NC}"
+            printf '%s\n' "${feature_lines[@]}"
+            echo ""
+        fi
 
         # Documentation link
         echo -e "  ${DIM}📚 Docs: ${BLUE}https://github.com/blackwell-systems/dotfiles/docs${NC}"

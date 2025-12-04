@@ -27,6 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Compatible with Homebrew 5.0+ which removed this flag
   - Setup wizard now works correctly on latest Homebrew versions
 
+- **Homebrew Path Detection** - Use actual installation path after fresh install
+  - macOS bootstrap now detects which Homebrew was just installed
+  - Directly uses the installation path instead of checking all possible locations
+  - Clearer logic: only checks paths after fresh installation
+  - Handles Apple Silicon (/opt/homebrew) vs Intel (/usr/local) correctly
+
 ### Added
 - **Vault Init Command** - New `dotfiles vault init` for easy vault configuration
   - Configure or reconfigure vault backend anytime
@@ -51,11 +57,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Shell Feature Discovery** - Highlights new ZSH features post-setup
   - Setup completion now shows useful shell aliases and tools
+  - Conditionally displays features based on what's actually installed
   - Enhanced ls commands (ll, la, lt) with eza
   - Git shortcuts (gst, gd, gco, etc.)
   - Fuzzy search with fzf (Ctrl+R)
   - Smart directory navigation with zoxide (z command)
   - Terminal file manager with yazi (y command)
+  - Adapts to minimal/enhanced/full Brewfile tiers
   - Helps users discover what they just installed
 
 - **Vault Setup UX** - Better experience for configuring and skipping vault
