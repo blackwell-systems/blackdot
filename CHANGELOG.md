@@ -120,6 +120,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Added tip explaining what merge preserves
     - Updated vault/discover-secrets.sh
 
+- **Documentation v3.0 Audit** - Updated all documentation for tier selection feature
+  - Fixed outdated package counts in README.md, docs/README-FULL.md, docs/architecture.md, docs/cli-reference.md
+  - Updated BREWFILE_TIER documentation to reflect interactive wizard (was env var only)
+  - Corrected package counts: 18/43/61 (was incorrectly documented as 15/40/80 or 40/80/120+)
+  - Added "How it works" sections explaining config.json persistence
+  - Emphasized interactive setup wizard over environment variable approach
+  - Affects: README.md (3 sections), docs/README-FULL.md, docs/architecture.md, docs/cli-reference.md
+
 - **Unit Test Compatibility** - Fixed 47 failing tests caused by export -f statements
   - Removed bash-specific `export -f` statements from lib/_config.sh
   - Functions sourced from library files don't need explicit export
