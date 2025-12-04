@@ -626,6 +626,27 @@ EOF
                                 echo "  • Merged total: $new_items"
                                 echo ""
 
+                                # Show existing items detail
+                                echo "📋 Existing Items:"
+                                if [[ "$old_items" -gt 0 ]]; then
+                                    echo "$existing_json" | jq -r '.vault_items | to_entries | .[] | "  • \(.key)\n    Path: \(.value.path)\n    Type: \(.value.type // "file")\n    Required: \(.value.required // true)"'
+                                else
+                                    echo "  (none)"
+                                fi
+                                echo ""
+
+                                # Show discovered items detail
+                                echo "🔍 Discovered Items:"
+                                if [[ "$discovered_count" -gt 0 ]]; then
+                                    echo "$discovered_json" | jq -r '.vault_items | to_entries | .[] | "  • \(.key)\n    Path: \(.value.path)\n    Type: \(.value.type // "file")\n    Required: \(.value.required // true)"'
+                                else
+                                    echo "  (none)"
+                                fi
+                                echo ""
+
+                                echo "🔀 Merge Impact:"
+                                echo ""
+
                                 local preserved=$(jq -n \
                                     --argjson old "$existing_json" \
                                     --argjson new "$discovered_json" '
