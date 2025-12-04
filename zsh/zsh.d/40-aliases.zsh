@@ -164,6 +164,92 @@ dotfiles() {
             dotfiles vault "$@"
             ;;
 
+        # Template system
+        template|tmpl)
+            local subcmd="${1:-help}"
+            shift 2>/dev/null || true
+            case "$subcmd" in
+                # Core commands
+                init)
+                    "$DOTFILES_DIR/bin/dotfiles-template" init "$@"
+                    ;;
+                render)
+                    "$DOTFILES_DIR/bin/dotfiles-template" render "$@"
+                    ;;
+                link)
+                    "$DOTFILES_DIR/bin/dotfiles-template" link "$@"
+                    ;;
+                diff)
+                    "$DOTFILES_DIR/bin/dotfiles-template" diff "$@"
+                    ;;
+                check|validate)
+                    "$DOTFILES_DIR/bin/dotfiles-template" check "$@"
+                    ;;
+
+                # Variable management
+                vars)
+                    "$DOTFILES_DIR/bin/dotfiles-template" vars "$@"
+                    ;;
+                edit)
+                    "$DOTFILES_DIR/bin/dotfiles-template" edit "$@"
+                    ;;
+                arrays)
+                    "$DOTFILES_DIR/bin/dotfiles-template" arrays "$@"
+                    ;;
+
+                # Utility
+                list)
+                    "$DOTFILES_DIR/bin/dotfiles-template" list "$@"
+                    ;;
+                help|--help|-h|"")
+                    echo "${BOLD}${CYAN}dotfiles template${NC} - Machine-specific config management"
+                    echo ""
+                    echo "${BOLD}Usage:${NC} dotfiles template <command> [options]"
+                    echo ""
+                    echo "${BOLD}Setup & Generate:${NC}"
+                    echo "  ${GREEN}init${NC}             Interactive setup (creates _variables.local.sh)"
+                    echo "  ${GREEN}render${NC} [file]    Render templates → generated/"
+                    echo "                   ${DIM}--dry-run: Preview without writing${NC}"
+                    echo "                   ${DIM}--force: Re-render even if up to date${NC}"
+                    echo "  ${GREEN}link${NC}             Create symlinks: generated/ → destinations"
+                    echo "  ${GREEN}diff${NC}             Show template vs generated differences"
+                    echo "  check            Validate template syntax"
+                    echo ""
+                    echo "${BOLD}Variables:${NC}"
+                    echo "  vars             List all template variables & values"
+                    echo "  edit             Open _variables.local.sh in editor"
+                    echo "  arrays           Manage JSON/shell arrays for {{#each}} loops"
+                    echo "                   ${DIM}--export-json: Convert shell → JSON${NC}"
+                    echo "                   ${DIM}--validate: Check JSON syntax${NC}"
+                    echo ""
+                    echo "${BOLD}Info:${NC}"
+                    echo "  list             Show available templates & status"
+                    echo ""
+                    echo "${BOLD}Typical Workflow:${NC}"
+                    echo "  ${DIM}First time:${NC}  dotfiles template init   ${DIM}→ Set up machine variables${NC}"
+                    echo "  ${DIM}Configure:${NC}   dotfiles template edit   ${DIM}→ Edit variables${NC}"
+                    echo "  ${DIM}Generate:${NC}    dotfiles template render ${DIM}→ Create configs${NC}"
+                    echo "  ${DIM}Deploy:${NC}      dotfiles template link   ${DIM}→ Symlink to destinations${NC}"
+                    echo ""
+                    echo "${BOLD}Examples:${NC}"
+                    echo "  dotfiles template init                  # Interactive setup"
+                    echo "  dotfiles template vars                  # See current values"
+                    echo "  dotfiles template render --dry-run      # Preview generation"
+                    echo "  dotfiles template render && \\           # Render & link"
+                    echo "    dotfiles template link"
+                    echo "  DOTFILES_TMPL_GIT_EMAIL=\"work@co.com\" \\"
+                    echo "    dotfiles template render              # Override variable"
+                    echo ""
+                    echo "${DIM}Learn more: ${GREEN}dotfiles template --help${NC}"
+                    ;;
+                *)
+                    echo "${RED}Unknown template command:${NC} $subcmd"
+                    echo "Run ${CYAN}dotfiles template help${NC} for usage"
+                    return 1
+                    ;;
+            esac
+            ;;
+
         # Setup & Maintenance
         setup)
             "$DOTFILES_DIR/bin/dotfiles-setup" "$@"
