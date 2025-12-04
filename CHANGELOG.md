@@ -14,7 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All `dotfiles` commands now work regardless of installation location
   - Introduced `$DOTFILES_DIR` environment variable (auto-detected from config location)
   - Replaced all hardcoded `$HOME/workspace/dotfiles` paths with `$DOTFILES_DIR`
+  - Fixed initial path calculation bug (needed :h:h:h not :h:h for 3 directory levels)
   - Fixes issue where commands would fail if dotfiles weren't at exact expected path
+  - Fixes "vault/discover-secrets.sh: no such file or directory" error
   - Affects: `40-aliases.zsh`, `50-functions.zsh`, `10-plugins.zsh`, `20-env.zsh`
   - Critical for users who clone dotfiles to custom locations
 
