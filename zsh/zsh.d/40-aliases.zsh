@@ -79,6 +79,9 @@ dotfiles() {
             local subcmd="${1:-help}"
             shift 2>/dev/null || true
             case "$subcmd" in
+                init)
+                    "$VAULT_DIR/init-vault.sh" "$@"
+                    ;;
                 restore)
                     "$VAULT_DIR/restore.sh" "$@"
                     ;;
@@ -106,6 +109,7 @@ dotfiles() {
                     echo "Usage: dotfiles vault <command> [options]"
                     echo ""
                     echo "Commands:"
+                    echo "  init             Configure vault backend (run anytime)"
                     echo "  restore          Restore all secrets from vault"
                     echo "                   --force: Skip drift check, overwrite local changes"
                     echo "  sync [item]      Sync local files to vault (--all for all)"
@@ -116,6 +120,7 @@ dotfiles() {
                     echo "  delete           Delete vault item"
                     echo ""
                     echo "Examples:"
+                    echo "  dotfiles vault init           # Configure/reconfigure vault"
                     echo "  dotfiles vault restore        # Restore all secrets"
                     echo "  dotfiles vault sync --all     # Sync all to vault"
                     echo "  dotfiles vault sync Git-Config"

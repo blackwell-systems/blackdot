@@ -27,7 +27,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Compatible with Homebrew 5.0+ which removed this flag
   - Setup wizard now works correctly on latest Homebrew versions
 
+### Added
+- **Vault Init Command** - New `dotfiles vault init` for easy vault configuration
+  - Configure or reconfigure vault backend anytime
+  - No need to reset setup state or run full wizard
+  - Detects existing configuration and asks to reconfigure
+  - Clear guidance when skipping vault setup
+  - Accessible via `dotfiles vault init` or `dotfiles vault init --force`
+
 ### Improved
+- **Vault Setup UX** - Better experience for configuring and skipping vault
+  - Setup wizard now asks "Reconfigure vault?" if already configured
+  - Distinguishes between "skipped" vs "configured" in status display
+  - Skipped vault shows `[⊘]` icon with hint: "run 'dotfiles vault init'"
+  - Configured vault shows backend name in status
+  - All skip paths mention how to configure later
+  - Fixes UX issue where skipping vault permanently locked you out of configuration
+
 - **macOS /workspace Symlink Handling** - Better guidance for read-only filesystem
   - Detects macOS read-only root filesystem (Catalina+)
   - Provides clear instructions for using synthetic.conf (Apple-approved method)
