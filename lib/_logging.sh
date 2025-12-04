@@ -61,27 +61,27 @@ export RED GREEN YELLOW BLUE MAGENTA CYAN BOLD DIM NC
 
 # Informational message (blue)
 info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    echo -e "${BLUE}[INFO]${NC} $1" >&2
 }
 
 # Success message (green)
 pass() {
-    echo -e "${GREEN}[OK]${NC} $1"
+    echo -e "${GREEN}[OK]${NC} $1" >&2
 }
 
 # Warning message (yellow)
 warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
+    echo -e "${YELLOW}[WARN]${NC} $1" >&2
 }
 
 # Error message (red)
 fail() {
-    echo -e "${RED}[FAIL]${NC} $1"
+    echo -e "${RED}[FAIL]${NC} $1" >&2
 }
 
 # Dry-run message (cyan)
 dry() {
-    echo -e "${CYAN}[DRY-RUN]${NC} $1"
+    echo -e "${CYAN}[DRY-RUN]${NC} $1" >&2
 }
 
 # Debug message (only when DEBUG=1)
@@ -97,14 +97,14 @@ debug() {
 
 # Print a section header
 section() {
-    echo ""
-    echo -e "${BOLD}=== $1 ===${NC}"
-    echo ""
+    echo "" >&2
+    echo -e "${BOLD}=== $1 ===${NC}" >&2
+    echo "" >&2
 }
 
 # Print a separator line
 separator() {
-    echo "────────────────────────────────────────"
+    echo "────────────────────────────────────────" >&2
 }
 
 # Confirm yes/no prompt (returns 0 for yes, 1 for no)
