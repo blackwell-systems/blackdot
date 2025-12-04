@@ -93,7 +93,7 @@ dotfiles setup
 ./bootstrap/bootstrap-linux.sh    # Linux / WSL2
 
 # Then manually configure secrets or run:
-dotfiles vault restore  # (requires vault CLI login first)
+dotfiles vault pull  # (requires vault CLI login first)
 
 # Verify installation
 dotfiles doctor
@@ -195,7 +195,7 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 │   │   ├── bitwarden.sh                # Bitwarden CLI integration
 │   │   ├── 1password.sh                # 1Password CLI integration
 │   │   └── pass.sh                     # pass (GPG) integration
-│   ├── restore.sh                      # Orchestrates all vault restores
+│   ├── restore.sh                      # Orchestrates all vault pulls
 │   ├── check-vault-items.sh            # Validates required vault items exist
 │   ├── create-vault-item.sh            # Creates new vault secure notes
 │   ├── delete-vault-item.sh            # Deletes items from vault (with safety)
@@ -527,7 +527,7 @@ Both systems coordinate seamlessly:
 dotclaude activate client-work
 
 # Secrets managed by dotfiles
-dotfiles vault restore client-*
+dotfiles vault pull client-*
 
 # Both respect /workspace for portable sessions
 cd /workspace/my-project && claude
@@ -565,7 +565,7 @@ flowchart TB
     h_workspace -.-> shared
     g_workspace -.-> shared
 
-    h_secrets <-.->|vault sync| g_secrets
+    h_secrets <-.->|vault push| g_secrets
 
     symlink["/workspace → ~/workspace<br/><small>Ensures identical paths across all machines</small>"]
 
@@ -1078,8 +1078,8 @@ This allows you to customize which secrets to manage without editing source code
 **Auto-Discovery (Recommended):**
 
 ```bash
-dotfiles vault init      # Configure backend, offers auto-discovery
-dotfiles vault discover  # Or run discovery directly
+dotfiles vault setup      # Configure backend, offers auto-discovery
+dotfiles vault scan  # Or run discovery directly
 ```
 
 Auto-discovery scans standard locations (`~/.ssh/`, `~/.aws/`, `~/.gitconfig`, etc.) and generates `vault-items.json` automatically with smart naming.
@@ -1263,7 +1263,7 @@ op signin
 
 **Using the unified vault command (recommended):**
 ```bash
-dotfiles vault sync AWS-Config
+dotfiles vault push AWS-Config
 ```
 
 **Or manually with Bitwarden CLI:**
@@ -1571,7 +1571,7 @@ Host newservice.example.com
 After editing `~/.ssh/config`, sync it back:
 
 ```bash
-dotfiles vault sync SSH-Config
+dotfiles vault push SSH-Config
 ```
 
 ### 6. Update zshrc for auto-add (optional)
@@ -1592,20 +1592,20 @@ When you modify local config files (`~/.ssh/config`, `~/.aws/config`, `~/.gitcon
 ### Preview changes (dry run)
 
 ```bash
-dotfiles vault sync --dry-run --all
+dotfiles vault push --dry-run --all
 ```
 
 ### Sync specific items
 
 ```bash
-dotfiles vault sync SSH-Config           # Just SSH config
-dotfiles vault sync AWS-Config Git-Config  # Multiple items
+dotfiles vault push SSH-Config           # Just SSH config
+dotfiles vault push AWS-Config Git-Config  # Multiple items
 ```
 
 ### Sync all items
 
 ```bash
-dotfiles vault sync --all
+dotfiles vault push --all
 ```
 
 ### Supported items
@@ -1630,7 +1630,7 @@ Regular security maintenance schedule to keep your dotfiles and credentials secu
 - [ ] **Rotate SSH keys** - Generate new SSH key pairs and update vault
   - Generate: `ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey`
   - Update GitHub/GitLab/etc. with new public key
-  - Sync to vault: `dotfiles vault sync`
+  - Sync to vault: `dotfiles vault push`
   - Test connections: `ssh -T git@github.com`
 - [ ] **Update vault master password** - Use a strong, unique password
   - Update in your vault app or web interface
@@ -1640,7 +1640,7 @@ Regular security maintenance schedule to keep your dotfiles and credentials secu
 - [ ] **Review AWS credentials** - Check for unused or expired credentials
   - Audit IAM access keys in AWS Console
   - Rotate if compromised or shared accidentally
-  - Update local files and sync: `dotfiles vault sync AWS-Credentials`
+  - Update local files and sync: `dotfiles vault push AWS-Credentials`
 - [ ] **Audit vault items** - Review all items stored in your vault
   - Run: `dotfiles vault list` for inventory
   - Run: `dotfiles vault check` to validate required items
@@ -1653,7 +1653,7 @@ Regular security maintenance schedule to keep your dotfiles and credentials secu
   - Review CHANGELOG.md for breaking changes
 - [ ] **Run health check with drift detection** - Ensure local files match vault
   - Run: `dotfiles drift`
-  - Sync any differences: `dotfiles vault sync --all`
+  - Sync any differences: `dotfiles vault push --all`
 
 **Best Practices:**
 - Never commit secrets to git (verify with `git diff` before committing)
@@ -1672,7 +1672,7 @@ Complete checklist when adding a new SSH identity:
 - [ ] Push to vault (see "Adding New SSH Keys" section above)
 - [ ] **Add to `SSH_KEYS` array in `vault/_common.sh`** (propagates to restore + health check)
 - [ ] Update `~/.ssh/config` with Host entry
-- [ ] Sync SSH config: `dotfiles vault sync SSH-Config`
+- [ ] Sync SSH config: `dotfiles vault push SSH-Config`
 - [ ] Update `zsh/zshrc` - add `_ssh_add_if_missing` line (optional, for ssh-agent)
 - [ ] Commit dotfiles changes
 
@@ -1681,25 +1681,25 @@ Complete checklist when adding a new SSH identity:
 When AWS credentials or config change:
 
 - [ ] Edit `~/.aws/config` and/or `~/.aws/credentials`
-- [ ] Sync to vault: `dotfiles vault sync AWS-Config AWS-Credentials`
-- [ ] Verify on other machines: `dotfiles vault restore`
+- [ ] Sync to vault: `dotfiles vault push AWS-Config AWS-Credentials`
+- [ ] Verify on other machines: `dotfiles vault pull`
 
 ### Adding a New Environment Variable
 
 - [ ] Edit `~/.local/env.secrets`
-- [ ] Sync to vault: `dotfiles vault sync Environment-Secrets`
+- [ ] Sync to vault: `dotfiles vault push Environment-Secrets`
 - [ ] Source on current shell: `source ~/.local/load-env.sh`
 
 ### Modifying SSH Config (add hosts, change options)
 
 - [ ] Edit `~/.ssh/config`
-- [ ] Sync to vault: `dotfiles vault sync SSH-Config`
-- [ ] Restore on other machines: `dotfiles vault restore`
+- [ ] Sync to vault: `dotfiles vault push SSH-Config`
+- [ ] Restore on other machines: `dotfiles vault pull`
 
 ### Updating Git Config
 
 - [ ] Edit `~/.gitconfig`
-- [ ] Sync to vault: `dotfiles vault sync Git-Config`
+- [ ] Sync to vault: `dotfiles vault push Git-Config`
 
 ### New Machine Setup
 
@@ -1709,7 +1709,7 @@ Complete checklist for a fresh machine:
 2. [ ] Run bootstrap: `./bootstrap/bootstrap-mac.sh` or `./bootstrap/bootstrap-linux.sh`
 3. [ ] Login to vault: `bw login` / `op signin` / (pass uses GPG)
 4. [ ] Validate vault items: `dotfiles vault check`
-5. [ ] Restore secrets: `dotfiles vault restore`
+5. [ ] Restore secrets: `dotfiles vault pull`
 6. [ ] Run health check: `dotfiles doctor`
 7. [ ] Restart shell or `source ~/.zshrc`
 
@@ -1800,8 +1800,8 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 
 **Vault:**
 
-- `dotfiles vault restore` → Restore all secrets from vault
-- `dotfiles vault sync` → Sync local files to vault
+- `dotfiles vault pull` → Restore all secrets from vault
+- `dotfiles vault push` → Sync local files to vault
 - `dotfiles vault setup` → Interactive onboarding wizard for new vault items
 - `dotfiles vault list` → List vault items
 - `dotfiles vault check` → Validate vault items exist
@@ -1980,7 +1980,7 @@ Example drift output:
 [WARN] Git-Config: LOCAL DIFFERS from vault
 
 To sync local changes to vault:
-  dotfiles vault sync --all
+  dotfiles vault push --all
 ```
 
 Example output:
@@ -2122,7 +2122,7 @@ Test vault functionality without real credentials using the mock vault setup:
 ./test/mocks/setup-mock-vault.sh --no-pass
 export DOTFILES_VAULT_BACKEND=pass
 dotfiles vault check
-dotfiles vault restore --preview
+dotfiles vault pull --preview
 ```
 
 See [Docker Guide](docker.md) for complete container details and testing workflows.
@@ -2366,7 +2366,7 @@ cat ~/.local/load-env.sh
 source ~/.local/load-env.sh
 echo $SOME_EXPECTED_VAR
 
-# If missing, re-run vault restore
+# If missing, re-run vault pull
 ./vault/restore.sh
 ```
 
