@@ -95,18 +95,21 @@ show_status() {
         local detail="${details[$i]}"
 
         if state_completed "$phase"; then
-            echo -e "  ${GREEN}[✓]${NC} $label ${DIM}($detail)${NC}"
+            # Special handling for vault to show if skipped
+            if [[ "$phase" == "vault" ]]; then
+                local backend=$(config_get "vault" "backend" "")
+                if [[ "$backend" == "none" ]]; then
+                    echo -e "  ${YELLOW}[⊘]${NC} $label ${DIM}(Skipped - run 'dotfiles vault init')${NC}"
+                else
+                    echo -e "  ${GREEN}[✓]${NC} $label ${DIM}($detail: ${backend:-unknown})${NC}"
+                fi
+            else
+                echo -e "  ${GREEN}[✓]${NC} $label ${DIM}($detail)${NC}"
+            fi
         else
             echo -e "  ${YELLOW}[ ]${NC} $label ${DIM}($detail)${NC}"
         fi
     done
-
-    # Show vault backend if configured
-    local backend=$(config_get "vault" "backend" "")
-    if [[ -n "$backend" ]]; then
-        echo ""
-        echo -e "  ${DIM}Vault backend: $backend${NC}"
-    fi
 
     echo ""
 }
@@ -194,12 +197,27 @@ phase_vault() {
 
     if state_completed "vault"; then
         local backend=$(config_get "vault" "backend" "")
-        if [[ -n "$backend" ]]; then
+        if [[ -n "$backend" ]] && [[ "$backend" != "none" ]]; then
             pass "Vault already configured ($backend)"
+        elif [[ "$backend" == "none" ]]; then
+            warn "Vault was skipped previously"
         else
             pass "Vault already configured"
         fi
-        return 0
+
+        echo ""
+        echo -n "Reconfigure vault? [y/N]: "
+        read reconfigure
+        if [[ "${reconfigure}" =~ ^[Yy]$ ]]; then
+            info "Reconfiguring vault..."
+            state_reset "vault"
+            # Fall through to configuration below
+        else
+            if [[ "$backend" == "none" ]]; then
+                info "Run 'dotfiles vault init' anytime to configure vault"
+            fi
+            return 0
+        fi
     fi
 
     # Detect available vault backends
@@ -228,6 +246,8 @@ phase_vault() {
             warn "Skipped vault setup"
             config_set "vault" "backend" "none"
             state_complete "vault"
+            echo ""
+            info "Run 'dotfiles vault init' anytime to configure vault"
             return 0
         else
             echo "Please install a vault CLI and run 'dotfiles setup' again."
@@ -251,6 +271,8 @@ phase_vault() {
         warn "Skipped vault setup"
         config_set "vault" "backend" "none"
         state_complete "vault"
+        echo ""
+        info "Run 'dotfiles vault init' anytime to configure vault"
         return 0
     fi
 
