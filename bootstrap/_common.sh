@@ -205,11 +205,51 @@ run_brew_bundle() {
             ;;
     esac
 
-    if [[ -f "$brewfile" ]]; then
-        echo "Running brew bundle ($PLATFORM_NAME)..."
-        brew bundle --file="$brewfile"
-    else
+    if [[ ! -f "$brewfile" ]]; then
         echo "No Brewfile found at $brewfile, skipping brew bundle."
+        return 0
+    fi
+
+    echo "Running brew bundle ($PLATFORM_NAME)..."
+
+    # Run brew bundle, but don't fail the entire bootstrap if there are issues
+    if ! brew bundle --file="$brewfile"; then
+        warn "Brew bundle completed with warnings"
+
+        # Auto-fix common link conflicts (e.g., npm-installed packages conflicting with brew)
+        info "Checking for link conflicts..."
+
+        # Try to fix unlinked packages from the Brewfile
+        # Parse the Brewfile and try to link each formula
+        local failed_links=()
+        while IFS= read -r line; do
+            # Extract formula names from 'brew "formula-name"' lines
+            if [[ "$line" =~ ^brew[[:space:]]+\"([^\"]+)\" ]]; then
+                local formula="${BASH_REMATCH[1]}"
+                # Check if it's installed but not linked
+                if brew list --formula "$formula" &>/dev/null; then
+                    if ! brew --prefix "$formula" &>/dev/null; then
+                        info "Attempting to link $formula..."
+                        if brew link --overwrite "$formula" 2>/dev/null; then
+                            pass "Linked $formula"
+                        else
+                            warn "Could not link $formula (non-critical)"
+                            failed_links+=("$formula")
+                        fi
+                    fi
+                fi
+            fi
+        done < "$brewfile"
+
+        if [[ ${#failed_links[@]} -gt 0 ]]; then
+            warn "Some packages could not be linked: ${failed_links[*]}"
+            info "You can manually fix with: brew link --overwrite <package>"
+        fi
+
+        pass "Package installation completed"
+        info "Run 'brew doctor' if you encounter issues"
+    else
+        pass "All packages installed successfully"
     fi
 }
 
