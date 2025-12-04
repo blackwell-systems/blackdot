@@ -294,20 +294,27 @@ Auto-detects your platform (macOS, Linux, WSL2), detects available vault CLIs (B
 </details>
 
 <details>
-<summary><b>Smart Secrets Onboarding</b> - Guided vault item setup</summary>
+<summary><b>Smart Secrets Onboarding</b> - Auto-discovery & guided vault setup</summary>
 
 ```bash
-dotfiles vault setup  # Interactive vault configuration
+dotfiles vault init       # Configure vault backend
+dotfiles vault discover   # Auto-detect existing secrets
 ```
 
-First-time vault setup wizard that:
-- Detects existing local secrets (SSH keys, AWS config, Git config)
-- Offers to create vault items for each detected secret
-- Validates vault item schema before creation
-- Creates `~/.config/dotfiles/vault-items.json` config file
-- Works with any vault backend (Bitwarden, 1Password, pass)
+**Auto-Discovery** - Automatically finds your existing secrets:
+- Scans `~/.ssh/` for SSH keys (all types: rsa, ed25519, ecdsa)
+- Discovers AWS configs (`~/.aws/config`, `~/.aws/credentials`)
+- Finds Git config (`~/.gitconfig`)
+- Detects other secrets (npm, pypi, docker configs)
+- Generates `vault-items.json` with smart naming (e.g., `id_ed25519_github` → `SSH-GitHub`)
+- Supports custom paths: `--ssh-path` and `--config-path` options
 
-Perfect for users migrating from manual credential management or setting up a new machine.
+**Manual Setup** - For non-standard configurations:
+- Copy example: `cp vault/vault-items.example.json ~/.config/dotfiles/vault-items.json`
+- Edit to match your setup
+- Validates schema before sync
+
+Perfect for users with existing credentials who want to sync them across machines with zero manual JSON editing.
 
 </details>
 
@@ -635,6 +642,13 @@ Bootstrap scripts check current state before changes. Already symlinked? Skip. A
 **Optional (for Claude Code portable sessions):**
 - **Claude Code installed** - For cross-machine session sync
   - Skip with `SKIP_CLAUDE_SETUP=true`
+
+**Optional (Brewfile package tiers):**
+- **BREWFILE_TIER** - Control which packages to install:
+  - `minimal` - Essential tools only (~40 packages: git, zsh, fzf, ripgrep)
+  - `enhanced` - Modern CLI tools without containers (~80 packages, adds: eza, bat, dust, zoxide)
+  - `full` - Everything including Docker/Kubernetes (~120+ packages) [default]
+  - Set before bootstrap: `export BREWFILE_TIER=minimal` or `export BREWFILE_TIER=enhanced`
 
 To clone via SSH (recommended), you'll also want an SSH key configured with GitHub. If you don't have Git yet, the bootstrap scripts will install it automatically.
 
