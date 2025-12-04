@@ -9,6 +9,11 @@ set -uo pipefail
 # Source common functions
 source "$(dirname "$0")/_common.sh"
 
+# Source config functions for timestamp tracking
+SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+source "$DOTFILES_DIR/lib/_config.sh"
+
 DRY_RUN=false
 ITEMS_TO_SYNC=()
 
@@ -195,6 +200,14 @@ if $DRY_RUN && [[ $SYNCED -gt 0 ]]; then
     echo ""
     echo "Run without --dry-run to apply changes:"
     echo "  $(basename "$0") ${ITEMS_TO_SYNC[*]}"
+fi
+
+# Track last push timestamp (only if successful and not dry run)
+if ! $DRY_RUN && [[ $SYNCED -gt 0 && $FAILED -eq 0 ]]; then
+    TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date +"%Y-%m-%dT%H:%M:%S" 2>/dev/null || echo "")
+    if [[ -n "$TIMESTAMP" ]]; then
+        config_set "vault.last_push" "$TIMESTAMP" 2>/dev/null || true
+    fi
 fi
 
 exit $FAILED
