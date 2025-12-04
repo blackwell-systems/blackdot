@@ -613,6 +613,62 @@ EOF
 
                         if [[ "$final_json" == "$discovered_json" ]] && command -v jq >/dev/null 2>&1; then
                             info "No manual items to preserve"
+                        else
+                            # Show merge preview
+                            echo ""
+                            echo -e "${CYAN}=== Merge Preview ===${NC}"
+
+                            if command -v jq >/dev/null 2>&1; then
+                                # Count changes
+                                local old_items=$(echo "$existing_json" | jq '.vault_items | length')
+                                local new_items=$(echo "$final_json" | jq '.vault_items | length')
+                                local discovered_count=$(echo "$discovered_json" | jq '.vault_items | length')
+
+                                echo ""
+                                echo "📊 Summary:"
+                                echo "  • Existing items: $old_items"
+                                echo "  • Discovered items: $discovered_count"
+                                echo "  • Merged total: $new_items"
+                                echo ""
+
+                                # Show what's preserved (in old but not discovered)
+                                local preserved=$(echo "$existing_json" "$discovered_json" | jq -s '
+                                    .[0].vault_items // {} | keys as $old |
+                                    .[1].vault_items // {} | keys as $new |
+                                    $old - $new
+                                ')
+                                local preserved_count=$(echo "$preserved" | jq 'length')
+
+                                if [[ "$preserved_count" -gt 0 ]]; then
+                                    echo "✅ Preserved manual items ($preserved_count):"
+                                    echo "$preserved" | jq -r '.[] | "  • " + .'
+                                    echo ""
+                                fi
+
+                                # Show what's new (in discovered but not in old)
+                                local added=$(echo "$existing_json" "$discovered_json" | jq -s '
+                                    .[0].vault_items // {} | keys as $old |
+                                    .[1].vault_items // {} | keys as $new |
+                                    $new - $old
+                                ')
+                                local added_count=$(echo "$added" | jq 'length')
+
+                                if [[ "$added_count" -gt 0 ]]; then
+                                    echo "➕ New discovered items ($added_count):"
+                                    echo "$added" | jq -r '.[] | "  • " + .'
+                                    echo ""
+                                fi
+                            fi
+
+                            echo -e "${CYAN}=====================${NC}"
+                            echo ""
+                            echo -n "Apply this merge? [y/N]: "
+                            read -r confirm
+
+                            if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+                                info "Merge cancelled"
+                                exit 0
+                            fi
                         fi
                     fi
                     ;;
