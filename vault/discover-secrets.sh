@@ -332,21 +332,21 @@ generate_vault_json() {
 
     # Add other items
     for item in $syncable_items; do
-        local name="${item%%:*}"
-        local path="${item##*:}"
+        local item_name="${item%%:*}"
+        local item_path="${item##*:}"
         [[ "$first" == "false" ]] && echo ","
-        echo "    \"$name\": {"
-        echo "      \"path\": \"$path\","
+        echo "    \"$item_name\": {"
+        echo "      \"path\": \"$item_path\","
 
         # Required by default for SSH/AWS/Git, optional for others
-        if [[ "$name" =~ ^(SSH-Config|AWS-|Git-) ]]; then
+        if [[ "$item_name" =~ ^(SSH-Config|AWS-|Git-) ]]; then
             echo "      \"required\": true,"
         else
             echo "      \"required\": false,"
         fi
 
         # Determine type
-        if [[ "$name" =~ ^SSH- ]]; then
+        if [[ "$item_name" =~ ^SSH- ]]; then
             echo "      \"type\": \"sshkey\""
         else
             echo "      \"type\": \"file\""
@@ -363,10 +363,10 @@ generate_vault_json() {
     echo "  \"syncable_items\": {"
     first=true
     for item in $syncable_items; do
-        local name="${item%%:*}"
-        local path="${item##*:}"
+        local item_name="${item%%:*}"
+        local item_path="${item##*:}"
         [[ "$first" == "false" ]] && echo ","
-        echo -n "    \"$name\": \"$path\""
+        echo -n "    \"$item_name\": \"$item_path\""
         first=false
     done
     echo ""
