@@ -11,6 +11,8 @@ alias cwhite='cd "$WORKSPACE/whitepapers"'
 alias cpat='cd "$WORKSPACE/patent-pool"'
 
 # Unified dotfiles command with subcommands
+# Remove any pre-existing alias (from .zshrc.local, etc.)
+unalias dotfiles 2>/dev/null || true
 dotfiles() {
     local cmd="${1:-help}"
     shift 2>/dev/null || true
