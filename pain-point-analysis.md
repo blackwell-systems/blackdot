@@ -25,10 +25,19 @@
 - ✅ **Issue #3** - Brewfile tier selection invisible → Interactive tier selection with package counts
 - ✅ **Test Suite** - Fixed 47 failing tests (export -f compatibility issue)
 
+**v3.0 Week 4 - Final Critical Issues RESOLVED:**
+- ✅ **Issue #5.5** - No vault schema validation → JSON schema with automatic validation
+- ✅ **Issue #6** - Error messages lack next steps → Structured error library with fix commands
+- ✅ **Issue #7** - Doctor health score arbitrary → Color-coded interpretation with actionable fixes
+- ✅ **Issue #8** - Setup wizard state opaque → Unicode progress bar + steps overview
+- ✅ **Issue #10** - Template system hidden → 16x documentation expansion with examples
+- ✅ **Issue #12** - Drift detection reactive → Proactive `vault status` command
+
 **Changes Implemented:**
 - v2.3.0: `zsh/zsh.d/40-aliases.zsh`, `vault/restore.sh`, `bin/dotfiles-setup`, `vault/README.md`
 - v3.0 Quick Wins: `CLAUDE.md`, `README.md`, `docs/README.md`, `docs/vault-README.md`, `vault/discover-secrets.sh`
 - v3.0 Week 3: `bin/dotfiles-setup`, `lib/_config.sh`
+- v3.0 Week 4: `lib/_errors.sh`, `lib/_vault.sh`, `bin/dotfiles-doctor`, `bin/dotfiles-setup`, `vault/status.sh`, `vault/sync-to-vault.sh`, `vault/restore.sh`, `vault/validate-config.sh`, `vault/vault-items.schema.json`, `README.md`
 - All changes documented in `CHANGELOG.md` under [Unreleased]
 
 ---
@@ -38,16 +47,17 @@
 **Overall Assessment:** Strong foundation with excellent modularity, with systematic improvements addressing user friction.
 
 **Key Findings:**
-- 🔴 **7 Critical Issues** - 6 resolved (v2.3: 3, v3.0 quick wins: 1, v3.0 Week 4: 2), 1 remaining
-- 🟡 **8 Medium Priority** - 5 resolved (v3.0 quick wins: 3, v3.0 Week 4: 2), 3 remaining
+- 🔴 **7 Critical Issues** - 7 resolved (v2.3: 3, v3.0 quick wins: 1, v3.0 Week 4: 3), 0 remaining ✅
+- 🟡 **8 Medium Priority** - 6 resolved (v3.0 quick wins: 3, v3.0 Week 4: 3), 2 remaining
 - 🟢 **8 Nice-to-Have** - 0 resolved, 8 remaining
 
 **Progress:**
 - **v2.3.0**: Top 3 critical issues addressed (vault confusion, rollback, progress)
 - **v3.0 Quick Wins**: 4 additional issues resolved (merge preview, multi-vault, CLAUDE.md, workspace symlink)
 - **v3.0 Week 3**: Brewfile tier selection implemented (pain point #3) + test suite fixes
-- **v3.0 Week 4**: Error handling + health score + vault status + template docs (pain points #6, #7, #10, #12)
-- **Total resolved**: 12 of 23 issues (52%) - 3 v2.3 + 4 v3.0 quick wins + 1 v3.0 week 3 + 4 v3.0 week 4
+- **v3.0 Week 4**: Error handling + health score + vault status + template docs + schema validation + progress bar (pain points #5.5, #6, #7, #8, #10, #12)
+- **Total resolved**: 14 of 23 issues (61%) - 3 v2.3 + 4 v3.0 quick wins + 1 v3.0 week 3 + 6 v3.0 week 4
+- **ALL CRITICAL ISSUES RESOLVED** 🎉
 - **v3.0 Full Release**: Comprehensive redesign addressing all remaining pain points (see DESIGN-v3.md)
 
 **v3.0 Breaking Changes:**
@@ -229,6 +239,73 @@
 
 ---
 
+### 5.5. No Vault Schema Validation 🚨 ✅ RESOLVED
+
+**Location:** `lib/_vault.sh`, `vault/sync-to-vault.sh`, `vault/restore.sh`
+**Status:** Implemented in v3.0 Week 4 (Pain Point #4)
+
+**Problem:** Users can create invalid vault-items.json
+- No validation of required fields (path, required, type)
+- Invalid type values silently accepted
+- Malformed JSON causes cryptic failures during sync
+- Item names with special characters break operations
+- Silent failures discovered only when vault operations fail
+
+**Before:**
+```json
+{
+  "vault_items": {
+    "BadItem": {
+      "path": "/tmp/test"
+      // Missing: required, type fields → fails during sync
+    }
+  }
+}
+```
+
+**v3.0 Solution (Implemented):**
+- ✅ JSON Schema for vault-items.json (`vault/vault-items.schema.json`)
+- ✅ `vault_validate_schema()` function in `lib/_vault.sh`
+- ✅ Automatic validation before all vault push/pull operations
+- ✅ Standalone `dotfiles vault validate` command for manual validation
+- ✅ Clear error messages showing exactly what's missing
+- ✅ Graceful degradation (warning if jq not installed, not failure)
+- ✅ Validates: required fields, type enums (file/sshkey), item name patterns
+
+**Validation Rules:**
+- Required fields: `path`, `required`, `type` for each vault item
+- Type must be either "file" or "sshkey"
+- Item names must match: `^[A-Z][A-Za-z0-9-]*$` (start with capital)
+- JSON syntax validation before schema checks
+- Top-level `vault_items` object is required
+
+**Example Error Output:**
+```
+[FAIL] vault-items.json validation failed:
+
+  ✗ Item BadItem: missing required field (path, required, or type)
+  ✗ Item lowercaseitem: invalid name (must start with capital)
+  ✗ Item Config: invalid type "config" (must be "file" or "sshkey")
+
+[INFO] See example: dotfiles/vault/vault-items.example.json
+[INFO] Schema: dotfiles/vault/vault-items.schema.json
+```
+
+**Integration Points:**
+- `vault/sync-to-vault.sh` - Validates before pushing to vault
+- `vault/restore.sh` - Validates before pulling from vault
+- `vault/validate-config.sh` - Standalone validation command
+- `zsh/zsh.d/40-aliases.zsh` - Maps `dotfiles vault validate` command
+
+**Impact:**
+- Prevents invalid configurations from breaking vault operations
+- Early error detection saves debugging time
+- Clear validation errors guide users to fix issues
+- Reduces support requests for vault sync failures
+- Professional-grade configuration management
+
+---
+
 ### 6. Error Messages Lack Next Steps 🤷 ✅ RESOLVED
 
 **Location:** Throughout codebase
@@ -332,9 +409,10 @@ Potential Score: 95/100 (if all issues fixed)
 
 ## Medium Priority Pain Points (Friction & Confusion)
 
-### 8. Setup Wizard State Is Opaque 📦
+### 8. Setup Wizard State Is Opaque 📦 ✅ RESOLVED
 
 **Location:** `lib/_state.sh`, `bin/dotfiles-setup`
+**Status:** Fixed in v3.0 Week 4 (Pain Point #8)
 
 **Problem:** Users can't see what wizard will do
 - "Will it overwrite my existing config?"
@@ -346,13 +424,35 @@ The wizard saves state, but:
 - No progress bar
 - Can't preview all steps
 
-**v3.0 Solution (Planned):**
-- Show all steps upfront with time estimates
-- Progress indicator: "Step 3 of 6 (Vault) - 50% complete"
-- State management clearly explained: "Safe to exit anytime - we'll resume"
-- Interactive tier selection with package counts
-- Auto-backup before wizard starts (safety first)
-- See: DESIGN-v3.md Section 5
+**v3.0 Solution (Implemented):**
+- ✅ Unicode progress bar shows current step (e.g., "Step 2 of 6: Packages")
+- ✅ Visual 20-character progress bar: `████████░░░░░░░░░░░░ 33%`
+- ✅ Steps overview shown upfront listing all 6 steps with descriptions
+- ✅ Beautiful box-drawing characters for visual appeal (╔═╗║╠╣╚═╝)
+- ✅ State management clearly explained: "Safe to exit anytime - Progress is saved"
+- ✅ All 6 phases updated: symlinks, packages, vault, secrets, claude, template
+- Functions: `show_progress()`, `show_steps_overview()` in `bin/dotfiles-setup`
+
+**Before:**
+```
+STEP 2 of 6: Install Packages
+──────────────────────────────
+```
+
+**After:**
+```
+╔═══════════════════════════════════════════════╗
+║ Step 2 of 6: Packages
+╠═══════════════════════════════════════════════╣
+║ ████░░░░░░░░░░░░░░░░ 33%
+╚═══════════════════════════════════════════════╝
+```
+
+**Impact:**
+- Users can see exactly where they are in the setup process
+- Clear visual feedback reduces anxiety about wizard progress
+- Overview upfront sets expectations for all steps
+- Professional appearance with unicode progress visualization
 
 ---
 
