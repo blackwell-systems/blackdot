@@ -492,25 +492,56 @@ File-based config items contain the full file content in the notes field:
 
 ## Schema Validation
 
-The `validate-schema.sh` script ensures all vault items have correct structure:
+The `validate-config.sh` script validates your `vault-items.json` configuration file against the JSON schema:
 
 ```bash
-# Validate all items
+# Validate configuration
 dotfiles vault validate
 ```
 
-**Validates:**
-- Item exists in vault
-- Item type is Secure Note
-- Notes field has content
-- SSH keys contain BEGIN/END markers
-- SSH keys contain public key line
-- Config files meet minimum length
+**What it validates:**
+- ✅ Valid JSON syntax
+- ✅ Required fields present (path, required, type)
+- ✅ Valid type values ("file" or "sshkey")
+- ✅ Item naming conventions (must start with capital letter)
+- ✅ Path format (must start with ~, /, or $)
 
-**Common errors:**
-- Item missing → Create with `dotfiles vault create`
-- Empty notes → Re-sync with `dotfiles vault push`
-- Wrong format → Edit in vault web interface
+**Validation runs automatically:**
+- Before `dotfiles vault push` operations
+- Before `dotfiles vault pull` operations
+- During setup wizard vault configuration phase
+
+**Interactive error recovery:**
+If validation fails during setup, the wizard offers to open your editor:
+```
+Vault configuration is invalid
+
+Open editor to fix now? [Y/n]: y
+```
+
+After you fix errors and save, validation re-runs automatically.
+
+**Example output:**
+```
+════════════════════════════════════════════════════════════
+  Vault Configuration Schema Validation
+════════════════════════════════════════════════════════════
+
+Validating: /home/user/.config/dotfiles/vault-items.json
+
+Configuration summary:
+  • 5 vault items configured
+  • 2 SSH keys configured
+  • 3 syncable items configured
+
+✓ vault-items.json schema is valid
+```
+
+**Common errors and fixes:**
+- `Missing required field: vault_items` → Add empty object: `"vault_items": {}`
+- `Item X: missing required field (path, required, or type)` → Add missing fields
+- `Item X: invalid type "folder"` → Change to "file" or "sshkey"
+- `Invalid JSON syntax` → Run `jq . ~/.config/dotfiles/vault-items.json` to find syntax errors
 
 ---
 

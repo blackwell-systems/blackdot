@@ -269,6 +269,29 @@ Vault items are defined in a user-editable config file:
 
 See `vault/vault-items.example.json` for the template. Run `dotfiles migrate` to upgrade from v2.x.
 
+### Schema Validation (v3.0+)
+
+The vault system validates `vault-items.json` before all sync operations:
+
+```bash
+dotfiles vault validate  # Manual validation
+```
+
+**Automatic validation:**
+- Before `dotfiles vault push` operations
+- Before `dotfiles vault pull` operations
+- During setup wizard vault configuration phase
+
+**Validates:**
+- ✅ Valid JSON syntax
+- ✅ Required fields (path, required, type)
+- ✅ Valid type values ("file" or "sshkey")
+- ✅ Naming conventions (capital letter start)
+- ✅ Path format (~, /, or $ prefix)
+
+**Interactive error recovery:**
+If validation fails during setup, offers to open editor for immediate fixes with automatic re-validation after save.
+
 ### Data Flow
 
 ```mermaid
@@ -317,6 +340,45 @@ Each vault item follows a consistent schema:
   ]
 }
 ```
+
+## Setup Wizard (v3.0+)
+
+The interactive setup wizard (`dotfiles setup`) guides users through installation with visual feedback:
+
+### Progress Visualization
+
+```
+╔═══════════════════════════════════════════════════════════════╗
+║ Step 3 of 6: Vault Configuration
+╠═══════════════════════════════════════════════════════════════╣
+║ ██████████░░░░░░░░░░ 50%
+╚═══════════════════════════════════════════════════════════════╝
+```
+
+**Features:**
+- **Unicode progress bars** - 20-character bar with █ (completed) and ░ (remaining)
+- **Step counter** - Shows current step and total steps
+- **Percentage indicator** - Exact completion percentage
+- **Overview display** - All steps shown at beginning
+- **Division by zero protection** - Guards against edge cases
+- **Overflow protection** - Clamps progress to valid range
+
+**Setup phases:**
+1. Symlinks - Shell configuration
+2. Packages - Homebrew installation
+3. Vault - Backend selection
+4. Secrets - Credential restoration
+5. Claude Code - Optional integration
+6. Templates - Machine-specific configs
+
+### State Persistence
+
+State is saved to `~/.config/dotfiles/config.json`:
+- Setup completion status per phase
+- User preferences (vault backend, package tier)
+- Can resume if interrupted
+
+See [State Management](state-management.md) for details.
 
 ## Health Check System
 
