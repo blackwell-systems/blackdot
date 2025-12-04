@@ -329,6 +329,15 @@ dotfiles setup  # Guides you through everything
 
 Auto-detects your platform (macOS, Linux, WSL2), detects available vault CLIs (Bitwarden, 1Password, pass), prompts you to choose. Option to skip vault entirely for minimal setups. One command handles bootstrap, vault selection, secret restoration, and health validation. Progress is saved—resume anytime if interrupted.
 
+**Visual progress tracking (v3.0+):** Unicode progress bars show your current step with percentage completion:
+```
+╔═══════════════════════════════════════════════════════════════╗
+║ Step 3 of 6: Vault Configuration
+╠═══════════════════════════════════════════════════════════════╣
+║ ██████████░░░░░░░░░░ 50%
+╚═══════════════════════════════════════════════════════════════╝
+```
+
 **State persistence:** If interrupted, just run `dotfiles setup` again—it picks up where you left off.
 
 </details>
@@ -365,9 +374,12 @@ Perfect for users with existing credentials who want to sync them across machine
 export DOTFILES_VAULT_BACKEND=bitwarden  # or 1password, pass
 dotfiles vault push --all    # Push local secrets to vault
 dotfiles vault pull       # Pull secrets on new machine
+dotfiles vault validate   # Validate configuration schema (v3.0+)
 ```
 
-Unified API across Bitwarden, 1Password, and pass. Syncs SSH keys, AWS credentials, Git config, environment secrets. Bidirectional: local changes push to vault, new machines restore from vault. Schema validation prevents corrupt items. Drift detection warns before overwrites.
+Unified API across Bitwarden, 1Password, and pass. Syncs SSH keys, AWS credentials, Git config, environment secrets. Bidirectional: local changes push to vault, new machines restore from vault. Drift detection warns before overwrites.
+
+**Schema validation (v3.0+):** Automatic validation before all sync operations catches configuration errors early. Validates JSON syntax, required fields, type values, and naming conventions. Interactive error recovery offers to open your editor for immediate fixes.
 
 **What credentials can I store?**
 
