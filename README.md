@@ -9,7 +9,6 @@
 [![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)](https://github.com/blackwell-systems/dotfiles)
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
 
 > **The first dotfiles designed for AI-assisted development.** Opinionated, batteries-included configuration for developers who use Claude Code across machines. Multi-vault secrets, portable sessions, machine-specific templates, and self-healing config.
 
@@ -17,19 +16,139 @@
 
 ---
 
-## Dotfiles for the AI-assisted development era
+## One-Line Install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
+```
+
+### What This Does
+
+**For users with existing credentials (SSH keys, AWS config, Git config):**
+
+```console
+$ curl -fsSL ... | bash && dotfiles setup
+
+    ____        __  _____ __
+   / __ \____  / /_/ __(_) /__  _____
+  / / / / __ \/ __/ /_/ / / _ \/ ___/
+ / /_/ / /_/ / /_/ __/ / /  __(__  )
+/_____/\____/\__/_/ /_/_/\___/____/
+
+Detected platform: macOS
+Installing Homebrew...
+Installing 80+ packages (eza, fzf, ripgrep, bat, etc.)...
+Linking shell config (.zshrc, .p10k.zsh)...
+Created /workspace symlink for portable Claude sessions
+
+═══════════════════════════════════════════════════════════════
+                        Setup Wizard
+═══════════════════════════════════════════════════════════════
+
+STEP 1: Symlinks (already configured)
+STEP 2: Packages (already installed)
+
+STEP 3: Vault Configuration
+────────────────────────────────────────────────────────────────
+Available vault backends:
+  1) bitwarden  ← detected
+  2) 1password  ← detected
+  3) pass
+  4) Skip (configure manually)
+
+Select vault backend [1]: 1
+
+Vault configured (bitwarden)
+Vault unlocked
+
+STEP 4: Secrets Management
+────────────────────────────────────────────────────────────────
+Scanning secrets...
+
+  Local only (not in vault):
+    • SSH-GitHub-Enterprise → ~/.ssh/id_ed25519_enterprise_ghub
+    • SSH-GitHub-Personal → ~/.ssh/id_ed25519_personal
+    • AWS-Config → ~/.aws/config
+    • AWS-Credentials → ~/.aws/credentials
+    • Git-Config → ~/.gitconfig
+
+Found 5 local secret(s) not in vault.
+Push these to bitwarden so you can restore on other machines.
+
+Push local secrets to vault? [Y/n]: y
+
+  Creating SSH-GitHub-Enterprise... done
+  Creating SSH-GitHub-Personal... done
+  Creating AWS-Config... done
+  Creating AWS-Credentials... done
+  Creating Git-Config... done
+
+Pushed 5 secret(s) to vault
+
+STEP 5: Claude Code (Optional)
+────────────────────────────────────────────────────────────────
+Claude Code detected. dotclaude helps manage profiles.
+
+Install dotclaude? [Y/n]: y
+
+dotclaude installed
+
+═══════════════════════════════════════════════════════════════
+Setup complete!
+
+Quick commands:
+  dotfiles status   - Visual dashboard
+  dotfiles doctor   - Health check
+  dotfiles help     - All commands
+```
+
+**What you get:**
+- **Homebrew + 80+ packages** (eza, fzf, ripgrep, bat, jq, aws-cli, etc.)
+- **Smart credential onboarding** - Detects existing SSH/AWS/Git, offers to vault them
+- **Bidirectional vault sync** - Push local → vault, restore vault → local
+- **Portable Claude sessions** - `/workspace` paths work across all machines
+- **Resume support** - Interrupted? Just run `dotfiles setup` again
+
+**5-minute setup. Works on macOS, Linux, WSL2, Docker.**
+
+### Alternative: Try Before Installing
+
+Test in a disposable Docker container (no installation):
+
+```bash
+docker run -it --rm ghcr.io/blackwell-systems/dotfiles:lite
+```
+
+See [Docker Guide](docs/docker.md) for container options.
+
+---
+
+## Why This Dotfiles?
+
+**Built for Claude Code users who work across multiple machines.**
 
 > **"Start on Mac, continue on Linux, keep your conversation."**
 
-If you use Claude Code across multiple machines, this is the only dotfiles solution that:
+The only dotfiles solution that:
 
-1. **Portable Sessions** – `/workspace` symlink ensures identical paths everywhere. Claude sessions sync seamlessly.
-2. **Auto-Redirect** – Work in `~/workspace/project`? Claude automatically uses `/workspace/project` for session continuity.
-3. **Multi-Backend Support** – Works with Claude via Anthropic Max, AWS Bedrock, or any provider.
+1. **Portable Claude Sessions** – `/workspace` symlink ensures identical paths everywhere. Your Claude conversations sync seamlessly across macOS, Linux, and WSL2.
+
+2. **Smart Secrets Onboarding** – Detects existing credentials (SSH keys, AWS, Git) and offers to vault them automatically. New machines restore everything with one command.
+
+3. **Multi-Vault Backend** – Works with Bitwarden, 1Password, or pass. Unified API across all backends. Bidirectional sync with drift detection.
+
+4. **Self-Healing Configuration** – `dotfiles doctor --fix` automatically repairs permissions, broken symlinks, and misconfigurations.
+
+**Not using Claude Code?** It's still the most robust dotfiles for multi-machine developer workflows with vault-backed secrets.
 
 ---
 
 ## Features
+
+<details>
+<summary><b>View All Features (18)</b></summary>
+
+### Core Features
 
 <details>
 <summary><b>Interactive Setup Wizard</b> - One command, complete setup</summary>
@@ -39,6 +158,9 @@ dotfiles setup  # Guides you through everything
 ```
 
 Auto-detects your platform (macOS, Linux, WSL2), detects available vault CLIs (Bitwarden, 1Password, pass), prompts you to choose. Option to skip vault entirely for minimal setups. One command handles bootstrap, vault selection, secret restoration, and health validation. Progress is saved—resume anytime if interrupted.
+
+**State persistence:** If interrupted, just run `dotfiles setup` again—it picks up where you left off.
+
 </details>
 
 <details>
@@ -55,7 +177,8 @@ First-time vault setup wizard that:
 - Creates `~/.config/dotfiles/vault-items.json` config file
 - Works with any vault backend (Bitwarden, 1Password, pass)
 
-Perfect for new machines or first-time vault users.
+Perfect for users migrating from manual credential management or setting up a new machine.
+
 </details>
 
 <details>
@@ -79,6 +202,7 @@ All credential types are stored as vault items (secure notes):
 - **AI Tools** - Claude Code profiles (optional)
 
 [Complete list and vault item formats →](vault/README.md#vault-items-complete-list)
+
 </details>
 
 <details>
@@ -94,6 +218,84 @@ cd /workspace/my-project && claude
 ```
 
 The `/workspace` symlink creates identical paths across platforms. Claude Code session folders match everywhere. Start on Mac, continue on Linux, full history intact. Multiple backends: Anthropic Max (consumer) or AWS Bedrock (enterprise SSO). No other dotfiles does this.
+
+**Auto-redirect:** The `claude` wrapper detects `~/workspace/*` and automatically redirects to `/workspace/*` with an educational message.
+
+</details>
+
+### Safety & Reliability
+
+<details>
+<summary><b>Self-Healing Configuration</b> - Never breaks</summary>
+
+```bash
+dotfiles doctor           # Validate everything
+dotfiles doctor --fix     # Auto-repair issues
+dotfiles drift            # Check local vs vault
+```
+
+Validates symlinks, SSH keys (permissions 600/644), AWS config, vault status, shell setup. Auto-repair fixes permissions, broken symlinks, missing dependencies. Drift detection catches unsync'd changes before switching machines.
+
+**Metrics collection:** Tracks health over time in `~/.dotfiles-metrics.jsonl` for trend analysis.
+
+</details>
+
+<details>
+<summary><b>Git Safety Hooks</b> - Prevent disasters</summary>
+
+**Blocked commands:**
+- `git push --force origin main`
+- `git reset --hard` (without confirmation)
+- `git clean -f` (removes untracked files)
+- `git rebase -i` (not supported in non-interactive environments)
+
+**SessionStart hook:** Fetches latest from remote and warns if branch has diverged.
+
+Pre-commit and pre-push hooks catch accidents before they happen. Configurable per-repository. [Setup guide](docs/claude-code.md)
+
+</details>
+
+<details>
+<summary><b>Comprehensive Testing</b> - 124 tests and counting</summary>
+
+```bash
+./test/run_tests.sh          # All tests
+./test/run_tests.sh unit     # Unit tests only
+./test/run_tests.sh error    # Error scenarios
+```
+
+**Test coverage:**
+- 32 dotclaude integration tests
+- 23 vault function tests
+- 22 error scenarios (permissions, missing files, edge cases)
+- 21 integration tests (mock Bitwarden, backup cycles)
+- 16 CLI command tests
+- 10 template engine tests
+
+CI runs shellcheck, zsh validation, all tests on every push. Code coverage via kcov + Codecov.
+
+</details>
+
+### Advanced Features
+
+<details>
+<summary><b>Machine-Specific Templates</b> - One config, many machines</summary>
+
+```bash
+dotfiles template init    # Setup machine variables
+dotfiles template render  # Generate configs
+dotfiles template link    # Symlink to destinations
+```
+
+One `.gitconfig.tmpl` becomes many `.gitconfig` files with different emails, signing keys, settings per machine. Supports variables, conditionals, loops. Auto-detected values (hostname, OS, user) with custom overrides.
+
+**Template syntax:**
+- `{{ variable }}` - Variable substitution
+- `{{#if os == "macos"}}...{{/if}}` - Conditionals
+- `{{#each ssh_hosts}}...{{/each}}` - Loops
+
+[Template Guide](docs/templates.md)
+
 </details>
 
 <details>
@@ -111,30 +313,7 @@ dotfiles vault restore     # Secrets follow your profile
 Seamless integration with [dotclaude](https://github.com/blackwell-systems/dotclaude). dotclaude manages Claude profiles (CLAUDE.md, agents, standards). dotfiles manages secrets (SSH, AWS, Git). Switch between OSS, client, and work contexts while vault secrets stay synced. Both respect `/workspace` paths for portable sessions.
 
 [Integration Guide](docs/DOTCLAUDE-INTEGRATION.md)
-</details>
 
-<details>
-<summary><b>Self-Healing Configuration</b> - Never breaks</summary>
-
-```bash
-dotfiles doctor           # Validate everything
-dotfiles doctor --fix     # Auto-repair issues
-dotfiles drift            # Check local vs vault
-```
-
-Validates symlinks, SSH keys (permissions 600/644), AWS config, vault status, shell setup. Auto-repair fixes permissions, broken symlinks, missing dependencies. Drift detection catches unsync'd changes before switching machines.
-</details>
-
-<details>
-<summary><b>Machine-Specific Templates</b> - One config, many machines</summary>
-
-```bash
-dotfiles template init    # Setup machine variables
-dotfiles template render  # Generate configs
-dotfiles template link    # Symlink to destinations
-```
-
-One `.gitconfig.tmpl` becomes many `.gitconfig` files with different emails, signing keys, settings per machine. Supports variables, conditionals, loops. Auto-detected values (hostname, OS, user) with custom overrides.
 </details>
 
 <details>
@@ -147,7 +326,10 @@ dotfiles backup restore   # Interactive restore
 ```
 
 Timestamped tar.gz archives in `~/.dotfiles-backups/`. Includes all dotfiles, configs, optional secrets. Interactive restore with preview. Auto-cleanup keeps only 10 most recent.
+
 </details>
+
+### Tools & Utilities
 
 <details>
 <summary><b>Unified CLI Interface</b> - Everything under one command</summary>
@@ -163,17 +345,9 @@ dotfiles help      # Full command list
 ```
 
 Consistent flags across all subcommands. Full tab completion for commands, flags, and context-aware arguments.
-</details>
 
-<details>
-<summary><b>Package Management</b> - Keep tools in sync</summary>
+[CLI Reference](docs/cli-reference.md)
 
-```bash
-dotfiles packages            # Check Brewfile status
-dotfiles packages --install  # Install missing packages
-```
-
-Shows which Brewfile packages are installed, missing, or outdated. Works across macOS (Homebrew) and Linux (Linuxbrew). Unified Brewfile means same tools everywhere. Supports conditional packages (macOS-only casks, Linux-only tools).
 </details>
 
 <details>
@@ -191,7 +365,36 @@ dust     # Visual disk usage
 ```
 
 All configured and ready. Lazy-loaded for fast shell startup (< 100ms). Unified keybindings work out of the box.
+
 </details>
+
+<details>
+<summary><b>AWS Workflow Helpers</b> - SSO made simple</summary>
+
+```bash
+awsswitch     # Interactive profile picker (auto-login)
+awsprofiles   # List all profiles
+awswho        # Current identity (account, user, ARN)
+awsassume     # Assume role
+```
+
+`awsswitch` detects expired SSO and runs `aws sso login` automatically. Fuzzy search profiles, auto-login if expired. Makes multi-account workflows painless.
+
+</details>
+
+<details>
+<summary><b>Package Management</b> - Keep tools in sync</summary>
+
+```bash
+dotfiles packages            # Check Brewfile status
+dotfiles packages --install  # Install missing packages
+```
+
+Shows which Brewfile packages are installed, missing, or outdated. Works across macOS (Homebrew) and Linux (Linuxbrew). Unified Brewfile means same tools everywhere. Supports conditional packages (macOS-only casks, Linux-only tools).
+
+</details>
+
+### Additional Features
 
 <details>
 <summary><b>Modular Shell Config</b> - Organized, not monolithic</summary>
@@ -212,32 +415,7 @@ zsh.d/
 ```
 
 Each module < 150 lines, focused, testable. Easy to enable/disable or customize per-machine.
-</details>
 
-<details>
-<summary><b>AWS Workflow Helpers</b> - SSO made simple</summary>
-
-```bash
-awsswitch     # Interactive profile picker (auto-login)
-awsprofiles   # List all profiles
-awswho        # Current identity (account, user, ARN)
-awsassume     # Assume role
-```
-
-`awsswitch` detects expired SSO and runs `aws sso login` automatically. Fuzzy search profiles, auto-login if expired. Makes multi-account workflows painless.
-</details>
-
-<details>
-<summary><b>Tab Completions</b> - Type less, do more</summary>
-
-```bash
-dotfiles <TAB>              # All subcommands
-dotfiles doctor <TAB>       # Flags (--fix, --drift)
-awsswitch <TAB>             # AWS profiles
-dotfiles vault sync <TAB>   # Vault item names
-```
-
-Context-aware suggestions for all commands. Auto-loaded on shell startup. Never memorize commands again.
 </details>
 
 <details>
@@ -246,23 +424,7 @@ Context-aware suggestions for all commands. Auto-loaded on shell startup. Never 
 **Supported platforms:** macOS, Linux, Windows (Git Bash/MSYS2), WSL2, Lima, Docker
 
 Platform detection auto-adapts (macOS uses `pbcopy`, Linux uses `xclip`/`wl-copy`). Brewfile works on both Homebrew and Linuxbrew. One codebase, many platforms. Vault system, health checks, CLI tools—all platform-independent. Adding a new platform takes ~30 lines.
-</details>
 
-<details>
-<summary><b>Comprehensive Testing</b> - 124 tests and counting</summary>
-
-```bash
-./test/run_tests.sh          # All tests
-./test/run_tests.sh unit     # Unit tests only
-./test/run_tests.sh error    # Error scenarios
-```
-
-**Test coverage:**
-- 39 unit tests (vault functions, CLI commands)
-- 21 integration tests (mock Bitwarden, backup cycles)
-- 20+ error scenarios (permissions, missing files, edge cases)
-
-CI runs shellcheck, zsh validation, all tests on every push. Code coverage via kcov + Codecov.
 </details>
 
 <details>
@@ -274,28 +436,7 @@ dotfiles metrics   # Visualize trends
 ```
 
 Writes to `~/.dotfiles-metrics.jsonl`: timestamp, hostname, OS, errors, warnings, fixes, health score (0-100), git branch/commit. ASCII graphs show health trends. Track average score, total errors/warnings, perfect run percentage.
-</details>
 
-<details>
-<summary><b>Git Safety Hooks</b> - Prevent disasters</summary>
-
-**Blocked commands:**
-- `git push --force origin main`
-- `git reset --hard` (without confirmation)
-- Committing `.env` files or credentials
-
-Pre-commit and pre-push hooks catch accidents before they happen. Configurable per-repository. [Setup guide](docs/claude-code.md)
-</details>
-
-<details>
-<summary><b>Shell Linting</b> - Catch errors early</summary>
-
-```bash
-dotfiles lint         # Validate syntax
-dotfiles lint --fix   # Auto-fix permissions
-```
-
-Runs shellcheck on all scripts (bootstrap, vault, bin). Pre-commit hooks prevent broken scripts. CI validates on every push. Finds bugs like unquoted variables, incorrect `[ ]` usage, missing error handling.
 </details>
 
 <details>
@@ -308,197 +449,50 @@ dotfiles uninstall --keep-secrets # Keep SSH/AWS/Git
 ```
 
 Removes all dotfiles, symlinks, configurations. Interactive confirmation prevents accidents. Dry-run shows exactly what would be deleted.
-</details>
 
-<details>
-<summary><b>Docker Test Environment</b> - Try before installing</summary>
-
-```bash
-docker build -f Dockerfile.lite -t dotfiles-lite .
-docker run -it --rm dotfiles-lite
-
-# Inside container
-dotfiles status
-dotfiles doctor
-exit  # Auto-deletes
-```
-
-Test in disposable containers with the right level of features for your needs:
-
-| Container | Size | Use Case |
-|-----------|------|----------|
-| `extralite` | ~50MB | Quick CLI exploration |
-| `lite` | ~200MB | Vault command testing |
-| `medium` | ~400MB | Full CLI + Homebrew |
-| `full` | ~800MB+ | Complete environment |
-
-See [Docker Guide](docs/docker.md) for container details and mock vault setup for testing without real credentials.
 </details>
 
 <details>
 <summary><b>Idempotent Design</b> - Safe to run anytime</summary>
 
 Bootstrap scripts check current state before changes. Already symlinked? Skip. Already installed? Skip. Wrong target? Fix it. Safe to re-run after updates, failed installs, or manual changes. No destructive operations without confirmation.
+
 </details>
 
 ---
 
-## How This Compares
-
-<details>
-<summary><b>Quick Comparison: This Repo vs Typical Dotfiles</b></summary>
-
-| Capability           | This Repo                                      | Typical Dotfiles                 |
-|----------------------|-----------------------------------------------|----------------------------------|
-| **Secrets management** | Multi-vault (Bitwarden, 1Password, pass)      | Manual copy between machines     |
-| **Health validation**  | Checker with `--fix`                          | None                             |
-| **Drift detection**    | Compare local vs vault state                  | None                             |
-| **Schema validation**  | Validates SSH keys & config structure         | None                             |
-| **Unit tests**         | 80+ bats-core tests                           | Rare                             |
-| **Docker support**     | Full Dockerfile for containerized bootstrap   | Rare                             |
-| **Modular shell config** | 10 modules in `zsh.d/`                      | Single monolithic file           |
-| **Optional components** | `SKIP_*` env flags                           | All-or-nothing                   |
-| **Cross-platform**     | macOS, Linux, Windows, WSL2, Docker           | Usually single-platform          |
+**→ [View detailed feature documentation](docs/README-FULL.md#features)**
 
 </details>
 
-<details>
-<summary><b>Why This Repo vs chezmoi?</b></summary>
+---
 
-chezmoi is the most popular dotfiles manager. Here's how we compare:
+## Use Cases
 
-| Feature | This Repo | chezmoi |
-|---------|-----------|---------|
-| **Secret Management** | 3 vault backends (bw/op/pass) with unified API | External tools only (no unified API) |
-| **Bidirectional Sync** | Local ↔ Vault | Templates only (one-way) |
-| **Claude Code Sessions** | Native integration | None |
-| **Health Checks** | Yes, with auto-fix | None |
-| **Drift Detection** | Local vs Vault comparison | `chezmoi diff` (files only) |
-| **Schema Validation** | SSH keys, configs | None |
-| **Machine Templates** | Custom engine | Go templates |
-| **Cross-Platform** | 5 platforms + Docker | Excellent |
-| **Learning Curve** | Shell scripts | YAML + Go templates |
-| **Single Binary** | Requires zsh | Go binary |
+**Perfect for:**
 
-</details>
+- **Claude Code users** working across macOS, Linux, and WSL2 with session portability
+- **Team onboarding** - New developer setup in < 5 minutes with vault-backed credentials
+- **Multi-cloud workflows** - AWS SSO, multiple profiles, automatic credential rotation
+- **Security-conscious developers** - Multi-vault backends, schema validation, drift detection
+- **CI/CD environments** - Docker containers, offline mode, state management
 
-### Detailed Comparison vs Popular Dotfiles
+**Also great for:**
 
-<details>
-<summary><b>Feature Matrix: This Repo vs thoughtbot, holman, mathiasbynens, YADR</b></summary>
-
-| Feature | This Repo | thoughtbot | holman | mathiasbynens | YADR |
-|---------|-----------|------------|--------|---------------|------|
-| **Secrets Management** | Multi-vault (bw/op/pass) | Manual | Manual | Manual | Manual |
-| **Bidirectional Sync** | Local ↔ Vault | No | No | No | No |
-| **Cross-Platform** | macOS, Linux, Windows, WSL2, Docker | Limited | macOS only | macOS only | Limited |
-| **Claude Code Sessions** | Portable via `/workspace` | No | No | No | No |
-| **Health Checks** | Yes, with auto-fix | No | No | No | No |
-| **Drift Detection** | Local vs Vault | No | No | No | No |
-| **Schema Validation** | SSH keys, configs | No | No | No | No |
-| **Unit Tests** | 80+ bats tests | No | No | No | No |
-| **CI/CD Integration** | GitHub Actions | Basic | No | No | No |
-| **Modular Shell Config** | 10 modules | Monolithic | Monolithic | Monolithic | Partial |
-| **Optional Components** | SKIP_* flags | No | No | No | No |
-| **Docker Bootstrap** | Full Dockerfile | No | No | No | No |
-| **One-Line Installer** | Interactive mode | Basic | No | No | Yes |
-| **Documentation Site** | Docsify (searchable) | README only | README only | README only | Wiki |
-| **Vault Item Templates** | With validation | No | No | No | No |
-| **Team Onboarding** | <5 min setup | ~30 min | ~30 min | ~30 min | ~45 min |
-| **macOS System Prefs** | 137 settings | No | Extensive | Extensive | No |
-| **Active Maintenance** | 2024 | Sporadic | Archived | Sporadic | Minimal |
-
-#### Key Differentiators
-
-**vs thoughtbot/dotfiles:**
-- **Secrets Management**: Multi-vault backends vs manual copying
-- **Cross-Platform**: Full Docker/WSL2/Lima support vs macOS/Linux only
-- **Health Monitoring**: Comprehensive checks vs none
-- **Testing**: Unit tests + CI vs basic install script
-
-**vs holman/dotfiles:**
-- **Active Development**: Regular updates vs archived (2018)
-- **Enterprise Ready**: Multi-vault support, team onboarding vs personal use
-- **Cross-Platform**: Multi-OS support vs macOS only
-- **Portability**: Claude Code sessions, /workspace symlink vs static paths
-
-**vs mathiasbynens/dotfiles:**
-- **Secrets Management**: Multi-vault system vs exposed in git
-- **Health Validation**: Auto-fix capability vs none
-- **Cross-Platform**: Full Linux/WSL2 support vs macOS focus
-- **Testing**: Automated tests vs manual verification
-- **Similar**: Both have extensive macOS system preferences
-
-**vs YADR (Yet Another Dotfile Repo):**
-- **Lighter Weight**: Focused tooling vs kitchen sink approach
-- **Secrets Safety**: Multi-vault backends vs all in git
-- **Modern Stack**: eza, fzf, zoxide vs older tools
-- **Maintenance**: Active vs minimal updates
-- **Similar**: Both aim for comprehensive setup
-
-#### What Makes This Unique
-
-1. **Only dotfiles with multi-vault backend support** - Bitwarden, 1Password, or pass with unified API
-2. **Only dotfiles with Claude Code session portability** - `/workspace` symlink + auto-redirect
-3. **Only dotfiles with comprehensive health checks** - Validator with auto-fix
-4. **Only dotfiles with drift detection** - Compare local vs vault state
-5. **Only dotfiles with schema validation** - Ensures SSH keys/configs are valid before restore
-6. **Only dotfiles with Docker bootstrap testing** - Reproducible CI/CD environments
-7. **Only dotfiles with machine-specific templates** - Auto-generate configs for work vs personal machines
-
-</details>
-
-### What you get
-
-- **Vault-backed secrets**: SSH keys, AWS credentials, and configs live in your vault (Bitwarden, 1Password, or pass)—not scattered across machines or committed to git
-- **Self-healing dotfiles**: Health checks catch permission drift, broken symlinks, and missing vault items. Auto-fix with `--fix`
-- **Observable state**: Track health metrics over time, detect when things break
-- **Tested**: CI runs shellcheck, zsh syntax validation, and unit tests on every push
-
-### Modern, opinionated defaults
-
-| Choice | Default | Why |
-|--------|---------|-----|
-| Shell | Zsh + Powerlevel10k | Fast, extensible, great prompts |
-| Package manager | Homebrew | Works on macOS and Linux |
-| CLI tools | eza, fzf, ripgrep, bat | Modern replacements for ls, find, grep, cat |
-| Secrets | Vault-backed (not in git) | Security best practice |
-| Structure | Modular `zsh.d/` | Easier to maintain than monolithic |
-
-Override anything in `99-local.zsh` or fork to customize.
-
-### What's optional
-
-Everything works on a single machine. Cross-platform sync, Claude session portability, and vault integration are opt-in:
-
-```bash
-# Minimal install (no vault, no /workspace symlink, no Claude setup)
-SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
-
-# Then manually configure ~/.ssh, ~/.aws, ~/.gitconfig
-```
-
-> 💡 **Don't use a vault manager?** No problem!
->
-> The vault system is completely optional. Run with `--minimal` flag:
-> ```bash
-> curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
-> ```
-> Then manually configure `~/.ssh`, `~/.aws`, `~/.gitconfig`. All shell config, aliases, and tools still work!
->
-> Or choose your preferred vault backend: Bitwarden (default), 1Password, or pass.
-
-Inspired by: holman/dotfiles, thoughtbot/dotfiles, mathiasbynens/dotfiles
+- Developers tired of manually copying SSH keys between machines
+- Teams that need consistent tooling across heterogeneous environments
+- Anyone managing multiple AWS accounts with SSO
+- DevOps engineers who need reproducible, testable configurations
 
 ---
 
 ## Prerequisites
 
 **Required:**
-- A supported environment: macOS, Windows, Linux, WSL2, or Lima
+- A computer running macOS, Linux, Windows (Git Bash/MSYS2), or WSL2
 - Internet access (for installing packages)
 
-**Auto-installed (if missing):**
+**Auto-installed:**
 - Git (via Xcode tools on macOS or apt on Linux)
 - Homebrew/Linuxbrew (bootstrap will install)
 - Modern CLI tools (eza, fzf, ripgrep, etc. via Brewfile)
@@ -512,36 +506,13 @@ Inspired by: holman/dotfiles, thoughtbot/dotfiles, mathiasbynens/dotfiles
 - **Claude Code installed** - For cross-machine session sync
   - Skip with `SKIP_CLAUDE_SETUP=true`
 
-To clone via SSH (recommended), you’ll also want an SSH key configured with GitHub. If you don’t have Git yet, you can either:
-- install it the way you normally would on your platform, or  
-- download this repository as a ZIP from GitHub, extract it, and run `bootstrap-mac.sh` / `bootstrap-linux.sh` / `bootstrap-windows.sh` – the scripts will install Git and configure your environment.
+To clone via SSH (recommended), you'll also want an SSH key configured with GitHub. If you don't have Git yet, the bootstrap scripts will install it automatically.
 
 ---
 
-## Try Before Installing
+## Quick Start
 
-**Don't trust random install scripts?** Smart! Test the entire system in a disposable Alpine container (< 30 seconds):
-
-```bash
-git clone https://github.com/blackwell-systems/dotfiles.git
-cd dotfiles
-docker build -f Dockerfile.lite -t dotfiles-lite .
-docker run -it --rm dotfiles-lite
-
-# Inside container - explore safely:
-dotfiles status      # See what's configured
-dotfiles doctor      # Run health checks
-dotfiles help        # View all commands
-exit                 # Container auto-deletes
-```
-
-**Why Alpine?** Lightweight (5MB base), fast boot, isolated environment. Perfect for trust-but-verify.
-
-**→ [Full Test Drive Guide](docs/TESTDRIVE.md)** - Sample workflows, dotclaude integration, troubleshooting
-
----
-
-## One-Line Install
+### One-Line Install (Recommended)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
@@ -555,31 +526,19 @@ The install script clones the repository and runs bootstrap. Then `dotfiles setu
 
 Progress is saved—resume anytime if interrupted.
 
-**Minimal mode** (shell config only, no secrets integration):
+### Minimal Mode (No Vault)
+
+Shell config only, no secrets integration:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
 ```
 
-<details>
-<summary><b>What minimal mode skips</b></summary>
-
-| Feature | Skipped | How to add later |
-|---------|---------|------------------|
-| `/workspace` symlink | Yes | `sudo ln -s ~/workspace /workspace` |
-| Claude Code integration | Yes | `dotfiles setup` (select Claude phase) |
-| Vault setup wizard | Yes | `dotfiles setup` |
-| Secret restoration | Yes | `dotfiles vault restore` |
-
 **You still get:** Zsh + Powerlevel10k, all CLI tools (eza, fzf, ripgrep, etc.), aliases, functions, and the `dotfiles` command.
 
-**To enable full features later:** Simply run `dotfiles setup` anytime.
+**To enable vault later:** Run `dotfiles setup`
 
-</details>
-
----
-
-## Quick Start (Manual)
+### Manual Clone
 
 ```bash
 # 1. Clone
@@ -594,73 +553,7 @@ cd ~/workspace/dotfiles
 dotfiles setup
 ```
 
-**That's it!** The wizard handles:
-- Platform detection and bootstrap
-- Vault selection (Bitwarden, 1Password, pass, or skip)
-- Secret restoration
-- Health validation
-
 > **💡 Why `~/workspace`?** Bootstrap creates `/workspace → ~/workspace` symlink for **portable Claude Code sessions**. Use `/workspace/project` paths and your AI conversations sync across macOS, Linux, WSL—same session folder, same history. [Learn more](docs/README-FULL.md#canonical-workspace-workspace)
-
-<details>
-<summary><b>Don't use a vault manager?</b></summary>
-
-The vault system supports Bitwarden, 1Password, and pass. Or skip it entirely:
-
-**Option 1: Use `--minimal` flag**
-```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
-```
-
-**Option 2: Skip step 3 and manually configure:**
-- `~/.ssh/` – your SSH keys
-- `~/.aws/` – your AWS credentials
-- `~/.gitconfig` – your git identity
-- `~/.local/env.secrets` – environment variables
-
-All shell config, aliases, functions, and CLI tools still work. Only vault sync features are disabled.
-</details>
-
-<details>
-<summary><b>Optional Components (environment variables)</b></summary>
-
-Skip optional features using environment variables:
-
-```bash
-# Skip /workspace symlink creation (single-machine setup)
-SKIP_WORKSPACE_SYMLINK=true ./bootstrap/bootstrap-mac.sh
-
-# Skip Claude Code setup
-SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
-
-# Combine flags
-SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-mac.sh
-```
-
-**Available flags:**
-- `SKIP_WORKSPACE_SYMLINK=true` – Skip `/workspace` symlink creation (for single-machine setups)
-- `SKIP_CLAUDE_SETUP=true` – Skip `~/.claude` configuration symlink
-- `DOTFILES_OFFLINE=1` – Skip all vault operations (for air-gapped or offline environments)
-- `DOTFILES_SKIP_DRIFT_CHECK=1` – Skip drift check before vault restore (useful for CI/automation)
-
-All features are opt-in by default and can be disabled without breaking the rest of the setup.
-</details>
-
----
-
-## Use Cases
-
-- **Single Linux machine** – Vault-backed secrets, health checks, modern CLI. No cross-platform complexity.
-
-- **macOS daily driver** – Full experience including Ghostty terminal config and macOS system preferences.
-
-- **Docker/CI environments** – Bootstrap in containers for reproducible builds. Vault restore from CI secrets.
-
-- **Air-gapped/Offline** – Use `DOTFILES_OFFLINE=1` when vault isn't available. Vault operations skip gracefully.
-
-- **Multi-machine workflow** – Develop on macOS, test on Linux VM, deploy from WSL. Same dotfiles, same secrets, same Claude sessions everywhere.
-
-- **Team onboarding** – New developer? Clone, bootstrap, unlock vault. Consistent environment in minutes, not days.
 
 ---
 
@@ -688,214 +581,103 @@ See [Brewfile](Brewfile) for complete package list.
 
 ---
 
-## Key Concepts
+## Documentation
+
+- **[Complete Guide](docs/README-FULL.md)** - Everything in detail (2,300+ lines)
+- **[Vault System](docs/vault-README.md)** - Multi-backend secrets management
+- **[Templates](docs/templates.md)** - Machine-specific configuration
+- **[Architecture](docs/architecture.md)** - System design and components
+- **[CLI Reference](docs/cli-reference.md)** - All commands and flags
+- **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
+- **[Test Drive Guide](docs/TESTDRIVE.md)** - Try in Docker before installing
+- **[dotclaude Integration](docs/DOTCLAUDE-INTEGRATION.md)** - Profile management
+- **[State Management](docs/state-management.md)** - Setup wizard internals
+
+**GitHub Pages:** [https://blackwell-systems.github.io/dotfiles/](https://blackwell-systems.github.io/dotfiles/)
+
+---
+
+## Platform Support
+
+| Platform | Status | Notes |
+|----------|--------|-------|
+| macOS (Apple Silicon) | Fully tested | Primary development environment |
+| macOS (Intel) | Fully tested | Auto-detects architecture |
+| Lima (Ubuntu 24.04) | Fully tested | Recommended Linux VM for macOS |
+| WSL2 (Windows) | Auto-detected | Uses Linux bootstrap |
+| Windows (Git Bash/MSYS2) | Native support | Uses Windows bootstrap |
+| Ubuntu/Debian | Compatible | Tested on Ubuntu 24.04 |
+| Arch/Fedora/BSD | Experimental | 15-30 min adaptation needed |
+
+---
+
+## How This Compares
 
 <details>
-<summary><h3>Workspace Architecture (Portable Sessions)</h3></summary>
+<summary><b>Comparison vs chezmoi, thoughtbot, holman, and other dotfiles</b></summary>
 
-Bootstrap creates `/workspace → ~/workspace` symlink for **portable Claude Code sessions** across machines.
+### Quick Comparison: This Repo vs Typical Dotfiles
 
-**The Problem:** Claude Code stores sessions by working directory path:
-- macOS: `/Users/name/project` → session `-Users-name-project-`
-- Linux: `/home/name/project` → session `-home-name-project-`
-- **Result:** Different machines = different session folders = lost conversation history
+| Capability           | This Repo                                      | Typical Dotfiles                 |
+|----------------------|-----------------------------------------------|----------------------------------|
+| **Secrets management** | Multi-vault (Bitwarden, 1Password, pass)      | Manual copy between machines     |
+| **Health validation**  | Checker with `--fix`                          | None                             |
+| **Drift detection**    | Compare local vs vault state                  | None                             |
+| **Schema validation**  | Validates SSH keys & config structure         | None                             |
+| **Unit tests**         | 124+ bats-core tests                          | Rare                             |
+| **Docker support**     | 4 container sizes for testing                 | Rare                             |
+| **Modular shell config** | 10 modules in `zsh.d/`                      | Single monolithic file           |
+| **Optional components** | `SKIP_*` env flags                           | All-or-nothing                   |
+| **Cross-platform**     | macOS, Linux, Windows, WSL2, Docker           | Usually single-platform          |
+| **Claude Code sessions** | Portable via `/workspace`                   | None                             |
 
-**The Solution:** Use `/workspace/project` everywhere:
-```bash
-# ✅ Portable (use this)
-cd /workspace/my-project
-claude
+### Why This Repo vs chezmoi?
 
-# Session stored as: ~/.claude/projects/-workspace-my-project-/
-# Same on ALL machines! Resume conversations anywhere.
+chezmoi is the most popular dotfiles manager. Here's how we compare:
 
-# ❌ Non-portable (avoid)
-cd ~/workspace/my-project  # Different path per OS
-```
+| Feature | This Repo | chezmoi |
+|---------|-----------|---------|
+| **Secret Management** | 3 vault backends (bw/op/pass) with unified API | External tools only (no unified API) |
+| **Bidirectional Sync** | Local ↔ Vault | Templates only (one-way) |
+| **Claude Code Sessions** | Native integration | None |
+| **Health Checks** | Yes, with auto-fix | None |
+| **Drift Detection** | Local vs Vault comparison | `chezmoi diff` (files only) |
+| **Schema Validation** | SSH keys, configs | None |
+| **Machine Templates** | Custom engine | Go templates |
+| **Cross-Platform** | 5 platforms + Docker | Excellent |
+| **Learning Curve** | Shell scripts | YAML + Go templates |
+| **Single Binary** | Requires zsh | Go binary |
 
-**Auto-redirect:** The `claude` wrapper detects `~/workspace/*` and automatically switches to `/workspace/*`.
+### Detailed Comparison vs Popular Dotfiles
 
-**Why it matters:** Work on Mac, continue on Linux, **same conversation, full history**. No other dotfiles system does this.
+| Feature | This Repo | thoughtbot | holman | mathiasbynens | YADR |
+|---------|-----------|------------|--------|---------------|------|
+| **Secrets Management** | Multi-vault (bw/op/pass) | Manual | Manual | Manual | Manual |
+| **Bidirectional Sync** | Local ↔ Vault | No | No | No | No |
+| **Cross-Platform** | macOS, Linux, Windows, WSL2, Docker | Limited | macOS only | macOS only | Limited |
+| **Claude Code Sessions** | Portable via `/workspace` | No | No | No | No |
+| **Health Checks** | Yes, with auto-fix | No | No | No | No |
+| **Drift Detection** | Local vs Vault | No | No | No | No |
+| **Schema Validation** | SSH keys, configs | No | No | No | No |
+| **Unit Tests** | 124+ bats tests | No | No | No | No |
+| **CI/CD Integration** | GitHub Actions | Basic | No | No | No |
+| **Modular Shell Config** | 10 modules | Monolithic | Monolithic | Monolithic | Partial |
+| **Optional Components** | SKIP_* flags | No | No | No | No |
+| **Docker Bootstrap** | 4 container sizes | No | No | No | No |
+| **One-Line Installer** | Interactive mode | Basic | No | No | Yes |
+| **Documentation Site** | Docsify (searchable) | README only | README only | README only | Wiki |
+| **Active Maintenance** | 2024 | Sporadic | Archived | Sporadic | Minimal |
 
-[Full workspace documentation →](docs/README-FULL.md#canonical-workspace-workspace)
+### What Makes This Unique
 
-</details>
-
-<details>
-<summary><h3>Claude Code Backends</h3></summary>
-
-Multiple backend support for different use cases:
-
-| Command | Backend | Use Case |
-|---------|---------|----------|
-| `claude` | Default | Uses Max subscription or direct API |
-| `claude-max` / `cm` | Anthropic Max | Personal/consumer subscription |
-| `claude-bedrock` / `cb` | AWS Bedrock | Enterprise, cost-controlled, SSO |
-
-**Setup for AWS Bedrock:**
-```bash
-cp ~/workspace/dotfiles/claude/claude.local.example ~/.claude.local
-vim ~/.claude.local  # Add AWS SSO profile
-```
-
-[Full Claude Code guide →](docs/claude-code.md)
-
-</details>
-
-<details>
-<summary><h3>Vault System (Multi-Backend)</h3></summary>
-
-Secrets are stored in your preferred vault and restored on new machines:
-
-```bash
-# Set your preferred backend (add to ~/.zshrc)
-export DOTFILES_VAULT_BACKEND=bitwarden  # default
-export DOTFILES_VAULT_BACKEND=1password  # 1Password CLI v2
-export DOTFILES_VAULT_BACKEND=pass       # Standard Unix password manager
-
-# First time: Push secrets to vault
-dotfiles vault sync --all
-
-# New machine: Restore secrets
-dotfiles vault restore
-
-# Validate vault item schema
-dotfiles vault validate
-
-# Check for drift (local vs vault)
-dotfiles drift
-```
-
-**Supported backends:**
-| Backend | CLI Tool | Description |
-|---------|----------|-------------|
-| Bitwarden | `bw` | Default, full-featured, cloud-synced |
-| 1Password | `op` | v2 CLI with biometric auth |
-| pass | `pass` | GPG-based, git-synced, local-first |
-
-**Supported secrets:**
-- SSH keys (multiple identities)
-- SSH config (host mappings)
-- AWS config & credentials
-- Git configuration (.gitconfig)
-- Environment variables (.local/env.secrets)
-
-**Configuration file:**
-
-Vault items are defined in `~/.config/dotfiles/vault-items.json`, making it easy to customize which secrets to manage without editing source code. See [Vault README](docs/vault-README.md#configuration-file) for schema details.
-
-</details>
-
-<details>
-<summary><h3>Template System (Machine-Specific Configs)</h3></summary>
-
-Generate configuration files tailored to each machine using templates:
-
-```bash
-# First-time setup
-dotfiles template init       # Interactive setup wizard
-
-# View detected values
-dotfiles template vars       # List all variables
-
-# Generate configs
-dotfiles template render     # Render all templates
-dotfiles template link       # Symlink to destinations
-
-# Maintenance
-dotfiles template check      # Validate syntax
-dotfiles template diff       # Show what would change
-```
-
-**How it works:**
-1. Templates in `templates/configs/*.tmpl` use `{{ variable }}` syntax
-2. Variables are auto-detected (hostname, OS, user) or user-configured
-3. Rendered files go to `generated/` and are symlinked to destinations
-
-**Supported templates:**
-- `.gitconfig` - Git identity, signing, editor, aliases
-- `99-local.zsh` - Machine-specific shell config
-- `ssh-config` - SSH host configurations
-- `claude.local` - Claude Code backend settings
-
-**Variable precedence:**
-1. Environment variables (`DOTFILES_TMPL_*`)
-2. Local overrides (`templates/_variables.local.sh`)
-3. Machine-type defaults (work/personal)
-4. Auto-detected values (hostname, OS, etc.)
-
-See [Template Guide](docs/templates.md) for full documentation.
-
-</details>
-
-<details>
-<summary><h3>The `dotfiles` Command</h3></summary>
-
-A unified command for managing your dotfiles:
-
-```bash
-# Status & Health
-dotfiles status          # Quick visual dashboard (color-coded)
-dotfiles doctor          # Comprehensive health check
-dotfiles doctor --fix    # Auto-repair permission issues
-dotfiles drift           # Compare local files vs vault
-dotfiles diff            # Preview changes before sync/restore
-
-# Backup & Restore
-dotfiles backup          # Create timestamped backup
-dotfiles backup --list   # List available backups
-dotfiles backup restore  # Restore from backup
-
-# Vault Operations
-dotfiles vault restore   # Restore secrets (checks for local drift first)
-dotfiles vault restore --force  # Skip drift check, overwrite local
-dotfiles vault sync      # Sync local files to vault
-dotfiles vault setup     # Interactive vault item onboarding
-dotfiles vault list      # List vault items
-dotfiles vault check     # Validate vault items exist
-
-# Setup & Maintenance
-dotfiles setup           # Interactive setup wizard (with resume)
-dotfiles upgrade         # Pull latest, run bootstrap, verify
-dotfiles uninstall       # Clean removal (with --dry-run option)
-dotfiles lint            # Validate shell config syntax
-dotfiles lint --fix      # Auto-fix permissions
-dotfiles packages        # Check Brewfile package status
-dotfiles packages --install  # Install missing packages
-
-# Templates (machine-specific configs)
-dotfiles template init   # Setup template variables
-dotfiles template vars   # List all variables
-dotfiles template render # Generate configs from templates
-dotfiles template link   # Symlink generated files
-dotfiles template diff   # Show what would change
-
-# Navigation
-dotfiles cd              # Navigate to dotfiles directory
-dotfiles edit            # Open dotfiles in $EDITOR
-dotfiles help            # Show all commands
-```
-
-</details>
-
-<details>
-<summary><h3>Health Checks</h3></summary>
-
-Validate your environment anytime:
-
-```bash
-dotfiles doctor             # Comprehensive check
-dotfiles doctor --fix       # Auto-repair permissions
-dotfiles drift              # Compare local vs vault
-```
-
-**Checks performed:**
-- Symlinks (zshrc, p10k, claude, ghostty)
-- Required commands (brew, zsh, git, bw, aws)
-- SSH keys and permissions (600 private, 644 public)
-- AWS configuration and credentials
-- Vault login status
-- Drift detection (local vs vault)
+1. **Only dotfiles with multi-vault backend support** - Bitwarden, 1Password, or pass with unified API
+2. **Only dotfiles with Claude Code session portability** - `/workspace` symlink + auto-redirect
+3. **Only dotfiles with comprehensive health checks** - Validator with auto-fix
+4. **Only dotfiles with drift detection** - Compare local vs vault state
+5. **Only dotfiles with schema validation** - Ensures SSH keys/configs are valid before restore
+6. **Only dotfiles with Docker bootstrap testing** - Reproducible CI/CD environments
+7. **Only dotfiles with machine-specific templates** - Auto-generate configs for work vs personal machines
+8. **Only dotfiles with smart credential onboarding** - Detects existing creds, offers to vault them
 
 </details>
 
@@ -906,7 +688,7 @@ dotfiles drift              # Compare local vs vault
 ### Update Dotfiles
 
 ```bash
-dotfiles-upgrade  # Pull latest, run bootstrap, check health
+dotfiles upgrade  # Pull latest, run bootstrap, check health
 ```
 
 ### Sync Secrets
@@ -926,7 +708,9 @@ dotfiles vault sync --dry-run --all
 # 1. Generate key
 ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey
 
-# 2. Add to vault/_common.sh SSH_KEYS array
+# 2. Add to vault config
+vim ~/.config/dotfiles/vault-items.json
+
 # 3. Sync to vault
 dotfiles vault sync SSH-GitHub-NewKey
 
@@ -936,213 +720,6 @@ dotfiles vault sync SSH-Config
 ```
 
 See [Maintenance Checklists](docs/README-FULL.md#maintenance-checklists) for more.
-
----
-
-## Project Structure
-
-<details>
-<summary><b>Directory Layout</b></summary>
-
-```
-dotfiles/
-├── Brewfile                   # Package definitions
-├── Dockerfile                 # Docker bootstrap example
-├── install.sh                 # One-line installer entry point
-│
-├── bootstrap/                 # Platform bootstrap scripts
-│   ├── _common.sh            # Shared bootstrap functions
-│   ├── bootstrap-mac.sh      # macOS setup
-│   ├── bootstrap-linux.sh    # Linux/WSL2/Lima setup
-│   └── bootstrap-dotfiles.sh # Symlink creation
-│
-├── bin/                       # CLI commands (use: dotfiles <command>)
-│   ├── dotfiles-doctor       # Health validation
-│   ├── dotfiles-drift        # Drift detection
-│   ├── dotfiles-backup       # Backup/restore
-│   ├── dotfiles-diff         # Preview changes
-│   ├── dotfiles-setup        # Setup wizard
-│   ├── dotfiles-metrics      # Metrics visualization
-│   └── dotfiles-uninstall    # Clean removal
-│
-├── vault/                     # Multi-backend secret management
-│   ├── _common.sh            # Shared config & validation
-│   ├── backends/             # Vault backend implementations
-│   │   ├── bitwarden.sh
-│   │   ├── 1password.sh
-│   │   └── pass.sh
-│   ├── restore.sh            # Orchestrator
-│   ├── restore-*.sh          # Restore SSH, AWS, Git, env
-│   └── sync-to-vault.sh      # Sync local → vault
-│
-├── zsh/                       # Shell configuration
-│   ├── zshrc                 # Main loader
-│   ├── p10k.zsh             # Powerlevel10k theme
-│   ├── completions/          # Tab completions
-│   └── zsh.d/               # Modular config (00-99)
-│       ├── 00-init.zsh      # Initialization
-│       ├── 40-aliases.zsh   # Aliases & dotfiles command
-│       ├── 70-claude.zsh    # Claude Code wrapper
-│       └── 99-local.zsh     # Machine-specific (gitignored)
-│
-├── lib/                       # Shared libraries
-│   ├── _logging.sh           # Colors and logging
-│   ├── _state.sh             # Setup wizard state management
-│   ├── _templates.sh         # Template engine
-│   └── _vault.sh             # Vault abstraction layer
-│
-├── templates/                 # Machine-specific templates
-│   ├── _variables.sh         # Default variables
-│   ├── _variables.local.sh   # Local overrides (gitignored)
-│   └── configs/*.tmpl        # Template files
-│
-├── generated/                 # Rendered templates (gitignored)
-│
-├── claude/                    # Claude Code integration
-│   ├── settings.json         # Permissions & preferences
-│   ├── hooks/                # Defensive git hooks
-│   └── commands/             # Custom slash commands
-│
-├── test/                      # Test suites (bats-core)
-│   ├── *.bats               # Unit & integration tests
-│   ├── fixtures/            # Test data (vault items, etc.)
-│   └── mocks/               # Mock CLI tools
-│
-├── macos/                     # macOS system preferences
-├── ghostty/                   # Ghostty terminal config
-├── zellij/                    # Zellij multiplexer config
-├── lima/                      # Lima VM configuration
-│
-└── docs/                      # Documentation (Docsify)
-    ├── cli-reference.md      # All commands & flags
-    ├── README-FULL.md        # Complete guide
-    └── *.md                  # Topic guides
-```
-
-</details>
-
----
-
-<details>
-<summary><b>Development & Testing</b> - Docker environments and 124 comprehensive tests</summary>
-
-### Docker Bootstrap
-
-Test the bootstrap process in a clean Ubuntu container:
-
-```bash
-# Build the Docker image
-docker build -t dotfiles-dev .
-
-# Run interactive shell
-docker run -it --rm dotfiles-dev
-
-# Run with vault restore (Bitwarden example)
-export BW_SESSION="$(bw unlock --raw)"
-docker run -it --rm -e BW_SESSION="$BW_SESSION" dotfiles-dev
-
-# Mount local dotfiles for testing changes
-docker run -it --rm -v $PWD:/home/developer/workspace/dotfiles dotfiles-dev
-```
-
-The Dockerfile demonstrates:
-- Clean environment setup from Ubuntu 24.04
-- Full bootstrap process (Homebrew, packages, dotfiles)
-- CI/CD integration patterns
-- Reproducible development containers
-
-### Testing (124 tests)
-
-Run tests with bats-core:
-
-```bash
-# Install bats-core (if not already installed)
-./test/setup_bats.sh
-
-# Run all tests
-./test/run_tests.sh
-
-# Or run specific suites
-./test/run_tests.sh unit         # Unit tests only
-./test/run_tests.sh integration  # Integration tests only
-./test/run_tests.sh error        # Error scenario tests only
-./test/run_tests.sh all          # All tests (default)
-```
-
-**Test coverage:**
-
-| Suite | Tests | Description |
-|-------|-------|-------------|
-| dotclaude integration | 32 | Claude profile management, sync, drift detection |
-| Vault functions | 23 | vault/_common.sh, multi-backend operations |
-| Error scenarios | 22 | Permission errors, missing files, edge cases |
-| Integration tests | 21 | Mock Bitwarden, backup/restore cycles |
-| CLI commands | 16 | Health check, drift, backup, init scripts |
-| Templates | 10 | Template engine, conditionals, loops |
-
-**CI/CD validates on every push:**
-- ShellCheck for bash scripts
-- ZSH syntax validation
-- All test suites (unit, integration, error)
-- Code coverage via kcov + Codecov
-- Cross-platform compatibility (macOS + Linux)
-
-### Modular Shell Configuration
-
-The zsh configuration is modular for easier maintenance and customization:
-
-```bash
-zsh/zsh.d/
-├── 00-init.zsh          # Powerlevel10k, OS detection
-├── 10-plugins.zsh       # Plugin loading
-├── 20-env.zsh           # Environment variables
-├── 30-tools.zsh         # CLI tool configurations (eza, fzf, bat)
-├── 40-aliases.zsh       # Aliases
-├── 50-functions.zsh     # Shell functions
-├── 60-aws.zsh           # AWS helpers
-├── 70-claude.zsh        # Claude Code wrapper
-├── 80-git.zsh           # Git shortcuts
-├── 90-integrations.zsh  # Tool integrations
-└── 99-local.zsh         # Machine-specific overrides (gitignored)
-```
-
-To customize:
-1. Copy `zsh/zsh.d/99-local.zsh.example` to `zsh/zsh.d/99-local.zsh`
-2. Add machine-specific aliases, environment variables, or PATH entries
-3. This file is gitignored and won't be overwritten on updates
-
-</details>
-
----
-
-## Platform Support
-
-| Platform | Status | Notes |
-|----------|--------|-------|
-| macOS (Apple Silicon) | Fully tested | Primary development environment |
-| macOS (Intel) | Fully tested | Auto-detects architecture |
-| Lima (Ubuntu 24.04) | Fully tested | Recommended Linux VM for macOS |
-| WSL2 (Windows) | Auto-detected | Uses Linux bootstrap |
-| Windows (Git Bash/MSYS2) | Native support | Uses Windows bootstrap |
-| Ubuntu/Debian | Compatible | Tested on Ubuntu 24.04 |
-| Arch/Fedora/BSD | Experimental | 15-30 min adaptation needed |
-
----
-
-**📚 [Complete Documentation Site](https://blackwell-systems.github.io/dotfiles/)**
-
-- **[CLI Reference](docs/cli-reference.md)** - All commands, flags, and environment variables
-- **[Full Documentation](docs/README-FULL.md)** - Complete guide (1,900+ lines)
-- **[Vault README](docs/vault-README.md)** - Multi-vault backend details
-- **[Template Guide](docs/templates.md)** - Machine-specific configuration templates
-- **[State Management](docs/state-management.md)** - Setup wizard state, resume, and preferences
-- **[Claude Code Guide](docs/claude-code.md)** - Multi-backend setup and session portability
-- **[dotclaude Integration](docs/DOTCLAUDE-INTEGRATION.md)** - Profile management with dotclaude
-- **[Architecture](docs/architecture.md)** - System diagrams and component overview
-- **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contributor guide
-- **[SECURITY.md](SECURITY.md)** - Security policy
-- **[CHANGELOG.md](CHANGELOG.md)** - Version history
 
 ---
 
