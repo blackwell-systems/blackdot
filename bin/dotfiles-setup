@@ -173,6 +173,14 @@ phase_packages() {
     echo "This will install packages from Brewfile."
     echo ""
 
+    # Count packages in Brewfile for progress indicator
+    local package_count=0
+    if [[ -f "$DOTFILES_DIR/Brewfile" ]]; then
+        package_count=$(grep -cE '^\s*(brew|cask|mas|tap)\s+' "$DOTFILES_DIR/Brewfile" 2>/dev/null || echo "80+")
+    fi
+
+    echo "This will install approximately ${package_count} packages."
+    echo ""
     echo -n "Install packages? [Y/n]: "
     read confirm
     if [[ "${confirm:-Y}" =~ ^[Nn]$ ]]; then
@@ -180,12 +188,33 @@ phase_packages() {
         return 0
     fi
 
-    info "Running brew bundle..."
-    if (cd "$DOTFILES_DIR" && brew bundle); then
+    info "Running brew bundle (this may take 5-10 minutes)..."
+    echo ""
+
+    # Show progress by streaming output
+    local brew_output
+    local current_package=0
+    (cd "$DOTFILES_DIR" && brew bundle 2>&1) | while IFS= read -r line; do
+        # Highlight package installations
+        if [[ "$line" =~ "Installing " ]] || [[ "$line" =~ "Upgrading " ]]; then
+            ((current_package++))
+            echo -e "${CYAN}→${NC} $line ${DIM}($current_package installed)${NC}"
+        elif [[ "$line" =~ "Using " ]] || [[ "$line" =~ "Skipping " ]]; then
+            echo -e "${DIM}  $line${NC}"
+        elif [[ "$line" =~ "Error:" ]] || [[ "$line" =~ "Warning:" ]]; then
+            echo -e "${YELLOW}  $line${NC}"
+        fi
+    done
+
+    # Check exit status
+    local brew_status=$?
+    echo ""
+    if [[ $brew_status -eq 0 ]]; then
         state_complete "packages"
-        pass "Packages installed"
+        pass "Packages installed successfully"
     else
         warn "Some packages may have failed - continuing"
+        info "Run 'brew bundle --file=$DOTFILES_DIR/Brewfile' to retry failed packages"
         state_complete "packages"
     fi
 }
