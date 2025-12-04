@@ -42,8 +42,8 @@ SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
 dotfiles status          # Visual dashboard
 dotfiles doctor          # Health check
 dotfiles doctor --fix    # Auto-fix issues
-dotfiles vault restore   # Restore secrets from vault
-dotfiles vault sync      # Sync local changes to vault
+dotfiles vault pull      # Pull secrets from vault
+dotfiles vault push      # Push local changes to vault
 dotfiles template init   # Setup machine-specific configs
 dotfiles help            # Show all commands
 ```
@@ -349,12 +349,12 @@ Define your items in the config file. Example structure:
 
 ---
 
-### `dotfiles vault restore`
+### `dotfiles vault pull`
 
-Restore secrets from vault to local machine.
+Pull secrets from vault to local machine.
 
 ```bash
-dotfiles vault restore [OPTIONS]
+dotfiles vault pull [OPTIONS]
 ```
 
 **Options:**
@@ -364,39 +364,40 @@ dotfiles vault restore [OPTIONS]
 | `--force` | `-f` | Skip drift check, overwrite local changes |
 
 **Behavior:**
-1. Checks for local drift (unless `--force`)
-2. Syncs vault to get latest
-3. Restores SSH keys, AWS config, Git config, etc.
-4. Sets correct file permissions
+1. Creates auto-backup of existing files
+2. Checks for local drift (unless `--force`)
+3. Syncs vault to get latest
+4. Pulls SSH keys, AWS config, Git config, etc.
+5. Sets correct file permissions
 
 **Environment variables:**
 - `DOTFILES_SKIP_DRIFT_CHECK=1` - Skip drift check (for automation)
 
 ---
 
-### `dotfiles vault sync`
+### `dotfiles vault push`
 
-Sync local configuration files back to vault.
+Push local configuration files to vault.
 
 ```bash
-dotfiles vault sync [OPTIONS] [ITEMS...]
+dotfiles vault push [OPTIONS] [ITEMS...]
 ```
 
 **Options:**
 
 | Option | Short | Description |
 |--------|-------|-------------|
-| `--dry-run` | `-n` | Show what would be synced without making changes |
-| `--all` | `-a` | Sync all items |
+| `--dry-run` | `-n` | Show what would be pushed without making changes |
+| `--all` | `-a` | Push all items |
 | `--help` | `-h` | Show help |
 
 **Arguments:**
 
 | Argument | Description |
 |----------|-------------|
-| `ITEMS` | Specific items to sync (space-separated) |
+| `ITEMS` | Specific items to push (space-separated) |
 
-**Syncable items:**
+**Pushable items:**
 - `SSH-Config`
 - `AWS-Config`
 - `AWS-Credentials`
@@ -406,10 +407,10 @@ dotfiles vault sync [OPTIONS] [ITEMS...]
 **Examples:**
 
 ```bash
-dotfiles vault sync --all            # Sync all items
-dotfiles vault sync --dry-run --all  # Preview changes
-dotfiles vault sync SSH-Config       # Sync single item
-dotfiles vault sync Git-Config AWS-Config  # Sync multiple
+dotfiles vault push --all            # Push all items
+dotfiles vault push --dry-run --all  # Preview changes
+dotfiles vault push SSH-Config       # Push single item
+dotfiles vault push Git-Config AWS-Config  # Push multiple
 ```
 
 ---
@@ -983,8 +984,8 @@ export DOTFILES_VAULT_BACKEND=1password
 # Offline mode (air-gapped environments)
 DOTFILES_OFFLINE=1 ./bootstrap/bootstrap-linux.sh
 
-# Force restore without drift check
-DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
+# Force pull without drift check
+DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull
 ```
 
 ---

@@ -270,16 +270,16 @@ sequenceDiagram
     participant Local as Local Files
     participant BW as Bitwarden
 
-    User->>CLI: dotfiles vault init
+    User->>CLI: dotfiles vault setup
     CLI->>Config: Create vault-items.json
     CLI->>Config: Set backend (bitwarden/1password/pass)
 
-    User->>CLI: dotfiles vault restore
+    User->>CLI: dotfiles vault pull
     CLI->>BW: Fetch secrets
     BW-->>CLI: Return encrypted data
     CLI->>Local: Write files (600 perms)
 
-    User->>CLI: dotfiles vault sync
+    User->>CLI: dotfiles vault push
     CLI->>Local: Read files
     CLI->>BW: Update vault items
 ```
@@ -371,8 +371,8 @@ graph TB
 |------|--------|-------------|---------|
 | Install | GitHub | Local | `curl ... \| bash` |
 | Bootstrap | Scripts | System | `dotfiles setup` |
-| Restore | Bitwarden | Local | `dotfiles vault restore` |
-| Sync | Local | Bitwarden | `dotfiles vault sync` |
+| Pull | Bitwarden | Local | `dotfiles vault pull` |
+| Push | Local | Bitwarden | `dotfiles vault push` |
 | Backup | Config | Archive | `dotfiles backup` |
 | Restore | Archive | Config | `dotfiles backup restore` |
 | Upgrade | GitHub | Local | `dotfiles upgrade` |
