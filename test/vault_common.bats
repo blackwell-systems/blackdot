@@ -93,7 +93,15 @@ zsh_var() {
 # ============================================================
 
 @test "get_ssh_key_paths returns all SSH key paths sorted" {
-  run zsh_eval "get_ssh_key_paths"
+  # Force reload of config by unsetting the guard variable
+  run zsh_eval "unset _VAULT_COMMON_LOADED _VAULT_LOADED; source '$COMMON_SH'; get_ssh_key_paths"
+
+  # Debug output
+  if [ "${#lines[@]}" -ne 2 ]; then
+    echo "Expected 2 lines, got ${#lines[@]}" >&3
+    echo "Output:" >&3
+    printf '%s\n' "${lines[@]}" >&3
+  fi
 
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 2 ]
