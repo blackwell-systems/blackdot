@@ -425,11 +425,9 @@ merge_configs() {
     # - Preserve custom properties where possible
 
     local merged
-    merged=$(jq -s '
-        # $discovered is .[0], $existing is .[1]
-        .[0] as $discovered |
-        .[1] as $existing |
-
+    merged=$(jq -n \
+        --argjson discovered "$discovered_json" \
+        --argjson existing "$existing_json" '
         # Start with discovered base
         $discovered |
 
@@ -472,7 +470,7 @@ merge_configs() {
         .aws_expected_profiles = (
             (($existing.aws_expected_profiles // []) + ($discovered.aws_expected_profiles // [])) | unique
         )
-    ' <(printf '%s' "$discovered_json") <(printf '%s' "$existing_json") 2>/dev/null)
+    ' 2>/dev/null)
 
     if [[ -z "$merged" ]]; then
         warn "Merge failed, using discovered items only"
@@ -628,11 +626,13 @@ EOF
                                 echo "  • Merged total: $new_items"
                                 echo ""
 
-                                local preserved=$(jq -s '
-                                    .[0].vault_items // {} | keys as $old |
-                                    .[1].vault_items // {} | keys as $new |
-                                    $old - $new
-                                ' <(printf '%s' "$existing_json") <(printf '%s' "$discovered_json"))
+                                local preserved=$(jq -n \
+                                    --argjson old "$existing_json" \
+                                    --argjson new "$discovered_json" '
+                                    $old.vault_items // {} | keys as $old_keys |
+                                    $new.vault_items // {} | keys as $new_keys |
+                                    $old_keys - $new_keys
+                                ')
                                 local preserved_count=$(echo "$preserved" | jq 'length')
 
                                 if [[ "$preserved_count" -gt 0 ]]; then
@@ -641,11 +641,13 @@ EOF
                                     echo ""
                                 fi
 
-                                local added=$(jq -s '
-                                    .[0].vault_items // {} | keys as $old |
-                                    .[1].vault_items // {} | keys as $new |
-                                    $new - $old
-                                ' <(printf '%s' "$existing_json") <(printf '%s' "$discovered_json"))
+                                local added=$(jq -n \
+                                    --argjson old "$existing_json" \
+                                    --argjson new "$discovered_json" '
+                                    $old.vault_items // {} | keys as $old_keys |
+                                    $new.vault_items // {} | keys as $new_keys |
+                                    $new_keys - $old_keys
+                                ')
                                 local added_count=$(echo "$added" | jq 'length')
 
                                 if [[ "$added_count" -gt 0 ]]; then
