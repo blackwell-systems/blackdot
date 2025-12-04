@@ -45,7 +45,7 @@ else
     echo ""
     echo "To fix:"
     echo "  1. Create missing items: dotfiles vault create"
-    echo "  2. Sync local changes: dotfiles vault sync"
+    echo "  2. Sync local changes: dotfiles vault push"
     echo "  3. Verify item structure in vault web interface"
     echo ""
     exit 1

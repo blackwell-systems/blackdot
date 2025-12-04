@@ -82,7 +82,7 @@ if is_offline; then
     echo ""
     echo "To sync later:"
     echo "  unset DOTFILES_OFFLINE"
-    echo "  dotfiles vault sync --all"
+    echo "  dotfiles vault push --all"
     exit 0
 fi
 

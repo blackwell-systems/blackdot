@@ -504,7 +504,7 @@ export DOTFILES_VAULT_BACKEND=mybackend
 
 # Should work with all vault commands
 dotfiles vault list
-dotfiles vault restore --dry-run
+dotfiles vault pull --dry-run
 dotfiles doctor
 dotfiles drift
 ```

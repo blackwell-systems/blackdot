@@ -142,7 +142,7 @@ if [[ -n "$EXISTING_JSON" ]]; then
     echo ""
 
     if ! $FORCE; then
-        fail "Use --force to overwrite, or use 'dotfiles vault sync' to update"
+        fail "Use --force to overwrite, or use 'dotfiles vault push' to update"
         exit 1
     fi
 

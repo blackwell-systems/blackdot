@@ -156,7 +156,7 @@ bw unlock --check --session "$BW_SESSION"
 
 ### "Vault item not found"
 
-**Symptom:** `dotfiles vault restore` can't find items.
+**Symptom:** `dotfiles vault pull` can't find items.
 
 **Solution:**
 ```bash
@@ -185,10 +185,10 @@ dotfiles diff --sync      # See what sync would do
 
 # Choose direction:
 # To use vault version:
-dotfiles vault restore
+dotfiles vault pull
 
 # To push local to vault:
-dotfiles vault sync --all
+dotfiles vault push --all
 ```
 
 ### Vault CLI not found

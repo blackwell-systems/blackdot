@@ -247,7 +247,7 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
 │  dotfiles status    ───────────────────► shows Claude profile status   │
 │  dotfiles doctor    ───────────────────► checks Claude health          │
 │  dotfiles drift     ───────────────────► detects profile changes       │
-│  dotfiles vault restore ───────────────► restores profiles.json        │
+│  dotfiles vault pull ───────────────► restores profiles.json        │
 │  dotfiles packages  ───────────────────► suggests dotclaude install    │
 │  dotfiles setup     ───────────────────► offers dotclaude setup        │
 │                                 │     │                                 │
@@ -268,7 +268,7 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
 |---------|-------------------|
 | `dotfiles status` | Shows active Claude profile |
 | `dotfiles doctor` | Validates Claude/dotclaude setup |
-| `dotfiles vault restore` | Restores Claude profiles.json |
+| `dotfiles vault pull` | Restores Claude profiles.json |
 | `dotfiles drift` | Detects profile changes vs vault |
 | `dotfiles packages` | Suggests dotclaude for Claude users |
 | `dotfiles setup` | Offers dotclaude installation |
@@ -278,7 +278,7 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
 1. **dotclaude** manages profiles in `~/code/dotclaude/profiles/`
 2. **dotclaude** auto-generates `~/.claude/profiles.json` on activate/create
 3. **dotfiles vault** syncs `profiles.json` to your password manager
-4. **dotfiles vault restore** restores it on new machines
+4. **dotfiles vault pull** restores it on new machines
 
 The `profiles.json` format:
 ```json
@@ -302,10 +302,10 @@ dotclaude create my-project
 dotclaude activate my-project
 
 # Sync to vault
-dotfiles vault sync Claude-Profiles
+dotfiles vault push Claude-Profiles
 
 # On new machine, restore everything including Claude profiles
-dotfiles vault restore
+dotfiles vault pull
 ```
 
 ### New Developer Onboarding
@@ -317,7 +317,7 @@ curl -fsSL .../install.sh | bash
 # Unlock vault and restore secrets (including Claude profiles)
 bw login
 export BW_SESSION="$(bw unlock --raw)"
-dotfiles vault restore
+dotfiles vault pull
 
 # Verify setup
 dotfiles doctor

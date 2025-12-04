@@ -128,7 +128,7 @@ docker run -it --rm dotfiles-full
 | `dotfiles status` | ✓ | ✓ | ✓ | ✓ |
 | `dotfiles doctor` | ✓ | ✓ | ✓ | ✓ |
 | `dotfiles setup` | ✓ | ✓ | ✓ | ✓ |
-| `dotfiles vault restore` | ✗ | ✓ | ✓ | ✓ |
+| `dotfiles vault pull` | ✗ | ✓ | ✓ | ✓ |
 | Bitwarden CLI | ✗ | ✓ | ✓ | ✓ |
 | 1Password CLI | ✗ | ✓ | ✓ | ✓ |
 | pass + GPG | ✗ | ✓ | ✓ | ✓ |
@@ -156,7 +156,7 @@ export DOTFILES_VAULT_BACKEND=pass
 
 # Test vault commands
 dotfiles vault check
-dotfiles vault restore --preview
+dotfiles vault pull --preview
 dotfiles drift
 ```
 

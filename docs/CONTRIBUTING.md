@@ -151,7 +151,7 @@ cd vault
 ./restore-ssh.sh --help
 
 # Test with dry-run mode (where available)
-dotfiles vault sync --dry-run SSH-Config
+dotfiles vault push --dry-run SSH-Config
 ```
 
 ### Integration Testing
@@ -369,7 +369,7 @@ export BW_SESSION="$(bw unlock --raw)"
 
 # Test vault operations (use test account!)
 ./vault/check-vault-items.sh -v
-dotfiles vault sync --dry-run SSH-Config
+dotfiles vault push --dry-run SSH-Config
 ```
 
 ### Debugging
