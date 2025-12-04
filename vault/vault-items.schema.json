@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/blackwell-systems/dotfiles/vault-items.schema.json",
+  "title": "Dotfiles Vault Items Configuration",
+  "description": "Schema for validating vault-items.json configuration file",
+  "type": "object",
+  "properties": {
+    "ssh_keys": {
+      "type": "object",
+      "description": "SSH key mappings (item name → file path)",
+      "patternProperties": {
+        "^[A-Z][A-Za-z0-9-]*$": {
+          "type": "string",
+          "pattern": "^[~/$].*"
+        }
+      },
+      "additionalProperties": false
+    },
+    "vault_items": {
+      "type": "object",
+      "description": "Detailed vault item configurations",
+      "patternProperties": {
+        "^[A-Z][A-Za-z0-9-]*$": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "pattern": "^[~/$].*",
+              "description": "File path (absolute or ~/ relative)"
+            },
+            "required": {
+              "type": "boolean",
+              "description": "Whether this item is required for system to function"
+            },
+            "type": {
+              "type": "string",
+              "enum": ["file", "sshkey"],
+              "description": "Type of vault item"
+            }
+          },
+          "required": ["path", "required", "type"],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "syncable_items": {
+      "type": "object",
+      "description": "Items that can be synced to vault (item name → file path)",
+      "patternProperties": {
+        "^[A-Z][A-Za-z0-9-]*$": {
+          "type": "string",
+          "pattern": "^[~/$].*"
+        }
+      },
+      "additionalProperties": false
+    },
+    "aws_expected_profiles": {
+      "type": "array",
+      "description": "List of expected AWS profile names",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": ["vault_items"],
+  "additionalProperties": false
+}
