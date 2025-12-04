@@ -2,6 +2,8 @@
 
 The `dotfiles setup` wizard uses a persistent state system to track progress, save preferences, and enable resume capability.
 
+> **v3.0 Update:** State management now uses JSON configuration format. Run `dotfiles migrate` to upgrade from v2.x INI files.
+
 ---
 
 ## Overview
@@ -15,27 +17,48 @@ State management provides:
 
 ---
 
-## State Files
+## Configuration File (v3.0)
 
-All state files are stored in `~/.config/dotfiles/`:
+All state and configuration is stored in a single JSON file:
 
-| File | Purpose |
-|------|---------|
-| `state.ini` | Setup wizard phase completion |
-| `config.ini` | User preferences and settings |
+**`~/.config/dotfiles/config.json`**
 
-### `~/.config/dotfiles/state.ini`
-
-Tracks which setup phases have been completed:
-
-```ini
-[phases]
-symlinks = complete
-packages = complete
-vault = complete
-secrets = complete
-claude = complete
+```json
+{
+  "version": 3,
+  "vault": {
+    "backend": "bitwarden",
+    "auto_sync": false,
+    "auto_backup": true
+  },
+  "backup": {
+    "enabled": true,
+    "auto_backup": true,
+    "retention_days": 30,
+    "max_snapshots": 10,
+    "compress": true,
+    "location": "~/.local/share/dotfiles/backups"
+  },
+  "setup": {
+    "completed": ["symlinks", "packages", "vault", "secrets"],
+    "current_tier": "enhanced"
+  },
+  "packages": {
+    "tier": "enhanced",
+    "auto_update": false,
+    "parallel_install": false
+  },
+  "paths": {
+    "dotfiles_dir": "~/workspace/dotfiles",
+    "config_dir": "~/.config/dotfiles",
+    "backup_dir": "~/.local/share/dotfiles/backups"
+  }
+}
 ```
+
+### Setup State (`setup.completed[]`)
+
+The `setup.completed` array tracks which setup phases have been completed:
 
 **Phases:**
 
@@ -46,21 +69,48 @@ claude = complete
 | `vault` | Vault backend | Selects and authenticates vault (Bitwarden/1Password/pass) |
 | `secrets` | Secret restoration | Restores SSH keys, AWS creds, Git config from vault |
 | `claude` | Claude Code | Optionally installs dotclaude for profile management |
+| `template` | Templates | Machine-specific config templates setup |
 
-### `~/.config/dotfiles/config.ini`
+### Configuration Settings
 
-Stores persistent user preferences:
+All settings are now stored in the same `config.json` file:
 
-```ini
-[vault]
-backend = bitwarden
+**Vault Settings (`vault.*`):**
+- `vault.backend` - `bitwarden`, `1password`, `pass`, or empty
+- `vault.auto_sync` - Auto-sync changes to vault (default: `false`)
+- `vault.auto_backup` - Auto-backup before operations (default: `true`)
+
+**Backup Settings (`backup.*`):**
+- `backup.enabled` - Enable backup system (default: `true`)
+- `backup.auto_backup` - Auto-backup before destructive operations (default: `true`)
+- `backup.retention_days` - Keep backups for N days (default: `30`)
+- `backup.max_snapshots` - Maximum number of backups (default: `10`)
+- `backup.compress` - Use gzip compression (default: `true`)
+- `backup.location` - Backup directory path
+
+**Paths (`paths.*`):**
+- `paths.dotfiles_dir` - Custom dotfiles installation directory
+- `paths.config_dir` - Configuration directory (default: `~/.config/dotfiles`)
+- `paths.backup_dir` - Backup storage location
+
+### Migrating from v2.x
+
+If you're upgrading from v2.x (INI files):
+
+```bash
+dotfiles migrate              # Interactive migration
+dotfiles migrate --yes        # Skip confirmation
+
+# Old files (v2.x):
+~/.config/dotfiles/state.ini
+~/.config/dotfiles/config.ini
+
+# New file (v3.0):
+~/.config/dotfiles/config.json
+
+# Backup location:
+~/.config/dotfiles/backups/pre-v3-migration-YYYYMMDD_HHMMSS/
 ```
-
-**Settings:**
-
-| Section | Key | Values | Description |
-|---------|-----|--------|-------------|
-| `vault` | `backend` | `bitwarden`, `1password`, `pass`, `none` | Preferred vault backend |
 
 ---
 
@@ -126,12 +176,12 @@ This means you can run `dotfiles setup` on an existing installation and it will 
 
 ## Library Functions
 
-The state system is implemented in `lib/_state.sh`:
+The state system is implemented in `lib/_state.sh` (uses `lib/_config.sh` as backend):
 
 ### Phase State Functions
 
 ```bash
-# Initialize state (creates directory and files if needed)
+# Initialize state (creates config.json if needed)
 state_init
 
 # Check if a phase is completed
@@ -139,37 +189,70 @@ if state_completed "symlinks"; then
     echo "Symlinks already configured"
 fi
 
-# Mark a phase as complete
+# Mark a phase as complete (adds to setup.completed[] array)
 state_complete "packages"
+
+# Mark a phase as incomplete (removes from array)
+state_reset "vault"
 
 # Check if setup is needed (any incomplete phases)
 if state_needs_setup; then
     echo "Run: dotfiles setup"
 fi
 
+# Get next incomplete phase
+next_phase=$(state_next_phase)
+
 # Infer state from filesystem
 state_infer
 ```
 
-### Config Functions
+### Config Functions (v3.0)
+
+Direct JSON config access via `lib/_config.sh`:
 
 ```bash
-# Get a config value
-backend=$(config_get "vault" "backend")
+# Get a config value (supports nested keys)
+backend=$(config_get "vault.backend")
+tier=$(config_get "packages.tier" "enhanced")
 
 # Set a config value
-config_set "vault" "backend" "1password"
+config_set "vault.backend" "1password"
+config_set "backup.retention_days" "60"
+
+# Boolean values
+config_set_bool "vault.auto_sync" true
+if config_get_bool "backup.enabled"; then
+    echo "Backups are enabled"
+fi
+
+# Array operations
+config_array_add "setup.completed" "symlinks"
+config_array_remove "setup.completed" "vault"
+config_get_array "setup.completed"  # Returns: symlinks\npackages\nsecrets
+
+# Validation and display
+config_validate                     # Validate JSON syntax and version
+config_show                         # Pretty-print entire config
+config_backup                       # Create timestamped backup
+```
+
+**Legacy API Compatibility:**
+```bash
+# v2.x API still works (delegates to v3.0 backend)
+backend=$(config_get "vault" "backend")      # Converts to vault.backend
+config_set "vault" "backend" "bitwarden"    # Converts to vault.backend
 ```
 
 ---
 
 ## Integration with Vault
 
-The vault backend preference is persisted in `config.ini`:
+The vault backend preference is persisted in `config.json`:
 
 ```bash
 # Priority order for vault backend:
-# 1. Config file (~/.config/dotfiles/config.ini)
+# 1. Config file (~/.config/dotfiles/config.json → vault.backend)
 # 2. Environment variable (DOTFILES_VAULT_BACKEND)
 # 3. Default (bitwarden)
 ```
@@ -181,20 +264,28 @@ When you select a vault during `dotfiles setup`, it's saved to the config file. 
 
 ---
 
-## File Format
+## File Format (v3.0)
 
-Both state files use INI format for simplicity and shell compatibility:
+Configuration uses JSON format for flexibility and nested structure support:
 
-```ini
-[section]
-key = value
+```json
+{
+  "version": 3,
+  "vault": { "backend": "bitwarden" },
+  "setup": { "completed": ["symlinks", "packages"] }
+}
 ```
 
-**Why INI?**
-- Pure zsh parsing (no external dependencies like `jq`)
-- Human-readable and hand-editable if needed
-- Simple key-value structure
-- Compatible with standard tools
+**Why JSON?**
+- Nested structures (e.g., `vault.backend`, `backup.retention_days`)
+- Array support (e.g., `setup.completed[]`)
+- Native jq support (jq already required dependency)
+- Consistent with `vault-items.json` format
+- Enables complex configurations (per-install paths, feature flags)
+- Still human-readable and hand-editable
+
+**Dependencies:**
+- `jq` - JSON processor (already in Brewfile, required for vault operations)
 
 ---
 
@@ -207,14 +298,14 @@ Check file permissions:
 ```bash
 ls -la ~/.config/dotfiles/
 # Should show: drwx------ (700) for directory
-# Files should be: -rw------- (600)
+# config.json should be: -rw------- (600)
 ```
 
 Fix permissions:
 
 ```bash
 chmod 700 ~/.config/dotfiles
-chmod 600 ~/.config/dotfiles/*.ini
+chmod 600 ~/.config/dotfiles/config.json
 ```
 
 ### Wrong Vault Backend
@@ -222,18 +313,37 @@ chmod 600 ~/.config/dotfiles/*.ini
 Check current config:
 
 ```bash
-cat ~/.config/dotfiles/config.ini
+cat ~/.config/dotfiles/config.json
+# Or pretty-print:
+jq '.' ~/.config/dotfiles/config.json
 ```
 
-Reset vault selection:
+Change vault backend:
 
 ```bash
-# Edit config directly
-echo "[vault]
-backend = 1password" > ~/.config/dotfiles/config.ini
+# Edit with jq
+jq '.vault.backend = "1password"' ~/.config/dotfiles/config.json > /tmp/config.json && \
+    mv /tmp/config.json ~/.config/dotfiles/config.json
 
 # Or reset and re-run setup
 dotfiles setup --reset
+```
+
+### Invalid JSON
+
+If config.json gets corrupted:
+
+```bash
+# Validate JSON
+jq empty ~/.config/dotfiles/config.json
+
+# If invalid, restore from backup
+ls ~/.config/dotfiles/backups/
+cp ~/.config/dotfiles/backups/config-YYYYMMDD_HHMMSS.json ~/.config/dotfiles/config.json
+
+# Or reset to defaults
+rm ~/.config/dotfiles/config.json
+dotfiles setup  # Will create new config
 ```
 
 ### State Out of Sync
@@ -242,7 +352,8 @@ If state doesn't match reality:
 
 ```bash
 # Option 1: Let inference fix it
-rm ~/.config/dotfiles/state.ini
+jq '.setup.completed = []' ~/.config/dotfiles/config.json > /tmp/config.json && \
+    mv /tmp/config.json ~/.config/dotfiles/config.json
 dotfiles setup  # Will infer from filesystem
 
 # Option 2: Full reset
@@ -251,13 +362,16 @@ dotfiles setup --reset
 
 ### Manual State Editing
 
-You can edit state files directly:
+You can edit config.json directly with jq:
 
 ```bash
-# Mark a phase as incomplete to re-run it
-vim ~/.config/dotfiles/state.ini
-# Change: packages = complete
-# To:     packages = incomplete
+# Mark a phase as incomplete (remove from array)
+jq '.setup.completed = (.setup.completed | map(select(. != "packages")))' \
+    ~/.config/dotfiles/config.json > /tmp/config.json && \
+    mv /tmp/config.json ~/.config/dotfiles/config.json
+
+# Or edit manually with vim (be careful with JSON syntax!)
+vim ~/.config/dotfiles/config.json
 ```
 
 ---
