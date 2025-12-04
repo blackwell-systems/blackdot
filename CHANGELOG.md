@@ -41,6 +41,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Clear guidance when skipping vault setup
   - Accessible via `dotfiles vault init` or `dotfiles vault init --force`
 
+- **Vault Auto-Discovery** - Automatically detect secrets in standard locations
+  - New `dotfiles vault discover` command scans for existing secrets
+  - Auto-detects SSH keys in ~/.ssh/ (all key types)
+  - Discovers AWS configs, Git config, npm, pypi, docker configs
+  - Supports custom paths: `--ssh-path` and `--config-path` options
+  - Generates vault-items.json automatically with smart naming
+  - Integrated into `dotfiles vault init` with auto-discover option
+  - No more manual JSON editing for standard setups
+  - Preview mode with `--dry-run` flag
+  - Eliminates biggest UX friction point in vault setup
+
 ### Improved
 - **Installation Flow** - Smoother onboarding experience
   - install.sh now prompts "Run setup wizard now? [Y/n]" after installation

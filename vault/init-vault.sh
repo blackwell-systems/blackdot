@@ -166,20 +166,68 @@ if [[ ! -f "$vault_config" ]]; then
     echo "  • SSH keys (names and paths)"
     echo "  • Config files (AWS, Git, etc.)"
     echo ""
+    echo "Configuration options:"
+    echo "  1) Auto-discover  - Scan standard locations (recommended)"
+    echo "  2) Manual setup   - Copy example and edit manually"
+    echo ""
+    echo -n "Your choice [1]: "
+    read config_choice
+    config_choice=${config_choice:-1}
 
     # Create config directory
     mkdir -p "$(dirname "$vault_config")"
 
-    # Copy example
-    if [[ -f "$vault_example" ]]; then
-        cp "$vault_example" "$vault_config"
-        pass "Created $vault_config"
+    if [[ "$config_choice" == "1" ]]; then
+        # Auto-discovery
         echo ""
-        info "Review and customize this file for your setup"
-        echo "  Edit with: $EDITOR $vault_config"
+        info "Scanning for secrets in standard locations..."
+        echo ""
+
+        if "$SCRIPT_DIR/discover-secrets.sh"; then
+            pass "Auto-discovery complete!"
+            echo ""
+            info "Review the generated config:"
+            echo "  ${CYAN}cat $vault_config${NC}"
+            echo ""
+            echo -n "Edit config before syncing? [y/N]: "
+            read edit_now
+            if [[ "$edit_now" =~ ^[Yy]$ ]]; then
+                ${EDITOR:-vim} "$vault_config"
+            fi
+        else
+            warn "Auto-discovery found no items or failed"
+            echo ""
+            echo -n "Fall back to manual setup? [Y/n]: "
+            read fallback
+            if [[ ! "$fallback" =~ ^[Nn]$ ]]; then
+                cp "$vault_example" "$vault_config"
+                pass "Created $vault_config from example"
+                echo ""
+                info "Please customize the example file:"
+                echo "  ${CYAN}\$EDITOR $vault_config${NC}"
+            else
+                fail "Vault items configuration not created"
+                exit 1
+            fi
+        fi
     else
-        fail "Example vault config not found: $vault_example"
-        exit 1
+        # Manual setup
+        if [[ -f "$vault_example" ]]; then
+            cp "$vault_example" "$vault_config"
+            pass "Created $vault_config"
+            echo ""
+            info "Please customize this file for your setup:"
+            echo "  ${CYAN}\$EDITOR $vault_config${NC}"
+            echo ""
+            echo -n "Open editor now? [Y/n]: "
+            read edit_now
+            if [[ ! "$edit_now" =~ ^[Nn]$ ]]; then
+                ${EDITOR:-vim} "$vault_config"
+            fi
+        else
+            fail "Example vault config not found: $vault_example"
+            exit 1
+        fi
     fi
 else
     info "Vault items config already exists: $vault_config"

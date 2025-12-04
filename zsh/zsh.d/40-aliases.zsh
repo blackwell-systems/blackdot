@@ -82,6 +82,9 @@ dotfiles() {
                 init)
                     "$VAULT_DIR/init-vault.sh" "$@"
                     ;;
+                discover)
+                    "$VAULT_DIR/discover-secrets.sh" "$@"
+                    ;;
                 restore)
                     "$VAULT_DIR/restore.sh" "$@"
                     ;;
@@ -110,6 +113,8 @@ dotfiles() {
                     echo ""
                     echo "Commands:"
                     echo "  init             Configure vault backend (run anytime)"
+                    echo "  discover         Auto-detect secrets in standard locations"
+                    echo "                   --dry-run: Preview without creating config"
                     echo "  restore          Restore all secrets from vault"
                     echo "                   --force: Skip drift check, overwrite local changes"
                     echo "  sync [item]      Sync local files to vault (--all for all)"
@@ -121,6 +126,7 @@ dotfiles() {
                     echo ""
                     echo "Examples:"
                     echo "  dotfiles vault init           # Configure/reconfigure vault"
+                    echo "  dotfiles vault discover       # Auto-find SSH keys, AWS, Git"
                     echo "  dotfiles vault restore        # Restore all secrets"
                     echo "  dotfiles vault sync --all     # Sync all to vault"
                     echo "  dotfiles vault sync Git-Config"
