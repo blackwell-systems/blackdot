@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2025-12-03
+
 ### Added
 - **Brewfile Tiers** - Tiered package management for flexible installation sizes
   - `Brewfile.minimal` (~15 packages) - Essentials only (git, zsh, jq, shell plugins)
