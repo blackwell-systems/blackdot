@@ -628,11 +628,11 @@ EOF
                                 echo "  • Merged total: $new_items"
                                 echo ""
 
-                                local preserved=$(echo "$existing_json" "$discovered_json" | jq -s '
+                                local preserved=$(jq -s '
                                     .[0].vault_items // {} | keys as $old |
                                     .[1].vault_items // {} | keys as $new |
                                     $old - $new
-                                ')
+                                ' <(echo "$existing_json") <(echo "$discovered_json"))
                                 local preserved_count=$(echo "$preserved" | jq 'length')
 
                                 if [[ "$preserved_count" -gt 0 ]]; then
@@ -641,11 +641,11 @@ EOF
                                     echo ""
                                 fi
 
-                                local added=$(echo "$existing_json" "$discovered_json" | jq -s '
+                                local added=$(jq -s '
                                     .[0].vault_items // {} | keys as $old |
                                     .[1].vault_items // {} | keys as $new |
                                     $new - $old
-                                ')
+                                ' <(echo "$existing_json") <(echo "$discovered_json"))
                                 local added_count=$(echo "$added" | jq 'length')
 
                                 if [[ "$added_count" -gt 0 ]]; then
