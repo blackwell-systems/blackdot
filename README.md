@@ -103,6 +103,25 @@ Install dotclaude? [Y/n]: y
 
 dotclaude installed
 
+STEP 6: Machine-Specific Templates (Optional)
+────────────────────────────────────────────────────────────────
+Templates let you customize configs per machine (gitconfig, ssh-config, etc.).
+
+Examples:
+  • Work vs personal git email
+  • Different SSH keys per machine
+  • Machine-specific environment variables
+
+Setup machine-specific config templates? [y/N]: y
+
+Initializing template system...
+What type of machine is this? (work/personal/other) [personal]: work
+Enter your work email for git commits: user@company.com
+Enter your work git name: John Doe
+
+Templates configured
+Run 'dotfiles template render' to generate configs from your templates
+
 ═══════════════════════════════════════════════════════════════
 Setup complete!
 
