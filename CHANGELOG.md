@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **v3.0 Command Namespace (Week 1 Implementation)** - Git-inspired command names now available
+  - NEW commands: `vault setup`, `vault scan`, `vault pull`, `vault push`, `vault status`
+  - DEPRECATED commands: `vault init`, `vault discover`, `vault restore`, `vault sync` (show warnings)
+  - All deprecated commands still work but will be removed in v3.1
+  - Dual command support allows gradual migration
+  - See: vault/README.md for complete command reference
+
+- **Top-Level Backup & Rollback Commands** - Safety features promoted to first-class
+  - `dotfiles backup` - Create backup of current configuration
+  - `dotfiles backup list` - List all available backups
+  - `dotfiles backup restore <name>` - Restore specific backup
+  - `dotfiles rollback` - Instant rollback to last backup
+  - `dotfiles rollback --to <name>` - Rollback to specific backup
+  - Backup moved out of vault namespace (was: `dotfiles vault backup`)
+  - Implements v3.0 design goal: mandatory safety features
+
+- **Enhanced Help Text** - Updated CLI help to show v3.0 commands
+  - Main help (`dotfiles help`) shows new command structure
+  - Vault help (`dotfiles vault help`) highlights v3.0 vs deprecated commands
+  - Color-coded sections for better readability
+  - Includes deprecation notices and migration guidance
+
 - **v3.0 Breaking Changes Design** - Comprehensive redesign proposal (DESIGN-v3.md)
   - Git-inspired command names: setup, scan, pull, push (replaces init, discover, restore, sync)
   - Config format migration: INI → JSON (consistent with vault-items.json, native jq support)
