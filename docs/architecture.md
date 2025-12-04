@@ -71,13 +71,15 @@ All optional components can be controlled via environment variables:
 | Variable | Effect | Use Case |
 |----------|--------|----------|
 | `--minimal` | Skip Homebrew, vault, Claude, /workspace | Minimal shell-only install |
-| `BREWFILE_TIER=minimal` | Install only essentials (~15 packages) | CI/CD, servers, containers |
-| `BREWFILE_TIER=enhanced` | Modern tools without containers (~40 packages) | Developer workstations |
-| `BREWFILE_TIER=full` | Everything including Docker/Node (~80 packages) | Full-stack development |
+| `BREWFILE_TIER=minimal` | Install only essentials (18 packages, ~2 min) | CI/CD, servers, containers |
+| `BREWFILE_TIER=enhanced` | Modern tools without containers (43 packages, ~5 min) | Developer workstations **← RECOMMENDED** |
+| `BREWFILE_TIER=full` | Everything including Docker/Node (61 packages, ~10 min) | Full-stack development |
 | `SKIP_WORKSPACE_SYMLINK=true` | Skip `/workspace` symlink | Single-machine setups |
 | `SKIP_CLAUDE_SETUP=true` | Skip Claude Code integration | Non-Claude workflows |
 | `DOTFILES_OFFLINE=1` | Skip all vault operations | Air-gapped/offline environments |
 | `DOTFILES_SKIP_DRIFT_CHECK=1` | Skip drift detection | CI/automation pipelines |
+
+**Note:** The `dotfiles setup` wizard now presents tier selection interactively. Environment variables are available for advanced/automated setups.
 
 ### Component Dependencies
 

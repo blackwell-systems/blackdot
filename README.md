@@ -196,7 +196,7 @@ SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh     # Everything except Cl
 | Component | What It Does | How to Skip | Still Works Without It? |
 |-----------|--------------|-------------|-------------------------|
 | **Shell Config** | ZSH + plugins, prompt, aliases | **Cannot skip** (core) | N/A (required) |
-| **Homebrew + Packages** | 80+ CLI tools (fzf, ripgrep, bat, etc.) | `--minimal` flag or `BREWFILE_TIER=minimal` | Yes - install tools manually |
+| **Homebrew + Packages** | 18-61 CLI tools (tier selection in wizard) | `--minimal` flag or select tier in wizard | Yes - install tools manually |
 | **Vault System** | Multi-backend secrets (Bitwarden/1Password/pass) | Select "Skip" in wizard or `--minimal` | Yes - manage secrets manually |
 | **Portable Sessions** | `/workspace` symlink for Claude sync | `SKIP_WORKSPACE_SYMLINK=true` | Yes - use OS-specific paths |
 | **Claude Integration** | dotclaude + hooks + settings | `SKIP_CLAUDE_SETUP=true` or `--minimal` | Yes - works without Claude |
@@ -204,13 +204,20 @@ SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh     # Everything except Cl
 
 #### Brewfile Tiers (Choose Your Package Level)
 
-| Tier | Packages | Use Case | Install With |
-|------|----------|----------|--------------|
-| **Minimal** | ~15 packages | Essentials only (git, zsh, jq, shell plugins) | `BREWFILE_TIER=minimal` |
-| **Enhanced** | ~40 packages | Modern CLI tools (fzf, ripgrep, bat, eza, etc.) | `BREWFILE_TIER=enhanced` |
-| **Full** | ~80 packages | Everything including Docker, Node, advanced tools | Default (or `BREWFILE_TIER=full`) |
+The `dotfiles setup` wizard presents three package tiers **interactively** with real-time counts:
 
-**Example:** Use enhanced tier without containers:
+| Tier | Packages | Time | What's Included |
+|------|----------|------|-----------------|
+| **Minimal** | 18 packages | ~2 min | Essentials only (git, zsh, jq, shell plugins) |
+| **Enhanced** | 43 packages | ~5 min | Modern CLI tools (fzf, ripgrep, bat, eza, etc.) **← RECOMMENDED** |
+| **Full** | 61 packages | ~10 min | Everything including Docker, Node, advanced tools |
+
+**How it works:**
+- Setup wizard shows this menu with current package counts
+- Your selection is saved in `~/.config/dotfiles/config.json`
+- Re-running setup reuses your saved preference
+
+**Advanced:** Bypass wizard with environment variable:
 ```bash
 BREWFILE_TIER=enhanced ./bootstrap/bootstrap-mac.sh
 ```
@@ -644,11 +651,14 @@ Bootstrap scripts check current state before changes. Already symlinked? Skip. A
   - Skip with `SKIP_CLAUDE_SETUP=true`
 
 **Optional (Brewfile package tiers):**
-- **BREWFILE_TIER** - Control which packages to install:
-  - `minimal` - Essential tools only (~40 packages: git, zsh, fzf, ripgrep)
-  - `enhanced` - Modern CLI tools without containers (~80 packages, adds: eza, bat, dust, zoxide)
-  - `full` - Everything including Docker/Kubernetes (~120+ packages) [default]
-  - Set before bootstrap: `export BREWFILE_TIER=minimal` or `export BREWFILE_TIER=enhanced`
+The `dotfiles setup` wizard presents three package tiers interactively:
+  - `minimal` - Essential tools only (18 packages, ~2 min)
+  - `enhanced` - Modern CLI tools without containers (43 packages, ~5 min) **← RECOMMENDED**
+  - `full` - Everything including Docker/Kubernetes (61 packages, ~10 min) [default]
+
+Your selection is saved in `~/.config/dotfiles/config.json` and reused if you re-run setup.
+
+**Advanced users:** Set `BREWFILE_TIER` environment variable to bypass interactive selection.
 
 To clone via SSH (recommended), you'll also want an SSH key configured with GitHub. If you don't have Git yet, the bootstrap scripts will install it automatically.
 

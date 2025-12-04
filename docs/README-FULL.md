@@ -627,11 +627,15 @@ When setting up a new machine or VM, no username updates are needed. Everything 
   - Installed via Brewfile on both macOS + Lima
 
 ### Optional (Brewfile package tiers)
-- **BREWFILE_TIER** - Control which packages to install:
-  - `minimal` - Essential tools only (~40 packages: git, zsh, fzf, ripgrep)
-  - `enhanced` - Modern CLI tools without containers (~80 packages, adds: eza, bat, dust, zoxide)
-  - `full` - Everything including Docker/Kubernetes (~120+ packages) [default]
-  - Set before bootstrap: `export BREWFILE_TIER=minimal` or `export BREWFILE_TIER=enhanced`
+
+The `dotfiles setup` wizard presents three package tiers **interactively**:
+  - `minimal` - Essential tools only (18 packages, ~2 min)
+  - `enhanced` - Modern CLI tools without containers (43 packages, ~5 min) **← RECOMMENDED**
+  - `full` - Everything including Docker/Kubernetes (61 packages, ~10 min) [default]
+
+Your selection is saved in `~/.config/dotfiles/config.json` and reused if you re-run setup.
+
+**Advanced users:** Set `BREWFILE_TIER` environment variable to bypass interactive selection.
 
 Most tools are installed automatically via Homebrew after the basic bootstrap is done.
 
