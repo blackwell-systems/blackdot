@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2025-01-04
+
+**🚨 BREAKING CHANGES - Major v3.0 Release**
+
+This release introduces significant improvements and breaking changes. Users on v2.x should review the migration guide and use `dotfiles migrate` to upgrade.
+
 ### Added
 - **Vault Schema Validation** (Pain Point #4) - Prevent invalid configurations
   - JSON schema for vault-items.json with comprehensive validation rules
