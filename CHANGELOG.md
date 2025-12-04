@@ -64,6 +64,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Discovers AWS configs, Git config, npm, pypi, docker configs
   - Supports custom paths: `--ssh-path` and `--config-path` options
   - Generates vault-items.json automatically with smart naming
+  - **Intelligent Merge Logic** - Safely merges with existing config (non-destructive)
+    - Preserves manual additions (items not auto-discovered)
+    - Preserves manual customizations (e.g., `required: false`)
+    - Creates automatic backup before merge
+    - Use `--force` to skip merge and overwrite completely
+    - Requires `jq` for merge (gracefully falls back if not available)
   - Integrated into `dotfiles vault init` with auto-discover option
   - No more manual JSON editing for standard setups
   - Preview mode with `--dry-run` flag
