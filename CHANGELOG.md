@@ -29,6 +29,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Color-coded sections for better readability
   - Removed version labels and migration noise
 
+- **JSON Config System** (v3.0) - Modern configuration format with nested structure
+  - `lib/_config.sh` - JSON config abstraction layer with type-safe functions
+  - config_get, config_set, config_get_bool, config_set_bool
+  - config_array_add, config_array_remove for array management
+  - config_get_array for retrieving array values
+  - Nested configuration: vault.backend, setup.completed[], paths.*
+  - Validation and backup functions built-in
+  - Uses jq for JSON manipulation (already a dependency)
+  - Default config with sensible defaults for all v3.0 settings
+
+- **Migration Tools** (v3.0) - Automated migration from v2.x to v3.0
+  - `bin/dotfiles-migrate` - Unified migration orchestrator
+  - `bin/dotfiles-migrate-config` - INI→JSON config migration
+  - `bin/dotfiles-migrate-vault-schema` - v2→v3 vault schema migration
+  - `dotfiles migrate` - Top-level command in main CLI
+  - Interactive confirmation with --yes flag to skip
+  - Timestamped backups before all migrations
+  - Detects if migration is needed (idempotent)
+  - Shows migration summary with before/after comparison
+
+- **Vault Schema v3.0** - Simplified, consistent vault item structure
+  - Single secrets[] array replaces separate ssh_keys/vault_items/syncable_items
+  - Eliminates duplication between ssh_keys and vault_items
+  - Per-item control: sync (always/manual), backup (true/false), required (true/false)
+  - Consistent schema: name, path, type, required, sync, backup
+  - Migration preserves all existing items and metadata
+  - version field indicates schema version
+
 ### Changed
 - **BREAKING: Vault commands renamed** - Old commands removed entirely
   - `vault init` → `vault setup`
@@ -37,6 +65,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `vault sync` → `vault push`
   - `vault backup` → top-level `backup` command
   - No migration period - clean break for greenfield deployment
+
+- **State Management Backend** (v3.0) - Now uses JSON config instead of INI files
+  - `lib/_state.sh` refactored to use JSON config as backend
+  - State stored in setup.completed[] array instead of INI sections
+  - API unchanged: state_completed(), state_complete(), state_reset() still work
+  - Backward compatible: existing scripts don't need changes
+  - Config stored in ~/.config/dotfiles/config.json (v3 format)
 
 - **v3.0 Breaking Changes Design** - Comprehensive redesign proposal (DESIGN-v3.md)
   - Git-inspired command names: setup, scan, pull, push (replaces init, discover, restore, sync)

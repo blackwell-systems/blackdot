@@ -74,6 +74,76 @@ dotfiles vault check            # Validate required items exist
 
 ---
 
+## v3.0 Migration
+
+If you're upgrading from v2.x, run the migration tool to update your configuration:
+
+```bash
+dotfiles migrate              # Interactive migration (INI→JSON, vault v2→v3)
+dotfiles migrate --yes        # Skip confirmation prompt
+```
+
+### What Gets Migrated
+
+**Config Format (INI → JSON):**
+- `~/.config/dotfiles/config.ini` → `~/.config/dotfiles/config.json`
+- Migrates vault backend setting
+- Converts setup state to `setup.completed[]` array
+- Auto-detects and sets `paths.dotfiles_dir`
+
+**Vault Schema (v2 → v3):**
+- `~/.config/dotfiles/vault-items.json` schema upgrade
+- **Before (v2):** Separate `ssh_keys`, `vault_items`, `syncable_items` objects
+- **After (v3):** Single `secrets[]` array with consistent schema
+- Eliminates duplication between `ssh_keys` and `vault_items`
+- Adds per-item `sync`, `backup`, `required` control
+
+**Automatic Backups:**
+Both config and vault schema are backed up to:
+```
+~/.config/dotfiles/backups/pre-v3-migration-YYYYMMDD_HHMMSS/
+```
+
+**Migration is idempotent** - safe to run multiple times. Detects if already migrated.
+
+### v3.0 Vault Schema
+
+```json
+{
+  "version": 3,
+  "secrets": [
+    {
+      "name": "SSH-GitHub",
+      "path": "~/.ssh/id_ed25519",
+      "type": "ssh-key",
+      "required": true,
+      "sync": "always",
+      "backup": true
+    },
+    {
+      "name": "Git-Config",
+      "path": "~/.gitconfig",
+      "type": "file",
+      "required": true,
+      "sync": "manual",
+      "backup": true
+    }
+  ]
+}
+```
+
+**Schema Fields:**
+- `version` - Schema version (3)
+- `secrets[]` - Single flat array of all secrets
+- `name` - Unique identifier (used in vault item title)
+- `path` - Local file path (supports `~` expansion)
+- `type` - `ssh-key`, `file`, or custom
+- `required` - `true` = `dotfiles vault check` validates existence
+- `sync` - `always` (auto-sync) or `manual` (on-demand only)
+- `backup` - `true` = include in backups
+
+---
+
 ## Backend Setup
 
 ### Bitwarden (Default)

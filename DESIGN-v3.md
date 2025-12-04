@@ -635,18 +635,18 @@ dotfiles vault init
 ## Implementation Plan
 
 ### Week 1: Core Changes
-- [ ] Rename command handlers (add new, keep old with warnings)
-- [ ] Add `dotfiles rollback` command
-- [ ] Add `dotfiles vault status` command
-- [ ] Update help text for all commands
-- [ ] Create migration script skeleton
+- [x] Rename command handlers (clean break, no warnings) - `zsh/zsh.d/40-aliases.zsh`
+- [x] Add `dotfiles rollback` command - Top-level command
+- [x] Add `dotfiles vault status` command - Shows vault sync status
+- [x] Update help text for all commands - Clean v3.0 help
+- [x] Migration tools created - `bin/dotfiles-migrate*`
 
 ### Week 2: Config & Schema
-- [ ] Implement JSON config support (using jq)
-- [ ] Create config migration (INI → JSON)
-- [ ] Implement v3 vault-items schema
-- [ ] Create schema migration (v2 → v3)
-- [ ] Add auto-migration on first run
+- [x] Implement JSON config support (using jq) - `lib/_config.sh`
+- [x] Create config migration (INI → JSON) - `bin/dotfiles-migrate-config`
+- [x] Implement v3 vault-items schema - Single secrets[] array
+- [x] Create schema migration (v2 → v3) - `bin/dotfiles-migrate-vault-schema`
+- [x] Add migration orchestrator - `bin/dotfiles-migrate`, `dotfiles migrate` command
 
 ### Week 3: UX Improvements
 - [ ] Add package tier selection to setup
