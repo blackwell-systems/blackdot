@@ -305,9 +305,9 @@ generate_vault_json() {
     echo "  \"ssh_keys\": {"
     if [[ ${#ssh_keys[@]} -gt 0 ]]; then
         local first=true
-        for name path in ${(kv)ssh_keys}; do
+        for name key_path in ${(kv)ssh_keys}; do
             [[ "$first" == "false" ]] && echo ","
-            echo -n "    \"$name\": \"$path\""
+            echo -n "    \"$name\": \"$key_path\""
             first=false
         done
         echo ""
@@ -320,10 +320,10 @@ generate_vault_json() {
     local first=true
 
     # Add SSH keys to vault_items
-    for name path in ${(kv)ssh_keys}; do
+    for name key_path in ${(kv)ssh_keys}; do
         [[ "$first" == "false" ]] && echo ","
         echo "    \"$name\": {"
-        echo "      \"path\": \"$path\","
+        echo "      \"path\": \"$key_path\","
         echo "      \"required\": true,"
         echo "      \"type\": \"sshkey\""
         echo -n "    }"
