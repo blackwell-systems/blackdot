@@ -596,10 +596,12 @@ EOF
             local user_choice=""
             while [[ -z "$user_choice" ]]; do
                 echo "Choose action:"
-                echo "  ${GREEN}[m]${NC} Merge - Preserve manual additions & customizations (recommended)"
-                echo "  ${YELLOW}[r]${NC} Replace - Use only discovered items (discards manual changes)"
+                echo "  ${GREEN}[m]${NC} Merge - Keep items in config that weren't discovered (recommended for existing machines)"
+                echo "  ${YELLOW}[r]${NC} Replace - Use only discovered items (recommended for fresh machines)"
                 echo "  ${BLUE}[p]${NC} Preview - Show what merge would look like (no changes)"
                 echo "  ${DIM}[c]${NC} Cancel - Exit without changes"
+                echo ""
+                echo "${DIM}Tip: Merge preserves items in config that weren't found locally (e.g., moved files, custom paths).${NC}"
                 echo ""
                 echo -n "Choice [m/r/p/c]: "
                 read -r choice
@@ -657,7 +659,8 @@ EOF
                                 local preserved_count=$(echo "$preserved" | jq 'length')
 
                                 if [[ "$preserved_count" -gt 0 ]]; then
-                                    echo "✅ Preserved manual items ($preserved_count):"
+                                    echo "✅ Preserved items in config but not discovered ($preserved_count):"
+                                    echo "${DIM}   (These may be custom paths, moved files, or items from other machines)${NC}"
                                     echo "$preserved" | jq -r '.[] | "  • " + .'
                                     echo ""
                                 fi
