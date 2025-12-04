@@ -9,7 +9,7 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 ```
 
 - **One command setup** - Interactive wizard guides you through
-- **Resume AI conversations** - Claude sessions sync across machines
+- **Claude Code + dotclaude** - Profiles, sessions & git safety sync everywhere
 - **Your vault, your way** - Bitwarden, 1Password, or pass
 - **Never breaks** - Self-healing catches drift automatically
 - **Runs everywhere** - macOS • Linux • Windows • WSL2 • Docker
