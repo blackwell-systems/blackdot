@@ -461,7 +461,7 @@ merge_configs() {
                     {key: $item_name, value: $old_item}
                 end
             ) | from_entries) |
-            # Add newly discovered items that weren't in old config
+            # Add newly discovered items that were not in old config
             . + ($new | to_entries | map(select(.key as $k | ($old | has($k) | not))) | from_entries)
         ) |
 
