@@ -136,7 +136,7 @@ Quick commands:
 - **Homebrew + 80+ packages** (eza, fzf, ripgrep, bat, jq, aws-cli, etc.) - or skip with `--minimal`
 - **Smart credential onboarding** - Detects existing SSH/AWS/Git, offers to vault them
 - **Bidirectional vault sync** - Push local → vault, restore vault → local
-- **Portable Claude sessions** - `/workspace` paths work across all machines
+- **Claude Code + dotclaude integration** - Profile sync, git safety hooks, portable sessions. Built for AI-assisted development
 - **Resume support** - Interrupted? Just run `dotfiles setup` again
 
 **5-minute setup. Works on macOS, Linux, WSL2, Docker.**
@@ -150,6 +150,26 @@ docker run -it --rm ghcr.io/blackwell-systems/dotfiles:lite
 ```
 
 See [Docker Guide](docs/docker.md) for container options.
+
+---
+
+## Claude Code + dotclaude
+
+**These dotfiles integrate with [dotclaude](https://github.com/blackwell-systems/dotclaude)** - a profile manager for Claude Code that syncs your AI assistant configurations across machines.
+
+**What dotclaude adds:**
+- **Profile sync** - Work/personal/client profiles follow you everywhere
+- **Git safety hooks** - Prevents dangerous commands (force push, hard reset) before Claude runs them
+- **Session portability** - `/workspace` paths work identically on macOS/Linux/WSL2
+- **Context isolation** - Keep work and personal projects separate
+
+**Automatically installed during `dotfiles setup` (STEP 5).** Or install standalone:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh | bash
+```
+
+**Learn more:** [github.com/blackwell-systems/dotclaude](https://github.com/blackwell-systems/dotclaude)
 
 ---
 
@@ -234,11 +254,14 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore   # No drift check (for CI/au
 
 **Built for Claude Code users who work across multiple machines.**
 
+> 💡 **Works with [dotclaude](https://github.com/blackwell-systems/dotclaude) for AI assistant profile sync**
+> Automatically installed during setup. Syncs Claude Code settings, profiles, and git safety hooks across all your machines.
+
 > **"Start on Mac, continue on Linux, keep your conversation."**
 
-The only dotfiles solution that:
+**Key features:**
 
-1. **Portable Claude Sessions** – `/workspace` symlink ensures identical paths everywhere. Your Claude conversations sync seamlessly across macOS, Linux, and WSL2.
+1. **Portable Claude Sessions** – `/workspace` symlink ensures identical paths everywhere. Your Claude conversations sync seamlessly across macOS, Linux, and WSL2. Enhanced by dotclaude profile management.
 
 2. **Smart Secrets Onboarding** – Detects existing credentials (SSH keys, AWS, Git) and offers to vault them automatically. New machines restore everything with one command.
 
@@ -246,7 +269,7 @@ The only dotfiles solution that:
 
 4. **Self-Healing Configuration** – `dotfiles doctor --fix` automatically repairs permissions, broken symlinks, and misconfigurations.
 
-**Not using Claude Code?** It's still the most robust dotfiles for multi-machine developer workflows with vault-backed secrets.
+**Not using Claude Code?** Still great for multi-machine developer workflows with vault-backed secrets.
 
 ---
 
