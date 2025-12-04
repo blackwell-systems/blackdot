@@ -389,6 +389,100 @@ generate_vault_json() {
 }
 
 # ============================================================
+# Merge Logic
+# ============================================================
+
+# Read existing config and parse it
+read_existing_config() {
+    if [[ ! -f "$VAULT_CONFIG_FILE" ]]; then
+        return 1
+    fi
+
+    # Parse JSON using zsh/zpty or jq if available
+    if command -v jq >/dev/null 2>&1; then
+        cat "$VAULT_CONFIG_FILE"
+    else
+        # Fallback: just read the file
+        cat "$VAULT_CONFIG_FILE"
+    fi
+}
+
+# Merge discovered items with existing config
+merge_configs() {
+    local discovered_json="$1"
+    local existing_json="$2"
+
+    # If no jq, just return discovered (fallback to old behavior)
+    if ! command -v jq >/dev/null 2>&1; then
+        warn "jq not installed - cannot merge configs, using discovered items only"
+        echo "$discovered_json"
+        return 0
+    fi
+
+    # Merge logic:
+    # - Keep all discovered items (they're current)
+    # - Add existing items that weren't discovered (manual additions)
+    # - Preserve custom properties where possible
+
+    local merged
+    merged=$(jq -s '
+        # $discovered is .[0], $existing is .[1]
+        .[0] as $discovered |
+        .[1] as $existing |
+
+        # Start with discovered base
+        $discovered |
+
+        # Merge ssh_keys: discovered + existing (discovered wins on conflicts)
+        .ssh_keys = ($existing.ssh_keys // {} | . + $discovered.ssh_keys) |
+
+        # Merge vault_items: more complex - preserve manual items
+        .vault_items = (
+            ($existing.vault_items // {}) as $old |
+            ($discovered.vault_items // {}) as $new |
+            # Start with old items, process each
+            ($old | to_entries | map(
+                .key as $item_name |
+                .value as $old_item |
+                # Check if item was rediscovered
+                if ($new | has($item_name)) then
+                    # Item exists in both: use discovered path but preserve customizations
+                    {
+                        key: $item_name,
+                        value: ($new[$item_name] |
+                            # Preserve "required" flag if it was manually set to false
+                            if ($old_item.required == false) then
+                                .required = false
+                            else . end
+                        )
+                    }
+                else
+                    # Item only in existing: keep it (manual addition)
+                    {key: $item_name, value: $old_item}
+                end
+            ) | from_entries) |
+            # Add newly discovered items that weren't in old config
+            . + ($new | to_entries | map(select(.key as $k | ($old | has($k) | not))) | from_entries)
+        ) |
+
+        # Merge syncable_items: discovered + existing
+        .syncable_items = (($existing.syncable_items // {}) | . + ($discovered.syncable_items // {})) |
+
+        # Merge aws_expected_profiles: union of both
+        .aws_expected_profiles = (
+            (($existing.aws_expected_profiles // []) + ($discovered.aws_expected_profiles // [])) | unique
+        )
+    ' <(echo "$discovered_json") <(echo "$existing_json") 2>/dev/null)
+
+    if [[ -z "$merged" ]]; then
+        warn "Merge failed, using discovered items only"
+        echo "$discovered_json"
+    else
+        echo "$merged"
+    fi
+}
+
+# ============================================================
 # Main
 # ============================================================
 
@@ -431,7 +525,7 @@ Usage: ./discover-secrets.sh [OPTIONS]
 
 Options:
   --dry-run, -n           Show what would be discovered without creating file
-  --force, -f             Overwrite existing vault-items.json
+  --force, -f             Overwrite existing config (skip merge, no backup)
   --ssh-path PATH         Additional directory to scan for SSH keys
   --config-path PATH      Additional directory to scan for config files
   --help, -h              Show this help
@@ -442,18 +536,26 @@ Standard locations scanned:
   • ~/.gitconfig      (Git config)
   • ~/.npmrc, ~/.pypirc, ~/.docker/config.json (other secrets)
 
+Merge behavior (when config exists):
+  ✓ Preserves manual additions (items not auto-discovered)
+  ✓ Preserves manual customizations (e.g., required: false)
+  ✓ Updates paths for discovered items
+  ✓ Creates automatic backup before merge
+  ✗ Use --force to skip merge and overwrite completely
+
 Custom paths:
   Use --ssh-path and --config-path to scan non-standard locations.
   You can specify these options multiple times.
 
 Examples:
-  ./discover-secrets.sh
-  ./discover-secrets.sh --dry-run
+  ./discover-secrets.sh                     # Safe merge with existing config
+  ./discover-secrets.sh --dry-run           # Preview without changes
+  ./discover-secrets.sh --force             # Overwrite without merge
   ./discover-secrets.sh --ssh-path /mnt/keys --ssh-path ~/backup/.ssh
-  ./discover-secrets.sh --config-path ~/custom/configs
 
 Output:
   Generates ~/.config/dotfiles/vault-items.json with discovered items.
+  If config exists, merges intelligently unless --force is used.
 EOF
                 exit 0
                 ;;
@@ -464,41 +566,74 @@ EOF
         esac
     done
 
-    # Check if config already exists
-    if [[ -f "$VAULT_CONFIG_FILE" ]] && ! $force && ! $dry_run; then
-        warn "Vault config already exists: $VAULT_CONFIG_FILE"
-        echo ""
-        echo -n "Overwrite with auto-discovered items? [y/N]: "
-        read -r confirm
-        if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-            info "Discovery cancelled"
-            exit 0
-        fi
+    # Generate discovered JSON
+    local discovered_json=$(generate_vault_json)
+
+    if [[ -z "$discovered_json" ]]; then
+        exit 1
     fi
 
-    # Generate JSON
-    local json=$(generate_vault_json)
+    # Check if config already exists and merge
+    local final_json="$discovered_json"
+    local config_existed=false
 
-    if [[ -z "$json" ]]; then
-        exit 1
+    if [[ -f "$VAULT_CONFIG_FILE" ]]; then
+        config_existed=true
+        info "Existing config found: $VAULT_CONFIG_FILE"
+
+        if $force; then
+            warn "Force mode: overwriting without merge"
+            final_json="$discovered_json"
+        else
+            # Attempt to merge
+            local existing_json=$(read_existing_config)
+            if [[ -n "$existing_json" ]]; then
+                info "Merging with existing config (preserves manual additions)..."
+                final_json=$(merge_configs "$discovered_json" "$existing_json")
+
+                if [[ "$final_json" == "$discovered_json" ]] && command -v jq >/dev/null 2>&1; then
+                    # Merge returned same as discovered (no existing items to preserve)
+                    info "No manual items to preserve"
+                fi
+            fi
+        fi
     fi
 
     if $dry_run; then
         echo ""
         echo -e "${CYAN}Preview of vault-items.json:${NC}"
         echo ""
-        echo "$json"
+        echo "$final_json" | jq '.' 2>/dev/null || echo "$final_json"
         echo ""
-        info "Dry-run mode: no files were created"
+        if $config_existed; then
+            info "Dry-run mode: would merge with existing config"
+        else
+            info "Dry-run mode: would create new config"
+        fi
     else
         # Create config directory
         mkdir -p "$(dirname "$VAULT_CONFIG_FILE")"
 
-        # Write JSON
-        echo "$json" > "$VAULT_CONFIG_FILE"
+        # Backup existing config if it exists
+        if $config_existed && ! $force; then
+            local backup_file="${VAULT_CONFIG_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
+            cp "$VAULT_CONFIG_FILE" "$backup_file"
+            info "Backed up existing config to: $backup_file"
+        fi
+
+        # Write JSON (pretty print if jq available)
+        if command -v jq >/dev/null 2>&1; then
+            echo "$final_json" | jq '.' > "$VAULT_CONFIG_FILE"
+        else
+            echo "$final_json" > "$VAULT_CONFIG_FILE"
+        fi
 
         echo ""
-        pass "Created: $VAULT_CONFIG_FILE"
+        if $config_existed; then
+            pass "Updated: $VAULT_CONFIG_FILE (merged with existing)"
+        else
+            pass "Created: $VAULT_CONFIG_FILE"
+        fi
         echo ""
         echo "Next steps:"
         echo "  1. Review the generated file:"
