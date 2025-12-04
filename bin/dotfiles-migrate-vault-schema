@@ -74,7 +74,7 @@ migrate_vault_schema() {
     local tmp_file="$VAULT_ITEMS.tmp"
 
     # Build v3 schema using jq
-    jq '{
+    jq '. as $root | {
       version: 3,
       secrets: [
         # Convert ssh_keys to secrets array
@@ -98,7 +98,7 @@ migrate_vault_schema() {
         # Convert syncable_items to secrets array
         (.syncable_items // {} | to_entries[] |
           # Skip if already in vault_items
-          select(.key as $k | ($vault_items // {} | has($k) | not)) | {
+          select(.key as $k | ($root.vault_items // {} | has($k) | not)) | {
           name: .key,
           path: .value,
           type: "file",
@@ -107,7 +107,7 @@ migrate_vault_schema() {
           backup: true
         })
       ] | unique_by(.name)
-    }' "$VAULT_ITEMS" as $vault_items as $syncable_items > "$tmp_file"
+    }' "$VAULT_ITEMS" > "$tmp_file"
 
     # Validate output
     if ! jq empty "$tmp_file" 2>/dev/null; then
