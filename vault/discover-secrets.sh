@@ -280,7 +280,7 @@ generate_vault_json() {
         syncable_items+=("Environment-Secrets:~/.local/env.secrets")
     fi
 
-    echo ""
+    echo "" >&2
 
     # Check if anything was found
     if [[ ${#ssh_scan_results[@]} -eq 0 ]] && [[ ${#syncable_items[@]} -eq 0 ]]; then
