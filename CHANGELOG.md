@@ -93,6 +93,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Success criteria and next steps
 
 ### Fixed
+- **v3.0 Consistency Audit** - Eliminated all v2.x command and config references (23 instances)
+  - Updated 7 vault scripts to use v3.0 commands (setup/scan/pull/push)
+  - Updated 9 documentation files with correct v3.0 command examples
+  - `vault/init-vault.sh` now uses centralized `lib/_config.sh` instead of inline INI parsing
+  - All config file references updated: state.ini/config.ini → config.json
+  - File Locations tables updated to reflect v3.0 JSON format
+  - State Management documentation sections rewritten for v3.0
+  - Complete codebase now consistent with v3.0 command namespace
+  - Affects: vault scripts, bootstrap, docs (17 files total)
 - **Vault Command Clarity** - Improved help text to clarify relationship between init and discover
   - Added workflow section showing: First time → init, Re-scan → discover
   - Highlighted that `vault init` includes auto-discovery as part of setup
