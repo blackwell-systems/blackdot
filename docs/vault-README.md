@@ -41,14 +41,14 @@ All `dotfiles vault` commands work identically regardless of backend.
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| `init-vault.sh` | Configure vault backend | `dotfiles vault init` |
-| `restore.sh` | Orchestrates all restores | `dotfiles vault restore` |
+| `init-vault.sh` | Configure vault backend | `dotfiles vault setup` |
+| `restore.sh` | Orchestrates all restores | `dotfiles vault pull` |
 | `restore-ssh.sh` | Restores SSH keys + config | Called by bootstrap |
 | `restore-aws.sh` | Restores AWS config/creds | Called by bootstrap |
 | `restore-env.sh` | Restores env secrets | Called by bootstrap |
 | `restore-git.sh` | Restores gitconfig | Called by bootstrap |
 | `create-vault-item.sh` | Creates new vault items | `dotfiles vault create ITEM` |
-| `sync-to-vault.sh` | Syncs local → vault | `dotfiles vault sync --all` |
+| `sync-to-vault.sh` | Syncs local → vault | `dotfiles vault push --all` |
 | `validate-schema.sh` | Validates vault item schema | `dotfiles vault validate` |
 | `delete-vault-item.sh` | Deletes items from vault | `dotfiles vault delete ITEM` |
 | `check-vault-items.sh` | Pre-flight validation | `dotfiles vault check` |
@@ -60,11 +60,11 @@ All `dotfiles vault` commands work identically regardless of backend.
 All vault operations are accessed via the unified `dotfiles vault` command:
 
 ```bash
-dotfiles vault init             # Configure or reconfigure vault backend
-dotfiles vault restore          # Restore all secrets (checks for local drift first)
-dotfiles vault restore --force  # Skip drift check, overwrite local changes
-dotfiles vault sync             # Sync local changes to vault
-dotfiles vault sync --all       # Sync all items
+dotfiles vault setup             # Configure or reconfigure vault backend
+dotfiles vault pull          # Restore all secrets (checks for local drift first)
+dotfiles vault pull --force  # Skip drift check, overwrite local changes
+dotfiles vault push             # Sync local changes to vault
+dotfiles vault push --all       # Sync all items
 dotfiles vault create           # Create new vault item
 dotfiles vault validate         # Validate vault item schema
 dotfiles vault delete           # Delete vault item
@@ -208,17 +208,17 @@ dotfiles setup
 
 ### Pre-Restore Safety Check
 
-The restore command automatically checks if your local files have changed since the last vault sync. This prevents accidental data loss:
+The restore command automatically checks if your local files have changed since the last vault push. This prevents accidental data loss:
 
 ```bash
-$ dotfiles vault restore
+$ dotfiles vault pull
 [INFO] Checking for local changes before restore...
-[WARN] Local files have changed since last vault sync:
+[WARN] Local files have changed since last vault push:
   - Git-Config (~/.gitconfig)
   - SSH-Config (~/.ssh/config)
 
 Options:
-  1. Run 'dotfiles vault sync' first to save local changes
+  1. Run 'dotfiles vault push' first to save local changes
   2. Run restore with --force to overwrite local changes
   3. Run 'dotfiles drift' to see detailed differences
 
@@ -228,10 +228,10 @@ Options:
 To skip this check (for automation or when you intentionally want to overwrite):
 ```bash
 # Use --force flag
-dotfiles vault restore --force
+dotfiles vault pull --force
 
 # Or set environment variable
-DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
+DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull
 ```
 
 ---
@@ -245,13 +245,13 @@ For air-gapped environments, vault outages, or when you simply don't have vault 
 DOTFILES_OFFLINE=1 ./bootstrap/bootstrap-mac.sh
 
 # Or for individual commands
-DOTFILES_OFFLINE=1 dotfiles vault restore  # Exits gracefully
-DOTFILES_OFFLINE=1 dotfiles vault sync     # Exits gracefully
+DOTFILES_OFFLINE=1 dotfiles vault pull  # Exits gracefully
+DOTFILES_OFFLINE=1 dotfiles vault push     # Exits gracefully
 ```
 
 When offline mode is enabled:
-- `dotfiles vault restore` - Skips restore, keeps existing local files
-- `dotfiles vault sync` - Skips sync with helpful message
+- `dotfiles vault pull` - Skips restore, keeps existing local files
+- `dotfiles vault push` - Skips sync with helpful message
 - All other dotfiles commands work normally
 
 ---
@@ -267,7 +267,7 @@ When offline mode is enabled:
 │                                                                  │
 │   USER COMMANDS                                                  │
 │   ═══════════════════════════════════════════════════════════    │
-│   dotfiles vault restore | sync | create | delete | list        │
+│   dotfiles vault pull | sync | create | delete | list        │
 │                     ↓                                            │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
@@ -320,7 +320,7 @@ op signin                   # 1Password
 # (pass uses GPG, no login needed)
 
 # 2. Push your existing secrets to vault
-dotfiles vault sync --all
+dotfiles vault push --all
 
 # 3. Verify items were created
 dotfiles vault list
@@ -342,7 +342,7 @@ op signin                   # 1Password
 # (pass uses GPG, no login needed)
 
 # 4. Restore all secrets
-dotfiles vault restore
+dotfiles vault pull
 ```
 
 ### Daily Operations
@@ -352,7 +352,7 @@ dotfiles vault restore
 vim ~/.ssh/config
 
 # Sync changes to vault
-dotfiles vault sync SSH-Config
+dotfiles vault push SSH-Config
 
 # Check vault health
 dotfiles vault check
@@ -432,7 +432,7 @@ dotfiles vault validate
 
 **Common errors:**
 - Item missing → Create with `dotfiles vault create`
-- Empty notes → Re-sync with `dotfiles vault sync`
+- Empty notes → Re-sync with `dotfiles vault push`
 - Wrong format → Edit in vault web interface
 
 ---

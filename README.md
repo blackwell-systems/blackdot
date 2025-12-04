@@ -135,7 +135,7 @@ Quick commands:
 - **Fully modular** - Everything optional except shell config. Use `--minimal` for just ZSH, or pick exactly what you need
 - **Homebrew + 80+ packages** (eza, fzf, ripgrep, bat, jq, aws-cli, etc.) - or skip with `--minimal`
 - **Smart credential onboarding** - Detects existing SSH/AWS/Git, offers to vault them
-- **Bidirectional vault sync** - Push local → vault, restore vault → local
+- **Bidirectional vault push** - Push local → vault, restore vault → local
 - **Claude Code + dotclaude integration** - Profile sync, git safety hooks, portable sessions. Built for AI-assisted development
 - **Resume support** - Interrupted? Just run `dotfiles setup` again
 
@@ -238,7 +238,7 @@ dotfiles template render          # Generate configs
 
 ```bash
 DOTFILES_OFFLINE=1 ./bootstrap/bootstrap-linux.sh    # Skips all vault operations
-DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore   # No drift check (for CI/automation)
+DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull   # No drift check (for CI/automation)
 ```
 
 **All setup wizard steps are optional.** The wizard detects your choices and adjusts:
@@ -297,8 +297,8 @@ Auto-detects your platform (macOS, Linux, WSL2), detects available vault CLIs (B
 <summary><b>Smart Secrets Onboarding</b> - Auto-discovery & guided vault setup</summary>
 
 ```bash
-dotfiles vault init       # Configure vault backend
-dotfiles vault discover   # Auto-detect existing secrets
+dotfiles vault setup       # Configure vault backend
+dotfiles vault scan   # Auto-detect existing secrets
 ```
 
 **Auto-Discovery** - Automatically finds your existing secrets:
@@ -323,8 +323,8 @@ Perfect for users with existing credentials who want to sync them across machine
 
 ```bash
 export DOTFILES_VAULT_BACKEND=bitwarden  # or 1password, pass
-dotfiles vault sync --all    # Push local secrets to vault
-dotfiles vault restore       # Pull secrets on new machine
+dotfiles vault push --all    # Push local secrets to vault
+dotfiles vault pull       # Pull secrets on new machine
 ```
 
 Unified API across Bitwarden, 1Password, and pass. Syncs SSH keys, AWS credentials, Git config, environment secrets. Bidirectional: local changes push to vault, new machines restore from vault. Schema validation prevents corrupt items. Drift detection warns before overwrites.
@@ -441,7 +441,7 @@ One `.gitconfig.tmpl` becomes many `.gitconfig` files with different emails, sig
 ```bash
 # Switch Claude contexts while keeping secrets synced
 dotclaude activate client-work
-dotfiles vault restore     # Secrets follow your profile
+dotfiles vault pull     # Secrets follow your profile
 
 # Profiles managed by dotclaude, secrets by dotfiles
 # Both use /workspace for portability
@@ -840,10 +840,10 @@ dotfiles upgrade  # Pull latest, run bootstrap, check health
 ```bash
 # Update SSH config locally, then sync to vault
 vim ~/.ssh/config
-dotfiles vault sync SSH-Config
+dotfiles vault push SSH-Config
 
 # View what would be synced (dry run)
-dotfiles vault sync --dry-run --all
+dotfiles vault push --dry-run --all
 ```
 
 ### Add New SSH Key
@@ -856,11 +856,11 @@ ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey
 vim ~/.config/dotfiles/vault-items.json
 
 # 3. Sync to vault
-dotfiles vault sync SSH-GitHub-NewKey
+dotfiles vault push SSH-GitHub-NewKey
 
 # 4. Update SSH config
 vim ~/.ssh/config
-dotfiles vault sync SSH-Config
+dotfiles vault push SSH-Config
 ```
 
 See [Maintenance Checklists](docs/README-FULL.md#maintenance-checklists) for more.

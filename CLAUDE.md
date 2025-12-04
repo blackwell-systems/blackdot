@@ -13,8 +13,8 @@ dotfiles status          # Visual dashboard
 dotfiles doctor          # Health check
 dotfiles doctor --fix    # Auto-fix permissions
 dotfiles drift           # Compare local vs vault
-dotfiles vault restore   # Restore secrets from vault
-dotfiles vault sync      # Sync local to vault
+dotfiles vault pull   # Restore secrets from vault
+dotfiles vault push      # Sync local to vault
 dotfiles lint            # Validate shell config syntax
 dotfiles packages        # Check/install Brewfile packages
 dotfiles metrics         # View health check history
