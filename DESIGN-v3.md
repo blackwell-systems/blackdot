@@ -120,15 +120,17 @@ dotfiles vault pull --no-backup --i-know-what-im-doing
 ```
 
 **Configuration:**
-```toml
-# ~/.config/dotfiles/config.toml (TOML replaces INI)
-[backup]
-enabled = true              # Can disable globally
-auto_backup = true          # Auto-backup before destructive ops
-retention_days = 30         # Auto-delete backups older than 30 days
-max_snapshots = 10          # Keep max 10 snapshots
-compress = true             # Compress backups (saves space)
-location = "~/.local/share/dotfiles/backups"
+```json
+{
+  "backup": {
+    "enabled": true,
+    "auto_backup": true,
+    "retention_days": 30,
+    "max_snapshots": 10,
+    "compress": true,
+    "location": "~/.local/share/dotfiles/backups"
+  }
+}
 ```
 
 **Benefits:**
@@ -139,7 +141,7 @@ location = "~/.local/share/dotfiles/backups"
 
 ---
 
-### 3. Config File Format - INI → TOML
+### 3. Config File Format - INI → JSON
 
 #### Current (v2.3.0)
 ```ini
@@ -158,49 +160,51 @@ packages=completed
 - No comments in values
 
 #### Proposed (v3.0)
-```toml
-# ~/.config/dotfiles/config.toml
-version = 3  # Auto-migration marker
-
-[vault]
-backend = "bitwarden"
-auto_sync = false
-auto_backup = true
-
-[backup]
-enabled = true
-retention_days = 30
-max_snapshots = 10
-compress = true
-
-[setup]
-completed = ["symlinks", "packages", "vault", "secrets"]
-current_tier = "enhanced"
-
-[packages]
-tier = "enhanced"
-auto_update = false
-parallel_install = false
-
-[paths]
-dotfiles_dir = "~/workspace/dotfiles"  # No longer hardcoded!
-config_dir = "~/.config/dotfiles"
-backup_dir = "~/.local/share/dotfiles/backups"
+```json
+{
+  "version": 3,
+  "vault": {
+    "backend": "bitwarden",
+    "auto_sync": false,
+    "auto_backup": true
+  },
+  "backup": {
+    "enabled": true,
+    "retention_days": 30,
+    "max_snapshots": 10,
+    "compress": true
+  },
+  "setup": {
+    "completed": ["symlinks", "packages", "vault", "secrets"],
+    "current_tier": "enhanced"
+  },
+  "packages": {
+    "tier": "enhanced",
+    "auto_update": false,
+    "parallel_install": false
+  },
+  "paths": {
+    "dotfiles_dir": "~/workspace/dotfiles",
+    "config_dir": "~/.config/dotfiles",
+    "backup_dir": "~/.local/share/dotfiles/backups"
+  }
+}
 ```
 
 **Migration:**
 ```bash
 # Auto-migrate on first v3.0 run
 dotfiles migrate-config
-# Reads config.ini, writes config.toml, backs up old
+# Reads config.ini, writes config.json, backs up old
 ```
 
 **Benefits:**
 - Nested structures
 - Arrays support
-- Better comments
-- Industry standard (used by Cargo, Poetry, etc.)
+- Native support via jq (already used throughout codebase)
+- Consistent with vault-items.json format
 - Allows per-install paths (fixes hardcoded path issue)
+- Zero new dependencies (jq already required)
 
 ---
 
@@ -502,13 +506,13 @@ vault)
 This is a major version upgrade with breaking changes.
 
 Changes:
-  • Config format: config.ini → config.toml
+  • Config format: config.ini → config.json
   • Vault schema: v2 → v3 (simplified format)
   • Commands renamed (see: dotfiles help)
 
 Migration:
   ✓ Backup current config
-  ✓ Migrate config.ini → config.toml
+  ✓ Migrate config.ini → config.json
   ✓ Migrate vault-items.json → v3 schema
   ✓ Update paths in config
 
@@ -518,7 +522,7 @@ Continue with migration? [Y/n]: y
 
 Migrating...
   ✓ Backed up config to: ~/.config/dotfiles/backups/pre-v3-migration/
-  ✓ Converted config.ini → config.toml
+  ✓ Converted config.ini → config.json
   ✓ Migrated vault-items.json (v2 → v3)
   ✓ Updated 6 file paths
 
@@ -546,8 +550,8 @@ mkdir -p "$BACKUP_DIR"
 cp ~/.config/dotfiles/config.ini "$BACKUP_DIR/" 2>/dev/null || true
 cp ~/.config/dotfiles/vault-items.json "$BACKUP_DIR/" 2>/dev/null || true
 
-# 2. Migrate config.ini → config.toml
-# (convert key=value to key = "value")
+# 2. Migrate config.ini → config.json
+# (convert INI format to JSON with jq)
 
 # 3. Migrate vault-items.json
 # (convert old schema to new schema)
@@ -638,8 +642,8 @@ dotfiles vault init
 - [ ] Create migration script skeleton
 
 ### Week 2: Config & Schema
-- [ ] Implement TOML config support
-- [ ] Create config migration (INI → TOML)
+- [ ] Implement JSON config support (using jq)
+- [ ] Create config migration (INI → JSON)
 - [ ] Implement v3 vault-items schema
 - [ ] Create schema migration (v2 → v3)
 - [ ] Add auto-migration on first run
@@ -691,7 +695,7 @@ dotfiles vault init
 | `vault restore` → `vault pull` | High | Alias + deprecation warning |
 | `vault sync` → `vault push` | High | Alias + deprecation warning |
 | `vault discover` → `vault scan` | Medium | Alias + deprecation warning |
-| config.ini → config.toml | Medium | Auto-migration script |
+| config.ini → config.json | Medium | Auto-migration script |
 | vault-items v2 → v3 | Low | Auto-migration script |
 | Mandatory auto-backup | Low | Config option to disable |
 | New error format | None | Backwards compatible |
@@ -755,7 +759,7 @@ v2: dotfiles setup                  → v3: dotfiles setup (with tier selection)
 
 **Before implementing, confirm:**
 - [ ] Command names approved (setup, scan, pull, push, rollback)
-- [ ] Config format change approved (TOML)
+- [ ] Config format change approved (JSON)
 - [ ] Schema change approved (v3 format)
 - [ ] Migration strategy approved (auto-migrate)
 - [ ] Timeline approved (4 weeks)
