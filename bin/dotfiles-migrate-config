@@ -159,7 +159,7 @@ show_summary() {
     config_show | head -20
     echo "  ..."
     echo ""
-    echo "${DIM}Old config.ini has been preserved but will not be used${NC}"
+    echo "${DIM}Old config backed up to $BACKUP_DIR and renamed to config.ini.v2-backup${NC}"
 }
 
 # ============================================================
@@ -181,6 +181,13 @@ main() {
 
     # Perform migration
     migrate_ini_to_json
+
+    # Rename old config.ini to avoid confusion
+    if [[ -f "$OLD_CONFIG" ]]; then
+        mv "$OLD_CONFIG" "$OLD_CONFIG.v2-backup"
+        info "Renamed old config: config.ini → config.ini.v2-backup"
+        echo ""
+    fi
 
     # Show summary
     show_summary
