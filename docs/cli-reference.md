@@ -937,6 +937,9 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 |----------|--------|-------------|
 | `SKIP_WORKSPACE_SYMLINK` | `true` | Skip `/workspace` symlink creation |
 | `SKIP_CLAUDE_SETUP` | `true` | Skip Claude Code configuration |
+| `BREWFILE_TIER` | `minimal` | Install only essentials (~15 packages: git, zsh, jq, shell plugins) |
+| `BREWFILE_TIER` | `enhanced` | Modern CLI tools without containers (~40 packages: fzf, ripgrep, bat, eza) |
+| `BREWFILE_TIER` | `full` | Everything including Docker/Node (~80 packages) [default] |
 
 **Examples:**
 
@@ -947,8 +950,14 @@ SKIP_WORKSPACE_SYMLINK=true ./bootstrap/bootstrap-mac.sh
 # Skip Claude integration
 SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
 
+# Use minimal Brewfile tier (essentials only)
+BREWFILE_TIER=minimal ./bootstrap/bootstrap-mac.sh
+
+# Use enhanced tier (modern tools, no containers)
+BREWFILE_TIER=enhanced ./bootstrap/bootstrap-linux.sh
+
 # Combine flags
-SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-mac.sh
+BREWFILE_TIER=enhanced SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-mac.sh
 ```
 
 ---

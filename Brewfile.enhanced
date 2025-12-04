@@ -1,0 +1,67 @@
+# ============================================================
+# Brewfile.enhanced - Modern developer experience
+# ============================================================
+# Use this for: Developer workstations without containers
+# Install: brew bundle --file=Brewfile.enhanced
+# ============================================================
+
+# Core essentials
+brew "git"
+brew "zsh"
+brew "jq"
+
+# Modern CLI tools (the real upgrade)
+brew "fzf"              # Fuzzy finder (Ctrl+R, file search)
+brew "eza"              # Modern ls replacement
+brew "fd"               # Fast find alternative (pairs with fzf)
+brew "ripgrep"          # Fast grep alternative (rg)
+brew "zoxide"           # Smarter cd that learns your habits (z command)
+brew "bat"              # Better cat with syntax highlighting
+brew "glow"             # Render markdown beautifully in terminal
+brew "dust"             # Intuitive disk usage (du replacement)
+brew "btop"             # Beautiful system monitor (htop replacement)
+
+# Essential dev tools
+brew "gh"               # GitHub CLI
+brew "tmux"             # Terminal multiplexer
+brew "tree"             # Directory tree viewer
+brew "yq"               # jq for YAML files
+
+# Shell experience
+brew "powerlevel10k"
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
+
+# System libraries (dependencies)
+brew "gettext"
+brew "openssl@3"
+brew "readline"
+brew "sqlite"
+brew "ncurses"
+brew "pcre2"
+brew "xz"
+brew "zstd"
+brew "lz4"
+brew "brotli"
+brew "c-ares"
+brew "ca-certificates"
+brew "libevent"
+brew "libnghttp2"
+brew "libunistring"
+brew "simdjson"
+brew "utf8proc"
+
+# Integrations
+brew "bitwarden-cli"    # Vault backend
+brew "awscli"           # AWS CLI
+
+# ============================================================
+# macOS essentials (GUI apps + font)
+# Note: Skipped on Linux automatically
+# ============================================================
+if OS.mac?
+  cask "font-meslo-for-powerlevel10k"
+  cask "ghostty"        # Terminal
+  cask "claude-code"    # AI assistant
+  cask "rectangle"      # Window manager
+end

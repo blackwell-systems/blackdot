@@ -1,0 +1,38 @@
+# ============================================================
+# Brewfile.minimal - Essentials only
+# ============================================================
+# Use this for: Minimal installs, servers, CI/CD, containers
+# Install: brew bundle --file=Brewfile.minimal
+# ============================================================
+
+# Core essentials
+brew "git"              # Version control (required)
+brew "zsh"              # Shell (required)
+brew "jq"               # JSON processing (used by dotfiles scripts)
+
+# Shell experience
+brew "powerlevel10k"                # Beautiful prompt
+brew "zsh-autosuggestions"          # Command suggestions
+brew "zsh-syntax-highlighting"      # Syntax highlighting
+
+# System libraries (dependencies)
+brew "gettext"
+brew "openssl@3"
+brew "readline"
+brew "sqlite"
+brew "ncurses"
+brew "pcre2"
+brew "xz"
+brew "zstd"
+brew "ca-certificates"
+
+# Vault (if using secrets management)
+brew "bitwarden-cli"    # Optional: comment out if not using vault
+
+# ============================================================
+# macOS font (GUI only)
+# Note: Skipped on Linux automatically
+# ============================================================
+if OS.mac?
+  cask "font-meslo-for-powerlevel10k"
+end
