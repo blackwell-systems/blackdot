@@ -14,7 +14,7 @@ alias cpat='cd "$WORKSPACE/patent-pool"'
 dotfiles() {
     local cmd="${1:-help}"
     shift 2>/dev/null || true
-    local VAULT_DIR="$HOME/workspace/dotfiles/vault"
+    local VAULT_DIR="$DOTFILES_DIR/vault"
 
     case "$cmd" in
         # Status & Health
@@ -22,16 +22,16 @@ dotfiles() {
             status "$@"
             ;;
         doctor|health)
-            "$HOME/workspace/dotfiles/bin/dotfiles-doctor" "$@"
+            "$DOTFILES_DIR/bin/dotfiles-doctor" "$@"
             ;;
         drift)
-            "$HOME/workspace/dotfiles/bin/dotfiles-drift"
+            "$DOTFILES_DIR/bin/dotfiles-drift"
             ;;
         diff)
-            "$HOME/workspace/dotfiles/bin/dotfiles-diff" "$@"
+            "$DOTFILES_DIR/bin/dotfiles-diff" "$@"
             ;;
         backup)
-            "$HOME/workspace/dotfiles/bin/dotfiles-backup" "$@"
+            "$DOTFILES_DIR/bin/dotfiles-backup" "$@"
             ;;
 
         # macOS settings (macOS only)
@@ -44,13 +44,13 @@ dotfiles() {
             shift 2>/dev/null || true
             case "$subcmd" in
                 apply)
-                    "$HOME/workspace/dotfiles/macos/apply-settings.sh" "$@"
+                    "$DOTFILES_DIR/macos/apply-settings.sh" "$@"
                     ;;
                 preview|dry-run)
-                    "$HOME/workspace/dotfiles/macos/apply-settings.sh" --dry-run
+                    "$DOTFILES_DIR/macos/apply-settings.sh" --dry-run
                     ;;
                 discover)
-                    "$HOME/workspace/dotfiles/macos/discover-settings.sh" "$@"
+                    "$DOTFILES_DIR/macos/discover-settings.sh" "$@"
                     ;;
                 help|--help|-h|"")
                     echo "dotfiles macos - macOS system settings"
@@ -147,31 +147,31 @@ dotfiles() {
 
         # Setup & Maintenance
         setup)
-            "$HOME/workspace/dotfiles/bin/dotfiles-setup" "$@"
+            "$DOTFILES_DIR/bin/dotfiles-setup" "$@"
             ;;
         uninstall)
-            "$HOME/workspace/dotfiles/bin/dotfiles-uninstall" "$@"
+            "$DOTFILES_DIR/bin/dotfiles-uninstall" "$@"
             ;;
         upgrade|update)
             dotfiles-upgrade
             ;;
         lint)
-            "$HOME/workspace/dotfiles/bin/dotfiles-lint" "$@"
+            "$DOTFILES_DIR/bin/dotfiles-lint" "$@"
             ;;
         packages|pkg)
-            "$HOME/workspace/dotfiles/bin/dotfiles-packages" "$@"
+            "$DOTFILES_DIR/bin/dotfiles-packages" "$@"
             ;;
         template|tmpl)
-            "$HOME/workspace/dotfiles/bin/dotfiles-template" "$@"
+            "$DOTFILES_DIR/bin/dotfiles-template" "$@"
             ;;
         metrics)
-            "$HOME/workspace/dotfiles/bin/dotfiles-metrics" "$@"
+            "$DOTFILES_DIR/bin/dotfiles-metrics" "$@"
             ;;
         cd)
-            cd "$HOME/workspace/dotfiles"
+            cd "$DOTFILES_DIR"
             ;;
         edit)
-            ${EDITOR:-vim} "$HOME/workspace/dotfiles"
+            ${EDITOR:-vim} "$DOTFILES_DIR"
             ;;
 
         # Help
