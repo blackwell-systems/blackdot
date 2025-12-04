@@ -88,6 +88,9 @@ dotfiles() {
                 restore)
                     "$VAULT_DIR/restore.sh" "$@"
                     ;;
+                backup)
+                    "$DOTFILES_DIR/bin/dotfiles-backup" "$@"
+                    ;;
                 sync)
                     "$VAULT_DIR/sync-to-vault.sh" "$@"
                     ;;
@@ -112,11 +115,12 @@ dotfiles() {
                     echo "Usage: dotfiles vault <command> [options]"
                     echo ""
                     echo "Commands:"
-                    echo "  init             Configure vault backend (run anytime)"
-                    echo "  discover         Auto-detect secrets in standard locations"
-                    echo "                   --dry-run: Preview without creating config"
+                    echo "  ${GREEN}init${NC}             ${DIM}Setup vault backend (includes auto-discovery)${NC}"
+                    echo "  ${CYAN}discover${NC}         ${DIM}Re-scan for new secrets (updates existing config)${NC}"
+                    echo "                   --dry-run: Preview without saving"
                     echo "  restore          Restore all secrets from vault"
-                    echo "                   --force: Skip drift check, overwrite local changes"
+                    echo "                   --force: Skip drift check, overwrite local"
+                    echo "  backup           Create backup of current secrets (auto before restore)"
                     echo "  sync [item]      Sync local files to vault (--all for all)"
                     echo "  list             List vault items"
                     echo "  check            Validate vault items exist"
@@ -124,12 +128,17 @@ dotfiles() {
                     echo "  create           Create new vault item"
                     echo "  delete           Delete vault item"
                     echo ""
+                    echo "Workflow:"
+                    echo "  ${DIM}First time:${NC}  dotfiles vault init     ${DIM}→ Choose backend & discover secrets${NC}"
+                    echo "  ${DIM}Add secrets:${NC} dotfiles vault sync     ${DIM}→ Push local changes to vault${NC}"
+                    echo "  ${DIM}New machine:${NC} dotfiles vault restore  ${DIM}→ Pull secrets from vault${NC}"
+                    echo "  ${DIM}Re-scan:${NC}     dotfiles vault discover ${DIM}→ Find new SSH keys/configs${NC}"
+                    echo ""
                     echo "Examples:"
-                    echo "  dotfiles vault init           # Configure/reconfigure vault"
-                    echo "  dotfiles vault discover       # Auto-find SSH keys, AWS, Git"
+                    echo "  dotfiles vault init           # First-time setup (recommended)"
                     echo "  dotfiles vault restore        # Restore all secrets"
                     echo "  dotfiles vault sync --all     # Sync all to vault"
-                    echo "  dotfiles vault sync Git-Config"
+                    echo "  dotfiles vault discover       # Re-scan for new items"
                     ;;
                 *)
                     echo "Unknown vault command: $subcmd"

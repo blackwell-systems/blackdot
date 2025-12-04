@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Vault Command Clarity** - Improved help text to clarify relationship between init and discover
+  - Added workflow section showing: First time → init, Re-scan → discover
+  - Highlighted that `vault init` includes auto-discovery as part of setup
+  - Reduced confusion about command order and purpose
+  - Addresses pain-point #1: "Do I run init first or discover first?"
+
+### Added
+- **Automatic Backup Before Restore** - Vault restore now auto-creates backup
+  - Creates timestamped backup before overwriting any local secrets
+  - Shows backup location and restore command
+  - Added `dotfiles vault backup` command (exposed existing bin/dotfiles-backup)
+  - Eliminates fear of losing local changes during restore
+  - Addresses pain-point #2: "No rollback/undo" concern
+
+- **Package Installation Progress** - Setup wizard now shows real-time progress
+  - Displays package count before installation
+  - Streams brew output with highlighted progress
+  - Shows "(X installed)" counter during installation
+  - Time estimate maintained: "~5-10 minutes"
+  - Addresses pain-point #3: "Is it frozen?" confusion
+
 ## [2.3.0] - 2025-12-04
 
 ### Fixed

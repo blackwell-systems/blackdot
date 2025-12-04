@@ -131,6 +131,50 @@ if [[ "$PREVIEW" == "true" ]]; then
 fi
 
 # ============================================================
+# Auto-backup before restore
+# ============================================================
+echo ""
+info "Creating backup before restore..."
+
+# Define dotfiles root
+DOTFILES_ROOT="$(dirname "$VAULT_DIR")"
+
+# Check if any tracked files exist
+has_files_to_backup=false
+for item in "${(@k)DOTFILES_ITEMS}"; do
+    local path="${DOTFILES_ITEMS[$item]}"
+    if [[ -e "$path" ]]; then
+        has_files_to_backup=true
+        break
+    fi
+done
+
+for key_item in "${(@k)SSH_KEYS}"; do
+    local key_path="${SSH_KEYS[$key_item]}"
+    if [[ -f "$key_path" ]]; then
+        has_files_to_backup=true
+        break
+    fi
+done
+
+if [[ "$has_files_to_backup" == "true" ]]; then
+    if "$DOTFILES_ROOT/bin/dotfiles-backup" create >/dev/null 2>&1; then
+        backup_dir="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/backups"
+        latest_backup=$(ls -t "$backup_dir" 2>/dev/null | head -1)
+        if [[ -n "$latest_backup" ]]; then
+            pass "Backup created: $backup_dir/$latest_backup"
+            echo "     ${DIM}Restore with: dotfiles backup restore $latest_backup${NC}"
+        else
+            pass "Backup created"
+        fi
+    else
+        warn "Backup failed (continuing with restore)"
+    fi
+else
+    info "No existing files to backup"
+fi
+
+# ============================================================
 # Run restoration scripts
 # ============================================================
 echo ""

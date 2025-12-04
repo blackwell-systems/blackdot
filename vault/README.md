@@ -61,16 +61,44 @@ All `dotfiles vault` commands work identically regardless of backend.
 All vault operations are accessed via the unified `dotfiles vault` command:
 
 ```bash
-dotfiles vault restore          # Restore all secrets (checks for local drift first)
+# Setup & Configuration
+dotfiles vault init             # Configure vault backend (includes auto-discovery)
+dotfiles vault discover         # Re-scan for new secrets (updates existing config)
+
+# Restore & Backup
+dotfiles vault restore          # Restore all secrets (auto-creates backup first)
 dotfiles vault restore --force  # Skip drift check, overwrite local changes
+dotfiles vault backup           # Manual backup of current secrets
+
+# Sync & Manage
 dotfiles vault sync             # Sync local changes to vault
 dotfiles vault sync --all       # Sync all items
-dotfiles vault setup            # Interactive onboarding wizard for new vault items
 dotfiles vault create           # Create new vault item
-dotfiles vault validate         # Validate vault item schema
 dotfiles vault delete           # Delete vault item
+
+# Validation & Info
 dotfiles vault list             # List all vault items
 dotfiles vault check            # Validate required items exist
+dotfiles vault validate         # Validate vault item schema
+```
+
+**Typical Workflows:**
+
+```bash
+# First-time setup
+dotfiles vault init             # Choose backend, auto-discover secrets
+dotfiles vault sync --all       # Push discovered secrets to vault
+
+# New machine
+dotfiles vault restore          # Pull secrets from vault (auto-backup first)
+
+# Daily use
+dotfiles vault sync Git-Config  # Sync specific item after local change
+dotfiles vault discover         # Re-scan when you add new SSH keys
+
+# Safety
+dotfiles vault backup           # Create manual backup anytime
+dotfiles backup restore <name>  # Rollback from backup if needed
 ```
 
 ---
