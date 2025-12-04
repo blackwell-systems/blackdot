@@ -33,7 +33,8 @@ set -euo pipefail
 SCRIPT_DIR="${0:A:h}"
 DOTFILES_DIR="${SCRIPT_DIR:h}"
 
-# Source template library
+# Source libraries
+source "$DOTFILES_DIR/lib/_logging.sh"
 source "$DOTFILES_DIR/lib/_templates.sh"
 
 # ============================================================
