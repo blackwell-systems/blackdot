@@ -35,18 +35,18 @@ $ curl -fsSL ... | bash && dotfiles setup
  / /_/ / /_/ / /_/ __/ / /  __(__  )
 /_____/\____/\__/_/ /_/_/\___/____/
 
-✓ Detected platform: macOS
-✓ Installing Homebrew...
-✓ Installing 80+ packages (eza, fzf, ripgrep, bat, etc.)...
-✓ Linking shell config (.zshrc, .p10k.zsh)...
-✓ Created /workspace symlink for portable Claude sessions
+Detected platform: macOS
+Installing Homebrew...
+Installing 80+ packages (eza, fzf, ripgrep, bat, etc.)...
+Linking shell config (.zshrc, .p10k.zsh)...
+Created /workspace symlink for portable Claude sessions
 
 ═══════════════════════════════════════════════════════════════
                         Setup Wizard
 ═══════════════════════════════════════════════════════════════
 
-STEP 1: Symlinks ✓ (already configured)
-STEP 2: Packages ✓ (already installed)
+STEP 1: Symlinks (already configured)
+STEP 2: Packages (already installed)
 
 STEP 3: Vault Configuration
 ────────────────────────────────────────────────────────────────
@@ -58,8 +58,8 @@ Available vault backends:
 
 Select vault backend [1]: 1
 
-✓ Vault configured (bitwarden)
-✓ Vault unlocked
+Vault configured (bitwarden)
+Vault unlocked
 
 STEP 4: Secrets Management
 ────────────────────────────────────────────────────────────────
@@ -77,13 +77,13 @@ Push these to bitwarden so you can restore on other machines.
 
 Push local secrets to vault? [Y/n]: y
 
-  Creating SSH-GitHub-Enterprise... ✓
-  Creating SSH-GitHub-Personal... ✓
-  Creating AWS-Config... ✓
-  Creating AWS-Credentials... ✓
-  Creating Git-Config... ✓
+  Creating SSH-GitHub-Enterprise... done
+  Creating SSH-GitHub-Personal... done
+  Creating AWS-Config... done
+  Creating AWS-Credentials... done
+  Creating Git-Config... done
 
-✓ Pushed 5 secret(s) to vault
+Pushed 5 secret(s) to vault
 
 STEP 5: Claude Code (Optional)
 ────────────────────────────────────────────────────────────────
@@ -91,7 +91,7 @@ Claude Code detected. dotclaude helps manage profiles.
 
 Install dotclaude? [Y/n]: y
 
-✓ dotclaude installed
+dotclaude installed
 
 ═══════════════════════════════════════════════════════════════
 Setup complete!
@@ -103,11 +103,11 @@ Quick commands:
 ```
 
 **What you get:**
-- ✅ **Homebrew + 80+ packages** (eza, fzf, ripgrep, bat, jq, aws-cli, etc.)
-- ✅ **Smart credential onboarding** - Detects existing SSH/AWS/Git, offers to vault them
-- ✅ **Bidirectional vault sync** - Push local → vault, restore vault → local
-- ✅ **Portable Claude sessions** - `/workspace` paths work across all machines
-- ✅ **Resume support** - Interrupted? Just run `dotfiles setup` again
+- **Homebrew + 80+ packages** (eza, fzf, ripgrep, bat, jq, aws-cli, etc.)
+- **Smart credential onboarding** - Detects existing SSH/AWS/Git, offers to vault them
+- **Bidirectional vault sync** - Push local → vault, restore vault → local
+- **Portable Claude sessions** - `/workspace` paths work across all machines
+- **Resume support** - Interrupted? Just run `dotfiles setup` again
 
 **5-minute setup. Works on macOS, Linux, WSL2, Docker.**
 
