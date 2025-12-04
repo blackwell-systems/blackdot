@@ -4,11 +4,13 @@
 
 > Modular dotfiles for the AI-assisted development era
 
+**Full install (recommended):**
 ```bash
-# Full install (recommended)
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
+```
 
-# Minimal: Just shell config
+**Minimal (shell config only):**
+```bash
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
 ```
 
