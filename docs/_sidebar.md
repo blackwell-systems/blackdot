@@ -12,7 +12,7 @@
   - [Full Guide](README-FULL.md)
 
 - **Features**
-  - [Claude Code Integration](claude-code.md)
+  - [Claude Code + dotclaude](claude-code.md)
   - [Template System](templates.md)
   - [Vault System](vault-README.md)
   - [Extending Vault Backends](extending-backends.md)
