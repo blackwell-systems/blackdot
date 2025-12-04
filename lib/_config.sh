@@ -282,20 +282,6 @@ config_backup() {
 }
 
 # ============================================================
-# Export Functions
+# Note: Functions are automatically available when this file
+# is sourced - no explicit export needed
 # ============================================================
-
-# Make functions available to scripts that source this file
-export -f config_get
-export -f config_get_bool
-export -f config_get_array
-export -f config_set
-export -f config_set_bool
-export -f config_array_add
-export -f config_array_remove
-export -f config_validate
-export -f config_show
-export -f config_backup
-export -f has_legacy_config
-export -f get_ini_value
-export -f init_config
