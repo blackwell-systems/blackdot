@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Vault Backend Permissions** - Fixed missing execute permissions on vault backends
+  - `vault/backends/bitwarden.sh`, `1password.sh`, `pass.sh` now executable
+  - Resolves potential execution failures when directly invoking backends
+  - Audit finding: Critical issue resolved
+
 - **Brew Bundle Resilience** - Bootstrap no longer fails on package link conflicts
   - Common issue: npm-installed packages (like `bw`) conflicting with Homebrew versions
   - Auto-detects unlinked packages and attempts to fix with `brew link --overwrite`
@@ -41,6 +46,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Clear guidance when skipping vault setup
   - Accessible via `dotfiles vault init` or `dotfiles vault init --force`
 
+- **Vault Auto-Discovery** - Automatically detect secrets in standard locations
+  - New `dotfiles vault discover` command scans for existing secrets
+  - Auto-detects SSH keys in ~/.ssh/ (all key types)
+  - Discovers AWS configs, Git config, npm, pypi, docker configs
+  - Supports custom paths: `--ssh-path` and `--config-path` options
+  - Generates vault-items.json automatically with smart naming
+  - Integrated into `dotfiles vault init` with auto-discover option
+  - No more manual JSON editing for standard setups
+  - Preview mode with `--dry-run` flag
+  - Eliminates biggest UX friction point in vault setup
+
+### Documentation
+- **Vault Discover Documentation** - Added comprehensive docs for auto-discovery
+  - Documented in root README.md and docs/README-FULL.md
+  - Usage examples and integration with vault init
+  - Audit finding: Critical documentation gap resolved
+
+- **Brewfile Tier Documentation** - Added BREWFILE_TIER environment variable docs
+  - Documented in Prerequisites sections of README.md and README-FULL.md
+  - Explains minimal/enhanced/full tier options
+  - Shows how to set before bootstrap
+  - Audit finding: High-priority documentation gap resolved
+
 ### Improved
 - **Installation Flow** - Smoother onboarding experience
   - install.sh now prompts "Run setup wizard now? [Y/n]" after installation
@@ -55,6 +83,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Always shows `dotfiles doctor` for health check
   - Helpful commands and documentation links
 
+- **Setup Progress Indicators** - Shows "Step X of 6" for all wizard phases
+  - Clear progress tracking throughout setup wizard
+  - Time estimates for long operations (Packages: ~5-10 min)
+  - Users always know how far along they are
+  - Audit recommendation: High-priority UX improvement implemented
+
 - **Shell Feature Discovery** - Highlights new ZSH features post-setup
   - Setup completion now shows useful shell aliases and tools
   - Conditionally displays features based on what's actually installed
@@ -65,6 +99,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Terminal file manager with yazi (y command)
   - Adapts to minimal/enhanced/full Brewfile tiers
   - Helps users discover what they just installed
+
+- **Vault Schema Validation** - Suggests running validation after vault configuration
+  - Setup completion now recommends `dotfiles vault validate`
+  - Catches schema errors before attempting restore
+  - Audit recommendation: Proactive error prevention
 
 - **Vault Setup UX** - Better experience for configuring and skipping vault
   - Setup wizard now asks "Reconfigure vault?" if already configured

@@ -120,8 +120,8 @@ show_status() {
 
 phase_symlinks() {
     echo ""
-    echo -e "${BOLD}${CYAN}STEP 1: Symlinks${NC}"
-    echo "─────────────────"
+    echo -e "${BOLD}${CYAN}STEP 1 of 6: Symlinks${NC}"
+    echo "─────────────────────────"
 
     if state_completed "symlinks"; then
         pass "Symlinks already configured"
@@ -155,8 +155,8 @@ phase_symlinks() {
 
 phase_packages() {
     echo ""
-    echo -e "${BOLD}${CYAN}STEP 2: Packages${NC}"
-    echo "─────────────────"
+    echo -e "${BOLD}${CYAN}STEP 2 of 6: Packages${NC} ${DIM}(~5-10 min)${NC}"
+    echo "────────────────────────────────"
 
     if state_completed "packages"; then
         pass "Packages already installed"
@@ -192,8 +192,8 @@ phase_packages() {
 
 phase_vault() {
     echo ""
-    echo -e "${BOLD}${CYAN}STEP 3: Vault Configuration${NC}"
-    echo "────────────────────────────"
+    echo -e "${BOLD}${CYAN}STEP 3 of 6: Vault Configuration${NC}"
+    echo "────────────────────────────────────"
 
     if state_completed "vault"; then
         local backend=$(config_get "vault" "backend" "")
@@ -382,8 +382,8 @@ phase_vault() {
 
 phase_secrets() {
     echo ""
-    echo -e "${BOLD}${CYAN}STEP 4: Secrets Management${NC}"
-    echo "───────────────────────────"
+    echo -e "${BOLD}${CYAN}STEP 4 of 6: Secrets Management${NC}"
+    echo "───────────────────────────────────"
 
     if state_completed "secrets"; then
         pass "Secrets already configured"
@@ -569,8 +569,8 @@ phase_secrets() {
 
 phase_claude() {
     echo ""
-    echo -e "${BOLD}${CYAN}STEP 5: Claude Code (Optional)${NC}"
-    echo "───────────────────────────────"
+    echo -e "${BOLD}${CYAN}STEP 5 of 6: Claude Code (Optional)${NC}"
+    echo "────────────────────────────────────────"
 
     if state_completed "claude"; then
         pass "Claude Code already configured"
@@ -612,8 +612,8 @@ phase_claude() {
 
 phase_template() {
     echo ""
-    echo -e "${BOLD}${CYAN}STEP 6: Machine-Specific Templates (Optional)${NC}"
-    echo "───────────────────────────────────────────────"
+    echo -e "${BOLD}${CYAN}STEP 6 of 6: Machine-Specific Templates (Optional)${NC}"
+    echo "───────────────────────────────────────────────────────────"
 
     if state_completed "template"; then
         pass "Templates already configured"
@@ -736,7 +736,8 @@ main() {
         # Vault-specific next steps
         if [[ -n "$vault_backend" ]] && [[ "$vault_backend" != "none" ]]; then
             echo -e "  ${CYAN}✓ Vault configured${NC} ($vault_backend)"
-            echo -e "    ${DIM}→${NC} ${BOLD}dotfiles vault restore${NC}    ${DIM}# Restore your secrets${NC}"
+            echo -e "    ${DIM}→${NC} ${BOLD}dotfiles vault validate${NC}    ${DIM}# Validate vault schema (recommended)${NC}"
+            echo -e "    ${DIM}→${NC} ${BOLD}dotfiles vault restore${NC}     ${DIM}# Restore your secrets${NC}"
             echo ""
         fi
 

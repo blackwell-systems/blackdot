@@ -622,6 +622,13 @@ When setting up a new machine or VM, no username updates are needed. Everything 
   - Skip with `SKIP_CLAUDE_SETUP=true`
   - Installed via Brewfile on both macOS + Lima
 
+### Optional (Brewfile package tiers)
+- **BREWFILE_TIER** - Control which packages to install:
+  - `minimal` - Essential tools only (~40 packages: git, zsh, fzf, ripgrep)
+  - `enhanced` - Modern CLI tools without containers (~80 packages, adds: eza, bat, dust, zoxide)
+  - `full` - Everything including Docker/Kubernetes (~120+ packages) [default]
+  - Set before bootstrap: `export BREWFILE_TIER=minimal` or `export BREWFILE_TIER=enhanced`
+
 Most tools are installed automatically via Homebrew after the basic bootstrap is done.
 
 ---
@@ -1066,11 +1073,23 @@ Vault items are defined in a user-editable JSON configuration file:
 ~/.config/dotfiles/vault-items.json
 ```
 
-This allows you to customize which secrets to manage without editing source code. The file is created automatically by `dotfiles vault setup` or you can copy from the example:
+This allows you to customize which secrets to manage without editing source code.
+
+**Auto-Discovery (Recommended):**
+
+```bash
+dotfiles vault init      # Configure backend, offers auto-discovery
+dotfiles vault discover  # Or run discovery directly
+```
+
+Auto-discovery scans standard locations (`~/.ssh/`, `~/.aws/`, `~/.gitconfig`, etc.) and generates `vault-items.json` automatically with smart naming.
+
+**Manual Setup:**
 
 ```bash
 mkdir -p ~/.config/dotfiles
 cp vault/vault-items.example.json ~/.config/dotfiles/vault-items.json
+# Edit to match your setup
 ```
 
 See [Vault README](vault-README.md#configuration-file) for the full schema and customization options.

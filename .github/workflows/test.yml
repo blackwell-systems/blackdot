@@ -80,6 +80,8 @@ jobs:
             vault/restore-git.sh
             vault/restore-ssh.sh
             vault/sync-to-vault.sh
+            vault/init-vault.sh
+            vault/discover-secrets.sh
           )
 
           ERRORS=0
