@@ -124,30 +124,61 @@ setup_workspace_symlink() {
     # Optional: enables session portability across machines if you use multiple.
     SKIP_WORKSPACE_SYMLINK="${SKIP_WORKSPACE_SYMLINK:-false}"
 
-    if [[ "$SKIP_WORKSPACE_SYMLINK" != "true" ]] && [[ ! -e /workspace ]]; then
-        echo "Creating /workspace symlink (requires sudo)..."
-        if sudo ln -sfn "$HOME/workspace" /workspace; then
-            echo "Created /workspace -> $HOME/workspace"
-        else
-            echo "WARNING: Could not create /workspace symlink."
-            echo "         Claude sessions will use OS-specific paths."
-            echo "         To fix manually: sudo ln -sfn $HOME/workspace /workspace"
-        fi
-    elif [[ "$SKIP_WORKSPACE_SYMLINK" != "true" ]] && [[ -L /workspace ]]; then
-        # Already a symlink - verify it points to the right place
+    if [[ "$SKIP_WORKSPACE_SYMLINK" = "true" ]]; then
+        echo "Skipping /workspace symlink (SKIP_WORKSPACE_SYMLINK=true)"
+        return 0
+    fi
+
+    # Check if /workspace already exists and is correct
+    if [[ -L /workspace ]]; then
         local current_target
         current_target=$(readlink /workspace)
-        if [[ "$current_target" != "$HOME/workspace" ]]; then
+        if [[ "$current_target" == "$HOME/workspace" ]]; then
+            echo "/workspace symlink already correct."
+            return 0
+        else
             echo "Updating /workspace symlink..."
             sudo rm /workspace && sudo ln -sfn "$HOME/workspace" /workspace
             echo "Updated /workspace -> $HOME/workspace"
-        else
-            echo "/workspace symlink already correct."
+            return 0
         fi
-    elif [[ "$SKIP_WORKSPACE_SYMLINK" = "true" ]]; then
-        echo "Skipping /workspace symlink (SKIP_WORKSPACE_SYMLINK=true)"
     elif [[ -e /workspace ]]; then
         echo "WARNING: /workspace exists but is not a symlink. Skipping."
+        return 0
+    fi
+
+    # Detect OS for platform-specific handling
+    local os_type
+    os_type="$(uname -s)"
+
+    # Try to create the symlink
+    echo "Creating /workspace symlink (requires sudo)..."
+    if sudo ln -sfn "$HOME/workspace" /workspace 2>/dev/null; then
+        pass "Created /workspace -> $HOME/workspace"
+        return 0
+    fi
+
+    # Handle macOS read-only filesystem (Catalina+)
+    if [[ "$os_type" == "Darwin" ]]; then
+        warn "Could not create /workspace symlink (read-only filesystem)"
+        echo ""
+        echo "Modern macOS requires using synthetic.conf for root-level symlinks."
+        echo ""
+        echo "To fix this, run the following commands:"
+        echo ""
+        echo "  1. Create synthetic.conf entry:"
+        echo "     ${CYAN}echo -e 'workspace\t$HOME/workspace' | sudo tee -a /etc/synthetic.conf${NC}"
+        echo ""
+        echo "  2. Reboot to apply:"
+        echo "     ${CYAN}sudo reboot${NC}"
+        echo ""
+        echo "  Or wait until next reboot - the symlink will appear automatically."
+        echo ""
+        info "For now, Claude sessions will use ~/workspace paths (still works fine)"
+    else
+        # Non-macOS failure
+        warn "Could not create /workspace symlink"
+        echo "  To fix manually: sudo ln -sfn $HOME/workspace /workspace"
     fi
 }
 
