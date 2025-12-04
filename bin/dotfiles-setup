@@ -155,7 +155,7 @@ phase_symlinks() {
 
 phase_packages() {
     echo ""
-    echo -e "${BOLD}${CYAN}STEP 2 of 6: Packages${NC} ${DIM}(~5-10 min)${NC}"
+    echo -e "${BOLD}${CYAN}STEP 2 of 6: Packages${NC}"
     echo "────────────────────────────────"
 
     if state_completed "packages"; then
@@ -170,16 +170,96 @@ phase_packages() {
         return 0
     fi
 
-    echo "This will install packages from Brewfile."
+    echo "This will install packages from Brewfile using Homebrew."
     echo ""
 
-    # Count packages in Brewfile for progress indicator
-    local package_count=0
+    # Count packages for each tier
+    local minimal_count=0
+    local enhanced_count=0
+    local full_count=0
+
+    if [[ -f "$DOTFILES_DIR/Brewfile.minimal" ]]; then
+        minimal_count=$(grep -cE '^\s*(brew|cask|mas|tap)\s+' "$DOTFILES_DIR/Brewfile.minimal" 2>/dev/null || echo "18")
+    fi
+    if [[ -f "$DOTFILES_DIR/Brewfile.enhanced" ]]; then
+        enhanced_count=$(grep -cE '^\s*(brew|cask|mas|tap)\s+' "$DOTFILES_DIR/Brewfile.enhanced" 2>/dev/null || echo "43")
+    fi
     if [[ -f "$DOTFILES_DIR/Brewfile" ]]; then
-        package_count=$(grep -cE '^\s*(brew|cask|mas|tap)\s+' "$DOTFILES_DIR/Brewfile" 2>/dev/null || echo "80+")
+        full_count=$(grep -cE '^\s*(brew|cask|mas|tap)\s+' "$DOTFILES_DIR/Brewfile" 2>/dev/null || echo "61")
     fi
 
-    echo "This will install approximately ${package_count} packages."
+    # Check if tier already selected
+    local selected_tier=$(config_get "packages.tier" "")
+
+    if [[ -z "$selected_tier" ]]; then
+        # Interactive tier selection
+        echo -e "${BOLD}Which package tier would you like?${NC}"
+        echo ""
+        echo -e "  ${GREEN}1)${NC} minimal    ${minimal_count} packages (~2 min)   ${DIM}# Essentials only${NC}"
+        echo -e "  ${GREEN}2)${NC} enhanced   ${enhanced_count} packages (~5 min)   ${DIM}# Modern tools, no containers${NC} ${BOLD}← RECOMMENDED${NC}"
+        echo -e "  ${GREEN}3)${NC} full       ${full_count} packages (~10 min)  ${DIM}# Everything (Docker, etc.)${NC}"
+        echo ""
+        echo -e "${DIM}Tip: You can always add more packages later with 'brew install <package>'${NC}"
+        echo ""
+        echo -n "Your choice [2]: "
+        read tier_choice
+        tier_choice=${tier_choice:-2}
+
+        case "$tier_choice" in
+            1)
+                selected_tier="minimal"
+                ;;
+            2)
+                selected_tier="enhanced"
+                ;;
+            3)
+                selected_tier="full"
+                ;;
+            *)
+                warn "Invalid choice, using enhanced tier"
+                selected_tier="enhanced"
+                ;;
+        esac
+
+        # Save preference
+        config_set "packages.tier" "$selected_tier"
+        info "Selected tier: $selected_tier"
+        echo ""
+    else
+        pass "Using saved tier preference: $selected_tier"
+        echo ""
+    fi
+
+    # Set package count based on tier
+    local package_count
+    local brewfile
+    local time_estimate
+
+    case "$selected_tier" in
+        minimal)
+            package_count=$minimal_count
+            brewfile="$DOTFILES_DIR/Brewfile.minimal"
+            time_estimate="~2 min"
+            ;;
+        enhanced)
+            package_count=$enhanced_count
+            brewfile="$DOTFILES_DIR/Brewfile.enhanced"
+            time_estimate="~5 min"
+            ;;
+        full)
+            package_count=$full_count
+            brewfile="$DOTFILES_DIR/Brewfile"
+            time_estimate="~10 min"
+            ;;
+        *)
+            # Fallback to full
+            package_count=$full_count
+            brewfile="$DOTFILES_DIR/Brewfile"
+            time_estimate="~10 min"
+            ;;
+    esac
+
+    echo "This will install ${package_count} packages (${time_estimate})."
     echo ""
     echo -n "Install packages? [Y/n]: "
     read confirm
@@ -188,17 +268,17 @@ phase_packages() {
         return 0
     fi
 
-    info "Running brew bundle (this may take 5-10 minutes)..."
+    info "Running brew bundle with ${selected_tier} tier..."
     echo ""
 
     # Show progress by streaming output
     local brew_output
     local current_package=0
-    (cd "$DOTFILES_DIR" && brew bundle 2>&1) | while IFS= read -r line; do
+    (cd "$DOTFILES_DIR" && brew bundle --file="$brewfile" 2>&1) | while IFS= read -r line; do
         # Highlight package installations
         if [[ "$line" =~ "Installing " ]] || [[ "$line" =~ "Upgrading " ]]; then
             ((current_package++))
-            echo -e "${CYAN}→${NC} $line ${DIM}($current_package installed)${NC}"
+            echo -e "${CYAN}→${NC} $line ${DIM}($current_package/$package_count)${NC}"
         elif [[ "$line" =~ "Using " ]] || [[ "$line" =~ "Skipping " ]]; then
             echo -e "${DIM}  $line${NC}"
         elif [[ "$line" =~ "Error:" ]] || [[ "$line" =~ "Warning:" ]]; then
@@ -211,10 +291,10 @@ phase_packages() {
     echo ""
     if [[ $brew_status -eq 0 ]]; then
         state_complete "packages"
-        pass "Packages installed successfully"
+        pass "Packages installed successfully (${selected_tier} tier)"
     else
         warn "Some packages may have failed - continuing"
-        info "Run 'brew bundle --file=$DOTFILES_DIR/Brewfile' to retry failed packages"
+        info "Run 'brew bundle --file=$brewfile' to retry failed packages"
         state_complete "packages"
     fi
 }

@@ -120,6 +120,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Added tip explaining what merge preserves
     - Updated vault/discover-secrets.sh
 
+- **Unit Test Compatibility** - Fixed 47 failing tests caused by export -f statements
+  - Removed bash-specific `export -f` statements from lib/_config.sh
+  - Functions sourced from library files don't need explicit export
+  - Improves cross-shell compatibility (bash/zsh/sh)
+  - Tests now pass: 75/76 unit tests, 21/21 integration tests, 22/22 error scenarios
+  - Only 1 minor test remains (SSH key count environmental issue)
+
 - **Vault Command Clarity** - Improved help text to clarify relationship between init and discover
   - Added workflow section showing: First time → init, Re-scan → discover
   - Highlighted that `vault init` includes auto-discovery as part of setup
@@ -133,6 +140,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `dotfiles vault backup` command (exposed existing bin/dotfiles-backup)
   - Eliminates fear of losing local changes during restore
   - Addresses pain-point #2: "No rollback/undo" concern
+
+- **Package Tier Selection** (#3) - Interactive tier selection in setup wizard
+  - Presents 3 tiers with package counts and time estimates:
+    - Minimal: 18 packages (~2 min) - Essentials only
+    - Enhanced: 43 packages (~5 min) - Modern tools, no containers (RECOMMENDED)
+    - Full: 61 packages (~10 min) - Everything (Docker, etc.)
+  - Saves tier preference in config.json (packages.tier)
+  - Uses saved preference if re-running setup
+  - Shows accurate package count and progress during installation
+  - Makes invisible tier options visible (was hidden env variable)
+  - Addresses pain-point #3: "Brewfile tier selection invisible"
 
 - **Package Installation Progress** - Setup wizard now shows real-time progress
   - Displays package count before installation

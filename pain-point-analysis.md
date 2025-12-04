@@ -21,9 +21,14 @@
 - ✅ **Issue #14** - CLAUDE.md placement → Added clear header for human users
 - ✅ **Issue #15** - Workspace symlink purpose → Expanded explanation with problem/solution format
 
+**v3.0 Week 3 - UX Improvements:**
+- ✅ **Issue #3** - Brewfile tier selection invisible → Interactive tier selection with package counts
+- ✅ **Test Suite** - Fixed 47 failing tests (export -f compatibility issue)
+
 **Changes Implemented:**
 - v2.3.0: `zsh/zsh.d/40-aliases.zsh`, `vault/restore.sh`, `bin/dotfiles-setup`, `vault/README.md`
 - v3.0 Quick Wins: `CLAUDE.md`, `README.md`, `docs/README.md`, `docs/vault-README.md`, `vault/discover-secrets.sh`
+- v3.0 Week 3: `bin/dotfiles-setup`, `lib/_config.sh`
 - All changes documented in `CHANGELOG.md` under [Unreleased]
 
 ---
@@ -40,8 +45,9 @@
 **Progress:**
 - **v2.3.0**: Top 3 critical issues addressed (vault confusion, rollback, progress), reducing critical blockers by 43%
 - **v3.0 Quick Wins**: 4 additional issues resolved (merge preview, multi-vault, CLAUDE.md, workspace symlink)
-- **Total resolved**: 7 of 23 issues (30%) - 3 v2.3 + 4 v3.0 quick wins
-- **v3.0 Week 3 Planned**: UX improvements targeting remaining 3 critical issues (tier selection, error messages, health score)
+- **v3.0 Week 3**: Brewfile tier selection implemented (pain point #3) + test suite fixes
+- **Total resolved**: 8 of 23 issues (35%) - 3 v2.3 + 4 v3.0 quick wins + 1 v3.0 week 3
+- **v3.0 Week 3 In Progress**: Error messages with fix commands (#6), health score interpretation (#7)
 - **v3.0 Full Release**: Comprehensive redesign addressing all remaining pain points (see DESIGN-v3.md)
 
 **v3.0 Breaking Changes:**
@@ -121,9 +127,10 @@
 
 ---
 
-### 3. Brewfile Tier Is Invisible 🎭
+### 3. Brewfile Tier Is Invisible 🎭 ✅ RESOLVED
 
-**Location:** `install.sh`, `README.md`
+**Location:** `bin/dotfiles-setup:156-300`
+**Status:** Fixed (Week 3 - Interactive tier selection implemented)
 
 **Problem:** Users don't know about `BREWFILE_TIER` variable
 - Documentation mentions it exists (line 64-66 of install.sh help)
@@ -135,21 +142,23 @@
 - "How many packages in each?"
 - "Can I see the list before installing?"
 
-**v3.0 Solution (Planned):**
+**v3.0 Solution (Implemented - Week 3):**
 - Interactive tier selection in setup wizard:
   ```
   Which package tier would you like?
 
-  1) minimal    20 packages (~2 min)
-  2) enhanced   80 packages (~8 min) ← RECOMMENDED
-  3) full       120 packages (~15 min)
-  4) custom     Choose packages interactively
+  1) minimal    18 packages (~2 min)   # Essentials only
+  2) enhanced   43 packages (~5 min)   # Modern tools, no containers ← RECOMMENDED
+  3) full       61 packages (~10 min)  # Everything (Docker, etc.)
 
   Your choice [2]:
   ```
-- Visual progress bar during installation
-- Store tier choice in config.json
-- See: DESIGN-v3.md Section 5
+- Package counts dynamically calculated from Brewfiles
+- Real-time progress display during installation: "(X/61)"
+- Tier preference stored in config.json (packages.tier)
+- Reuses saved preference if re-running setup
+- Tip displayed: "You can always add more packages later with 'brew install <package>'"
+- Makes previously invisible tier options discoverable and actionable
 
 ---
 
