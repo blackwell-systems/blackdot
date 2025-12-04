@@ -178,9 +178,9 @@ generate_vault_json() {
     local -a syncable_items=()
     local -a aws_profiles=()
 
-    echo ""
-    echo -e "${BOLD}${CYAN}Discovering secrets in standard locations...${NC}"
-    echo ""
+    echo "" >&2
+    echo -e "${BOLD}${CYAN}Discovering secrets in standard locations...${NC}" >&2
+    echo "" >&2
 
     # Discover SSH keys
     info "Scanning ~/.ssh/ for SSH keys..."
@@ -285,13 +285,13 @@ generate_vault_json() {
     # Check if anything was found
     if [[ ${#ssh_scan_results[@]} -eq 0 ]] && [[ ${#syncable_items[@]} -eq 0 ]]; then
         warn "No secrets found in standard locations"
-        echo ""
-        echo "Checked locations:"
-        echo "  • ~/.ssh/ (SSH keys)"
-        echo "  • ~/.aws/ (AWS configs)"
-        echo "  • ~/.gitconfig (Git config)"
-        echo "  • ~/.npmrc, ~/.pypirc, ~/.docker/config.json"
-        echo ""
+        echo "" >&2
+        echo "Checked locations:" >&2
+        echo "  • ~/.ssh/ (SSH keys)" >&2
+        echo "  • ~/.aws/ (AWS configs)" >&2
+        echo "  • ~/.gitconfig (Git config)" >&2
+        echo "  • ~/.npmrc, ~/.pypirc, ~/.docker/config.json" >&2
+        echo "" >&2
         return 1
     fi
 
