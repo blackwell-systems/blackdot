@@ -447,10 +447,11 @@ jobs:
 
           # Check for required sections in README
           REQUIRED_SECTIONS=(
-            "Quick Start"
-            "Project Structure"
+            "One-Line Install"
+            "Pick What You Want"
+            "Why This Dotfiles"
             "Platform Support"
-            "Troubleshooting"
+            "Documentation"
           )
 
           MISSING=0
