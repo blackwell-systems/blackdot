@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Brew Bundle Resilience** - Bootstrap no longer fails on package link conflicts
+  - Common issue: npm-installed packages (like `bw`) conflicting with Homebrew versions
+  - Auto-detects unlinked packages and attempts to fix with `brew link --overwrite`
+  - Bootstrap continues even if some packages have link issues (non-fatal)
+  - Provides clear feedback about what was fixed vs what needs manual attention
+  - Fixes #UX: "why should it fail just because something is installed already"
+
 ## [2.2.0] - 2025-12-03
 
 ### Added
