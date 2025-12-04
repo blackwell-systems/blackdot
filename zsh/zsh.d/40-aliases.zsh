@@ -176,6 +176,9 @@ dotfiles() {
         setup)
             "$DOTFILES_DIR/bin/dotfiles-setup" "$@"
             ;;
+        migrate)
+            "$DOTFILES_DIR/bin/dotfiles-migrate" "$@"
+            ;;
         uninstall)
             "$DOTFILES_DIR/bin/dotfiles-uninstall" "$@"
             ;;
@@ -255,6 +258,7 @@ dotfiles() {
             echo ""
             echo "${BOLD}Setup & Health:${NC}"
             echo "  setup             Interactive setup wizard (recommended)"
+            echo "  migrate           Migrate config to v3.0 (INI→JSON, vault v2→v3)"
             echo "  status, s         Quick visual dashboard"
             echo "  doctor, health    Run comprehensive health check"
             echo "  drift             Compare local files vs vault"
