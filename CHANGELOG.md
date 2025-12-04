@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Vault Schema Validation** (Pain Point #4) - Prevent invalid configurations
+  - JSON schema for vault-items.json with comprehensive validation rules
+  - `vault_validate_schema()` function in `lib/_vault.sh` validates required fields, types, naming conventions
+  - Automatic validation before all vault sync operations (push/pull)
+  - Standalone `dotfiles vault validate` command for manual validation
+  - Clear error messages showing exactly what's wrong and how to fix it
+  - Graceful degradation when jq is not installed (warning instead of failure)
+  - Schema file: `vault/vault-items.schema.json` with JSON Schema Draft 2020-12
+  - Validates: required fields (path, required, type), enum values (file/sshkey), item name patterns
+
+- **Setup Wizard Progress Bar** (Pain Point #8) - Visual feedback for setup progress
+  - Unicode progress bar with 20-character visualization (█ filled, ░ empty)
+  - `show_progress()` function displays current step (e.g., "Step 2 of 6: Packages")
+  - `show_steps_overview()` function shows all 6 steps upfront with descriptions
+  - Beautiful bordered sections using box drawing characters (╔═╗║╠╣╚═╝)
+  - Progress percentage calculation (33%, 50%, etc.)
+  - All 6 setup phases updated: symlinks, packages, vault, secrets, claude, template
+  - Overview shown at wizard start with safety reminder ("Safe to exit anytime")
+
 - **Structured Error Handling Library** (Pain Point #6) - Actionable error messages
   - `lib/_errors.sh` - Comprehensive error handling with 15 pre-built error functions
   - Structured format: What / Why / Impact / Fix / Help URL

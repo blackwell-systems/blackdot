@@ -321,6 +321,96 @@ vault_clear_session() {
 }
 
 # ============================================================
+# Vault Schema Validation
+# ============================================================
+
+# Validate vault-items.json against JSON schema
+# Returns 0 if valid, 1 if invalid
+# Usage: vault_validate_schema [path_to_vault_items_json]
+vault_validate_schema() {
+    local vault_items_file="${1:-$HOME/.config/dotfiles/vault-items.json}"
+    local schema_file="$DOTFILES_DIR/vault/vault-items.schema.json"
+
+    # Check if vault-items.json exists
+    if [[ ! -f "$vault_items_file" ]]; then
+        warn "vault-items.json not found at: $vault_items_file"
+        info "Run 'dotfiles vault scan' to create it"
+        return 1
+    fi
+
+    # Check if jq is available
+    if ! command -v jq >/dev/null 2>&1; then
+        warn "jq not installed - skipping schema validation"
+        info "Install jq for schema validation: brew install jq"
+        return 0  # Don't fail if jq is missing
+    fi
+
+    # Validate JSON syntax first
+    if ! jq empty "$vault_items_file" 2>/dev/null; then
+        fail "Invalid JSON syntax in vault-items.json"
+        info "Check syntax: jq . $vault_items_file"
+        return 1
+    fi
+
+    # Validate required fields
+    local errors=""
+
+    # Check vault_items is present (required field)
+    if ! jq -e '.vault_items' "$vault_items_file" >/dev/null 2>&1; then
+        errors+="✗ Missing required field: vault_items\n"
+    fi
+
+    # Validate vault_items structure
+    if jq -e '.vault_items' "$vault_items_file" >/dev/null 2>&1; then
+        local item_errors=$(jq -r '
+            .vault_items | to_entries[] |
+            select(.value.path == null or .value.required == null or .value.type == null) |
+            "✗ Item \(.key): missing required field (path, required, or type)"
+        ' "$vault_items_file" 2>/dev/null)
+
+        if [[ -n "$item_errors" ]]; then
+            errors+="$item_errors\n"
+        fi
+
+        # Validate type field values
+        local type_errors=$(jq -r '
+            .vault_items | to_entries[] |
+            select(.value.type != null and (.value.type != "file" and .value.type != "sshkey")) |
+            "✗ Item \(.key): invalid type \"\(.value.type)\" (must be \"file\" or \"sshkey\")"
+        ' "$vault_items_file" 2>/dev/null)
+
+        if [[ -n "$type_errors" ]]; then
+            errors+="$type_errors\n"
+        fi
+    fi
+
+    # Validate item names match pattern ^[A-Z][A-Za-z0-9-]*$
+    local name_errors=$(jq -r '
+        (.vault_items // {} | keys[]) as $key |
+        select($key | test("^[A-Z][A-Za-z0-9-]*$") | not) |
+        "✗ Invalid item name: \($key) (must start with capital, contain only alphanumeric and hyphens)"
+    ' "$vault_items_file" 2>/dev/null)
+
+    if [[ -n "$name_errors" ]]; then
+        errors+="$name_errors\n"
+    fi
+
+    # Report errors if any
+    if [[ -n "$errors" ]]; then
+        fail "vault-items.json validation failed:"
+        echo ""
+        echo -e "$errors" | sed 's/^/  /'
+        echo ""
+        info "See example: $DOTFILES_DIR/vault/vault-items.example.json"
+        info "Schema: $schema_file"
+        return 1
+    fi
+
+    # Validation passed
+    return 0
+}
+
+# ============================================================
 # Offline Mode Support
 # ============================================================
 

@@ -104,7 +104,7 @@ dotfiles() {
                     "$VAULT_DIR/check-vault-items.sh" "$@"
                     ;;
                 validate)
-                    "$VAULT_DIR/validate-schema.sh" "$@"
+                    "$VAULT_DIR/validate-config.sh" "$@"
                     ;;
                 create)
                     "$VAULT_DIR/create-vault-item.sh" "$@"

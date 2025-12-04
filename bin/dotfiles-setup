@@ -65,6 +65,73 @@ done
 # Display Functions
 # ============================================================
 
+# Show progress bar with current step
+# Usage: show_progress <current_step> <total_steps> <step_name>
+show_progress() {
+    local current=$1
+    local total=$2
+    local step_name="$3"
+
+    local percent=$((current * 100 / total))
+    local filled=$((current * 20 / total))
+    local empty=$((20 - filled))
+
+    # Build progress bar
+    local bar=""
+    for ((i=0; i<filled; i++)); do
+        bar+="█"
+    done
+    for ((i=0; i<empty; i++)); do
+        bar+="░"
+    done
+
+    echo ""
+    echo -e "${BOLD}${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${BOLD}${CYAN}║${NC} ${BOLD}Step $current of $total: $step_name${NC}"
+    echo -e "${BOLD}${CYAN}╠═══════════════════════════════════════════════════════════════╣${NC}"
+    echo -e "${BOLD}${CYAN}║${NC} ${bar} ${BOLD}${percent}%${NC}"
+    echo -e "${BOLD}${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+}
+
+# Show all steps overview at the beginning
+show_steps_overview() {
+    echo ""
+    echo -e "${BOLD}${CYAN}═══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${BOLD}                    Setup Wizard Overview${NC}"
+    echo -e "${BOLD}${CYAN}═══════════════════════════════════════════════════════════════${NC}"
+    echo ""
+    echo -e "${BOLD}This wizard will guide you through 6 steps:${NC}"
+    echo ""
+    echo -e "  ${CYAN}1.${NC} ${BOLD}Symlinks${NC}          - Link shell config files"
+    echo -e "     ${DIM}~/.zshrc, ~/.p10k.zsh, ~/.claude${NC}"
+    echo ""
+    echo -e "  ${CYAN}2.${NC} ${BOLD}Packages${NC}          - Install Homebrew packages"
+    echo -e "     ${DIM}Choose: minimal (18) | enhanced (43) | full (61)${NC}"
+    echo ""
+    echo -e "  ${CYAN}3.${NC} ${BOLD}Vault${NC}             - Configure secret backend"
+    echo -e "     ${DIM}Bitwarden, 1Password, or pass${NC}"
+    echo ""
+    echo -e "  ${CYAN}4.${NC} ${BOLD}Secrets${NC}           - Manage SSH keys, AWS, Git config"
+    echo -e "     ${DIM}Auto-discover and sync to vault${NC}"
+    echo ""
+    echo -e "  ${CYAN}5.${NC} ${BOLD}Claude Code${NC}       - AI assistant integration"
+    echo -e "     ${DIM}Optional: dotclaude + portable sessions${NC}"
+    echo ""
+    echo -e "  ${CYAN}6.${NC} ${BOLD}Templates${NC}         - Machine-specific configs"
+    echo -e "     ${DIM}Optional: work vs personal configs${NC}"
+    echo ""
+    echo -e "${BOLD}${GREEN}✓${NC} ${BOLD}Safe to exit anytime${NC} - Progress is saved automatically"
+    echo -e "${BOLD}${GREEN}✓${NC} ${BOLD}Resume anytime${NC} - Just run 'dotfiles setup' again"
+    echo ""
+    echo -e "${BOLD}${CYAN}═══════════════════════════════════════════════════════════════${NC}"
+    echo ""
+
+    # Prompt to continue
+    echo -n "Press Enter to begin setup..."
+    read
+}
+
 show_banner() {
     echo ""
     echo -e "${BOLD}${CYAN}"
@@ -119,9 +186,7 @@ show_status() {
 # ============================================================
 
 phase_symlinks() {
-    echo ""
-    echo -e "${BOLD}${CYAN}STEP 1 of 6: Symlinks${NC}"
-    echo "─────────────────────────"
+    show_progress 1 6 "Symlinks"
 
     if state_completed "symlinks"; then
         pass "Symlinks already configured"
@@ -154,8 +219,7 @@ phase_symlinks() {
 }
 
 phase_packages() {
-    echo ""
-    echo -e "${BOLD}${CYAN}STEP 2 of 6: Packages${NC}"
+    show_progress 2 6 "Packages"
     echo "────────────────────────────────"
 
     if state_completed "packages"; then
@@ -171,7 +235,6 @@ phase_packages() {
     fi
 
     echo "This will install packages from Brewfile using Homebrew."
-    echo ""
 
     # Count packages for each tier
     local minimal_count=0
@@ -260,7 +323,6 @@ phase_packages() {
     esac
 
     echo "This will install ${package_count} packages (${time_estimate})."
-    echo ""
     echo -n "Install packages? [Y/n]: "
     read confirm
     if [[ "${confirm:-Y}" =~ ^[Nn]$ ]]; then
@@ -269,7 +331,6 @@ phase_packages() {
     fi
 
     info "Running brew bundle with ${selected_tier} tier..."
-    echo ""
 
     # Show progress by streaming output
     local brew_output
@@ -288,7 +349,6 @@ phase_packages() {
 
     # Check exit status
     local brew_status=$?
-    echo ""
     if [[ $brew_status -eq 0 ]]; then
         state_complete "packages"
         pass "Packages installed successfully (${selected_tier} tier)"
@@ -300,8 +360,7 @@ phase_packages() {
 }
 
 phase_vault() {
-    echo ""
-    echo -e "${BOLD}${CYAN}STEP 3 of 6: Vault Configuration${NC}"
+    show_progress 3 6 "Vault Configuration"
     echo "────────────────────────────────────"
 
     if state_completed "vault"; then
@@ -369,7 +428,6 @@ phase_vault() {
         echo "  $i) ${available[$i]}"
     done
     echo "  $((${#available[@]} + 1))) Skip (configure secrets manually)"
-    echo ""
 
     echo -n "Select vault backend [1]: "
     read choice
@@ -396,7 +454,6 @@ phase_vault() {
     export DOTFILES_VAULT_BACKEND="$selected"
 
     info "Using vault backend: $selected"
-    echo ""
 
     # Check/create vault items configuration
     local vault_config="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/vault-items.json"
@@ -433,7 +490,6 @@ phase_vault() {
     else
         pass "Vault items config exists"
     fi
-    echo ""
 
     # Backend-specific login
     case "$selected" in
@@ -490,8 +546,7 @@ phase_vault() {
 }
 
 phase_secrets() {
-    echo ""
-    echo -e "${BOLD}${CYAN}STEP 4 of 6: Secrets Management${NC}"
+    show_progress 4 6 "Secrets Management"
     echo "───────────────────────────────────"
 
     if state_completed "secrets"; then
@@ -524,7 +579,6 @@ phase_secrets() {
     local both_exist=()
 
     echo "Scanning secrets..."
-    echo ""
 
     # Get vault session
     local session
@@ -583,7 +637,6 @@ phase_secrets() {
 
     # Display status
     echo -e "${BOLD}Secrets Status:${NC}"
-    echo ""
 
     if [[ ${#local_only[@]} -gt 0 ]]; then
         echo -e "  ${YELLOW}Local only (not in vault):${NC}"
@@ -677,8 +730,7 @@ phase_secrets() {
 }
 
 phase_claude() {
-    echo ""
-    echo -e "${BOLD}${CYAN}STEP 5 of 6: Claude Code (Optional)${NC}"
+    show_progress 5 6 "Claude Code (Optional)"
     echo "────────────────────────────────────────"
 
     if state_completed "claude"; then
@@ -701,7 +753,6 @@ phase_claude() {
     fi
 
     echo "Claude Code detected. dotclaude helps manage profiles across machines."
-    echo ""
     echo -n "Install dotclaude? [Y/n]: "
     read response
 
@@ -720,8 +771,7 @@ phase_claude() {
 }
 
 phase_template() {
-    echo ""
-    echo -e "${BOLD}${CYAN}STEP 6 of 6: Machine-Specific Templates (Optional)${NC}"
+    show_progress 6 6 "Machine-Specific Templates (Optional)"
     echo "───────────────────────────────────────────────────────────"
 
     if state_completed "template"; then
@@ -730,12 +780,10 @@ phase_template() {
     fi
 
     echo "Templates let you customize configs per machine (gitconfig, ssh-config, etc.)."
-    echo ""
     echo "Examples:"
     echo "  • Work vs personal git email"
     echo "  • Different SSH keys per machine"
     echo "  • Machine-specific environment variables"
-    echo ""
     echo -n "Setup machine-specific config templates? [y/N]: "
     read response
 
@@ -806,6 +854,7 @@ main() {
 
     echo "Let's complete your setup..."
     echo ""
+    show_steps_overview
 
     # Run each phase
     local phases=("symlinks" "packages" "vault" "secrets" "claude" "template")
@@ -821,7 +870,6 @@ main() {
     done
 
     # Final status
-    echo ""
     echo "═══════════════════════════════════════════════════════"
     show_status
 
@@ -913,7 +961,6 @@ main() {
         echo "Run 'dotfiles setup' again to continue."
     fi
 
-    echo ""
 }
 
 # Run main

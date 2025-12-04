@@ -16,6 +16,7 @@ source "$(dirname "$0")/_common.sh"
 SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
 DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
 source "$DOTFILES_DIR/lib/_config.sh"
+source "$DOTFILES_DIR/lib/_vault.sh"
 
 # Parse arguments
 FORCE=false
@@ -66,6 +67,17 @@ if is_offline; then
     echo "  dotfiles vault pull"
     exit 0
 fi
+
+# Validate vault-items.json schema before restoring
+info "Validating vault-items.json schema..."
+if ! vault_validate_schema; then
+    fail "Schema validation failed - cannot proceed with restore"
+    echo ""
+    echo "Fix the validation errors above and try again."
+    exit 1
+fi
+pass "Schema validation passed"
+echo ""
 
 # Require vault config to be present
 require_vault_config || exit 1
