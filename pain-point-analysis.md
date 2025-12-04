@@ -10,32 +10,39 @@
 
 ## 🎉 Resolution Status
 
-**Top 3 Critical Issues - RESOLVED:**
+**v2.3.0 - Top 3 Critical Issues RESOLVED:**
 - ✅ **Issue #1** - Vault init/discover confusion → Fixed with improved help text and workflow documentation
 - ✅ **Issue #2** - No rollback/undo → Fixed with automatic backup before restore operations
 - ✅ **Issue #3** - Package installation progress → Fixed with real-time progress indicators
 
+**v3.0 Quick Wins - 4 Additional Issues RESOLVED/IMPROVED:**
+- ✅ **Issue #5** - Vault merge preview confusing → Improved messaging and terminology
+- ✅ **Issue #9** - Multi-vault unclear → Clarified documentation (one backend at a time)
+- ✅ **Issue #14** - CLAUDE.md placement → Added clear header for human users
+- ✅ **Issue #15** - Workspace symlink purpose → Expanded explanation with problem/solution format
+
 **Changes Implemented:**
-- Updated `zsh/zsh.d/40-aliases.zsh` - Enhanced vault help with workflow section
-- Updated `vault/restore.sh` - Auto-backup before destructive operations
-- Updated `bin/dotfiles-setup` - Streaming package installation progress
-- Updated `vault/README.md` - Documented workflows and backup command
-- Updated `CHANGELOG.md` - Documented all fixes under [Unreleased]
+- v2.3.0: `zsh/zsh.d/40-aliases.zsh`, `vault/restore.sh`, `bin/dotfiles-setup`, `vault/README.md`
+- v3.0 Quick Wins: `CLAUDE.md`, `README.md`, `docs/README.md`, `docs/vault-README.md`, `vault/discover-secrets.sh`
+- All changes documented in `CHANGELOG.md` under [Unreleased]
 
 ---
 
 ## Executive Summary
 
-**Overall Assessment:** Strong foundation with excellent modularity, but several friction points that could confuse new users or cause abandonment during onboarding.
+**Overall Assessment:** Strong foundation with excellent modularity, with systematic improvements addressing user friction.
 
 **Key Findings:**
-- 🔴 **7 Critical Issues** - Blockers & Major Friction (3 resolved in v2.3)
-- 🟡 **8 Medium Priority** - Friction & Confusion
-- 🟢 **8 Nice-to-Have** - Polish & Quality of Life
+- 🔴 **7 Critical Issues** - 4 resolved (v2.3: 3, v3.0 quick wins: 1 improved), 3 remaining
+- 🟡 **8 Medium Priority** - 3 resolved (v3.0 quick wins), 5 remaining
+- 🟢 **8 Nice-to-Have** - 0 resolved, 8 remaining
 
 **Progress:**
-- **v2.3.0**: Top 3 issues addressed (vault confusion, rollback, progress), reducing critical blockers by 43%
-- **v3.0.0 Planned**: Comprehensive redesign addressing all remaining pain points with breaking changes (see DESIGN-v3.md)
+- **v2.3.0**: Top 3 critical issues addressed (vault confusion, rollback, progress), reducing critical blockers by 43%
+- **v3.0 Quick Wins**: 4 additional issues resolved (merge preview, multi-vault, CLAUDE.md, workspace symlink)
+- **Total resolved**: 7 of 23 issues (30%) - 3 v2.3 + 4 v3.0 quick wins
+- **v3.0 Week 3 Planned**: UX improvements targeting remaining 3 critical issues (tier selection, error messages, health score)
+- **v3.0 Full Release**: Comprehensive redesign addressing all remaining pain points (see DESIGN-v3.md)
 
 **v3.0 Breaking Changes:**
 - Git-inspired command names (setup, scan, pull, push)
@@ -183,9 +190,10 @@
 
 ---
 
-### 5. Vault Merge Preview Is Still Confusing 📋
+### 5. Vault Merge Preview Is Still Confusing 📋 ✅ IMPROVED
 
 **Location:** `vault/discover-secrets.sh:615-680`
+**Status:** Messaging improved in v3.0 Quick Wins
 
 **Problem:** Even with detailed preview, users don't understand:
 - Why are there "manual items"? (they didn't add them manually)
@@ -196,13 +204,17 @@
 - Really means: "items in config but not discovered"
 - Could be: old/moved files, custom paths, or actual manual additions
 
-**v3.0 Solution (Planned):**
+**v3.0 Quick Win (Implemented):**
+- ✅ Changed "Preserved manual items" → "Preserved items in config but not discovered"
+- ✅ Added explanation: "(These may be custom paths, moved files, or items from other machines)"
+- ✅ Updated merge/replace prompts with clearer recommendations:
+  - "[m]erge - Keep items in config that weren't discovered (recommended for existing machines)"
+  - "[r]eplace - Use only discovered items (recommended for fresh machines)"
+- ✅ Added tip: "Merge preserves items in config that weren't found locally (e.g., moved files, custom paths)"
+
+**Further v3.0 Improvements (Planned):**
 - Simplified vault schema eliminates duplication and confusion
 - New `vault status` command shows sync status before operations
-- Clear terminology: "items in config but not found locally"
-- Enhanced merge preview with recommendations:
-  - "[r]eplace (recommended for new machine)"
-  - "[m]erge (recommended for existing machine)"
 - Schema uses single flat array (no ssh_keys vs vault_items distinction)
 - See: DESIGN-v3.md Section 4
 
@@ -309,9 +321,10 @@ The wizard saves state, but:
 
 ---
 
-### 9. Multiple Vaults Not Clear 🔐
+### 9. Multiple Vaults Not Clear 🔐 ✅ RESOLVED
 
 **Location:** `vault/README.md`, `lib/_vault.sh`
+**Status:** Documentation clarified in v3.0 Quick Wins
 
 **Problem:** Documentation mentions "multi-vault" but:
 - Not clear what this means
@@ -323,23 +336,14 @@ The wizard saves state, but:
 - "Why would I want multiple vaults?"
 - "How do I switch between them?"
 
-**v3.0 Solution (Planned):**
-- Clarify in documentation: single backend at a time, not simultaneous use
-- Backend stored in config.json with easy switching:
-  ```json
-  {
-    "vault": {
-      "backend": "bitwarden",
-      "backends": {
-        "bitwarden": { "enabled": true },
-        "1password": { "enabled": false },
-        "pass": { "enabled": false }
-      }
-    }
-  }
-  ```
-- Command to switch: `dotfiles vault setup` (reconfigure backend)
-- Future: Consider profile support (personal vs work configs)
+**v3.0 Quick Win (Implemented):**
+- ✅ Added clear note in docs/vault-README.md: "Multi-vault means the system supports multiple backends, not that you use them simultaneously"
+- ✅ Clarified: "You configure one active backend at a time"
+- ✅ Documented switching process: `dotfiles vault setup` (reconfigure backend)
+- ✅ Backend stored in config.json (vault.backend)
+
+**Future Enhancement:**
+- Consider profile support (personal vs work configs with different backends)
 
 ---
 
@@ -465,62 +469,49 @@ The wizard saves state, but:
 
 ---
 
-### 14. CLAUDE.md Is For Claude, Not Users 🤖
+### 14. CLAUDE.md Is For Claude, Not Users 🤖 ✅ RESOLVED
 
 **Location:** `CLAUDE.md`
+**Status:** Header added in v3.0 Quick Wins
 
 **Problem:** This 400-line file is excellent for AI agents but:
 - Users see it and think "Is this user documentation?"
 - No explanation that it's for Claude Code
 - Duplicates some info in README.md (causes confusion)
 
-**v3.0 Solution (Planned):**
-- Move to `.claude/CONTEXT.md` (already in claude/ directory)
-- Add clear header explaining purpose
-- Reference in main README:
-  ```markdown
-  ## For Claude Code Users
-  This repository includes Claude Code configuration and context.
-  See [.claude/CONTEXT.md](.claude/CONTEXT.md) for AI session guidelines.
-  ```
-- Keep CLAUDE.md as symlink for backwards compatibility (deprecation notice)
+**v3.0 Quick Win (Implemented):**
+- ✅ Added prominent notice block at top of CLAUDE.md:
+  - "NOTE FOR HUMAN USERS: This file is context documentation for Claude Code AI sessions, not user documentation"
+  - Links to actual user documentation: README.md, docs/README.md, docs/README-FULL.md
+  - Clear visual separation with blockquote formatting
+
+**Future Enhancement:**
+- Consider moving to `.claude/CONTEXT.md` and creating symlink (if needed for backwards compatibility)
 
 ---
 
-### 15. Workspace Symlink Purpose Is Unclear 🔗
+### 15. Workspace Symlink Purpose Is Unclear 🔗 ✅ RESOLVED
 
 **Location:** Bootstrap scripts, README
+**Status:** Documentation expanded in v3.0 Quick Wins
 
 **Problem:** Creates `/workspace` → `$HOME/workspace` symlink
 - Purpose: "portable Claude sessions"
 - Users think: "What does that mean?"
 - Not clear what breaks if skipped
 
-**v3.0 Solution (Planned):**
-- Clearer explanation in setup wizard:
-  ```
-  Workspace Symlink
-  ─────────────────
-  Create /workspace → ~/workspace symlink?
+**v3.0 Quick Win (Implemented):**
+- ✅ Expanded explanation in README.md and docs/README.md with clear problem/solution format:
+  - **The problem:** Claude Code uses absolute paths for session folders
+  - Shows concrete examples: macOS vs Linux = different paths = different sessions = lost history
+  - **The solution:** /workspace is same absolute path everywhere
+  - Shows how symlink enables session portability across machines
+  - **Skip if:** You only use one machine or don't use Claude Code
+  - Links to full explanation in docs/README-FULL.md
 
-  Purpose: Enables Claude Code session sync across machines
-    ✓ With symlink: session history works everywhere
-    ✗ Without: session paths won't match on other machines
-
-  Recommended if you use Claude Code on multiple machines.
-
-  Create symlink? [Y/n]:
-  ```
-- Document in config.json:
-  ```json
-  {
-    "workspace": {
-      "symlink_enabled": true,
-      "path": "/workspace"
-    }
-  }
-  ```
-- More prominent "skip if not using Claude Code" option
+**Future Enhancement:**
+- Add clearer explanation in setup wizard with visual examples
+- Document in config.json workspace settings
 
 ---
 

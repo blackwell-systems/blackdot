@@ -20,8 +20,10 @@ This directory contains scripts for **bidirectional secret management** with mul
 
 ### Switching Backends
 
+> **Note:** "Multi-vault" means the system **supports multiple backends**, not that you use them simultaneously. You configure **one active backend at a time**. To switch backends, reconfigure with `dotfiles vault setup`.
+
 ```bash
-# Set your preferred backend (add to ~/.zshrc or ~/.zshenv)
+# Set your preferred backend (stored in config.json, or override with env var)
 export DOTFILES_VAULT_BACKEND=bitwarden  # default
 export DOTFILES_VAULT_BACKEND=1password
 export DOTFILES_VAULT_BACKEND=pass
@@ -33,7 +35,12 @@ export ONEPASSWORD_VAULT=Personal  # default
 export PASS_PREFIX=dotfiles  # default, items stored as dotfiles/Git-Config
 ```
 
-All `dotfiles vault` commands work identically regardless of backend.
+**Switching backends:**
+```bash
+dotfiles vault setup  # Interactive reconfiguration, updates config.json
+```
+
+All `dotfiles vault` commands work identically regardless of which backend you've configured.
 
 ---
 

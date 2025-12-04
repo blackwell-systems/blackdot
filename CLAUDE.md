@@ -1,5 +1,14 @@
 # Claude Code Session Guidelines
 
+> **📋 NOTE FOR HUMAN USERS:**
+> This file is **context documentation for Claude Code AI sessions**, not user documentation.
+> If you're looking for user documentation, see:
+> - **[README.md](README.md)** - Main user documentation
+> - **[docs/README.md](docs/README.md)** - Full documentation site
+> - **[docs/README-FULL.md](docs/README-FULL.md)** - Comprehensive guide
+
+---
+
 This file contains important guidelines and reminders for Claude Code sessions working on this repository.
 
 ---

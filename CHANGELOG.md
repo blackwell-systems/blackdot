@@ -102,6 +102,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - State Management documentation sections rewritten for v3.0
   - Complete codebase now consistent with v3.0 command namespace
   - Affects: vault scripts, bootstrap, docs (17 files total)
+
+- **Documentation Quick Wins** - Improved clarity on common pain points (#5, #9, #14, #15)
+  - **CLAUDE.md placement** (#14): Added prominent header explaining it's for AI agents, not users
+  - **Workspace symlink purpose** (#15): Expanded explanation of `/workspace` symlink benefits
+    - Clear problem/solution format showing why it enables Claude Code session portability
+    - Explains different paths = different sessions = lost history without symlink
+    - Updated in README.md and docs/README.md
+  - **Multi-vault clarification** (#9): Clarified "multi-vault" means one backend at a time
+    - Added note explaining system supports multiple backends but you use one active backend
+    - Documented switching process with `dotfiles vault setup`
+    - Updated docs/vault-README.md
+  - **Vault merge preview** (#5): Improved confusing "manual items" terminology
+    - Changed "Preserved manual items" → "Preserved items in config but not discovered"
+    - Added explanation: "may be custom paths, moved files, or items from other machines"
+    - Updated merge/replace prompts with clearer recommendations (existing vs. fresh machines)
+    - Added tip explaining what merge preserves
+    - Updated vault/discover-secrets.sh
+
 - **Vault Command Clarity** - Improved help text to clarify relationship between init and discover
   - Added workflow section showing: First time → init, Re-scan → discover
   - Highlighted that `vault init` includes auto-discovery as part of setup

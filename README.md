@@ -697,7 +697,22 @@ cd ~/workspace/dotfiles
 dotfiles setup
 ```
 
-> **💡 Why `~/workspace`?** Bootstrap creates `/workspace → ~/workspace` symlink for **portable Claude Code sessions**. Use `/workspace/project` paths and your AI conversations sync across macOS, Linux, WSL—same session folder, same history. [Learn more](docs/README-FULL.md#canonical-workspace-workspace)
+> **💡 Why `/workspace` symlink?**
+>
+> Bootstrap creates `/workspace → ~/workspace` symlink to enable **Claude Code session portability** across machines.
+>
+> **The problem:** Claude Code uses absolute paths for session folders. Without the symlink:
+> - macOS: `/Users/you/workspace/dotfiles` → session `Users-you-workspace-dotfiles`
+> - Linux: `/home/you/workspace/dotfiles` → session `home-you-workspace-dotfiles`
+> - Different paths = different sessions = **lost conversation history** when switching machines
+>
+> **The solution:** `/workspace` is the same absolute path everywhere:
+> - All machines: `/workspace/dotfiles` → session `workspace-dotfiles` ✨
+> - Same session folder across macOS, Linux, WSL2 = **full history syncs**
+>
+> **Skip if:** You only use one machine or don't use Claude Code (`SKIP_WORKSPACE_SYMLINK=true`)
+>
+> [Learn more](docs/README-FULL.md#canonical-workspace-workspace)
 
 ---
 
