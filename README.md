@@ -157,11 +157,24 @@ SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh     # Everything except Cl
 | Component | What It Does | How to Skip | Still Works Without It? |
 |-----------|--------------|-------------|-------------------------|
 | **Shell Config** | ZSH + plugins, prompt, aliases | **Cannot skip** (core) | N/A (required) |
-| **Homebrew + Packages** | 80+ CLI tools (fzf, ripgrep, bat, etc.) | `--minimal` flag | Yes - install tools manually |
+| **Homebrew + Packages** | 80+ CLI tools (fzf, ripgrep, bat, etc.) | `--minimal` flag or `BREWFILE_TIER=minimal` | Yes - install tools manually |
 | **Vault System** | Multi-backend secrets (Bitwarden/1Password/pass) | Select "Skip" in wizard or `--minimal` | Yes - manage secrets manually |
 | **Portable Sessions** | `/workspace` symlink for Claude sync | `SKIP_WORKSPACE_SYMLINK=true` | Yes - use OS-specific paths |
 | **Claude Integration** | dotclaude + hooks + settings | `SKIP_CLAUDE_SETUP=true` or `--minimal` | Yes - works without Claude |
 | **Template Engine** | Machine-specific configs | Don't run `dotfiles template` | Yes - use static configs |
+
+#### Brewfile Tiers (Choose Your Package Level)
+
+| Tier | Packages | Use Case | Install With |
+|------|----------|----------|--------------|
+| **Minimal** | ~15 packages | Essentials only (git, zsh, jq, shell plugins) | `BREWFILE_TIER=minimal` |
+| **Enhanced** | ~40 packages | Modern CLI tools (fzf, ripgrep, bat, eza, etc.) | `BREWFILE_TIER=enhanced` |
+| **Full** | ~80 packages | Everything including Docker, Node, advanced tools | Default (or `BREWFILE_TIER=full`) |
+
+**Example:** Use enhanced tier without containers:
+```bash
+BREWFILE_TIER=enhanced ./bootstrap/bootstrap-mac.sh
+```
 
 ### Modular By Design
 

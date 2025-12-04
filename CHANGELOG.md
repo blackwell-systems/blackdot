@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Brewfile Tiers** - Tiered package management for flexible installation sizes
+  - `Brewfile.minimal` (~15 packages) - Essentials only (git, zsh, jq, shell plugins)
+  - `Brewfile.enhanced` (~40 packages) - Modern CLI tools without containers (fzf, ripgrep, bat, eza)
+  - `Brewfile` (~80 packages) - Full install including Docker, Node, advanced tools
+  - Control tier with `BREWFILE_TIER=minimal|enhanced|full` environment variable
+  - Bootstrap scripts automatically select correct Brewfile based on tier
+  - Default tier is "full" (maintains backwards compatibility)
+  - Use cases:
+    - `minimal` - CI/CD, servers, containers, resource-constrained environments
+    - `enhanced` - Developer workstations without container needs
+    - `full` - Complete toolkit including Docker/Lima for full-stack development
+  - All tiers work on macOS (Homebrew) and Linux (Linuxbrew)
+  - macOS-specific casks automatically skipped on Linux
+
+### Changed
+- **Modularity Documentation** - Emphasized optional components throughout docs
+  - Updated tagline: "Opinionated" → "Modular, batteries-included"
+  - Added "Pick What You Want" section to README with Component Matrix
+  - Multiple one-line install options shown upfront (Full/Minimal/Custom)
+  - Added "Modular Architecture" section to docs/architecture.md
+  - Added "Modular Design" section to docs/cli-reference.md
+  - Enhanced install.sh help text with modular install instructions
+  - Documented all SKIP_* environment variables prominently
+  - Updated Docsify coverpage to emphasize modularity
+  - Philosophy: "Everything is optional except shell config"
+
 ## [2.1.0] - 2025-12-03
 
 ### Added
