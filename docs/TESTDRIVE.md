@@ -230,7 +230,7 @@ curl -fsSL https://dotfiles.blackwell.systems/install | bash
 # Or manual
 git clone https://github.com/blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
-./bootstrap-mac.sh  # or bootstrap-linux.sh
+./bootstrap/bootstrap-mac.sh  # or ./bootstrap/bootstrap-linux.sh
 ```
 
 ### Want to Learn More?

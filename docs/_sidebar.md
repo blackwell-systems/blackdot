@@ -25,7 +25,6 @@
 
 - **Planning**
   - [Roadmap](ROADMAP.md)
-  - [Template JSON Arrays](PLAN-TEMPLATE-JSON.md)
 
 - **Contributing**
   - [Contributing Guide](CONTRIBUTING.md)
