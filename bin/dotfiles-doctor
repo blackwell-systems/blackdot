@@ -19,7 +19,24 @@ elif [[ -d "$HOME/workspace/dotfiles" ]]; then
 elif [[ -d "/workspace/dotfiles" ]]; then
     DOTFILES_DIR="/workspace/dotfiles"
 else
-    echo "Error: Could not find dotfiles directory"
+    # Source error handling if available
+    if [[ -f "$HOME/workspace/dotfiles/lib/_errors.sh" ]]; then
+        source "$HOME/workspace/dotfiles/lib/_errors.sh"
+        error_msg \
+            "Could not find dotfiles directory" \
+            "DOTFILES_DIR not set and standard locations not found" \
+            "Cannot run health checks" \
+            "Set dotfiles directory:
+   → export DOTFILES_DIR=/path/to/dotfiles
+   → dotfiles doctor
+
+Or: Clone dotfiles first
+   → git clone https://github.com/blackwell-systems/dotfiles ~/workspace/dotfiles" \
+            "https://github.com/blackwell-systems/dotfiles"
+    else
+        echo "Error: Could not find dotfiles directory"
+        echo "Expected: ~/workspace/dotfiles or /workspace/dotfiles"
+    fi
     exit 1
 fi
 
@@ -37,6 +54,12 @@ NC='\033[0m'
 CHECKS_PASSED=0
 CHECKS_FAILED=0
 CHECKS_WARNED=0
+
+# Track failed checks and their fixes
+declare -a FAILED_CHECKS
+declare -a FAILED_FIXES
+declare -a WARNING_CHECKS
+declare -a WARNING_FIXES
 
 # Parse arguments
 FIX_MODE=false
@@ -77,11 +100,23 @@ pass() {
 
 fail() {
     echo -e "${RED}✗${NC} $1"
+    FAILED_CHECKS+=("$1")
+    if [[ -n "${2:-}" ]]; then
+        FAILED_FIXES+=("$2")
+    else
+        FAILED_FIXES+=("")
+    fi
     ((CHECKS_FAILED++))
 }
 
 warn() {
     echo -e "${YELLOW}!${NC} $1"
+    WARNING_CHECKS+=("$1")
+    if [[ -n "${2:-}" ]]; then
+        WARNING_FIXES+=("$2")
+    else
+        WARNING_FIXES+=("")
+    fi
     ((CHECKS_WARNED++))
 }
 
@@ -163,12 +198,12 @@ check_symlink() {
         if [[ "$actual_target" == "$target" || "$actual_target" == "$DOTFILES_DIR/$target" ]]; then
             pass "$name symlink OK"
         else
-            fail "$name points to wrong target: $actual_target"
+            fail "$name points to wrong target: $actual_target" "rm \"$link\" && ln -sf \"\$DOTFILES_DIR/$target\" \"$link\""
         fi
     elif [[ -e "$link" ]]; then
-        warn "$name exists but is not a symlink"
+        warn "$name exists but is not a symlink" "mv \"$link\" \"$link.backup\" && ln -sf \"\$DOTFILES_DIR/$target\" \"$link\""
     else
-        fail "$name symlink missing"
+        fail "$name symlink missing" "ln -sf \"\$DOTFILES_DIR/$target\" \"$link\""
     fi
 }
 
@@ -196,7 +231,7 @@ check_command() {
         local version=$("$cmd" --version 2>/dev/null | head -1 | cut -d' ' -f2- | head -c 30)
         pass "$cmd ${DIM}($version)${NC}"
     else
-        fail "$cmd not found - install with: brew install $pkg"
+        fail "$cmd not found" "brew install $pkg"
     fi
 }
 
@@ -233,7 +268,7 @@ if [[ -d "$SSH_DIR" ]]; then
             chmod 700 "$SSH_DIR"
             pass "~/.ssh permissions fixed to 700"
         else
-            fail "~/.ssh has permissions $perms (should be 700)"
+            fail "~/.ssh has permissions $perms (should be 700)" "chmod 700 ~/.ssh"
         fi
     fi
 
@@ -251,15 +286,15 @@ if [[ -d "$SSH_DIR" ]]; then
                     chmod 600 "$key"
                     pass "Fixed permissions on $(basename "$key")"
                 else
-                    fail "$(basename "$key") has permissions $perms (should be 600)"
+                    fail "$(basename "$key") has permissions $perms (should be 600)" "chmod 600 \"$key\""
                 fi
             fi
         done
     else
-        warn "No SSH keys found in ~/.ssh"
+        warn "No SSH keys found in ~/.ssh" "ssh-keygen -t ed25519 -C \"your_email@example.com\""
     fi
 else
-    warn "~/.ssh directory does not exist"
+    warn "~/.ssh directory does not exist" "mkdir -p ~/.ssh && chmod 700 ~/.ssh"
 fi
 
 # ============================================================
@@ -283,7 +318,7 @@ if [[ -d "$HOME/.aws" ]] || command -v aws >/dev/null 2>&1; then
                 chmod 600 "$HOME/.aws/credentials"
                 pass "Fixed ~/.aws/credentials permissions"
             else
-                fail "~/.aws/credentials has permissions $perms (should be 600)"
+                fail "~/.aws/credentials has permissions $perms (should be 600)" "chmod 600 ~/.aws/credentials"
             fi
         fi
     else
@@ -305,10 +340,10 @@ if ! $QUICK_MODE; then
             if bw unlock --check >/dev/null 2>&1; then
                 pass "Vault is unlocked"
             else
-                warn "Vault is locked - run: export BW_SESSION=\"\$(bw unlock --raw)\""
+                warn "Vault is locked" "bw unlock && export BW_SESSION=\"\$(bw unlock --raw)\""
             fi
         else
-            warn "Not logged in to Bitwarden - run: bw login"
+            warn "Not logged in to Bitwarden" "bw login"
         fi
     elif command -v op >/dev/null 2>&1; then
         section "Vault Status (1Password)"
@@ -316,7 +351,7 @@ if ! $QUICK_MODE; then
         if op account get >/dev/null 2>&1; then
             pass "Signed in to 1Password"
         else
-            warn "Not signed in to 1Password - run: op signin"
+            warn "Not signed in to 1Password" "op signin"
         fi
     elif command -v pass >/dev/null 2>&1; then
         section "Vault Status (pass)"
@@ -324,7 +359,7 @@ if ! $QUICK_MODE; then
         if [[ -d "$HOME/.password-store" ]]; then
             pass "Password store initialized"
         else
-            warn "Password store not initialized - run: pass init <gpg-id>"
+            warn "Password store not initialized" "pass init <gpg-id>"
         fi
     fi
 fi
@@ -338,7 +373,7 @@ section "Shell Configuration"
 if [[ "$SHELL" == *"zsh"* ]]; then
     pass "Default shell is zsh"
 else
-    warn "Default shell is $SHELL (expected zsh)"
+    warn "Default shell is $SHELL (expected zsh)" "chsh -s \$(which zsh)"
 fi
 
 # Check zsh modules exist
@@ -419,15 +454,15 @@ if [[ -f "$TEMPLATES_DIR/_variables.local.sh" ]]; then
             shopt -u nullglob
 
             if [[ $stale_count -gt 0 ]]; then
-                warn "$stale_count template(s) need re-rendering - run: dotfiles template render"
+                warn "$stale_count template(s) need re-rendering" "dotfiles template render"
             else
                 pass "All generated configs up to date"
             fi
         else
-            warn "No generated configs - run: dotfiles template render"
+            warn "No generated configs" "dotfiles template render"
         fi
     else
-        warn "Generated directory missing - run: dotfiles template render"
+        warn "Generated directory missing" "mkdir -p \"$DOTFILES_DIR/generated\" && dotfiles template render"
     fi
 else
     info "Template system not configured (optional)"
@@ -435,7 +470,7 @@ else
 fi
 
 # ============================================================
-# Summary
+# Summary with Health Score Interpretation
 # ============================================================
 echo ""
 echo -e "${BOLD}═══════════════════════════════════════════════════════════${NC}"
@@ -443,24 +478,140 @@ echo ""
 
 TOTAL=$((CHECKS_PASSED + CHECKS_FAILED + CHECKS_WARNED))
 
+# Calculate health score
 if [[ $CHECKS_FAILED -eq 0 && $CHECKS_WARNED -eq 0 ]]; then
-    echo -e "${GREEN}${BOLD}  ✓ All $TOTAL checks passed!${NC}"
     HEALTH_SCORE=100
+    SCORE_STATUS="Healthy"
+    SCORE_COLOR="${GREEN}"
+    SCORE_ICON="🟢"
 elif [[ $CHECKS_FAILED -eq 0 ]]; then
-    echo -e "${YELLOW}${BOLD}  ! $CHECKS_PASSED passed, $CHECKS_WARNED warnings${NC}"
     HEALTH_SCORE=$((100 - (CHECKS_WARNED * 5)))
+    if [[ $HEALTH_SCORE -ge 80 ]]; then
+        SCORE_STATUS="Healthy"
+        SCORE_COLOR="${GREEN}"
+        SCORE_ICON="🟢"
+    else
+        SCORE_STATUS="Minor Issues"
+        SCORE_COLOR="${YELLOW}"
+        SCORE_ICON="🟡"
+    fi
 else
-    echo -e "${RED}${BOLD}  ✗ $CHECKS_PASSED passed, $CHECKS_FAILED failed, $CHECKS_WARNED warnings${NC}"
     HEALTH_SCORE=$((100 - (CHECKS_FAILED * 10) - (CHECKS_WARNED * 5)))
     [[ $HEALTH_SCORE -lt 0 ]] && HEALTH_SCORE=0
+
+    if [[ $HEALTH_SCORE -ge 80 ]]; then
+        SCORE_STATUS="Healthy"
+        SCORE_COLOR="${GREEN}"
+        SCORE_ICON="🟢"
+    elif [[ $HEALTH_SCORE -ge 60 ]]; then
+        SCORE_STATUS="Minor Issues"
+        SCORE_COLOR="${YELLOW}"
+        SCORE_ICON="🟡"
+    elif [[ $HEALTH_SCORE -ge 40 ]]; then
+        SCORE_STATUS="Needs Work"
+        SCORE_COLOR="${YELLOW}"
+        SCORE_ICON="🟠"
+    else
+        SCORE_STATUS="Critical"
+        SCORE_COLOR="${RED}"
+        SCORE_ICON="🔴"
+    fi
 fi
 
-echo ""
-echo -e "  Health Score: ${BOLD}$HEALTH_SCORE/100${NC}"
+# Health score banner
+echo -e "  ${SCORE_ICON}  ${BOLD}Health Score: ${SCORE_COLOR}$HEALTH_SCORE/100${NC} ${BOLD}- $SCORE_STATUS${NC}"
 echo ""
 
-if [[ $CHECKS_FAILED -gt 0 && ! $FIX_MODE ]]; then
-    echo -e "  ${DIM}Run with --fix to auto-repair permission issues${NC}"
+# Score interpretation
+echo -e "  ${DIM}Score Interpretation:${NC}"
+echo -e "    🟢 ${BOLD}80-100${NC}  Healthy      - All checks passed or minor warnings"
+echo -e "    🟡 ${BOLD}60-79${NC}   Minor Issues - Some warnings, safe to use"
+echo -e "    🟠 ${BOLD}40-59${NC}   Needs Work   - Several issues, fix recommended"
+echo -e "    🔴 ${BOLD}0-39${NC}    Critical     - Major problems, fix immediately"
+echo ""
+
+# Results summary
+echo -e "  ${BOLD}Your Results:${NC}"
+if [[ $CHECKS_FAILED -gt 0 ]]; then
+    echo -e "    ${RED}✗${NC} $CHECKS_FAILED failed check(s)   ${DIM}(-$((CHECKS_FAILED * 10)) points)${NC}"
+fi
+if [[ $CHECKS_WARNED -gt 0 ]]; then
+    echo -e "    ${YELLOW}!${NC} $CHECKS_WARNED warning(s)        ${DIM}(-$((CHECKS_WARNED * 5)) points)${NC}"
+fi
+if [[ $CHECKS_PASSED -gt 0 ]]; then
+    echo -e "    ${GREEN}✓${NC} $CHECKS_PASSED passed check(s)"
+fi
+echo ""
+
+# Quick fixes section
+if [[ $CHECKS_FAILED -gt 0 || $CHECKS_WARNED -gt 0 ]]; then
+    echo -e "  ${BOLD}Quick Fixes:${NC}"
+    echo ""
+
+    # Show failed checks with fixes
+    if [[ $CHECKS_FAILED -gt 0 ]]; then
+        for i in "${!FAILED_CHECKS[@]}"; do
+            check="${FAILED_CHECKS[$i]}"
+            fix="${FAILED_FIXES[$i]}"
+            echo -e "    ${RED}✗${NC} ${check}"
+            if [[ -n "$fix" ]]; then
+                echo -e "      ${GREEN}→${NC} ${DIM}$fix${NC}"
+            fi
+        done
+        echo ""
+    fi
+
+    # Show warnings with fixes (limit to first 3 to avoid clutter)
+    if [[ $CHECKS_WARNED -gt 0 ]]; then
+        local warn_count=0
+        for i in "${!WARNING_CHECKS[@]}"; do
+            [[ $warn_count -ge 3 ]] && break
+            check="${WARNING_CHECKS[$i]}"
+            fix="${WARNING_FIXES[$i]}"
+            echo -e "    ${YELLOW}!${NC} ${check}"
+            if [[ -n "$fix" ]]; then
+                echo -e "      ${GREEN}→${NC} ${DIM}$fix${NC}"
+            fi
+            ((warn_count++))
+        done
+
+        if [[ ${#WARNING_CHECKS[@]} -gt 3 ]]; then
+            local remaining=$((${#WARNING_CHECKS[@]} - 3))
+            echo -e "    ${DIM}... and $remaining more warning(s)${NC}"
+        fi
+        echo ""
+    fi
+
+    # Auto-fix suggestion
+    if [[ ! $FIX_MODE ]]; then
+        local fixable=0
+        # Count how many issues are auto-fixable (permissions)
+        for check in "${FAILED_CHECKS[@]}"; do
+            if [[ "$check" == *"permissions"* ]]; then
+                ((fixable++))
+            fi
+        done
+
+        if [[ $fixable -gt 0 ]]; then
+            echo -e "  ${BOLD}Auto-fix available for $fixable issue(s):${NC}"
+            echo -e "    ${GREEN}→${NC} dotfiles doctor --fix"
+            echo ""
+        fi
+    fi
+
+    # Estimated improvement
+    if [[ $CHECKS_FAILED -gt 0 || $CHECKS_WARNED -gt 0 ]]; then
+        local potential_score=$((100 - (CHECKS_WARNED * 2)))  # Assume most failures can be fixed
+        [[ $potential_score -gt 100 ]] && potential_score=100
+
+        echo -e "  ${BOLD}Potential Score:${NC} ${GREEN}$potential_score/100${NC} ${DIM}(if all issues fixed)${NC}"
+        echo ""
+    fi
+fi
+
+# Perfect score celebration
+if [[ $HEALTH_SCORE -eq 100 ]]; then
+    echo -e "  ${GREEN}${BOLD}🎉 Perfect score! Your dotfiles are healthy.${NC}"
     echo ""
 fi
 

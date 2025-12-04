@@ -44,7 +44,7 @@
 
 | Feature | This Product (v3.0) | Typical Dotfiles | Enterprise Tools |
 |---------|---------------------|------------------|------------------|
-| **AI-First Design** | ✅ Built for Claude Code | ❌ Generic | ❌ N/A |
+| **AI-Ready Design** | ✅ Works with Claude Code, Cursor, Copilot | ❌ Generic | ❌ N/A |
 | **Multi-Vault** | ✅ 3 backends (Bitwarden/1Password/pass) | ⚠️ Usually manual | ✅ Single vendor |
 | **Interactive Setup** | ✅ Wizard + tier selection | ❌ Manual README | ✅ GUI installer |
 | **Portable Sessions** | ✅ `/workspace` symlink | ❌ Not addressed | ❌ N/A |
@@ -290,8 +290,8 @@ curl -fsSL ... | bash && dotfiles setup
 ### Adoption Likelihood: **70%** ⚠️
 - Ease of use: Improved significantly in v3.0
 - Migration path: Smooth (v2.x → v3.0 automated)
-- Community: Small but passionate (Claude Code users)
-- Competition: Low (unique positioning)
+- Community: Growing (multi-machine developers, DevOps engineers)
+- Competition: Low (unique positioning in professional-grade space)
 
 ### Sustainability: **80%** ✅
 - Code quality: High (maintainable)
@@ -361,15 +361,15 @@ curl -fsSL ... | bash && dotfiles setup
 ### Product Grade: **A- (Excellent)**
 
 **Strengths:**
-- ⭐ Unique positioning (AI-first dotfiles)
+- ⭐ Unique positioning (professional-grade config management)
 - ⭐ Technical excellence (98.7% test coverage)
 - ⭐ Progressive disclosure (modular, optional features)
 - ⭐ Safety culture (auto-backup, rollback, drift detection)
 - ⭐ v3.0 UX improvements (interactive wizard)
 
 **Weaknesses:**
-- ⚠️ Niche market (tied to Claude Code adoption)
-- ⚠️ Discoverability (needs marketing)
+- ⚠️ Discoverability (crowded dotfiles space, needs differentiation)
+- ⚠️ Marketing required (great product, low awareness)
 - ⚠️ Template system adoption (powerful but hidden)
 
 **Recommendation:** **Ship v3.0 and market aggressively**
@@ -382,7 +382,7 @@ This product is **ready for prime time**. The v3.0 improvements (interactive wiz
 3. 📚 Create content (blog post, video walkthrough)
 4. 🤝 Explore partnerships (Anthropic, Claude Code marketplace)
 
-**Success is highly likely** if the product is actively promoted to the target audience (Claude Code users). Without marketing, even excellent products can languish in obscurity.
+**Success is highly likely** if the product is actively promoted to the target audience (multi-machine developers, DevOps engineers, security-conscious developers). Without marketing, even excellent products can languish in obscurity.
 
 ---
 
