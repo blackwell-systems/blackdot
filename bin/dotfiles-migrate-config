@@ -36,10 +36,17 @@ check_migration_needed() {
             if [[ "$version" == "3" ]]; then
                 info "Config is already v3.0 (JSON format)"
 
-                # Clean up leftover .ini file if it exists (from pre-cleanup migrations)
+                # Clean up leftover .ini files if they exist (from pre-cleanup migrations)
                 if [[ -f "$OLD_CONFIG" ]]; then
                     mv "$OLD_CONFIG" "$OLD_CONFIG.v2-backup"
                     info "Cleaned up leftover config.ini → config.ini.v2-backup"
+                    echo ""
+                fi
+
+                # Also clean up old state.ini if it exists
+                if [[ -f "$CONFIG_DIR/state.ini" ]]; then
+                    mv "$CONFIG_DIR/state.ini" "$CONFIG_DIR/state.ini.v2-backup"
+                    info "Cleaned up leftover state.ini → state.ini.v2-backup"
                     echo ""
                 fi
 
@@ -190,10 +197,17 @@ main() {
     # Perform migration
     migrate_ini_to_json
 
-    # Rename old config.ini to avoid confusion
+    # Rename old .ini files to avoid confusion
     if [[ -f "$OLD_CONFIG" ]]; then
         mv "$OLD_CONFIG" "$OLD_CONFIG.v2-backup"
         info "Renamed old config: config.ini → config.ini.v2-backup"
+        echo ""
+    fi
+
+    # Also rename old state.ini if it exists
+    if [[ -f "$CONFIG_DIR/state.ini" ]]; then
+        mv "$CONFIG_DIR/state.ini" "$CONFIG_DIR/state.ini.v2-backup"
+        info "Renamed old state: state.ini → state.ini.v2-backup"
         echo ""
     fi
 

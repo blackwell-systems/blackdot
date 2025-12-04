@@ -601,7 +601,7 @@ if [[ $CHECKS_FAILED -gt 0 || $CHECKS_WARNED -gt 0 ]]; then
 
     # Estimated improvement
     if [[ $CHECKS_FAILED -gt 0 || $CHECKS_WARNED -gt 0 ]]; then
-        local potential_score=$((100 - (CHECKS_WARNED * 2)))  # Assume most failures can be fixed
+        potential_score=$((100 - (CHECKS_WARNED * 2)))  # Assume most failures can be fixed
         [[ $potential_score -gt 100 ]] && potential_score=100
 
         echo -e "  ${BOLD}Potential Score:${NC} ${GREEN}$potential_score/100${NC} ${DIM}(if all issues fixed)${NC}"
