@@ -47,6 +47,7 @@ All `dotfiles vault` commands work identically regardless of backend.
 | `restore-aws.sh` | Restores AWS config/creds | Called by bootstrap |
 | `restore-env.sh` | Restores env secrets | Called by bootstrap |
 | `restore-git.sh` | Restores gitconfig | Called by bootstrap |
+| `vault-setup.sh` | Interactive onboarding wizard | `dotfiles vault setup` |
 | `create-vault-item.sh` | Creates new vault items | `dotfiles vault create ITEM` |
 | `sync-to-vault.sh` | Syncs local → vault | `dotfiles vault sync --all` |
 | `validate-schema.sh` | Validates vault item schema | `dotfiles vault validate` |
@@ -64,6 +65,7 @@ dotfiles vault restore          # Restore all secrets (checks for local drift fi
 dotfiles vault restore --force  # Skip drift check, overwrite local changes
 dotfiles vault sync             # Sync local changes to vault
 dotfiles vault sync --all       # Sync all items
+dotfiles vault setup            # Interactive onboarding wizard for new vault items
 dotfiles vault create           # Create new vault item
 dotfiles vault validate         # Validate vault item schema
 dotfiles vault delete           # Delete vault item

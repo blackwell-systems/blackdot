@@ -143,9 +143,15 @@ dotfiles doctor
 
 ### Unit Testing
 
-We don't currently have unit tests, but you can validate scripts:
+We use [bats-core](https://github.com/bats-core/bats-core) for testing:
 
 ```bash
+# Run all tests
+cd test && ./run_tests.sh
+
+# Or run directly with bats
+bats test/
+
 # Test individual vault scripts
 cd vault
 ./restore-ssh.sh --help
@@ -314,7 +320,7 @@ Once approved:
 Browse [open issues](https://github.com/blackwell-systems/dotfiles/issues) for ideas, or propose your own:
 
 **Desired features:**
-- [ ] Support for additional secret managers (age, pass, 1Password)
+- [ ] Support for additional secret managers (age, HashiCorp Vault)
 - [ ] Web-based metrics dashboard
 - [ ] Automated rollback on failed upgrades
 - [ ] Plugin system for extensibility
@@ -418,8 +424,8 @@ Thank you for making dotfiles better! 🚀
 ## Additional Resources
 
 - **Main Documentation:** [README.md](README.md)
+- **Full Documentation:** [docs/README-FULL.md](docs/README-FULL.md)
 - **Security Policy:** [SECURITY.md](SECURITY.md)
 - **Code of Conduct:** [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 - **Changelog:** [CHANGELOG.md](CHANGELOG.md)
-- **Architecture Review:** [REVIEW.md](REVIEW.md)
-- **Roadmap:** [RECOMMENDATIONS.md](RECOMMENDATIONS.md)
+- **Roadmap:** [docs/ROADMAP.md](docs/ROADMAP.md)

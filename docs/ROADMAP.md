@@ -28,17 +28,60 @@ dotfiles macos discover           # Capture current settings
 
 ---
 
-## Recently Completed (v2.0.x)
+## Recently Completed (v2.1.0)
+
+### Smart Secrets Onboarding ✅
+
+**Status:** Complete (v2.1.0)
+
+Interactive vault item setup wizard:
+```bash
+dotfiles vault setup  # Guides first-time vault users
+```
+- Detects existing local secrets (SSH keys, AWS config, Git config)
+- Offers to create vault items for each detected secret
+- Validates vault item schema before creation
+- Works with any vault backend (Bitwarden, 1Password, pass)
+
+### Vault Items Configuration File ✅
+
+**Status:** Complete (v2.1.0)
+
+User-editable JSON configuration for vault items:
+- `~/.config/dotfiles/vault-items.json` for customization
+- No need to edit source code to add/remove items
+- Created automatically by `dotfiles vault setup`
 
 ### Template JSON Arrays ✅
 
-**Status:** Complete (v2.0.x)
+**Status:** Complete (v2.1.0)
 
 JSON configuration support for template arrays:
 - `templates/_arrays.local.json` for cleaner SSH host definitions
 - `dotfiles template arrays` command to view/manage
 - Falls back to shell arrays if no JSON file
 - Export existing shell arrays to JSON with `--export-json`
+
+### Docker Container Taxonomy ✅
+
+**Status:** Complete (v2.1.0)
+
+Four container sizes for different use cases:
+| Container | Size | Use Case |
+|-----------|------|----------|
+| `extralite` | ~50MB | Quick CLI exploration |
+| `lite` | ~200MB | Vault command testing |
+| `medium` | ~400MB | Full CLI + Homebrew |
+| `full` | ~800MB+ | Complete environment |
+
+### Mock Vault for Testing ✅
+
+**Status:** Complete (v2.1.0)
+
+Test vault functionality without real credentials:
+```bash
+./test/mocks/setup-mock-vault.sh --no-pass
+```
 
 ---
 
@@ -153,6 +196,7 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 | 1.8.0 | Windows support, git safety hooks, dotclaude integration |
 | **2.0.0** | **Unified setup wizard, state management, macOS CLI** |
 | 2.0.1 | CLI help improvements, Docker container enhancements |
+| **2.1.0** | **Smart secrets onboarding, vault config file, Docker taxonomy** |
 
 ---
 
@@ -170,4 +214,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ---
 
-*Last updated: 2025-12-02*
+*Last updated: 2025-12-04*
