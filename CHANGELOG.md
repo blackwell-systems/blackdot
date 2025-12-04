@@ -8,11 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **v3.0 Command Namespace (Week 1 Implementation)** - Git-inspired command names now available
+- **v3.0 Command Namespace** - Git-inspired command names (BREAKING CHANGE)
   - NEW commands: `vault setup`, `vault scan`, `vault pull`, `vault push`, `vault status`
-  - DEPRECATED commands: `vault init`, `vault discover`, `vault restore`, `vault sync` (show warnings)
-  - All deprecated commands still work but will be removed in v3.1
-  - Dual command support allows gradual migration
+  - Git-inspired naming: pull/push instead of restore/sync
+  - Clearer intent: setup (not init), scan (not discover)
   - See: vault/README.md for complete command reference
 
 - **Top-Level Backup & Rollback Commands** - Safety features promoted to first-class
@@ -21,14 +20,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `dotfiles backup restore <name>` - Restore specific backup
   - `dotfiles rollback` - Instant rollback to last backup
   - `dotfiles rollback --to <name>` - Rollback to specific backup
-  - Backup moved out of vault namespace (was: `dotfiles vault backup`)
+  - Backup moved out of vault namespace for clearer separation
   - Implements v3.0 design goal: mandatory safety features
 
-- **Enhanced Help Text** - Updated CLI help to show v3.0 commands
-  - Main help (`dotfiles help`) shows new command structure
-  - Vault help (`dotfiles vault help`) highlights v3.0 vs deprecated commands
+- **Enhanced Help Text** - Clean, focused CLI help
+  - Main help (`dotfiles help`) shows complete command structure
+  - Vault help (`dotfiles vault help`) with clear command categories
   - Color-coded sections for better readability
-  - Includes deprecation notices and migration guidance
+  - Removed version labels and migration noise
+
+### Changed
+- **BREAKING: Vault commands renamed** - Old commands removed entirely
+  - `vault init` → `vault setup`
+  - `vault discover` → `vault scan`
+  - `vault restore` → `vault pull`
+  - `vault sync` → `vault push`
+  - `vault backup` → top-level `backup` command
+  - No migration period - clean break for greenfield deployment
 
 - **v3.0 Breaking Changes Design** - Comprehensive redesign proposal (DESIGN-v3.md)
   - Git-inspired command names: setup, scan, pull, push (replaces init, discover, restore, sync)

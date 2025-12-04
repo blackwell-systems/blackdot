@@ -60,8 +60,6 @@ All `dotfiles vault` commands work identically regardless of backend.
 
 All vault operations are accessed via the unified `dotfiles vault` command:
 
-**v3.0 Commands (Recommended):**
-
 ```bash
 # Setup & Configuration
 dotfiles vault setup            # Setup vault backend (first-time setup)
@@ -73,7 +71,7 @@ dotfiles vault pull             # Pull secrets FROM vault to local
 dotfiles vault pull --force     # Skip drift check, overwrite local
 dotfiles vault push [item]      # Push secrets TO vault
 dotfiles vault push --all       # Push all items
-dotfiles vault status           # Show sync status (coming soon)
+dotfiles vault status           # Show sync status
 
 # Management
 dotfiles vault list             # List all vault items
@@ -82,23 +80,11 @@ dotfiles vault validate         # Validate vault item schema
 dotfiles vault create           # Create new vault item
 dotfiles vault delete           # Delete vault item
 
-# Backup & Safety (moved to top-level)
+# Backup & Safety (top-level commands)
 dotfiles backup                 # Create backup of current config
 dotfiles backup list            # List all backups
 dotfiles backup restore <name>  # Restore specific backup
 dotfiles rollback               # Instant rollback to last backup
-```
-
-**Legacy v2.x Commands (Deprecated):**
-
-> ⚠️  These commands still work but show deprecation warnings. They will be removed in v3.1.
-
-```bash
-dotfiles vault init      → use: dotfiles vault setup
-dotfiles vault discover  → use: dotfiles vault scan
-dotfiles vault restore   → use: dotfiles vault pull
-dotfiles vault sync      → use: dotfiles vault push
-dotfiles vault backup    → use: dotfiles backup (top-level)
 ```
 
 **Typical Workflows:**
