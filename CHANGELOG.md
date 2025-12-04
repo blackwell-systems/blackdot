@@ -27,7 +27,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Compatible with Homebrew 5.0+ which removed this flag
   - Setup wizard now works correctly on latest Homebrew versions
 
+- **Homebrew Path Detection** - Use actual installation path after fresh install
+  - macOS bootstrap now detects which Homebrew was just installed
+  - Directly uses the installation path instead of checking all possible locations
+  - Clearer logic: only checks paths after fresh installation
+  - Handles Apple Silicon (/opt/homebrew) vs Intel (/usr/local) correctly
+
+### Added
+- **Vault Init Command** - New `dotfiles vault init` for easy vault configuration
+  - Configure or reconfigure vault backend anytime
+  - No need to reset setup state or run full wizard
+  - Detects existing configuration and asks to reconfigure
+  - Clear guidance when skipping vault setup
+  - Accessible via `dotfiles vault init` or `dotfiles vault init --force`
+
 ### Improved
+- **Installation Flow** - Smoother onboarding experience
+  - install.sh now prompts "Run setup wizard now? [Y/n]" after installation
+  - Automatically loads new shell and runs setup if user confirms
+  - No more manual "exec zsh" → "dotfiles setup" dance
+  - Minimal mode shows numbered steps for manual configuration
+
+- **Setup Completion** - Context-aware next steps after wizard completes
+  - Shows dynamic recommendations based on what was configured
+  - Vault configured → Suggests `dotfiles vault restore`
+  - Templates configured → Suggests `dotfiles template render`
+  - Always shows `dotfiles doctor` for health check
+  - Helpful commands and documentation links
+
+- **Shell Feature Discovery** - Highlights new ZSH features post-setup
+  - Setup completion now shows useful shell aliases and tools
+  - Conditionally displays features based on what's actually installed
+  - Enhanced ls commands (ll, la, lt) with eza
+  - Git shortcuts (gst, gd, gco, etc.)
+  - Fuzzy search with fzf (Ctrl+R)
+  - Smart directory navigation with zoxide (z command)
+  - Terminal file manager with yazi (y command)
+  - Adapts to minimal/enhanced/full Brewfile tiers
+  - Helps users discover what they just installed
+
+- **Vault Setup UX** - Better experience for configuring and skipping vault
+  - Setup wizard now asks "Reconfigure vault?" if already configured
+  - Distinguishes between "skipped" vs "configured" in status display
+  - Skipped vault shows `[⊘]` icon with hint: "run 'dotfiles vault init'"
+  - Configured vault shows backend name in status
+  - All skip paths mention how to configure later
+  - Fixes UX issue where skipping vault permanently locked you out of configuration
+
 - **macOS /workspace Symlink Handling** - Better guidance for read-only filesystem
   - Detects macOS read-only root filesystem (Catalina+)
   - Provides clear instructions for using synthetic.conf (Apple-approved method)

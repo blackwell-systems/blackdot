@@ -174,26 +174,41 @@ echo -e "${GREEN}${BOLD}╚═════════════════�
 echo ""
 
 if ! $MINIMAL; then
-    echo "Next step:"
+    echo "Next step: Run the setup wizard to configure vault and restore secrets"
     echo ""
-    echo "  Run the setup wizard to configure vault and restore secrets:"
-    echo -e "     ${CYAN}dotfiles setup${NC}"
-    echo ""
-    echo "  Then verify installation:"
-    echo -e "     ${CYAN}dotfiles doctor${NC}"
+    echo -n "Run setup wizard now? [Y/n]: "
+    read -r run_setup
+
+    if [[ ! "${run_setup:-Y}" =~ ^[Nn]$ ]]; then
+        echo ""
+        echo -e "${CYAN}Starting setup wizard...${NC}"
+        echo ""
+
+        # Source zsh and run setup
+        exec zsh -c "source $HOME/.zshrc 2>/dev/null; cd $INSTALL_DIR && $INSTALL_DIR/bin/dotfiles-setup"
+    else
+        echo ""
+        echo "You can run the setup wizard later with:"
+        echo -e "  ${CYAN}exec zsh${NC}"
+        echo -e "  ${CYAN}dotfiles setup${NC}"
+        echo ""
+        echo "Then verify installation:"
+        echo -e "  ${CYAN}dotfiles doctor${NC}"
+    fi
 else
     echo "Next steps (minimal mode):"
     echo ""
-    echo "  1. Manually configure:"
+    echo "  1. Load your new shell:"
+    echo -e "     ${CYAN}exec zsh${NC}"
+    echo ""
+    echo "  2. Manually configure:"
     echo -e "     ${CYAN}~/.ssh/config and keys${NC}"
     echo -e "     ${CYAN}~/.aws/config and credentials${NC}"
     echo -e "     ${CYAN}~/.gitconfig${NC}"
     echo ""
-    echo "  2. Verify installation:"
+    echo "  3. Verify installation:"
     echo -e "     ${CYAN}dotfiles doctor${NC}"
 fi
 echo ""
 echo -e "Documentation: ${BLUE}https://github.com/blackwell-systems/dotfiles${NC}"
-echo ""
-echo -e "${YELLOW}${BOLD}>>> Run 'exec zsh' to start using your new shell <<<${NC}"
 echo ""

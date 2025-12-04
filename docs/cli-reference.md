@@ -253,6 +253,7 @@ dotfiles vault <command> [OPTIONS]
 
 | Command | Description |
 |---------|-------------|
+| `init` | Configure or reconfigure vault backend |
 | `restore` | Restore all secrets from vault |
 | `sync` | Sync local files to vault |
 | `setup` | Interactive onboarding wizard for new vault items |

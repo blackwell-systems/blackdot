@@ -266,8 +266,13 @@ This defines SSH keys, config files, and syncable items. See `vault/vault-items.
 sequenceDiagram
     participant User
     participant CLI as dotfiles CLI
+    participant Config as ~/.config/dotfiles
     participant Local as Local Files
     participant BW as Bitwarden
+
+    User->>CLI: dotfiles vault init
+    CLI->>Config: Create vault-items.json
+    CLI->>Config: Set backend (bitwarden/1password/pass)
 
     User->>CLI: dotfiles vault restore
     CLI->>BW: Fetch secrets
