@@ -22,6 +22,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All tiers work on macOS (Homebrew) and Linux (Linuxbrew)
   - macOS-specific casks automatically skipped on Linux
 
+- **Templates Onboarding** - Added interactive template setup to setup wizard
+  - New STEP 6 in `dotfiles setup` guides users through template configuration
+  - Explains use cases: work vs personal git email, different SSH keys, machine-specific env vars
+  - Runs `dotfiles template init` interactively during onboarding
+  - Defaults to "No" (opt-in) to keep setup fast for users who don't need templates
+  - Shows how to enable later: `dotfiles template init`
+  - Integrates with state management system (resume support)
+  - Updated README hero section to show complete 6-step flow
+  - Makes templates discoverable without forcing complexity
+
 ### Changed
 - **Modularity Documentation** - Emphasized optional components throughout docs
   - Updated tagline: "Opinionated" → "Modular, batteries-included"
