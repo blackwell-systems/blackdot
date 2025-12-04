@@ -2,12 +2,17 @@
 
 # dotfiles
 
-> Dotfiles for the AI-assisted development era
+> Modular dotfiles for the AI-assisted development era
 
 ```bash
+# Full install (recommended)
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
+
+# Minimal: Just shell config
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
 ```
 
+- **Fully modular** - Everything optional except shell config
 - **One command setup** - Interactive wizard guides you through
 - **Claude Code + dotclaude** - Profiles, sessions & git safety sync everywhere
 - **Your vault, your way** - Bitwarden, 1Password, or pass
