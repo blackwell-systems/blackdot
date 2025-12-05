@@ -56,6 +56,7 @@ All `dotfiles vault` commands work identically regardless of which backend you'v
 | `restore-git.sh` | Restores gitconfig | Called by bootstrap |
 | `create-vault-item.sh` | Creates new vault items | `dotfiles vault create ITEM` |
 | `sync-to-vault.sh` | Syncs local → vault | `dotfiles vault push --all` |
+| `dotfiles-sync` | Smart bidirectional sync | `dotfiles sync` or `dotfiles vault sync` |
 | `validate-schema.sh` | Validates vault item schema | `dotfiles vault validate` |
 | `delete-vault-item.sh` | Deletes items from vault | `dotfiles vault delete ITEM` |
 | `check-vault-items.sh` | Pre-flight validation | `dotfiles vault check` |
@@ -72,6 +73,9 @@ dotfiles vault pull          # Restore all secrets (checks for local drift first
 dotfiles vault pull --force  # Skip drift check, overwrite local changes
 dotfiles vault push             # Sync local changes to vault
 dotfiles vault push --all       # Sync all items
+dotfiles vault sync             # Smart bidirectional sync (auto push/pull)
+dotfiles vault sync --force-local   # Force push local to vault
+dotfiles vault sync --force-vault   # Force pull vault to local
 dotfiles vault create           # Create new vault item
 dotfiles vault validate         # Validate vault item schema
 dotfiles vault delete           # Delete vault item
@@ -493,7 +497,10 @@ dotfiles vault pull
 # Update SSH config locally
 vim ~/.ssh/config
 
-# Sync changes to vault
+# Smart sync - auto-detects push/pull direction
+dotfiles sync
+
+# Or explicitly push changes to vault
 dotfiles vault push SSH-Config
 
 # Check vault health
