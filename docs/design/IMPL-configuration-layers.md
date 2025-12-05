@@ -516,167 +516,128 @@ config_cache_clear() {
 
 ## CLI Command (`bin/dotfiles-config`)
 
-```bash
-#!/usr/bin/env bash
-# bin/dotfiles-config - Configuration management CLI
-set -euo pipefail
+> **Note:** The actual implementation uses explicit layer parameters for clarity.
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/../lib/_logging.sh"
-source "${SCRIPT_DIR}/../lib/_config_layers.sh"
+```bash
+#!/usr/bin/env zsh
+# bin/dotfiles-config - Configuration management CLI
+set -uo pipefail
 
 usage() {
     cat <<EOF
 Usage: dotfiles config <command> [args]
 
 Commands:
-  get <key>               Get config value (layered resolution)
-  set <key> <value>       Set config value in user layer
-  set --machine <k> <v>   Set config value in machine layer
-  set --project <k> <v>   Set config value in project layer
-  layers <key>            Show all layers for a key
-  show                    Show merged config from all layers
-  show --layer <name>     Show specific layer (user, machine, project)
-  init machine [id]       Initialize machine config
-  init project            Initialize project config in current dir
-  edit [layer]            Open config in editor
+  get <key> [default]        Get config value (layered resolution)
+  set <layer> <key> <value>  Set config value in specific layer
+  show <key>                 Show value from all layers
+  source <key> [default]     Get value with source information (JSON)
+  list                       Show layer locations and status
+  merged                     Show merged config from all layers
+  init <layer> [id]          Initialize a config layer (machine or project)
+  edit [layer]               Open config in editor (default: user)
 
-Options:
-  --json                  Output in JSON format
-  -h, --help              Show this help
+Layers (in priority order):
+  env        Environment variables (DOTFILES_*)
+  project    Project-specific (.dotfiles.json)
+  machine    Machine-specific (~/.config/dotfiles/machine.json)
+  user       User preferences (~/.config/dotfiles/config.json)
 
 Examples:
-  dotfiles config get vault.backend
-  dotfiles config set vault.auto_sync true
-  dotfiles config set --machine vault.backend 1password
-  dotfiles config layers vault.backend
+  dotfiles config get vault.backend bitwarden
+  dotfiles config set user vault.backend 1password
+  dotfiles config set machine vault.backend 1password
+  dotfiles config show vault.backend
   dotfiles config init machine work-laptop
   dotfiles config init project
 EOF
 }
 
 cmd_get() {
-    local key="${1:?Key required}"
-    local json=false
-    [[ "${2:-}" == "--json" ]] && json=true
-
-    if $json; then
-        config_get_with_source "$key"
-    else
-        config_get_layered "$key"
+    local key="${1:-}"
+    local default="${2:-}"
+    if [[ -z "$key" ]]; then
+        echo "Usage: dotfiles config get <key> [default]" >&2
+        return 1
     fi
+    config_get_layered "$key" "$default"
 }
 
 cmd_set() {
-    local layer="user"
-    local key=""
-    local value=""
-
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            --machine) layer="machine"; shift ;;
-            --project) layer="project"; shift ;;
-            --user)    layer="user"; shift ;;
-            *)
-                if [[ -z "$key" ]]; then
-                    key="$1"
-                else
-                    value="$1"
-                fi
-                shift
-                ;;
-        esac
-    done
-
-    if [[ -z "$key" || -z "$value" ]]; then
-        fail "Usage: dotfiles config set [--layer] <key> <value>"
-        exit 1
+    local layer="${1:-}"
+    local key="${2:-}"
+    local value="${3:-}"
+    if [[ -z "$layer" || -z "$key" || -z "$value" ]]; then
+        echo "Usage: dotfiles config set <layer> <key> <value>" >&2
+        echo "Layers: user, machine, project" >&2
+        return 1
     fi
-
-    # Auto-detect JSON vs string
-    if [[ "$value" =~ ^(true|false|[0-9]+|\[.*\]|\{.*\})$ ]]; then
-        config_set_layered "$layer" "$key" "$value"
-    else
-        config_set_layered "$layer" "$key" "\"$value\""
-    fi
-
-    pass "Set $key = $value in $layer layer"
-}
-
-cmd_layers() {
-    local key="${1:?Key required}"
-    config_show_layers "$key"
+    config_set_layered "$layer" "$key" "$value"
+    echo "✓ Set $key = $value in $layer config"
 }
 
 cmd_show() {
-    local layer=""
-    [[ "${1:-}" == "--layer" ]] && layer="${2:-}"
+    local key="${1:-}"
+    if [[ -z "$key" ]]; then
+        echo "Usage: dotfiles config show <key>" >&2
+        return 1
+    fi
+    config_show_layers "$key"
+}
 
-    case "$layer" in
-        user)
-            [[ -f "$CONFIG_LAYER_USER" ]] && jq '.' "$CONFIG_LAYER_USER" || echo "{}"
-            ;;
-        machine)
-            [[ -f "$CONFIG_LAYER_MACHINE" ]] && jq '.' "$CONFIG_LAYER_MACHINE" || echo "{}"
-            ;;
-        project)
-            local project_config=$(_find_project_config)
-            [[ -n "$project_config" && -f "$project_config" ]] && jq '.' "$project_config" || echo "{}"
-            ;;
-        "")
-            config_show_merged
-            ;;
-        *)
-            fail "Unknown layer: $layer (use: user, machine, project)"
-            exit 1
-            ;;
-    esac
+cmd_source() {
+    local key="${1:-}"
+    if [[ -z "$key" ]]; then
+        echo "Usage: dotfiles config source <key>" >&2
+        return 1
+    fi
+    config_get_with_source "$key" "${2:-}"
+}
+
+cmd_list() {
+    echo "Configuration Layers"
+    echo "═══════════════════════════════════════════════════════════════"
+    echo ""
+    echo "Layer Locations:"
+    echo "───────────────────────────────────────────────────────────────"
+    printf "  %-12s %s\n" "env:" "DOTFILES_* environment variables"
+    # ... show project, machine, user locations with existence check
+    echo ""
+    echo "Priority: env > project > machine > user > default"
+}
+
+cmd_merged() {
+    echo "Merged Configuration"
+    echo "═══════════════════════════════════════════════════════════════"
+    config_show_merged
 }
 
 cmd_init() {
-    local type="${1:?Type required (machine or project)}"
-    shift
-
-    case "$type" in
-        machine) config_init_machine "$@" ;;
+    local layer="${1:-}"
+    case "$layer" in
+        machine) config_init_machine "${2:-}" ;;
         project) config_init_project ;;
-        *)
-            fail "Unknown type: $type (use: machine or project)"
-            exit 1
-            ;;
+        *) echo "Usage: dotfiles config init <layer> [id]" >&2; return 1 ;;
     esac
 }
 
 cmd_edit() {
     local layer="${1:-user}"
-    local config_file
-
-    case "$layer" in
-        user)    config_file="$CONFIG_LAYER_USER" ;;
-        machine) config_file="$CONFIG_LAYER_MACHINE" ;;
-        project)
-            config_file=$(_find_project_config)
-            [[ -z "$config_file" ]] && config_file="$PWD/$CONFIG_LAYER_PROJECT"
-            ;;
-        *)
-            fail "Unknown layer: $layer"
-            exit 1
-            ;;
-    esac
-
-    ${EDITOR:-vim} "$config_file"
+    # Opens appropriate config file in $EDITOR
 }
 
 # Main
 case "${1:-}" in
-    get)        shift; cmd_get "$@" ;;
-    set)        shift; cmd_set "$@" ;;
-    layers)     shift; cmd_layers "$@" ;;
-    show)       shift; cmd_show "$@" ;;
-    init)       shift; cmd_init "$@" ;;
-    edit)       shift; cmd_edit "$@" ;;
-    -h|--help)  usage ;;
-    *)          usage; exit 1 ;;
+    get)     shift; cmd_get "$@" ;;
+    set)     shift; cmd_set "$@" ;;
+    show)    shift; cmd_show "$@" ;;
+    source)  shift; cmd_source "$@" ;;
+    list)    shift; cmd_list "$@" ;;
+    merged)  shift; cmd_merged "$@" ;;
+    init)    shift; cmd_init "$@" ;;
+    edit)    shift; cmd_edit "$@" ;;
+    help|--help|-h) usage ;;
+    *)       usage ;;
 esac
 ```
 

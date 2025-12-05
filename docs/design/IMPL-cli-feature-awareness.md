@@ -268,9 +268,34 @@ _cli_feature_disabled_message() {
 
 ---
 
-## Implementation Plan
+## Implementation Status
 
-### Phase 1: Command Mapping (Week 1)
+### ✅ Implemented (v2.3.0)
+
+| Component | File | Status |
+|-----------|------|--------|
+| Command→Feature mapping | `lib/_cli_features.sh` | ✅ Complete |
+| `cli_command_visible()` | `lib/_cli_features.sh` | ✅ Complete |
+| `cli_require_feature()` | `lib/_cli_features.sh` | ✅ Complete |
+| Help filtering (`--all` flag) | `zsh/zsh.d/40-aliases.zsh` | ✅ Complete |
+| Feature guards on commands | `zsh/zsh.d/40-aliases.zsh` | ✅ Complete |
+| Hidden features footer | `zsh/zsh.d/40-aliases.zsh` | ✅ Complete |
+
+### 🔲 Future Enhancements
+
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| `DOTFILES_CLI_SHOW_ALL` env var | Low | For scripting |
+| `DOTFILES_FORCE` env var | Low | For scripting |
+| Subcommand awareness (Phase 4) | Low | Not critical for v1 |
+| `dotfiles help <command>` | Low | Nice-to-have |
+| Tab completion filtering | Low | Future enhancement |
+
+---
+
+## Implementation Plan (Historical Reference)
+
+### Phase 1: Command Mapping ✅
 
 1. Create `lib/_cli_features.sh` with command→feature mapping
 2. Add `cli_command_visible()` function
@@ -282,7 +307,7 @@ source "$DOTFILES_DIR/lib/_features.sh"
 source "$DOTFILES_DIR/lib/_cli_features.sh"  # New
 ```
 
-### Phase 2: Help Filtering (Week 1-2)
+### Phase 2: Help Filtering ✅
 
 1. Refactor help output to use helper functions
 2. Add `--all` flag support
