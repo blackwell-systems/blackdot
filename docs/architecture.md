@@ -34,7 +34,7 @@ graph TB
     end
 
     subgraph "External Services"
-        VAULT_BACKEND[Multi-Vault<br/>Bitwarden/1Password/pass]
+        VAULT_BACKEND["Multi-Vault<br/>Bitwarden/1Password/pass"]
         GH[GitHub]
     end
 
@@ -205,12 +205,12 @@ All optional components can be controlled via environment variables:
 
 ```mermaid
 graph TD
-    SHELL[Shell Config<br/>REQUIRED]
-    BREW[Homebrew + Packages<br/>optional]
-    VAULT[Vault System<br/>optional]
-    WORKSPACE[/workspace Symlink<br/>optional]
-    CLAUDE[Claude Integration<br/>optional]
-    TEMPLATE[Template Engine<br/>optional]
+    SHELL["Shell Config<br/>REQUIRED"]
+    BREW["Homebrew + Packages<br/>optional"]
+    VAULT["Vault System<br/>optional"]
+    WORKSPACE["Workspace Symlink<br/>optional"]
+    CLAUDE["Claude Integration<br/>optional"]
+    TEMPLATE["Template Engine<br/>optional"]
 
     SHELL -.->|uses if present| BREW
     SHELL -.->|uses if present| VAULT
