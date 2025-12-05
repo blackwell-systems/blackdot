@@ -18,6 +18,11 @@ VAULT_CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/vault-items.json"
 typeset -a CUSTOM_SSH_PATHS=()
 typeset -a CUSTOM_CONFIG_PATHS=()
 
+# Location settings (from init-vault.sh)
+LOCATION_TYPE=""
+LOCATION_VALUE=""
+MERGE_MODE=false
+
 # ============================================================
 # Discovery Functions
 # ============================================================
@@ -165,6 +170,24 @@ discover_other_secrets() {
         info "Found: ~/.local/env.secrets"
     fi
 
+    # Template variables (XDG location - preferred for vault portability)
+    local xdg_vars="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/template-variables.sh"
+    if [[ -f "$xdg_vars" ]]; then
+        items+=("Template-Variables:$xdg_vars")
+        info "Found: $xdg_vars"
+    else
+        # Check templates directory location (legacy/repo location)
+        # Try common dotfiles locations
+        local dotfiles_dirs=("$HOME/dotfiles" "$HOME/.dotfiles" "$HOME/workspace/dotfiles")
+        for dir in "${dotfiles_dirs[@]}"; do
+            if [[ -f "$dir/templates/_variables.local.sh" ]]; then
+                items+=("Template-Variables:$dir/templates/_variables.local.sh")
+                info "Found: $dir/templates/_variables.local.sh"
+                break
+            fi
+        done
+    fi
+
     echo "${items[@]}"
 }
 
@@ -280,6 +303,22 @@ generate_vault_json() {
         syncable_items+=("Environment-Secrets:~/.local/env.secrets")
     fi
 
+    # Discover template variables (XDG location preferred, then dotfiles repo)
+    local xdg_vars="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/template-variables.sh"
+    if [[ -f "$xdg_vars" ]]; then
+        pass "  Found: $xdg_vars"
+        syncable_items+=("Template-Variables:~/.config/dotfiles/template-variables.sh")
+    else
+        # Check common dotfiles locations
+        for dir in "$HOME/dotfiles" "$HOME/.dotfiles" "$HOME/workspace/dotfiles"; do
+            if [[ -f "$dir/templates/_variables.local.sh" ]]; then
+                pass "  Found: $dir/templates/_variables.local.sh"
+                syncable_items+=("Template-Variables:$dir/templates/_variables.local.sh")
+                break
+            fi
+        done
+    fi
+
     echo "" >&2
 
     # Check if anything was found
@@ -291,6 +330,7 @@ generate_vault_json() {
         echo "  • ~/.aws/ (AWS configs)" >&2
         echo "  • ~/.gitconfig (Git config)" >&2
         echo "  • ~/.npmrc, ~/.pypirc, ~/.docker/config.json" >&2
+        echo "  • ~/.config/dotfiles/template-variables.sh (template vars)" >&2
         echo "" >&2
         return 1
     fi
@@ -515,6 +555,25 @@ main() {
                 CUSTOM_CONFIG_PATHS+=("$2")
                 shift 2
                 ;;
+            --location)
+                # Format: type:value (e.g., folder:dotfiles)
+                if [[ -z "${2:-}" ]]; then
+                    fail "--location requires argument in format type:value"
+                    exit 1
+                fi
+                if [[ "$2" == *:* ]]; then
+                    LOCATION_TYPE="${2%%:*}"
+                    LOCATION_VALUE="${2#*:}"
+                else
+                    LOCATION_TYPE="$2"
+                    LOCATION_VALUE=""
+                fi
+                shift 2
+                ;;
+            --merge)
+                MERGE_MODE=true
+                shift
+                ;;
             --help|-h)
                 cat << 'EOF'
 Vault Auto-Discovery - Automatically detect secrets in standard locations
@@ -524,6 +583,8 @@ Usage: ./discover-secrets.sh [OPTIONS]
 Options:
   --dry-run, -n           Show what would be discovered without creating file
   --force, -f             Overwrite existing config (skip merge, no backup)
+  --merge                 Merge with existing config (no prompt)
+  --location TYPE:VALUE   Set vault location (e.g., folder:dotfiles)
   --ssh-path PATH         Additional directory to scan for SSH keys
   --config-path PATH      Additional directory to scan for config files
   --help, -h              Show this help
@@ -533,6 +594,8 @@ Standard locations scanned:
   • ~/.aws/           (AWS configs)
   • ~/.gitconfig      (Git config)
   • ~/.npmrc, ~/.pypirc, ~/.docker/config.json (other secrets)
+  • ~/.config/dotfiles/template-variables.sh (template variables)
+  • ~/dotfiles/templates/_variables.local.sh (alternate location)
 
 Merge behavior (when config exists):
   Interactive prompt offers three choices:
@@ -585,6 +648,13 @@ EOF
         if $force; then
             warn "Force mode: overwriting without merge"
             final_json="$discovered_json"
+        elif $MERGE_MODE; then
+            # --merge flag: merge without prompt
+            info "Merge mode: combining with existing config"
+            local existing_json=$(read_existing_config)
+            if [[ -n "$existing_json" ]]; then
+                final_json=$(merge_configs "$discovered_json" "$existing_json")
+            fi
         elif $dry_run; then
             # In dry-run, default to merge for preview
             local existing_json=$(read_existing_config)
@@ -721,6 +791,14 @@ EOF
                     ;;
             esac
         fi
+    fi
+
+    # Add vault_location if specified via --location
+    if [[ -n "$LOCATION_TYPE" ]] && command -v jq >/dev/null 2>&1; then
+        final_json=$(echo "$final_json" | jq \
+            --arg type "$LOCATION_TYPE" \
+            --arg value "$LOCATION_VALUE" \
+            '.vault_location = {type: $type, value: $value}')
     fi
 
     if $dry_run; then

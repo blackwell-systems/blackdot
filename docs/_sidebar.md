@@ -23,6 +23,9 @@
   - [System Overview](architecture.md)
   - [Troubleshooting](troubleshooting.md)
 
+- **Design Documents**
+  - [Vault Setup Wizard v2](design/vault-setup-wizard-v2.md)
+
 - **Planning**
   - [Roadmap](ROADMAP.md)
 
