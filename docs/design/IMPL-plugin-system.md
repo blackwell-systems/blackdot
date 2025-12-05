@@ -4,10 +4,40 @@
 > **Priority:** High
 > **Complexity:** High
 > **Target:** v2.2.0
+> **Foundation:** [Feature Registry](../features.md) (v2.1.0)
 
 ## Overview
 
 The plugin system allows users to extend dotfiles functionality without forking the repository. Plugins are self-contained packages that can add shell functions, aliases, completions, and integrations.
+
+---
+
+## Architecture Foundation
+
+The Plugin System builds on the **Feature Registry** (`lib/_features.sh`) which serves as the control plane for the entire modular architecture:
+
+```
+┌─────────────────────────────────────────────┐
+│         Feature Registry (v2.1.0)            │
+│   - Tracks enabled/disabled features         │
+│   - Resolves dependencies                    │
+│   - Persists state to config.json            │
+└─────────────────┬───────────────────────────┘
+                  │ controls
+                  ▼
+┌─────────────────────────────────────────────┐
+│           Plugin System (this doc)           │
+│   - Each plugin maps to a feature            │
+│   - Uses feature_enabled() for load checks   │
+│   - Registers as "integration" category      │
+└─────────────────────────────────────────────┘
+```
+
+**Key integration points:**
+- Plugins register themselves as features in the `integration` category
+- `plugin_load()` checks `feature_enabled()` before loading
+- Plugin dependencies can require other features (not just commands)
+- `dotfiles features enable <plugin>` enables a plugin's feature
 
 ---
 
