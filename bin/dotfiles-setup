@@ -654,7 +654,23 @@ phase_vault() {
             if ! bw unlock --check &>/dev/null 2>&1; then
                 echo ""
                 echo "Unlock your vault:"
-                local session=$(bw unlock --raw)
+                local session=""
+                local attempts=0
+                local max_attempts=5
+
+                while [[ -z "$session" && $attempts -lt $max_attempts ]]; do
+                    ((attempts++))
+                    session=$(bw unlock --raw 2>/dev/null)
+
+                    if [[ -z "$session" ]]; then
+                        if [[ $attempts -lt $max_attempts ]]; then
+                            echo ""
+                            warn "Incorrect password. Attempt $attempts of $max_attempts."
+                            echo "Try again:"
+                        fi
+                    fi
+                done
+
                 if [[ -n "$session" ]]; then
                     export BW_SESSION="$session"
                     # Cache session
@@ -662,7 +678,8 @@ phase_vault() {
                     chmod 600 "$DOTFILES_DIR/vault/.vault-session"
                     pass "Vault unlocked"
                 else
-                    fail "Failed to unlock vault"
+                    fail "Failed to unlock vault after $max_attempts attempts"
+                    echo "You can retry later with: dotfiles setup"
                     return 1
                 fi
             else
