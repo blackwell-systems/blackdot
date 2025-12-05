@@ -179,6 +179,7 @@ dotfiles/
 ├── bin/                    # CLI tools
 │   ├── dotfiles-doctor     # Health checks
 │   ├── dotfiles-drift      # Vault comparison
+│   ├── dotfiles-sync       # Bidirectional vault sync
 │   ├── dotfiles-diff       # Preview changes
 │   ├── dotfiles-backup     # Backup/restore
 │   ├── dotfiles-setup      # Setup wizard
