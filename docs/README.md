@@ -24,6 +24,7 @@
 |-------|-------------|
 | [Architecture](architecture.md) | Framework systems & design |
 | [Feature Registry](features.md) | Control plane for all features |
+| [Hook System](hooks.md) | Lifecycle hooks for custom behavior |
 | [CLI Reference](cli-reference.md) | All commands, flags & environment variables |
 | [Full Documentation](README-FULL.md) | Complete 1,900+ line guide |
 | [Template System](templates.md) | Machine-specific configuration |
