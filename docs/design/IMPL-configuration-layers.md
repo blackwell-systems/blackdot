@@ -682,25 +682,74 @@ esac
 
 ---
 
+## Relationship with State Management
+
+**Critical:** The existing state management system (`lib/_state.sh`) is NOT affected by config layers.
+
+### Why State Management Stays Separate
+
+State management tracks **what has happened on THIS machine**:
+- Which setup phases completed
+- When setup was last run
+- Machine-specific installation state
+
+This is fundamentally different from configuration preferences:
+
+| Data Type | Example | Layer-Aware? | Why |
+|-----------|---------|--------------|-----|
+| Setup state | `setup.completed[]` | ❌ No | "Did I install packages?" is machine reality |
+| Preferences | `vault.backend` | ✅ Yes | Can vary by machine/project |
+| Feature state | `features.vault` | ✅ Yes | Can be overridden per-project |
+
+### Two Access Patterns
+
+```bash
+# Direct access (state management, setup wizard)
+# Always reads/writes ~/.config/dotfiles/config.json only
+config_get "setup.completed"           # lib/_config.sh
+config_set "setup.completed" "..."     # lib/_config.sh
+state_completed "packages"             # lib/_state.sh
+
+# Layered access (features, user preferences)
+# Resolves: env → project → machine → user → defaults
+config_get_layered "vault.backend"     # lib/_config_layers.sh
+config_get_layered "features.vault"    # lib/_config_layers.sh
+```
+
+### What Uses What
+
+| Component | Access Method | File |
+|-----------|---------------|------|
+| State management | Direct | `lib/_state.sh` → `lib/_config.sh` |
+| Setup wizard | Direct | Uses `lib/_state.sh` |
+| Feature registry | Layered | `lib/_features.sh` → `lib/_config_layers.sh` |
+| User preferences | Layered | Via `dotfiles config` CLI |
+
+**Result:** State management continues working exactly as before. Config layers is purely additive.
+
+---
+
 ## Migration from Current System
 
 ### Phase 1: Add Layer Support
 
 1. Create `lib/_config_layers.sh`
 2. Add `config_get_layered()` alongside existing `config_get()`
-3. Existing code continues using `config_get()`
+3. Existing code continues using `config_get()` - **no changes to state management**
 
 ### Phase 2: Migrate Internal Usage
 
-1. Update scripts to use `config_get_layered()` where appropriate
-2. Feature registry uses layered config for feature state
-3. Add machine config documentation
+1. Update Feature Registry to use `config_get_layered()` for feature state
+2. Add machine config documentation
+3. State management remains on direct access
 
-### Phase 3: Deprecate Direct Config Access
+### Phase 3: CLI and Documentation
 
-1. `config_get()` internally calls `config_get_layered()`
-2. Full backward compatibility maintained
-3. Document layer system in docs
+1. Add `dotfiles config` CLI for layer management
+2. Document which settings are layer-aware
+3. `lib/_config.sh` remains for direct access (state management)
+
+**Note:** Phase 3 does NOT deprecate direct access. Both patterns coexist permanently.
 
 ---
 
