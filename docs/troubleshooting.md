@@ -183,12 +183,13 @@ dotfiles vault create
 dotfiles diff --restore   # See what restore would do
 dotfiles diff --sync      # See what sync would do
 
-# Choose direction:
-# To use vault version:
-dotfiles vault pull
+# Best: Smart sync auto-detects direction for each file
+dotfiles sync             # Auto push/pull based on what changed
+dotfiles sync --dry-run   # Preview first
 
-# To push local to vault:
-dotfiles vault push --all
+# Or choose direction manually:
+dotfiles vault pull       # Pull vault → local (overwrites local)
+dotfiles vault push --all # Push local → vault (overwrites vault)
 ```
 
 ### Vault CLI not found
