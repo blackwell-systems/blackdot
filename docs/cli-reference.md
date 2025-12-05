@@ -145,8 +145,22 @@ dotfiles doctor --quick      # Fast checks (skip vault status)
 Compare local configuration files against vault to detect differences.
 
 ```bash
-dotfiles drift
+dotfiles drift [OPTIONS]
 ```
+
+**Options:**
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--quick` | `-q` | Fast check against cached state (no vault access) |
+| `--help` | `-h` | Show help |
+
+**Modes:**
+
+| Mode | Speed | Vault Access | Description |
+|------|-------|--------------|-------------|
+| Full (default) | ~2-5s | Required | Connects to vault, compares live vault content |
+| Quick (`--quick`) | <50ms | Not required | Compares against cached checksums from last pull |
 
 **Checks these items:**
 - SSH-Config (`~/.ssh/config`)
@@ -154,11 +168,36 @@ dotfiles drift
 - AWS-Credentials (`~/.aws/credentials`)
 - Git-Config (`~/.gitconfig`)
 - Environment-Secrets (`~/.local/env.secrets`)
+- Template-Variables (`~/.config/dotfiles/template-variables.sh`)
 
 **Output:**
 - Shows which items are in sync
 - Shows which items have local changes
 - Suggests next steps (sync or restore)
+
+**Examples:**
+
+```bash
+dotfiles drift           # Full check (connects to vault)
+dotfiles drift --quick   # Fast check (local checksums only)
+```
+
+**Shell Startup Integration:**
+
+Drift detection runs automatically on shell startup using quick mode. If local files have changed since your last `vault pull`, you'll see:
+
+```
+⚠ Drift detected: Git-Config Template-Variables
+  Run: dotfiles drift (to compare) or dotfiles vault pull (to restore)
+```
+
+Disable with: `export DOTFILES_SKIP_DRIFT_CHECK=1`
+
+**How it works:**
+1. After `dotfiles vault pull`, checksums are saved to `~/.cache/dotfiles/vault-state.json`
+2. On shell startup, local files are compared against cached checksums
+3. If checksums differ, a warning is shown
+4. Run full `dotfiles drift` to compare against actual vault content
 
 ---
 
@@ -1205,6 +1244,7 @@ Most commands follow these conventions:
 | `generated/` | Rendered templates |
 | `~/.config/dotfiles/config.json` | All configuration and state (v3.0 JSON format) |
 | `~/.config/dotfiles/vault-items.json` | Vault items schema (v3.0 format) |
+| `~/.cache/dotfiles/vault-state.json` | Drift detection cache (file checksums from last vault pull) |
 
 ---
 
