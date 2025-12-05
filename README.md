@@ -341,6 +341,7 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull   # No drift check (for CI/autom
 
 **Additional capabilities:**
 
+- **Hook System** – 19 lifecycle hooks for custom behavior (vault sync, shell init, doctor checks)
 - **Multi-Vault Backend** – Bitwarden, 1Password, or pass with unified API
 - **Self-Healing** – `dotfiles doctor --fix` repairs permissions and symlinks
 - **Machine Templates** – Generate machine-specific configs from templates
@@ -1019,6 +1020,7 @@ See [Brewfile](Brewfile) for complete package list.
 
 - **[Complete Guide](docs/README-FULL.md)** - Everything in detail (2,300+ lines)
 - **[Vault System](docs/vault-README.md)** - Multi-backend secrets management
+- **[Hook System](docs/hooks.md)** - Lifecycle hooks for custom behavior
 - **[Templates](docs/templates.md)** - Machine-specific configuration
 - **[Architecture](docs/architecture.md)** - System design and components
 - **[CLI Reference](docs/cli-reference.md)** - All commands and flags
