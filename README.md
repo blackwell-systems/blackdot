@@ -353,7 +353,67 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull   # No drift check (for CI/autom
 ## Features
 
 <details>
-<summary><b>View All Features (18)</b></summary>
+<summary><b>View All Features (21)</b></summary>
+
+### Framework Systems
+
+<details>
+<summary><b>Feature Registry</b> - Central control plane for all functionality</summary>
+
+```bash
+dotfiles features              # List all features with status
+dotfiles features enable X     # Enable a feature
+dotfiles features preset Y     # Apply preset (minimal/developer/claude/full)
+```
+
+The Feature Registry (`lib/_features.sh`) controls what's enabled/disabled across the system. Features can depend on other features (e.g., `claude_integration` requires `workspace_symlink`). Dependencies are resolved automatically.
+
+**Presets:**
+- `minimal` - Shell config only
+- `developer` - Shell + vault + AWS helpers + git hooks + modern CLI
+- `claude` - Developer preset + Claude Code integration
+- `full` - All features enabled
+
+**Persistence:** Use `--persist` flag to save settings across shell restarts.
+
+</details>
+
+<details>
+<summary><b>Configuration Layers</b> - 5-layer priority hierarchy for settings</summary>
+
+```bash
+dotfiles config layers         # Show all config with sources
+dotfiles config get vault.backend
+```
+
+Settings resolve through 5 layers (highest to lowest priority):
+
+1. **Environment** - `$DOTFILES_*` variables (CI/CD, temporary overrides)
+2. **Project** - `.dotfiles.local` in current directory
+3. **Machine** - `~/.config/dotfiles/machine.json` (per-machine settings)
+4. **User** - `~/.config/dotfiles/config.json` (user preferences)
+5. **Defaults** - Built-in fallbacks
+
+This allows machine-specific overrides without editing the main config, project-level settings for repositories, and environment-based CI/CD configuration.
+
+</details>
+
+<details>
+<summary><b>CLI Feature Awareness</b> - Adaptive CLI based on enabled features</summary>
+
+```bash
+dotfiles help                  # Shows only enabled feature commands
+dotfiles vault pull            # Shows enable hint if vault disabled
+```
+
+The CLI adapts to your enabled features:
+- Help output hides commands for disabled features
+- Tab completion excludes disabled feature commands
+- Running a disabled command shows an enable hint with the exact command to enable it
+
+This keeps the CLI clean and focused on what you actually use.
+
+</details>
 
 ### Core Features
 
@@ -995,6 +1055,9 @@ See [Brewfile](Brewfile) for complete package list.
 
 | Capability           | This Repo                                      | Typical Dotfiles                 |
 |----------------------|-----------------------------------------------|----------------------------------|
+| **Feature Registry** | Central control plane with presets              | None                             |
+| **Configuration Layers** | 5-layer priority (env/project/machine/user/defaults) | Single config file        |
+| **CLI Feature Awareness** | Adaptive CLI based on enabled features       | Static CLI                       |
 | **Secrets management** | Multi-vault (Bitwarden, 1Password, pass)      | Manual copy between machines     |
 | **Health validation**  | Checker with `--fix`                          | None                             |
 | **Drift detection**    | Compare local vs vault state                  | None                             |
@@ -1002,7 +1065,7 @@ See [Brewfile](Brewfile) for complete package list.
 | **Unit tests**         | 124+ bats-core tests                          | Rare                             |
 | **Docker support**     | 4 container sizes for testing                 | Rare                             |
 | **Modular shell config** | 10 modules in `zsh.d/`                      | Single monolithic file           |
-| **Optional components** | `SKIP_*` env flags                           | All-or-nothing                   |
+| **Optional components** | Feature Registry with presets                | All-or-nothing                   |
 | **Cross-platform**     | macOS, Linux, Windows, WSL2, Docker           | Usually single-platform          |
 | **Claude Code sessions** | Portable via `/workspace`                   | None                             |
 
@@ -1012,6 +1075,9 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 
 | Feature | This Repo | chezmoi |
 |---------|-----------|---------|
+| **Feature Registry** | Central control plane with presets | None |
+| **Configuration Layers** | 5-layer priority system | `.chezmoi.toml` only |
+| **CLI Feature Awareness** | Adaptive CLI | Static CLI |
 | **Secret Management** | 3 vault backends (bw/op/pass) with unified API | External tools only (no unified API) |
 | **Bidirectional Sync** | Local ↔ Vault | Templates only (one-way) |
 | **Claude Code Sessions** | Native integration | None |
@@ -1021,12 +1087,14 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 | **Machine Templates** | Custom engine | Go templates |
 | **Cross-Platform** | 5 platforms + Docker | Excellent |
 | **Learning Curve** | Shell scripts | YAML + Go templates |
-| **Single Binary** | Requires zsh | Go binary |
 
 ### Detailed Comparison vs Popular Dotfiles
 
 | Feature | This Repo | thoughtbot | holman | mathiasbynens | YADR |
 |---------|-----------|------------|--------|---------------|------|
+| **Feature Registry** | Central control plane | No | No | No | No |
+| **Configuration Layers** | 5-layer priority | No | No | No | No |
+| **CLI Feature Awareness** | Adaptive CLI | No | No | No | No |
 | **Secrets Management** | Multi-vault (bw/op/pass) | Manual | Manual | Manual | Manual |
 | **Bidirectional Sync** | Local ↔ Vault | No | No | No | No |
 | **Cross-Platform** | macOS, Linux, Windows, WSL2, Docker | Limited | macOS only | macOS only | Limited |
@@ -1037,22 +1105,23 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 | **Unit Tests** | 124+ bats tests | No | No | No | No |
 | **CI/CD Integration** | GitHub Actions | Basic | No | No | No |
 | **Modular Shell Config** | 10 modules | Monolithic | Monolithic | Monolithic | Partial |
-| **Optional Components** | SKIP_* flags | No | No | No | No |
 | **Docker Bootstrap** | 4 container sizes | No | No | No | No |
 | **One-Line Installer** | Interactive mode | Basic | No | No | Yes |
 | **Documentation Site** | Docsify (searchable) | README only | README only | README only | Wiki |
-| **Active Maintenance** | 2024 | Sporadic | Archived | Sporadic | Minimal |
+| **Active Maintenance** | 2025 | Sporadic | Archived | Sporadic | Minimal |
 
 ### What Makes This Unique
 
-1. **Only dotfiles with multi-vault backend support** - Bitwarden, 1Password, or pass with unified API
-2. **Only dotfiles with Claude Code session portability** - `/workspace` symlink + auto-redirect
-3. **Only dotfiles with comprehensive health checks** - Validator with auto-fix
-4. **Only dotfiles with drift detection** - Compare local vs vault state
-5. **Only dotfiles with schema validation** - Ensures SSH keys/configs are valid before restore
-6. **Only dotfiles with Docker bootstrap testing** - Reproducible CI/CD environments
-7. **Only dotfiles with machine-specific templates** - Auto-generate configs for work vs personal machines
-8. **Only dotfiles with smart credential onboarding** - Detects existing creds, offers to vault them
+1. **Only dotfiles with Feature Registry architecture** - Central control plane for all functionality with presets and dependency resolution
+2. **Only dotfiles with Configuration Layers** - 5-layer priority system (env → project → machine → user → defaults)
+3. **Only dotfiles with CLI Feature Awareness** - Adaptive CLI that adjusts based on enabled features
+4. **Only dotfiles with multi-vault backend support** - Bitwarden, 1Password, or pass with unified API
+5. **Only dotfiles with Claude Code session portability** - `/workspace` symlink + auto-redirect
+6. **Only dotfiles with comprehensive health checks** - Validator with auto-fix
+7. **Only dotfiles with drift detection** - Compare local vs vault state
+8. **Only dotfiles with schema validation** - Ensures SSH keys/configs are valid before restore
+9. **Only dotfiles with Docker bootstrap testing** - Reproducible CI/CD environments
+10. **Only dotfiles with machine-specific templates** - Auto-generate configs for work vs personal machines
 
 </details>
 
