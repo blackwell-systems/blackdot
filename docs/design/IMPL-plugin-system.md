@@ -677,6 +677,100 @@ test/plugins/test_loading.bats
 
 ---
 
+## Lessons Learned (from v2.1-v2.3 implementations)
+
+Based on implementing CLI Feature Awareness, Configuration Layers, and Feature Registry:
+
+### 1. Environment Variable Overrides
+Add env var bypass for scripting/CI:
+```bash
+# In lib/_plugins.sh
+DOTFILES_PLUGIN_FORCE=true   # Bypass dependency checks
+DOTFILES_PLUGIN_VERBOSE=true # Show debug output
+```
+
+### 2. Meta-Feature Pattern
+Register plugin system itself as a feature:
+```zsh
+# In FEATURE_REGISTRY
+["plugins"]="true|Plugin system for extensibility|optional|"
+
+# Check before loading any plugins
+feature_enabled "plugins" || return 0
+```
+
+### 3. `--force` Escape Hatch
+Always provide bypass for guards:
+```bash
+# Enable plugin even if deps missing
+dotfiles plugin enable docker-helpers --force
+```
+
+### 4. Per-Plugin Help with Feature Status
+Show plugin details with enable hints:
+```bash
+dotfiles plugin info docker-helpers
+# Shows: enabled/disabled, deps status, enable command
+```
+
+### 5. jq Boolean Handling
+Don't use `// empty` for booleans - it treats `false` as empty:
+```bash
+# WRONG - returns empty for false
+jq -r '.enabled // empty' manifest.json
+
+# CORRECT - returns "false" string
+jq -r '.enabled' manifest.json
+```
+
+### 6. Consistent Feature Guard Pattern
+```zsh
+plugin_load() {
+    local name="$1"
+
+    # Environment override
+    if [[ "${DOTFILES_PLUGIN_FORCE:-}" == "true" ]]; then
+        # Skip dependency check
+    fi
+
+    # Meta-feature check
+    if ! feature_enabled "plugins"; then
+        return 0
+    fi
+
+    # Individual plugin feature check
+    if ! feature_enabled "plugin_${name}"; then
+        return 0
+    fi
+
+    # ... load plugin
+}
+```
+
+### 7. Testing with zsh
+All plugin tests need zsh since scripts use zsh syntax:
+```bash
+@test "plugin_load works" {
+  run zsh -c "source '$PLUGINS_SH'; plugin_load 'docker-helpers'"
+  [ "$status" -eq 0 ]
+}
+```
+
+### 8. CLI Integration Pattern
+Add to CLI_COMMAND_FEATURES and CLI_COMMAND_HELP:
+```zsh
+# In lib/_cli_features.sh
+["plugin"]="plugins"
+
+# In zsh/zsh.d/40-aliases.zsh CLI_COMMAND_HELP
+["plugin"]="plugins|Plugin Management|Manage dotfiles plugins|
+  plugin list       List available plugins
+  plugin enable     Enable a plugin
+  ..."
+```
+
+---
+
 ## Open Questions
 
 1. Should plugins support update/upgrade from git remotes?
@@ -686,3 +780,4 @@ test/plugins/test_loading.bats
 ---
 
 *Created: 2025-12-05*
+*Updated: 2025-12-05 (Added Lessons Learned)*
