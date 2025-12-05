@@ -672,7 +672,8 @@ phase_vault() {
         1password)
             if ! op account list &>/dev/null 2>&1; then
                 echo "Sign in to 1Password:"
-                eval $(op signin) || { fail "1Password signin failed"; return 1; }
+                # Note: eval is required per 1Password CLI docs to set OP_SESSION
+                eval "$(op signin)" || { fail "1Password signin failed"; return 1; }
             fi
             pass "1Password authenticated"
             ;;
