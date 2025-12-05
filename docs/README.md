@@ -76,6 +76,7 @@ The setup wizard also prompts for workspace directory (Step 1 of 7).
 
 ## Core Features
 
+- **Feature registry** – Enable exactly what you need with `dotfiles features`. Use presets or toggle individual features
 - **Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with Bitwarden, 1Password, or pass
 - **Smart secrets onboarding** – Interactive `dotfiles vault setup` detects local secrets and creates vault items
 - **Claude Code + dotclaude** – Portable sessions, profile management, git safety hooks, vault-synced Claude profiles

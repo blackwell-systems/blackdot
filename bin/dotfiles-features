@@ -156,18 +156,40 @@ cmd_enable() {
         return 0
     fi
 
-    # Check dependencies
-    local missing
-    if missing=$(feature_missing_deps "$feature" 2>/dev/null); then
-        : # No missing deps
-    else
-        info "Enabling dependencies first: $missing"
+    # Collect all dependencies recursively (for persist)
+    local deps_to_enable=()
+    _collect_deps_recursive() {
+        local feat="$1"
+        local deps
+        deps="$(_feature_meta "$feat" "deps")"
+        if [[ -n "$deps" ]]; then
+            for dep in ${(s: :)deps}; do
+                if ! feature_enabled "$dep"; then
+                    # Recurse first (to get deps of deps)
+                    _collect_deps_recursive "$dep"
+                    # Then add this dep if not already in list
+                    if [[ ! " ${deps_to_enable[*]} " =~ " ${dep} " ]]; then
+                        deps_to_enable+=("$dep")
+                    fi
+                fi
+            done
+        fi
+    }
+    _collect_deps_recursive "$feature"
+
+    if [[ ${#deps_to_enable[@]} -gt 0 ]]; then
+        info "Enabling dependencies first: ${deps_to_enable[*]}"
     fi
 
-    # Enable the feature
+    # Enable the feature (and dependencies via feature_enable)
     feature_enable "$feature"
 
     if $persist; then
+        # Persist dependencies first (in order)
+        for dep in "${deps_to_enable[@]}"; do
+            feature_persist "$dep" "true" 2>/dev/null || true
+        done
+        # Persist the main feature
         feature_persist "$feature" "true"
         pass "Feature '$feature' enabled and saved to config"
     else
