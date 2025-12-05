@@ -102,9 +102,13 @@ dotfiles features preset developer   # Apply preset (developer, claude, full)
 
 See [Feature Registry](features.md) for full documentation.
 
+---
+
+## Recently Completed (v3.0)
+
 ### Configuration Layers ✅
 
-**Status:** Complete (v2.1.0)
+**Status:** Complete (v3.0)
 
 5-layer priority system for configuration:
 
@@ -128,7 +132,7 @@ config_get_layered "vault.backend"  # Layer-aware config access
 
 ### CLI Feature Awareness ✅
 
-**Status:** Complete (v2.1.0)
+**Status:** Complete (v3.0)
 
 Adaptive CLI that adjusts based on enabled features:
 
@@ -341,7 +345,8 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 | 1.8.0 | Windows support, git safety hooks, dotclaude integration |
 | **2.0.0** | **Unified setup wizard, state management, macOS CLI** |
 | 2.0.1 | CLI help improvements, Docker container enhancements |
-| **2.1.0** | **Smart secrets onboarding, vault config file, Docker taxonomy, Feature Registry, Configuration Layers, CLI Feature Awareness** |
+| **2.1.0** | **Smart secrets onboarding, vault config file, Docker taxonomy, Feature Registry** |
+| **3.0** | **Configuration Layers, CLI Feature Awareness, JSON config format** |
 
 ---
 
