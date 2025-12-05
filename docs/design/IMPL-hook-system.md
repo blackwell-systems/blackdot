@@ -827,5 +827,118 @@ Hook settings should respect config layer precedence:
 
 ---
 
+## Existing Functionality to Consolidate
+
+The following existing functionality in the codebase would be brought under hook system administration:
+
+### Vault Hooks (Already Implemented Inline)
+
+| Current Location | Function | Hook Point |
+|-----------------|----------|------------|
+| `vault/_common.sh:546` | `check_pre_restore_drift()` | `pre_vault_pull` |
+| `vault/restore.sh:155-193` | Auto-backup before restore | `pre_vault_pull` |
+| `vault/restore.sh:199-212` | Run restore scripts in order | `vault_pull` |
+| `vault/restore.sh:219-227` | Track timestamp, save drift state | `post_vault_pull` |
+| `vault/restore-ssh.sh:79,117` | `chmod 600` on keys/config | `post_vault_pull` |
+| `vault/restore-aws.sh:55` | `chmod 600` on credentials | `post_vault_pull` |
+| `vault/restore-env.sh:68` | `chmod 600` on .env file | `post_vault_pull` |
+
+**Migration benefit:** Unified permission-setting hook instead of scattered `chmod` calls.
+
+### Bootstrap Hooks (Hardcoded in Scripts)
+
+| Current Location | Function | Hook Point |
+|-----------------|----------|------------|
+| `bootstrap/bootstrap-mac.sh:33-38` | Xcode CLI tools check | `pre_bootstrap` |
+| `bootstrap/bootstrap-mac.sh:43-64` | Homebrew installation | `bootstrap_packages` |
+| `bootstrap/bootstrap-mac.sh:69` | `run_brew_bundle` | `bootstrap_packages` |
+| `bootstrap/bootstrap-mac.sh:74-79` | Workspace layout setup | `post_bootstrap` |
+| `bootstrap/_common.sh:237` | Suggest `template init` | `post_bootstrap` |
+
+**Migration benefit:** Users can add custom post-bootstrap hooks for extra package installation.
+
+### Setup Wizard Hooks
+
+| Current Location | Function | Hook Point |
+|-----------------|----------|------------|
+| `bin/dotfiles-setup:328` | Create symlinks | `setup_symlinks` |
+| `bin/dotfiles-setup:662` | `chmod 600` vault session | `post_setup_vault` |
+| `bin/dotfiles-setup:947` | Template init | `post_setup` |
+
+**Migration benefit:** Project-specific setup hooks via `.dotfiles.json`.
+
+### Template Hooks
+
+| Current Location | Function | Hook Point |
+|-----------------|----------|------------|
+| `lib/_templates.sh` | Render templates | `template_render` |
+| `bin/dotfiles-template:link` | Create symlinks | `post_template_render` |
+
+**Migration benefit:** Custom post-render hooks for file permissions, notifications.
+
+### Doctor/Health Hooks
+
+| Current Location | Function | Hook Point |
+|-----------------|----------|------------|
+| `bin/dotfiles-doctor:302,334` | Auto-fix permissions | `doctor_fix` |
+
+**Migration benefit:** Extensible auto-fix system with user-defined repairs.
+
+### Claude Code Hooks (Already Hook-Based)
+
+These are already implemented as Claude Code native hooks and serve as the reference implementation:
+
+| Current Location | Function | Hook Point |
+|-----------------|----------|------------|
+| `claude/hooks/block-dangerous-git.sh` | Block dangerous git commands | `PreToolUse` |
+| `claude/hooks/git-sync-check.sh` | Check git sync status | `SessionStart` |
+
+**Pattern to follow:** These scripts demonstrate the hook interface (stdin JSON, exit codes).
+
+### Proposed Hook Consolidation
+
+```zsh
+# Instead of scattered chmod calls in restore scripts:
+# vault/restore-ssh.sh:79
+chmod 600 "$priv_path"
+
+# Becomes a hook in ~/.config/dotfiles/hooks.json:
+{
+  "post_vault_pull": [
+    {
+      "name": "fix-ssh-permissions",
+      "type": "function",
+      "function": "chmod 600 ~/.ssh/id_*"
+    }
+  ]
+}
+
+# Or register programmatically:
+hook_register "post_vault_pull" "fix_ssh_permissions"
+fix_ssh_permissions() {
+    chmod 600 ~/.ssh/id_* 2>/dev/null || true
+    chmod 644 ~/.ssh/*.pub 2>/dev/null || true
+}
+```
+
+### Migration Priority
+
+| Priority | Hook Point | Current Code | Benefit |
+|----------|-----------|--------------|---------|
+| **High** | `post_vault_pull` | Scattered chmod, ssh-add | Unified permissions + key loading |
+| **High** | `pre_vault_pull` | `check_pre_restore_drift()` | Configurable safety checks |
+| **Medium** | `post_bootstrap` | Template suggestions | User-defined post-install |
+| **Medium** | `doctor_fix` | Hardcoded auto-repairs | Extensible repair system |
+| **Low** | `post_template_render` | Link creation | Custom linking logic |
+
+### Implementation Notes
+
+1. **Backward compatibility:** Keep existing inline functions, have hook system call them
+2. **Default hooks:** Register built-in functions as default hooks (users can override)
+3. **Feature-gated:** Only run vault hooks if `vault` feature enabled
+4. **Error isolation:** Hook failures don't break core operations (log and continue)
+
+---
+
 *Created: 2025-12-05*
-*Updated: 2025-12-05 (Added Lessons Learned)*
+*Updated: 2025-12-05 (Added Lessons Learned, Existing Functionality)*
