@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Command-to-feature mapping: vault→vault, config→config_layers, backup→backup_auto, etc.
   - Section-level filtering in help output (Vault Operations, Backup & Safety, etc.)
   - Footer shows hidden features when commands are filtered
+  - `DOTFILES_CLI_SHOW_ALL=true` env var - Always show all commands in help
+  - `DOTFILES_FORCE=true` env var - Bypass all feature guards (for scripting/CI)
+  - `cli_feature_filter` meta-feature - Disable to show all commands, bypass all guards
+  - Subcommand awareness - `vault:pull`, `config:get` have granular feature mappings
+  - Per-command help - `dotfiles help <cmd>` shows feature status and subcommands
 
 - **Configuration Layers System** - Hierarchical config resolution (`lib/_config_layers.sh`)
   - 5-layer priority: env > project > machine > user > defaults
@@ -88,6 +93,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Shows helpful "feature not enabled" message when disabled
   - Consistent with other feature-gated commands (vault, backup, template)
   - Use `--force` to bypass if needed
+
+- **Missing feature guard on Claude shell module** - `70-claude.zsh` now respects `claude_integration` feature
+  - Shell functions (`claude()`, `claude-bedrock()`, etc.) only load when feature enabled
+  - Consistent with feature-first architecture
 
 - **Underscore in vault item names** - Regex now allows underscores in item names
   - Pattern changed from `^[A-Z][A-Za-z0-9-]*$` to `^[A-Z][A-Za-z0-9_-]*$`

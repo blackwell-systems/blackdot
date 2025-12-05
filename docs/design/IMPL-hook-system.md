@@ -687,4 +687,145 @@ test/hooks/test_json_config.bats
 
 ---
 
+## Lessons Learned (from v2.1-v2.3 implementations)
+
+Based on implementing CLI Feature Awareness, Configuration Layers, and Feature Registry:
+
+### 1. Environment Variable Overrides
+Add env var control for scripting/CI:
+```bash
+# In lib/_hooks.sh
+DOTFILES_HOOKS_DISABLED=true  # Skip all hook execution
+DOTFILES_HOOKS_VERBOSE=true   # Show detailed execution log
+DOTFILES_HOOKS_TIMEOUT=60     # Override timeout
+
+# Check at start of hook_run()
+if [[ "${DOTFILES_HOOKS_DISABLED:-}" == "true" ]]; then
+    return 0
+fi
+```
+
+### 2. Meta-Feature Pattern
+Register hook system itself as a feature with parent feature awareness:
+```zsh
+# In FEATURE_REGISTRY
+["hooks"]="true|Lifecycle hook system|optional|"
+
+# Vault hooks only run if both enabled
+hook_run() {
+    local point="$1"
+
+    # Meta-feature: is hook system enabled?
+    feature_enabled "hooks" || return 0
+
+    # Parent feature check (e.g., vault hooks need vault)
+    if [[ "$point" == *vault* ]]; then
+        feature_enabled "vault" || return 0
+    fi
+
+    # ... run hooks
+}
+```
+
+### 3. `--force` Bypass Pattern
+Allow skipping hooks in emergencies:
+```bash
+# In vault scripts
+if [[ "${1:-}" != "--no-hooks" ]]; then
+    hook_run "pre_vault_pull"
+fi
+
+# Usage: dotfiles vault pull --no-hooks
+```
+
+### 4. Helpful Error Messages with Enable Hints
+When hooks fail, show context:
+```bash
+hook_run() {
+    # ...
+    if (( result != 0 )); then
+        echo "Hook failed: $name" >&2
+        echo "  Disable with: dotfiles features disable hooks" >&2
+        echo "  Or skip with: --no-hooks flag" >&2
+    fi
+}
+```
+
+### 5. jq Boolean Handling
+Don't use `// empty` for booleans - it treats `false` as empty:
+```bash
+# WRONG
+enabled=$(jq -r '.enabled // empty' hooks.json)
+
+# CORRECT
+enabled=$(jq -r '.enabled' hooks.json)
+[[ "$enabled" != "null" ]] || enabled="true"
+```
+
+### 6. Layered Configuration Support
+Allow hooks config from multiple sources (like config_layers):
+```bash
+# Priority: env > project > user
+# Project hooks in .dotfiles.json
+# User hooks in ~/.config/dotfiles/hooks.json
+
+_hooks_get_config() {
+    local project_hooks=""
+    [[ -f .dotfiles.json ]] && project_hooks=$(jq -r '.hooks // empty' .dotfiles.json)
+
+    # Merge project + user hooks
+}
+```
+
+### 7. Testing Pattern with zsh
+All hook tests need zsh:
+```bash
+@test "hook_run executes hooks in order" {
+  run zsh -c "
+    source '$HOOKS_SH'
+    hook_register 'test_point' 'test_func'
+    test_func() { echo 'executed'; }
+    hook_run 'test_point'
+  "
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"executed"* ]]
+}
+```
+
+### 8. CLI Integration Pattern
+```zsh
+# In lib/_cli_features.sh
+["hook"]="hooks"
+["hooks"]="hooks"
+
+# In CLI_COMMAND_HELP
+["hooks"]="hooks|Hook Management|Lifecycle hook configuration|
+  hooks list       List all hooks
+  hooks run        Manually trigger hooks
+  hooks add        Add a hook script
+  ..."
+
+# In CLI_SUBCOMMAND_FEATURES
+["hooks:list"]="hooks"
+["hooks:run"]="hooks"
+["hooks:add"]="hooks"
+```
+
+### 9. Integration with Config Layers
+Hook settings should respect config layer precedence:
+```bash
+# Allow project-level hook overrides
+# .dotfiles.json in repo can add project-specific hooks
+{
+  "hooks": {
+    "post_install": [
+      {"name": "project-setup", "script": "./scripts/setup.sh"}
+    ]
+  }
+}
+```
+
+---
+
 *Created: 2025-12-05*
+*Updated: 2025-12-05 (Added Lessons Learned)*

@@ -12,6 +12,11 @@
 #
 # See ~/.claude.local.example for a template.
 
+# Feature guard: skip if claude_integration is disabled
+if type feature_enabled &>/dev/null && ! feature_enabled "claude_integration" 2>/dev/null; then
+    return 0
+fi
+
 # =========================
 # Configuration (env var overrides)
 # =========================
