@@ -7,17 +7,50 @@
 #   dotfiles backup --list       # List backups
 #   dotfiles backup restore      # Restore latest
 #   dotfiles backup restore <id> # Restore specific
+#
+# Configuration (in ~/.config/dotfiles/config.json):
+#   backup.enabled        - Enable/disable backup system (default: true)
+#   backup.max_snapshots  - Maximum backups to keep (default: 10)
+#   backup.retention_days - Days to keep backups (default: 30)
+#   backup.compress       - Use gzip compression (default: true)
+#   backup.location       - Backup directory (default: ~/.dotfiles-backups)
 # ============================================================
 set -uo pipefail
 
-# Source shared logging functions
-SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
-# DOTFILES_DIR is parent of bin/
-DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
-source "$DOTFILES_DIR/lib/_logging.sh"
+# Determine dotfiles directory
+if [[ -n "${DOTFILES_DIR:-}" ]]; then
+    DOTFILES_DIR="$DOTFILES_DIR"
+elif [[ -d "$HOME/workspace/dotfiles" ]]; then
+    DOTFILES_DIR="$HOME/workspace/dotfiles"
+elif [[ -d "/workspace/dotfiles" ]]; then
+    DOTFILES_DIR="/workspace/dotfiles"
+else
+    echo "Error: DOTFILES_DIR not set and standard locations not found" >&2
+    exit 1
+fi
 
-BACKUP_DIR="$HOME/.dotfiles-backups"
-MAX_BACKUPS=10
+# Source shared libraries
+source "$DOTFILES_DIR/lib/_logging.sh"
+source "$DOTFILES_DIR/lib/_config.sh"
+
+# ============================================================
+# Load Configuration from config.json
+# ============================================================
+
+load_backup_config() {
+    # Read settings from config.json with defaults
+    BACKUP_ENABLED=$(config_get "backup.enabled" "true")
+    MAX_BACKUPS=$(config_get "backup.max_snapshots" "10")
+    RETENTION_DAYS=$(config_get "backup.retention_days" "30")
+    COMPRESS=$(config_get "backup.compress" "true")
+
+    # Get backup location, expand ~ to $HOME
+    local location=$(config_get "backup.location" "~/.dotfiles-backups")
+    BACKUP_DIR="${location/#\~/$HOME}"
+}
+
+# Load config at startup
+load_backup_config
 
 # Files to backup
 BACKUP_FILES=(
@@ -29,9 +62,21 @@ BACKUP_FILES=(
     "$HOME/.local/env.secrets"
     "$HOME/.zshrc"
     "$HOME/.p10k.zsh"
+    "$HOME/.config/dotfiles/template-variables.sh"
 )
 
+# ============================================================
+# Backup Operations
+# ============================================================
+
 create_backup() {
+    # Check if backup is enabled
+    if [[ "$BACKUP_ENABLED" != "true" ]]; then
+        warn "Backup system is disabled in config"
+        echo "Enable with: dotfiles config set backup.enabled true"
+        return 1
+    fi
+
     mkdir -p "$BACKUP_DIR"
 
     local timestamp=$(date +%Y%m%d-%H%M%S)
@@ -48,7 +93,7 @@ create_backup() {
             local dest_dir="$backup_path/$(dirname "$rel_path")"
             mkdir -p "$dest_dir"
             cp "$file" "$backup_path/$rel_path"
-            ((count++))
+            count=$((count + 1))
         fi
     done
 
@@ -59,49 +104,72 @@ create_backup() {
     "date": "$(date -Iseconds)",
     "hostname": "$(hostname)",
     "files_count": $count,
-    "dotfiles_version": "$(cd "$HOME/workspace/dotfiles" && git rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
+    "compressed": $COMPRESS,
+    "dotfiles_version": "$(cd "$DOTFILES_DIR" && git rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
 }
 EOF
 
-    # Create tarball
-    tar -czf "$BACKUP_DIR/$backup_name.tar.gz" -C "$BACKUP_DIR" "$backup_name"
-    rm -rf "$backup_path"
-
-    pass "Backup created: $backup_name.tar.gz ($count files)"
+    # Create archive (compressed or not based on config)
+    if [[ "$COMPRESS" == "true" ]]; then
+        tar -czf "$BACKUP_DIR/$backup_name.tar.gz" -C "$BACKUP_DIR" "$backup_name"
+        rm -rf "$backup_path"
+        pass "Backup created: $backup_name.tar.gz ($count files, compressed)"
+    else
+        tar -cf "$BACKUP_DIR/$backup_name.tar" -C "$BACKUP_DIR" "$backup_name"
+        rm -rf "$backup_path"
+        pass "Backup created: $backup_name.tar ($count files, uncompressed)"
+    fi
 
     # Cleanup old backups
     cleanup_old_backups
 }
 
 cleanup_old_backups() {
-    local backup_count=$(ls -1 "$BACKUP_DIR"/*.tar.gz 2>/dev/null | wc -l)
+    # Get all backup files (both .tar.gz and .tar)
+    local backup_files=("$BACKUP_DIR"/*.tar.gz(N) "$BACKUP_DIR"/*.tar(N))
+    local backup_count=${#backup_files[@]}
+
+    # Remove backups exceeding max_snapshots
     if [[ $backup_count -gt $MAX_BACKUPS ]]; then
         local to_delete=$((backup_count - MAX_BACKUPS))
-        info "Cleaning up $to_delete old backup(s)..."
-        ls -1t "$BACKUP_DIR"/*.tar.gz | tail -n $to_delete | xargs rm -f
+        info "Cleaning up $to_delete old backup(s) (max: $MAX_BACKUPS)..."
+        ls -1t "$BACKUP_DIR"/*.tar* 2>/dev/null | tail -n $to_delete | xargs rm -f
+    fi
+
+    # Remove backups older than retention_days
+    if [[ $RETENTION_DAYS -gt 0 ]]; then
+        local old_backups=$(find "$BACKUP_DIR" -name "backup-*.tar*" -mtime +$RETENTION_DAYS 2>/dev/null)
+        if [[ -n "$old_backups" ]]; then
+            local old_count=$(echo "$old_backups" | wc -l | tr -d ' ')
+            info "Removing $old_count backup(s) older than $RETENTION_DAYS days..."
+            echo "$old_backups" | xargs rm -f
+        fi
     fi
 }
 
 list_backups() {
     if [[ ! -d "$BACKUP_DIR" ]] || [[ -z "$(ls -A "$BACKUP_DIR" 2>/dev/null)" ]]; then
-        warn "No backups found"
+        warn "No backups found in $BACKUP_DIR"
         echo "Create one with: dotfiles backup"
         return 1
     fi
 
     echo ""
-    echo "Available backups:"
-    echo "=================="
+    echo "Available backups (max: $MAX_BACKUPS, retention: ${RETENTION_DAYS}d):"
+    echo "================================================================"
 
-    for backup in $(ls -1t "$BACKUP_DIR"/*.tar.gz 2>/dev/null); do
-        local name=$(basename "$backup" .tar.gz)
+    for backup in $(ls -1t "$BACKUP_DIR"/*.tar* 2>/dev/null); do
+        local name=$(basename "$backup")
         local size=$(du -h "$backup" | cut -f1)
-        local date_part="${name#backup-}"
-        echo "  $name  ($size)"
+        local ext="${name##*.}"
+        local compressed=""
+        [[ "$ext" == "gz" ]] && compressed=" [compressed]"
+        echo "  ${name%.tar*}  ($size)$compressed"
     done
 
     echo ""
     echo "Restore with: dotfiles backup restore [backup-name]"
+    echo "Location: $BACKUP_DIR"
 }
 
 restore_backup() {
@@ -109,7 +177,7 @@ restore_backup() {
 
     if [[ -z "$backup_name" ]]; then
         # Get latest
-        backup_name=$(ls -1t "$BACKUP_DIR"/*.tar.gz 2>/dev/null | head -1 | xargs basename 2>/dev/null | sed 's/.tar.gz//')
+        backup_name=$(ls -1t "$BACKUP_DIR"/*.tar* 2>/dev/null | head -1 | xargs basename 2>/dev/null | sed 's/.tar.*//')
     fi
 
     if [[ -z "$backup_name" ]]; then
@@ -117,12 +185,19 @@ restore_backup() {
         return 1
     fi
 
-    local backup_file="$BACKUP_DIR/$backup_name.tar.gz"
-    if [[ ! -f "$backup_file" ]]; then
+    # Find backup file (could be .tar.gz or .tar)
+    local backup_file=""
+    if [[ -f "$BACKUP_DIR/$backup_name.tar.gz" ]]; then
+        backup_file="$BACKUP_DIR/$backup_name.tar.gz"
+    elif [[ -f "$BACKUP_DIR/$backup_name.tar" ]]; then
+        backup_file="$BACKUP_DIR/$backup_name.tar"
+    elif [[ -f "$BACKUP_DIR/${backup_name}.tar.gz" ]]; then
         backup_file="$BACKUP_DIR/${backup_name}.tar.gz"
+    elif [[ -f "$BACKUP_DIR/${backup_name}.tar" ]]; then
+        backup_file="$BACKUP_DIR/${backup_name}.tar"
     fi
 
-    if [[ ! -f "$backup_file" ]]; then
+    if [[ -z "$backup_file" || ! -f "$backup_file" ]]; then
         fail "Backup not found: $backup_name"
         list_backups
         return 1
@@ -132,7 +207,7 @@ restore_backup() {
 
     # Extract to temp
     local temp_dir=$(mktemp -d)
-    if ! tar -xzf "$backup_file" -C "$temp_dir" 2>/dev/null; then
+    if ! tar -xf "$backup_file" -C "$temp_dir" 2>/dev/null; then
         fail "Failed to extract backup (corrupted or invalid archive)"
         rm -rf "$temp_dir"
         return 1
@@ -150,7 +225,7 @@ restore_backup() {
             mkdir -p "$dest_dir"
             cp "$src" "$file"
             pass "Restored: $rel_path"
-            ((restored++))
+            restored=$((restored + 1))
         fi
     done
 
@@ -160,13 +235,32 @@ restore_backup() {
     pass "Restored $restored files from $backup_name"
 }
 
+show_config() {
+    echo ""
+    echo "Backup Configuration:"
+    echo "====================="
+    echo "  enabled:        $BACKUP_ENABLED"
+    echo "  max_snapshots:  $MAX_BACKUPS"
+    echo "  retention_days: $RETENTION_DAYS"
+    echo "  compress:       $COMPRESS"
+    echo "  location:       $BACKUP_DIR"
+    echo ""
+    echo "Configure in: ~/.config/dotfiles/config.json"
+}
+
+# ============================================================
 # Main
+# ============================================================
+
 case "${1:-}" in
     --list|-l|list)
         list_backups
         ;;
     restore)
         restore_backup "${2:-}"
+        ;;
+    --config|-c|config)
+        show_config
         ;;
     --help|-h|help)
         echo "dotfiles backup - Backup and restore configuration"
@@ -176,13 +270,21 @@ case "${1:-}" in
         echo "  dotfiles backup --list       List available backups"
         echo "  dotfiles backup restore      Restore from latest backup"
         echo "  dotfiles backup restore ID   Restore specific backup"
+        echo "  dotfiles backup --config     Show current configuration"
         echo ""
-        echo "Backups are stored in: $BACKUP_DIR"
-        echo "Maximum backups kept: $MAX_BACKUPS"
+        echo "Configuration (in ~/.config/dotfiles/config.json):"
+        echo "  backup.enabled        Enable backup system (default: true)"
+        echo "  backup.max_snapshots  Max backups to keep (default: 10)"
+        echo "  backup.retention_days Days to keep backups (default: 30)"
+        echo "  backup.compress       Use gzip compression (default: true)"
+        echo "  backup.location       Backup directory"
+        echo ""
+        echo "Current settings:"
+        show_config
         ;;
     -*)
         fail "Unknown option: $1"
-        echo "Usage: dotfiles backup [--list|restore|--help]"
+        echo "Usage: dotfiles backup [--list|restore|--config|--help]"
         exit 1
         ;;
     *)
