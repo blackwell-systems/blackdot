@@ -46,7 +46,8 @@ get_default_config() {
   "paths": {
     "dotfiles_dir": "",
     "config_dir": "~/.config/dotfiles",
-    "backup_dir": "~/.dotfiles-backups"
+    "backup_dir": "~/.dotfiles-backups",
+    "workspace_target": "~/workspace"
   }
 }
 EOF

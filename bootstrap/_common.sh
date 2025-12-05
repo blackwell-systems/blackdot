@@ -58,6 +58,7 @@ show_bootstrap_help() {
     echo "  --help, -h           Show this help"
     echo ""
     echo "Environment variables:"
+    echo "  WORKSPACE_TARGET=~/code       Custom workspace directory (default: ~/workspace)"
     echo "  SKIP_WORKSPACE_SYMLINK=true   Skip /workspace symlink creation"
     echo "  SKIP_CLAUDE_SETUP=true        Skip Claude Code configuration"
     echo "  BREWFILE_TIER=minimal         Use Brewfile.minimal (essentials only)"
@@ -110,17 +111,46 @@ run_interactive_config() {
 # ============================================================
 # Workspace setup (shared between macOS and Linux)
 # ============================================================
+
+# Get workspace target from env var, config, or default
+# This is inlined here to avoid dependency on _paths.sh during bootstrap
+_get_workspace_target() {
+    # 1. Check environment variable first
+    if [[ -n "${WORKSPACE_TARGET:-}" ]]; then
+        echo "${WORKSPACE_TARGET/#\~/$HOME}"
+        return 0
+    fi
+
+    # 2. Check config file
+    local config_file="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/config.json"
+    if [[ -f "$config_file" ]] && command -v jq &>/dev/null; then
+        local configured
+        configured=$(jq -r '.paths.workspace_target // empty' "$config_file" 2>/dev/null)
+        if [[ -n "$configured" && "$configured" != "null" && "$configured" != "" ]]; then
+            echo "${configured/#\~/$HOME}"
+            return 0
+        fi
+    fi
+
+    # 3. Default
+    echo "$HOME/workspace"
+}
+
 setup_workspace_layout() {
-    echo "Ensuring ~/workspace layout..."
-    mkdir -p "$HOME/workspace"
-    mkdir -p "$HOME/workspace/code"
+    local workspace_target
+    workspace_target="$(_get_workspace_target)"
+
+    echo "Ensuring workspace layout at $workspace_target..."
+    mkdir -p "$workspace_target"
+    mkdir -p "$workspace_target/code"
 }
 
 # ============================================================
 # /workspace symlink setup (shared between macOS and Linux)
 # ============================================================
 setup_workspace_symlink() {
-    # Creates /workspace -> ~/workspace for consistent Claude session paths.
+    # Creates /workspace -> $WORKSPACE_TARGET for consistent Claude session paths.
+    # The /workspace path stays constant for portability; only the target changes.
     # Optional: enables session portability across machines if you use multiple.
     SKIP_WORKSPACE_SYMLINK="${SKIP_WORKSPACE_SYMLINK:-false}"
 
@@ -129,17 +159,21 @@ setup_workspace_symlink() {
         return 0
     fi
 
+    # Get the configured workspace target
+    local target
+    target="$(_get_workspace_target)"
+
     # Check if /workspace already exists and is correct
     if [[ -L /workspace ]]; then
         local current_target
         current_target=$(readlink /workspace)
-        if [[ "$current_target" == "$HOME/workspace" ]]; then
-            echo "/workspace symlink already correct."
+        if [[ "$current_target" == "$target" ]]; then
+            echo "/workspace symlink already correct -> $target"
             return 0
         else
             echo "Updating /workspace symlink..."
-            sudo rm /workspace && sudo ln -sfn "$HOME/workspace" /workspace
-            echo "Updated /workspace -> $HOME/workspace"
+            sudo rm /workspace && sudo ln -sfn "$target" /workspace
+            echo "Updated /workspace -> $target"
             return 0
         fi
     elif [[ -e /workspace ]]; then
@@ -153,8 +187,8 @@ setup_workspace_symlink() {
 
     # Try to create the symlink
     echo "Creating /workspace symlink (requires sudo)..."
-    if sudo ln -sfn "$HOME/workspace" /workspace 2>/dev/null; then
-        pass "Created /workspace -> $HOME/workspace"
+    if sudo ln -sfn "$target" /workspace 2>/dev/null; then
+        pass "Created /workspace -> $target"
         return 0
     fi
 
@@ -167,18 +201,18 @@ setup_workspace_symlink() {
         echo "To fix this, run the following commands:"
         echo ""
         echo "  1. Create synthetic.conf entry:"
-        echo "     ${CYAN}echo -e 'workspace\t$HOME/workspace' | sudo tee -a /etc/synthetic.conf${NC}"
+        echo "     ${CYAN}echo -e 'workspace\t$target' | sudo tee -a /etc/synthetic.conf${NC}"
         echo ""
         echo "  2. Reboot to apply:"
         echo "     ${CYAN}sudo reboot${NC}"
         echo ""
         echo "  Or wait until next reboot - the symlink will appear automatically."
         echo ""
-        info "For now, Claude sessions will use ~/workspace paths (still works fine)"
+        info "For now, Claude sessions will use $target paths (still works fine)"
     else
         # Non-macOS failure
         warn "Could not create /workspace symlink"
-        echo "  To fix manually: sudo ln -sfn $HOME/workspace /workspace"
+        echo "  To fix manually: sudo ln -sfn $target /workspace"
     fi
 }
 
