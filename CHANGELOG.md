@@ -7,7 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+*No unreleased changes yet. All changes are part of v3.0.0.*
+
+---
+
+## [3.0.0] - 2024-12-05
+
+**🎨 MAJOR RELEASE - v3.0 Framework Architecture**
+
+This is a comprehensive framework redesign that transforms dotfiles from a collection of scripts into a modular, feature-driven system. All breaking changes, new features, and improvements from the v3 development cycle are included in this single release.
+
+### Added - Framework Core
+
+- **Hook System** - Extensible event-driven hook system (`lib/_hooks.sh`)
+  - Event-based hook triggers at 8 lifecycle points: `shell_init`, `directory_change`, `pre_vault_pull`, `post_vault_pull`, `pre_vault_push`, `post_vault_push`, `doctor_check`, `pre_uninstall`
+  - `dotfiles hook` command for managing hooks
+  - `dotfiles hook list` - Show all available hooks and their status
+  - `dotfiles hook run <event> [--dry-run]` - Manually trigger hooks
+  - `dotfiles hook enable <path>` - Enable hook script
+  - `dotfiles hook disable <path>` - Disable hook script
+  - `dotfiles hook validate [path]` - Validate hook scripts
+  - Automatic hook discovery from `~/hooks/` and `$DOTFILES_DIR/hooks/`
+  - Per-directory hook support via `.dotfiles-hooks/`
+  - Hook script naming convention: `[priority]-descriptive-name.{sh,zsh}`
+  - Priority-based execution (00-99, lower runs first)
+  - Hook environment with context variables ($DOTFILES_HOOK_*, $DOTFILES_*)
+  - Safety features: timeouts, error isolation, validation
+  - Shell integration hooks automatically loaded
+  - Example hooks provided for common use cases
+  - Comprehensive documentation at `docs/hooks.md`
+  - 874 test cases covering all hook functionality
+
+- **Template Pipeline Filters** - Transform variables during template rendering
+  - `{{ variable | upper }}` - Convert to uppercase
+  - `{{ variable | lower }}` - Convert to lowercase
+  - `{{ variable | trim }}` - Remove leading/trailing whitespace
+  - `{{ variable | replace:old:new }}` - String replacement
+  - `{{ variable | default:fallback }}` - Provide default value
+  - `{{ variable | sanitize_path }}` - Sanitize for safe path usage
+  - Chain multiple filters: `{{ email | lower | trim }}`
+  - Works in `{{#if}}` conditions and `{{#each}}` loops
+  - Documented in `docs/templates.md`
+  - 206 test cases for template functionality
 
 - **CLI Feature Awareness** - Smart CLI that adapts to enabled features (`lib/_cli_features.sh`)
   - `dotfiles help` only shows commands for enabled features (cleaner UX)
@@ -134,13 +175,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Migration from `ONEPASSWORD_VAULT` env var to config
   - See `docs/design/vault-setup-wizard-v2.md` for implementation plan
 
-## [3.0.0] - 2025-01-04
-
-**🚨 BREAKING CHANGES - Major v3.0 Release**
-
-This release introduces significant improvements and breaking changes. Users on v2.x should review the migration guide and use `dotfiles migrate` to upgrade.
-
-### Added
+### Added - v3.0 Core Features (consolidated from earlier releases)
 - **Vault Schema Validation** (Pain Point #4) - Prevent invalid configurations
   - JSON schema for vault-items.json with comprehensive validation rules
   - `vault_validate_schema()` function in `lib/_vault.sh` validates required fields, types, naming conventions
