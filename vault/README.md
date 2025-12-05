@@ -366,6 +366,7 @@ dotfiles vault sync --all
 | `AWS-Credentials` | `~/.aws/credentials` |
 | `Git-Config` | `~/.gitconfig` |
 | `Environment-Secrets` | `~/.local/env.secrets` |
+| `Template-Variables` | `~/.config/dotfiles/template-variables.sh` |
 
 **When to use:** After editing local config files, before switching machines.
 
@@ -472,6 +473,7 @@ All items must be **Secure Notes** (or equivalent) with content in the **notes**
 | `Git-Config` | Yes | Full `~/.gitconfig` contents |
 | `Environment-Secrets` | No | `KEY=value` pairs for env vars |
 | `Claude-Profiles` | No | Claude Code profiles JSON |
+| `Template-Variables` | No | Machine-specific template variables |
 
 ---
 
