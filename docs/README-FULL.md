@@ -13,11 +13,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
 
-> **Enterprise-grade dotfiles** with multi-vault secret management (Bitwarden, 1Password, pass), machine-specific templates, portable Claude Code sessions, and automated health checks. Works across macOS, Linux, Windows, WSL2, and Docker.
+> A dotfiles management framework built on **Feature Registry**, **Configuration Layers**, and **CLI Feature Awareness**. Multi-vault secrets, portable Claude Code sessions, machine-specific templates, and self-healing configuration.
 
 [Changelog](../CHANGELOG.md) | [Quick Start Guide](../README.md)
 
-This is the comprehensive reference documentation for the dotfiles system. It covers configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code**, and a **multi-vault secret bootstrap** (supporting Bitwarden, 1Password, and pass) for SSH keys, AWS credentials, and environment secrets across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
+This is the comprehensive reference for the dotfiles framework. It covers the core systems (Feature Registry, Configuration Layers, CLI Feature Awareness), along with configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code**, and **multi-vault secret management** (Bitwarden, 1Password, pass) across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
 
 ---
 
