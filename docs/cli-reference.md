@@ -315,11 +315,11 @@ dotfiles vault <command> [OPTIONS]
 
 | Command | Description |
 |---------|-------------|
-| `init` | Configure or reconfigure vault backend |
-| `restore` | Restore all secrets from vault |
-| `sync` | Sync local files to vault |
-| `setup` | Interactive onboarding wizard for new vault items |
-| `list` | List vault items |
+| `init` | Configure vault backend with location support (v2 wizard) |
+| `pull` | Pull secrets from vault to local machine |
+| `push` | Push local files to vault |
+| `setup` | Interactive onboarding wizard (three modes: Existing/Fresh/Manual) |
+| `list` | List vault items (supports location filtering) |
 | `check` | Validate vault items exist |
 | `validate` | Validate vault item schema |
 | `create` | Create new vault item |
@@ -373,6 +373,39 @@ pass init <gpg-key-id>
 export DOTFILES_VAULT_BACKEND=pass
 export PASS_PREFIX=dotfiles  # optional, items stored as dotfiles/Git-Config
 ```
+
+---
+
+### Location Management (v3.1+)
+
+Vault items can be organized by location (folder, vault, directory) depending on your backend:
+
+| Backend | Location Type | Example |
+|---------|---------------|---------|
+| **Bitwarden** | `folder` | Items in "dotfiles" folder |
+| **1Password** | `vault` or `tag` | Items in "Personal" vault (planned) |
+| **pass** | `directory` | Items in `dotfiles/` prefix directory |
+
+**Configuration in `vault-items.json`:**
+```json
+{
+  "vault_location": {
+    "type": "folder",
+    "value": "dotfiles"
+  },
+  "vault_items": { ... }
+}
+```
+
+**Location types:**
+- `folder` - Bitwarden folders
+- `vault` - 1Password vaults (planned)
+- `tag` - 1Password tags (planned)
+- `directory` - pass directories/prefixes
+- `prefix` - Name-based prefix filtering
+- `none` - No location filtering (legacy behavior)
+
+The setup wizard (`dotfiles vault init`) guides you through selecting or creating a location.
 
 ---
 
@@ -465,6 +498,7 @@ dotfiles vault push [OPTIONS] [ITEMS...]
 - `AWS-Credentials`
 - `Git-Config`
 - `Environment-Secrets`
+- `Template-Variables`
 
 **Examples:**
 
@@ -551,6 +585,20 @@ dotfiles template init
 1. Detects system info (hostname, OS, architecture)
 2. Creates `templates/_variables.local.sh`
 3. Opens editor to customize variables
+
+**Vault Integration:**
+Template variables can be stored in your vault for portable restoration across machines:
+
+```bash
+# Store in vault (current machine)
+dotfiles vault push Template-Variables
+
+# Restore from vault (new machine)
+dotfiles vault pull
+dotfiles template render --all
+```
+
+Variables are stored at `~/.config/dotfiles/template-variables.sh` (XDG location).
 
 ---
 
@@ -1152,7 +1200,8 @@ Most commands follow these conventions:
 | `~/.dotfiles-metrics.jsonl` | Health check metrics |
 | `~/workspace/.notes.md` | Quick notes |
 | `vault/.vault-session` | Cached vault session |
-| `templates/_variables.local.sh` | Local template overrides |
+| `templates/_variables.local.sh` | Local template overrides (repo-specific) |
+| `~/.config/dotfiles/template-variables.sh` | Template variables (XDG, vault-portable) |
 | `generated/` | Rendered templates |
 | `~/.config/dotfiles/config.json` | All configuration and state (v3.0 JSON format) |
 | `~/.config/dotfiles/vault-items.json` | Vault items schema (v3.0 format) |

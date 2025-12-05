@@ -346,3 +346,202 @@ vault_backend_get_attachment() {
     # Get attachment
     bw get attachment "$attachment_name" --itemid "$item_id" --session "$session" --raw 2>/dev/null
 }
+
+# ============================================================
+# Location Management (v3.1)
+# Folder-based organization for Bitwarden
+# ============================================================
+
+# List all folders in the vault
+# Returns: JSON array of folder names
+vault_backend_list_locations() {
+    local session="$1"
+
+    if [[ -z "$session" ]]; then
+        fail "Session required for listing folders"
+        return 1
+    fi
+
+    bw list folders --session "$session" 2>/dev/null | jq -r '[.[].name]' || echo "[]"
+}
+
+# Check if a folder exists
+vault_backend_location_exists() {
+    local folder_name="$1"
+    local session="$2"
+
+    if [[ -z "$folder_name" || -z "$session" ]]; then
+        return 1
+    fi
+
+    bw list folders --session "$session" 2>/dev/null | \
+        jq -e ".[] | select(.name == \"$folder_name\")" >/dev/null 2>&1
+}
+
+# Get folder ID by name
+_bw_get_folder_id() {
+    local folder_name="$1"
+    local session="$2"
+
+    bw list folders --session "$session" 2>/dev/null | \
+        jq -r ".[] | select(.name == \"$folder_name\") | .id" 2>/dev/null
+}
+
+# Create a new folder
+vault_backend_create_location() {
+    local folder_name="$1"
+    local session="$2"
+
+    if [[ -z "$folder_name" || -z "$session" ]]; then
+        fail "Folder name and session required"
+        return 1
+    fi
+
+    # Check if already exists
+    if vault_backend_location_exists "$folder_name" "$session"; then
+        info "Folder '$folder_name' already exists"
+        return 0
+    fi
+
+    # Create the folder
+    local folder_json="{\"name\": \"$folder_name\"}"
+    if echo "$folder_json" | bw encode | bw create folder --session "$session" >/dev/null 2>&1; then
+        pass "Created folder '$folder_name' in Bitwarden"
+        return 0
+    else
+        fail "Failed to create folder '$folder_name'"
+        return 1
+    fi
+}
+
+# List items in a specific folder
+# Usage: vault_backend_list_items_in_location "folder" "dotfiles" "$SESSION"
+vault_backend_list_items_in_location() {
+    local loc_type="$1"
+    local loc_value="$2"
+    local session="$3"
+
+    if [[ -z "$session" ]]; then
+        fail "Session required for listing items"
+        return 1
+    fi
+
+    case "$loc_type" in
+        folder)
+            if [[ -z "$loc_value" ]]; then
+                # No folder specified, list all
+                vault_backend_list_items "$session"
+                return
+            fi
+
+            # Get folder ID
+            local folder_id
+            folder_id=$(_bw_get_folder_id "$loc_value" "$session")
+
+            if [[ -z "$folder_id" ]]; then
+                warn "Folder '$loc_value' not found"
+                echo "[]"
+                return 1
+            fi
+
+            # List items in folder
+            bw list items --folderid "$folder_id" --session "$session" 2>/dev/null || echo "[]"
+            ;;
+
+        prefix)
+            # Filter by name prefix
+            if [[ -z "$loc_value" ]]; then
+                vault_backend_list_items "$session"
+                return
+            fi
+
+            bw list items --session "$session" 2>/dev/null | \
+                jq "[.[] | select(.name | startswith(\"$loc_value\"))]" || echo "[]"
+            ;;
+
+        none|"")
+            # No location filter, list all
+            vault_backend_list_items "$session"
+            ;;
+
+        *)
+            warn "Unknown location type: $loc_type"
+            vault_backend_list_items "$session"
+            ;;
+    esac
+}
+
+# Create item in a specific folder
+# Usage: vault_backend_create_item_in_location "Item-Name" "content" "folder_name" "$SESSION"
+vault_backend_create_item_in_location() {
+    local item_name="$1"
+    local content="$2"
+    local folder_name="$3"
+    local session="$4"
+
+    if [[ -z "$item_name" || -z "$session" ]]; then
+        fail "Item name and session required"
+        return 1
+    fi
+
+    # Check if item already exists
+    if vault_backend_item_exists "$item_name" "$session"; then
+        fail "Item '$item_name' already exists. Use update instead."
+        return 1
+    fi
+
+    # Get folder ID if specified
+    local folder_id=""
+    if [[ -n "$folder_name" ]]; then
+        folder_id=$(_bw_get_folder_id "$folder_name" "$session")
+        if [[ -z "$folder_id" ]]; then
+            # Create the folder first
+            vault_backend_create_location "$folder_name" "$session" || return 1
+            folder_id=$(_bw_get_folder_id "$folder_name" "$session")
+        fi
+    fi
+
+    # Create secure note JSON template
+    local json_template
+    if [[ -n "$folder_id" ]]; then
+        json_template=$(cat <<EOF
+{
+    "type": 2,
+    "secureNote": {"type": 0},
+    "name": "$item_name",
+    "notes": "",
+    "folderId": "$folder_id",
+    "favorite": false
+}
+EOF
+)
+    else
+        json_template=$(cat <<EOF
+{
+    "type": 2,
+    "secureNote": {"type": 0},
+    "name": "$item_name",
+    "notes": "",
+    "favorite": false
+}
+EOF
+)
+    fi
+
+    # Add content to notes field
+    local json_with_content
+    json_with_content=$(printf '%s' "$json_template" | jq --arg notes "$content" '.notes = $notes')
+
+    # Create the item
+    if printf '%s' "$json_with_content" | bw encode | bw create item --session "$session" >/dev/null 2>&1; then
+        if [[ -n "$folder_name" ]]; then
+            pass "Created item '$item_name' in folder '$folder_name'"
+        else
+            pass "Created item '$item_name' in Bitwarden"
+        fi
+        return 0
+    else
+        fail "Failed to create item '$item_name'"
+        return 1
+    fi
+}
