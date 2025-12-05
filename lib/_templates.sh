@@ -464,6 +464,192 @@ escape_for_sed() {
     echo "$str"
 }
 
+# ============================================================
+# Pipeline Filters
+# ============================================================
+# Filters transform variable values: {{ var | filter }} or {{ var | filter "arg" }}
+# Multiple filters can be chained: {{ var | upper | trim }}
+
+# Apply a single filter to a value
+apply_filter() {
+    local value="$1"
+    local filter="$2"
+    local arg="${3:-}"
+
+    case "$filter" in
+        # Case transformations
+        upper)
+            echo "$value" | tr '[:lower:]' '[:upper:]'
+            ;;
+        lower)
+            echo "$value" | tr '[:upper:]' '[:lower:]'
+            ;;
+        capitalize)
+            # Capitalize first letter
+            if [[ -n "$value" ]]; then
+                echo "${value:0:1}" | tr '[:lower:]' '[:upper:]'
+                echo -n "${value:1}"
+            fi | tr -d '\n'
+            echo
+            ;;
+
+        # String operations
+        trim)
+            echo "$value" | xargs
+            ;;
+        replace)
+            # arg format: "old,new" - replace old with new
+            if [[ -n "$arg" ]]; then
+                local old="${arg%%,*}"
+                local new="${arg#*,}"
+                echo "${value//$old/$new}"
+            else
+                echo "$value"
+            fi
+            ;;
+        append)
+            echo "${value}${arg}"
+            ;;
+        prepend)
+            echo "${arg}${value}"
+            ;;
+        quote)
+            echo "\"${value}\""
+            ;;
+        squote)
+            echo "'${value}'"
+            ;;
+
+        # Path operations
+        basename)
+            basename "$value" 2>/dev/null || echo "$value"
+            ;;
+        dirname)
+            dirname "$value" 2>/dev/null || echo "$value"
+            ;;
+
+        # Default value
+        default)
+            if [[ -z "$value" ]]; then
+                echo "$arg"
+            else
+                echo "$value"
+            fi
+            ;;
+
+        # Length
+        length)
+            echo "${#value}"
+            ;;
+
+        # Truncate
+        truncate)
+            if [[ -n "$arg" ]] && [[ "$arg" =~ ^[0-9]+$ ]]; then
+                echo "${value:0:$arg}"
+            else
+                echo "$value"
+            fi
+            ;;
+
+        # Unknown filter - pass through unchanged
+        *)
+            debug "Unknown filter: $filter"
+            echo "$value"
+            ;;
+    esac
+}
+
+# Process a pipeline expression: var | filter1 | filter2 "arg"
+# Returns the transformed value
+process_pipeline() {
+    local expression="$1"
+    local value=""
+
+    # Split on pipes (but not inside quotes)
+    # Simple approach: split on | and handle args
+    local -a parts
+    parts=("${(@s:|:)expression}")
+
+    # First part is the variable name
+    local var="${parts[1]}"
+    var="${var## }"  # trim leading space
+    var="${var%% }"  # trim trailing space
+    value="${TMPL_VARS[$var]:-}"
+
+    debug "Pipeline: var=$var, initial value='$value'"
+
+    # Apply each filter in sequence
+    local i
+    for (( i = 2; i <= ${#parts[@]}; i++ )); do
+        local filter_expr="${parts[$i]}"
+        filter_expr="${filter_expr## }"  # trim leading space
+        filter_expr="${filter_expr%% }"  # trim trailing space
+
+        # Extract filter name and optional argument
+        local filter_name=""
+        local filter_arg=""
+
+        # Check if there's a quoted argument: filter "arg" or filter 'arg'
+        if [[ "$filter_expr" =~ ^([a-zA-Z_]+)[[:space:]]+[\"\'](.*)[\"\']$ ]]; then
+            filter_name="${match[1]}"
+            filter_arg="${match[2]}"
+        elif [[ "$filter_expr" =~ ^([a-zA-Z_]+)[[:space:]]+(.+)$ ]]; then
+            # Unquoted argument
+            filter_name="${match[1]}"
+            filter_arg="${match[2]}"
+        else
+            # No argument
+            filter_name="$filter_expr"
+        fi
+
+        debug "  Applying filter: $filter_name with arg='$filter_arg'"
+        value=$(apply_filter "$value" "$filter_name" "$filter_arg")
+    done
+
+    echo "$value"
+}
+
+# Check if an expression contains a pipeline
+has_pipeline() {
+    local expr="$1"
+    [[ "$expr" == *"|"* ]]
+}
+
+# List available filters (for CLI help)
+list_filters() {
+    print "${BOLD}Available Pipeline Filters${NC}"
+    print "══════════════════════════════════════════════════════════"
+    print ""
+    print "${CYAN}Case Transformations:${NC}"
+    printf "  %-20s %s\n" "upper" "Convert to UPPERCASE"
+    printf "  %-20s %s\n" "lower" "Convert to lowercase"
+    printf "  %-20s %s\n" "capitalize" "Capitalize first letter"
+    print ""
+    print "${CYAN}String Operations:${NC}"
+    printf "  %-20s %s\n" "trim" "Remove leading/trailing whitespace"
+    printf "  %-20s %s\n" "replace \"old,new\"" "Replace old with new"
+    printf "  %-20s %s\n" "append \"text\"" "Append text to value"
+    printf "  %-20s %s\n" "prepend \"text\"" "Prepend text to value"
+    printf "  %-20s %s\n" "quote" "Wrap in double quotes"
+    printf "  %-20s %s\n" "squote" "Wrap in single quotes"
+    printf "  %-20s %s\n" "truncate N" "Truncate to N characters"
+    printf "  %-20s %s\n" "length" "Return string length"
+    print ""
+    print "${CYAN}Path Operations:${NC}"
+    printf "  %-20s %s\n" "basename" "Extract filename from path"
+    printf "  %-20s %s\n" "dirname" "Extract directory from path"
+    print ""
+    print "${CYAN}Default Values:${NC}"
+    printf "  %-20s %s\n" "default \"value\"" "Use value if variable is empty"
+    print ""
+    print "${DIM}Examples:${NC}"
+    print "  {{ hostname | upper }}"
+    print "  {{ editor | default \"vim\" }}"
+    print "  {{ git_email | replace \"@,_at_\" }}"
+    print "  {{ home | basename }}"
+    print "  {{ hostname | upper | truncate 10 }}"
+}
+
 # Evaluate a condition expression
 evaluate_condition() {
     local condition="$1"
@@ -829,7 +1015,61 @@ render_template() {
     # Process conditionals second (works inside expanded loops)
     content=$(process_conditionals "$content")
 
-    # Variable substitution: {{ var }} and {{var}}
+    # Process pipeline expressions: {{ var | filter }}
+    # Use a simpler approach: find {{ containing |, extract and process
+    local max_pipeline_iterations=100
+    local pipeline_iteration=0
+    local pipeline_result=""  # Declare outside loop to avoid zsh local re-declaration output
+
+    while [[ "$content" == *'{{'*'|'*'}}'* ]] && \
+          (( pipeline_iteration++ < max_pipeline_iterations )); do
+        # Find first {{ that contains a |
+        local found=false
+        local before="" after="" expr=""
+
+        # Scan for {{ ... | ... }}
+        local temp="$content"
+        local prefix=""
+
+        while [[ "$temp" == *'{{'* ]]; do
+            # Get everything before first {{
+            local pre="${temp%%\{\{*}"
+            prefix+="$pre"
+            temp="${temp#*\{\{}"
+
+            # Find the closing }}
+            if [[ "$temp" == *'}}'* ]]; then
+                local inner="${temp%%\}\}*}"
+                local post="${temp#*\}\}}"
+
+                # Check if this expression contains a pipe
+                if [[ "$inner" == *'|'* ]]; then
+                    before="$prefix"
+                    expr="$inner"
+                    after="$post"
+                    found=true
+                    break
+                else
+                    # Not a pipeline, include this {{ ... }} and continue
+                    prefix+="{{${inner}}}"
+                    temp="$post"
+                fi
+            else
+                # No closing }}, stop
+                break
+            fi
+        done
+
+        if $found; then
+            # Process the pipeline
+            pipeline_result=$(process_pipeline "$expr")
+            content="${before}${pipeline_result}${after}"
+        else
+            break
+        fi
+    done
+
+    # Simple variable substitution: {{ var }} and {{var}}
     for key in "${(@k)TMPL_VARS}"; do
         local value="${TMPL_VARS[$key]}"
         local escaped_value=$(escape_for_sed "$value")

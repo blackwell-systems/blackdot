@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Template Pipeline Filters** - Transform variable values with chainable filters
+  - 14 built-in filters: `upper`, `lower`, `capitalize`, `trim`, `default`, `replace`, `append`, `prepend`, `quote`, `squote`, `truncate`, `length`, `basename`, `dirname`
+  - Chainable syntax: `{{ hostname | upper | truncate 8 }}`
+  - Default values for optional settings: `{{ editor | default "vim" }}`
+  - Path manipulation: `{{ home | basename }}`, `{{ path | dirname }}`
+  - New command: `dotfiles template filters` to list all available filters
+  - 20 new tests for pipeline functionality
+- **Hook System** - 19 lifecycle hooks for custom behavior at key points
+  - Categories: Lifecycle, Vault, Doctor, Shell, Setup
+  - Three registration methods: file-based, JSON config, inline
+  - CLI: `dotfiles hook list`, `dotfiles hook run`, `dotfiles hook test`
+  - Example hooks in `hooks/examples/`
+  - Full documentation in `docs/hooks.md`
 - **Smart Bidirectional Sync** (`dotfiles sync`) - Intelligent vault sync command
   - Auto-detects sync direction for each file (push vs pull)
   - Uses cached checksums from last sync as baseline

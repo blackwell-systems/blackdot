@@ -53,6 +53,7 @@ usage() {
     print "    check             Validate template syntax"
     print "    diff              Show differences between templates and generated files"
     print "    vars              List all template variables and values"
+    print "    filters           List available pipeline filters"
     print "    edit              Open _variables.local.sh in editor"
     print "    link              Create symlinks from generated files to destinations"
     print "    list              Show available templates and their status"
@@ -96,6 +97,9 @@ usage() {
     print ""
     print "${CYAN}TEMPLATE SYNTAX${NC}"
     print "    {{ variable }}              Variable substitution"
+    print "    {{ var | filter }}          Pipeline filter"
+    print "    {{ var | filter \"arg\" }}    Filter with argument"
+    print "    {{ var | f1 | f2 }}         Chained filters"
     print "    {{#if variable }}...{{/if}} Conditional block"
     print "    {{#if var == \"value\" }}     Conditional with comparison"
     print "    {{#unless variable }}       Negative conditional"
@@ -357,6 +361,11 @@ cmd_list() {
     done
 }
 
+# Show available filters
+cmd_filters() {
+    list_filters
+}
+
 # Show/manage arrays
 cmd_arrays() {
     local export_json=false
@@ -424,6 +433,9 @@ main() {
             ;;
         vars|variables)
             cmd_vars "$@"
+            ;;
+        filters)
+            cmd_filters "$@"
             ;;
         edit)
             cmd_edit "$@"
