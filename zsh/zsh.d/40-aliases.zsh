@@ -10,6 +10,177 @@ alias ccode='cd "$WORKSPACE/code"'
 alias cwhite='cd "$WORKSPACE/whitepapers"'
 alias cpat='cd "$WORKSPACE/patent-pool"'
 
+# Source CLI feature awareness if available
+if [[ -f "$DOTFILES_DIR/lib/_cli_features.sh" ]]; then
+    source "$DOTFILES_DIR/lib/_cli_features.sh" 2>/dev/null || true
+fi
+
+# Helper function for feature-aware help display
+_dotfiles_help() {
+    local show_all=false
+    [[ "${1:-}" == "--all" || "${1:-}" == "-a" ]] && show_all=true
+
+    echo "${BOLD}${CYAN}dotfiles${NC} - Manage your dotfiles"
+    echo ""
+    echo "${BOLD}Usage:${NC} dotfiles <command> [options]"
+    echo ""
+
+    # Setup & Health (always visible)
+    echo "${BOLD}Setup & Health:${NC}"
+    echo "  setup             Interactive setup wizard (recommended)"
+    echo "  status, s         Quick visual dashboard"
+    echo "  doctor, health    Run comprehensive health check"
+    echo "  lint              Validate shell config syntax"
+    echo "  packages, pkg     Check/install Brewfile packages"
+    echo "  upgrade, update   Pull latest and run bootstrap"
+    echo ""
+
+    # Vault Operations (feature: vault)
+    local vault_visible=true
+    if type cli_section_visible &>/dev/null && ! cli_section_visible "Vault Operations"; then
+        vault_visible=false
+    fi
+    if $show_all || $vault_visible; then
+        local indicator=""
+        if $show_all && type cli_feature_indicator &>/dev/null; then
+            indicator=" $(cli_feature_indicator vault)"
+        fi
+        echo "${BOLD}Vault Operations:${NC}${indicator}"
+        echo "  vault setup       Setup vault backend (first-time setup)"
+        echo "  vault pull        Pull secrets from vault"
+        echo "  vault push        Push secrets to vault"
+        echo "  vault sync        Bidirectional sync (smart direction)"
+        echo "  vault scan        Re-scan for new secrets"
+        echo "  vault list        List all vault items"
+        echo "  drift             Compare local files vs vault"
+        echo "  sync              Bidirectional vault sync (smart push/pull)"
+        echo "  diff              Preview changes before sync/restore"
+        echo ""
+    fi
+
+    # Backup & Safety (feature: backup_auto)
+    local backup_visible=true
+    if type cli_section_visible &>/dev/null && ! cli_section_visible "Backup & Safety"; then
+        backup_visible=false
+    fi
+    if $show_all || $backup_visible; then
+        local indicator=""
+        if $show_all && type cli_feature_indicator &>/dev/null; then
+            indicator=" $(cli_feature_indicator backup_auto)"
+        fi
+        echo "${BOLD}Backup & Safety:${NC}${indicator}"
+        echo "  backup            Create backup of current config"
+        echo "  backup list       List all backups"
+        echo "  backup restore    Restore specific backup"
+        echo "  rollback          Instant rollback to last backup"
+        echo ""
+    fi
+
+    # Feature Management (always visible)
+    echo "${BOLD}Feature Management:${NC}"
+    echo "  features          List all features and status"
+    echo "  features enable   Enable a feature"
+    echo "  features disable  Disable a feature"
+    echo "  features preset   Enable a preset (minimal/developer/claude/full)"
+    echo ""
+
+    # Configuration (feature: config_layers)
+    local config_visible=true
+    if type cli_section_visible &>/dev/null && ! cli_section_visible "Configuration"; then
+        config_visible=false
+    fi
+    if $show_all || $config_visible; then
+        local indicator=""
+        if $show_all && type cli_feature_indicator &>/dev/null; then
+            indicator=" $(cli_feature_indicator config_layers)"
+        fi
+        echo "${BOLD}Configuration:${NC}${indicator}"
+        echo "  config get        Get config value (with layer resolution)"
+        echo "  config set        Set config value in specific layer"
+        echo "  config show       Show where a config value comes from"
+        echo "  config list       Show configuration layer status"
+        echo ""
+    fi
+
+    # Templates (feature: templates)
+    local templates_visible=true
+    if type cli_section_visible &>/dev/null && ! cli_section_visible "Templates"; then
+        templates_visible=false
+    fi
+    if $show_all || $templates_visible; then
+        local indicator=""
+        if $show_all && type cli_feature_indicator &>/dev/null; then
+            indicator=" $(cli_feature_indicator templates)"
+        fi
+        echo "${BOLD}Templates:${NC}${indicator}"
+        echo "  template, tmpl    Machine-specific config templates"
+        echo ""
+    fi
+
+    # macOS Settings (feature: macos_settings, macOS only)
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+        local macos_visible=true
+        if type cli_section_visible &>/dev/null && ! cli_section_visible "macOS Settings"; then
+            macos_visible=false
+        fi
+        if $show_all || $macos_visible; then
+            local indicator=""
+            if $show_all && type cli_feature_indicator &>/dev/null; then
+                indicator=" $(cli_feature_indicator macos_settings)"
+            fi
+            echo "${BOLD}macOS Settings:${NC}${indicator}"
+            echo "  macos <cmd>       macOS system settings"
+            echo ""
+        fi
+    fi
+
+    # Metrics (feature: health_metrics)
+    local metrics_visible=true
+    if type cli_section_visible &>/dev/null && ! cli_section_visible "Metrics"; then
+        metrics_visible=false
+    fi
+    if $show_all || $metrics_visible; then
+        local indicator=""
+        if $show_all && type cli_feature_indicator &>/dev/null; then
+            indicator=" $(cli_feature_indicator health_metrics)"
+        fi
+        echo "${BOLD}Metrics:${NC}${indicator}"
+        echo "  metrics           Visualize health check metrics over time"
+        echo ""
+    fi
+
+    # Other Commands (always visible)
+    echo "${BOLD}Other Commands:${NC}"
+    echo "  migrate           Migrate config to v3.0 (INI→JSON, vault v2→v3)"
+    echo "  uninstall         Remove dotfiles configuration"
+    echo "  cd                Change to dotfiles directory"
+    echo "  edit              Open dotfiles in editor"
+    echo "  help              Show this help"
+    echo ""
+
+    # Footer
+    if ! $show_all; then
+        # Check for hidden features
+        local hidden=""
+        if type cli_hidden_features &>/dev/null; then
+            hidden=$(cli_hidden_features)
+        fi
+        if [[ -n "$hidden" ]]; then
+            echo "─────────────────────────────────────────────────────"
+            echo "${DIM}Some commands hidden. Run 'dotfiles help --all' to see all.${NC}"
+            echo "${DIM}Disabled features: ${hidden}${NC}"
+            echo ""
+        fi
+    else
+        echo "─────────────────────────────────────────────────────"
+        echo "${DIM}Legend: ${GREEN}●${NC}${DIM} enabled  ${NC}○${DIM} disabled${NC}"
+        echo "${DIM}Enable features: dotfiles features enable <name>${NC}"
+        echo ""
+    fi
+
+    echo "${DIM}Run 'dotfiles <command> --help' for detailed options.${NC}"
+}
+
 # Unified dotfiles command with subcommands
 # Remove any pre-existing alias (from .zshrc.local, etc.)
 unalias dotfiles 2>/dev/null || true
@@ -27,16 +198,34 @@ dotfiles() {
             "$DOTFILES_DIR/bin/dotfiles-doctor" "$@"
             ;;
         drift)
+            # Feature guard (requires drift_check)
+            if type cli_require_feature &>/dev/null; then
+                if ! cli_require_feature "drift_check" "drift $*" "$@"; then
+                    return 1
+                fi
+                set -- "${CLI_FILTERED_ARGS[@]}"
+            fi
             "$DOTFILES_DIR/bin/dotfiles-drift" "$@"
             ;;
         sync)
+            # Feature guard (requires vault)
+            if type cli_require_feature &>/dev/null; then
+                if ! cli_require_feature "vault" "sync $*" "$@"; then
+                    return 1
+                fi
+                set -- "${CLI_FILTERED_ARGS[@]}"
+            fi
             "$DOTFILES_DIR/bin/dotfiles-sync" "$@"
             ;;
         diff)
+            # Feature guard (requires vault)
+            if type cli_require_feature &>/dev/null; then
+                if ! cli_require_feature "vault" "diff $*" "$@"; then
+                    return 1
+                fi
+                set -- "${CLI_FILTERED_ARGS[@]}"
+            fi
             "$DOTFILES_DIR/bin/dotfiles-diff" "$@"
-            ;;
-        backup)
-            "$DOTFILES_DIR/bin/dotfiles-backup" "$@"
             ;;
 
         # macOS settings (macOS only)
@@ -44,6 +233,13 @@ dotfiles() {
             if [[ "$(uname -s)" != "Darwin" ]]; then
                 echo "macOS settings only available on macOS"
                 return 1
+            fi
+            # Feature guard
+            if type cli_require_feature &>/dev/null; then
+                if ! cli_require_feature "macos_settings" "macos $*" "$@"; then
+                    return 1
+                fi
+                set -- "${CLI_FILTERED_ARGS[@]}"
             fi
             local subcmd="${1:-help}"
             shift 2>/dev/null || true
@@ -81,6 +277,14 @@ dotfiles() {
 
         # Vault operations
         vault)
+            # Feature guard (allow --force to bypass, filters out --force from args)
+            if type cli_require_feature &>/dev/null; then
+                if ! cli_require_feature "vault" "vault $*" "$@"; then
+                    return 1
+                fi
+                # Use filtered args (--force removed)
+                set -- "${CLI_FILTERED_ARGS[@]}"
+            fi
             local subcmd="${1:-help}"
             shift 2>/dev/null || true
             case "$subcmd" in
@@ -175,6 +379,13 @@ dotfiles() {
 
         # Template system
         template|tmpl)
+            # Feature guard
+            if type cli_require_feature &>/dev/null; then
+                if ! cli_require_feature "templates" "template $*" "$@"; then
+                    return 1
+                fi
+                set -- "${CLI_FILTERED_ARGS[@]}"
+            fi
             local subcmd="${1:-help}"
             shift 2>/dev/null || true
             case "$subcmd" in
@@ -288,15 +499,26 @@ dotfiles() {
         packages|pkg)
             "$DOTFILES_DIR/bin/dotfiles-packages" "$@"
             ;;
-        template|tmpl)
-            "$DOTFILES_DIR/bin/dotfiles-template" "$@"
-            ;;
         metrics)
+            # Feature guard
+            if type cli_require_feature &>/dev/null; then
+                if ! cli_require_feature "health_metrics" "metrics $*" "$@"; then
+                    return 1
+                fi
+                set -- "${CLI_FILTERED_ARGS[@]}"
+            fi
             "$DOTFILES_DIR/bin/dotfiles-metrics" "$@"
             ;;
 
         # Backup & Rollback (v3.0 top-level commands)
         backup)
+            # Feature guard
+            if type cli_require_feature &>/dev/null; then
+                if ! cli_require_feature "backup_auto" "backup $*" "$@"; then
+                    return 1
+                fi
+                set -- "${CLI_FILTERED_ARGS[@]}"
+            fi
             local backup_cmd="${1:-help}"
             case "$backup_cmd" in
                 create|list|restore|clean|help|--help|-h|"")
@@ -309,6 +531,13 @@ dotfiles() {
             esac
             ;;
         rollback)
+            # Feature guard (same as backup)
+            if type cli_require_feature &>/dev/null; then
+                if ! cli_require_feature "backup_auto" "rollback $*" "$@"; then
+                    return 1
+                fi
+                set -- "${CLI_FILTERED_ARGS[@]}"
+            fi
             # Quick rollback to last backup
             local backup_dir="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/backups"
             if [[ ! -d "$backup_dir" ]]; then
@@ -349,73 +578,7 @@ dotfiles() {
 
         # Help
         help|--help|-h)
-            echo "${BOLD}${CYAN}dotfiles${NC} - Manage your dotfiles"
-            echo ""
-            echo "${BOLD}Usage:${NC} dotfiles <command> [options]"
-            echo ""
-            echo "${BOLD}Setup & Health:${NC}"
-            echo "  setup             Interactive setup wizard (recommended)"
-            echo "  migrate           Migrate config to v3.0 (INI→JSON, vault v2→v3)"
-            echo "  status, s         Quick visual dashboard"
-            echo "  doctor, health    Run comprehensive health check"
-            echo "  drift             Compare local files vs vault"
-            echo "  sync              Bidirectional vault sync (smart push/pull)"
-            echo "  diff              Preview changes before sync/restore"
-            echo ""
-            echo "${BOLD}Vault Operations:${NC}"
-            echo "  vault setup       Setup vault backend (first-time setup)"
-            echo "  vault pull        Pull secrets from vault"
-            echo "  vault push        Push secrets to vault"
-            echo "  vault sync        Bidirectional sync (smart direction)"
-            echo "  vault scan        Re-scan for new secrets"
-            echo "  vault list        List all vault items"
-            echo "  vault help        Show all vault commands"
-            echo ""
-            echo "${BOLD}Backup & Safety:${NC}"
-            echo "  backup            Create backup of current config"
-            echo "  backup list       List all backups"
-            echo "  backup restore    Restore specific backup"
-            echo "  rollback          Instant rollback to last backup"
-            echo ""
-            echo "${BOLD}Feature Management:${NC}"
-            echo "  features          List all features and status"
-            echo "  features enable   Enable a feature"
-            echo "  features disable  Disable a feature"
-            echo "  features preset   Enable a preset (minimal/developer/claude/full)"
-            echo ""
-            echo "${BOLD}Configuration:${NC}"
-            echo "  config get        Get config value (with layer resolution)"
-            echo "  config set        Set config value in specific layer"
-            echo "  config show       Show where a config value comes from"
-            echo "  config list       Show configuration layer status"
-            echo "  config help       Show all config commands"
-            echo ""
-            echo "${BOLD}Other Commands:${NC}"
-            echo "  secrets <cmd>     Alias for vault commands"
-            echo "  macos <cmd>       macOS system settings (macOS only)"
-            echo "  template, tmpl    Machine-specific config templates"
-            echo "  lint              Validate shell config syntax"
-            echo "  packages, pkg     Check/install Brewfile packages"
-            echo "  metrics           Visualize health check metrics over time"
-            echo "  upgrade, update   Pull latest and run bootstrap"
-            echo "  uninstall         Remove dotfiles configuration"
-            echo "  cd                Change to dotfiles directory"
-            echo "  edit              Open dotfiles in editor"
-            echo "  help              Show this help"
-            echo ""
-            echo "${DIM}Run 'dotfiles <command> --help' for detailed options.${NC}"
-            echo ""
-            echo "${BOLD}Examples:${NC}"
-            echo "  dotfiles setup                # Interactive setup wizard"
-            echo "  dotfiles status               # Visual dashboard"
-            echo "  dotfiles doctor --fix         # Health check with auto-fix"
-            echo "  dotfiles features             # List all features and status"
-            echo "  dotfiles features preset developer  # Enable developer preset"
-            echo "  dotfiles sync                 # Smart bidirectional sync"
-            echo "  dotfiles vault pull           # Pull secrets from vault"
-            echo "  dotfiles vault push --all     # Push all to vault"
-            echo "  dotfiles backup               # Create backup"
-            echo "  dotfiles rollback             # Rollback to last backup"
+            _dotfiles_help "$@"
             ;;
         *)
             echo "Unknown command: $cmd"
