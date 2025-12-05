@@ -215,9 +215,21 @@ load_variable_files() {
     fi
 
     # Load local overrides (machine-specific)
-    if [[ -f "${TEMPLATES_DIR}/_variables.local.sh" ]]; then
-        source "${TEMPLATES_DIR}/_variables.local.sh"
-        debug "Loaded: ${TEMPLATES_DIR}/_variables.local.sh"
+    # Check XDG config location first (vault-portable), then templates dir
+    local xdg_vars="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/template-variables.sh"
+    local templates_vars="${TEMPLATES_DIR}/_variables.local.sh"
+
+    if [[ -f "$xdg_vars" ]]; then
+        source "$xdg_vars"
+        debug "Loaded: $xdg_vars (XDG location)"
+        # Also source templates dir version if it exists (for additional local overrides)
+        if [[ -f "$templates_vars" ]]; then
+            source "$templates_vars"
+            debug "Loaded: $templates_vars (additional overrides)"
+        fi
+    elif [[ -f "$templates_vars" ]]; then
+        source "$templates_vars"
+        debug "Loaded: $templates_vars"
     fi
 }
 

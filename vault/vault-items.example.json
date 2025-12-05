@@ -42,6 +42,12 @@
       "path": "~/.local/env.secrets",
       "required": false,
       "type": "file"
+    },
+    "Template-Variables": {
+      "path": "~/.config/dotfiles/template-variables.sh",
+      "required": false,
+      "type": "file",
+      "description": "Machine-specific template variables for dotfiles template system"
     }
   },
 
@@ -51,7 +57,8 @@
     "AWS-Credentials": "~/.aws/credentials",
     "Git-Config": "~/.gitconfig",
     "Environment-Secrets": "~/.local/env.secrets",
-    "Claude-Profiles": "~/.claude/profiles.json"
+    "Claude-Profiles": "~/.claude/profiles.json",
+    "Template-Variables": "~/.config/dotfiles/template-variables.sh"
   },
 
   "aws_expected_profiles": [

@@ -552,6 +552,69 @@ File-based config items contain the full file content in the notes field:
 | `AWS-Credentials` | `~/.aws/credentials` |
 | `Git-Config` | `~/.gitconfig` |
 | `Environment-Secrets` | `~/.local/env.secrets` |
+| `Template-Variables` | `~/.config/dotfiles/template-variables.sh` |
+
+---
+
+## Template Variables Integration
+
+The vault system can store and restore machine-specific template variables, enabling portable configurations across machines.
+
+### What are Template Variables?
+
+Template variables customize dotfiles per-machine. They're stored in `~/.config/dotfiles/template-variables.sh`:
+
+```bash
+# Machine-specific template variables
+TMPL_DEFAULTS[git_name]="Your Name"
+TMPL_DEFAULTS[git_email]="your@email.com"
+TMPL_DEFAULTS[company]="ACME Corp"
+```
+
+### Vault Workflow
+
+**Push to vault (current machine):**
+```bash
+# Store template variables in your vault
+pass insert -mf dotfiles/Template-Variables < ~/.config/dotfiles/template-variables.sh
+
+# Or with Bitwarden (via vault scripts)
+dotfiles vault push Template-Variables
+```
+
+**Pull from vault (new machine):**
+```bash
+# Restore template variables from vault
+pass show dotfiles/Template-Variables > ~/.config/dotfiles/template-variables.sh
+
+# Then render templates
+dotfiles template render --all
+```
+
+### Location Priority
+
+The template system loads variables from these locations (in order):
+1. `~/.config/dotfiles/template-variables.sh` (XDG, vault-portable)
+2. `templates/_variables.local.sh` (repo-specific fallback)
+3. `templates/_variables.sh` (defaults)
+
+### Complete New Machine Workflow
+
+```bash
+# 1. Clone dotfiles
+git clone git@github.com:USER/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+
+# 2. Run bootstrap
+./bootstrap/bootstrap-mac.sh
+
+# 3. Login to vault and pull secrets
+bw login  # or: op signin / pass init
+dotfiles vault pull
+
+# 4. Render templates (uses restored variables)
+dotfiles template render --all
+```
 
 ---
 

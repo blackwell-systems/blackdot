@@ -679,6 +679,104 @@ TMPL_AUTO[machine_type]="work"
 
 ---
 
+## Vault Integration
+
+Template variables can be stored in your vault for portable restoration across machines. This enables a seamless new-machine workflow.
+
+### Variable File Locations
+
+The template system checks two locations for variables (in order of priority):
+
+| Location | Purpose | Vault-Portable |
+|----------|---------|----------------|
+| `~/.config/dotfiles/template-variables.sh` | XDG standard location | ✓ Yes |
+| `templates/_variables.local.sh` | Traditional repo location | Depends on dotfiles path |
+
+**For vault storage, use the XDG location** - it works regardless of where your dotfiles repo is installed.
+
+### Storing Template Variables in Vault
+
+```bash
+# 1. Create/copy your variables to the XDG location
+mkdir -p ~/.config/dotfiles
+cp templates/_variables.local.sh ~/.config/dotfiles/template-variables.sh
+
+# 2. Push to vault
+dotfiles vault push Template-Variables
+
+# 3. Verify it's in your vault config
+cat ~/.config/dotfiles/vault-items.json | grep Template-Variables
+```
+
+### Restoring on a New Machine
+
+```bash
+# 1. Pull all secrets (including template variables)
+dotfiles vault pull
+
+# 2. Render templates - uses variables from vault
+dotfiles template render
+
+# 3. Create symlinks
+dotfiles template link
+```
+
+### Discovery
+
+The `dotfiles vault scan` (discover-secrets.sh) command automatically detects template variables:
+
+```bash
+# Preview what would be discovered
+dotfiles vault scan --dry-run
+
+# Output includes:
+# [OK]   Found: ~/.config/dotfiles/template-variables.sh
+```
+
+### Configuration in vault-items.json
+
+Template variables are stored like any other syncable item:
+
+```json
+{
+  "vault_items": {
+    "Template-Variables": {
+      "path": "~/.config/dotfiles/template-variables.sh",
+      "required": false,
+      "type": "file"
+    }
+  },
+  "syncable_items": {
+    "Template-Variables": "~/.config/dotfiles/template-variables.sh"
+  }
+}
+```
+
+### New Machine Workflow (Complete)
+
+With template variables in vault, setting up a new machine becomes:
+
+```bash
+# 1. Clone dotfiles
+git clone https://github.com/you/dotfiles ~/dotfiles
+
+# 2. Bootstrap (installs dependencies, sets up vault)
+cd ~/dotfiles && ./install.sh
+
+# 3. Pull all secrets including template variables
+dotfiles vault pull
+
+# 4. Render all templates
+dotfiles template render
+
+# 5. Create symlinks
+dotfiles template link
+
+# Done! All configs are now in place
+```
+
+---
+
 ## Related Documentation
 
 - [Main README](README.md) - Overview
