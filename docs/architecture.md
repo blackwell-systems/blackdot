@@ -208,6 +208,7 @@ dotfiles/
 ├── lib/                    # Shared libraries
 │   ├── _logging.sh         # Logging functions
 │   ├── _config.sh          # JSON config abstraction (v3.0)
+│   ├── _drift.sh           # Fast drift detection (shell startup)
 │   ├── _state.sh           # Setup state management
 │   ├── _vault.sh           # Vault abstraction layer
 │   └── _templates.sh       # Template engine
