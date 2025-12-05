@@ -1,8 +1,9 @@
 #!/usr/bin/env zsh
 # ============================================================
 # FILE: vault/init-vault.sh
-# Initialize or reconfigure vault backend
-# Usage: ./init-vault.sh [--force]
+# Vault Setup Wizard v2
+# Improved onboarding with location awareness and vault-first discovery
+# Usage: ./init-vault.sh [--force] [--reconfigure]
 # ============================================================
 set -euo pipefail
 
@@ -13,189 +14,757 @@ DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
 # Source libraries
 source "$DOTFILES_DIR/lib/_logging.sh"
 source "$DOTFILES_DIR/lib/_vault.sh"
+source "$DOTFILES_DIR/lib/_config.sh"
+
+# Configuration
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
+VAULT_CONFIG="$CONFIG_DIR/vault-items.json"
 
 # Parse arguments
 FORCE=false
-if [[ "${1:-}" == "--force" ]]; then
-    FORCE=true
-fi
-
-# Load config management (v3.0: use centralized JSON config)
-source "$DOTFILES_DIR/lib/_config.sh"
-
-CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
-
-# Banner
-echo ""
-echo -e "${BOLD}${CYAN}Vault Configuration${NC}"
-echo "═══════════════════════════════"
-echo ""
-
-# Check if already configured
-current_backend=$(config_get "vault.backend" "")
-if [[ -n "$current_backend" ]] && [[ "$current_backend" != "none" ]] && ! $FORCE; then
-    echo "Vault is already configured:"
-    echo "  Backend: $current_backend"
-    echo ""
-    echo -n "Reconfigure vault? [y/N]: "
-    read confirm
-    if [[ ! "${confirm}" =~ ^[Yy]$ ]]; then
-        info "Vault configuration unchanged"
-        exit 0
-    fi
-    echo ""
-fi
-
-# Detect available vault backends
-available=()
-if command -v bw &>/dev/null; then
-    available+=("bitwarden")
-fi
-if command -v op &>/dev/null; then
-    available+=("1password")
-fi
-if command -v pass &>/dev/null; then
-    available+=("pass")
-fi
-
-if [[ ${#available[@]} -eq 0 ]]; then
-    echo "No vault CLI detected. Vault features are optional."
-    echo ""
-    echo "Supported vault backends:"
-    echo "  • Bitwarden:  brew install bitwarden-cli"
-    echo "  • 1Password:  brew install 1password-cli"
-    echo "  • pass:       brew install pass"
-    echo ""
-    echo -n "Skip vault setup? [Y/n]: "
-    read skip
-    if [[ "${skip:-Y}" =~ ^[Yy]$ ]]; then
-        warn "Vault setup skipped"
-        config_set "vault.backend" "none"
-        echo ""
-        info "Run 'dotfiles vault setup' anytime to configure vault"
-        exit 0
-    else
-        fail "Please install a vault CLI and run 'dotfiles vault setup' again"
-        exit 1
-    fi
-fi
-
-echo "Available vault backends:"
-for i in {1..${#available[@]}}; do
-    echo "  $i) ${available[$i]}"
+RECONFIGURE=false
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --force|-f) FORCE=true; shift ;;
+        --reconfigure|-r) RECONFIGURE=true; shift ;;
+        --help|-h)
+            echo "Usage: $(basename "$0") [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --force, -f       Skip confirmation prompts"
+            echo "  --reconfigure     Start fresh (backup existing config)"
+            echo "  --help, -h        Show this help"
+            exit 0
+            ;;
+        *) shift ;;
+    esac
 done
-echo "  $((${#available[@]} + 1))) Skip (configure secrets manually)"
-echo ""
 
-echo -n "Select vault backend [1]: "
-read choice
-choice=${choice:-1}
+# ============================================================
+# Helper Functions
+# ============================================================
 
-# Check if user chose to skip
-if [[ $choice -eq $((${#available[@]} + 1)) ]]; then
-    warn "Vault setup skipped"
-    config_set "vault.backend" "none"
+print_box() {
+    local title="$1"
+    local width=60
     echo ""
-    info "Run 'dotfiles vault setup' anytime to configure vault"
-    exit 0
-fi
-
-selected="${available[$choice]}"
-if [[ -z "$selected" ]]; then
-    fail "Invalid selection"
-    exit 1
-fi
-
-# Save preference
-config_set "vault.backend" "$selected"
-export DOTFILES_VAULT_BACKEND="$selected"
-
-pass "Vault backend set to: $selected"
-echo ""
-
-# Check/create vault items configuration
-vault_config="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/vault-items.json"
-vault_example="$DOTFILES_DIR/vault/vault-items.example.json"
-
-if [[ ! -f "$vault_config" ]]; then
-    echo "Vault items configuration needed."
+    echo -e "${BOLD}${CYAN}╔$(printf '═%.0s' {1..58})╗${NC}"
+    printf "${BOLD}${CYAN}║${NC} %-56s ${BOLD}${CYAN}║${NC}\n" "$title"
+    echo -e "${BOLD}${CYAN}╚$(printf '═%.0s' {1..58})╝${NC}"
     echo ""
-    echo "This config defines which secrets to manage:"
-    echo "  • SSH keys (names and paths)"
-    echo "  • Config files (AWS, Git, etc.)"
+}
+
+print_section() {
     echo ""
-    echo "Configuration options:"
-    echo "  1) Auto-discover  - Scan standard locations (recommended)"
-    echo "  2) Manual setup   - Copy example and edit manually"
-    echo ""
-    echo -n "Your choice [1]: "
-    read config_choice
-    config_choice=${config_choice:-1}
+    echo -e "${BOLD}$1${NC}"
+    echo -e "${DIM}$(printf '─%.0s' {1..50})${NC}"
+}
 
-    # Create config directory
-    mkdir -p "$(dirname "$vault_config")"
+prompt_choice() {
+    local prompt="$1"
+    local default="$2"
+    local result
 
-    if [[ "$config_choice" == "1" ]]; then
-        # Auto-discovery
-        echo ""
-        info "Scanning for secrets in standard locations..."
-        echo ""
+    echo -n -e "${CYAN}?${NC} $prompt ${DIM}[$default]${NC}: "
+    read result
+    echo "${result:-$default}"
+}
 
-        if "$SCRIPT_DIR/discover-secrets.sh"; then
-            pass "Auto-discovery complete!"
-            echo ""
-            info "Review the generated config:"
-            echo "  ${CYAN}cat $vault_config${NC}"
-            echo ""
-            echo -n "Edit config before syncing? [y/N]: "
-            read edit_now
-            if [[ "$edit_now" =~ ^[Yy]$ ]]; then
-                ${EDITOR:-vim} "$vault_config"
-            fi
-        else
-            warn "Auto-discovery found no items or failed"
-            echo ""
-            echo -n "Fall back to manual setup? [Y/n]: "
-            read fallback
-            if [[ ! "$fallback" =~ ^[Nn]$ ]]; then
-                cp "$vault_example" "$vault_config"
-                pass "Created $vault_config from example"
-                echo ""
-                info "Please customize the example file:"
-                echo "  ${CYAN}\$EDITOR $vault_config${NC}"
-            else
-                fail "Vault items configuration not created"
-                exit 1
-            fi
-        fi
+prompt_yesno() {
+    local prompt="$1"
+    local default="${2:-y}"
+    local result
+
+    if [[ "$default" == "y" ]]; then
+        echo -n -e "${CYAN}?${NC} $prompt ${DIM}[Y/n]${NC}: "
     else
-        # Manual setup
-        if [[ -f "$vault_example" ]]; then
-            cp "$vault_example" "$vault_config"
-            pass "Created $vault_config"
-            echo ""
-            info "Please customize this file for your setup:"
-            echo "  ${CYAN}\$EDITOR $vault_config${NC}"
-            echo ""
-            echo -n "Open editor now? [Y/n]: "
-            read edit_now
-            if [[ ! "$edit_now" =~ ^[Nn]$ ]]; then
-                ${EDITOR:-vim} "$vault_config"
-            fi
+        echo -n -e "${CYAN}?${NC} $prompt ${DIM}[y/N]${NC}: "
+    fi
+    read result
+    result="${result:-$default}"
+    [[ "$result" =~ ^[Yy] ]]
+}
+
+# ============================================================
+# Phase 1: Education
+# ============================================================
+
+show_education() {
+    print_box "How Vault Storage Works"
+
+    cat <<EOF
+This system stores your secrets as individual items in your
+password vault. Each file (SSH key, config) becomes one item.
+
+  ${DIM}┌─────────────────┐         ┌─────────────────────┐${NC}
+  ${DIM}│ Local Machine   │  sync   │ Your Vault          │${NC}
+  ${DIM}├─────────────────┤ ◄─────► ├─────────────────────┤${NC}
+  ${DIM}│ ~/.ssh/key      │         │ "SSH-MyKey"         │${NC}
+  ${DIM}│ ~/.aws/creds    │         │ "AWS-Credentials"   │${NC}
+  ${DIM}│ ~/.gitconfig    │         │ "Git-Config"        │${NC}
+  ${DIM}└─────────────────┘         └─────────────────────┘${NC}
+
+${BOLD}Key points:${NC}
+  • Item names can be anything you choose
+  • We recommend organizing items in a dedicated folder
+  • You control where items are stored and what they're named
+
+EOF
+}
+
+# ============================================================
+# Phase 2: Backend Selection
+# ============================================================
+
+select_backend() {
+    print_section "Step 1: Select Vault Backend"
+
+    # Detect available backends
+    local -a available=()
+    local -A backend_names=(
+        [bitwarden]="Bitwarden"
+        [1password]="1Password"
+        [pass]="pass (GPG-based)"
+    )
+
+    command -v bw &>/dev/null && available+=(bitwarden)
+    command -v op &>/dev/null && available+=(1password)
+    command -v pass &>/dev/null && available+=(pass)
+
+    if [[ ${#available[@]} -eq 0 ]]; then
+        echo ""
+        warn "No vault CLI detected."
+        echo ""
+        echo "Supported vault backends:"
+        echo "  • Bitwarden:  ${GREEN}brew install bitwarden-cli${NC}"
+        echo "  • 1Password:  ${GREEN}brew install 1password-cli${NC}"
+        echo "  • pass:       ${GREEN}brew install pass${NC}"
+        echo ""
+
+        if prompt_yesno "Skip vault setup for now?" "y"; then
+            config_set "vault.backend" "none"
+            info "Vault setup skipped. Run 'dotfiles vault setup' anytime."
+            exit 0
         else
-            fail "Example vault config not found: $vault_example"
+            fail "Please install a vault CLI and try again"
             exit 1
         fi
     fi
-else
-    info "Vault items config already exists: $vault_config"
-fi
 
-echo ""
-pass "Vault configuration complete!"
-echo ""
-echo "Next steps:"
-echo "  1. Review vault items: $EDITOR $vault_config"
-echo "  2. Restore secrets:    dotfiles vault pull"
-echo "  3. List vault items:   dotfiles vault list"
-echo ""
+    echo ""
+    echo "Available vault backends:"
+    local i=1
+    for backend in "${available[@]}"; do
+        echo "  ${GREEN}$i)${NC} ${backend_names[$backend]}"
+        ((i++))
+    done
+    echo "  ${DIM}$i) Skip (configure later)${NC}"
+    echo ""
+
+    local choice
+    choice=$(prompt_choice "Select backend" "1")
+
+    # Validate choice
+    if [[ "$choice" =~ ^[0-9]+$ ]]; then
+        if [[ $choice -eq $i ]]; then
+            config_set "vault.backend" "none"
+            info "Vault setup skipped. Run 'dotfiles vault setup' anytime."
+            exit 0
+        elif [[ $choice -ge 1 && $choice -lt $i ]]; then
+            SELECTED_BACKEND="${available[$choice]}"
+            config_set "vault.backend" "$SELECTED_BACKEND"
+            export DOTFILES_VAULT_BACKEND="$SELECTED_BACKEND"
+            pass "Backend set to: ${backend_names[$SELECTED_BACKEND]}"
+        else
+            fail "Invalid selection"
+            exit 1
+        fi
+    else
+        fail "Invalid selection"
+        exit 1
+    fi
+}
+
+# ============================================================
+# Phase 3: Authentication Check
+# ============================================================
+
+check_authentication() {
+    print_section "Step 2: Authentication"
+
+    # Initialize backend
+    if ! vault_init 2>/dev/null; then
+        fail "Failed to initialize $SELECTED_BACKEND backend"
+        exit 1
+    fi
+
+    # Check login status
+    if ! vault_login_check; then
+        echo ""
+        warn "Not logged in to $(vault_name)"
+        echo ""
+
+        case "$SELECTED_BACKEND" in
+            bitwarden)
+                echo "Please log in first:"
+                echo "  ${GREEN}bw login${NC}"
+                echo ""
+                echo "Then run setup again:"
+                echo "  ${GREEN}dotfiles vault setup${NC}"
+                ;;
+            1password)
+                echo "Please sign in first:"
+                echo "  ${GREEN}op signin${NC}"
+                ;;
+            pass)
+                echo "Please initialize pass:"
+                echo "  ${GREEN}pass init <gpg-id>${NC}"
+                ;;
+        esac
+        exit 1
+    fi
+
+    pass "Logged in to $(vault_name)"
+
+    # Get session
+    SESSION=$(vault_get_session 2>/dev/null || echo "")
+    if [[ -z "$SESSION" && "$SELECTED_BACKEND" == "bitwarden" ]]; then
+        warn "Vault is locked. Unlocking..."
+        SESSION=$(vault_get_session)
+    fi
+
+    # Sync vault
+    vault_sync "$SESSION" 2>/dev/null || true
+}
+
+# ============================================================
+# Phase 4: Determine Starting Point
+# ============================================================
+
+determine_starting_point() {
+    print_section "Step 3: Setup Type"
+
+    echo ""
+    echo "How would you like to set up vault integration?"
+    echo ""
+    echo "  ${GREEN}e)${NC} ${BOLD}Existing${NC}  - I have items in my vault already"
+    echo "                ${DIM}(Import existing secrets, keep your naming)${NC}"
+    echo ""
+    echo "  ${GREEN}f)${NC} ${BOLD}Fresh${NC}     - I'm starting new, create from local files"
+    echo "                ${DIM}(Scan local machine, push to vault)${NC}"
+    echo ""
+    echo "  ${GREEN}m)${NC} ${BOLD}Manual${NC}    - I'll configure everything myself"
+    echo "                ${DIM}(Create template config, edit manually)${NC}"
+    echo ""
+
+    local choice
+    choice=$(prompt_choice "Your choice" "e")
+
+    case "${choice:0:1}" in
+        e|E) SETUP_MODE="existing" ;;
+        f|F) SETUP_MODE="fresh" ;;
+        m|M) SETUP_MODE="manual" ;;
+        *)
+            warn "Invalid choice, defaulting to 'existing'"
+            SETUP_MODE="existing"
+            ;;
+    esac
+}
+
+# ============================================================
+# Phase 5A: Existing Items Flow
+# ============================================================
+
+setup_existing() {
+    print_section "Import Existing Vault Items"
+
+    # Ask where to look
+    echo ""
+    echo "Where are your dotfiles secrets stored?"
+    echo ""
+
+    case "$SELECTED_BACKEND" in
+        bitwarden)
+            echo "  ${GREEN}1)${NC} In a folder      ${DIM}(e.g., 'dotfiles' folder)${NC}"
+            echo "  ${GREEN}2)${NC} By name prefix   ${DIM}(e.g., items starting with 'SSH-')${NC}"
+            echo "  ${GREEN}3)${NC} Let me list them ${DIM}(type item names manually)${NC}"
+            ;;
+        1password)
+            echo "  ${GREEN}1)${NC} In a vault       ${DIM}(e.g., 'Dotfiles' vault)${NC}"
+            echo "  ${GREEN}2)${NC} By tag           ${DIM}(e.g., 'dotfiles' tag)${NC}"
+            echo "  ${GREEN}3)${NC} Let me list them ${DIM}(type item names manually)${NC}"
+            ;;
+        pass)
+            echo "  ${GREEN}1)${NC} In a directory   ${DIM}(e.g., 'dotfiles/' path)${NC}"
+            echo "  ${GREEN}2)${NC} Let me list them ${DIM}(type item names manually)${NC}"
+            ;;
+    esac
+    echo ""
+
+    local loc_choice
+    loc_choice=$(prompt_choice "Your choice" "1")
+
+    local loc_type=""
+    local loc_value=""
+    local items_json="[]"
+
+    case "$loc_choice" in
+        1)
+            # Folder/vault/directory based
+            case "$SELECTED_BACKEND" in
+                bitwarden)
+                    loc_type="folder"
+                    # List available folders
+                    echo ""
+                    echo "Available folders:"
+                    local folders
+                    folders=$(vault_list_locations "$SESSION")
+                    if [[ "$folders" == "[]" || -z "$folders" ]]; then
+                        echo "  ${DIM}(no folders found)${NC}"
+                        echo ""
+                        loc_value=$(prompt_choice "Enter folder name to create" "dotfiles")
+                    else
+                        echo "$folders" | jq -r '.[]' | while read -r f; do
+                            echo "  • $f"
+                        done
+                        echo ""
+                        loc_value=$(prompt_choice "Enter folder name" "dotfiles")
+                    fi
+                    ;;
+                1password)
+                    loc_type="vault"
+                    loc_value=$(prompt_choice "Enter vault name" "Personal")
+                    ;;
+                pass)
+                    loc_type="directory"
+                    loc_value=$(prompt_choice "Enter directory path" "dotfiles")
+                    ;;
+            esac
+
+            # Save location preference
+            vault_set_location "$loc_type" "$loc_value" "$VAULT_CONFIG"
+            pass "Location set: $loc_type = $loc_value"
+
+            # List items in location
+            echo ""
+            info "Scanning $loc_type '$loc_value'..."
+            items_json=$(vault_list_items_in_location "$loc_type" "$loc_value" "$SESSION" 2>/dev/null || echo "[]")
+            ;;
+
+        2)
+            if [[ "$SELECTED_BACKEND" == "pass" ]]; then
+                # pass doesn't support prefix, treat as manual
+                setup_manual_item_list
+                return
+            fi
+
+            # Prefix-based
+            loc_type="prefix"
+            echo ""
+            loc_value=$(prompt_choice "Enter name prefix" "SSH-")
+            vault_set_location "$loc_type" "$loc_value" "$VAULT_CONFIG"
+
+            echo ""
+            info "Scanning for items starting with '$loc_value'..."
+            items_json=$(vault_list_items_in_location "$loc_type" "$loc_value" "$SESSION" 2>/dev/null || echo "[]")
+            ;;
+
+        3|*)
+            setup_manual_item_list
+            return
+            ;;
+    esac
+
+    # Process found items
+    process_found_items "$items_json"
+}
+
+setup_manual_item_list() {
+    echo ""
+    echo "Enter the names of vault items to import (one per line)."
+    echo "Press Enter on empty line when done."
+    echo ""
+
+    local -a item_names=()
+    while true; do
+        local name
+        echo -n "  Item name: "
+        read name
+        [[ -z "$name" ]] && break
+        item_names+=("$name")
+    done
+
+    if [[ ${#item_names[@]} -eq 0 ]]; then
+        warn "No items specified"
+        return
+    fi
+
+    # Build items JSON from names
+    local items_json="["
+    local first=true
+    for name in "${item_names[@]}"; do
+        $first || items_json+=","
+        first=false
+        items_json+="{\"name\": \"$name\"}"
+    done
+    items_json+="]"
+
+    # No location preference for manual
+    vault_set_location "none" "" "$VAULT_CONFIG"
+
+    process_found_items "$items_json"
+}
+
+process_found_items() {
+    local items_json="$1"
+    local item_count
+
+    item_count=$(echo "$items_json" | jq 'length')
+
+    if [[ "$item_count" == "0" ]]; then
+        echo ""
+        warn "No items found in specified location."
+        echo ""
+        echo "Options:"
+        echo "  ${GREEN}1)${NC} Scan local files instead (create new items)"
+        echo "  ${GREEN}2)${NC} Try a different location"
+        echo "  ${GREEN}3)${NC} Cancel"
+        echo ""
+
+        local choice
+        choice=$(prompt_choice "Your choice" "1")
+
+        case "$choice" in
+            1) setup_fresh ;;
+            2) setup_existing ;;
+            *)
+                info "Setup cancelled"
+                exit 0
+                ;;
+        esac
+        return
+    fi
+
+    echo ""
+    echo "Found ${GREEN}$item_count${NC} items:"
+    echo ""
+
+    # Display items
+    echo "$items_json" | jq -r '.[].name' | while read -r name; do
+        echo "  • $name"
+    done
+
+    echo ""
+    if ! prompt_yesno "Import these items?" "y"; then
+        info "Setup cancelled"
+        exit 0
+    fi
+
+    # Map items to local paths
+    print_section "Map Items to Local Paths"
+
+    echo ""
+    echo "For each item, specify where it should be saved locally."
+    echo "Press Enter to accept the suggested path."
+    echo ""
+
+    local -A item_mappings=()
+
+    echo "$items_json" | jq -r '.[].name' | while read -r name; do
+        local suggested_path=""
+        local item_type="file"
+
+        # Suggest paths based on name patterns
+        case "$name" in
+            SSH-Config|ssh-config)
+                suggested_path="~/.ssh/config"
+                ;;
+            SSH-*)
+                suggested_path="~/.ssh/id_ed25519_$(echo "$name" | sed 's/SSH-//' | tr '[:upper:]' '[:lower:]')"
+                item_type="sshkey"
+                ;;
+            AWS-Credentials|aws-credentials)
+                suggested_path="~/.aws/credentials"
+                ;;
+            AWS-Config|aws-config)
+                suggested_path="~/.aws/config"
+                ;;
+            Git-Config|git-config)
+                suggested_path="~/.gitconfig"
+                ;;
+            *)
+                suggested_path="~/.config/$name"
+                ;;
+        esac
+
+        echo -e "  ${BOLD}$name${NC}"
+        local path
+        path=$(prompt_choice "    Local path" "$suggested_path")
+
+        # Store mapping (will be written to config later)
+        # For now just output
+        echo "    → $path ($item_type)"
+        echo ""
+    done
+
+    # Finalize config
+    finalize_config "$items_json"
+}
+
+# ============================================================
+# Phase 5B: Fresh Start Flow
+# ============================================================
+
+setup_fresh() {
+    print_section "Create Items from Local Files"
+
+    # Ask where to store
+    echo ""
+    echo "Where should we store your secrets?"
+    echo ""
+
+    local loc_type=""
+    local loc_value=""
+
+    case "$SELECTED_BACKEND" in
+        bitwarden)
+            echo "  ${GREEN}1)${NC} Create new folder 'dotfiles' ${DIM}(recommended)${NC}"
+            echo "  ${GREEN}2)${NC} Use existing folder"
+            echo "  ${GREEN}3)${NC} No folder (root level)"
+            ;;
+        1password)
+            echo "  ${GREEN}1)${NC} Use 'Personal' vault ${DIM}(recommended)${NC}"
+            echo "  ${GREEN}2)${NC} Use different vault"
+            ;;
+        pass)
+            echo "  ${GREEN}1)${NC} Use 'dotfiles' directory ${DIM}(recommended)${NC}"
+            echo "  ${GREEN}2)${NC} Use different directory"
+            ;;
+    esac
+    echo ""
+
+    local choice
+    choice=$(prompt_choice "Your choice" "1")
+
+    case "$choice" in
+        1)
+            case "$SELECTED_BACKEND" in
+                bitwarden)
+                    loc_type="folder"
+                    loc_value="dotfiles"
+                    # Create folder if needed
+                    vault_create_location "$loc_value" "$SESSION" 2>/dev/null || true
+                    ;;
+                1password)
+                    loc_type="vault"
+                    loc_value="Personal"
+                    ;;
+                pass)
+                    loc_type="directory"
+                    loc_value="dotfiles"
+                    ;;
+            esac
+            ;;
+        2)
+            case "$SELECTED_BACKEND" in
+                bitwarden)
+                    loc_type="folder"
+                    loc_value=$(prompt_choice "Enter folder name" "dotfiles")
+                    ;;
+                1password)
+                    loc_type="vault"
+                    loc_value=$(prompt_choice "Enter vault name" "Personal")
+                    ;;
+                pass)
+                    loc_type="directory"
+                    loc_value=$(prompt_choice "Enter directory path" "dotfiles")
+                    ;;
+            esac
+            ;;
+        3)
+            loc_type="none"
+            loc_value=""
+            ;;
+    esac
+
+    # Save location preference
+    vault_set_location "$loc_type" "$loc_value" "$VAULT_CONFIG"
+    if [[ -n "$loc_value" ]]; then
+        pass "Location set: $loc_type = $loc_value"
+    fi
+
+    # Scan local files
+    echo ""
+    info "Scanning for secrets in standard locations..."
+    echo ""
+
+    # Run discovery script
+    "$SCRIPT_DIR/discover-secrets.sh" --location "$loc_type:$loc_value"
+}
+
+# ============================================================
+# Phase 5C: Manual Flow
+# ============================================================
+
+setup_manual() {
+    print_section "Manual Configuration"
+
+    # Create template config
+    mkdir -p "$CONFIG_DIR"
+
+    if [[ -f "$VAULT_CONFIG" ]] && ! $FORCE; then
+        warn "Config already exists: $VAULT_CONFIG"
+        if ! prompt_yesno "Overwrite?" "n"; then
+            info "Keeping existing config"
+            exit 0
+        fi
+    fi
+
+    # Copy example
+    local example_file="$DOTFILES_DIR/vault/vault-items.example.json"
+    if [[ -f "$example_file" ]]; then
+        cp "$example_file" "$VAULT_CONFIG"
+        pass "Created config from template"
+    else
+        # Create minimal config
+        vault_set_location "folder" "dotfiles" "$VAULT_CONFIG"
+        pass "Created minimal config"
+    fi
+
+    echo ""
+    echo "Configuration created at:"
+    echo "  ${CYAN}$VAULT_CONFIG${NC}"
+    echo ""
+    echo "Edit this file to define your vault items:"
+    echo "  ${GREEN}\$EDITOR $VAULT_CONFIG${NC}"
+    echo ""
+    echo "When ready, run:"
+    echo "  ${GREEN}dotfiles vault pull${NC}    # Restore from vault"
+    echo "  ${GREEN}dotfiles vault push${NC}    # Backup to vault"
+}
+
+# ============================================================
+# Finalize Configuration
+# ============================================================
+
+finalize_config() {
+    local items_json="${1:-}"
+
+    print_section "Setup Complete"
+
+    echo ""
+    pass "Vault configuration saved!"
+    echo ""
+    echo "Configuration: ${CYAN}$VAULT_CONFIG${NC}"
+    echo ""
+    echo "Next steps:"
+    echo "  ${GREEN}dotfiles vault pull${NC}    Pull secrets from vault"
+    echo "  ${GREEN}dotfiles vault status${NC}  Check sync status"
+    echo "  ${GREEN}dotfiles vault list${NC}    List all vault items"
+    echo ""
+}
+
+# ============================================================
+# Handle Reconfiguration
+# ============================================================
+
+handle_existing_config() {
+    if [[ ! -f "$VAULT_CONFIG" ]]; then
+        return 0  # No existing config
+    fi
+
+    if $RECONFIGURE; then
+        # Backup and proceed
+        local backup="$VAULT_CONFIG.backup-$(date +%Y%m%d%H%M%S)"
+        cp "$VAULT_CONFIG" "$backup"
+        info "Backed up existing config to: $backup"
+        return 0
+    fi
+
+    if $FORCE; then
+        return 0  # Skip check
+    fi
+
+    # Existing config found
+    print_section "Existing Configuration Found"
+
+    local backend loc_type loc_value
+    backend=$(config_get "vault.backend" "unknown")
+    loc_type=$(vault_get_location_type "$VAULT_CONFIG")
+    loc_value=$(vault_get_location_value "$VAULT_CONFIG")
+
+    echo ""
+    echo "Current configuration:"
+    echo "  Backend:  ${GREEN}$backend${NC}"
+    if [[ -n "$loc_value" ]]; then
+        echo "  Location: ${GREEN}$loc_type = $loc_value${NC}"
+    fi
+    echo ""
+
+    echo "What would you like to do?"
+    echo ""
+    echo "  ${GREEN}1)${NC} Add new items   ${DIM}(keep existing, scan for more)${NC}"
+    echo "  ${GREEN}2)${NC} Reconfigure     ${DIM}(backup current, start fresh)${NC}"
+    echo "  ${GREEN}3)${NC} Cancel          ${DIM}(keep current config)${NC}"
+    echo ""
+
+    local choice
+    choice=$(prompt_choice "Your choice" "1")
+
+    case "$choice" in
+        1)
+            # Add new items - run discovery with merge
+            "$SCRIPT_DIR/discover-secrets.sh" --merge
+            exit $?
+            ;;
+        2)
+            # Reconfigure
+            local backup="$VAULT_CONFIG.backup-$(date +%Y%m%d%H%M%S)"
+            cp "$VAULT_CONFIG" "$backup"
+            info "Backed up to: $backup"
+            rm "$VAULT_CONFIG"
+            ;;
+        *)
+            info "Keeping current configuration"
+            exit 0
+            ;;
+    esac
+}
+
+# ============================================================
+# Main Flow
+# ============================================================
+
+main() {
+    print_box "Vault Setup Wizard"
+
+    # Check for existing config
+    handle_existing_config
+
+    # Show education
+    show_education
+
+    if ! prompt_yesno "Ready to continue?" "y"; then
+        info "Setup cancelled"
+        exit 0
+    fi
+
+    # Select backend
+    select_backend
+
+    # Check auth
+    check_authentication
+
+    # Determine setup type
+    determine_starting_point
+
+    # Run appropriate flow
+    case "$SETUP_MODE" in
+        existing) setup_existing ;;
+        fresh)    setup_fresh ;;
+        manual)   setup_manual ;;
+    esac
+}
+
+# Run
+main "$@"
