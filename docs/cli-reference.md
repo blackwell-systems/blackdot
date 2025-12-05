@@ -30,6 +30,7 @@ The unified command for managing your dotfiles. All subcommands are accessed via
 | `status` | `s` | Quick visual dashboard |
 | `doctor` | `health` | Comprehensive health check |
 | `features` | `feat` | **Feature Registry** - enable/disable optional features |
+| `hook` | - | **Hook System** - manage lifecycle hooks |
 | `config` | `cfg` | **Configuration Layers** - view layered config |
 | `drift` | - | Compare local files vs vault |
 | `sync` | - | Bidirectional vault sync (smart push/pull) |
@@ -227,6 +228,93 @@ DOTFILES_FEATURE_VAULT=false   # Disable vault
 ```
 
 **See also:** [Feature Registry](features.md) for complete documentation.
+
+---
+
+## Hook Commands
+
+### `dotfiles hook`
+
+Manage lifecycle hooks for custom behavior at key points.
+
+```bash
+dotfiles hook [COMMAND] [OPTIONS] [HOOK_POINT]
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `list` | List all hook points or hooks for a specific point |
+| `run` | Execute hooks for a hook point |
+| `test` | Test hooks (shows what would run, then executes) |
+
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `--verbose` | Show detailed execution output |
+| `--no-hooks` | Skip hook execution (for debugging) |
+
+**Examples:**
+
+```bash
+# List all hook points
+dotfiles hook list
+
+# List hooks for a specific point
+dotfiles hook list post_vault_pull
+
+# Run hooks for a point
+dotfiles hook run post_vault_pull
+
+# Run with verbose output
+dotfiles hook run --verbose shell_init
+
+# Test hooks (dry-run + execute)
+dotfiles hook test doctor_check
+```
+
+### Hook Points
+
+| Category | Hook Points |
+|----------|-------------|
+| **Lifecycle** | `pre_install`, `post_install`, `pre_bootstrap`, `post_bootstrap`, `pre_upgrade`, `post_upgrade` |
+| **Vault** | `pre_vault_pull`, `post_vault_pull`, `pre_vault_push`, `post_vault_push` |
+| **Doctor** | `pre_doctor`, `post_doctor`, `doctor_check` |
+| **Shell** | `shell_init`, `shell_exit`, `directory_change` |
+| **Setup** | `pre_setup_phase`, `post_setup_phase`, `setup_complete` |
+
+### Creating Hooks
+
+**File-based hooks** (recommended):
+```bash
+# Create hook directory
+mkdir -p ~/.config/dotfiles/hooks/post_vault_pull
+
+# Create executable script
+cat > ~/.config/dotfiles/hooks/post_vault_pull/10-fix-perms.sh << 'EOF'
+#!/bin/bash
+chmod 600 ~/.ssh/id_* 2>/dev/null
+EOF
+chmod +x ~/.config/dotfiles/hooks/post_vault_pull/10-fix-perms.sh
+```
+
+**JSON-based hooks:**
+```bash
+# Configure in hooks.json
+cat > ~/.config/dotfiles/hooks.json << 'EOF'
+{
+  "hooks": {
+    "post_vault_pull": [
+      {"name": "ssh-add", "command": "ssh-add ~/.ssh/id_ed25519", "enabled": true, "fail_ok": true}
+    ]
+  }
+}
+EOF
+```
+
+**See also:** [Hook System](hooks.md) for complete documentation.
 
 ---
 

@@ -13,6 +13,7 @@
 
 - **Features**
   - [Feature Registry](features.md)
+  - [Hook System](hooks.md)
   - [Claude Code + dotclaude](claude-code.md)
   - [Template System](templates.md)
   - [Vault System](vault-README.md)
