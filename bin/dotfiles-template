@@ -341,19 +341,19 @@ cmd_list() {
     for template in "$TEMPLATES_CONFIG_DIR"/*.tmpl(N); do
         local basename="${template:t:r}"
         local output="$GENERATED_DIR/$basename"
-        local status
+        local file_status=""  # Initialize to avoid zsh printing previous value
 
         if [[ -f "$output" ]]; then
             if [[ "$output" -nt "$template" ]]; then
-                status="${GREEN}✓ up to date${NC}"
+                file_status="${GREEN}✓ up to date${NC}"
             else
-                status="${YELLOW}○ stale${NC}"
+                file_status="${YELLOW}○ stale${NC}"
             fi
         else
-            status="${RED}✗ not generated${NC}"
+            file_status="${RED}✗ not generated${NC}"
         fi
 
-        printf "  %-25s %b\n" "$basename" "$status"
+        printf "  %-25s %b\n" "$basename" "$file_status"
     done
 }
 

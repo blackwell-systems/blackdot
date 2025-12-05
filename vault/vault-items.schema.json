@@ -5,6 +5,25 @@
   "description": "Schema for validating vault-items.json configuration file",
   "type": "object",
   "properties": {
+    "vault_location": {
+      "type": "object",
+      "description": "Where to find/store dotfiles items in the vault backend",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["folder", "vault", "tag", "directory", "prefix", "none"],
+          "description": "Location type (backend-specific: folder=Bitwarden, vault/tag=1Password, directory=pass)"
+        },
+        "value": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "null" }
+          ],
+          "description": "Location identifier (folder name, vault name, directory path, etc.)"
+        }
+      },
+      "required": ["type", "value"]
+    },
     "ssh_keys": {
       "type": "object",
       "description": "SSH key mappings (item name → file path)",
@@ -64,6 +83,12 @@
       "uniqueItems": true
     }
   },
-  "required": ["vault_items"],
-  "additionalProperties": false
+  "required": [],
+  "additionalProperties": false,
+  "$defs": {
+    "comment": "Allow $schema and $comment for JSON schema validation and documentation"
+  },
+  "patternProperties": {
+    "^\\$": true
+  }
 }

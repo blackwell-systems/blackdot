@@ -79,13 +79,14 @@ teardown() {
 }
 
 # Helper function to invoke zsh functions with test config
+# Note: Redirects all stderr to /dev/null to avoid test noise from config initialization
 zsh_eval() {
-  zsh -c "export PATH='/usr/local/bin:/usr/bin:/bin'; export VAULT_CONFIG_FILE='$VAULT_CONFIG_FILE'; source '$COMMON_SH' 2>/dev/null; $*"
+  zsh -c "export PATH='/usr/local/bin:/usr/bin:/bin'; export VAULT_CONFIG_FILE='$VAULT_CONFIG_FILE'; source '$COMMON_SH'; $*" 2>/dev/null
 }
 
 # Helper function to get zsh variable value with test config
 zsh_var() {
-  zsh -c "export PATH='/usr/local/bin:/usr/bin:/bin'; export VAULT_CONFIG_FILE='$VAULT_CONFIG_FILE'; source '$COMMON_SH'; echo \"\${$1}\""
+  zsh -c "export PATH='/usr/local/bin:/usr/bin:/bin'; export VAULT_CONFIG_FILE='$VAULT_CONFIG_FILE'; source '$COMMON_SH'; echo \"\${$1}\"" 2>/dev/null
 }
 
 # ============================================================

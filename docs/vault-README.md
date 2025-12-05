@@ -48,7 +48,7 @@ All `dotfiles vault` commands work identically regardless of which backend you'v
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| `init-vault.sh` | Configure vault backend | `dotfiles vault setup` |
+| `init-vault.sh` | Configure vault backend with location support (v2 wizard) | `dotfiles vault setup` |
 | `restore.sh` | Orchestrates all restores | `dotfiles vault pull` |
 | `restore-ssh.sh` | Restores SSH keys + config | Called by bootstrap |
 | `restore-aws.sh` | Restores AWS config/creds | Called by bootstrap |
@@ -197,6 +197,71 @@ export DOTFILES_VAULT_BACKEND=pass
 # Items will be stored under dotfiles/ prefix
 # e.g., dotfiles/Git-Config, dotfiles/SSH-Config
 ```
+
+---
+
+## Location Management (v3.1+)
+
+The vault setup wizard v2 introduces location-based organization. Instead of scanning your entire vault, you tell the system where your dotfiles secrets are stored.
+
+### Why Location Management?
+
+1. **Respects your existing structure** - Use your own folder/vault/directory naming
+2. **No random scanning** - The system asks you where to look
+3. **Works on new machines** - Vault-first discovery without local files
+4. **Supports all backends** - Unified API across Bitwarden, 1Password, and pass
+
+### Location Types by Backend
+
+| Backend | Location Type | Config Value | Example |
+|---------|---------------|--------------|---------|
+| **Bitwarden** | `folder` | Folder name | `"dotfiles"` |
+| **1Password** | `vault` | Vault name | `"Personal"` (planned) |
+| **1Password** | `tag` | Tag name | `"dotfiles"` (planned) |
+| **pass** | `directory` | Directory name | `"dotfiles"` |
+| **Any** | `prefix` | Name prefix | `"SSH-"` |
+| **Any** | `none` | No filter | Legacy behavior |
+
+### Setup Wizard v2 Flow
+
+The wizard (`dotfiles vault init`) now has three modes:
+
+1. **Existing Items** - You have secrets in your vault already
+   - Select or create a location (folder/directory)
+   - Import items from that location
+   - Map each item to a local path
+
+2. **Fresh Start** - Create new items from local files
+   - Scans local machine for secrets
+   - Creates vault items with your naming preference
+   - Stores in your chosen location
+
+3. **Manual Setup** - Configure yourself
+   - Creates minimal config
+   - You edit `vault-items.json` directly
+
+### Configuration Example
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "vault_location": {
+    "type": "folder",
+    "value": "dotfiles"
+  },
+  "vault_items": {
+    "SSH-GitHub": {
+      "path": "~/.ssh/id_ed25519_github",
+      "required": true,
+      "type": "sshkey"
+    }
+  }
+}
+```
+
+### Design Document
+
+For the full design rationale, see: [`docs/design/vault-setup-wizard-v2.md`](design/vault-setup-wizard-v2.md)
 
 ---
 
@@ -487,6 +552,69 @@ File-based config items contain the full file content in the notes field:
 | `AWS-Credentials` | `~/.aws/credentials` |
 | `Git-Config` | `~/.gitconfig` |
 | `Environment-Secrets` | `~/.local/env.secrets` |
+| `Template-Variables` | `~/.config/dotfiles/template-variables.sh` |
+
+---
+
+## Template Variables Integration
+
+The vault system can store and restore machine-specific template variables, enabling portable configurations across machines.
+
+### What are Template Variables?
+
+Template variables customize dotfiles per-machine. They're stored in `~/.config/dotfiles/template-variables.sh`:
+
+```bash
+# Machine-specific template variables
+TMPL_DEFAULTS[git_name]="Your Name"
+TMPL_DEFAULTS[git_email]="your@email.com"
+TMPL_DEFAULTS[company]="ACME Corp"
+```
+
+### Vault Workflow
+
+**Push to vault (current machine):**
+```bash
+# Store template variables in your vault
+pass insert -mf dotfiles/Template-Variables < ~/.config/dotfiles/template-variables.sh
+
+# Or with Bitwarden (via vault scripts)
+dotfiles vault push Template-Variables
+```
+
+**Pull from vault (new machine):**
+```bash
+# Restore template variables from vault
+pass show dotfiles/Template-Variables > ~/.config/dotfiles/template-variables.sh
+
+# Then render templates
+dotfiles template render --all
+```
+
+### Location Priority
+
+The template system loads variables from these locations (in order):
+1. `~/.config/dotfiles/template-variables.sh` (XDG, vault-portable)
+2. `templates/_variables.local.sh` (repo-specific fallback)
+3. `templates/_variables.sh` (defaults)
+
+### Complete New Machine Workflow
+
+```bash
+# 1. Clone dotfiles
+git clone git@github.com:USER/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+
+# 2. Run bootstrap
+./bootstrap/bootstrap-mac.sh
+
+# 3. Login to vault and pull secrets
+bw login  # or: op signin / pass init
+dotfiles vault pull
+
+# 4. Render templates (uses restored variables)
+dotfiles template render --all
+```
 
 ---
 
