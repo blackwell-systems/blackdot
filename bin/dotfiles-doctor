@@ -228,7 +228,7 @@ check_symlink "~/.zshrc" "$HOME/.zshrc" "zsh/zshrc"
 check_symlink "~/.p10k.zsh" "$HOME/.p10k.zsh" "zsh/p10k.zsh"
 
 # Check ~/.claude symlink (workspace-target aware)
-local claude_ws_target
+claude_ws_target=""
 if type get_workspace_target &>/dev/null; then
     claude_ws_target="$(get_workspace_target)/.claude"
 else
@@ -238,7 +238,6 @@ check_symlink "~/.claude" "$HOME/.claude" "$claude_ws_target"
 
 # Check /workspace symlink (target-aware)
 if [[ -L "/workspace" ]]; then
-    local actual_target expected_target
     actual_target=$(readlink /workspace 2>/dev/null)
     if type get_workspace_target &>/dev/null; then
         expected_target=$(get_workspace_target)

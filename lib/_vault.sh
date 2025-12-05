@@ -35,7 +35,7 @@ fi
 _get_configured_backend() {
     # 1. Check config file (if state library loaded)
     if type config_get >/dev/null 2>&1; then
-        local from_config=$(config_get "vault" "backend" "")
+        local from_config=$(config_get "vault.backend" "")
         if [[ -n "$from_config" ]]; then
             echo "$from_config"
             return 0

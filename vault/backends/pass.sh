@@ -63,7 +63,8 @@ vault_backend_login_check() {
     # and can access the password store
     if [[ -d "$PASSWORD_STORE_DIR" ]]; then
         # Try to list (this may trigger gpg-agent)
-        pass ls >/dev/null 2>&1
+        # Use 'command pass' to avoid shadowing by pass() logging function
+        command pass ls >/dev/null 2>&1
         return $?
     fi
     return 1
@@ -129,7 +130,7 @@ vault_backend_get_item() {
 
     # Get content and format as JSON
     local content
-    content=$(pass show "$pass_path" 2>/dev/null)
+    content=$(command pass show "$pass_path" 2>/dev/null)
 
     if [[ -n "$content" ]]; then
         # Create JSON structure similar to other backends
@@ -155,7 +156,7 @@ vault_backend_get_notes() {
     pass_path=$(_pass_path "$item_name")
 
     # Get content directly
-    pass show "$pass_path" 2>/dev/null || echo ""
+    command pass show "$pass_path" 2>/dev/null || echo ""
 }
 
 vault_backend_item_exists() {
@@ -226,7 +227,7 @@ vault_backend_create_item() {
     mkdir -p "$parent_dir"
 
     # Insert content (pass insert with -m for multiline)
-    if printf '%s' "$content" | pass insert -m "$pass_path" >/dev/null 2>&1; then
+    if printf '%s' "$content" | command pass insert -m "$pass_path" >/dev/null 2>&1; then
         pass "Created item '$item_name' in pass"
         return 0
     else
@@ -255,7 +256,7 @@ vault_backend_update_item() {
     fi
 
     # Update by overwriting (pass insert -f for force)
-    if printf '%s' "$content" | pass insert -m -f "$pass_path" >/dev/null 2>&1; then
+    if printf '%s' "$content" | command pass insert -m -f "$pass_path" >/dev/null 2>&1; then
         pass "Updated item '$item_name' in pass"
         return 0
     else
@@ -283,7 +284,7 @@ vault_backend_delete_item() {
     fi
 
     # Delete (pass rm -f for force, no prompt)
-    if pass rm -f "$pass_path" >/dev/null 2>&1; then
+    if command pass rm -f "$pass_path" >/dev/null 2>&1; then
         pass "Deleted item '$item_name' from pass"
         return 0
     else
@@ -302,7 +303,7 @@ vault_backend_health_check() {
     # Check pass installed
     if command -v pass >/dev/null 2>&1; then
         local version
-        version=$(pass version 2>/dev/null | head -1 || echo "unknown")
+        version=$(command pass version 2>/dev/null | head -1 || echo "unknown")
         pass "pass installed ($version)"
     else
         fail "pass not installed"
@@ -479,7 +480,7 @@ vault_backend_create_item_in_location() {
     mkdir -p "$parent_dir"
 
     # Insert content
-    if printf '%s' "$content" | pass insert -m "$pass_path" >/dev/null 2>&1; then
+    if printf '%s' "$content" | command pass insert -m "$pass_path" >/dev/null 2>&1; then
         pass "Created item '$item_name' in directory '$prefix'"
         return 0
     else
