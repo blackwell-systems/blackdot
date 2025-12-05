@@ -264,6 +264,11 @@ dotfiles() {
             "$DOTFILES_DIR/bin/dotfiles-features" "$@"
             ;;
 
+        # Configuration layers management
+        config|cfg)
+            "$DOTFILES_DIR/bin/dotfiles-config" "$@"
+            ;;
+
         # Setup & Maintenance
         setup)
             "$DOTFILES_DIR/bin/dotfiles-setup" "$@"
@@ -377,6 +382,13 @@ dotfiles() {
             echo "  features enable   Enable a feature"
             echo "  features disable  Disable a feature"
             echo "  features preset   Enable a preset (minimal/developer/claude/full)"
+            echo ""
+            echo "${BOLD}Configuration:${NC}"
+            echo "  config get        Get config value (with layer resolution)"
+            echo "  config set        Set config value in specific layer"
+            echo "  config show       Show where a config value comes from"
+            echo "  config list       Show configuration layer status"
+            echo "  config help       Show all config commands"
             echo ""
             echo "${BOLD}Other Commands:${NC}"
             echo "  secrets <cmd>     Alias for vault commands"
