@@ -26,8 +26,8 @@ source "$DOTFILES_DIR/lib/_config.sh"
 # ============================================================
 
 STATE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
-STATE_FILE="$STATE_DIR/state.ini"  # Legacy, kept for migration
-CONFIG_FILE="$STATE_DIR/config.ini"  # Legacy, kept for migration
+# Note: CONFIG_FILE is set in _config.sh (config.json)
+# Old state.ini/config.ini files are renamed to *.v2-backup during migration
 
 # ============================================================
 # Initialization
