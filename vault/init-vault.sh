@@ -25,49 +25,6 @@ source "$DOTFILES_DIR/lib/_config.sh"
 
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
 
-# Wrapper functions for backward compatibility
-config_get() {
-    local section="$1"
-    local key="$2"
-    local default="${3:-}"
-
-    # Convert to nested key format for v3.0
-    local nested_key="${section}.${key}"
-    command config_get "$nested_key" "$default"
-}
-
-config_set() {
-    local section="$1"
-    local key="$2"
-    local value="$3"
-
-    mkdir -p "$CONFIG_DIR"
-
-    # Convert to nested key format for v3.0
-    local nested_key="${section}.${key}"
-    command config_set "$nested_key" "$value"
-
-    # Keep INI compatibility (no-op for v3.0)
-    if [[ ! -f "$CONFIG_DIR/config.json" ]]; then
-        echo "# Dotfiles Configuration" > "$CONFIG_FILE"
-    fi
-
-    # Check if section exists
-    if ! grep -q "^\[$section\]" "$CONFIG_FILE" 2>/dev/null; then
-        echo "" >> "$CONFIG_FILE"
-        echo "[$section]" >> "$CONFIG_FILE"
-    fi
-
-    # Update or add key
-    if grep -q "^$key=" "$CONFIG_FILE" 2>/dev/null; then
-        sed -i.bak "s|^$key=.*|$key=$value|" "$CONFIG_FILE"
-    else
-        # Add after section header
-        sed -i.bak "/^\[$section\]/a\\
-$key=$value" "$CONFIG_FILE"
-    fi
-}
-
 # Banner
 echo ""
 echo -e "${BOLD}${CYAN}Vault Configuration${NC}"
@@ -75,7 +32,7 @@ echo "════════════════════════�
 echo ""
 
 # Check if already configured
-current_backend=$(config_get "vault" "backend" "")
+current_backend=$(config_get "vault.backend" "")
 if [[ -n "$current_backend" ]] && [[ "$current_backend" != "none" ]] && ! $FORCE; then
     echo "Vault is already configured:"
     echo "  Backend: $current_backend"
@@ -113,7 +70,7 @@ if [[ ${#available[@]} -eq 0 ]]; then
     read skip
     if [[ "${skip:-Y}" =~ ^[Yy]$ ]]; then
         warn "Vault setup skipped"
-        config_set "vault" "backend" "none"
+        config_set "vault.backend" "none"
         echo ""
         info "Run 'dotfiles vault setup' anytime to configure vault"
         exit 0
@@ -137,20 +94,20 @@ choice=${choice:-1}
 # Check if user chose to skip
 if [[ $choice -eq $((${#available[@]} + 1)) ]]; then
     warn "Vault setup skipped"
-    config_set "vault" "backend" "none"
+    config_set "vault.backend" "none"
     echo ""
     info "Run 'dotfiles vault setup' anytime to configure vault"
     exit 0
 fi
 
-local selected="${available[$choice]}"
+selected="${available[$choice]}"
 if [[ -z "$selected" ]]; then
     fail "Invalid selection"
     exit 1
 fi
 
 # Save preference
-config_set "vault" "backend" "$selected"
+config_set "vault.backend" "$selected"
 export DOTFILES_VAULT_BACKEND="$selected"
 
 pass "Vault backend set to: $selected"
