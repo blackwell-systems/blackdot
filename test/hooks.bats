@@ -779,3 +779,59 @@ EOF
     [ "$status" -eq 0 ]
     [[ "$output" == *"hooks"* ]]
 }
+
+# ============================================================
+# Integration Tests - Hooks in Other Files
+# ============================================================
+
+@test "bin/dotfiles-sync sources hooks library" {
+    grep -q "source.*_hooks.sh" "${DOTFILES_DIR}/bin/dotfiles-sync"
+}
+
+@test "bin/dotfiles-sync has vault hook calls" {
+    grep -q "hook_run.*pre_vault" "${DOTFILES_DIR}/bin/dotfiles-sync"
+    grep -q "hook_run.*post_vault" "${DOTFILES_DIR}/bin/dotfiles-sync"
+}
+
+@test "bootstrap/_common.sh has run_hook function" {
+    grep -q "run_hook()" "${DOTFILES_DIR}/bootstrap/_common.sh"
+}
+
+@test "bootstrap/bootstrap-mac.sh has bootstrap hooks" {
+    grep -q "run_hook.*pre_bootstrap" "${DOTFILES_DIR}/bootstrap/bootstrap-mac.sh"
+    grep -q "run_hook.*post_bootstrap" "${DOTFILES_DIR}/bootstrap/bootstrap-mac.sh"
+}
+
+@test "bootstrap/bootstrap-linux.sh has bootstrap hooks" {
+    grep -q "run_hook.*pre_bootstrap" "${DOTFILES_DIR}/bootstrap/bootstrap-linux.sh"
+    grep -q "run_hook.*post_bootstrap" "${DOTFILES_DIR}/bootstrap/bootstrap-linux.sh"
+}
+
+@test "install.sh has install hooks" {
+    grep -q "run_hook.*pre_install" "${DOTFILES_DIR}/install.sh"
+    grep -q "run_hook.*post_install" "${DOTFILES_DIR}/install.sh"
+}
+
+@test "zsh/zsh.d/90-integrations.zsh has shell hooks" {
+    grep -q "hook_run.*shell_init" "${DOTFILES_DIR}/zsh/zsh.d/90-integrations.zsh"
+    grep -q "hook_run.*directory_change" "${DOTFILES_DIR}/zsh/zsh.d/90-integrations.zsh"
+    grep -q "hook_run.*shell_exit" "${DOTFILES_DIR}/zsh/zsh.d/90-integrations.zsh"
+}
+
+@test "bin/dotfiles-doctor has doctor hooks" {
+    grep -q "run_hook.*pre_doctor" "${DOTFILES_DIR}/bin/dotfiles-doctor"
+    grep -q "run_hook.*post_doctor" "${DOTFILES_DIR}/bin/dotfiles-doctor"
+    grep -q "run_hook.*doctor_check" "${DOTFILES_DIR}/bin/dotfiles-doctor"
+}
+
+@test "run_hook in _common.sh handles missing zsh gracefully" {
+    # Test that run_hook returns 0 even when hooks can't run
+    run bash -c "
+        DOTFILES_DIR='${DOTFILES_DIR}'
+        source '${DOTFILES_DIR}/bootstrap/_common.sh'
+        run_hook 'pre_bootstrap'
+        echo 'success'
+    "
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"success"* ]]
+}

@@ -21,6 +21,32 @@ DOTFILES_DIR="$(dirname "$BOOTSTRAP_DIR")"
 source "$DOTFILES_DIR/lib/_logging.sh"
 
 # ============================================================
+# Hooks support (call zsh hooks from bash)
+# ============================================================
+# Run lifecycle hooks via zsh (since hooks library is zsh)
+# Usage: run_hook "pre_bootstrap"
+run_hook() {
+    local hook_point="$1"
+    shift
+
+    # Skip if zsh not available
+    if ! command -v zsh &>/dev/null; then
+        return 0
+    fi
+
+    # Skip if hooks library doesn't exist
+    if [[ ! -f "$DOTFILES_DIR/lib/_hooks.sh" ]]; then
+        return 0
+    fi
+
+    # Run hooks via zsh (silently fail if hooks disabled)
+    zsh -c "
+        source '$DOTFILES_DIR/lib/_hooks.sh' 2>/dev/null || exit 0
+        hook_run '$hook_point' \"\$@\"
+    " -- "$@" 2>/dev/null || true
+}
+
+# ============================================================
 # Script configuration (set by bootstrap scripts)
 # ============================================================
 PLATFORM_NAME="${PLATFORM_NAME:-Unknown}"
