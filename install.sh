@@ -30,7 +30,13 @@ fail()  { echo -e "${RED}[FAIL]${NC} $1"; }
 # Configuration
 REPO_URL="https://github.com/blackwell-systems/dotfiles.git"
 REPO_SSH="git@github.com:blackwell-systems/dotfiles.git"
-INSTALL_DIR="$HOME/workspace/dotfiles"
+
+# Workspace target (configurable via env var, defaults to ~/workspace)
+WORKSPACE_TARGET="${WORKSPACE_TARGET:-$HOME/workspace}"
+# Expand ~ if present
+WORKSPACE_TARGET="${WORKSPACE_TARGET/#\~/$HOME}"
+
+INSTALL_DIR="$WORKSPACE_TARGET/dotfiles"
 
 # Parse arguments
 MINIMAL=false
@@ -62,6 +68,7 @@ while [[ $# -gt 0 ]]; do
             echo "  Everything is optional except shell config. Use --minimal for just ZSH,"
             echo "  or customize with environment variables:"
             echo ""
+            echo "    WORKSPACE_TARGET=~/code ./install.sh             # Use ~/code instead of ~/workspace"
             echo "    SKIP_WORKSPACE_SYMLINK=true ./bootstrap-mac.sh   # Skip /workspace symlink"
             echo "    SKIP_CLAUDE_SETUP=true ./bootstrap-linux.sh      # Skip Claude integration"
             echo ""
@@ -133,7 +140,7 @@ if ! command -v git >/dev/null 2>&1; then
 fi
 
 # Create workspace directory
-mkdir -p "$HOME/workspace"
+mkdir -p "$WORKSPACE_TARGET"
 
 # Clone or update repository
 if [[ -d "$INSTALL_DIR/.git" ]]; then

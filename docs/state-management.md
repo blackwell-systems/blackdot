@@ -14,19 +14,19 @@ State management provides:
 - **Resume Support** - Continue where you left off if interrupted
 - **Preference Persistence** - Save choices like vault backend across sessions
 - **State Inference** - Auto-detect existing installations from filesystem
-- **Visual Progress Indicators** (v3.0+) - Unicode progress bars show current step and completion percentage
+- **Visual Progress Indicators** - Unicode progress bars show current step and completion percentage
 
 ---
 
-## Visual Progress Indicators (v3.0+)
+## Visual Progress Indicators
 
 The setup wizard displays real-time visual feedback as you progress through setup:
 
 ```
 ╔═══════════════════════════════════════════════════════════════╗
-║ Step 3 of 6: Vault Configuration
+║ Step 4 of 7: Vault Configuration
 ╠═══════════════════════════════════════════════════════════════╣
-║ ██████████░░░░░░░░░░ 50%
+║ ██████████░░░░░░░░░░ 57%
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
@@ -44,17 +44,18 @@ The setup wizard displays real-time visual feedback as you progress through setu
 
 **Example flow:**
 ```
-Step 1 of 6: Symlinks          ████░░░░░░░░░░░░░░░░  17%
-Step 2 of 6: Packages          ████████░░░░░░░░░░░░  33%
-Step 3 of 6: Vault Config      ████████████░░░░░░░░  50%
-Step 4 of 6: Secrets           ████████████████░░░░  67%
-Step 5 of 6: Claude Code       ████████████████████  83%
-Step 6 of 6: Templates         ████████████████████ 100%
+Step 1 of 7: Workspace         ██░░░░░░░░░░░░░░░░░░  14%
+Step 2 of 7: Symlinks          ████░░░░░░░░░░░░░░░░  29%
+Step 3 of 7: Packages          ██████░░░░░░░░░░░░░░  43%
+Step 4 of 7: Vault Config      ████████░░░░░░░░░░░░  57%
+Step 5 of 7: Secrets           ██████████░░░░░░░░░░  71%
+Step 6 of 7: Claude Code       ████████████░░░░░░░░  86%
+Step 7 of 7: Templates         ████████████████████ 100%
 ```
 
 ---
 
-## Configuration File (v3.0)
+## Configuration File
 
 All state and configuration is stored in a single JSON file:
 
@@ -89,6 +90,11 @@ All state and configuration is stored in a single JSON file:
     "dotfiles_dir": "~/workspace/dotfiles",
     "config_dir": "~/.config/dotfiles",
     "backup_dir": "~/.local/share/dotfiles/backups"
+  },
+  "features": {
+    "vault": true,
+    "claude_integration": true,
+    "workspace_symlink": true
   }
 }
 ```
@@ -101,6 +107,7 @@ The `setup.completed` array tracks which setup phases have been completed:
 
 | Phase | Description | What It Does |
 |-------|-------------|--------------|
+| `workspace` | Workspace directory | Configures workspace directory and /workspace symlink |
 | `symlinks` | Shell configuration | Links `.zshrc`, `.p10k.zsh` to home directory |
 | `packages` | Homebrew packages | Installs packages from Brewfile |
 | `vault` | Vault backend | Selects and authenticates vault (Bitwarden/1Password/pass) |
@@ -129,6 +136,33 @@ All settings are now stored in the same `config.json` file:
 - `paths.dotfiles_dir` - Custom dotfiles installation directory
 - `paths.config_dir` - Configuration directory (default: `~/.config/dotfiles`)
 - `paths.backup_dir` - Backup storage location
+
+**Feature State (`features.*`):**
+
+The feature registry persists enabled/disabled features in the config file:
+
+- `features.vault` - Multi-vault secret management
+- `features.workspace_symlink` - /workspace symlink for portable sessions
+- `features.claude_integration` - Claude Code integration and hooks
+- `features.templates` - Machine-specific config templates
+- And more... (see [Feature Registry](features.md))
+
+```bash
+# Enable a feature and persist to config
+dotfiles features enable vault --persist
+
+# Disable a feature and persist
+dotfiles features disable drift_check --persist
+
+# Apply a preset and persist all features
+dotfiles features preset developer --persist
+```
+
+**Priority order for feature state:**
+1. Runtime state (current shell session)
+2. Environment variables (`DOTFILES_FEATURE_<NAME>` or `SKIP_*`)
+3. Config file (`features.*` in config.json)
+4. Registry defaults (lib/_features.sh)
 
 ### Migrating from v2.x
 
@@ -164,11 +198,13 @@ Shows current setup progress with visual checkmarks:
 ```
 Setup Status
 ============
+[✓] Workspace   - /workspace → ~/workspace
 [✓] Symlinks    - Shell configuration linked
 [✓] Packages    - Homebrew packages installed
 [✓] Vault       - Backend: bitwarden
 [✓] Secrets     - SSH keys, AWS, Git restored
 [ ] Claude      - Not configured
+[ ] Templates   - Not configured
 ```
 
 ### Reset State
@@ -201,6 +237,7 @@ When state files don't exist (fresh install or after reset), `dotfiles setup` in
 
 | Phase | Detection Method |
 |-------|------------------|
+| Workspace | Checks if `/workspace` symlink exists |
 | Symlinks | Checks if `~/.zshrc` is a symlink pointing to dotfiles |
 | Packages | Checks if Homebrew (`brew`) is installed |
 | Vault | Checks for vault CLI (`bw`/`op`/`pass`) and valid session |
@@ -244,7 +281,7 @@ next_phase=$(state_next_phase)
 state_infer
 ```
 
-### Config Functions (v3.0)
+### Config Functions
 
 Direct JSON config access via `lib/_config.sh`:
 
@@ -305,7 +342,7 @@ When you select a vault during `dotfiles setup`, it's saved to the config file. 
 
 ---
 
-## File Format (v3.0)
+## File Format
 
 Configuration uses JSON format for flexibility and nested structure support:
 
@@ -420,5 +457,6 @@ vim ~/.config/dotfiles/config.json
 ## See Also
 
 - [Setup Wizard](cli-reference.md#dotfiles-setup) - Full setup command reference
+- [Feature Registry](features.md) - Enable/disable optional features
 - [Vault System](vault-README.md) - Multi-backend secret management
 - [Troubleshooting](troubleshooting.md) - Common issues and solutions
