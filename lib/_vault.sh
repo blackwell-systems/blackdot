@@ -384,11 +384,12 @@ vault_validate_schema() {
         fi
     fi
 
-    # Validate item names match pattern ^[A-Z][A-Za-z0-9-]*$
+    # Validate item names match pattern ^[A-Z][A-Za-z0-9_-]*$
+    # Allows: capital start, alphanumeric, hyphens, and underscores
     local name_errors=$(jq -r '
         (.vault_items // {} | keys[]) as $key |
-        select($key | test("^[A-Z][A-Za-z0-9-]*$") | not) |
-        "✗ Invalid item name: \($key) (must start with capital, contain only alphanumeric and hyphens)"
+        select($key | test("^[A-Z][A-Za-z0-9_-]*$") | not) |
+        "✗ Invalid item name: \($key) (must start with capital, contain only alphanumeric, hyphens, or underscores)"
     ' "$vault_items_file" 2>/dev/null)
 
     if [[ -n "$name_errors" ]]; then
