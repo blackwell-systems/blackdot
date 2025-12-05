@@ -103,6 +103,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixes validation error for items like `SSH-Enterprise_Ghub`
   - Updated both `lib/_vault.sh` and `vault/vault-items.schema.json`
 
+- **Recursive dependency collection in feature enable** - Transitive dependencies now correctly listed
+  - `dep` variable in for loop wasn't `local`, causing nested deps to be lost in recursion
+  - Before: `dotfiles features enable dotclaude` showed "Enabling: workspace_symlink"
+  - After: Shows "Enabling: workspace_symlink claude_integration" (full chain)
+  - Affects `bin/dotfiles-features` dependency collection
+
+- **Missing color variables in CLI help** - `dotfiles help` now works without errors
+  - `$BOLD`, `$CYAN`, `$NC` weren't defined in shell context
+  - Added color definitions to `40-aliases.zsh` with TTY detection
+  - Fixes "parameter not set" error when running help commands
+
 ### Changed
 - **Schema relaxed** - `vault_items` no longer required in vault-items.json
   - Allows minimal config with just `vault_location` during initial setup
