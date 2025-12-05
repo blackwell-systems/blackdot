@@ -1,434 +1,207 @@
 # Claude Code Session Guidelines
 
-> **📋 NOTE FOR HUMAN USERS:**
-> This file is **context documentation for Claude Code AI sessions**, not user documentation.
-> If you're looking for user documentation, see:
-> - **[README.md](README.md)** - Main user documentation
-> - **[docs/README.md](docs/README.md)** - Full documentation site
-> - **[docs/README-FULL.md](docs/README-FULL.md)** - Comprehensive guide
+> For user documentation, see [README.md](README.md) or [docs/](docs/)
 
 ---
 
-This file contains important guidelines and reminders for Claude Code sessions working on this repository.
+## Architecture Overview
 
----
+The **Feature Registry** (`lib/_features.sh`) is the control plane for the entire system. Everything flows through it.
 
-## 🚀 Quick Reference
-
-For quick access to common commands and project structure:
-
-```bash
-dotfiles status          # Visual dashboard
-dotfiles doctor          # Health check
-dotfiles doctor --fix    # Auto-fix permissions
-dotfiles drift           # Compare local vs vault
-dotfiles vault pull   # Restore secrets from vault
-dotfiles vault push      # Sync local to vault
-dotfiles lint            # Validate shell config syntax
-dotfiles packages        # Check/install Brewfile packages
-dotfiles metrics         # View health check history
-dotfiles template init   # Setup machine-specific configs
-dotfiles template render # Generate configs from templates
-dotfiles upgrade         # Pull latest and run bootstrap
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Feature Registry                          │
+│                   (lib/_features.sh)                         │
+│                                                              │
+│  - Controls what's enabled/disabled                          │
+│  - Resolves dependencies between features                    │
+│  - Persists state to config.json                            │
+│  - Provides presets (minimal, developer, claude, full)       │
+└─────────────────────────────────────────────────────────────┘
+         │                    │                    │
+         ▼                    ▼                    ▼
+   ┌───────────┐       ┌───────────┐       ┌───────────┐
+   │   Shell   │       │   Vault   │       │  Plugins  │
+   │  Modules  │       │  System   │       │  (future) │
+   └───────────┘       └───────────┘       └───────────┘
 ```
 
-### Project Structure
+**Key principle:** New functionality registers as a feature. The registry controls loading.
+
+---
+
+## Adding a New Feature
+
+### 1. Register the feature
+
+In `lib/_features.sh`, add to the `FEATURES` array:
+
+```zsh
+FEATURES[my_feature]="optional:My Feature Description:dependency1,dependency2"
+#        ^name       ^category ^description          ^dependencies (optional)
+```
+
+Categories: `core` (always on), `optional` (user choice), `integration` (external tools)
+
+### 2. Create the feature code
+
+```bash
+# lib/_my_feature.sh or bin/dotfiles-myfeature
+
+# Guard: only run if feature is enabled
+feature_enabled "my_feature" || return 0
+
+# Your feature code here
+```
+
+### 3. Add CLI command (if needed)
+
+```bash
+# bin/dotfiles-myfeature
+#!/usr/bin/env bash
+set -euo pipefail
+source "$(dirname "$0")/../lib/_features.sh"
+
+feature_enabled "my_feature" || {
+    echo "Feature 'my_feature' is not enabled"
+    echo "Run: dotfiles features enable my_feature"
+    exit 1
+}
+
+# Command implementation
+```
+
+### 4. Wire into shell (if needed)
+
+Add to appropriate `zsh/zsh.d/*.zsh` file:
+
+```zsh
+# Only load if feature enabled
+if feature_enabled "my_feature"; then
+    source "${DOTFILES_DIR}/lib/_my_feature.sh"
+fi
+```
+
+### 5. Update documentation
+
+- `docs/features.md` - Add feature description
+- `docs/cli-reference.md` - Add CLI command (if applicable)
+
+**That's it.** No core changes needed. The registry handles enable/disable, persistence, and presets.
+
+---
+
+## Project Structure
 
 ```
 dotfiles/
-├── bootstrap/           # Platform setup scripts
-├── bin/                 # CLI tools (doctor, drift, backup, etc.)
-├── vault/*.sh           # Multi-vault integration scripts
-├── zsh/zsh.d/*.zsh      # Shell config (numbered load order: 00-99)
-├── lib/                 # Shared libraries (_logging.sh, _state.sh, _vault.sh, _templates.sh)
-├── templates/           # Machine-specific config templates
-│   ├── configs/*.tmpl   # Template files (gitconfig, ssh-config, etc.)
-│   └── _variables*.sh   # Variable definitions
-├── generated/           # Rendered templates (gitignored)
-├── claude/              # Claude Code config & commands
-│   ├── hooks/           # Defensive git hooks (PreToolUse, SessionStart)
-│   └── commands/        # Custom slash commands
-└── docs/                # Docsify documentation site
+├── lib/                      # Core libraries
+│   ├── _features.sh          # Feature Registry (IMPORTANT)
+│   ├── _config.sh            # JSON config access
+│   ├── _state.sh             # Setup wizard state
+│   ├── _logging.sh           # info(), pass(), warn(), fail()
+│   └── _vault.sh             # Vault abstraction
+├── bin/                      # CLI commands (dotfiles-*)
+├── zsh/zsh.d/                # Shell modules (00-99 load order)
+├── vault/                    # Multi-vault integration
+├── templates/                # Machine-specific configs
+└── docs/                     # Docsify documentation
 ```
 
 ### Key Files
 
 | File | Purpose |
 |------|---------|
-| `zsh/zsh.d/40-aliases.zsh` | The `dotfiles` command lives here |
-| `zsh/zsh.d/50-functions.zsh` | Shell functions including `status` |
-| `vault/_common.sh` | Shared vault functions, SSH_KEYS config |
-| `bin/dotfiles-doctor` | Health check implementation |
-| `bin/dotfiles-setup` | Interactive setup wizard |
-| `lib/_logging.sh` | Shared logging functions (info, pass, warn, fail) |
-| `lib/_state.sh` | State management for setup wizard |
-| `lib/_vault.sh` | Multi-backend vault abstraction layer |
-| `lib/_templates.sh` | Template engine for machine-specific configs |
-| `templates/_variables.sh` | Default template variable definitions |
-| `bin/dotfiles-template` | Template CLI tool |
+| `lib/_features.sh` | Feature Registry - the control plane |
+| `lib/_config.sh` | JSON config read/write |
+| `lib/_state.sh` | Setup wizard state management |
+| `bin/dotfiles-features` | Features CLI command |
+| `zsh/zsh.d/40-aliases.zsh` | The `dotfiles` command |
 
 ---
 
-## 📝 Documentation Updates
-
-**⚠️ CRITICAL: Always update documentation in ALL locations**
-
-When making changes that affect documentation, you MUST update all these files:
-
-### Main Documentation
-- **`README.md`** (root) - Primary documentation, shown on GitHub repo homepage
-
-### GitHub Pages / Docsify Site (`docs/` directory)
-- **`docs/README.md`** - Homepage for GitHub Pages documentation site
-- **`docs/README-FULL.md`** - Comprehensive full documentation guide
-- **`docs/templates.md`** - Template system documentation
-- **`docs/vault-README.md`** - Vault system documentation
-- **`docs/macos-settings.md`** - macOS settings guide (if macOS-related changes)
-
-### Keep in Sync
-Changes to features, prerequisites, installation instructions, or usage examples MUST be reflected across:
-1. Root `README.md`
-2. `docs/README.md`
-3. `docs/README-FULL.md` (if applicable)
-
-**Example areas that need multi-file updates:**
-- Prerequisites / dependencies
-- Installation instructions
-- Feature descriptions
-- Usage examples / quick start
-- Environment variables / flags
-- Troubleshooting steps
-
----
-
-## 🧪 Testing Requirements
-
-### Before Committing Code Changes
-
-1. **Run shellcheck** (if available):
-   ```bash
-   shellcheck **/*.sh
-   ```
-
-2. **Run unit tests**:
-   ```bash
-   cd test && ./run_tests.sh
-   ```
-
-3. **Test on target platform** (if possible):
-   - macOS changes: Test on macOS
-   - Linux changes: Test on Linux/WSL2/Lima
-   - Cross-platform: Test on both
-
-### Pre-commit Hooks
-
-The repository has pre-commit hooks that automatically:
-- Check bash scripts with shellcheck (if installed)
-- Validate ZSH syntax
-- Scan for secrets
-- Check repository structure
-
-These run automatically on `git commit`.
-
----
-
-## 📂 Repository Structure
-
-### Key Directories
-
-```
-.
-├── bootstrap-*.sh          # Platform bootstrap scripts
-├── vault/                  # Multi-vault integration (Bitwarden, 1Password, pass)
-│   ├── _common.sh          # Single source of truth (IMPORTANT!)
-│   ├── restore-*.sh        # Restore scripts for each category
-│   └── sync-to-vault.sh
-├── zsh/                    # Shell configuration
-│   └── zsh.d/              # Modular zsh config (10 files)
-├── macos/                  # macOS-specific configs
-├── docs/                   # GitHub Pages documentation
-├── test/                   # Unit tests (bats-core)
-└── install.sh              # One-line installer
-```
-
-### Single Source of Truth Files
-
-**`vault/_common.sh`** - Contains central data structures:
-- `SSH_KEYS` - All SSH key mappings
-- `DOTFILES_ITEMS` - Protected dotfiles items
-- `SYNCABLE_ITEMS` - Items that can sync to vault
-
-**When adding new vault items:** Update `_common.sh` FIRST, then other scripts will automatically pick up changes.
-
----
-
-## 🎯 Coding Standards
-
-### Shell Scripts
-
-1. **Always use strict mode:**
-   ```bash
-   set -euo pipefail
-   ```
-
-2. **Source common functions:**
-   ```bash
-   source "$(dirname "$0")/_common.sh"
-   ```
-
-3. **Use logging functions:**
-   - `info()` - Informational messages (blue)
-   - `pass()` - Success messages (green)
-   - `warn()` - Warnings (yellow)
-   - `fail()` - Errors (red)
-   - `dry()` - Dry-run messages (cyan)
-
-4. **Idempotent design:**
-   - Scripts should be safe to run multiple times
-   - Check if operation already done before doing it
-   - Backup before destructive operations
-
-5. **Graceful degradation:**
-   - Handle missing optional dependencies
-   - Provide helpful error messages
-   - Suggest remediation steps
-
-### ZSH Configuration
-
-When modifying zsh config:
-1. Use appropriate module in `zsh/zsh.d/`
-2. Follow numbered prefix convention (00-90)
-3. Test that modules load in correct order
-
----
-
-## 🔧 Common Tasks
-
-### Adding a New Vault Item
-
-1. Update `vault/_common.sh`:
-   ```zsh
-   typeset -A SYNCABLE_ITEMS=(
-       ["New-Item"]="$HOME/.config/newitem"
-       # ... existing items
-   )
-   ```
-
-2. Add restore logic (if needed) to appropriate `restore-*.sh`
-
-3. Update documentation:
-   - `vault/README.md`
-   - `docs/vault-README.md`
-
-4. Add tests in `test/vault_common.bats` if applicable
-
-### Adding a New macOS Setting
-
-1. Update `macos/settings.sh`
-2. Group with related settings
-3. Add comment explaining what it does
-4. Update `docs/macos-settings.md` with description
-
-### Adding a New Environment Variable Flag
-
-1. Add to bootstrap script (`bootstrap-mac.sh` / `bootstrap-linux.sh`)
-2. Document in:
-   - Root `README.md` (Prerequisites or Optional Components section)
-   - `docs/README.md`
-   - `docs/README-FULL.md`
-3. Update `install.sh` if it should work with `--minimal`
-
----
-
-## 🚨 What NOT to Do
-
-1. **DON'T** commit secrets or credentials
-2. **DON'T** hard-code user-specific paths (use `$HOME`, `$WORKSPACE`)
-3. **DON'T** break idempotency (scripts must be re-runnable)
-4. **DON'T** add dependencies without updating Brewfile
-5. **DON'T** update README without updating docs/README.md
-6. **DON'T** modify `_common.sh` without checking dependent scripts
-7. **DON'T** skip tests (run `test/run_tests.sh` before committing)
-
----
-
-## 🔒 Git Safety Rules
-
-**CRITICAL: Follow these rules to prevent merge conflicts and diverging branches.**
-
-### 1. Always sync before working
-- Run `git fetch && git status` at the start of every session
-- If the branch has diverged from remote, STOP and ask the user before proceeding
-- Run `git pull --rebase` before making any commits
-
-### 2. Never force push
-- Do not use `git push --force` or `git push -f`
-- If a push is rejected, ask the user how to proceed
-
-### 3. Check before committing
-- Run `git status` before staging changes
-- Ensure you're on the correct branch
-- Verify no unexpected changes are staged
-
-### 4. One session at a time
-- If you detect uncommitted changes you didn't make, ask the user
-- If remote has commits not in local, pull before continuing
-
-### Defensive Hooks
-
-This repository includes Claude Code hooks that enforce safe git practices:
-
-#### SessionStart Hook (`git-sync-check.sh`)
-
-Automatically checks git sync status when a session starts:
-- Fetches latest from remote
-- Reports ahead/behind status
-- Warns if branch has diverged
-- Suggests resolution steps before proceeding
-
-#### PreToolUse Hook (`block-dangerous-git.sh`)
-
-Blocks potentially destructive git commands before execution:
-
-| Command | Action | Reason |
-|---------|--------|--------|
-| `git push --force` / `-f` | **BLOCKED** | Can overwrite remote history |
-| `git reset --hard` | **BLOCKED** | Discards uncommitted changes permanently |
-| `git clean -f` | **BLOCKED** | Removes untracked files permanently |
-| `git checkout --force` | **BLOCKED** | Can discard local changes |
-| `git rebase -i` | **BLOCKED** | Not supported in non-interactive env |
-| `git branch -D` | WARNING | Force deletes unmerged branches |
-| `git commit --amend` | WARNING | Check authorship first |
-
-#### Hook Configuration (`claude/settings.json`)
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [{ "type": "command", "command": "claude/hooks/block-dangerous-git.sh" }]
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [{ "type": "command", "command": "claude/hooks/git-sync-check.sh" }]
-      }
-    ]
-  }
-}
-```
-
-See `claude/hooks/README.md` for full documentation on customizing these hooks
-
----
-
-## 📋 Commit Message Guidelines
-
-Use conventional commits format:
-
-```
-<type>: <description>
-
-[optional body]
-
-[optional footer]
-```
-
-**Types:**
-- `feat:` - New feature
-- `fix:` - Bug fix
-- `docs:` - Documentation only changes
-- `refactor:` - Code refactoring (no behavior change)
-- `test:` - Adding or updating tests
-- `chore:` - Maintenance tasks
-
-**Examples:**
-```
-feat: Add drift detection for vault items
-
-docs: Clarify that vault integration is optional
-
-fix: Handle missing SSH keys gracefully in restore script
-
-refactor: Consolidate vault item definitions in _common.sh
+## Quick Commands
+
+```bash
+dotfiles features              # List all features
+dotfiles features enable X     # Enable feature
+dotfiles features disable X    # Disable feature
+dotfiles features preset Y     # Apply preset (minimal/developer/claude/full)
+dotfiles doctor                # Health check
+dotfiles doctor --fix          # Auto-fix issues
+dotfiles status                # Visual dashboard
 ```
 
 ---
 
-## 🤝 Working with Users
+## Two Config Access Patterns
 
-### When User Asks for Changes
+**Direct access** - For state management (what happened on this machine):
+```bash
+config_get "setup.completed"   # lib/_config.sh
+state_completed "packages"     # lib/_state.sh
+```
 
-1. **Understand the goal** - Ask clarifying questions if needed
-2. **Check existing implementation** - Feature might already exist but not documented
-3. **Propose approach** - Explain what you'll change before doing it
-4. **Update all affected files** - Don't forget docs/
-5. **Test thoroughly** - Run tests, check on target platform if possible
-6. **Commit with clear message** - Explain what and why
+**Layered access** (future) - For preferences that can vary:
+```bash
+config_get_layered "vault.backend"  # Checks: env → project → machine → user
+```
 
-### When Feature Already Exists
-
-If user asks for something that already works:
-1. **Verify it actually works** - Read the code, don't assume
-2. **Check if documentation is clear** - Maybe just needs better docs
-3. **Improve documentation** if feature is hidden/unclear
-4. **Show user how to use it** - Provide concrete examples
+State management always uses direct access. It tracks machine reality, not preferences.
 
 ---
 
-## 🔍 Review Checklist
+## Coding Standards
 
-Before completing work, verify:
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-- [ ] All affected documentation files updated (README.md, docs/README.md, docs/README-FULL.md)
-- [ ] Code follows conventions (set -euo pipefail, logging functions, etc.)
-- [ ] Tests pass (`test/run_tests.sh`)
-- [ ] Changes are idempotent (safe to run multiple times)
-- [ ] Error messages are helpful and suggest solutions
-- [ ] Commit message follows conventional commits format
-- [ ] No secrets or credentials committed
-- [ ] Single source of truth files updated if applicable (_common.sh)
+# Source what you need
+source "${DOTFILES_DIR}/lib/_logging.sh"
+source "${DOTFILES_DIR}/lib/_features.sh"
 
----
+# Check feature before doing anything
+feature_enabled "my_feature" || exit 0
 
-## 📚 Key Concepts
-
-### Vault System
-- Multi-vault secret management (Bitwarden, 1Password, pass)
-- Bidirectional sync (restore from vault, push to vault)
-- Schema validation before operations
-- Protected items (require explicit confirmation to delete)
-
-### Portable Sessions
-- `/workspace` symlink for consistent paths across machines
-- Enables Claude Code session sync
-- Optional feature (SKIP_WORKSPACE_SYMLINK)
-
-### Health Checks
-- `dotfiles doctor` - Comprehensive validation
-- `dotfiles doctor --fix` - Auto-remediation
-- `dotfiles drift` - Detect local vs vault differences
-
-### Modularity
-- 10 zsh modules instead of monolithic .zshrc
-- Numbered prefixes control load order
-- Each module is self-contained and documented
+# Use logging functions
+info "Starting operation..."
+pass "Success"
+warn "Warning message"
+fail "Error message"
+```
 
 ---
 
-## 💡 Tips for Claude Code Sessions
+## Documentation Updates
 
-1. **Read before writing** - Always read files before editing
-2. **Search before creating** - Feature might already exist
-3. **Test assumptions** - Verify code actually does what documentation claims
-4. **Be thorough with docs** - Users rely on accurate documentation
-5. **Explain your changes** - Help user understand what you did and why
-6. **Commit incrementally** - Don't batch unrelated changes
-7. **Keep context** - Reference file:line numbers when discussing code
+When changing features, update:
+1. `README.md` - Root documentation
+2. `docs/README.md` - Docsify homepage
+3. `docs/features.md` - Feature registry docs
+4. `docs/cli-reference.md` - CLI commands
 
 ---
 
-**Last Updated:** 2025-12-02
-**Version:** 2.0.1
+## Git Rules
+
+- Always `git fetch && git status` before working
+- Never `git push --force`
+- Use conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`
+
+The repository has hooks that block dangerous git commands.
+
+---
+
+## Design Documents
+
+For planned features, see `docs/design/`:
+- `IMPL-plugin-system.md` - Plugin architecture
+- `IMPL-hook-system.md` - Lifecycle hooks
+- `IMPL-configuration-layers.md` - Layered config
+
+All planned features build on the Feature Registry as their foundation.
+
+---
+
+*Last Updated: 2025-12-05*
