@@ -81,7 +81,7 @@ vault_backend_get_session() {
 # ============================================================
 
 vault_backend_sync() {
-    local session="$1"  # Unused for pass
+    local session="${1:-}"  # Unused for pass
 
     # pass can use git for sync
     if [[ -d "$PASSWORD_STORE_DIR/.git" ]]; then
@@ -175,7 +175,7 @@ vault_backend_get_item_id() {
 }
 
 vault_backend_list_items() {
-    local session="$1"  # Unused
+    local session="${1:-}"  # Unused
 
     # List all items under our prefix
     local items_json="[]"
@@ -356,7 +356,7 @@ vault_backend_health_check() {
 # List available directories (top-level prefixes)
 # Returns: JSON array of directory names
 vault_backend_list_locations() {
-    local session="$1"  # Unused for pass
+    local session="${1:-}"  # Unused for pass
 
     # Find top-level directories in password store
     local dirs=()
@@ -376,16 +376,16 @@ vault_backend_list_locations() {
 
 # Check if a directory exists
 vault_backend_location_exists() {
-    local dir_name="$1"
-    local session="$2"  # Unused
+    local dir_name="${1:-}"
+    local session="${2:-}"  # Unused
 
-    [[ -d "$PASSWORD_STORE_DIR/$dir_name" ]]
+    [[ -n "$dir_name" ]] && [[ -d "$PASSWORD_STORE_DIR/$dir_name" ]]
 }
 
 # Create a new directory
 vault_backend_create_location() {
-    local dir_name="$1"
-    local session="$2"  # Unused
+    local dir_name="${1:-}"
+    local session="${2:-}"  # Unused
 
     if [[ -z "$dir_name" ]]; then
         fail "Directory name required"
@@ -411,9 +411,9 @@ vault_backend_create_location() {
 # List items in a specific directory
 # Usage: vault_backend_list_items_in_location "directory" "dotfiles" "$SESSION"
 vault_backend_list_items_in_location() {
-    local loc_type="$1"
-    local loc_value="$2"
-    local session="$3"  # Unused
+    local loc_type="${1:-}"
+    local loc_value="${2:-}"
+    local session="${3:-}"  # Unused
 
     case "$loc_type" in
         directory)
