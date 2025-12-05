@@ -199,9 +199,19 @@ state_next_phase() {
 
 # Check if a feature is enabled
 # Usage: if config_feature_enabled "workspace_symlink"; then ...
+# Note: Delegates to feature_enabled() from _features.sh if available
 config_feature_enabled() {
     local feature="$1"
-    local value=$(config_get "features" "$feature" "true")
+
+    # Use feature registry if available (preferred)
+    if type feature_enabled &>/dev/null; then
+        feature_enabled "$feature"
+        return $?
+    fi
+
+    # Fallback: check config file directly
+    local value
+    value="$(config_get "features.$feature" "true")"
     [[ "$value" == "true" ]]
 }
 
