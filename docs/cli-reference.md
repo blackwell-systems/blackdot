@@ -465,7 +465,7 @@ export PASS_PREFIX=dotfiles  # optional, items stored as dotfiles/Git-Config
 
 ---
 
-### Location Management (v3.1+)
+### Location Management
 
 Vault items can be organized by location (folder, vault, directory) depending on your backend:
 
