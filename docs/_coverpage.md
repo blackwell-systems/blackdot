@@ -2,7 +2,7 @@
 
 # dotfiles
 
-> A dotfiles management framework
+> Modular dotfiles framework for the AI-assisted development era
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
