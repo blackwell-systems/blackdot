@@ -10,6 +10,10 @@ The dotfiles system is built on three core architectural systems:
 2. **Configuration Layers** (`lib/_config_layers.sh`) - 5-layer priority system for settings
 3. **Claude Code Integration** (`claude/`, `/workspace`) - Portable sessions, dotclaude profiles, git safety hooks
 
+Additional systems:
+
+4. **Hook System** (`lib/_hooks.sh`) - Lifecycle hooks for custom behavior at key points
+
 These systems work together to provide a modular, extensible foundation for AI-assisted development across machines.
 
 ## System Overview
@@ -69,7 +73,7 @@ dotfiles features preset developer --persist
 | Category | Features |
 |----------|----------|
 | **Core** | `shell` (always enabled) |
-| **Optional** | `workspace_symlink`, `claude_integration`, `vault`, `templates`, `aws_helpers`, `git_hooks`, `drift_check`, `backup_auto`, `health_metrics`, `macos_settings` |
+| **Optional** | `workspace_symlink`, `claude_integration`, `vault`, `hooks`, `templates`, `aws_helpers`, `git_hooks`, `drift_check`, `backup_auto`, `health_metrics`, `macos_settings` |
 | **Integration** | `modern_cli`, `nvm_integration`, `sdkman_integration`, `dotclaude` |
 
 **Presets:**
@@ -240,6 +244,7 @@ graph LR
     B --> D[doctor]
     B --> M[features]
     B --> N[config]
+    B --> O[hook]
     B --> E[vault]
     B --> F[backup]
     B --> G[diff]
@@ -257,6 +262,10 @@ graph LR
     N --> N1[layers]
     N --> N2[get]
     N --> N3[set]
+
+    O --> O1[list]
+    O --> O2[run]
+    O --> O3[test]
 
     E --> E1[pull]
     E --> E2[push]
@@ -307,6 +316,7 @@ dotfiles/
 │   ├── dotfiles-doctor     # Health checks
 │   ├── dotfiles-drift      # Vault comparison
 │   ├── dotfiles-features   # Feature registry management
+│   ├── dotfiles-hook       # Hook system management
 │   ├── dotfiles-sync       # Bidirectional vault sync
 │   ├── dotfiles-diff       # Preview changes
 │   ├── dotfiles-backup     # Backup/restore
@@ -340,6 +350,7 @@ dotfiles/
 │   ├── _config_layers.sh   # Configuration Layers (5-layer priority)
 │   ├── _cli_features.sh    # CLI Feature Awareness
 │   ├── _features.sh        # Feature Registry (control plane)
+│   ├── _hooks.sh           # Hook System (lifecycle hooks)
 │   ├── _drift.sh           # Fast drift detection (shell startup)
 │   ├── _state.sh           # Setup state management
 │   ├── _vault.sh           # Vault abstraction layer
@@ -353,6 +364,13 @@ dotfiles/
 │   ├── restore.sh          # Restore secrets
 │   ├── sync-to-vault.sh
 │   └── restore-*.sh        # Category restores
+│
+├── hooks/
+│   └── examples/           # Example hook scripts
+│       ├── post_vault_pull/
+│       ├── doctor_check/
+│       ├── shell_init/
+│       └── directory_change/
 │
 ├── macos/
 │   └── settings.sh         # macOS defaults
@@ -481,6 +499,42 @@ Each vault item follows a consistent schema:
   ]
 }
 ```
+
+## Hook System
+
+The hook system (`lib/_hooks.sh`) allows custom behavior at lifecycle events without modifying core scripts.
+
+### Hook Points
+
+| Category | Hook Points |
+|----------|-------------|
+| **Lifecycle** | `pre_install`, `post_install`, `pre_bootstrap`, `post_bootstrap`, `pre_upgrade`, `post_upgrade` |
+| **Vault** | `pre_vault_pull`, `post_vault_pull`, `pre_vault_push`, `post_vault_push` |
+| **Doctor** | `pre_doctor`, `post_doctor`, `doctor_check` |
+| **Shell** | `shell_init`, `shell_exit`, `directory_change` |
+| **Setup** | `pre_setup_phase`, `post_setup_phase`, `setup_complete` |
+
+### Registration Methods
+
+1. **File-based** - Scripts in `~/.config/dotfiles/hooks/<hook_point>/`
+2. **JSON config** - Hooks defined in `~/.config/dotfiles/hooks.json`
+3. **Inline** - Registered programmatically via `hook_register`
+
+### Integration Points
+
+```mermaid
+flowchart TD
+    A[install.sh] -->|pre/post_install| H[Hook System]
+    B[bootstrap-*.sh] -->|pre/post_bootstrap| H
+    C[dotfiles sync] -->|pre/post_vault_*| H
+    D[dotfiles doctor] -->|pre/post/check_doctor| H
+    E[.zshrc] -->|shell_init/exit| H
+    F[cd command] -->|directory_change| H
+
+    H --> G[User Scripts]
+```
+
+See [Hook System](hooks.md) for complete documentation.
 
 ## Setup Wizard
 

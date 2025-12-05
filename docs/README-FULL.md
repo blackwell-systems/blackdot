@@ -48,6 +48,7 @@ This is the comprehensive reference for the dotfiles framework. It covers the co
 - [Using the Dotfiles Day-to-Day](#using-the-dotfiles-day-to-day)
 - [Health Check](#health-check)
   - [The dotfiles Command](#the-dotfiles-command)
+  - [Custom Doctor Checks (Hooks)](#custom-doctor-checks)
 - [Metrics & Observability](#metrics--observability)
 - [Docker Test Environments](#docker-test-environments)
 - [CI/CD & Testing](#cicd--testing)
@@ -2090,6 +2091,9 @@ dotfiles lint            # Validate shell config syntax
 dotfiles lint --fix      # Auto-fix script permissions
 dotfiles packages        # Check Brewfile package status
 dotfiles packages --install  # Install missing packages
+dotfiles hook list       # List registered hooks
+dotfiles hook run <point> # Run hooks for a hook point
+dotfiles hook test <point> # Test hooks (dry-run + execute)
 dotfiles template init   # Setup machine-specific config templates
 dotfiles template vars   # List template variables and values
 dotfiles template render # Generate configs from templates
@@ -2118,7 +2122,27 @@ The script verifies:
 - **AWS configuration**: Config and credentials files with correct permissions
 - **Vault status**: Login and unlock state for configured backend
 - **Shell configuration**: Default shell, zsh modules, Powerlevel10k
+- **Custom hooks**: Runs `doctor_check` hooks for custom validations
 - **Health Score**: 0-100 score based on check results
+
+**Custom doctor checks**: Add your own health checks via hooks:
+
+```bash
+# Create a custom doctor check hook
+mkdir -p ~/.config/dotfiles/hooks/doctor_check
+cat > ~/.config/dotfiles/hooks/doctor_check/10-custom.sh << 'EOF'
+#!/bin/bash
+# Check VPN connection
+if pgrep -x "openconnect" > /dev/null; then
+    echo "[OK] VPN connected"
+else
+    echo "[WARN] VPN not connected"
+fi
+EOF
+chmod +x ~/.config/dotfiles/hooks/doctor_check/10-custom.sh
+```
+
+See [Hook System](hooks.md) for more on custom hooks.
 
 **Auto-fix mode**: Run with `--fix` to automatically correct permission issues:
 
