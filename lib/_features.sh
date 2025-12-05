@@ -36,6 +36,7 @@ typeset -gA FEATURE_REGISTRY=(
     ["health_metrics"]="false|Health check metrics collection and trending|optional|"
     ["macos_settings"]="true|macOS system preferences automation|optional|"
     ["config_layers"]="true|Hierarchical configuration resolution (env>project>machine>user)|optional|"
+    ["cli_feature_filter"]="true|Filter CLI help and commands based on enabled features|optional|"
 
     # Integration features (third-party tools, lazy-loaded)
     ["modern_cli"]="true|Modern CLI tools (eza, bat, ripgrep, fzf, zoxide)|integration|"
