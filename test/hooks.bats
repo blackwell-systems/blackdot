@@ -655,3 +655,127 @@ EOF
     [ "$status" -eq 0 ]
     [[ "$output" == *"sourced multiple times without error"* ]]
 }
+
+# ============================================================
+# CLI Command Tests (bin/dotfiles-hook)
+# ============================================================
+
+@test "dotfiles-hook command exists and is executable" {
+    [ -x "${DOTFILES_DIR}/bin/dotfiles-hook" ]
+}
+
+@test "dotfiles-hook --help shows usage" {
+    run "${DOTFILES_DIR}/bin/dotfiles-hook" --help
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Usage:"* ]]
+    [[ "$output" == *"Commands:"* ]]
+}
+
+@test "dotfiles-hook list shows all hook points" {
+    run "${DOTFILES_DIR}/bin/dotfiles-hook" list
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Hook System"* ]]
+    [[ "$output" == *"Lifecycle"* ]]
+    [[ "$output" == *"Vault"* ]]
+}
+
+@test "dotfiles-hook list <point> shows specific point" {
+    run "${DOTFILES_DIR}/bin/dotfiles-hook" list post_vault_pull
+    [ "$status" -eq 0 ]
+    # Output has ANSI color codes, so check parts separately
+    [[ "$output" == *"Hooks for:"* ]]
+    [[ "$output" == *"post_vault_pull"* ]]
+}
+
+@test "dotfiles-hook list fails for invalid point" {
+    run "${DOTFILES_DIR}/bin/dotfiles-hook" list invalid_hook
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"Invalid hook point"* ]]
+}
+
+@test "dotfiles-hook points lists all hook points with descriptions" {
+    run "${DOTFILES_DIR}/bin/dotfiles-hook" points
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Available Hook Points"* ]]
+    [[ "$output" == *"pre_vault_pull"* ]]
+    [[ "$output" == *"Before restoring secrets"* ]]
+}
+
+@test "dotfiles-hook run requires point argument" {
+    run "${DOTFILES_DIR}/bin/dotfiles-hook" run
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"Hook point required"* ]]
+}
+
+@test "dotfiles-hook run fails for invalid point" {
+    run "${DOTFILES_DIR}/bin/dotfiles-hook" run invalid_hook
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"Invalid hook point"* ]]
+}
+
+@test "dotfiles-hook run succeeds with no hooks" {
+    run "${DOTFILES_DIR}/bin/dotfiles-hook" run post_vault_pull
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Hooks completed successfully"* ]]
+}
+
+@test "dotfiles-hook run --verbose shows detailed output" {
+    run "${DOTFILES_DIR}/bin/dotfiles-hook" run --verbose post_vault_pull
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"running hooks"* ]] || [[ "$output" == *"Hooks completed"* ]]
+}
+
+@test "dotfiles-hook add requires both arguments" {
+    run "${DOTFILES_DIR}/bin/dotfiles-hook" add post_vault_pull
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"required"* ]]
+}
+
+@test "dotfiles-hook add fails for non-existent script" {
+    run "${DOTFILES_DIR}/bin/dotfiles-hook" add post_vault_pull /nonexistent/script.sh
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"not found"* ]]
+}
+
+@test "dotfiles-hook remove requires both arguments" {
+    run "${DOTFILES_DIR}/bin/dotfiles-hook" remove post_vault_pull
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"required"* ]]
+}
+
+@test "dotfiles-hook test requires point argument" {
+    run "${DOTFILES_DIR}/bin/dotfiles-hook" test
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"Hook point required"* ]]
+}
+
+@test "dotfiles-hook test shows hooks and runs them" {
+    run "${DOTFILES_DIR}/bin/dotfiles-hook" test post_vault_pull
+    [ "$status" -eq 0 ]
+    # Output has ANSI color codes, so check parts separately
+    [[ "$output" == *"Testing hooks for:"* ]]
+    [[ "$output" == *"post_vault_pull"* ]]
+}
+
+# ============================================================
+# CLI Feature Awareness Integration
+# ============================================================
+
+@test "hook command is registered in CLI_COMMAND_FEATURES" {
+    run zsh -c "
+        source '${DOTFILES_DIR}/lib/_cli_features.sh'
+        echo \"\${CLI_COMMAND_FEATURES[hook]}\"
+    "
+    [ "$status" -eq 0 ]
+    [ "$output" = "hooks" ]
+}
+
+@test "hook subcommands are registered in CLI_SUBCOMMAND_FEATURES" {
+    run zsh -c "
+        source '${DOTFILES_DIR}/lib/_cli_features.sh'
+        echo \"\${CLI_SUBCOMMAND_FEATURES[hook:list]}\"
+        echo \"\${CLI_SUBCOMMAND_FEATURES[hook:run]}\"
+    "
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"hooks"* ]]
+}
