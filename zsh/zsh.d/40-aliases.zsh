@@ -477,6 +477,13 @@ dotfiles() {
 
         # Configuration layers management
         config|cfg)
+            # Feature guard
+            if type cli_require_feature &>/dev/null; then
+                if ! cli_require_feature "config_layers" "config $*" "$@"; then
+                    return 1
+                fi
+                set -- "${CLI_FILTERED_ARGS[@]}"
+            fi
             "$DOTFILES_DIR/bin/dotfiles-config" "$@"
             ;;
 
