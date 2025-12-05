@@ -177,8 +177,10 @@ discover_other_secrets() {
         info "Found: $xdg_vars"
     else
         # Check templates directory location (legacy/repo location)
-        # Try common dotfiles locations
-        local dotfiles_dirs=("$HOME/dotfiles" "$HOME/.dotfiles" "$HOME/workspace/dotfiles")
+        # Try common dotfiles locations (including configured workspace target)
+        local ws_target="${WORKSPACE_TARGET:-$HOME/workspace}"
+        ws_target="${ws_target/#\~/$HOME}"
+        local dotfiles_dirs=("$HOME/dotfiles" "$HOME/.dotfiles" "$ws_target/dotfiles")
         for dir in "${dotfiles_dirs[@]}"; do
             if [[ -f "$dir/templates/_variables.local.sh" ]]; then
                 items+=("Template-Variables:$dir/templates/_variables.local.sh")
@@ -309,8 +311,10 @@ generate_vault_json() {
         pass "  Found: $xdg_vars"
         syncable_items+=("Template-Variables:~/.config/dotfiles/template-variables.sh")
     else
-        # Check common dotfiles locations
-        for dir in "$HOME/dotfiles" "$HOME/.dotfiles" "$HOME/workspace/dotfiles"; do
+        # Check common dotfiles locations (including configured workspace target)
+        local ws_target="${WORKSPACE_TARGET:-$HOME/workspace}"
+        ws_target="${ws_target/#\~/$HOME}"
+        for dir in "$HOME/dotfiles" "$HOME/.dotfiles" "$ws_target/dotfiles"; do
             if [[ -f "$dir/templates/_variables.local.sh" ]]; then
                 pass "  Found: $dir/templates/_variables.local.sh"
                 syncable_items+=("Template-Variables:$dir/templates/_variables.local.sh")

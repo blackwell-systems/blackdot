@@ -32,7 +32,7 @@ typeset -A DIFF_ITEMS=(
 get_vault_content() {
     local item_name="$1"
     local session="${BW_SESSION:-}"
-    local vault_dir="$HOME/workspace/dotfiles/vault"
+    local vault_dir="$DOTFILES_DIR/vault"
 
     if [[ -z "$session" && -f "$vault_dir/.bw-session" ]]; then
         session=$(cat "$vault_dir/.bw-session")
@@ -146,7 +146,7 @@ show_restore_preview() {
 # Check Bitwarden session
 check_session() {
     local session="${BW_SESSION:-}"
-    local vault_dir="$HOME/workspace/dotfiles/vault"
+    local vault_dir="$DOTFILES_DIR/vault"
 
     if [[ -z "$session" && -f "$vault_dir/.bw-session" ]]; then
         session=$(cat "$vault_dir/.bw-session")
