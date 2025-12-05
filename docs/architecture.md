@@ -6,11 +6,11 @@ This page describes the architecture of the dotfiles framework—the systems tha
 
 The dotfiles system is built on three core architectural systems:
 
-1. **Feature Registry** (`lib/_features.sh`) - The control plane for all optional functionality
+1. **Feature Registry** (`lib/_features.sh`) - Modular control plane for all functionality
 2. **Configuration Layers** (`lib/_config_layers.sh`) - 5-layer priority system for settings
-3. **CLI Feature Awareness** (`lib/_cli_features.sh`) - Adaptive CLI based on enabled features
+3. **Claude Code Integration** (`claude/`, `/workspace`) - Portable sessions, dotclaude profiles, git safety hooks
 
-These systems work together to provide a modular, extensible foundation.
+These systems work together to provide a modular, extensible foundation for AI-assisted development across machines.
 
 ## System Overview
 

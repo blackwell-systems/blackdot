@@ -10,7 +10,7 @@
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> A dotfiles management framework built on three core systems: **Feature Registry** (control plane for all functionality), **Configuration Layers** (5-layer priority hierarchy), and **CLI Feature Awareness** (adaptive CLI). Designed for developers who work across machines with Claude Code. Everything is optional except shell config.
+> A dotfiles management framework built on **Feature Registry** (modular control plane), **Configuration Layers** (multi-machine settings), and **Claude Code Integration** (portable AI-assisted development). Designed for developers who work across machines. Everything is optional except shell config.
 
 [Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
 
@@ -325,28 +325,26 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull   # No drift check (for CI/autom
 └─────────────────────────────────────────────────────────────┘
          │                              │
          ▼                              ▼
-┌─────────────────────────┐   ┌─────────────────────────┐
-│  Configuration Layers   │   │  CLI Feature Awareness  │
-│ (lib/_config_layers.sh) │   │ (lib/_cli_features.sh)  │
-│  5-layer priority for   │   │  Adaptive CLI based on  │
-│  all settings           │   │  enabled features       │
-└─────────────────────────┘   └─────────────────────────┘
+┌─────────────────────────┐   ┌───────────────────────────┐
+│  Configuration Layers   │   │  Claude Code Integration  │
+│ (lib/_config_layers.sh) │   │  (claude/, /workspace)    │
+│  5-layer priority for   │   │  Portable sessions,       │
+│  all settings           │   │  dotclaude, git hooks     │
+└─────────────────────────┘   └───────────────────────────┘
 ```
 
 **1. Feature Registry** – Central control plane for all functionality. Enable/disable features, resolve dependencies, apply presets (minimal, developer, claude, full).
 
 **2. Configuration Layers** – 5-layer priority system: Environment → Project → Machine → User → Defaults. Settings come from the right place automatically.
 
-**3. CLI Feature Awareness** – The CLI adapts to enabled features. Help hides disabled commands. Tab completion adjusts. Running disabled commands shows enable hints.
+**3. Claude Code Integration** – Portable sessions via `/workspace` symlink, vault-synced profiles with [dotclaude](https://github.com/blackwell-systems/dotclaude), git safety hooks, multi-backend support (Anthropic Max, AWS Bedrock, Google Vertex).
 
 **Additional capabilities:**
 
 - **Multi-Vault Backend** – Bitwarden, 1Password, or pass with unified API
-- **Portable Claude Sessions** – `/workspace` symlink for consistent paths across machines
 - **Self-Healing** – `dotfiles doctor --fix` repairs permissions and symlinks
 - **Machine Templates** – Generate machine-specific configs from templates
-
-**Works with [dotclaude](https://github.com/blackwell-systems/dotclaude)** for Claude Code profile management.
+- **Adaptive CLI** – Help and tab completion adjust based on enabled features
 
 ---
 
@@ -399,19 +397,20 @@ This allows machine-specific overrides without editing the main config, project-
 </details>
 
 <details>
-<summary><b>CLI Feature Awareness</b> - Adaptive CLI based on enabled features</summary>
+<summary><b>Claude Code Integration</b> - Portable AI-assisted development</summary>
 
 ```bash
-dotfiles help                  # Shows only enabled feature commands
-dotfiles vault pull            # Shows enable hint if vault disabled
+dotfiles setup     # Step 6: Claude Code integration
+dotfiles doctor    # Validates Claude setup
 ```
 
-The CLI adapts to your enabled features:
-- Help output hides commands for disabled features
-- Tab completion excludes disabled feature commands
-- Running a disabled command shows an enable hint with the exact command to enable it
+**Portable sessions:** `/workspace` symlink provides consistent paths across machines, so Claude Code conversations continue seamlessly between macOS, Linux, and WSL2.
 
-This keeps the CLI clean and focused on what you actually use.
+**Profile management:** Integrates with [dotclaude](https://github.com/blackwell-systems/dotclaude) for managing multiple Claude contexts (work, personal, client projects). Profiles sync via vault.
+
+**Git safety hooks:** PreToolUse hook blocks dangerous commands like `git push --force`. SessionStart hook validates branch sync status.
+
+**Multi-backend:** Works with Anthropic Max, AWS Bedrock, and Google Vertex AI.
 
 </details>
 
@@ -1057,7 +1056,7 @@ See [Brewfile](Brewfile) for complete package list.
 |----------------------|-----------------------------------------------|----------------------------------|
 | **Feature Registry** | Central control plane with presets              | None                             |
 | **Configuration Layers** | 5-layer priority (env/project/machine/user/defaults) | Single config file        |
-| **CLI Feature Awareness** | Adaptive CLI based on enabled features       | Static CLI                       |
+| **Claude Code Integration** | Portable sessions, dotclaude, git hooks   | None                             |
 | **Secrets management** | Multi-vault (Bitwarden, 1Password, pass)      | Manual copy between machines     |
 | **Health validation**  | Checker with `--fix`                          | None                             |
 | **Drift detection**    | Compare local vs vault state                  | None                             |
@@ -1067,7 +1066,6 @@ See [Brewfile](Brewfile) for complete package list.
 | **Modular shell config** | 10 modules in `zsh.d/`                      | Single monolithic file           |
 | **Optional components** | Feature Registry with presets                | All-or-nothing                   |
 | **Cross-platform**     | macOS, Linux, Windows, WSL2, Docker           | Usually single-platform          |
-| **Claude Code sessions** | Portable via `/workspace`                   | None                             |
 
 ### Why This Repo vs chezmoi?
 
@@ -1077,10 +1075,9 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 |---------|-----------|---------|
 | **Feature Registry** | Central control plane with presets | None |
 | **Configuration Layers** | 5-layer priority system | `.chezmoi.toml` only |
-| **CLI Feature Awareness** | Adaptive CLI | Static CLI |
+| **Claude Code Integration** | Portable sessions, dotclaude, git hooks | None |
 | **Secret Management** | 3 vault backends (bw/op/pass) with unified API | External tools only (no unified API) |
 | **Bidirectional Sync** | Local ↔ Vault | Templates only (one-way) |
-| **Claude Code Sessions** | Native integration | None |
 | **Health Checks** | Yes, with auto-fix | None |
 | **Drift Detection** | Local vs Vault comparison | `chezmoi diff` (files only) |
 | **Schema Validation** | SSH keys, configs | None |
@@ -1094,11 +1091,10 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 |---------|-----------|------------|--------|---------------|------|
 | **Feature Registry** | Central control plane | No | No | No | No |
 | **Configuration Layers** | 5-layer priority | No | No | No | No |
-| **CLI Feature Awareness** | Adaptive CLI | No | No | No | No |
+| **Claude Code Integration** | Portable sessions, dotclaude, git hooks | No | No | No | No |
 | **Secrets Management** | Multi-vault (bw/op/pass) | Manual | Manual | Manual | Manual |
 | **Bidirectional Sync** | Local ↔ Vault | No | No | No | No |
 | **Cross-Platform** | macOS, Linux, Windows, WSL2, Docker | Limited | macOS only | macOS only | Limited |
-| **Claude Code Sessions** | Portable via `/workspace` | No | No | No | No |
 | **Health Checks** | Yes, with auto-fix | No | No | No | No |
 | **Drift Detection** | Local vs Vault | No | No | No | No |
 | **Schema Validation** | SSH keys, configs | No | No | No | No |
@@ -1112,16 +1108,15 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 
 ### What Makes This Unique
 
-1. **Only dotfiles with Feature Registry architecture** - Central control plane for all functionality with presets and dependency resolution
-2. **Only dotfiles with Configuration Layers** - 5-layer priority system (env → project → machine → user → defaults)
-3. **Only dotfiles with CLI Feature Awareness** - Adaptive CLI that adjusts based on enabled features
+1. **Only dotfiles built for Claude Code** - Portable sessions, dotclaude profiles, git safety hooks, multi-backend support
+2. **Only dotfiles with Feature Registry architecture** - Central control plane with presets and dependency resolution
+3. **Only dotfiles with Configuration Layers** - 5-layer priority system (env → project → machine → user → defaults)
 4. **Only dotfiles with multi-vault backend support** - Bitwarden, 1Password, or pass with unified API
-5. **Only dotfiles with Claude Code session portability** - `/workspace` symlink + auto-redirect
-6. **Only dotfiles with comprehensive health checks** - Validator with auto-fix
-7. **Only dotfiles with drift detection** - Compare local vs vault state
-8. **Only dotfiles with schema validation** - Ensures SSH keys/configs are valid before restore
-9. **Only dotfiles with Docker bootstrap testing** - Reproducible CI/CD environments
-10. **Only dotfiles with machine-specific templates** - Auto-generate configs for work vs personal machines
+5. **Only dotfiles with comprehensive health checks** - Validator with auto-fix
+6. **Only dotfiles with drift detection** - Compare local vs vault state
+7. **Only dotfiles with schema validation** - Ensures SSH keys/configs are valid before restore
+8. **Only dotfiles with Docker bootstrap testing** - Reproducible CI/CD environments
+9. **Only dotfiles with machine-specific templates** - Auto-generate configs for work vs personal machines
 
 </details>
 
