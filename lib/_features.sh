@@ -123,7 +123,8 @@ feature_enabled() {
     # 4. Check config file
     if [[ -f "${CONFIG_FILE:-}" ]]; then
         local config_value
-        config_value=$(jq -r ".features.${feature} // empty" "$CONFIG_FILE" 2>/dev/null || true)
+        # Note: don't use // empty as it treats false as empty
+        config_value=$(jq -r ".features.${feature}" "$CONFIG_FILE" 2>/dev/null || true)
         if [[ -n "$config_value" && "$config_value" != "null" ]]; then
             [[ "$config_value" == "true" ]]
             return $?
