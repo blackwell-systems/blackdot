@@ -2097,12 +2097,34 @@ dotfiles doctor --fix
 **Drift detection**: Compare local files vs vault:
 
 ```bash
-dotfiles drift
+dotfiles drift           # Full check (connects to vault)
+dotfiles drift --quick   # Fast check (local checksums only, <50ms)
 ```
 
 This checks if your local `~/.ssh/config`, `~/.aws/config`, `~/.gitconfig`, etc. differ from what's stored in your vault. Useful for detecting unsync'd changes before switching machines.
 
-Example drift output:
+### Automatic Drift Detection on Shell Startup
+
+The shell automatically checks for drift when you open a new terminal. This uses a fast, local-only comparison (<50ms) that doesn't require vault authentication.
+
+**How it works:**
+1. After `dotfiles vault pull`, file checksums are saved to `~/.cache/dotfiles/vault-state.json`
+2. On every shell startup, local files are compared against cached checksums
+3. If differences are detected, you'll see a warning:
+
+```
+⚠ Drift detected: Git-Config Template-Variables
+  Run: dotfiles drift (to compare) or dotfiles vault pull (to restore)
+```
+
+**Disable automatic checks:**
+```bash
+export DOTFILES_SKIP_DRIFT_CHECK=1
+```
+
+Add this to `~/.zshrc.local` to permanently disable.
+
+**Example drift output (full mode):**
 
 ```
 === Drift Detection (Local vs Vault) ===
