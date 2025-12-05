@@ -1930,6 +1930,7 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 
 - `dotfiles vault pull` → Restore all secrets from vault
 - `dotfiles vault push` → Sync local files to vault
+- `dotfiles vault sync` → **Smart bidirectional sync** (auto-detects push/pull direction)
 - `dotfiles vault setup` → Interactive onboarding wizard for new vault items
 - `dotfiles vault list` → List vault items
 - `dotfiles vault check` → Validate vault items exist
@@ -1939,6 +1940,8 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 **Dotfiles Management:**
 
 - `dotfiles status` → Visual dashboard
+- `dotfiles sync` → Smart bidirectional vault sync (shortcut for `dotfiles vault sync`)
+- `dotfiles drift` → Compare local files vs vault
 - `dotfiles doctor` → Run health check + vault item validation
 - `dotfiles backup` → Create timestamped backup of config files
 - `dotfiles backup --list` → List available backups
@@ -2134,6 +2137,62 @@ Add this to `~/.zshrc.local` to permanently disable.
 
 To sync local changes to vault:
   dotfiles vault push --all
+```
+
+### Bidirectional Sync
+
+Instead of manually choosing `vault push` or `vault pull`, use the smart **sync** command that automatically determines the correct direction for each file:
+
+```bash
+dotfiles sync                     # Smart sync all items
+dotfiles sync --dry-run           # Preview what would happen
+dotfiles sync Git-Config          # Sync specific item
+```
+
+**How it determines direction:**
+
+| Condition | Action |
+|-----------|--------|
+| Local changed, vault unchanged | Push to vault |
+| Vault changed, local unchanged | Pull from vault |
+| Both changed | **Conflict** - requires resolution |
+| Neither changed | Skip (already in sync) |
+
+**Resolving conflicts:**
+
+When both sides have changed, use force flags:
+
+```bash
+dotfiles sync --force-local   # Push local changes, overwrite vault
+dotfiles sync --force-vault   # Pull vault changes, overwrite local
+```
+
+**Example sync output:**
+
+```
+=== Dotfiles Sync ===
+Syncing 6 items with Bitwarden
+
+--- Git-Config ---
+    Local: ~/.gitconfig
+[INFO] Local → Vault
+[OK] Pushed Git-Config to Bitwarden
+
+--- AWS-Config ---
+    Local: ~/.aws/config
+[OK] Already in sync
+
+--- SSH-Config ---
+    Local: ~/.ssh/config
+[INFO] Vault → Local
+[OK] Pulled SSH-Config to ~/.ssh/config
+
+========================================
+SYNC SUMMARY:
+  Pushed to vault:    1
+  Pulled from vault:  1
+  Already in sync:    4
+========================================
 ```
 
 Example output:
