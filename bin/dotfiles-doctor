@@ -126,6 +126,23 @@ section() {
     echo -e "${BOLD}${CYAN}── $1 ──${NC}"
 }
 
+# Run hook via zsh (since hooks library is zsh)
+run_hook() {
+    local hook_point="$1"
+
+    # Skip if zsh not available
+    command -v zsh &>/dev/null || return 0
+
+    # Skip if hooks library doesn't exist
+    [[ -f "$DOTFILES_DIR/lib/_hooks.sh" ]] || return 0
+
+    # Run hooks via zsh (silently fail if hooks disabled)
+    zsh -c "
+        source '$DOTFILES_DIR/lib/_hooks.sh' 2>/dev/null || exit 0
+        hook_run '$hook_point'
+    " 2>/dev/null || true
+}
+
 # Banner
 echo ""
 echo -e "${BOLD}${CYAN}"
@@ -139,6 +156,9 @@ EOF
 echo -e "${NC}"
 echo -e "${DIM}Comprehensive dotfiles health check${NC}"
 echo ""
+
+# Run pre-doctor hooks
+run_hook "pre_doctor"
 
 # ============================================================
 # Section 1: Version & Updates
@@ -484,6 +504,15 @@ else
     info "Template system not configured (optional)"
     info "Run 'dotfiles template init' to set up machine-specific configs"
 fi
+
+# ============================================================
+# Section 10: Custom Checks (via hooks)
+# ============================================================
+# Run doctor_check hooks - users can add custom validation
+run_hook "doctor_check"
+
+# Run post-doctor hooks
+run_hook "post_doctor"
 
 # ============================================================
 # Summary with Health Score Interpretation

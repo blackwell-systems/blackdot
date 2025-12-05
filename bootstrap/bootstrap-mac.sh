@@ -27,6 +27,9 @@ run_interactive_config
 
 echo "=== macOS bootstrap starting ==="
 
+# Run pre-bootstrap hooks
+run_hook "pre_bootstrap"
+
 # ============================================================
 # 1. Xcode CLI tools (macOS-specific)
 # ============================================================
@@ -86,6 +89,9 @@ link_dotfiles
 # ============================================================
 # Done
 # ============================================================
+# Run post-bootstrap hooks
+run_hook "post_bootstrap"
+
 echo "=== macOS bootstrap complete ==="
 echo ""
 echo "Next step:"

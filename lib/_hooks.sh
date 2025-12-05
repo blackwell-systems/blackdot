@@ -412,10 +412,12 @@ _hook_run_json_hooks() {
     count=$(echo "$hooks_json" | jq 'length' 2>/dev/null) || return 0
     [[ "$count" -eq 0 ]] && return 0
 
-    local i=0
+    # Declare loop variables outside loop to prevent zsh echoing on reassignment
+    local i enabled name fail_ok cmd script func result
+
+    i=0
     while (( i < count )); do
         # Check if enabled (default: true)
-        local enabled
         enabled=$(echo "$hooks_json" | jq -r ".[$i].enabled" 2>/dev/null)
         [[ "$enabled" == "null" ]] && enabled="true"
         if [[ "$enabled" != "true" ]]; then
@@ -423,20 +425,17 @@ _hook_run_json_hooks() {
             continue
         fi
 
-        local name
         name=$(echo "$hooks_json" | jq -r ".[$i].name // \"hook-$i\"" 2>/dev/null)
 
-        local fail_ok
         fail_ok=$(echo "$hooks_json" | jq -r ".[$i].fail_ok" 2>/dev/null)
         [[ "$fail_ok" == "null" ]] && fail_ok="false"
 
         # Get execution type: command, script, or function
-        local cmd script func
         cmd=$(echo "$hooks_json" | jq -r ".[$i].command // empty" 2>/dev/null)
         script=$(echo "$hooks_json" | jq -r ".[$i].script // empty" 2>/dev/null)
         func=$(echo "$hooks_json" | jq -r ".[$i].function // empty" 2>/dev/null)
 
-        local result=0
+        result=0
 
         if [[ -n "$cmd" ]]; then
             [[ "$HOOKS_VERBOSE" == "true" ]] && \

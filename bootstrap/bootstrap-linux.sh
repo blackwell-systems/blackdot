@@ -39,6 +39,9 @@ run_interactive_config
 
 echo "=== Linux bootstrap starting ($PLATFORM_NAME) ==="
 
+# Run pre-bootstrap hooks
+run_hook "pre_bootstrap"
+
 # ============================================================
 # 1. Basic apt packages (Linux-specific)
 # ============================================================
@@ -108,6 +111,9 @@ fi
 # ============================================================
 # Done - Platform-specific tips
 # ============================================================
+# Run post-bootstrap hooks
+run_hook "post_bootstrap"
+
 echo "=== Linux bootstrap complete ($PLATFORM_NAME) ==="
 echo ""
 echo "Next step:"

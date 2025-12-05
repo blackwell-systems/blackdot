@@ -19,6 +19,7 @@ source "$DOTFILES_DIR/lib/_logging.sh"
 source "$DOTFILES_DIR/lib/_config.sh"
 source "$DOTFILES_DIR/lib/_vault.sh"
 source "$DOTFILES_DIR/lib/_drift.sh"
+source "$DOTFILES_DIR/lib/_hooks.sh"
 source "$DOTFILES_DIR/vault/_common.sh"
 
 # ============================================================
@@ -384,6 +385,18 @@ IN_SYNC=0
 CONFLICTS=0
 FAILED=0
 
+# Run pre-sync hooks (unless dry run)
+if ! $DRY_RUN; then
+    # Fire pre_vault_push if pushing is possible
+    if $FORCE_LOCAL || ! $FORCE_VAULT; then
+        hook_run "pre_vault_push" 2>/dev/null || true
+    fi
+    # Fire pre_vault_pull if pulling is possible
+    if $FORCE_VAULT || ! $FORCE_LOCAL; then
+        hook_run "pre_vault_pull" 2>/dev/null || true
+    fi
+fi
+
 for item_name in "${ITEMS_TO_SYNC[@]}"; do
     echo -e "${BLUE}--- $item_name ---${NC}"
     local_path="${SYNCABLE_ITEMS[$item_name]}"
@@ -450,6 +463,16 @@ if [[ $FAILED -gt 0 ]]; then
     echo -e "  ${RED}Failed:               $FAILED${NC}"
 fi
 echo "========================================"
+
+# Run post-sync hooks based on what operations were performed
+if ! $DRY_RUN; then
+    if [[ $PUSHED -gt 0 ]]; then
+        hook_run "post_vault_push" 2>/dev/null || true
+    fi
+    if [[ $PULLED -gt 0 ]]; then
+        hook_run "post_vault_pull" 2>/dev/null || true
+    fi
+fi
 
 # Update drift state after successful sync
 if ! $DRY_RUN && [[ $PUSHED -gt 0 || $PULLED -gt 0 ]]; then

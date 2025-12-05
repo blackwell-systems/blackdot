@@ -164,6 +164,39 @@ if [[ -f ~/.zshrc.local ]]; then
 fi
 
 # =========================
+# Hooks Integration
+# =========================
+# Source hooks library and run shell_init hooks
+# Enables custom behavior at shell lifecycle points
+_dotfiles_init_hooks() {
+  local dotfiles_dir="${DOTFILES_DIR:-${HOME}/workspace/dotfiles}"
+  local hooks_lib="$dotfiles_dir/lib/_hooks.sh"
+
+  # Skip if hooks library doesn't exist
+  [[ -f "$hooks_lib" ]] || return 0
+
+  # Source hooks library
+  source "$hooks_lib" 2>/dev/null || return 0
+
+  # Run shell_init hooks
+  hook_run "shell_init" 2>/dev/null || true
+
+  # Set up directory change hook
+  _dotfiles_directory_change_hook() {
+    hook_run "directory_change" "$PWD" 2>/dev/null || true
+  }
+  add-zsh-hook chpwd _dotfiles_directory_change_hook 2>/dev/null
+
+  # Set up shell exit hook
+  zshexit() {
+    hook_run "shell_exit" 2>/dev/null || true
+  }
+}
+
+# Initialize hooks (silently)
+_dotfiles_init_hooks
+
+# =========================
 # zsh-syntax-highlighting (must be at the end)
 # =========================
 if command -v brew >/dev/null 2>&1; then
