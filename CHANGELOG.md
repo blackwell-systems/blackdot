@@ -8,6 +8,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- **CLI Feature Awareness** - Smart CLI that adapts to enabled features (`lib/_cli_features.sh`)
+  - `dotfiles help` only shows commands for enabled features (cleaner UX)
+  - `dotfiles help --all` shows all commands with enabled/disabled indicators (● / ○)
+  - Feature guards prevent running disabled commands with helpful enable message
+  - `--force` flag bypasses feature guard for any command
+  - Command-to-feature mapping: vault→vault, config→config_layers, backup→backup_auto, etc.
+  - Section-level filtering in help output (Vault Operations, Backup & Safety, etc.)
+  - Footer shows hidden features when commands are filtered
+
+- **Configuration Layers System** - Hierarchical config resolution (`lib/_config_layers.sh`)
+  - 5-layer priority: env > project > machine > user > defaults
+  - `dotfiles config get <key> [default]` - Get value with layer resolution
+  - `dotfiles config set <layer> <key> <value>` - Set in specific layer
+  - `dotfiles config show <key>` - Display value from all layers
+  - `dotfiles config source <key>` - Get value with source info (JSON)
+  - `dotfiles config list` - Show layer locations and status
+  - `dotfiles config merged` - Show merged config from all layers
+  - `dotfiles config init machine|project` - Initialize layer configs
+  - Project config (`.dotfiles.json`) travels with repos
+  - Machine config (`~/.config/dotfiles/machine.json`) stays local
+  - Environment variable override: `DOTFILES_<KEY>` (e.g., `DOTFILES_VAULT_BACKEND`)
+
 - **Feature Registry** - Centralized control for all optional features (`lib/_features.sh`)
   - `dotfiles features` - List all features with enabled/disabled status
   - `dotfiles features enable <name> [--persist]` - Enable a feature (optionally persist to config)
@@ -61,6 +84,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `prompt_file_path()` - Validated prompt for file paths
 
 ### Fixed
+- **Missing feature guard on config command** - `dotfiles config` now properly respects `config_layers` feature state
+  - Shows helpful "feature not enabled" message when disabled
+  - Consistent with other feature-gated commands (vault, backup, template)
+  - Use `--force` to bypass if needed
+
 - **Underscore in vault item names** - Regex now allows underscores in item names
   - Pattern changed from `^[A-Z][A-Za-z0-9-]*$` to `^[A-Z][A-Za-z0-9_-]*$`
   - Fixes validation error for items like `SSH-Enterprise_Ghub`
