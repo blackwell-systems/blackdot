@@ -347,3 +347,143 @@ vault_backend_health_check() {
 
     return $status
 }
+
+# ============================================================
+# Location Management (v3.1)
+# Directory-based organization for pass
+# ============================================================
+
+# List available directories (top-level prefixes)
+# Returns: JSON array of directory names
+vault_backend_list_locations() {
+    local session="$1"  # Unused for pass
+
+    # Find top-level directories in password store
+    local dirs=()
+    if [[ -d "$PASSWORD_STORE_DIR" ]]; then
+        while IFS= read -r dir; do
+            [[ -n "$dir" ]] && dirs+=("$dir")
+        done < <(find "$PASSWORD_STORE_DIR" -maxdepth 1 -type d -not -name ".*" -not -path "$PASSWORD_STORE_DIR" 2>/dev/null | xargs -n1 basename 2>/dev/null)
+    fi
+
+    # Output as JSON array
+    if [[ ${#dirs[@]} -eq 0 ]]; then
+        echo "[]"
+    else
+        printf '%s\n' "${dirs[@]}" | jq -R . | jq -s .
+    fi
+}
+
+# Check if a directory exists
+vault_backend_location_exists() {
+    local dir_name="$1"
+    local session="$2"  # Unused
+
+    [[ -d "$PASSWORD_STORE_DIR/$dir_name" ]]
+}
+
+# Create a new directory
+vault_backend_create_location() {
+    local dir_name="$1"
+    local session="$2"  # Unused
+
+    if [[ -z "$dir_name" ]]; then
+        fail "Directory name required"
+        return 1
+    fi
+
+    local full_path="$PASSWORD_STORE_DIR/$dir_name"
+
+    if [[ -d "$full_path" ]]; then
+        info "Directory '$dir_name' already exists"
+        return 0
+    fi
+
+    if mkdir -p "$full_path"; then
+        pass "Created directory '$dir_name' in password store"
+        return 0
+    else
+        fail "Failed to create directory '$dir_name'"
+        return 1
+    fi
+}
+
+# List items in a specific directory
+# Usage: vault_backend_list_items_in_location "directory" "dotfiles" "$SESSION"
+vault_backend_list_items_in_location() {
+    local loc_type="$1"
+    local loc_value="$2"
+    local session="$3"  # Unused
+
+    case "$loc_type" in
+        directory)
+            if [[ -z "$loc_value" ]]; then
+                # No directory specified, use default prefix
+                loc_value="$PASS_PREFIX"
+            fi
+
+            local search_dir="$PASSWORD_STORE_DIR/$loc_value"
+
+            if [[ ! -d "$search_dir" ]]; then
+                echo "[]"
+                return 0
+            fi
+
+            # Find all .gpg files and convert to JSON array
+            find "$search_dir" -name "*.gpg" -type f 2>/dev/null | while read -r file; do
+                # Extract item name from path
+                local rel_path="${file#$PASSWORD_STORE_DIR/$loc_value/}"
+                local item_name="${rel_path%.gpg}"
+                echo "$item_name"
+            done | jq -R . | jq -s 'map({name: ., type: 2, id: .})'
+            ;;
+
+        none|"")
+            # No location filter, use default prefix
+            vault_backend_list_items "$session"
+            ;;
+
+        *)
+            warn "Unknown location type for pass: $loc_type (use 'directory')"
+            vault_backend_list_items "$session"
+            ;;
+    esac
+}
+
+# Create item in a specific directory
+# Usage: vault_backend_create_item_in_location "Item-Name" "content" "directory" "$SESSION"
+vault_backend_create_item_in_location() {
+    local item_name="$1"
+    local content="$2"
+    local dir_name="$3"
+    local session="$4"  # Unused
+
+    if [[ -z "$item_name" ]]; then
+        fail "Item name required"
+        return 1
+    fi
+
+    # Use specified directory or default prefix
+    local prefix="${dir_name:-$PASS_PREFIX}"
+    local pass_path="$prefix/$item_name"
+
+    # Check if exists
+    if [[ -f "$PASSWORD_STORE_DIR/${pass_path}.gpg" ]]; then
+        fail "Item '$item_name' already exists in '$prefix'. Use update instead."
+        return 1
+    fi
+
+    # Create parent directory if needed
+    local parent_dir
+    parent_dir=$(dirname "$PASSWORD_STORE_DIR/${pass_path}.gpg")
+    mkdir -p "$parent_dir"
+
+    # Insert content
+    if printf '%s' "$content" | pass insert -m "$pass_path" >/dev/null 2>&1; then
+        pass "Created item '$item_name' in directory '$prefix'"
+        return 0
+    else
+        fail "Failed to create item '$item_name'"
+        return 1
+    fi
+}
