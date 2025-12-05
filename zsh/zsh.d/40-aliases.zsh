@@ -27,7 +27,10 @@ dotfiles() {
             "$DOTFILES_DIR/bin/dotfiles-doctor" "$@"
             ;;
         drift)
-            "$DOTFILES_DIR/bin/dotfiles-drift"
+            "$DOTFILES_DIR/bin/dotfiles-drift" "$@"
+            ;;
+        sync)
+            "$DOTFILES_DIR/bin/dotfiles-sync" "$@"
             ;;
         diff)
             "$DOTFILES_DIR/bin/dotfiles-diff" "$@"
@@ -94,6 +97,9 @@ dotfiles() {
                 push)
                     "$VAULT_DIR/sync-to-vault.sh" "$@"
                     ;;
+                sync)
+                    "$DOTFILES_DIR/bin/dotfiles-sync" "$@"
+                    ;;
                 status)
                     "$VAULT_DIR/status.sh" "$@"
                     ;;
@@ -127,6 +133,9 @@ dotfiles() {
                     echo "                   ${DIM}--force: Skip drift check, overwrite local${NC}"
                     echo "  ${GREEN}push${NC} [item]      Push secrets TO vault"
                     echo "                   ${DIM}--all: Push all items${NC}"
+                    echo "  ${GREEN}sync${NC}             Bidirectional sync (smart push/pull)"
+                    echo "                   ${DIM}--force-local: Push all local to vault${NC}"
+                    echo "                   ${DIM}--force-vault: Pull all vault to local${NC}"
                     echo "  ${GREEN}status${NC}           Show vault sync status"
                     echo ""
                     echo "${BOLD}Management:${NC}"
@@ -340,12 +349,14 @@ dotfiles() {
             echo "  status, s         Quick visual dashboard"
             echo "  doctor, health    Run comprehensive health check"
             echo "  drift             Compare local files vs vault"
+            echo "  sync              Bidirectional vault sync (smart push/pull)"
             echo "  diff              Preview changes before sync/restore"
             echo ""
             echo "${BOLD}Vault Operations:${NC}"
             echo "  vault setup       Setup vault backend (first-time setup)"
             echo "  vault pull        Pull secrets from vault"
             echo "  vault push        Push secrets to vault"
+            echo "  vault sync        Bidirectional sync (smart direction)"
             echo "  vault scan        Re-scan for new secrets"
             echo "  vault list        List all vault items"
             echo "  vault help        Show all vault commands"
@@ -375,6 +386,8 @@ dotfiles() {
             echo "  dotfiles setup                # Interactive setup wizard"
             echo "  dotfiles status               # Visual dashboard"
             echo "  dotfiles doctor --fix         # Health check with auto-fix"
+            echo "  dotfiles sync                 # Smart bidirectional sync"
+            echo "  dotfiles sync --force-local   # Push all local to vault"
             echo "  dotfiles vault pull           # Pull secrets from vault"
             echo "  dotfiles vault push --all     # Push all to vault"
             echo "  dotfiles backup               # Create backup"

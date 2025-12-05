@@ -189,7 +189,7 @@ dotfiles setup
 ```
 
 If interrupted, simply run `dotfiles setup` again. It automatically:
-1. Reads existing state from `state.ini`
+1. Reads existing state from `config.json`
 2. Skips completed phases
 3. Continues from where you left off
 
@@ -257,11 +257,15 @@ tier=$(config_get "packages.tier" "enhanced")
 config_set "vault.backend" "1password"
 config_set "backup.retention_days" "60"
 
-# Boolean values
+# Boolean values (use config_get_bool for conditionals)
 config_set_bool "vault.auto_sync" true
 if config_get_bool "backup.enabled"; then
     echo "Backups are enabled"
 fi
+
+# Note: config_get returns "true" or "false" as strings for booleans
+compress=$(config_get "backup.compress" "true")
+[[ "$compress" == "true" ]] && echo "Compression enabled"
 
 # Array operations
 config_array_add "setup.completed" "symlinks"

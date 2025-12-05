@@ -44,6 +44,7 @@ This is the comprehensive reference documentation for the dotfiles system. It co
 - [Adding New SSH Keys](#adding-new-ssh-keys)
 - [Syncing Local Changes to Vault](#syncing-local-changes-to-vault)
 - [Maintenance Checklists](#maintenance-checklists)
+- [Backup System](#backup-system)
 - [Using the Dotfiles Day-to-Day](#using-the-dotfiles-day-to-day)
 - [Health Check](#health-check)
   - [The dotfiles Command](#the-dotfiles-command)
@@ -1678,6 +1679,7 @@ dotfiles vault push --all
 | `AWS-Credentials` | `~/.aws/credentials` |
 | `Git-Config` | `~/.gitconfig` |
 | `Environment-Secrets` | `~/.local/env.secrets` |
+| `Template-Variables` | `~/.config/dotfiles/template-variables.sh` |
 
 ---
 
@@ -1776,6 +1778,71 @@ Complete checklist for a fresh machine:
 
 ---
 
+## Backup System
+
+The dotfiles system includes automatic backup and restore functionality to protect your configuration files.
+
+### Creating Backups
+
+```bash
+# Create a backup
+dotfiles backup
+
+# List all available backups
+dotfiles backup --list
+```
+
+Each backup creates a timestamped archive in `~/.dotfiles-backups/` containing:
+- `~/.ssh/config` and `~/.ssh/known_hosts`
+- `~/.gitconfig`
+- `~/.aws/config` and `~/.aws/credentials`
+- `~/.local/env.secrets`
+- `~/.zshrc` and `~/.p10k.zsh`
+
+### Restoring from Backup
+
+```bash
+# Interactive restore (shows list of backups)
+dotfiles backup restore
+
+# Restore specific backup
+dotfiles backup restore backup-20240115-143022
+```
+
+### Automatic Backup Behavior
+
+The system can automatically create backups before potentially destructive operations:
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `backup.enabled` | `true` | Enable backup system |
+| `backup.auto_backup` | `true` | Auto-backup before destructive ops |
+| `backup.max_snapshots` | `10` | Maximum backups retained |
+| `backup.retention_days` | `30` | Days to keep backups |
+| `backup.compress` | `true` | Use gzip compression |
+
+Configure in `~/.config/dotfiles/config.json`:
+
+```json
+{
+  "backup": {
+    "enabled": true,
+    "auto_backup": true,
+    "max_snapshots": 10,
+    "retention_days": 30
+  }
+}
+```
+
+### Best Practices
+
+- **Before major changes**: Run `dotfiles backup` before modifying configs
+- **Before uninstall**: Always backup before running `dotfiles uninstall`
+- **Regular backups**: Run periodic backups even with vault sync
+- **Test restores**: Occasionally verify backups work with `--list`
+
+---
+
 ## Using the Dotfiles Day-to-Day
 
 ### Aliases (defined in zshrc)
@@ -1863,6 +1930,7 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 
 - `dotfiles vault pull` → Restore all secrets from vault
 - `dotfiles vault push` → Sync local files to vault
+- `dotfiles vault sync` → **Smart bidirectional sync** (auto-detects push/pull direction)
 - `dotfiles vault setup` → Interactive onboarding wizard for new vault items
 - `dotfiles vault list` → List vault items
 - `dotfiles vault check` → Validate vault items exist
@@ -1872,7 +1940,12 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 **Dotfiles Management:**
 
 - `dotfiles status` → Visual dashboard
+- `dotfiles sync` → Smart bidirectional vault sync (shortcut for `dotfiles vault sync`)
+- `dotfiles drift` → Compare local files vs vault
 - `dotfiles doctor` → Run health check + vault item validation
+- `dotfiles backup` → Create timestamped backup of config files
+- `dotfiles backup --list` → List available backups
+- `dotfiles backup restore` → Restore from backup (interactive)
 - `dotfiles upgrade` → Pull latest dotfiles and run bootstrap
 - `dotfiles lint` → Validate shell config syntax
 - `dotfiles lint --fix` → Auto-fix script permissions
@@ -2027,12 +2100,34 @@ dotfiles doctor --fix
 **Drift detection**: Compare local files vs vault:
 
 ```bash
-dotfiles drift
+dotfiles drift           # Full check (connects to vault)
+dotfiles drift --quick   # Fast check (local checksums only, <50ms)
 ```
 
 This checks if your local `~/.ssh/config`, `~/.aws/config`, `~/.gitconfig`, etc. differ from what's stored in your vault. Useful for detecting unsync'd changes before switching machines.
 
-Example drift output:
+### Automatic Drift Detection on Shell Startup
+
+The shell automatically checks for drift when you open a new terminal. This uses a fast, local-only comparison (<50ms) that doesn't require vault authentication.
+
+**How it works:**
+1. After `dotfiles vault pull`, file checksums are saved to `~/.cache/dotfiles/vault-state.json`
+2. On every shell startup, local files are compared against cached checksums
+3. If differences are detected, you'll see a warning:
+
+```
+⚠ Drift detected: Git-Config Template-Variables
+  Run: dotfiles drift (to compare) or dotfiles vault pull (to restore)
+```
+
+**Disable automatic checks:**
+```bash
+export DOTFILES_SKIP_DRIFT_CHECK=1
+```
+
+Add this to `~/.zshrc.local` to permanently disable.
+
+**Example drift output (full mode):**
 
 ```
 === Drift Detection (Local vs Vault) ===
@@ -2042,6 +2137,62 @@ Example drift output:
 
 To sync local changes to vault:
   dotfiles vault push --all
+```
+
+### Bidirectional Sync
+
+Instead of manually choosing `vault push` or `vault pull`, use the smart **sync** command that automatically determines the correct direction for each file:
+
+```bash
+dotfiles sync                     # Smart sync all items
+dotfiles sync --dry-run           # Preview what would happen
+dotfiles sync Git-Config          # Sync specific item
+```
+
+**How it determines direction:**
+
+| Condition | Action |
+|-----------|--------|
+| Local changed, vault unchanged | Push to vault |
+| Vault changed, local unchanged | Pull from vault |
+| Both changed | **Conflict** - requires resolution |
+| Neither changed | Skip (already in sync) |
+
+**Resolving conflicts:**
+
+When both sides have changed, use force flags:
+
+```bash
+dotfiles sync --force-local   # Push local changes, overwrite vault
+dotfiles sync --force-vault   # Pull vault changes, overwrite local
+```
+
+**Example sync output:**
+
+```
+=== Dotfiles Sync ===
+Syncing 6 items with Bitwarden
+
+--- Git-Config ---
+    Local: ~/.gitconfig
+[INFO] Local → Vault
+[OK] Pushed Git-Config to Bitwarden
+
+--- AWS-Config ---
+    Local: ~/.aws/config
+[OK] Already in sync
+
+--- SSH-Config ---
+    Local: ~/.ssh/config
+[INFO] Vault → Local
+[OK] Pulled SSH-Config to ~/.ssh/config
+
+========================================
+SYNC SUMMARY:
+  Pushed to vault:    1
+  Pulled from vault:  1
+  Already in sync:    4
+========================================
 ```
 
 Example output:

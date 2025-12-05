@@ -180,8 +180,9 @@ dotfiles doctor --fix    # Auto-repair
 dotfiles drift           # Compare local vs vault
 
 # Vault Operations
-dotfiles vault pull      # Restore secrets
-dotfiles vault push      # Sync local to vault
+dotfiles sync            # Smart bidirectional sync
+dotfiles vault pull      # Restore secrets from vault
+dotfiles vault push      # Push local changes to vault
 dotfiles vault validate  # Validate vault schema (v3.0)
 dotfiles vault setup     # Interactive onboarding
 

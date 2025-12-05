@@ -17,6 +17,7 @@ SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
 DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
 source "$DOTFILES_DIR/lib/_config.sh"
 source "$DOTFILES_DIR/lib/_vault.sh"
+source "$DOTFILES_DIR/lib/_drift.sh"
 
 # Parse arguments
 FORCE=false
@@ -219,3 +220,8 @@ TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date +"%Y-%m-%dT%H:%M:%
 if [[ -n "$TIMESTAMP" ]]; then
     config_set "vault.last_pull" "$TIMESTAMP" 2>/dev/null || true
 fi
+
+# Save drift state for quick startup checks
+info "Saving drift state for startup checks..."
+drift_save_state
+pass "Drift state saved to ~/.cache/dotfiles/vault-state.json"

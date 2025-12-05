@@ -83,9 +83,9 @@ config_get() {
     # Ensure config exists
     [[ -f "$CONFIG_FILE" ]] || init_config
 
-    # Use jq to extract value
+    # Use jq to extract value (handle booleans properly - false is valid, not empty)
     local value
-    value=$(jq -r ".$key // empty" "$CONFIG_FILE" 2>/dev/null)
+    value=$(jq -r "if .$key == null then empty else .$key end" "$CONFIG_FILE" 2>/dev/null)
 
     # Return value or default
     if [[ -n "$value" && "$value" != "null" ]]; then
