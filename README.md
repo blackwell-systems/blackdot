@@ -352,7 +352,7 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull   # No drift check (for CI/autom
 ## Features
 
 <details>
-<summary><b>View All Features (21)</b></summary>
+<summary><b>View All Features (23)</b></summary>
 
 ### Framework Systems
 
@@ -412,6 +412,65 @@ dotfiles doctor    # Validates Claude setup
 **Git safety hooks:** PreToolUse hook blocks dangerous commands like `git push --force`. SessionStart hook validates branch sync status.
 
 **Multi-backend:** Works with Anthropic Max, AWS Bedrock, and Google Vertex AI.
+
+</details>
+
+<details>
+<summary><b>Hook System</b> - Custom behavior at lifecycle points</summary>
+
+```bash
+dotfiles hook list              # Show all available hook points
+dotfiles hook list post_vault_pull  # Show hooks for specific point
+dotfiles hook test post_vault_pull  # Dry-run hooks
+```
+
+**19 lifecycle hooks** let you inject custom scripts at key moments:
+
+| Hook Point | When | Example Use |
+|------------|------|-------------|
+| `post_vault_pull` | After secrets restored | Fix SSH permissions, run ssh-add |
+| `post_install` | After bootstrap | Install extra packages |
+| `pre_doctor` | Before health check | Custom validations |
+| `shell_init` | Shell startup | Load project-specific env |
+
+**Creating a hook:**
+```bash
+mkdir -p ~/.config/dotfiles/hooks/post_vault_pull
+cat > ~/.config/dotfiles/hooks/post_vault_pull/10-ssh-agent.sh << 'EOF'
+#!/bin/bash
+ssh-add ~/.ssh/id_ed25519 2>/dev/null
+EOF
+chmod +x ~/.config/dotfiles/hooks/post_vault_pull/10-ssh-agent.sh
+```
+
+Hooks run in numeric order (10-*, 20-*, etc.). [Full documentation](docs/hooks.md)
+
+</details>
+
+<details>
+<summary><b>Portable Workspace</b> - Consistent paths across machines</summary>
+
+```bash
+# Default setup
+/workspace → ~/workspace
+
+# Custom target directory
+WORKSPACE_TARGET=~/code ./install.sh
+# Result: /workspace → ~/code
+```
+
+**The problem:** Claude Code session folders are based on absolute paths:
+- macOS: `/Users/you/projects/app` → session `Users-you-projects-app`
+- Linux: `/home/you/projects/app` → session `home-you-projects-app`
+
+Different paths = different sessions = lost conversation history.
+
+**The solution:** `/workspace` symlink provides the same absolute path everywhere:
+- All machines: `/workspace/app` → session `workspace-app` ✨
+
+**Customization:** Set `WORKSPACE_TARGET=~/code` to point the symlink at a different directory. The `/workspace` path stays consistent for portability.
+
+**Skip if:** Single-machine setup or no Claude Code: `SKIP_WORKSPACE_SYMLINK=true`
 
 </details>
 
