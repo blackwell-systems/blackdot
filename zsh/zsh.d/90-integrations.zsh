@@ -127,6 +127,33 @@ check_dotfiles_updates() {
 check_dotfiles_updates
 
 # =========================
+# Drift Detection (local vs vault)
+# =========================
+# Quick check if local config files have changed since last vault pull
+# Runs in <50ms (local checksum comparison only, no vault access)
+check_vault_drift() {
+  local dotfiles_dir="${HOME}/workspace/dotfiles"
+  local drift_lib="$dotfiles_dir/lib/_drift.sh"
+  local state_file="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/vault-state.json"
+
+  # Skip if disabled
+  [[ "${DOTFILES_SKIP_DRIFT_CHECK:-}" == "1" ]] && return 0
+
+  # Skip if no state file (user hasn't done vault pull yet)
+  [[ ! -f "$state_file" ]] && return 0
+
+  # Skip if drift library doesn't exist
+  [[ ! -f "$drift_lib" ]] && return 0
+
+  # Source drift library and run quick check
+  source "$drift_lib"
+  drift_check_quick false
+}
+
+# Run drift check on shell startup (fast, local-only)
+check_vault_drift
+
+# =========================
 # Machine-specific local overrides
 # =========================
 # Load local customizations that shouldn't be in version control

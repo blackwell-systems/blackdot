@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Smart Bidirectional Sync** (`dotfiles sync`) - Intelligent vault sync command
+  - Auto-detects sync direction for each file (push vs pull)
+  - Uses cached checksums from last sync as baseline
+  - Handles conflicts with `--force-local` / `--force-vault`
+  - Works with all vault backends (Bitwarden, 1Password, pass)
+  - Available as `dotfiles sync` or `dotfiles vault sync`
+- **Automatic Drift Detection on Shell Startup** - Fast local-only check (<50ms)
+  - Compares local files against cached checksums from last vault pull
+  - Shows warning if files have changed since last sync
+  - Disable with `DOTFILES_SKIP_DRIFT_CHECK=1`
+- **Drift Detection Quick Mode** (`dotfiles drift --quick`) - Fast check without vault access
+  - Uses cached state instead of connecting to vault
+  - Useful for quick checks when vault is unavailable
+
+### Changed
+- **Drift Command Enhancement** - Added `--quick` flag for fast local-only checks
+- **Backup System** - Now reads settings from config.json (max_snapshots, retention_days, compress)
+
+### Fixed
+- **Boolean False in config_get** - jq now correctly returns `false` values instead of treating as empty
+
 ## [2.0.1] - 2025-12-02
 
 ### Added

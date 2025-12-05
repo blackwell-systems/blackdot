@@ -5,6 +5,7 @@
 # Works with any configured vault backend (Bitwarden, 1Password, pass)
 # Usage: ./dotfiles-drift.sh
 #        dotfiles drift
+#        dotfiles drift --quick   # Fast local-only check (no vault access)
 # ============================================================
 set -uo pipefail
 
@@ -13,6 +14,43 @@ SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
 # DOTFILES_DIR is parent of bin/
 DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
 source "$DOTFILES_DIR/lib/_logging.sh"
+source "$DOTFILES_DIR/lib/_drift.sh"
+
+# Parse arguments
+QUICK_MODE=false
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --quick|-q)
+            QUICK_MODE=true
+            shift
+            ;;
+        --help|-h)
+            echo "Compare local configuration files against vault"
+            echo ""
+            echo "Usage: dotfiles drift [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --quick, -q   Fast check against cached state (no vault access)"
+            echo "  --help, -h    Show this help"
+            echo ""
+            echo "Quick mode compares local files against the last vault pull."
+            echo "Full mode connects to vault and compares current vault contents."
+            exit 0
+            ;;
+        *)
+            fail "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
+# Quick mode - use cached state, no vault access needed
+if [[ "$QUICK_MODE" == "true" ]]; then
+    drift_check_verbose
+    exit $?
+fi
+
+# Full mode - connect to vault
 source "$DOTFILES_DIR/lib/_vault.sh"
 
 # Initialize vault backend

@@ -66,9 +66,12 @@ dotfiles vault help
 
 # View available backends
 ls vault/backends/
+
+# Preview what sync would do (dry run)
+dotfiles sync --help
 ```
 
-**What this shows:** Multi-backend secret management (Bitwarden, 1Password, pass) - no vendor lock-in.
+**What this shows:** Multi-backend secret management (Bitwarden, 1Password, pass) with smart bidirectional sync - no vendor lock-in.
 
 ---
 
@@ -81,11 +84,15 @@ ls templates/configs/
 # View a template
 cat templates/configs/ssh-config.tmpl
 
-# Check template variables
+# Check default template variables
 cat templates/_variables.sh
+
+# Template variables can also be stored in vault for portability:
+# ~/.config/dotfiles/template-variables.sh (XDG location, vault-synced)
+# templates/_variables.local.sh (repo-local overrides)
 ```
 
-**What this shows:** How templates adapt configs to different machines (work vs personal, macOS vs Linux).
+**What this shows:** How templates adapt configs to different machines (work vs personal, macOS vs Linux). Variables can be stored in your vault for easy restoration on new machines.
 
 ---
 
@@ -149,6 +156,7 @@ exit
 dotfiles help
 dotfiles doctor
 dotfiles status
+dotfiles sync --help
 dotfiles packages --help
 dotfiles vault help
 
