@@ -4,53 +4,6 @@ Complete reference for all dotfiles commands, options, and environment variables
 
 ---
 
-## Modular Design
-
-**Everything is optional except shell config.** The dotfiles system is fully modular - use only what you need.
-
-### Feature Registry
-
-The **feature registry** (`dotfiles features`) is the central system for enabling and disabling optional functionality. See [Feature Registry](features.md) for full documentation.
-
-```bash
-# List all features and their status
-dotfiles features
-
-# Enable a feature
-dotfiles features enable vault --persist
-
-# Use a preset (group of features)
-dotfiles features preset developer --persist
-```
-
-### Install Options
-
-```bash
-# Full install (recommended for Claude Code users)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
-
-# Minimal: Just shell config (no Homebrew, vault, Claude, /workspace)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
-
-# Custom: Use environment variables to skip specific components
-SKIP_WORKSPACE_SYMLINK=true ./bootstrap/bootstrap-mac.sh
-SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
-```
-
-### What's Optional?
-
-| Component | Skip With | Feature Flag | Documented In |
-|-----------|-----------|--------------|---------------|
-| **Homebrew + Packages** | `--minimal` flag | - | [Installation](#installation) |
-| **Vault System** | `--minimal` or select "Skip" in wizard | `vault` | [Feature Registry](features.md) |
-| **/workspace Symlink** | `SKIP_WORKSPACE_SYMLINK=true` | `workspace_symlink` | [Feature Registry](features.md) |
-| **Claude Integration** | `SKIP_CLAUDE_SETUP=true` or `--minimal` | `claude_integration` | [Feature Registry](features.md) |
-| **Template Engine** | Don't run `dotfiles template` | `templates` | [Template Commands](#template-commands) |
-
-**See [Feature Registry](features.md) for the complete list of features and presets.**
-
----
-
 ## Quick Reference
 
 ```bash
