@@ -10,7 +10,7 @@
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **The first dotfiles designed for AI-assisted development.** Modular, batteries-included configuration for developers who use Claude Code across machines. Use the **feature registry** to pick exactly what you need: multi-vault secrets, portable sessions, machine-specific templates, and self-healing config. Everything is optional except shell config.
+> A dotfiles management framework built on three core systems: **Feature Registry** (control plane for all functionality), **Configuration Layers** (5-layer priority hierarchy), and **CLI Feature Awareness** (adaptive CLI). Designed for developers who work across machines with Claude Code. Everything is optional except shell config.
 
 [Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
 
@@ -312,28 +312,41 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull   # No drift check (for CI/autom
 
 ---
 
-## Why This Dotfiles?
+## Framework Architecture
 
-**Built for Claude Code users who work across multiple machines.**
+**Three core systems provide the foundation:**
 
-> 💡 **Works with [dotclaude](https://github.com/blackwell-systems/dotclaude) for AI assistant profile sync**
-> Automatically installed during setup. Syncs Claude Code settings, profiles, and git safety hooks across all your machines.
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Feature Registry                          │
+│                   (lib/_features.sh)                         │
+│  Controls what's enabled/disabled, resolves dependencies,   │
+│  persists state, provides presets                           │
+└─────────────────────────────────────────────────────────────┘
+         │                              │
+         ▼                              ▼
+┌─────────────────────────┐   ┌─────────────────────────┐
+│  Configuration Layers   │   │  CLI Feature Awareness  │
+│ (lib/_config_layers.sh) │   │ (lib/_cli_features.sh)  │
+│  5-layer priority for   │   │  Adaptive CLI based on  │
+│  all settings           │   │  enabled features       │
+└─────────────────────────┘   └─────────────────────────┘
+```
 
-> **"Start on Mac, continue on Linux, keep your conversation."**
+**1. Feature Registry** – Central control plane for all functionality. Enable/disable features, resolve dependencies, apply presets (minimal, developer, claude, full).
 
-**Key features:**
+**2. Configuration Layers** – 5-layer priority system: Environment → Project → Machine → User → Defaults. Settings come from the right place automatically.
 
-1. **Feature Registry** – Enable exactly what you need with `dotfiles features`. Use presets (minimal, developer, claude, full) or toggle individual features. Persists to config for consistent behavior across sessions.
+**3. CLI Feature Awareness** – The CLI adapts to enabled features. Help hides disabled commands. Tab completion adjusts. Running disabled commands shows enable hints.
 
-2. **Portable Claude Sessions** – `/workspace` symlink ensures identical paths everywhere. Your Claude conversations sync seamlessly across macOS, Linux, and WSL2. Enhanced by dotclaude profile management. Target directory is configurable via `WORKSPACE_TARGET`.
+**Additional capabilities:**
 
-3. **Smart Secrets Onboarding** – Detects existing credentials (SSH keys, AWS, Git) and offers to vault them automatically. New machines restore everything with one command.
+- **Multi-Vault Backend** – Bitwarden, 1Password, or pass with unified API
+- **Portable Claude Sessions** – `/workspace` symlink for consistent paths across machines
+- **Self-Healing** – `dotfiles doctor --fix` repairs permissions and symlinks
+- **Machine Templates** – Generate machine-specific configs from templates
 
-4. **Multi-Vault Backend** – Works with Bitwarden, 1Password, or pass. Unified API across all backends. Bidirectional sync with drift detection.
-
-5. **Self-Healing Configuration** – `dotfiles doctor --fix` automatically repairs permissions, broken symlinks, and misconfigurations.
-
-**Not using Claude Code?** Still great for multi-machine developer workflows with vault-backed secrets.
+**Works with [dotclaude](https://github.com/blackwell-systems/dotclaude)** for Claude Code profile management.
 
 ---
 

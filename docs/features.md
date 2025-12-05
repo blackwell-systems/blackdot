@@ -2,7 +2,9 @@
 
 > **Deep Modularity:** Every optional feature can be enabled or disabled independently, without breaking other parts of the system.
 
-The feature registry is the central system for managing optional dotfiles functionality. It provides:
+The Feature Registry (`lib/_features.sh`) is the control plane for the dotfiles framework. All optional functionality flows through it—enabling, disabling, dependency resolution, and persistence.
+
+The registry provides:
 
 - **Opt-in by default** - Features are disabled until explicitly enabled
 - **SKIP_* compatibility** - Existing environment variables still work
@@ -335,6 +337,35 @@ exec zsh
 Or source the feature registry:
 ```bash
 source "$DOTFILES_DIR/lib/_features.sh"
+```
+
+---
+
+## Related Systems
+
+The Feature Registry works with two companion systems:
+
+### Configuration Layers
+
+The Configuration Layers system (`lib/_config_layers.sh`) provides a 5-layer priority hierarchy for settings. Features use layered config for their preferences:
+
+```bash
+config_get_layered "vault.backend"  # Checks all layers in priority order
+```
+
+See [Architecture](architecture.md#configuration-layers) for details.
+
+### CLI Feature Awareness
+
+The CLI Feature Awareness system (`lib/_cli_features.sh`) adapts the CLI based on enabled features:
+
+- Help output hides commands for disabled features
+- Tab completion excludes disabled feature commands
+- Running a disabled command shows an enable hint
+
+```bash
+dotfiles help                    # Shows only enabled feature commands
+dotfiles features enable vault   # Enables vault, CLI shows vault commands
 ```
 
 ---
