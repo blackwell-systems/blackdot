@@ -259,6 +259,11 @@ dotfiles() {
             esac
             ;;
 
+        # Feature management
+        features|feature|feat)
+            "$DOTFILES_DIR/bin/dotfiles-features" "$@"
+            ;;
+
         # Setup & Maintenance
         setup)
             "$DOTFILES_DIR/bin/dotfiles-setup" "$@"
@@ -367,6 +372,12 @@ dotfiles() {
             echo "  backup restore    Restore specific backup"
             echo "  rollback          Instant rollback to last backup"
             echo ""
+            echo "${BOLD}Feature Management:${NC}"
+            echo "  features          List all features and status"
+            echo "  features enable   Enable a feature"
+            echo "  features disable  Disable a feature"
+            echo "  features preset   Enable a preset (minimal/developer/claude/full)"
+            echo ""
             echo "${BOLD}Other Commands:${NC}"
             echo "  secrets <cmd>     Alias for vault commands"
             echo "  macos <cmd>       macOS system settings (macOS only)"
@@ -386,8 +397,9 @@ dotfiles() {
             echo "  dotfiles setup                # Interactive setup wizard"
             echo "  dotfiles status               # Visual dashboard"
             echo "  dotfiles doctor --fix         # Health check with auto-fix"
+            echo "  dotfiles features             # List all features and status"
+            echo "  dotfiles features preset developer  # Enable developer preset"
             echo "  dotfiles sync                 # Smart bidirectional sync"
-            echo "  dotfiles sync --force-local   # Push all local to vault"
             echo "  dotfiles vault pull           # Pull secrets from vault"
             echo "  dotfiles vault push --all     # Push all to vault"
             echo "  dotfiles backup               # Create backup"

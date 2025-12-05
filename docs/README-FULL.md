@@ -378,7 +378,14 @@ esac
 
 ## Canonical Workspace (`~/workspace`)
 
-A key architectural decision is the **canonical workspace directory** at `~/workspace`. This serves multiple purposes:
+A key architectural decision is the **canonical workspace directory** at `~/workspace` (configurable via `WORKSPACE_TARGET`). This serves multiple purposes:
+
+> **💡 Customization:** The workspace target directory is configurable via:
+> - Environment variable: `WORKSPACE_TARGET=~/code`
+> - Setup wizard: Step 1 prompts for workspace directory
+> - Config file: `paths.workspace_target` in `~/.config/dotfiles/config.json`
+>
+> The `/workspace` symlink name stays the same for Claude Code portability - only the target changes.
 
 ### 1. Username-Agnostic Paths
 
@@ -472,8 +479,11 @@ Bootstrap creates a **platform-independent symlink**:
 
 ```bash
 # Created automatically by bootstrap scripts
-/workspace → ~/workspace
+/workspace → ~/workspace    # Default target
+/workspace → ~/code         # Custom target (via WORKSPACE_TARGET)
 ```
+
+The target directory is configurable - set `WORKSPACE_TARGET=~/code` before install, or configure via the setup wizard. The `/workspace` symlink name stays constant for portability.
 
 This symlink resolves to the correct home directory on each platform but provides a **canonical absolute path**:
 - macOS: `/workspace/dotfiles` (symlink resolves to `/Users/username/workspace/dotfiles`)
@@ -689,15 +699,15 @@ The setup wizard displays a Unicode progress bar showing your current step:
 
 ```
 ╔═══════════════════════════════════════════════════════════════╗
-║ Step 3 of 6: Vault Configuration
+║ Step 4 of 7: Vault Configuration
 ╠═══════════════════════════════════════════════════════════════╣
-║ ██████████░░░░░░░░░░ 50%
+║ ████████░░░░░░░░░░░░ 57%
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
 The wizard shows:
 - **Overview of all steps** at the beginning
-- **Current step name and number** (e.g., "Step 3 of 6: Vault Configuration")
+- **Current step name and number** (e.g., "Step 4 of 7: Vault Configuration")
 - **Visual progress bar** using Unicode characters (█ for completed, ░ for remaining)
 - **Percentage complete** to track overall progress
 
@@ -720,12 +730,31 @@ This wizard:
 
 Perfect for new machines or first-time vault users who haven't yet populated their vault.
 
-You can skip optional features using environment variables:
+### Feature Registry
+
+The **feature registry** provides centralized control over all optional functionality:
+
+```bash
+# List all features and their status
+dotfiles features
+
+# Enable/disable features
+dotfiles features enable vault --persist
+dotfiles features disable drift_check --persist
+
+# Apply presets
+dotfiles features preset developer --persist  # vault, aws_helpers, git_hooks, modern_cli
+dotfiles features preset claude --persist     # Claude Code optimized
+```
+
+You can also skip optional features using environment variables:
 
 ```bash
 # Skip optional features during bootstrap
 SKIP_WORKSPACE_SYMLINK=true SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
 ```
+
+See [Feature Registry](features.md) for complete documentation.
 
 Use `--help` to see available options:
 

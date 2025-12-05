@@ -8,6 +8,21 @@ Complete reference for all dotfiles commands, options, and environment variables
 
 **Everything is optional except shell config.** The dotfiles system is fully modular - use only what you need.
 
+### Feature Registry
+
+The **feature registry** (`dotfiles features`) is the central system for enabling and disabling optional functionality. See [Feature Registry](features.md) for full documentation.
+
+```bash
+# List all features and their status
+dotfiles features
+
+# Enable a feature
+dotfiles features enable vault --persist
+
+# Use a preset (group of features)
+dotfiles features preset developer --persist
+```
+
 ### Install Options
 
 ```bash
@@ -24,15 +39,15 @@ SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
 
 ### What's Optional?
 
-| Component | Skip With | Documented In |
-|-----------|-----------|---------------|
-| **Homebrew + Packages** | `--minimal` flag | [Installation](#installation) |
-| **Vault System** | `--minimal` or select "Skip" in wizard | [Environment Variables](#vault-operations) |
-| **/workspace Symlink** | `SKIP_WORKSPACE_SYMLINK=true` | [Environment Variables](#bootstrap--installation) |
-| **Claude Integration** | `SKIP_CLAUDE_SETUP=true` or `--minimal` | [Environment Variables](#bootstrap--installation) |
-| **Template Engine** | Don't run `dotfiles template` | [Template Commands](#template-commands) |
+| Component | Skip With | Feature Flag | Documented In |
+|-----------|-----------|--------------|---------------|
+| **Homebrew + Packages** | `--minimal` flag | - | [Installation](#installation) |
+| **Vault System** | `--minimal` or select "Skip" in wizard | `vault` | [Feature Registry](features.md) |
+| **/workspace Symlink** | `SKIP_WORKSPACE_SYMLINK=true` | `workspace_symlink` | [Feature Registry](features.md) |
+| **Claude Integration** | `SKIP_CLAUDE_SETUP=true` or `--minimal` | `claude_integration` | [Feature Registry](features.md) |
+| **Template Engine** | Don't run `dotfiles template` | `templates` | [Template Commands](#template-commands) |
 
-**See [Environment Variables](#environment-variables) for complete list of SKIP flags.**
+**See [Feature Registry](features.md) for the complete list of features and presets.**
 
 ---
 
@@ -61,6 +76,7 @@ The unified command for managing your dotfiles. All subcommands are accessed via
 |---------|-------|-------------|
 | `status` | `s` | Quick visual dashboard |
 | `doctor` | `health` | Comprehensive health check |
+| `features` | `feat` | **Feature registry** - enable/disable optional features |
 | `drift` | - | Compare local files vs vault |
 | `sync` | - | Bidirectional vault sync (smart push/pull) |
 | `diff` | - | Preview changes before sync/restore |
@@ -139,6 +155,124 @@ dotfiles doctor --quick      # Fast checks (skip vault status)
 **Exit codes:**
 - `0` - All checks passed
 - `1` - One or more checks failed
+
+---
+
+## Feature Management
+
+### `dotfiles features`
+
+Central registry for managing optional features. Enable, disable, and query the status of all optional dotfiles functionality.
+
+```bash
+dotfiles features [COMMAND] [OPTIONS]
+dotfiles feat               # Alias
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `list` | List all features and their status (default) |
+| `status [feature]` | Show status for one or all features |
+| `enable <feature>` | Enable a feature |
+| `disable <feature>` | Disable a feature |
+| `preset <name>` | Enable a preset (group of features) |
+| `check <feature>` | Check if feature is enabled (for scripts) |
+| `help` | Show help |
+
+**List Options:**
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--all` | `-a` | Show dependencies |
+| `--json` | `-j` | Output as JSON |
+| `--category` | `-c` | Filter by category (core, optional, integration) |
+
+**Enable/Disable Options:**
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--persist` | `-p` | Save to config file (survives shell restart) |
+
+**Preset Options:**
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--list` | `-l` | List available presets |
+| `--persist` | `-p` | Save all preset features to config file |
+
+**Available Presets:**
+
+| Preset | Features |
+|--------|----------|
+| `minimal` | `shell` |
+| `developer` | `shell`, `vault`, `aws_helpers`, `git_hooks`, `modern_cli` |
+| `claude` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `git_hooks`, `modern_cli` |
+| `full` | All features |
+
+**Examples:**
+
+```bash
+# List all features with status
+dotfiles features
+dotfiles features list
+
+# Filter by category
+dotfiles features list optional
+dotfiles features list integration
+
+# Show with dependencies
+dotfiles features list --all
+
+# JSON output (for scripting)
+dotfiles features list --json
+
+# Enable a feature (runtime only)
+dotfiles features enable vault
+
+# Enable and persist to config file
+dotfiles features enable vault --persist
+
+# Disable a feature
+dotfiles features disable health_metrics
+
+# Enable a preset
+dotfiles features preset developer --persist
+
+# List available presets
+dotfiles features preset --list
+
+# Check if feature enabled (for scripts)
+if dotfiles features check vault; then
+    dotfiles vault pull
+fi
+```
+
+**Feature Categories:**
+
+| Category | Description |
+|----------|-------------|
+| `core` | Always enabled (shell) |
+| `optional` | Optional features (vault, templates, etc.) |
+| `integration` | Third-party tool integrations (nvm, sdkman, etc.) |
+
+**Environment Variable Control:**
+
+Features can also be controlled via environment variables:
+
+```bash
+# SKIP_* variables (backward compatible)
+SKIP_WORKSPACE_SYMLINK=true    # Disables workspace_symlink
+SKIP_CLAUDE_SETUP=true         # Disables claude_integration
+DOTFILES_SKIP_DRIFT_CHECK=1    # Disables drift_check
+
+# Direct feature control
+DOTFILES_FEATURE_VAULT=true    # Enable vault
+DOTFILES_FEATURE_VAULT=false   # Disable vault
+```
+
+**See also:** [Feature Registry](features.md) for complete documentation.
 
 ---
 

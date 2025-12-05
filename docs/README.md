@@ -24,6 +24,7 @@
 |-------|-------------|
 | [CLI Reference](cli-reference.md) | All commands, flags & environment variables |
 | [Full Documentation](README-FULL.md) | Complete 1,900+ line guide |
+| [Feature Registry](features.md) | Opt-in features, presets & modularity |
 | [Template System](templates.md) | Machine-specific configuration |
 | [State Management](state-management.md) | Setup wizard state, resume & preferences |
 | [Vault System](vault-README.md) | Multi-backend secret management |
@@ -63,10 +64,19 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 
 Skips: `/workspace` symlink, vault setup, Claude integration. You still get Zsh, CLI tools, and aliases. Run `dotfiles setup` later to enable full features.
 
+**Custom workspace** (use `~/code` instead of `~/workspace`):
+
+```bash
+WORKSPACE_TARGET=~/code curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+```
+
+The setup wizard also prompts for workspace directory (Step 1 of 7).
+
 ---
 
 ## Core Features
 
+- **Feature registry** – Enable exactly what you need with `dotfiles features`. Use presets or toggle individual features
 - **Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with Bitwarden, 1Password, or pass
 - **Smart secrets onboarding** – Interactive `dotfiles vault setup` detects local secrets and creates vault items
 - **Claude Code + dotclaude** – Portable sessions, profile management, git safety hooks, vault-synced Claude profiles
@@ -83,7 +93,7 @@ Skips: `/workspace` symlink, vault setup, Claude integration. You still get Zsh,
 
 | Feature | What It Does |
 |---------|--------------|
-| **Portable sessions** | `/workspace` symlink lets Claude conversations continue across machines |
+| **Portable sessions** | `/workspace` symlink (target is configurable) lets Claude conversations continue across machines |
 | **[dotclaude](https://github.com/blackwell-systems/dotclaude) profiles** | Manage multiple Claude contexts (work, personal, client projects) |
 | **Vault-synced profiles** | `dotfiles vault pull` brings your Claude profiles to new machines |
 | **Git safety hooks** | PreToolUse hook blocks dangerous commands like `git push --force` |
@@ -137,6 +147,8 @@ dotfiles setup
 > **The solution:** `/workspace` is the same absolute path everywhere:
 > - All machines: `/workspace/dotfiles` → session `workspace-dotfiles` ✨
 > - Same session folder across macOS, Linux, WSL2 = **full history syncs**
+>
+> **Customization:** Target directory is configurable via `WORKSPACE_TARGET=~/code` or the setup wizard - the `/workspace` symlink name stays the same.
 >
 > **Skip if:** You only use one machine or don't use Claude Code (`SKIP_WORKSPACE_SYMLINK=true`)
 >

@@ -12,6 +12,7 @@
   - [Full Guide](README-FULL.md)
 
 - **Features**
+  - [Feature Registry](features.md)
   - [Claude Code + dotclaude](claude-code.md)
   - [Template System](templates.md)
   - [Vault System](vault-README.md)
@@ -22,9 +23,6 @@
 - **Architecture**
   - [System Overview](architecture.md)
   - [Troubleshooting](troubleshooting.md)
-
-- **Design Documents**
-  - [Vault Setup Wizard v2](design/vault-setup-wizard-v2.md)
 
 - **Planning**
   - [Roadmap](ROADMAP.md)
