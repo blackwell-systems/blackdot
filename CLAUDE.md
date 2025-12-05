@@ -173,6 +173,48 @@ fail "Error message"
 
 ---
 
+## Testing
+
+**IMPORTANT:** Before running tests, ensure these tools are available:
+
+```bash
+# Check/install zsh (scripts are zsh-based)
+which zsh || apt-get install -y zsh
+
+# Check/install shellcheck (static analysis)
+which shellcheck || apt-get install -y shellcheck
+
+# Check/install jq (JSON processing)
+which jq || apt-get install -y jq
+
+# Install bats (test framework) - use the setup script!
+./test/setup_bats.sh
+# This installs bats to ~/.local/bin/bats
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+**Run tests:**
+```bash
+# All tests
+bats test/
+
+# Specific test files
+bats test/feature_registry.bats      # 38 tests
+bats test/cli_feature_awareness.bats # 30 tests
+bats test/config_layers.bats         # 28 tests
+
+# Quick syntax check (no zsh needed)
+shellcheck --shell=bash bin/dotfiles-*
+```
+
+**Test counts (as of 2025-12-05):**
+- Feature Registry: 38 tests
+- CLI Feature Awareness: 30 tests
+- Config Layers: 28 tests
+- Total: 140+ tests across all suites
+
+---
+
 ## Documentation Updates
 
 When changing features, update:

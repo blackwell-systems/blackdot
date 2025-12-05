@@ -15,10 +15,129 @@ if [[ -f "$DOTFILES_DIR/lib/_cli_features.sh" ]]; then
     source "$DOTFILES_DIR/lib/_cli_features.sh" 2>/dev/null || true
 fi
 
+# Command-specific help information
+typeset -gA CLI_COMMAND_HELP=(
+    ["vault"]="vault|Vault Operations|Multi-vault secret management (Bitwarden/1Password/pass)|
+  vault setup       Setup vault backend (first-time setup)
+  vault pull        Pull secrets from vault
+  vault push        Push secrets to vault
+  vault sync        Bidirectional sync (smart direction)
+  vault scan        Re-scan for new secrets
+  vault list        List all vault items
+  vault status      Show vault sync status"
+    ["config"]="config_layers|Configuration|Hierarchical configuration resolution (env>project>machine>user)|
+  config get <key>          Get config value with layer resolution
+  config set <layer> <k> <v> Set config in specific layer
+  config show <key>         Show where a config value comes from
+  config list               Show configuration layer status
+  config merged             Show merged config from all layers
+  config init <type>        Initialize machine or project config
+  config edit [layer]       Edit config in \$EDITOR"
+    ["backup"]="backup_auto|Backup & Safety|Automatic backup before destructive operations|
+  backup create     Create backup of current config
+  backup list       List all backups
+  backup restore    Restore specific backup
+  rollback          Instant rollback to last backup"
+    ["template"]="templates|Templates|Machine-specific configuration templates|
+  template init     Initialize templates for this machine
+  template render   Render all templates
+  template link     Create symlinks from templates
+  template diff     Show differences from rendered
+  template vars     Show available template variables"
+    ["features"]="core|Feature Management|Enable/disable dotfiles features|
+  features          List all features and status
+  features list     List features (optionally by category)
+  features enable   Enable a feature
+  features disable  Disable a feature
+  features preset   Apply a preset (minimal/developer/claude/full)
+  features check    Check if feature is enabled (for scripts)"
+    ["doctor"]="core|Health Check|Comprehensive system health diagnostics|
+  doctor            Run all health checks
+  doctor --fix      Auto-fix common issues
+  doctor --json     Output as JSON for automation"
+    ["status"]="core|Status|Quick visual dashboard|
+  status            Show quick status dashboard
+  status --verbose  Show detailed status"
+    ["metrics"]="health_metrics|Metrics|Health check metrics visualization|
+  metrics           Show metrics dashboard
+  metrics history   Show historical trends"
+)
+
+# Helper: Show help for a specific command
+_dotfiles_help_command() {
+    local cmd="$1"
+    local info="${CLI_COMMAND_HELP[$cmd]:-}"
+
+    if [[ -z "$info" ]]; then
+        echo "No detailed help available for: $cmd"
+        echo ""
+        echo "Try: dotfiles help"
+        return 1
+    fi
+
+    # Parse info - first line contains metadata, rest is subcommands
+    local first_line="${info%%$'\n'*}"
+    local subcommands="${info#*$'\n'}"
+
+    # Parse first line: "feature|title|description"
+    local feature="${first_line%%|*}"
+    local rest="${first_line#*|}"
+    local title="${rest%%|*}"
+    local description="${rest#*|}"
+    description="${description%%|*}"  # Remove trailing pipe if any
+
+    # Show feature status
+    local status_text="${GREEN}●${NC} enabled"
+    local feature_status="enabled"
+    if [[ -n "$feature" && "$feature" != "core" ]]; then
+        if type feature_enabled &>/dev/null && ! feature_enabled "$feature" 2>/dev/null; then
+            status_text="${DIM}○${NC} disabled"
+            feature_status="disabled"
+        fi
+    else
+        status_text="${CYAN}core${NC}"
+        feature_status="core"
+    fi
+
+    echo "${BOLD}${CYAN}dotfiles $cmd${NC} - $title"
+    echo ""
+    echo "${BOLD}Feature:${NC} $feature ($status_text)"
+    echo "${BOLD}Description:${NC} $description"
+    echo ""
+    echo "${BOLD}Commands:${NC}"
+    echo "$subcommands"
+    echo ""
+
+    # Show enable hint if disabled
+    if [[ "$feature_status" == "disabled" ]]; then
+        echo "─────────────────────────────────────────────────────"
+        echo "${YELLOW}⚠${NC} This feature is not enabled."
+        echo "  Enable with: ${GREEN}dotfiles features enable $feature${NC}"
+        echo "  Or use: ${DIM}dotfiles $cmd --force${NC}"
+        echo ""
+    fi
+}
+
 # Helper function for feature-aware help display
 _dotfiles_help() {
     local show_all=false
-    [[ "${1:-}" == "--all" || "${1:-}" == "-a" ]] && show_all=true
+    local show_cmd=""
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --all|-a) show_all=true ;;
+            -*) ;;  # ignore other flags
+            *) show_cmd="$1" ;;
+        esac
+        shift
+    done
+
+    # If command specified, show command-specific help
+    if [[ -n "$show_cmd" ]]; then
+        _dotfiles_help_command "$show_cmd"
+        return $?
+    fi
 
     echo "${BOLD}${CYAN}dotfiles${NC} - Manage your dotfiles"
     echo ""
