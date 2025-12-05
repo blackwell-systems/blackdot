@@ -48,7 +48,7 @@ All `dotfiles vault` commands work identically regardless of which backend you'v
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| `init-vault.sh` | Configure vault backend with location support (v2 wizard) | `dotfiles vault setup` |
+| `init-vault.sh` | Configure vault backend with location support | `dotfiles vault setup` |
 | `restore.sh` | Orchestrates all restores | `dotfiles vault pull` |
 | `restore-ssh.sh` | Restores SSH keys + config | Called by bootstrap |
 | `restore-aws.sh` | Restores AWS config/creds | Called by bootstrap |
@@ -85,39 +85,7 @@ dotfiles vault check            # Validate required items exist
 
 ---
 
-## v3.0 Migration
-
-If you're upgrading from v2.x, run the migration tool to update your configuration:
-
-```bash
-dotfiles migrate              # Interactive migration (INI→JSON, vault v2→v3)
-dotfiles migrate --yes        # Skip confirmation prompt
-```
-
-### What Gets Migrated
-
-**Config Format (INI → JSON):**
-- `~/.config/dotfiles/config.ini` → `~/.config/dotfiles/config.json`
-- Migrates vault backend setting
-- Converts setup state to `setup.completed[]` array
-- Auto-detects and sets `paths.dotfiles_dir`
-
-**Vault Schema (v2 → v3):**
-- `~/.config/dotfiles/vault-items.json` schema upgrade
-- **Before (v2):** Separate `ssh_keys`, `vault_items`, `syncable_items` objects
-- **After (v3):** Single `secrets[]` array with consistent schema
-- Eliminates duplication between `ssh_keys` and `vault_items`
-- Adds per-item `sync`, `backup`, `required` control
-
-**Automatic Backups:**
-Both config and vault schema are backed up to:
-```
-~/.config/dotfiles/backups/pre-v3-migration-YYYYMMDD_HHMMSS/
-```
-
-**Migration is idempotent** - safe to run multiple times. Detects if already migrated.
-
-### v3.0 Vault Schema
+## Vault Schema
 
 ```json
 {

@@ -65,30 +65,6 @@ Skips: `/workspace` symlink, vault setup, Claude integration. You still get Zsh,
 
 ---
 
-## Upgrading from v2.x to v3.0
-
-If you're upgrading from v2.x, run the migration tool:
-
-```bash
-cd ~/workspace/dotfiles  # or wherever your dotfiles are
-git pull
-dotfiles migrate
-```
-
-**What gets migrated:**
-- Config format: `config.ini` → `config.json`
-- Vault schema: v2 → v3 (consolidated structure)
-- Command history preserved
-
-**Migration is safe:**
-- ✅ Automatic timestamped backups
-- ✅ Idempotent (run multiple times safely)
-- ✅ Shows before/after comparison
-
-[Detailed Migration Guide →](vault-README.md#v30-migration)
-
----
-
 ## Core Features
 
 - **Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with Bitwarden, 1Password, or pass
@@ -183,7 +159,7 @@ dotfiles drift           # Compare local vs vault
 dotfiles sync            # Smart bidirectional sync
 dotfiles vault pull      # Restore secrets from vault
 dotfiles vault push      # Push local changes to vault
-dotfiles vault validate  # Validate vault schema (v3.0)
+dotfiles vault validate  # Validate vault schema
 dotfiles vault setup     # Interactive onboarding
 
 # Templates
