@@ -27,6 +27,11 @@
 - **Planning**
   - [Roadmap](ROADMAP.md)
 
+- **Design Documents**
+  - [Plugin System](design/IMPL-plugin-system.md)
+  - [Hook System](design/IMPL-hook-system.md)
+  - [Configuration Layers](design/IMPL-configuration-layers.md)
+
 - **Contributing**
   - [Contributing Guide](CONTRIBUTING.md)
   - [Security](SECURITY.md)
