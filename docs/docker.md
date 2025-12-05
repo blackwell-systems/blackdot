@@ -2,7 +2,7 @@
 
 Test dotfiles in isolated containers before installing on your system.
 
-> **v3.0 Compatible:** All containers support v3.0 features including schema validation (`dotfiles vault validate`), progress bar visualization in `dotfiles setup`, and the new JSON configuration format. No special configuration needed—just rebuild containers to get the latest features.
+> All containers include full dotfiles functionality: schema validation, progress visualization, JSON configuration, and vault operations. No special configuration needed.
 
 ## Container Options
 
