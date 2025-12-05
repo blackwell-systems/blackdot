@@ -170,6 +170,24 @@ discover_other_secrets() {
         info "Found: ~/.local/env.secrets"
     fi
 
+    # Template variables (XDG location - preferred for vault portability)
+    local xdg_vars="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/template-variables.sh"
+    if [[ -f "$xdg_vars" ]]; then
+        items+=("Template-Variables:$xdg_vars")
+        info "Found: $xdg_vars"
+    else
+        # Check templates directory location (legacy/repo location)
+        # Try common dotfiles locations
+        local dotfiles_dirs=("$HOME/dotfiles" "$HOME/.dotfiles" "$HOME/workspace/dotfiles")
+        for dir in "${dotfiles_dirs[@]}"; do
+            if [[ -f "$dir/templates/_variables.local.sh" ]]; then
+                items+=("Template-Variables:$dir/templates/_variables.local.sh")
+                info "Found: $dir/templates/_variables.local.sh"
+                break
+            fi
+        done
+    fi
+
     echo "${items[@]}"
 }
 
@@ -285,6 +303,22 @@ generate_vault_json() {
         syncable_items+=("Environment-Secrets:~/.local/env.secrets")
     fi
 
+    # Discover template variables (XDG location preferred, then dotfiles repo)
+    local xdg_vars="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/template-variables.sh"
+    if [[ -f "$xdg_vars" ]]; then
+        pass "  Found: $xdg_vars"
+        syncable_items+=("Template-Variables:~/.config/dotfiles/template-variables.sh")
+    else
+        # Check common dotfiles locations
+        for dir in "$HOME/dotfiles" "$HOME/.dotfiles" "$HOME/workspace/dotfiles"; do
+            if [[ -f "$dir/templates/_variables.local.sh" ]]; then
+                pass "  Found: $dir/templates/_variables.local.sh"
+                syncable_items+=("Template-Variables:$dir/templates/_variables.local.sh")
+                break
+            fi
+        done
+    fi
+
     echo "" >&2
 
     # Check if anything was found
@@ -296,6 +330,7 @@ generate_vault_json() {
         echo "  • ~/.aws/ (AWS configs)" >&2
         echo "  • ~/.gitconfig (Git config)" >&2
         echo "  • ~/.npmrc, ~/.pypirc, ~/.docker/config.json" >&2
+        echo "  • ~/.config/dotfiles/template-variables.sh (template vars)" >&2
         echo "" >&2
         return 1
     fi
@@ -559,6 +594,8 @@ Standard locations scanned:
   • ~/.aws/           (AWS configs)
   • ~/.gitconfig      (Git config)
   • ~/.npmrc, ~/.pypirc, ~/.docker/config.json (other secrets)
+  • ~/.config/dotfiles/template-variables.sh (template variables)
+  • ~/dotfiles/templates/_variables.local.sh (alternate location)
 
 Merge behavior (when config exists):
   Interactive prompt offers three choices:
