@@ -44,6 +44,7 @@ This is the comprehensive reference documentation for the dotfiles system. It co
 - [Adding New SSH Keys](#adding-new-ssh-keys)
 - [Syncing Local Changes to Vault](#syncing-local-changes-to-vault)
 - [Maintenance Checklists](#maintenance-checklists)
+- [Backup System](#backup-system)
 - [Using the Dotfiles Day-to-Day](#using-the-dotfiles-day-to-day)
 - [Health Check](#health-check)
   - [The dotfiles Command](#the-dotfiles-command)
@@ -1777,6 +1778,71 @@ Complete checklist for a fresh machine:
 
 ---
 
+## Backup System
+
+The dotfiles system includes automatic backup and restore functionality to protect your configuration files.
+
+### Creating Backups
+
+```bash
+# Create a backup
+dotfiles backup
+
+# List all available backups
+dotfiles backup --list
+```
+
+Each backup creates a timestamped archive in `~/.dotfiles-backups/` containing:
+- `~/.ssh/config` and `~/.ssh/known_hosts`
+- `~/.gitconfig`
+- `~/.aws/config` and `~/.aws/credentials`
+- `~/.local/env.secrets`
+- `~/.zshrc` and `~/.p10k.zsh`
+
+### Restoring from Backup
+
+```bash
+# Interactive restore (shows list of backups)
+dotfiles backup restore
+
+# Restore specific backup
+dotfiles backup restore backup-20240115-143022
+```
+
+### Automatic Backup Behavior
+
+The system can automatically create backups before potentially destructive operations:
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `backup.enabled` | `true` | Enable backup system |
+| `backup.auto_backup` | `true` | Auto-backup before destructive ops |
+| `backup.max_snapshots` | `10` | Maximum backups retained |
+| `backup.retention_days` | `30` | Days to keep backups |
+| `backup.compress` | `true` | Use gzip compression |
+
+Configure in `~/.config/dotfiles/config.json`:
+
+```json
+{
+  "backup": {
+    "enabled": true,
+    "auto_backup": true,
+    "max_snapshots": 10,
+    "retention_days": 30
+  }
+}
+```
+
+### Best Practices
+
+- **Before major changes**: Run `dotfiles backup` before modifying configs
+- **Before uninstall**: Always backup before running `dotfiles uninstall`
+- **Regular backups**: Run periodic backups even with vault sync
+- **Test restores**: Occasionally verify backups work with `--list`
+
+---
+
 ## Using the Dotfiles Day-to-Day
 
 ### Aliases (defined in zshrc)
@@ -1874,6 +1940,9 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 
 - `dotfiles status` → Visual dashboard
 - `dotfiles doctor` → Run health check + vault item validation
+- `dotfiles backup` → Create timestamped backup of config files
+- `dotfiles backup --list` → List available backups
+- `dotfiles backup restore` → Restore from backup (interactive)
 - `dotfiles upgrade` → Pull latest dotfiles and run bootstrap
 - `dotfiles lint` → Validate shell config syntax
 - `dotfiles lint --fix` → Auto-fix script permissions
