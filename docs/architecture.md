@@ -183,9 +183,9 @@ dotfiles/
 │   ├── dotfiles-diff       # Preview changes
 │   ├── dotfiles-backup     # Backup/restore
 │   ├── dotfiles-setup      # Setup wizard
-│   ├── dotfiles-migrate    # v3.0 migration orchestrator
+│   ├── dotfiles-migrate    # Config migration orchestrator
 │   ├── dotfiles-migrate-config    # INI→JSON config migration
-│   ├── dotfiles-migrate-vault-schema # v2→v3 vault schema migration
+│   ├── dotfiles-migrate-vault-schema # Legacy vault schema migration
 │   ├── dotfiles-uninstall  # Clean removal
 │   └── dotfiles-metrics    # Show metrics
 │
@@ -208,7 +208,7 @@ dotfiles/
 │
 ├── lib/                    # Shared libraries
 │   ├── _logging.sh         # Logging functions
-│   ├── _config.sh          # JSON config abstraction (v3.0)
+│   ├── _config.sh          # JSON config abstraction
 │   ├── _drift.sh           # Fast drift detection (shell startup)
 │   ├── _state.sh           # Setup state management
 │   ├── _vault.sh           # Vault abstraction layer
@@ -269,15 +269,15 @@ The vault system provides bidirectional sync with multiple backends (Bitwarden, 
 Vault items are defined in a user-editable config file:
 
 ```
-~/.config/dotfiles/vault-items.json    # v3.0 schema (single secrets[] array)
-~/.config/dotfiles/config.json         # v3.0 config (vault backend, state, paths)
+~/.config/dotfiles/vault-items.json    # Vault schema (single secrets[] array)
+~/.config/dotfiles/config.json         # Config (vault backend, state, paths)
 ```
 
-**v3.0 Schema** uses a single `secrets[]` array instead of separate `ssh_keys`, `vault_items`, `syncable_items` objects. This eliminates duplication and provides per-item control for sync, backup, and required status.
+**Vault Schema:** Uses a single `secrets[]` array for all secrets. Each item has granular control for sync, backup, and required status.
 
-See `vault/vault-items.example.json` for the template. Run `dotfiles migrate` to upgrade from v2.x.
+See `vault/vault-items.example.json` for the template.
 
-### Schema Validation (v3.0+)
+### Schema Validation
 
 The vault system validates `vault-items.json` before all sync operations:
 
@@ -349,7 +349,7 @@ Each vault item follows a consistent schema:
 }
 ```
 
-## Setup Wizard (v3.0+)
+## Setup Wizard
 
 The interactive setup wizard (`dotfiles setup`) guides users through installation with visual feedback:
 
