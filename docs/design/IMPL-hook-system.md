@@ -4,10 +4,40 @@
 > **Priority:** Medium
 > **Complexity:** Medium
 > **Target:** v2.3.0
+> **Foundation:** [Feature Registry](../features.md) (v2.1.0)
 
 ## Overview
 
 The hook system allows users to inject custom behavior at key lifecycle points without modifying core scripts. Hooks are shell functions or scripts that execute before/after major operations.
+
+---
+
+## Architecture Foundation
+
+The Hook System integrates with the **Feature Registry** (`lib/_features.sh`) which serves as the control plane for the entire modular architecture:
+
+```
+┌─────────────────────────────────────────────┐
+│         Feature Registry (v2.1.0)            │
+│   - Tracks enabled/disabled features         │
+│   - Resolves dependencies                    │
+│   - Persists state to config.json            │
+└─────────────────┬───────────────────────────┘
+                  │ controls
+                  ▼
+┌─────────────────────────────────────────────┐
+│           Hook System (this doc)             │
+│   - Hooks only run if parent feature enabled │
+│   - Hook system itself is a feature          │
+│   - Hooks can check feature state            │
+└─────────────────────────────────────────────┘
+```
+
+**Key integration points:**
+- The hook system registers as the `hooks` feature (optional category)
+- Vault hooks only run if `vault` feature is enabled
+- Hooks can call `feature_enabled()` to conditionally execute
+- `dotfiles features disable hooks` disables all hook execution
 
 ---
 
