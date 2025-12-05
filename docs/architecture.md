@@ -14,23 +14,23 @@ graph TB
 
     subgraph "Dotfiles Repository"
         BOOTSTRAP[Bootstrap Scripts]
-        VAULT[Vault Scripts]
+        VAULT_SCRIPTS[Vault Scripts]
         DOCTOR[Health Checks]
         ZSHD[ZSH Modules]
     end
 
     subgraph "External Services"
-        BW[Bitwarden Vault]
+        VAULT_BACKEND[Multi-Vault<br/>Bitwarden/1Password/pass]
         GH[GitHub]
     end
 
     CLI --> DOCTOR
-    CLI --> VAULT
+    CLI --> VAULT_SCRIPTS
     CLI --> BOOTSTRAP
     ZSH --> ZSHD
     SYMLINKS --> ZSHD
 
-    VAULT <--> BW
+    VAULT_SCRIPTS <--> VAULT_BACKEND
     BOOTSTRAP --> SYMLINKS
     GH --> BOOTSTRAP
 ```
@@ -129,11 +129,17 @@ graph LR
     B --> I[upgrade]
     B --> J[uninstall]
     B --> K[macos]
+    B --> L[template]
 
-    E --> E1[restore]
-    E --> E2[sync]
+    E --> E1[pull]
+    E --> E2[push]
     E --> E3[list]
     E --> E4[check]
+
+    L --> L1[init]
+    L --> L2[render]
+    L --> L3[vars]
+    L --> L4[check]
 ```
 
 ### File Flow

@@ -1678,6 +1678,7 @@ dotfiles vault push --all
 | `AWS-Credentials` | `~/.aws/credentials` |
 | `Git-Config` | `~/.gitconfig` |
 | `Environment-Secrets` | `~/.local/env.secrets` |
+| `Template-Variables` | `~/.config/dotfiles/template-variables.sh` |
 
 ---
 
