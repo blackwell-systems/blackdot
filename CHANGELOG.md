@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Feature Registry** - Centralized control for all optional features (`lib/_features.sh`)
+  - `dotfiles features` - List all features with enabled/disabled status
+  - `dotfiles features enable <name> [--persist]` - Enable a feature (optionally persist to config)
+  - `dotfiles features disable <name> [--persist]` - Disable a feature
+  - `dotfiles features preset <name> [--persist]` - Apply a preset (minimal, developer, claude, full)
+  - `dotfiles features check <name>` - Check if enabled (for scripts, returns exit code)
+  - `dotfiles features --json` - JSON output for automation
+  - Three categories: core (always enabled), optional, integration
+  - Dependency resolution: enabling `claude_integration` auto-enables `workspace_symlink`
+  - Backward compatible with `SKIP_*` environment variables
+  - State persisted to `config.json` features object
+
 - **Vault Setup Wizard v2** - Complete redesign of vault onboarding flow
   - Educational phase explains how vault storage works before any configuration
   - Three setup modes: Existing (import from vault), Fresh (create new), Manual (configure yourself)
