@@ -161,7 +161,7 @@ cmd_enable() {
     local deps_to_enable=()
     _collect_deps_recursive() {
         local feat="$1"
-        local deps
+        local deps dep
         deps="$(_feature_meta "$feat" "deps")"
         if [[ -n "$deps" ]]; then
             for dep in ${(s: :)deps}; do
