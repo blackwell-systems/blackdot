@@ -68,7 +68,7 @@ The unified command for managing your dotfiles. All subcommands are accessed via
 | `vault` | - | Secret vault operations |
 | `template` | `tmpl` | Machine-specific config templates |
 | `lint` | - | Validate shell config syntax |
-| `migrate` | - | Migrate config to v3.0 (INI→JSON, vault v2→v3) |
+| `migrate` | - | Migrate legacy config formats (INI→JSON) |
 | `packages` | `pkg` | Check/install Brewfile packages |
 | `metrics` | - | Visualize health check metrics over time |
 | `setup` | - | Interactive setup wizard |
@@ -357,25 +357,16 @@ dotfiles backup restore backup-20240115-143022  # Restore specific
 
 ### `dotfiles migrate`
 
-**v3.0 Migration Tool** - Migrate configuration from v2.x to v3.0 format.
+**Configuration Migration** - Migrate legacy configuration formats to JSON.
 
 ```bash
 dotfiles migrate [OPTIONS]
 ```
 
 **What it migrates:**
-
-1. **Config Format (INI → JSON)**
-   - `~/.config/dotfiles/config.ini` → `config.json`
-   - Preserves vault backend setting
-   - Converts setup state to `setup.completed[]` array
-   - Auto-detects `paths.dotfiles_dir`
-
-2. **Vault Schema (v2 → v3)**
-   - `~/.config/dotfiles/vault-items.json` schema upgrade
-   - Consolidates `ssh_keys`, `vault_items`, `syncable_items` into single `secrets[]` array
-   - Eliminates duplication
-   - Adds per-item `sync`, `backup`, `required` control
+- Config format: `config.ini` → `config.json`
+- Vault schema: Legacy format → current `secrets[]` array format
+- Preserves vault backend settings and setup state
 
 **Options:**
 
@@ -392,27 +383,9 @@ dotfiles migrate --yes        # Skip confirmation, migrate immediately
 ```
 
 **Safety:**
-
-- Creates timestamped backups before migration:
-  ```
-  ~/.config/dotfiles/backups/pre-v3-migration-YYYYMMDD_HHMMSS/
-  ├── config.ini
-  ├── config.json (if exists)
-  └── vault-items.json
-  ```
+- Creates timestamped backups before migration
 - Idempotent - safe to run multiple times
 - Automatically detects if migration is needed
-- Skips if already v3.0 format
-
-**When to use:**
-
-- Upgrading from v2.x to v3.0
-- After pulling latest v3.0 changes
-- If you see deprecation warnings about INI format
-
-**See also:**
-- [State Management](state-management.md#migrating-from-v2x) - Config format details
-- [Vault System](vault-README.md#v30-migration) - Vault schema changes
 
 ---
 
@@ -1340,17 +1313,17 @@ Most commands follow these conventions:
 | `templates/_variables.local.sh` | Local template overrides (repo-specific) |
 | `~/.config/dotfiles/template-variables.sh` | Template variables (XDG, vault-portable) |
 | `generated/` | Rendered templates |
-| `~/.config/dotfiles/config.json` | All configuration and state (v3.0 JSON format) |
-| `~/.config/dotfiles/vault-items.json` | Vault items schema (v3.0 format) |
+| `~/.config/dotfiles/config.json` | All configuration and state (JSON format) |
+| `~/.config/dotfiles/vault-items.json` | Vault items schema |
 | `~/.cache/dotfiles/vault-state.json` | Drift detection cache (file checksums from last vault pull) |
 
 ---
 
 ## State Management
 
-The `dotfiles setup` wizard uses persistent state in JSON format (v3.0). See [State Management](state-management.md) for full documentation.
+The `dotfiles setup` wizard uses persistent state in JSON format. See [State Management](state-management.md) for full documentation.
 
-### Configuration File (v3.0)
+### Configuration File
 
 #### `~/.config/dotfiles/config.json`
 
@@ -1378,7 +1351,7 @@ All state and configuration in a single JSON file:
 **Key Sections:**
 - `setup.completed[]` - Array of completed setup phases
 - `vault.backend` - Preferred vault backend (`bitwarden`, `1password`, `pass`)
-- `paths.dotfiles_dir` - Custom dotfiles installation directory (v3.0)
+- `paths.dotfiles_dir` - Custom dotfiles installation directory
 
 **Completed Phases:**
 - `symlinks` - Shell configuration symlinks created
