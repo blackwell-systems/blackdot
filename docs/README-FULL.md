@@ -378,7 +378,14 @@ esac
 
 ## Canonical Workspace (`~/workspace`)
 
-A key architectural decision is the **canonical workspace directory** at `~/workspace`. This serves multiple purposes:
+A key architectural decision is the **canonical workspace directory** at `~/workspace` (configurable via `WORKSPACE_TARGET`). This serves multiple purposes:
+
+> **💡 Customization:** The workspace target directory is configurable via:
+> - Environment variable: `WORKSPACE_TARGET=~/code`
+> - Setup wizard: Step 1 prompts for workspace directory
+> - Config file: `paths.workspace_target` in `~/.config/dotfiles/config.json`
+>
+> The `/workspace` symlink name stays the same for Claude Code portability - only the target changes.
 
 ### 1. Username-Agnostic Paths
 
@@ -472,8 +479,11 @@ Bootstrap creates a **platform-independent symlink**:
 
 ```bash
 # Created automatically by bootstrap scripts
-/workspace → ~/workspace
+/workspace → ~/workspace    # Default target
+/workspace → ~/code         # Custom target (via WORKSPACE_TARGET)
 ```
+
+The target directory is configurable - set `WORKSPACE_TARGET=~/code` before install, or configure via the setup wizard. The `/workspace` symlink name stays constant for portability.
 
 This symlink resolves to the correct home directory on each platform but provides a **canonical absolute path**:
 - macOS: `/workspace/dotfiles` (symlink resolves to `/Users/username/workspace/dotfiles`)

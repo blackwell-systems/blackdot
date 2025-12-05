@@ -93,11 +93,11 @@ This release introduces significant improvements and breaking changes. Users on 
 
 - **Setup Wizard Progress Bar** (Pain Point #8) - Visual feedback for setup progress
   - Unicode progress bar with 20-character visualization (█ filled, ░ empty)
-  - `show_progress()` function displays current step (e.g., "Step 2 of 6: Packages")
-  - `show_steps_overview()` function shows all 6 steps upfront with descriptions
+  - `show_progress()` function displays current step (e.g., "Step 3 of 7: Packages")
+  - `show_steps_overview()` function shows all 7 steps upfront with descriptions
   - Beautiful bordered sections using box drawing characters (╔═╗║╠╣╚═╝)
-  - Progress percentage calculation (33%, 50%, etc.)
-  - All 6 setup phases updated: symlinks, packages, vault, secrets, claude, template
+  - Progress percentage calculation (14%, 29%, 43%, etc.)
+  - All 7 setup phases: workspace, symlinks, packages, vault, secrets, claude, template
   - Overview shown at wizard start with safety reminder ("Safe to exit anytime")
 
 - **Structured Error Handling Library** (Pain Point #6) - Actionable error messages
@@ -185,6 +185,19 @@ This release introduces significant improvements and breaking changes. Users on 
   - Consistent schema: name, path, type, required, sync, backup
   - Migration preserves all existing items and metadata
   - version field indicates schema version
+
+- **Configurable Workspace Target** - Customize where /workspace points
+  - New setup wizard step (Step 1 of 7): Interactive workspace configuration
+  - New `WORKSPACE_TARGET` environment variable to specify custom directory
+  - New `paths.workspace_target` config option in config.json
+  - `/workspace` symlink name stays constant (for Claude Code portability)
+  - Only the TARGET directory is configurable (default: `~/workspace`)
+  - Priority order: env var > config.json > default
+  - New `lib/_paths.sh` helper with `get_workspace_target()` and `get_dotfiles_dir()`
+  - All CLI tools updated to use configurable paths
+  - Usage: `WORKSPACE_TARGET=~/code ./install.sh` or configure via wizard
+  - Supports users with existing project layouts (`~/code`, `~/projects`, `~/dev`)
+  - Zero breaking changes - default behavior unchanged
 
 ### Changed
 - **BREAKING: Vault commands renamed** - Old commands removed entirely

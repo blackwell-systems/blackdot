@@ -12,6 +12,7 @@ DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Source libraries
 source "$DOTFILES_DIR/lib/_logging.sh"
+source "$DOTFILES_DIR/lib/_config.sh"
 source "$DOTFILES_DIR/lib/_state.sh"
 source "$DOTFILES_DIR/lib/_vault.sh"
 
@@ -119,24 +120,27 @@ show_steps_overview() {
     echo -e "${BOLD}                    Setup Wizard Overview${NC}"
     echo -e "${BOLD}${CYAN}═══════════════════════════════════════════════════════════════${NC}"
     echo ""
-    echo -e "${BOLD}This wizard will guide you through 6 steps:${NC}"
+    echo -e "${BOLD}This wizard will guide you through 7 steps:${NC}"
     echo ""
-    echo -e "  ${CYAN}1.${NC} ${BOLD}Symlinks${NC}          - Link shell config files"
+    echo -e "  ${CYAN}1.${NC} ${BOLD}Workspace${NC}         - Configure workspace directory"
+    echo -e "     ${DIM}Default: ~/workspace (target for /workspace symlink)${NC}"
+    echo ""
+    echo -e "  ${CYAN}2.${NC} ${BOLD}Symlinks${NC}          - Link shell config files"
     echo -e "     ${DIM}~/.zshrc, ~/.p10k.zsh, ~/.claude${NC}"
     echo ""
-    echo -e "  ${CYAN}2.${NC} ${BOLD}Packages${NC}          - Install Homebrew packages"
+    echo -e "  ${CYAN}3.${NC} ${BOLD}Packages${NC}          - Install Homebrew packages"
     echo -e "     ${DIM}Choose: minimal (18) | enhanced (43) | full (61)${NC}"
     echo ""
-    echo -e "  ${CYAN}3.${NC} ${BOLD}Vault${NC}             - Configure secret backend"
+    echo -e "  ${CYAN}4.${NC} ${BOLD}Vault${NC}             - Configure secret backend"
     echo -e "     ${DIM}Bitwarden, 1Password, or pass${NC}"
     echo ""
-    echo -e "  ${CYAN}4.${NC} ${BOLD}Secrets${NC}           - Manage SSH keys, AWS, Git config"
+    echo -e "  ${CYAN}5.${NC} ${BOLD}Secrets${NC}           - Manage SSH keys, AWS, Git config"
     echo -e "     ${DIM}Auto-discover and sync to vault${NC}"
     echo ""
-    echo -e "  ${CYAN}5.${NC} ${BOLD}Claude Code${NC}       - AI assistant integration"
+    echo -e "  ${CYAN}6.${NC} ${BOLD}Claude Code${NC}       - AI assistant integration"
     echo -e "     ${DIM}Optional: dotclaude + portable sessions${NC}"
     echo ""
-    echo -e "  ${CYAN}6.${NC} ${BOLD}Templates${NC}         - Machine-specific configs"
+    echo -e "  ${CYAN}7.${NC} ${BOLD}Templates${NC}         - Machine-specific configs"
     echo -e "     ${DIM}Optional: work vs personal configs${NC}"
     echo ""
     echo -e "${BOLD}${GREEN}✓${NC} ${BOLD}Safe to exit anytime${NC} - Progress is saved automatically"
@@ -170,9 +174,9 @@ show_status() {
     echo -e "${BOLD}Current Status:${NC}"
     echo "───────────────"
 
-    local phases=("symlinks" "packages" "vault" "secrets" "claude" "template")
-    local labels=("Symlinks" "Packages" "Vault" "Secrets" "Claude" "Templates")
-    local details=("Shell config linked" "Homebrew packages" "Vault backend" "SSH keys, AWS, Git" "Claude Code integration" "Machine-specific configs")
+    local phases=("workspace" "symlinks" "packages" "vault" "secrets" "claude" "template")
+    local labels=("Workspace" "Symlinks" "Packages" "Vault" "Secrets" "Claude" "Templates")
+    local details=("Workspace directory" "Shell config linked" "Homebrew packages" "Vault backend" "SSH keys, AWS, Git" "Claude Code integration" "Machine-specific configs")
 
     for i in {1..${#phases[@]}}; do
         local phase="${phases[$i]}"
@@ -180,8 +184,12 @@ show_status() {
         local detail="${details[$i]}"
 
         if state_completed "$phase"; then
+            # Special handling for workspace to show target
+            if [[ "$phase" == "workspace" ]]; then
+                local ws_target=$(config_get "paths.workspace_target" "$HOME/workspace")
+                echo -e "  ${GREEN}[✓]${NC} $label ${DIM}(→ $ws_target)${NC}"
             # Special handling for vault to show if skipped
-            if [[ "$phase" == "vault" ]]; then
+            elif [[ "$phase" == "vault" ]]; then
                 local backend=$(config_get "vault" "backend" "")
                 if [[ "$backend" == "none" ]]; then
                     echo -e "  ${YELLOW}[⊘]${NC} $label ${DIM}(Skipped - run 'dotfiles vault init')${NC}"
@@ -203,8 +211,99 @@ show_status() {
 # Setup Phases
 # ============================================================
 
+phase_workspace() {
+    show_progress 1 7 "Workspace Configuration"
+
+    if state_completed "workspace"; then
+        local current_target=$(config_get "paths.workspace_target" "$HOME/workspace")
+        pass "Workspace already configured: $current_target"
+        echo ""
+        echo -n "Reconfigure workspace target? [y/N]: "
+        read reconfigure
+        if [[ "${reconfigure}" =~ ^[Yy]$ ]]; then
+            state_reset "workspace"
+            # Fall through to configuration
+        else
+            return 0
+        fi
+    fi
+
+    # Get current/default workspace target
+    local default_target="${WORKSPACE_TARGET:-$HOME/workspace}"
+    # Expand tilde if present
+    default_target="${default_target/#\~/$HOME}"
+
+    echo "The workspace directory is where dotfiles and projects are stored."
+    echo "The /workspace symlink will point to this directory for Claude Code portability."
+    echo ""
+    echo "Current target: $default_target"
+    echo ""
+    echo "Examples:"
+    echo "  ~/workspace     (default)"
+    echo "  ~/code"
+    echo "  ~/dev"
+    echo "  ~/projects"
+    echo ""
+    echo -n "Workspace directory [$default_target]: "
+    read user_target
+
+    # Use default if empty
+    local final_target="${user_target:-$default_target}"
+
+    # Expand tilde if user entered one
+    final_target="${final_target/#\~/$HOME}"
+
+    # Save to config
+    config_set "paths.workspace_target" "$final_target"
+
+    # Create the directory if it doesn't exist
+    if [[ ! -d "$final_target" ]]; then
+        echo ""
+        echo -n "Directory doesn't exist. Create it? [Y/n]: "
+        read create_dir
+        if [[ "${create_dir:-Y}" =~ ^[Yy]$ ]]; then
+            mkdir -p "$final_target"
+            pass "Created $final_target"
+        fi
+    fi
+
+    # Check/update /workspace symlink
+    if [[ -L "/workspace" ]]; then
+        local current_link=$(readlink /workspace)
+        if [[ "$current_link" != "$final_target" ]]; then
+            echo ""
+            info "Current /workspace → $current_link"
+            echo -n "Update symlink to → $final_target? [Y/n]: "
+            read update_link
+            if [[ "${update_link:-Y}" =~ ^[Yy]$ ]]; then
+                if sudo ln -sfn "$final_target" /workspace; then
+                    pass "Updated /workspace → $final_target"
+                else
+                    warn "Failed to update symlink (may need sudo permissions)"
+                fi
+            fi
+        else
+            pass "Symlink /workspace → $final_target already correct"
+        fi
+    elif [[ ! -e "/workspace" ]]; then
+        echo ""
+        echo -n "Create /workspace symlink to $final_target? [Y/n]: "
+        read create_link
+        if [[ "${create_link:-Y}" =~ ^[Yy]$ ]]; then
+            if sudo ln -sfn "$final_target" /workspace; then
+                pass "Created /workspace → $final_target"
+            else
+                warn "Failed to create symlink (may need sudo permissions)"
+            fi
+        fi
+    fi
+
+    state_complete "workspace"
+    pass "Workspace configured: $final_target"
+}
+
 phase_symlinks() {
-    show_progress 1 6 "Symlinks"
+    show_progress 2 7 "Symlinks"
 
     if state_completed "symlinks"; then
         pass "Symlinks already configured"
@@ -237,7 +336,7 @@ phase_symlinks() {
 }
 
 phase_packages() {
-    show_progress 2 6 "Packages"
+    show_progress 3 7 "Packages"
     echo "────────────────────────────────"
 
     if state_completed "packages"; then
@@ -379,7 +478,7 @@ phase_packages() {
 }
 
 phase_vault() {
-    show_progress 3 6 "Vault Configuration"
+    show_progress 4 7 "Vault Configuration"
     echo "────────────────────────────────────"
 
     if state_completed "vault"; then
@@ -598,7 +697,7 @@ phase_vault() {
 }
 
 phase_secrets() {
-    show_progress 4 6 "Secrets Management"
+    show_progress 5 7 "Secrets Management"
     echo "───────────────────────────────────"
 
     if state_completed "secrets"; then
@@ -782,7 +881,7 @@ phase_secrets() {
 }
 
 phase_claude() {
-    show_progress 5 6 "Claude Code (Optional)"
+    show_progress 6 7 "Claude Code (Optional)"
     echo "────────────────────────────────────────"
 
     if state_completed "claude"; then
@@ -823,7 +922,7 @@ phase_claude() {
 }
 
 phase_template() {
-    show_progress 6 6 "Machine-Specific Templates (Optional)"
+    show_progress 7 7 "Machine-Specific Templates (Optional)"
     echo "───────────────────────────────────────────────────────────"
 
     if state_completed "template"; then
@@ -882,7 +981,7 @@ main() {
         echo -n "Reset all setup progress? [y/N]: "
         read confirm
         if [[ "${confirm:-N}" =~ ^[Yy]$ ]]; then
-            for phase in symlinks packages vault secrets claude template; do
+            for phase in workspace symlinks packages vault secrets claude template; do
                 state_reset "$phase"
             done
             pass "State reset"
@@ -909,8 +1008,8 @@ main() {
     show_steps_overview
 
     # Run each phase
-    local phases=("symlinks" "packages" "vault" "secrets" "claude" "template")
-    local phase_funcs=("phase_symlinks" "phase_packages" "phase_vault" "phase_secrets" "phase_claude" "phase_template")
+    local phases=("workspace" "symlinks" "packages" "vault" "secrets" "claude" "template")
+    local phase_funcs=("phase_workspace" "phase_symlinks" "phase_packages" "phase_vault" "phase_secrets" "phase_claude" "phase_template")
 
     for i in {1..${#phases[@]}}; do
         local phase="${phases[$i]}"
