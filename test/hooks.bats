@@ -835,3 +835,40 @@ EOF
     [ "$status" -eq 0 ]
     [[ "$output" == *"success"* ]]
 }
+
+# ============================================================
+# Example Hooks Tests
+# ============================================================
+
+@test "hooks/examples directory exists" {
+    [ -d "${DOTFILES_DIR}/hooks/examples" ]
+}
+
+@test "hooks/examples/README.md exists" {
+    [ -f "${DOTFILES_DIR}/hooks/examples/README.md" ]
+}
+
+@test "post_vault_pull permission hook example exists and is executable" {
+    [ -f "${DOTFILES_DIR}/hooks/examples/post_vault_pull/10-fix-permissions.sh" ]
+    [ -x "${DOTFILES_DIR}/hooks/examples/post_vault_pull/10-fix-permissions.sh" ]
+}
+
+@test "post_vault_pull ssh-add hook example exists and is executable" {
+    [ -f "${DOTFILES_DIR}/hooks/examples/post_vault_pull/20-ssh-add.sh" ]
+    [ -x "${DOTFILES_DIR}/hooks/examples/post_vault_pull/20-ssh-add.sh" ]
+}
+
+@test "doctor_check custom checks hook example exists and is executable" {
+    [ -f "${DOTFILES_DIR}/hooks/examples/doctor_check/10-custom-checks.sh" ]
+    [ -x "${DOTFILES_DIR}/hooks/examples/doctor_check/10-custom-checks.sh" ]
+}
+
+@test "shell_init project-env hook example exists and is executable" {
+    [ -f "${DOTFILES_DIR}/hooks/examples/shell_init/10-project-env.zsh" ]
+    [ -x "${DOTFILES_DIR}/hooks/examples/shell_init/10-project-env.zsh" ]
+}
+
+@test "directory_change auto-env hook example exists and is executable" {
+    [ -f "${DOTFILES_DIR}/hooks/examples/directory_change/10-auto-env.zsh" ]
+    [ -x "${DOTFILES_DIR}/hooks/examples/directory_change/10-auto-env.zsh" ]
+}
