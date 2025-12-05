@@ -23,19 +23,26 @@
 - Template system for machine-specific configs
 - ZSH modules (00-99 numbered load order)
 
+### What's Been Implemented
+
+- **Feature Registry** - `lib/_features.sh` provides centralized feature control
+  - `dotfiles features` - List all features and status
+  - `dotfiles features enable/disable` - Toggle features with optional persistence
+  - `dotfiles features preset` - Apply predefined feature sets
+  - Categories: core, optional, integration
+  - Presets: minimal, developer, claude, full
+
 ### What Needs Improvement
-- Features are "all or nothing" in some areas
-- No central feature registry
 - Limited plugin/extension support
 - Hard to add custom modules without forking
 
 ---
 
-## Proposed Architecture
+## Architecture
 
-### 1. Feature Registry (`lib/_features.sh`)
+### 1. Feature Registry (`lib/_features.sh`) ✅ IMPLEMENTED
 
-Central registry of all optional features with enable/disable control:
+Central registry of all optional features with enable/disable control. See [Feature Registry](../features.md) for full documentation.
 
 ```bash
 # Feature definition structure

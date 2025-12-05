@@ -234,21 +234,38 @@ feature_persist() {
         return 1
     fi
 
-    # Ensure config functions are available
-    if ! type config_set &>/dev/null; then
-        echo "ERROR: config_set not available. Source _config.sh first." >&2
+    # Ensure config file exists
+    local config_file="${CONFIG_FILE:-$HOME/.config/dotfiles/config.json}"
+    local config_dir="$(dirname "$config_file")"
+
+    # Create config directory and file if they don't exist
+    if [[ ! -d "$config_dir" ]]; then
+        mkdir -p "$config_dir" 2>/dev/null || {
+            echo "ERROR: Cannot create config directory: $config_dir" >&2
+            return 1
+        }
+    fi
+
+    if [[ ! -f "$config_file" ]]; then
+        # Create minimal config with features object
+        echo '{"version": 3, "features": {}}' > "$config_file" || {
+            echo "ERROR: Cannot create config file: $config_file" >&2
+            return 1
+        }
+    fi
+
+    # Ensure jq is available
+    if ! command -v jq &>/dev/null; then
+        echo "ERROR: jq is required for feature persistence. Install with: brew install jq" >&2
         return 1
     fi
 
-    # Update config file
-    local config_file="${CONFIG_FILE:-$HOME/.config/dotfiles/config.json}"
-    if [[ -f "$config_file" ]]; then
-        local tmp_file="${config_file}.tmp"
-        if [[ "$enabled" == "true" ]]; then
-            jq ".features.${feature} = true" "$config_file" > "$tmp_file" && mv "$tmp_file" "$config_file"
-        else
-            jq ".features.${feature} = false" "$config_file" > "$tmp_file" && mv "$tmp_file" "$config_file"
-        fi
+    # Update config file (ensure features object exists)
+    local tmp_file="${config_file}.tmp"
+    if [[ "$enabled" == "true" ]]; then
+        jq ".features = (.features // {}) | .features.${feature} = true" "$config_file" > "$tmp_file" && mv "$tmp_file" "$config_file"
+    else
+        jq ".features = (.features // {}) | .features.${feature} = false" "$config_file" > "$tmp_file" && mv "$tmp_file" "$config_file"
     fi
 
     # Update runtime state

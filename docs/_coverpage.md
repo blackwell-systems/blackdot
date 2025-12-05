@@ -12,6 +12,7 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
 ```
 
+- **Feature registry** - Enable exactly what you need with `dotfiles features`
 - **Fully modular** - Everything optional except shell config
 - **One command setup** - Interactive wizard guides you through
 - **Claude Code + dotclaude** - Profiles, sessions & git safety sync everywhere

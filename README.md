@@ -10,7 +10,7 @@
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **The first dotfiles designed for AI-assisted development.** Modular, batteries-included configuration for developers who use Claude Code across machines. Pick what you need: multi-vault secrets, portable sessions, machine-specific templates, and self-healing config. Everything is optional except shell config.
+> **The first dotfiles designed for AI-assisted development.** Modular, batteries-included configuration for developers who use Claude Code across machines. Use the **feature registry** to pick exactly what you need: multi-vault secrets, portable sessions, machine-specific templates, and self-healing config. Everything is optional except shell config.
 
 [Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
 
@@ -262,6 +262,23 @@ BREWFILE_TIER=enhanced ./bootstrap/bootstrap-mac.sh
 
 ### Modular By Design
 
+**The feature registry controls all optional components:**
+
+```bash
+# See what's available and enabled
+dotfiles features                         # List all features and status
+
+# Enable/disable features
+dotfiles features enable vault --persist  # Enable vault support
+dotfiles features disable drift_check     # Turn off drift checking
+
+# Apply presets for quick setup
+dotfiles features preset minimal          # Just shell (fastest)
+dotfiles features preset developer        # vault, aws_helpers, git_hooks, modern_cli
+dotfiles features preset claude           # Claude Code optimized
+dotfiles features preset full --persist   # Everything, saved to config
+```
+
 **Enable features later if you change your mind:**
 
 ```bash
@@ -306,13 +323,15 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull   # No drift check (for CI/autom
 
 **Key features:**
 
-1. **Portable Claude Sessions** – `/workspace` symlink ensures identical paths everywhere. Your Claude conversations sync seamlessly across macOS, Linux, and WSL2. Enhanced by dotclaude profile management. Target directory is configurable via `WORKSPACE_TARGET`.
+1. **Feature Registry** – Enable exactly what you need with `dotfiles features`. Use presets (minimal, developer, claude, full) or toggle individual features. Persists to config for consistent behavior across sessions.
 
-2. **Smart Secrets Onboarding** – Detects existing credentials (SSH keys, AWS, Git) and offers to vault them automatically. New machines restore everything with one command.
+2. **Portable Claude Sessions** – `/workspace` symlink ensures identical paths everywhere. Your Claude conversations sync seamlessly across macOS, Linux, and WSL2. Enhanced by dotclaude profile management. Target directory is configurable via `WORKSPACE_TARGET`.
 
-3. **Multi-Vault Backend** – Works with Bitwarden, 1Password, or pass. Unified API across all backends. Bidirectional sync with drift detection.
+3. **Smart Secrets Onboarding** – Detects existing credentials (SSH keys, AWS, Git) and offers to vault them automatically. New machines restore everything with one command.
 
-4. **Self-Healing Configuration** – `dotfiles doctor --fix` automatically repairs permissions, broken symlinks, and misconfigurations.
+4. **Multi-Vault Backend** – Works with Bitwarden, 1Password, or pass. Unified API across all backends. Bidirectional sync with drift detection.
+
+5. **Self-Healing Configuration** – `dotfiles doctor --fix` automatically repairs permissions, broken symlinks, and misconfigurations.
 
 **Not using Claude Code?** Still great for multi-machine developer workflows with vault-backed secrets.
 

@@ -37,18 +37,52 @@ graph TB
 
 ## Modular Architecture
 
-**Everything is optional except shell config.** The system is designed to be fully modular, allowing users to pick only the components they need.
+**Everything is optional except shell config.** The system is designed to be fully modular, allowing users to pick only the components they need. The **feature registry** (`lib/_features.sh`) provides centralized control over all optional functionality.
+
+### Feature Registry
+
+The feature registry is the central system for enabling and disabling optional features:
+
+```bash
+# List all features
+dotfiles features
+
+# Enable a feature
+dotfiles features enable vault --persist
+
+# Use a preset
+dotfiles features preset developer --persist
+```
+
+**Available Features:**
+
+| Category | Features |
+|----------|----------|
+| **Core** | `shell` (always enabled) |
+| **Optional** | `workspace_symlink`, `claude_integration`, `vault`, `templates`, `aws_helpers`, `git_hooks`, `drift_check`, `backup_auto`, `health_metrics`, `macos_settings` |
+| **Integration** | `modern_cli`, `nvm_integration`, `sdkman_integration`, `dotclaude` |
+
+**Presets:**
+
+| Preset | Features Enabled |
+|--------|------------------|
+| `minimal` | `shell` |
+| `developer` | `shell`, `vault`, `aws_helpers`, `git_hooks`, `modern_cli` |
+| `claude` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `git_hooks`, `modern_cli` |
+| `full` | All features |
+
+See [Feature Registry](features.md) for complete documentation.
 
 ### Core vs. Optional Components
 
-| Component | Type | Skip Method | Details |
-|-----------|------|-------------|---------|
-| **Shell Config** | **REQUIRED** | Cannot skip | ZSH configuration, plugins, prompt |
-| **Homebrew + Packages** | Optional | `--minimal` flag | 80+ CLI tools (fzf, ripgrep, bat, etc.) |
-| **Vault System** | Optional | Select "Skip" in wizard or `--minimal` | Multi-backend secrets (Bitwarden/1Password/pass) |
-| **/workspace Symlink** | Optional | `SKIP_WORKSPACE_SYMLINK=true` | For portable Claude sessions |
-| **Claude Integration** | Optional | `SKIP_CLAUDE_SETUP=true` or `--minimal` | dotclaude + hooks + settings |
-| **Template Engine** | Optional | Don't run `dotfiles template` | Machine-specific configs |
+| Component | Type | Feature Flag | Skip Method | Details |
+|-----------|------|--------------|-------------|---------|
+| **Shell Config** | **REQUIRED** | `shell` | Cannot skip | ZSH configuration, plugins, prompt |
+| **Homebrew + Packages** | Optional | - | `--minimal` flag | 80+ CLI tools (fzf, ripgrep, bat, etc.) |
+| **Vault System** | Optional | `vault` | Select "Skip" in wizard or `--minimal` | Multi-backend secrets (Bitwarden/1Password/pass) |
+| **/workspace Symlink** | Optional | `workspace_symlink` | `SKIP_WORKSPACE_SYMLINK=true` | For portable Claude sessions |
+| **Claude Integration** | Optional | `claude_integration` | `SKIP_CLAUDE_SETUP=true` or `--minimal` | dotclaude + hooks + settings |
+| **Template Engine** | Optional | `templates` | Don't run `dotfiles template` | Machine-specific configs |
 
 ### Install Modes
 
@@ -122,6 +156,7 @@ graph LR
     A[dotfiles] --> B{Command}
     B --> C[status]
     B --> D[doctor]
+    B --> M[features]
     B --> E[vault]
     B --> F[backup]
     B --> G[diff]
@@ -130,6 +165,11 @@ graph LR
     B --> J[uninstall]
     B --> K[macos]
     B --> L[template]
+
+    M --> M1[list]
+    M --> M2[enable]
+    M --> M3[disable]
+    M --> M4[preset]
 
     E --> E1[pull]
     E --> E2[push]
@@ -179,6 +219,7 @@ dotfiles/
 ├── bin/                    # CLI tools
 │   ├── dotfiles-doctor     # Health checks
 │   ├── dotfiles-drift      # Vault comparison
+│   ├── dotfiles-features   # Feature registry management
 │   ├── dotfiles-sync       # Bidirectional vault sync
 │   ├── dotfiles-diff       # Preview changes
 │   ├── dotfiles-backup     # Backup/restore
@@ -209,6 +250,7 @@ dotfiles/
 ├── lib/                    # Shared libraries
 │   ├── _logging.sh         # Logging functions
 │   ├── _config.sh          # JSON config abstraction
+│   ├── _features.sh        # Feature registry (opt-in features)
 │   ├── _drift.sh           # Fast drift detection (shell startup)
 │   ├── _state.sh           # Setup state management
 │   ├── _vault.sh           # Vault abstraction layer
@@ -357,9 +399,9 @@ The interactive setup wizard (`dotfiles setup`) guides users through installatio
 
 ```
 ╔═══════════════════════════════════════════════════════════════╗
-║ Step 3 of 6: Vault Configuration
+║ Step 4 of 7: Vault Configuration
 ╠═══════════════════════════════════════════════════════════════╣
-║ ██████████░░░░░░░░░░ 50%
+║ ██████████░░░░░░░░░░ 57%
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
@@ -372,12 +414,13 @@ The interactive setup wizard (`dotfiles setup`) guides users through installatio
 - **Overflow protection** - Clamps progress to valid range
 
 **Setup phases:**
-1. Symlinks - Shell configuration
-2. Packages - Homebrew installation
-3. Vault - Backend selection
-4. Secrets - Credential restoration
-5. Claude Code - Optional integration
-6. Templates - Machine-specific configs
+1. Workspace - Configure workspace directory target
+2. Symlinks - Shell configuration
+3. Packages - Homebrew installation (tier selection)
+4. Vault - Backend selection
+5. Secrets - Credential restoration
+6. Claude Code - Optional integration
+7. Templates - Machine-specific configs
 
 ### State Persistence
 
