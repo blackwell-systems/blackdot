@@ -6,7 +6,8 @@
 #   source "$DOTFILES_DIR/lib/_cli_features.sh"
 #   if cli_command_visible "vault"; then ... fi
 
-set -euo pipefail
+# Note: Do NOT use 'set -euo pipefail' here - this file is sourced into
+# interactive shells and errexit would cause the shell to crash on any error
 
 # ============================================================
 # Command-to-Feature Mapping
