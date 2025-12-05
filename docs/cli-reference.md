@@ -42,6 +42,7 @@ SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh
 dotfiles status          # Visual dashboard
 dotfiles doctor          # Health check
 dotfiles doctor --fix    # Auto-fix issues
+dotfiles sync            # Smart bidirectional vault sync
 dotfiles vault pull      # Pull secrets from vault
 dotfiles vault push      # Push local changes to vault
 dotfiles template init   # Setup machine-specific configs
@@ -61,6 +62,7 @@ The unified command for managing your dotfiles. All subcommands are accessed via
 | `status` | `s` | Quick visual dashboard |
 | `doctor` | `health` | Comprehensive health check |
 | `drift` | - | Compare local files vs vault |
+| `sync` | - | Bidirectional vault sync (smart push/pull) |
 | `diff` | - | Preview changes before sync/restore |
 | `backup` | - | Backup and restore configuration |
 | `vault` | - | Secret vault operations |
@@ -198,6 +200,80 @@ Disable with: `export DOTFILES_SKIP_DRIFT_CHECK=1`
 2. On shell startup, local files are compared against cached checksums
 3. If checksums differ, a warning is shown
 4. Run full `dotfiles drift` to compare against actual vault content
+
+---
+
+### `dotfiles sync`
+
+Bidirectional sync between local files and vault. Intelligently determines sync direction based on what changed.
+
+```bash
+dotfiles sync [OPTIONS] [ITEMS...]
+```
+
+**Options:**
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--dry-run` | `-n` | Show what would be synced without making changes |
+| `--force-local` | `-l` | Push all local changes to vault (overwrite vault) |
+| `--force-vault` | `-v` | Pull all vault content to local (overwrite local) |
+| `--verbose` | - | Show detailed comparison info (checksums) |
+| `--all` | `-a` | Sync all syncable items |
+| `--help` | `-h` | Show help |
+
+**Sync Behavior:**
+
+By default, sync determines the correct direction for each item:
+
+| Condition | Action |
+|-----------|--------|
+| Local changed since last sync | Push to vault |
+| Vault changed since last sync | Pull from vault |
+| Both changed | **Conflict** - requires `--force-*` flag |
+| Neither changed | Skip (already in sync) |
+
+**Conflict Resolution:**
+
+When both local and vault have changed since last sync:
+
+```bash
+dotfiles sync --force-local   # Push local changes, overwrite vault
+dotfiles sync --force-vault   # Pull vault changes, overwrite local
+```
+
+**Syncable Items:**
+- `SSH-Config` (`~/.ssh/config`)
+- `AWS-Config` (`~/.aws/config`)
+- `AWS-Credentials` (`~/.aws/credentials`)
+- `Git-Config` (`~/.gitconfig`)
+- `Environment-Secrets` (`~/.local/env.secrets`)
+- `Template-Variables` (`~/.config/dotfiles/template-variables.sh`)
+- `Claude-Profiles` (`~/.claude/profiles.json`)
+
+**Examples:**
+
+```bash
+dotfiles sync                     # Smart sync all items
+dotfiles sync --dry-run           # Preview what would be synced
+dotfiles sync Git-Config          # Sync single item
+dotfiles sync --force-local       # Push all local to vault
+dotfiles sync --force-vault       # Pull all vault to local
+dotfiles sync --verbose           # Show checksum details
+```
+
+**How it works:**
+1. Loads cached checksums from `~/.cache/dotfiles/vault-state.json` (baseline from last sync)
+2. Calculates current checksums for local files
+3. Fetches vault content and calculates checksums
+4. Compares each against baseline to determine which side changed
+5. Performs push/pull operations based on detected changes
+6. Updates drift state after successful sync
+
+**Exit Codes:**
+- `0` - All items synced successfully
+- `1` - One or more items failed to sync
+- `2` - Conflicts detected (use `--force-*` to resolve)
 
 ---
 
@@ -357,6 +433,7 @@ dotfiles vault <command> [OPTIONS]
 | `init` | Configure vault backend with location support (v2 wizard) |
 | `pull` | Pull secrets from vault to local machine |
 | `push` | Push local files to vault |
+| `sync` | Bidirectional sync (smart push/pull based on changes) |
 | `setup` | Interactive onboarding wizard (three modes: Existing/Fresh/Manual) |
 | `list` | List vault items (supports location filtering) |
 | `check` | Validate vault items exist |
@@ -546,6 +623,27 @@ dotfiles vault push --all            # Push all items
 dotfiles vault push --dry-run --all  # Preview changes
 dotfiles vault push SSH-Config       # Push single item
 dotfiles vault push Git-Config AWS-Config  # Push multiple
+```
+
+---
+
+### `dotfiles vault sync`
+
+Bidirectional sync - intelligently determines whether to push or pull each item.
+
+```bash
+dotfiles vault sync [OPTIONS] [ITEMS...]
+```
+
+Same as `dotfiles sync`. See [dotfiles sync](#dotfiles-sync) for full documentation.
+
+**Quick Examples:**
+
+```bash
+dotfiles vault sync                  # Smart sync all items
+dotfiles vault sync --dry-run        # Preview changes
+dotfiles vault sync --force-local    # Force push local to vault
+dotfiles vault sync --force-vault    # Force pull vault to local
 ```
 
 ---
