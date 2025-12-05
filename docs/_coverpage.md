@@ -2,23 +2,19 @@
 
 # dotfiles
 
-> Modular dotfiles for the AI-assisted development era
+> A dotfiles management framework
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
 ```
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
-```
-
-- **Feature registry** - Enable exactly what you need with `dotfiles features`
-- **Fully modular** - Everything optional except shell config
-- **One command setup** - Interactive wizard guides you through
-- **Claude Code + dotclaude** - Profiles, sessions & git safety sync everywhere
-- **Your vault, your way** - Bitwarden, 1Password, or pass
-- **Never breaks** - Self-healing catches drift automatically
-- **Runs everywhere** - macOS • Linux • Windows • WSL2 • Docker
+- **Feature Registry** - Central control plane for all functionality
+- **Configuration Layers** - 5-layer priority hierarchy for settings
+- **CLI Feature Awareness** - Adaptive CLI based on enabled features
+- **Multi-Vault Backend** - Bitwarden, 1Password, or pass
+- **Portable Sessions** - Claude Code sessions work across machines
+- **Self-Healing** - Auto-repair permissions and symlinks
+- **Cross-Platform** - macOS • Linux • Windows • WSL2 • Docker
 
 [Get Started](#one-line-install)
 [VIEW ON GITHUB](https://github.com/blackwell-systems/dotfiles)

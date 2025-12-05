@@ -1,6 +1,6 @@
 # State Management
 
-The `dotfiles setup` wizard uses a persistent state system to track progress, save preferences, and enable resume capability.
+The `dotfiles setup` wizard uses a persistent state system to track progress, save preferences, and enable resume capability. State management is a foundation component that works with the [Configuration Layers](architecture.md#configuration-layers) system.
 
 > **v3.0 Update:** State management now uses JSON configuration format. Run `dotfiles migrate` to upgrade from v2.x INI files.
 
@@ -14,6 +14,7 @@ State management provides:
 - **Resume Support** - Continue where you left off if interrupted
 - **Preference Persistence** - Save choices like vault backend across sessions
 - **State Inference** - Auto-detect existing installations from filesystem
+- **Feature Persistence** - Store enabled/disabled features for the [Feature Registry](features.md)
 
 ---
 
