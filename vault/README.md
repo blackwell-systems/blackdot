@@ -42,19 +42,21 @@ All `dotfiles vault` commands work identically regardless of backend.
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| `restore.sh` | Orchestrates all restores | `dotfiles vault restore` |
+| `init-vault.sh` | Setup wizard v2 with location support | `dotfiles vault setup` |
+| `restore.sh` | Orchestrates all restores | `dotfiles vault pull` |
 | `restore-ssh.sh` | Restores SSH keys + config | Called by bootstrap |
 | `restore-aws.sh` | Restores AWS config/creds | Called by bootstrap |
 | `restore-env.sh` | Restores env secrets | Called by bootstrap |
 | `restore-git.sh` | Restores gitconfig | Called by bootstrap |
-| `vault-setup.sh` | Interactive onboarding wizard | `dotfiles vault setup` |
+| `discover-secrets.sh` | Scan local files for secrets | `dotfiles vault scan` |
 | `create-vault-item.sh` | Creates new vault items | `dotfiles vault create ITEM` |
-| `sync-to-vault.sh` | Syncs local → vault | `dotfiles vault sync --all` |
+| `sync-to-vault.sh` | Syncs local → vault | `dotfiles vault push --all` |
 | `validate-schema.sh` | Validates vault item schema | `dotfiles vault validate` |
 | `delete-vault-item.sh` | Deletes items from vault | `dotfiles vault delete ITEM` |
 | `check-vault-items.sh` | Pre-flight validation | `dotfiles vault check` |
 | `list-vault-items.sh` | Debug/inventory tool | `dotfiles vault list` |
 | `_common.sh` | Shared functions library | Sourced by other scripts |
+| `backends/*.sh` | Backend implementations | Bitwarden, 1Password, pass |
 
 ### Commands
 
@@ -154,6 +156,48 @@ export DOTFILES_VAULT_BACKEND=pass
 # Items will be stored under dotfiles/ prefix
 # e.g., dotfiles/Git-Config, dotfiles/SSH-Config
 ```
+
+---
+
+## Location Management (v3.1+)
+
+The setup wizard v2 introduces **location-based organization**. You tell the system where your secrets are stored instead of scanning your entire vault.
+
+### Setup Wizard v2 Flow
+
+Run `dotfiles vault setup` to launch the interactive wizard:
+
+1. **Educational Phase** - Explains how vault storage works for your backend
+2. **Setup Mode Selection**:
+   - **Existing Items** - Import from existing vault location
+   - **Fresh Start** - Create new items from local files
+   - **Manual** - Configure yourself
+3. **Location Selection** - Choose or create a folder/directory/vault
+
+### Location Types
+
+| Backend | Type | Description |
+|---------|------|-------------|
+| Bitwarden | `folder` | Items in a Bitwarden folder |
+| 1Password | `vault` | Items in a specific vault (planned) |
+| 1Password | `tag` | Items with a specific tag (planned) |
+| pass | `directory` | Items in a subdirectory |
+
+### Configuration
+
+Location is stored in `~/.config/dotfiles/vault-items.json`:
+
+```json
+{
+  "vault_location": {
+    "type": "folder",
+    "value": "dotfiles"
+  },
+  "vault_items": { ... }
+}
+```
+
+**Design Document:** See `docs/design/vault-setup-wizard-v2.md` for full rationale.
 
 ---
 
