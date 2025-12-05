@@ -821,8 +821,9 @@ render_template() {
     done
 
     # Check for unresolved variables
+    # Note: grep returns 1 when no matches, use || true to prevent set -e exit
     local unresolved
-    unresolved=$(echo "$content" | grep -oE '\{\{[^}]+\}\}' | head -5)
+    unresolved=$(echo "$content" | grep -oE '\{\{[^}]+\}\}' | head -5 || true)
     if [[ -n "$unresolved" ]]; then
         warn "Unresolved variables in template:"
         echo "$unresolved" | while read -r var; do
@@ -877,9 +878,9 @@ render_all_templates() {
         fi
 
         if render_template "$template" "$output_file" "$dry_run"; then
-            (( count++ ))
+            (( ++count ))  # Use pre-increment to avoid exit code 1 when count is 0
         else
-            (( errors++ ))
+            (( ++errors ))  # Use pre-increment to avoid exit code 1 when errors is 0
         fi
     done
 
@@ -916,23 +917,27 @@ validate_template() {
     local line_num=0
 
     # Check for unmatched conditionals
-    local if_count=$(grep -c '{{#if ' <<< "$content" || echo 0)
-    local endif_count=$(grep -c '{{/if}}' <<< "$content" || echo 0)
+    # Note: grep -c returns 1 when no matches but still outputs "0"
+    # We capture output separately to avoid "0\n0" from || echo 0
+    local if_count=0 endif_count=0 unless_count=0 endunless_count=0
+    local each_count=0 endeach_count=0
+    if_count=$(grep -c '{{#if ' <<< "$content" 2>/dev/null) || true
+    endif_count=$(grep -c '{{/if}}' <<< "$content" 2>/dev/null) || true
     if [[ "$if_count" -ne "$endif_count" ]]; then
         fail "Unmatched {{#if}}/{{/if}} blocks: $if_count opens, $endif_count closes"
         (( errors++ ))
     fi
 
-    local unless_count=$(grep -c '{{#unless ' <<< "$content" || echo 0)
-    local endunless_count=$(grep -c '{{/unless}}' <<< "$content" || echo 0)
+    unless_count=$(grep -c '{{#unless ' <<< "$content" 2>/dev/null) || true
+    endunless_count=$(grep -c '{{/unless}}' <<< "$content" 2>/dev/null) || true
     if [[ "$unless_count" -ne "$endunless_count" ]]; then
         fail "Unmatched {{#unless}}/{{/unless}} blocks"
         (( errors++ ))
     fi
 
     # Check for unmatched {{#each}} blocks
-    local each_count=$(grep -c '{{#each ' <<< "$content" || echo 0)
-    local endeach_count=$(grep -c '{{/each}}' <<< "$content" || echo 0)
+    each_count=$(grep -c '{{#each ' <<< "$content" 2>/dev/null) || true
+    endeach_count=$(grep -c '{{/each}}' <<< "$content" 2>/dev/null) || true
     if [[ "$each_count" -ne "$endeach_count" ]]; then
         fail "Unmatched {{#each}}/{{/each}} blocks: $each_count opens, $endeach_count closes"
         (( errors++ ))
