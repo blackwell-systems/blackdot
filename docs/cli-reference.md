@@ -29,7 +29,8 @@ The unified command for managing your dotfiles. All subcommands are accessed via
 |---------|-------|-------------|
 | `status` | `s` | Quick visual dashboard |
 | `doctor` | `health` | Comprehensive health check |
-| `features` | `feat` | **Feature registry** - enable/disable optional features |
+| `features` | `feat` | **Feature Registry** - enable/disable optional features |
+| `config` | `cfg` | **Configuration Layers** - view layered config |
 | `drift` | - | Compare local files vs vault |
 | `sync` | - | Bidirectional vault sync (smart push/pull) |
 | `diff` | - | Preview changes before sync/restore |
@@ -226,6 +227,58 @@ DOTFILES_FEATURE_VAULT=false   # Disable vault
 ```
 
 **See also:** [Feature Registry](features.md) for complete documentation.
+
+---
+
+## Configuration Commands
+
+### `dotfiles config`
+
+View and manage configuration across all layers.
+
+```bash
+dotfiles config [COMMAND] [OPTIONS]
+dotfiles cfg                # Alias
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `layers` | Show effective config with source layer for each setting |
+| `get <key>` | Get a specific config value |
+| `set <key> <value>` | Set a config value in user layer |
+| `help` | Show help |
+
+**Examples:**
+
+```bash
+# Show all config with sources
+dotfiles config layers
+
+# Output:
+# vault.backend = bitwarden (user)
+# vault.auto_sync = false (default)
+# setup.completed = ["symlinks","packages"] (machine)
+
+# Get specific value
+dotfiles config get vault.backend
+
+# Set value in user config
+dotfiles config set vault.auto_backup true
+```
+
+**Layer Priority (highest to lowest):**
+
+| Priority | Layer | Source |
+|----------|-------|--------|
+| 1 | Environment | `$DOTFILES_*` variables |
+| 2 | Project | `.dotfiles.local` in current directory |
+| 3 | Machine | `~/.config/dotfiles/machine.json` |
+| 4 | User | `~/.config/dotfiles/config.json` |
+| 5 | Defaults | Built-in fallbacks |
+
+**See also:** [Architecture - Configuration Layers](architecture.md#configuration-layers)
 
 ---
 

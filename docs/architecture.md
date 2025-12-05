@@ -1,6 +1,16 @@
 # Architecture
 
-This page describes the high-level architecture and component interactions of the dotfiles system.
+This page describes the architecture of the dotfiles framework—the systems that control how features are loaded, configured, and composed.
+
+## Framework Architecture
+
+The dotfiles system is built on three core architectural systems:
+
+1. **Feature Registry** (`lib/_features.sh`) - The control plane for all optional functionality
+2. **Configuration Layers** (`lib/_config_layers.sh`) - 5-layer priority system for settings
+3. **CLI Feature Awareness** (`lib/_cli_features.sh`) - Adaptive CLI based on enabled features
+
+These systems work together to provide a modular, extensible foundation.
 
 ## System Overview
 
@@ -72,6 +82,78 @@ dotfiles features preset developer --persist
 | `full` | All features |
 
 See [Feature Registry](features.md) for complete documentation.
+
+### Configuration Layers
+
+The configuration layer system provides a 5-layer priority hierarchy for settings:
+
+```
+Priority (highest to lowest):
+┌─────────────────────────────────────────────────┐
+│ 1. Environment Variables   (session-specific)   │
+├─────────────────────────────────────────────────┤
+│ 2. Project Config          (.dotfiles.local)    │
+├─────────────────────────────────────────────────┤
+│ 3. Machine Config          (machine.json)       │
+├─────────────────────────────────────────────────┤
+│ 4. User Config             (config.json)        │
+├─────────────────────────────────────────────────┤
+│ 5. Defaults                (built-in)           │
+└─────────────────────────────────────────────────┘
+```
+
+```bash
+# Layer-aware config access
+config_get_layered "vault.backend"  # Checks all layers in priority order
+
+# Show where a setting comes from
+dotfiles config layers              # Displays effective config with sources
+```
+
+**Layer Files:**
+
+| Layer | File | Use Case |
+|-------|------|----------|
+| Environment | `$DOTFILES_*` vars | CI/CD, temporary overrides |
+| Project | `.dotfiles.local` | Repository-specific settings |
+| Machine | `~/.config/dotfiles/machine.json` | Per-machine preferences |
+| User | `~/.config/dotfiles/config.json` | User preferences |
+| Defaults | `lib/_config_layers.sh` | Built-in fallbacks |
+
+### CLI Feature Awareness
+
+The CLI adapts based on enabled features:
+
+```bash
+dotfiles help  # Shows only commands for enabled features
+```
+
+**Behavior:**
+- Commands for disabled features are hidden from help output
+- Tab completion excludes disabled feature commands
+- Running a disabled command shows an enable hint
+
+```bash
+# Example: vault feature disabled
+$ dotfiles vault pull
+Feature 'vault' is not enabled.
+Run: dotfiles features enable vault
+```
+
+**Implementation:**
+
+```bash
+# In lib/_cli_features.sh
+_cli_feature_map=(
+    ["vault:pull"]="vault"
+    ["vault:push"]="vault"
+    ["template:render"]="templates"
+    # ...
+)
+
+# Commands check feature status before executing
+cli_command_available "vault:pull"  # Returns 0 if vault enabled
+```
 
 ### Core vs. Optional Components
 

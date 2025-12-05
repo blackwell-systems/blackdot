@@ -12,7 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
 
-> **The first dotfiles designed for AI-assisted development.** Multi-vault secrets, portable Claude Code sessions, machine-specific templates, and self-healing configuration.
+> A dotfiles management framework built on **Feature Registry**, **Configuration Layers**, and **CLI Feature Awareness**. Multi-vault secrets, portable Claude Code sessions, machine-specific templates, and self-healing configuration.
 
 [Changelog](https://github.com/blackwell-systems/dotfiles/blob/main/CHANGELOG.md) | [GitHub](https://github.com/blackwell-systems/dotfiles)
 
@@ -22,15 +22,15 @@
 
 | Topic | Description |
 |-------|-------------|
+| [Architecture](architecture.md) | Framework systems & design |
+| [Feature Registry](features.md) | Control plane for all features |
 | [CLI Reference](cli-reference.md) | All commands, flags & environment variables |
 | [Full Documentation](README-FULL.md) | Complete 1,900+ line guide |
-| [Feature Registry](features.md) | Opt-in features, presets & modularity |
 | [Template System](templates.md) | Machine-specific configuration |
 | [State Management](state-management.md) | Setup wizard state, resume & preferences |
 | [Vault System](vault-README.md) | Multi-backend secret management |
 | [Claude Code + dotclaude](claude-code.md) | Portable sessions, profile sync, git safety hooks |
 | [Docker Containers](docker.md) | Test environments & mock vault |
-| [Architecture](architecture.md) | System diagrams |
 | [Troubleshooting](troubleshooting.md) | Common issues & solutions |
 | [macOS Settings](macos-settings.md) | 137+ system preferences |
 
@@ -76,12 +76,16 @@ The setup wizard also prompts for workspace directory (Step 1 of 7).
 
 ## Core Features
 
-- **Feature registry** – Enable exactly what you need with `dotfiles features`. Use presets or toggle individual features
+**Framework Systems:**
+- **Feature Registry** – Central control plane for all functionality (`dotfiles features`)
+- **Configuration Layers** – 5-layer priority: env → project → machine → user → defaults
+- **CLI Feature Awareness** – Adaptive CLI that shows only enabled feature commands
+
+**Capabilities:**
 - **Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with Bitwarden, 1Password, or pass
-- **Smart secrets onboarding** – Interactive `dotfiles vault setup` detects local secrets and creates vault items
-- **Claude Code + dotclaude** – Portable sessions, profile management, git safety hooks, vault-synced Claude profiles
-- **Self-healing configuration** – Health checker with auto-fix, drift detection
+- **Portable Claude sessions** – `/workspace` symlink for consistent paths across machines
 - **Machine-specific templates** – Generate configs tailored to each machine
+- **Self-healing configuration** – Health checker with auto-fix, drift detection
 - **Modern CLI stack** – eza, fzf, ripgrep, zoxide, bat—configured and ready
 - **Cross-platform** – macOS, Linux, Windows, WSL2, Docker with [4 container sizes](docker.md)
 
@@ -89,7 +93,7 @@ The setup wizard also prompts for workspace directory (Step 1 of 7).
 
 ## Claude Code + dotclaude Integration
 
-**The first dotfiles project designed for AI-assisted development.** This is what sets us apart from chezmoi, yadm, and every other dotfiles manager.
+Integration with Claude Code and [dotclaude](https://github.com/blackwell-systems/dotclaude) profile manager:
 
 | Feature | What It Does |
 |---------|--------------|

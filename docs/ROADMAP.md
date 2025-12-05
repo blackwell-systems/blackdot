@@ -102,6 +102,47 @@ dotfiles features preset developer   # Apply preset (developer, claude, full)
 
 See [Feature Registry](features.md) for full documentation.
 
+### Configuration Layers ✅
+
+**Status:** Complete (v2.1.0)
+
+5-layer priority system for configuration:
+
+```bash
+dotfiles config layers           # Show effective config with sources
+config_get_layered "vault.backend"  # Layer-aware config access
+```
+
+**Layers (highest to lowest priority):**
+1. Environment Variables (`$DOTFILES_*`)
+2. Project Config (`.dotfiles.local` in project dir)
+3. Machine Config (`~/.config/dotfiles/machine.json`)
+4. User Config (`~/.config/dotfiles/config.json`)
+5. Defaults (built-in)
+
+**Features:**
+- `config_get_layered()` function for layer-aware access
+- Machine-specific config without editing main config
+- Project-level overrides for repository-specific settings
+- `dotfiles config layers` shows where each setting comes from
+
+### CLI Feature Awareness ✅
+
+**Status:** Complete (v2.1.0)
+
+Adaptive CLI that adjusts based on enabled features:
+
+```bash
+dotfiles help    # Shows only commands for enabled features
+dotfiles vault   # Shows enable hint if vault feature disabled
+```
+
+**Features:**
+- Commands for disabled features hidden from help
+- Tab completion excludes disabled feature commands
+- Running disabled command shows enable hint
+- Feature-to-command mapping in `lib/_cli_features.sh`
+
 ---
 
 ## Backlog
@@ -181,28 +222,7 @@ Generate documentation for all exported functions:
 
 ---
 
-### 6. Configuration Layers
-
-**Status:** Not Started
-
-Add layered configuration with priority order (highest wins):
-```
-1. Session     (environment variables)
-2. Project     (.dotfiles.local in project dir)
-3. Machine     (~/.config/dotfiles/machine.json)
-4. User        (~/.config/dotfiles/config.json)
-5. Defaults    (lib/_config.sh defaults)
-```
-
-**Features:**
-- `config_get_layered()` function for layer-aware config access
-- Machine-specific config without editing main config
-- Project-level overrides for repository-specific settings
-- `dotfiles config layers` to show where each setting comes from
-
----
-
-### 7. Plugin System
+### 5. Plugin System
 
 **Status:** Not Started
 
@@ -227,7 +247,7 @@ dotfiles plugin create <name>     # Scaffold new plugin
 
 ---
 
-### 8. Module System Refactor
+### 6. Module System Refactor
 
 **Status:** Not Started
 
@@ -250,7 +270,7 @@ modules/
 
 ---
 
-### 9. Hook System
+### 7. Hook System
 
 **Status:** Not Started
 
@@ -272,7 +292,7 @@ hook_register "post_vault_pull" "my_custom_function"
 
 ---
 
-### 10. Lazy Loading for Heavy Modules
+### 8. Lazy Loading for Heavy Modules
 
 **Status:** Not Started
 
@@ -321,7 +341,7 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 | 1.8.0 | Windows support, git safety hooks, dotclaude integration |
 | **2.0.0** | **Unified setup wizard, state management, macOS CLI** |
 | 2.0.1 | CLI help improvements, Docker container enhancements |
-| **2.1.0** | **Smart secrets onboarding, vault config file, Docker taxonomy, Feature Registry** |
+| **2.1.0** | **Smart secrets onboarding, vault config file, Docker taxonomy, Feature Registry, Configuration Layers, CLI Feature Awareness** |
 
 ---
 
