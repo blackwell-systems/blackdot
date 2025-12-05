@@ -191,7 +191,7 @@ show_status() {
                 echo -e "  ${GREEN}[✓]${NC} $label ${DIM}(→ $ws_target)${NC}"
             # Special handling for vault to show if skipped
             elif [[ "$phase" == "vault" ]]; then
-                local backend=$(config_get "vault" "backend" "")
+                local backend=$(config_get "vault.backend" "")
                 if [[ "$backend" == "none" ]]; then
                     echo -e "  ${YELLOW}[⊘]${NC} $label ${DIM}(Skipped - run 'dotfiles vault init')${NC}"
                 else
@@ -483,7 +483,7 @@ phase_vault() {
     echo "────────────────────────────────────"
 
     if state_completed "vault"; then
-        local backend=$(config_get "vault" "backend" "")
+        local backend=$(config_get "vault.backend" "")
         if [[ -n "$backend" ]] && [[ "$backend" != "none" ]]; then
             pass "Vault already configured ($backend)"
         elif [[ "$backend" == "none" ]]; then
@@ -653,7 +653,9 @@ phase_vault() {
 
             if ! bw unlock --check &>/dev/null 2>&1; then
                 echo ""
-                echo "Unlock your vault:"
+                info "Unlock your Bitwarden vault"
+                echo "Enter your master password when prompted:"
+                echo ""
                 local session=""
                 local attempts=0
                 local max_attempts=5
@@ -724,7 +726,7 @@ phase_secrets() {
         return 0
     fi
 
-    local backend=$(config_get "vault" "backend" "none")
+    local backend=$(config_get "vault.backend" "none")
     if [[ "$backend" == "none" ]]; then
         warn "Vault not configured - skipping secrets"
         echo "Configure secrets manually in ~/.ssh, ~/.aws, ~/.gitconfig"
@@ -811,8 +813,8 @@ phase_secrets() {
     if [[ ${#local_only[@]} -gt 0 ]]; then
         echo -e "  ${YELLOW}Local only (not in vault):${NC}"
         for item in "${local_only[@]}"; do
-            local path="${SYNCABLE_ITEMS[$item]:-${SSH_KEYS[$item]:-}}"
-            echo "    • $item → $path"
+            local item_path="${SYNCABLE_ITEMS[$item]:-${SSH_KEYS[$item]:-}}"
+            echo "    • $item → $item_path"
         done
         echo ""
     fi
@@ -1051,7 +1053,7 @@ main() {
         echo ""
 
         # Show dynamic next steps based on configuration
-        local vault_backend=$(config_get "vault" "backend" "")
+        local vault_backend=$(config_get "vault.backend" "")
         local template_configured=false
         if [[ -f "$DOTFILES_DIR/templates/_variables.local.sh" ]]; then
             template_configured=true
