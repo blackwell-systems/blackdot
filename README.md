@@ -135,7 +135,7 @@ Quick commands:
 - **Fully modular** - Everything optional except shell config. Use `--minimal` for just ZSH, or pick exactly what you need
 - **Homebrew + 80+ packages** (eza, fzf, ripgrep, bat, jq, aws-cli, etc.) - or skip with `--minimal`
 - **Smart credential onboarding** - Detects existing SSH/AWS/Git, offers to vault them
-- **Bidirectional vault push** - Push local → vault, restore vault → local
+- **Smart bidirectional sync** - `dotfiles sync` auto-detects push/pull direction per file
 - **Claude Code + dotclaude integration** - Profile sync, git safety hooks, portable sessions. Built for AI-assisted development
 - **Resume support** - Interrupted? Just run `dotfiles setup` again
 
@@ -372,12 +372,13 @@ Perfect for users with existing credentials who want to sync them across machine
 
 ```bash
 export DOTFILES_VAULT_BACKEND=bitwarden  # or 1password, pass
-dotfiles vault push --all    # Push local secrets to vault
-dotfiles vault pull       # Pull secrets on new machine
-dotfiles vault validate   # Validate configuration schema (v3.0+)
+dotfiles sync              # Smart bidirectional sync (auto push/pull)
+dotfiles vault push --all  # Push local secrets to vault
+dotfiles vault pull        # Pull secrets on new machine
+dotfiles vault validate    # Validate configuration schema (v3.0+)
 ```
 
-Unified API across Bitwarden, 1Password, and pass. Syncs SSH keys, AWS credentials, Git config, environment secrets. Bidirectional: local changes push to vault, new machines restore from vault. Drift detection warns before overwrites.
+Unified API across Bitwarden, 1Password, and pass. Syncs SSH keys, AWS credentials, Git config, environment secrets. **Smart bidirectional sync** automatically detects which direction each item needs (local→vault or vault→local). Drift detection warns before overwrites.
 
 **Schema validation (v3.0+):** Automatic validation before all sync operations catches configuration errors early. Validates JSON syntax, required fields, type values, and naming conventions. Interactive error recovery offers to open your editor for immediate fixes.
 
