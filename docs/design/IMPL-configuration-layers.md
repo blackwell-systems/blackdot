@@ -4,10 +4,48 @@
 > **Priority:** High
 > **Complexity:** Medium
 > **Target:** v2.2.0
+> **Foundation:** [Feature Registry](../features.md) (v2.1.0)
 
 ## Overview
 
 Configuration layers provide hierarchical config resolution, allowing settings to be overridden at different levels (project, machine, user) without modifying the main config file.
+
+---
+
+## Architecture Foundation
+
+Configuration Layers provides the data layer that works alongside the **Feature Registry** (`lib/_features.sh`) control plane:
+
+```
+┌─────────────────────────────────────────────┐
+│         Feature Registry (v2.1.0)            │
+│   - Controls what's enabled/disabled         │
+│   - Reads feature state from config          │
+│   - Already uses config.json for persistence │
+└─────────────────┬───────────────────────────┘
+                  │ reads/writes
+                  ▼
+┌─────────────────────────────────────────────┐
+│       Configuration Layers (this doc)        │
+│   - Provides layered config resolution       │
+│   - Features can be overridden per-machine   │
+│   - Projects can override feature defaults   │
+└─────────────────────────────────────────────┘
+```
+
+**Key integration points:**
+- Feature state (`features.*`) resolves through config layers
+- Machine config can override feature defaults for that machine
+- Project config can enable/disable features per-project
+- `feature_enabled()` will use `config_get_layered()` internally
+
+**Example: Feature state through layers**
+```bash
+# Default (lib/_features.sh): claude_integration = false
+# User config.json: features.claude_integration = true
+# Machine config: features.claude_integration = false  # Work laptop
+# Result: claude_integration is DISABLED on this machine
+```
 
 ---
 
