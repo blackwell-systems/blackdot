@@ -259,6 +259,11 @@ dotfiles() {
             esac
             ;;
 
+        # Feature management
+        features|feature|feat)
+            "$DOTFILES_DIR/bin/dotfiles-features" "$@"
+            ;;
+
         # Setup & Maintenance
         setup)
             "$DOTFILES_DIR/bin/dotfiles-setup" "$@"
@@ -366,6 +371,12 @@ dotfiles() {
             echo "  backup list       List all backups"
             echo "  backup restore    Restore specific backup"
             echo "  rollback          Instant rollback to last backup"
+            echo ""
+            echo "${BOLD}Feature Management:${NC}"
+            echo "  features          List all features and status"
+            echo "  features enable   Enable a feature"
+            echo "  features disable  Disable a feature"
+            echo "  features preset   Enable a preset (minimal/developer/claude/full)"
             echo ""
             echo "${BOLD}Other Commands:${NC}"
             echo "  secrets <cmd>     Alias for vault commands"

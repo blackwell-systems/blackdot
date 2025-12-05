@@ -24,6 +24,7 @@
 |-------|-------------|
 | [CLI Reference](cli-reference.md) | All commands, flags & environment variables |
 | [Full Documentation](README-FULL.md) | Complete 1,900+ line guide |
+| [Feature Registry](features.md) | Opt-in features, presets & modularity |
 | [Template System](templates.md) | Machine-specific configuration |
 | [State Management](state-management.md) | Setup wizard state, resume & preferences |
 | [Vault System](vault-README.md) | Multi-backend secret management |

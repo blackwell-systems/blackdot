@@ -12,6 +12,7 @@
   - [Full Guide](README-FULL.md)
 
 - **Features**
+  - [Feature Registry](features.md)
   - [Claude Code + dotclaude](claude-code.md)
   - [Template System](templates.md)
   - [Vault System](vault-README.md)
