@@ -61,6 +61,10 @@ typeset -gA CLI_COMMAND_FEATURES=(
 
     # Metrics
     ["metrics"]="health_metrics"
+
+    # Hooks
+    ["hook"]="hooks"
+    ["hooks"]="hooks"
 )
 
 # ============================================================
@@ -108,6 +112,14 @@ typeset -gA CLI_SUBCOMMAND_FEATURES=(
     ["backup:create"]="backup_auto"
     ["backup:list"]="backup_auto"
     ["backup:restore"]="backup_auto"
+
+    # Hook subcommands
+    ["hook:list"]="hooks"
+    ["hook:run"]="hooks"
+    ["hook:add"]="hooks"
+    ["hook:remove"]="hooks"
+    ["hook:points"]="hooks"
+    ["hook:test"]="hooks"
 )
 
 # ============================================================
@@ -122,6 +134,7 @@ typeset -gA CLI_SECTIONS=(
     ["Feature Management"]=""
     ["Configuration"]="config_layers"
     ["Templates"]="templates"
+    ["Hooks"]="hooks"
     ["macOS Settings"]="macos_settings"
     ["Metrics"]="health_metrics"
     ["Other Commands"]=""
@@ -135,6 +148,7 @@ typeset -gA CLI_SECTION_COMMANDS=(
     ["Feature Management"]="features"
     ["Configuration"]="config"
     ["Templates"]="template"
+    ["Hooks"]="hook"
     ["macOS Settings"]="macos"
     ["Metrics"]="metrics"
     ["Other Commands"]="cd edit migrate uninstall"
