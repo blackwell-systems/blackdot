@@ -27,6 +27,9 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 # Minimal: Just shell config (skip Homebrew, vault, Claude, /workspace)
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
 
+# Custom workspace: Install to ~/code instead of ~/workspace
+WORKSPACE_TARGET=~/code curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+
 # Custom: Pick components in the interactive wizard
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
 # (wizard lets you skip vault, Claude, packages, etc.)
@@ -49,6 +52,7 @@ $ curl -fsSL ... | bash && dotfiles setup
 
 Current Status:
 ───────────────
+  [ ] Workspace  (Workspace directory)
   [ ] Symlinks   (Shell config linked)
   [ ] Packages   (Homebrew packages)
   [ ] Vault      (Vault backend)
@@ -60,24 +64,27 @@ Current Status:
                     Setup Wizard Overview
 ═══════════════════════════════════════════════════════════════
 
-This wizard will guide you through 6 steps:
+This wizard will guide you through 7 steps:
 
-  1. Symlinks     - Link shell config files
+  1. Workspace    - Configure workspace directory
+     Default: ~/workspace (target for /workspace symlink)
+
+  2. Symlinks     - Link shell config files
      ~/.zshrc, ~/.p10k.zsh, ~/.claude
 
-  2. Packages     - Install Homebrew packages
+  3. Packages     - Install Homebrew packages
      Choose: minimal (18) | enhanced (43) | full (61)
 
-  3. Vault        - Configure secret backend
+  4. Vault        - Configure secret backend
      Bitwarden, 1Password, or pass
 
-  4. Secrets      - Manage SSH keys, AWS, Git config
+  5. Secrets      - Manage SSH keys, AWS, Git config
      Auto-discover and sync to vault
 
-  5. Claude Code  - AI assistant integration
+  6. Claude Code  - AI assistant integration
      Optional: dotclaude + portable sessions
 
-  6. Templates    - Machine-specific configs
+  7. Templates    - Machine-specific configs
      Optional: work vs personal configs
 
 ✓ Safe to exit anytime - Progress is saved automatically
@@ -86,9 +93,9 @@ This wizard will guide you through 6 steps:
 ═══════════════════════════════════════════════════════════════
 
 ╔═══════════════════════════════════════════════════════════════╗
-║ Step 2 of 6: Packages
+║ Step 3 of 7: Packages
 ╠═══════════════════════════════════════════════════════════════╣
-║ ████████░░░░░░░░░░░░ 33%
+║ ████████░░░░░░░░░░░░ 43%
 ╚═══════════════════════════════════════════════════════════════╝
 
 Which package tier would you like?
@@ -105,9 +112,9 @@ Your choice [2]: 2
 ✓ Packages installed successfully (enhanced tier)
 
 ╔═══════════════════════════════════════════════════════════════╗
-║ Step 4 of 6: Secrets Management
+║ Step 5 of 7: Secrets Management
 ╠═══════════════════════════════════════════════════════════════╣
-║ ████████████░░░░░░░░ 66%
+║ ██████████████░░░░░░ 71%
 ╚═══════════════════════════════════════════════════════════════╝
 
 Scanning secrets...
@@ -187,7 +194,7 @@ See [Docker Guide](docs/docker.md) for container options.
 **What dotclaude adds:**
 - **Profile sync** - Work/personal/client profiles follow you everywhere
 - **Git safety hooks** - Prevents dangerous commands (force push, hard reset) before Claude runs them
-- **Session portability** - `/workspace` paths work identically on macOS/Linux/WSL2
+- **Session portability** - `/workspace` paths work identically on macOS/Linux/WSL2 (target is configurable)
 - **Context isolation** - Keep work and personal projects separate
 
 **Automatically installed during `dotfiles setup` (STEP 5).** Or install standalone:
@@ -216,6 +223,9 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 # Custom: Skip specific components with environment variables
 SKIP_WORKSPACE_SYMLINK=true ./bootstrap/bootstrap-mac.sh  # Shell + packages, no /workspace
 SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh     # Everything except Claude
+
+# Custom workspace location (default: ~/workspace)
+WORKSPACE_TARGET=~/code ./bootstrap/bootstrap-mac.sh      # Use ~/code as workspace
 ```
 
 ### Component Matrix
@@ -226,6 +236,7 @@ SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh     # Everything except Cl
 | **Homebrew + Packages** | 18-61 CLI tools (tier selection in wizard) | `--minimal` flag or select tier in wizard | Yes - install tools manually |
 | **Vault System** | Multi-backend secrets (Bitwarden/1Password/pass) | Select "Skip" in wizard or `--minimal` | Yes - manage secrets manually |
 | **Portable Sessions** | `/workspace` symlink for Claude sync | `SKIP_WORKSPACE_SYMLINK=true` | Yes - use OS-specific paths |
+| **Workspace Target** | Directory `/workspace` points to | `WORKSPACE_TARGET=~/code` | N/A (uses ~/workspace by default) |
 | **Claude Integration** | dotclaude + hooks + settings | `SKIP_CLAUDE_SETUP=true` or `--minimal` | Yes - works without Claude |
 | **Template Engine** | Machine-specific configs | Don't run `dotfiles template` | Yes - use static configs |
 
@@ -258,7 +269,7 @@ BREWFILE_TIER=enhanced ./bootstrap/bootstrap-mac.sh
 dotfiles setup                    # Run wizard, select vault backend
 
 # Want portable sessions now?
-sudo ln -sfn ~/workspace /workspace
+sudo ln -sfn ~/workspace /workspace  # Or use WORKSPACE_TARGET=~/code for custom location
 
 # Install missing packages:
 dotfiles packages --install       # Uses Brewfile
@@ -295,7 +306,7 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull   # No drift check (for CI/autom
 
 **Key features:**
 
-1. **Portable Claude Sessions** – `/workspace` symlink ensures identical paths everywhere. Your Claude conversations sync seamlessly across macOS, Linux, and WSL2. Enhanced by dotclaude profile management.
+1. **Portable Claude Sessions** – `/workspace` symlink ensures identical paths everywhere. Your Claude conversations sync seamlessly across macOS, Linux, and WSL2. Enhanced by dotclaude profile management. Target directory is configurable via `WORKSPACE_TARGET`.
 
 2. **Smart Secrets Onboarding** – Detects existing credentials (SSH keys, AWS, Git) and offers to vault them automatically. New machines restore everything with one command.
 
@@ -326,9 +337,9 @@ Auto-detects your platform (macOS, Linux, WSL2), detects available vault CLIs (B
 **Visual progress tracking (v3.0+):** Unicode progress bars show your current step with percentage completion:
 ```
 ╔═══════════════════════════════════════════════════════════════╗
-║ Step 3 of 6: Vault Configuration
+║ Step 4 of 7: Vault Configuration
 ╠═══════════════════════════════════════════════════════════════╣
-║ ██████████░░░░░░░░░░ 50%
+║ ██████████░░░░░░░░░░ 57%
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
@@ -402,6 +413,8 @@ cd /workspace/my-project && claude
 ```
 
 The `/workspace` symlink creates identical paths across platforms. Claude Code session folders match everywhere. Start on Mac, continue on Linux, full history intact. Multiple backends: Anthropic Max (consumer) or AWS Bedrock (enterprise SSO). No other dotfiles does this.
+
+**Custom workspace:** Set `WORKSPACE_TARGET=~/code` to use a different directory (symlink still points to `/workspace`).
 
 **Auto-redirect:** The `claude` wrapper detects `~/workspace/*` and automatically redirects to `/workspace/*` with an educational message.
 
@@ -610,7 +623,7 @@ dotfiles vault pull     # Secrets follow your profile
 # Both use /workspace for portability
 ```
 
-Seamless integration with [dotclaude](https://github.com/blackwell-systems/dotclaude). dotclaude manages Claude profiles (CLAUDE.md, agents, standards). dotfiles manages secrets (SSH, AWS, Git). Switch between OSS, client, and work contexts while vault secrets stay synced. Both respect `/workspace` paths for portable sessions.
+Seamless integration with [dotclaude](https://github.com/blackwell-systems/dotclaude). dotclaude manages Claude profiles (CLAUDE.md, agents, standards). dotfiles manages secrets (SSH, AWS, Git). Switch between OSS, client, and work contexts while vault secrets stay synced. Both respect `/workspace` paths for portable sessions (target directory is configurable via `WORKSPACE_TARGET`).
 
 [Integration Guide](docs/DOTCLAUDE-INTEGRATION.md)
 
@@ -851,9 +864,12 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 ### Manual Clone
 
 ```bash
-# 1. Clone
+# 1. Clone (to your workspace directory - defaults to ~/workspace)
 git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
+
+# Or use a custom workspace location
+WORKSPACE_TARGET=~/code git clone git@github.com:blackwell-systems/dotfiles.git ~/code/dotfiles
 
 # 2. Run platform bootstrap
 ./bootstrap/bootstrap-mac.sh   # macOS
@@ -875,6 +891,8 @@ dotfiles setup
 > **The solution:** `/workspace` is the same absolute path everywhere:
 > - All machines: `/workspace/dotfiles` → session `workspace-dotfiles` ✨
 > - Same session folder across macOS, Linux, WSL2 = **full history syncs**
+>
+> **Customization:** The target directory is configurable via `WORKSPACE_TARGET=~/code` - the `/workspace` symlink name stays the same for portability.
 >
 > **Skip if:** You only use one machine or don't use Claude Code (`SKIP_WORKSPACE_SYMLINK=true`)
 >

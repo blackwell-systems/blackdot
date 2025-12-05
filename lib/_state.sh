@@ -103,7 +103,7 @@ state_summary() {
 # Usage: if state_needs_setup; then ...
 state_needs_setup() {
     state_init
-    local phases=("symlinks" "vault" "secrets")
+    local phases=("workspace" "symlinks" "vault" "secrets")
 
     for phase in "${phases[@]}"; do
         if ! state_completed "$phase"; then
@@ -113,11 +113,73 @@ state_needs_setup() {
     return 1  # Fully configured
 }
 
+# Infer state from existing system configuration
+# This auto-marks phases as complete if they're already done
+# Usage: state_infer
+state_infer() {
+    state_init
+
+    # Infer workspace: if config exists or /workspace symlink exists
+    if ! state_completed "workspace"; then
+        local ws_target
+        ws_target=$(config_get "paths.workspace_target" "")
+        if [[ -n "$ws_target" ]] || [[ -L "/workspace" ]]; then
+            state_complete "workspace"
+        fi
+    fi
+
+    # Infer symlinks: if ~/.zshrc points to our dotfiles
+    if ! state_completed "symlinks"; then
+        if [[ -L "$HOME/.zshrc" ]]; then
+            local target
+            target=$(readlink "$HOME/.zshrc" 2>/dev/null || true)
+            if [[ "$target" == *dotfiles/zsh/zshrc* ]]; then
+                state_complete "symlinks"
+            fi
+        fi
+    fi
+
+    # Infer packages: if brew is available and a tier is set
+    if ! state_completed "packages"; then
+        local tier
+        tier=$(config_get "packages.tier" "")
+        if [[ -n "$tier" ]] && command -v brew &>/dev/null; then
+            state_complete "packages"
+        fi
+    fi
+
+    # Infer vault: if a backend is configured
+    if ! state_completed "vault"; then
+        local backend
+        backend=$(config_get "vault.backend" "")
+        if [[ -n "$backend" ]]; then
+            state_complete "vault"
+        fi
+    fi
+
+    # Infer secrets: if vault is configured and we've run through secrets
+    # This is harder to infer, so we leave it unless explicitly marked
+
+    # Infer claude: if dotclaude is installed or SKIP_CLAUDE is set
+    if ! state_completed "claude"; then
+        if command -v dotclaude &>/dev/null || ! command -v claude &>/dev/null; then
+            state_complete "claude"
+        fi
+    fi
+
+    # Infer template: if _variables.local.sh exists
+    if ! state_completed "template"; then
+        if [[ -f "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/templates/_variables.local.sh" ]]; then
+            state_complete "template"
+        fi
+    fi
+}
+
 # Get the first incomplete phase
 # Usage: next=$(state_next_phase)
 state_next_phase() {
     state_init
-    local phases=("symlinks" "packages" "vault" "secrets" "claude" "template")
+    local phases=("workspace" "symlinks" "packages" "vault" "secrets" "claude" "template")
 
     for phase in "${phases[@]}"; do
         if ! state_completed "$phase"; then
@@ -130,36 +192,10 @@ state_next_phase() {
 }
 
 # ============================================================
-# Config API (v3.0: Delegates to JSON config)
+# Config API (v3.0: Delegates to JSON config in _config.sh)
+# Note: config_get and config_set are provided by _config.sh
+# Source _config.sh before _state.sh to use these functions
 # ============================================================
-
-# Get a config value
-# Usage: value=$(config_get "vault" "backend")
-# Note: Now uses nested keys like "vault.backend"
-config_get() {
-    local section="$1"
-    local key="$2"
-    local default="${3:-}"
-    state_init
-
-    # Convert section.key to nested notation
-    local nested_key="${section}.${key}"
-    "$DOTFILES_DIR/lib/_config.sh" >/dev/null 2>&1  # Ensure config loaded
-    $(declare -f config_get >/dev/null 2>&1) && config_get "$nested_key" "$default" || echo "$default"
-}
-
-# Set a config value
-# Usage: config_set "vault" "backend" "1password"
-config_set() {
-    local section="$1"
-    local key="$2"
-    local value="$3"
-    state_init
-
-    # Convert section.key to nested notation
-    local nested_key="${section}.${key}"
-    $(declare -f config_set >/dev/null 2>&1) && config_set "$nested_key" "$value"
-}
 
 # Check if a feature is enabled
 # Usage: if config_feature_enabled "workspace_symlink"; then ...
