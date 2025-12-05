@@ -27,6 +27,27 @@ pass()  { echo -e "${GREEN}[OK]${NC} $1"; }
 warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
 fail()  { echo -e "${RED}[FAIL]${NC} $1"; }
 
+# Run hook via zsh (requires repo to be cloned first)
+run_hook() {
+    local hook_point="$1"
+    local dotfiles_dir="${INSTALL_DIR:-}"
+
+    # Skip if repo not cloned yet
+    [[ -z "$dotfiles_dir" || ! -d "$dotfiles_dir" ]] && return 0
+
+    # Skip if zsh not available
+    command -v zsh &>/dev/null || return 0
+
+    # Skip if hooks library doesn't exist
+    [[ -f "$dotfiles_dir/lib/_hooks.sh" ]] || return 0
+
+    # Run hooks via zsh (silently fail if hooks disabled)
+    zsh -c "
+        source '$dotfiles_dir/lib/_hooks.sh' 2>/dev/null || exit 0
+        hook_run '$hook_point'
+    " 2>/dev/null || true
+}
+
 # Configuration
 REPO_URL="https://github.com/blackwell-systems/dotfiles.git"
 REPO_SSH="git@github.com:blackwell-systems/dotfiles.git"
@@ -167,11 +188,17 @@ if $MINIMAL; then
     info "Minimal mode: skipping optional features"
 fi
 
+# Run pre-install hooks
+run_hook "pre_install"
+
 # Run bootstrap
 info "Running bootstrap script..."
 echo ""
 
 ./"$BOOTSTRAP_SCRIPT"
+
+# Run post-install hooks
+run_hook "post_install"
 
 # Success message
 echo ""
