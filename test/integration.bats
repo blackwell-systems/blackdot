@@ -22,7 +22,22 @@ setup() {
     mkdir -p "$TEST_HOME/.aws"
     mkdir -p "$TEST_HOME/.local"
     mkdir -p "$TEST_HOME/.dotfiles-backups"
+    mkdir -p "$TEST_HOME/.config/dotfiles"
     mkdir -p "$MOCK_DATA_DIR/items"
+
+    # Create config.json to ensure backup uses expected location
+    cat > "$TEST_HOME/.config/dotfiles/config.json" <<'EOFCONFIG'
+{
+  "version": 3,
+  "backup": {
+    "enabled": true,
+    "max_snapshots": 10,
+    "retention_days": 30,
+    "compress": true,
+    "location": "~/.dotfiles-backups"
+  }
+}
+EOFCONFIG
 
     # Path to dotfiles repo
     export DOTFILES_DIR="${BATS_TEST_DIRNAME}/.."
