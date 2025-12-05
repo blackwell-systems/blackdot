@@ -51,8 +51,18 @@ fi
 # ============================================================
 SKIP_CLAUDE_SETUP="${SKIP_CLAUDE_SETUP:-false}"
 
+# Get workspace target (consistent with bootstrap/_common.sh)
+_get_ws_target() {
+    if [[ -n "${WORKSPACE_TARGET:-}" ]]; then
+        echo "${WORKSPACE_TARGET/#\~/$HOME}"
+    else
+        echo "$HOME/workspace"
+    fi
+}
+
 if [ "$SKIP_CLAUDE_SETUP" != "true" ]; then
-  CLAUDE_SHARED="$HOME/workspace/.claude"
+  WORKSPACE_DIR="$(_get_ws_target)"
+  CLAUDE_SHARED="$WORKSPACE_DIR/.claude"
 
   # Create shared Claude directory if it doesn't exist
   mkdir -p "$CLAUDE_SHARED"

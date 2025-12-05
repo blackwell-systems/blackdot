@@ -175,6 +175,14 @@ build_auto_vars() {
     local hostname_short="${$(hostname -s 2>/dev/null):-unknown}"
     local hostname_full="${$(hostname -f 2>/dev/null):-$hostname_short}"
 
+    # Get workspace target (use helper if available, else default)
+    local workspace_target
+    if type get_workspace_target &>/dev/null; then
+        workspace_target="$(get_workspace_target)"
+    else
+        workspace_target="${WORKSPACE_TARGET:-${WORKSPACE:-$HOME/workspace}}"
+    fi
+
     TMPL_AUTO=(
         # System info
         [hostname]="$hostname_short"
@@ -187,7 +195,7 @@ build_auto_vars() {
 
         # Paths
         [home]="$HOME"
-        [workspace]="${WORKSPACE:-$HOME/workspace}"
+        [workspace]="$workspace_target"
         [dotfiles_dir]="${DOTFILES_DIR}"
 
         # Machine type
