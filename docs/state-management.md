@@ -14,11 +14,11 @@ State management provides:
 - **Resume Support** - Continue where you left off if interrupted
 - **Preference Persistence** - Save choices like vault backend across sessions
 - **State Inference** - Auto-detect existing installations from filesystem
-- **Visual Progress Indicators** (v3.0+) - Unicode progress bars show current step and completion percentage
+- **Visual Progress Indicators** - Unicode progress bars show current step and completion percentage
 
 ---
 
-## Visual Progress Indicators (v3.0+)
+## Visual Progress Indicators
 
 The setup wizard displays real-time visual feedback as you progress through setup:
 
@@ -54,7 +54,7 @@ Step 6 of 6: Templates         ████████████████�
 
 ---
 
-## Configuration File (v3.0)
+## Configuration File
 
 All state and configuration is stored in a single JSON file:
 
@@ -244,7 +244,7 @@ next_phase=$(state_next_phase)
 state_infer
 ```
 
-### Config Functions (v3.0)
+### Config Functions
 
 Direct JSON config access via `lib/_config.sh`:
 
@@ -305,7 +305,7 @@ When you select a vault during `dotfiles setup`, it's saved to the config file. 
 
 ---
 
-## File Format (v3.0)
+## File Format
 
 Configuration uses JSON format for flexibility and nested structure support:
 
