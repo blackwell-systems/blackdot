@@ -35,6 +35,7 @@ typeset -gA FEATURE_REGISTRY=(
     ["backup_auto"]="false|Automatic backup before destructive operations|optional|"
     ["health_metrics"]="false|Health check metrics collection and trending|optional|"
     ["macos_settings"]="true|macOS system preferences automation|optional|"
+    ["config_layers"]="true|Hierarchical configuration resolution (env>project>machine>user)|optional|"
 
     # Integration features (third-party tools, lazy-loaded)
     ["modern_cli"]="true|Modern CLI tools (eza, bat, ripgrep, fzf, zoxide)|integration|"
@@ -410,10 +411,10 @@ feature_missing_deps() {
 # Presets are named groups of features that can be enabled together
 
 typeset -gA FEATURE_PRESETS=(
-    ["minimal"]="shell"
-    ["developer"]="shell vault aws_helpers git_hooks modern_cli"
-    ["claude"]="shell workspace_symlink claude_integration vault git_hooks modern_cli"
-    ["full"]="shell workspace_symlink claude_integration vault templates aws_helpers git_hooks drift_check backup_auto modern_cli nvm_integration sdkman_integration"
+    ["minimal"]="shell config_layers"
+    ["developer"]="shell vault aws_helpers git_hooks modern_cli config_layers"
+    ["claude"]="shell workspace_symlink claude_integration vault git_hooks modern_cli config_layers"
+    ["full"]="shell workspace_symlink claude_integration vault templates aws_helpers git_hooks drift_check backup_auto health_metrics config_layers modern_cli nvm_integration sdkman_integration"
 )
 
 # Enable a preset
