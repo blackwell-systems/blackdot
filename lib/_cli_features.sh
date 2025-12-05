@@ -64,6 +64,53 @@ typeset -gA CLI_COMMAND_FEATURES=(
 )
 
 # ============================================================
+# Subcommand-to-Feature Mapping
+# ============================================================
+# Maps specific subcommands to features (more granular than command level)
+# Format: "command:subcommand" -> "feature"
+
+typeset -gA CLI_SUBCOMMAND_FEATURES=(
+    # Vault subcommands
+    ["vault:setup"]="vault"
+    ["vault:pull"]="vault"
+    ["vault:push"]="vault"
+    ["vault:sync"]="vault"
+    ["vault:scan"]="vault"
+    ["vault:list"]="vault"
+    ["vault:status"]="vault"
+    ["vault:validate"]="vault"
+
+    # Config subcommands
+    ["config:get"]="config_layers"
+    ["config:set"]="config_layers"
+    ["config:show"]="config_layers"
+    ["config:list"]="config_layers"
+    ["config:merged"]="config_layers"
+    ["config:init"]="config_layers"
+    ["config:edit"]="config_layers"
+    ["config:source"]="config_layers"
+
+    # Features subcommands (always visible)
+    ["features:list"]=""
+    ["features:enable"]=""
+    ["features:disable"]=""
+    ["features:preset"]=""
+    ["features:check"]=""
+
+    # Template subcommands
+    ["template:init"]="templates"
+    ["template:render"]="templates"
+    ["template:link"]="templates"
+    ["template:diff"]="templates"
+    ["template:vars"]="templates"
+
+    # Backup subcommands
+    ["backup:create"]="backup_auto"
+    ["backup:list"]="backup_auto"
+    ["backup:restore"]="backup_auto"
+)
+
+# ============================================================
 # Command Sections for Help Display
 # ============================================================
 # Groups commands into sections with their required feature
@@ -94,6 +141,34 @@ typeset -gA CLI_SECTION_COMMANDS=(
 )
 
 # ============================================================
+# Environment Variable Overrides
+# ============================================================
+# DOTFILES_CLI_SHOW_ALL=true  - Always show all commands in help
+# DOTFILES_FORCE=true         - Bypass all feature guards
+
+# Check if show-all mode is enabled (env var or --all flag)
+_cli_show_all_enabled() {
+    [[ "${DOTFILES_CLI_SHOW_ALL:-}" == "true" || "${DOTFILES_CLI_SHOW_ALL:-}" == "1" ]]
+}
+
+# Check if force mode is enabled via env var
+_cli_force_enabled() {
+    [[ "${DOTFILES_FORCE:-}" == "true" || "${DOTFILES_FORCE:-}" == "1" ]]
+}
+
+# Check if CLI filtering is enabled (cli_feature_filter feature)
+# When disabled, all commands are visible and guards are bypassed
+_cli_filtering_enabled() {
+    # Check if feature_enabled function exists
+    if ! type feature_enabled &>/dev/null; then
+        return 0  # Default to enabled if registry not loaded
+    fi
+
+    # Check the cli_feature_filter feature
+    feature_enabled "cli_feature_filter" 2>/dev/null
+}
+
+# ============================================================
 # Core Functions
 # ============================================================
 
@@ -103,6 +178,16 @@ typeset -gA CLI_SECTION_COMMANDS=(
 cli_command_visible() {
     local cmd="$1"
     local feature="${CLI_COMMAND_FEATURES[$cmd]:-}"
+
+    # Environment override: show all
+    if _cli_show_all_enabled; then
+        return 0
+    fi
+
+    # Meta-feature: if cli_feature_filter disabled, show all
+    if ! _cli_filtering_enabled; then
+        return 0
+    fi
 
     # No feature requirement = always visible
     if [[ -z "$feature" ]]; then
@@ -126,11 +211,69 @@ cli_command_feature() {
     echo "${CLI_COMMAND_FEATURES[$cmd]:-}"
 }
 
+# Get the feature required for a subcommand
+# Usage: cli_subcommand_feature "vault" "pull" -> "vault"
+cli_subcommand_feature() {
+    local cmd="$1"
+    local subcmd="$2"
+    local key="${cmd}:${subcmd}"
+    echo "${CLI_SUBCOMMAND_FEATURES[$key]:-}"
+}
+
+# Check if a subcommand should be visible
+# Usage: cli_subcommand_visible "vault" "pull"
+cli_subcommand_visible() {
+    local cmd="$1"
+    local subcmd="$2"
+    local key="${cmd}:${subcmd}"
+    local feature="${CLI_SUBCOMMAND_FEATURES[$key]:-}"
+
+    # Environment override: show all
+    if _cli_show_all_enabled; then
+        return 0
+    fi
+
+    # Meta-feature: if cli_feature_filter disabled, show all
+    if ! _cli_filtering_enabled; then
+        return 0
+    fi
+
+    # Check if subcommand is mapped
+    if [[ -z "${CLI_SUBCOMMAND_FEATURES[$key]+x}" ]]; then
+        # Not mapped - fall back to parent command check
+        cli_command_visible "$cmd"
+        return $?
+    fi
+
+    # No feature requirement = always visible
+    if [[ -z "$feature" ]]; then
+        return 0
+    fi
+
+    # Check if feature_enabled function exists
+    if ! type feature_enabled &>/dev/null; then
+        return 0
+    fi
+
+    # Check feature state
+    feature_enabled "$feature"
+}
+
 # Check if a section should be visible
 # Usage: cli_section_visible "Vault Operations"
 cli_section_visible() {
     local section="$1"
     local feature="${CLI_SECTIONS[$section]:-}"
+
+    # Environment override: show all
+    if _cli_show_all_enabled; then
+        return 0
+    fi
+
+    # Meta-feature: if cli_feature_filter disabled, show all
+    if ! _cli_filtering_enabled; then
+        return 0
+    fi
 
     # No feature requirement = always visible
     if [[ -z "$feature" ]]; then
@@ -173,8 +316,18 @@ cli_require_feature() {
     # Export filtered args for caller to use
     CLI_FILTERED_ARGS=("${filtered_args[@]}")
 
-    # If force flag, allow execution
+    # Environment override: DOTFILES_FORCE bypasses all guards
+    if _cli_force_enabled; then
+        return 0
+    fi
+
+    # If --force flag passed, allow execution
     if $force; then
+        return 0
+    fi
+
+    # Meta-feature: if cli_feature_filter disabled, allow all
+    if ! _cli_filtering_enabled; then
         return 0
     fi
 

@@ -351,3 +351,106 @@ teardown() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"vault"* ]] || [[ "$output" == *"backup_auto"* ]]
 }
+
+# ============================================================
+# Environment Variable Override Tests
+# ============================================================
+
+@test "DOTFILES_CLI_SHOW_ALL makes hidden commands visible" {
+  echo '{"features": {"vault": false}}' > "$CONFIG_FILE"
+
+  run zsh -c "
+    export CONFIG_FILE='$CONFIG_FILE'
+    export DOTFILES_CLI_SHOW_ALL=true
+    source '$FEATURES_SH'
+    source '$CLI_FEATURES_SH'
+    cli_command_visible 'vault' && echo 'visible' || echo 'hidden'
+  "
+  [ "$status" -eq 0 ]
+  [ "$output" = "visible" ]
+}
+
+@test "DOTFILES_CLI_SHOW_ALL=1 also works" {
+  echo '{"features": {"vault": false}}' > "$CONFIG_FILE"
+
+  run zsh -c "
+    export CONFIG_FILE='$CONFIG_FILE'
+    export DOTFILES_CLI_SHOW_ALL=1
+    source '$FEATURES_SH'
+    source '$CLI_FEATURES_SH'
+    cli_command_visible 'vault' && echo 'visible' || echo 'hidden'
+  "
+  [ "$status" -eq 0 ]
+  [ "$output" = "visible" ]
+}
+
+@test "DOTFILES_FORCE bypasses feature guard" {
+  echo '{"features": {"vault": false}}' > "$CONFIG_FILE"
+
+  run zsh -c "
+    export CONFIG_FILE='$CONFIG_FILE'
+    export DOTFILES_FORCE=true
+    source '$FEATURES_SH'
+    source '$CLI_FEATURES_SH'
+    cli_require_feature 'vault' 'vault pull' && echo 'allowed' || echo 'blocked'
+  "
+  [ "$status" -eq 0 ]
+  [ "$output" = "allowed" ]
+}
+
+@test "DOTFILES_FORCE=1 also works" {
+  echo '{"features": {"vault": false}}' > "$CONFIG_FILE"
+
+  run zsh -c "
+    export CONFIG_FILE='$CONFIG_FILE'
+    export DOTFILES_FORCE=1
+    source '$FEATURES_SH'
+    source '$CLI_FEATURES_SH'
+    cli_require_feature 'vault' 'vault pull' && echo 'allowed' || echo 'blocked'
+  "
+  [ "$status" -eq 0 ]
+  [ "$output" = "allowed" ]
+}
+
+# ============================================================
+# cli_feature_filter Meta-Feature Tests
+# ============================================================
+
+@test "cli_feature_filter disabled makes all commands visible" {
+  echo '{"features": {"vault": false, "cli_feature_filter": false}}' > "$CONFIG_FILE"
+
+  run zsh -c "
+    export CONFIG_FILE='$CONFIG_FILE'
+    source '$FEATURES_SH'
+    source '$CLI_FEATURES_SH'
+    cli_command_visible 'vault' && echo 'visible' || echo 'hidden'
+  "
+  [ "$status" -eq 0 ]
+  [ "$output" = "visible" ]
+}
+
+@test "cli_feature_filter disabled bypasses feature guard" {
+  echo '{"features": {"vault": false, "cli_feature_filter": false}}' > "$CONFIG_FILE"
+
+  run zsh -c "
+    export CONFIG_FILE='$CONFIG_FILE'
+    source '$FEATURES_SH'
+    source '$CLI_FEATURES_SH'
+    cli_require_feature 'vault' 'vault pull' && echo 'allowed' || echo 'blocked'
+  "
+  [ "$status" -eq 0 ]
+  [ "$output" = "allowed" ]
+}
+
+@test "cli_feature_filter disabled affects sections too" {
+  echo '{"features": {"vault": false, "cli_feature_filter": false}}' > "$CONFIG_FILE"
+
+  run zsh -c "
+    export CONFIG_FILE='$CONFIG_FILE'
+    source '$FEATURES_SH'
+    source '$CLI_FEATURES_SH'
+    cli_section_visible 'Vault Operations' && echo 'visible' || echo 'hidden'
+  "
+  [ "$status" -eq 0 ]
+  [ "$output" = "visible" ]
+}
