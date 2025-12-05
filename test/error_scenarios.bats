@@ -26,6 +26,24 @@ setup() {
 
     # Create mock session (unlocked state)
     echo "mock-session-token" > "$MOCK_DATA_DIR/.session"
+
+    # Create config.json to ensure backup uses expected location
+    mkdir -p "$TEST_HOME/.config/dotfiles"
+    cat > "$TEST_HOME/.config/dotfiles/config.json" <<'EOFCONFIG'
+{
+  "version": 3,
+  "backup": {
+    "enabled": true,
+    "max_snapshots": 10,
+    "retention_days": 30,
+    "compress": true,
+    "location": "~/.dotfiles-backups"
+  },
+  "paths": {
+    "backup_dir": "~/.dotfiles-backups"
+  }
+}
+EOFCONFIG
 }
 
 teardown() {

@@ -32,7 +32,7 @@ get_default_config() {
     "retention_days": 30,
     "max_snapshots": 10,
     "compress": true,
-    "location": "~/.local/share/dotfiles/backups"
+    "location": "~/.dotfiles-backups"
   },
   "setup": {
     "completed": [],
@@ -46,7 +46,7 @@ get_default_config() {
   "paths": {
     "dotfiles_dir": "",
     "config_dir": "~/.config/dotfiles",
-    "backup_dir": "~/.local/share/dotfiles/backups"
+    "backup_dir": "~/.dotfiles-backups"
   }
 }
 EOF
