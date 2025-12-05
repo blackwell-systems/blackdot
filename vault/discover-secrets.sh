@@ -18,6 +18,11 @@ VAULT_CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/vault-items.json"
 typeset -a CUSTOM_SSH_PATHS=()
 typeset -a CUSTOM_CONFIG_PATHS=()
 
+# Location settings (from init-vault.sh)
+LOCATION_TYPE=""
+LOCATION_VALUE=""
+MERGE_MODE=false
+
 # ============================================================
 # Discovery Functions
 # ============================================================
@@ -515,6 +520,25 @@ main() {
                 CUSTOM_CONFIG_PATHS+=("$2")
                 shift 2
                 ;;
+            --location)
+                # Format: type:value (e.g., folder:dotfiles)
+                if [[ -z "${2:-}" ]]; then
+                    fail "--location requires argument in format type:value"
+                    exit 1
+                fi
+                if [[ "$2" == *:* ]]; then
+                    LOCATION_TYPE="${2%%:*}"
+                    LOCATION_VALUE="${2#*:}"
+                else
+                    LOCATION_TYPE="$2"
+                    LOCATION_VALUE=""
+                fi
+                shift 2
+                ;;
+            --merge)
+                MERGE_MODE=true
+                shift
+                ;;
             --help|-h)
                 cat << 'EOF'
 Vault Auto-Discovery - Automatically detect secrets in standard locations
@@ -524,6 +548,8 @@ Usage: ./discover-secrets.sh [OPTIONS]
 Options:
   --dry-run, -n           Show what would be discovered without creating file
   --force, -f             Overwrite existing config (skip merge, no backup)
+  --merge                 Merge with existing config (no prompt)
+  --location TYPE:VALUE   Set vault location (e.g., folder:dotfiles)
   --ssh-path PATH         Additional directory to scan for SSH keys
   --config-path PATH      Additional directory to scan for config files
   --help, -h              Show this help
@@ -585,6 +611,13 @@ EOF
         if $force; then
             warn "Force mode: overwriting without merge"
             final_json="$discovered_json"
+        elif $MERGE_MODE; then
+            # --merge flag: merge without prompt
+            info "Merge mode: combining with existing config"
+            local existing_json=$(read_existing_config)
+            if [[ -n "$existing_json" ]]; then
+                final_json=$(merge_configs "$discovered_json" "$existing_json")
+            fi
         elif $dry_run; then
             # In dry-run, default to merge for preview
             local existing_json=$(read_existing_config)
@@ -721,6 +754,14 @@ EOF
                     ;;
             esac
         fi
+    fi
+
+    # Add vault_location if specified via --location
+    if [[ -n "$LOCATION_TYPE" ]] && command -v jq >/dev/null 2>&1; then
+        final_json=$(echo "$final_json" | jq \
+            --arg type "$LOCATION_TYPE" \
+            --arg value "$LOCATION_VALUE" \
+            '.vault_location = {type: $type, value: $value}')
     fi
 
     if $dry_run; then
