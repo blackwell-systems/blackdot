@@ -81,11 +81,15 @@ ls templates/configs/
 # View a template
 cat templates/configs/ssh-config.tmpl
 
-# Check template variables
+# Check default template variables
 cat templates/_variables.sh
+
+# Template variables can also be stored in vault for portability:
+# ~/.config/dotfiles/template-variables.sh (XDG location, vault-synced)
+# templates/_variables.local.sh (repo-local overrides)
 ```
 
-**What this shows:** How templates adapt configs to different machines (work vs personal, macOS vs Linux).
+**What this shows:** How templates adapt configs to different machines (work vs personal, macOS vs Linux). Variables can be stored in your vault for easy restoration on new machines.
 
 ---
 

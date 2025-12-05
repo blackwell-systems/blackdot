@@ -189,7 +189,7 @@ dotfiles setup
 ```
 
 If interrupted, simply run `dotfiles setup` again. It automatically:
-1. Reads existing state from `state.ini`
+1. Reads existing state from `config.json`
 2. Skips completed phases
 3. Continues from where you left off
 
