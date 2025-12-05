@@ -31,6 +31,7 @@
   - [Plugin System](design/IMPL-plugin-system.md)
   - [Hook System](design/IMPL-hook-system.md)
   - [Configuration Layers](design/IMPL-configuration-layers.md)
+  - [CLI Feature Awareness](design/IMPL-cli-feature-awareness.md)
 
 - **Contributing**
   - [Contributing Guide](CONTRIBUTING.md)
