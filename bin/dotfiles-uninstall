@@ -121,14 +121,14 @@ fi
 # Remove dotfiles repo
 echo ""
 echo -e "${BLUE}Dotfiles repository...${NC}"
-if [[ -d "$HOME/workspace/dotfiles" ]]; then
+if [[ -d "$DOTFILES_DIR" ]]; then
     if $DRY_RUN; then
-        echo -e "  ${YELLOW}Would remove${NC}: $HOME/workspace/dotfiles (repository)"
+        echo -e "  ${YELLOW}Would remove${NC}: $DOTFILES_DIR (repository)"
     else
         read -p "Remove dotfiles repository? (yes/no): " confirm
         if [[ "$confirm" == "yes" ]]; then
-            rm -rf "$HOME/workspace/dotfiles"
-            echo -e "  ${GREEN}Removed${NC}: $HOME/workspace/dotfiles"
+            rm -rf "$DOTFILES_DIR"
+            echo -e "  ${GREEN}Removed${NC}: $DOTFILES_DIR"
         else
             echo "  Keeping repository."
         fi
