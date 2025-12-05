@@ -45,97 +45,122 @@ $ curl -fsSL ... | bash && dotfiles setup
  / /_/ / /_/ / /_/ __/ / /  __(__  )
 /_____/\____/\__/_/ /_/_/\___/____/
 
-Detected platform: macOS
-Installing Homebrew...
-Installing 80+ packages (eza, fzf, ripgrep, bat, etc.)...
-Linking shell config (.zshrc, .p10k.zsh)...
-Created /workspace symlink for portable Claude sessions
+              Setup Wizard
+
+Current Status:
+───────────────
+  [ ] Symlinks   (Shell config linked)
+  [ ] Packages   (Homebrew packages)
+  [ ] Vault      (Vault backend)
+  [ ] Secrets    (SSH keys, AWS, Git)
+  [ ] Claude     (Claude Code integration)
+  [ ] Templates  (Machine-specific configs)
 
 ═══════════════════════════════════════════════════════════════
-                        Setup Wizard
+                    Setup Wizard Overview
 ═══════════════════════════════════════════════════════════════
 
-STEP 1: Symlinks (already configured)
-STEP 2: Packages (already installed)
+This wizard will guide you through 6 steps:
 
-STEP 3: Vault Configuration
-────────────────────────────────────────────────────────────────
-Available vault backends:
-  1) bitwarden  ← detected
-  2) 1password  ← detected
-  3) pass
-  4) Skip (configure manually)
+  1. Symlinks     - Link shell config files
+     ~/.zshrc, ~/.p10k.zsh, ~/.claude
 
-Select vault backend [1]: 1
+  2. Packages     - Install Homebrew packages
+     Choose: minimal (18) | enhanced (43) | full (61)
 
-Vault configured (bitwarden)
-Vault unlocked
+  3. Vault        - Configure secret backend
+     Bitwarden, 1Password, or pass
 
-STEP 4: Secrets Management
-────────────────────────────────────────────────────────────────
+  4. Secrets      - Manage SSH keys, AWS, Git config
+     Auto-discover and sync to vault
+
+  5. Claude Code  - AI assistant integration
+     Optional: dotclaude + portable sessions
+
+  6. Templates    - Machine-specific configs
+     Optional: work vs personal configs
+
+✓ Safe to exit anytime - Progress is saved automatically
+✓ Resume anytime - Just run 'dotfiles setup' again
+
+═══════════════════════════════════════════════════════════════
+
+╔═══════════════════════════════════════════════════════════════╗
+║ Step 2 of 6: Packages
+╠═══════════════════════════════════════════════════════════════╣
+║ ████████░░░░░░░░░░░░ 33%
+╚═══════════════════════════════════════════════════════════════╝
+
+Which package tier would you like?
+
+  1) minimal    18 packages (~2 min)   # Essentials only
+  2) enhanced   43 packages (~5 min)   # Modern tools ← RECOMMENDED
+  3) full       61 packages (~10 min)  # Everything (Docker, etc.)
+
+Your choice [2]: 2
+
+→ Installing fzf... (1/43)
+→ Installing ripgrep... (2/43)
+...
+✓ Packages installed successfully (enhanced tier)
+
+╔═══════════════════════════════════════════════════════════════╗
+║ Step 4 of 6: Secrets Management
+╠═══════════════════════════════════════════════════════════════╣
+║ ████████████░░░░░░░░ 66%
+╚═══════════════════════════════════════════════════════════════╝
+
 Scanning secrets...
 
+Secrets Status:
   Local only (not in vault):
-    • SSH-GitHub-Enterprise → ~/.ssh/id_ed25519_enterprise_ghub
     • SSH-GitHub-Personal → ~/.ssh/id_ed25519_personal
     • AWS-Config → ~/.aws/config
-    • AWS-Credentials → ~/.aws/credentials
     • Git-Config → ~/.gitconfig
 
-Found 5 local secret(s) not in vault.
+Found 3 local secret(s) not in vault.
 Push these to bitwarden so you can restore on other machines.
 
 Push local secrets to vault? [Y/n]: y
 
-  Creating SSH-GitHub-Enterprise... done
   Creating SSH-GitHub-Personal... done
   Creating AWS-Config... done
-  Creating AWS-Credentials... done
   Creating Git-Config... done
 
-Pushed 5 secret(s) to vault
-
-STEP 5: Claude Code (Optional)
-────────────────────────────────────────────────────────────────
-Claude Code detected. dotclaude helps manage profiles.
-
-Install dotclaude? [Y/n]: y
-
-dotclaude installed
-
-STEP 6: Machine-Specific Templates (Optional)
-────────────────────────────────────────────────────────────────
-Templates let you customize configs per machine (gitconfig, ssh-config, etc.).
-
-Examples:
-  • Work vs personal git email
-  • Different SSH keys per machine
-  • Machine-specific environment variables
-
-Setup machine-specific config templates? [y/N]: y
-
-Initializing template system...
-What type of machine is this? (work/personal/other) [personal]: work
-Enter your work email for git commits: user@company.com
-Enter your work git name: John Doe
-
-Templates configured
-Run 'dotfiles template render' to generate configs from your templates
+✓ Pushed 3 secret(s) to vault
 
 ═══════════════════════════════════════════════════════════════
-Setup complete!
+╔════════════════════════════════════════════════════════════╗
+║              Setup Complete!                               ║
+╚════════════════════════════════════════════════════════════╝
 
-Quick commands:
-  dotfiles status   - Visual dashboard
-  dotfiles sync     - Smart bidirectional vault sync
-  dotfiles drift    - Compare local vs vault
-  dotfiles doctor   - Health check
-  dotfiles help     - All commands
+Next steps based on your configuration:
+
+  ✓ Vault configured (bitwarden)
+    → dotfiles vault validate    # Validate vault schema
+    → dotfiles vault pull        # Restore your secrets
+
+  ✓ Templates configured
+    → dotfiles template render   # Generate configs
+
+  ℹ Health check:
+    → dotfiles doctor            # Verify everything works
+
+  ℹ Explore commands:
+    → dotfiles status            # Visual dashboard
+    → dotfiles sync              # Smart bidirectional vault sync
+    → dotfiles help              # See all commands
+
+  ℹ Your new shell features:
+    → ll, la, lt                 # Enhanced ls (eza with icons)
+    → gst, gd, gco               # Git shortcuts
+    → Ctrl+R                     # Fuzzy history search (fzf)
+    → z [directory]              # Smart cd (learns your habits)
 ```
 
 **What you get:**
 - **Fully modular** - Everything optional except shell config. Use `--minimal` for just ZSH, or pick exactly what you need
-- **Homebrew + 80+ packages** (eza, fzf, ripgrep, bat, jq, aws-cli, etc.) - or skip with `--minimal`
+- **Tiered packages** - Choose minimal (18), enhanced (43), or full (61) - or skip with `--minimal`
 - **Smart credential onboarding** - Detects existing SSH/AWS/Git, offers to vault them
 - **Smart bidirectional sync** - `dotfiles sync` auto-detects push/pull direction per file
 - **Claude Code + dotclaude integration** - Profile sync, git safety hooks, portable sessions. Built for AI-assisted development
