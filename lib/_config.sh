@@ -48,7 +48,8 @@ get_default_config() {
     "config_dir": "~/.config/dotfiles",
     "backup_dir": "~/.dotfiles-backups",
     "workspace_target": "~/workspace"
-  }
+  },
+  "features": {}
 }
 EOF
 }
