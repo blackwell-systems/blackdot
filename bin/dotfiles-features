@@ -31,7 +31,7 @@ NC="${NC:-\033[0m}"
 # ============================================================
 
 cmd_list() {
-    local filter="${1:-}"
+    local filter=""
     local show_all=false
     local show_json=false
 
@@ -42,6 +42,7 @@ cmd_list() {
             --json|-j) show_json=true; shift ;;
             --category|-c) filter="$2"; shift 2 ;;
             core|optional|integration) filter="$1"; shift ;;
+            -*) shift ;;  # Skip unknown flags
             *) shift ;;
         esac
     done
