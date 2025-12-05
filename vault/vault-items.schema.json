@@ -9,7 +9,7 @@
       "type": "object",
       "description": "SSH key mappings (item name → file path)",
       "patternProperties": {
-        "^[A-Z][A-Za-z0-9-]*$": {
+        "^[A-Z][A-Za-z0-9_-]*$": {
           "type": "string",
           "pattern": "^[~/$].*"
         }
@@ -20,7 +20,7 @@
       "type": "object",
       "description": "Detailed vault item configurations",
       "patternProperties": {
-        "^[A-Z][A-Za-z0-9-]*$": {
+        "^[A-Z][A-Za-z0-9_-]*$": {
           "type": "object",
           "properties": {
             "path": {
@@ -48,7 +48,7 @@
       "type": "object",
       "description": "Items that can be synced to vault (item name → file path)",
       "patternProperties": {
-        "^[A-Z][A-Za-z0-9-]*$": {
+        "^[A-Z][A-Za-z0-9_-]*$": {
           "type": "string",
           "pattern": "^[~/$].*"
         }
