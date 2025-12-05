@@ -83,6 +83,25 @@ Test vault functionality without real credentials:
 ./test/mocks/setup-mock-vault.sh --no-pass
 ```
 
+### Feature Registry ✅
+
+**Status:** Complete (v2.1.0)
+
+Centralized control for all optional features:
+```bash
+dotfiles features                    # List all features
+dotfiles features enable vault       # Enable a feature
+dotfiles features disable vault      # Disable a feature
+dotfiles features preset developer   # Apply preset (developer, claude, full)
+```
+
+- Categories: core, optional, integration
+- Dependency resolution (e.g., claude_integration → workspace_symlink)
+- Runtime and persistent state via `--persist` flag
+- Backward compatible with SKIP_* environment variables
+
+See [Feature Registry](features.md) for full documentation.
+
 ---
 
 ## Backlog
@@ -162,6 +181,112 @@ Generate documentation for all exported functions:
 
 ---
 
+### 6. Configuration Layers
+
+**Status:** Not Started
+
+Add layered configuration with priority order (highest wins):
+```
+1. Session     (environment variables)
+2. Project     (.dotfiles.local in project dir)
+3. Machine     (~/.config/dotfiles/machine.json)
+4. User        (~/.config/dotfiles/config.json)
+5. Defaults    (lib/_config.sh defaults)
+```
+
+**Features:**
+- `config_get_layered()` function for layer-aware config access
+- Machine-specific config without editing main config
+- Project-level overrides for repository-specific settings
+- `dotfiles config layers` to show where each setting comes from
+
+---
+
+### 7. Plugin System
+
+**Status:** Not Started
+
+Allow users to add custom functionality without forking:
+
+```
+plugins/
+├── available/           # All available plugins
+│   └── docker-helpers/
+│       ├── plugin.json  # Metadata and dependencies
+│       └── docker.zsh   # ZSH module
+└── enabled/             # Symlinks to enabled plugins
+```
+
+**Commands:**
+```bash
+dotfiles plugin list              # List available plugins
+dotfiles plugin enable <name>     # Enable a plugin
+dotfiles plugin disable <name>    # Disable a plugin
+dotfiles plugin create <name>     # Scaffold new plugin
+```
+
+---
+
+### 8. Module System Refactor
+
+**Status:** Not Started
+
+Refactor ZSH config into independent modules with metadata:
+
+```
+modules/
+├── core/                # Always loaded
+├── optional/            # Loaded if feature enabled
+│   └── aws/
+│       ├── module.json  # Feature mapping, load order, lazy flag
+│       └── aws.zsh
+└── local/               # User's custom modules (gitignored)
+```
+
+**Features:**
+- Module manifests (`module.json`) for metadata
+- Feature-to-module mapping
+- `dotfiles module` subcommand
+
+---
+
+### 9. Hook System
+
+**Status:** Not Started
+
+Allow users to inject behavior at key lifecycle points:
+
+```bash
+# Hook points
+HOOK_POINTS=(
+    "pre_install" "post_install"
+    "pre_bootstrap" "post_bootstrap"
+    "pre_vault_pull" "post_vault_pull"
+    "pre_doctor" "post_doctor"
+    "shell_init" "shell_exit"
+)
+
+# User registration (~/.config/dotfiles/hooks.zsh)
+hook_register "post_vault_pull" "my_custom_function"
+```
+
+---
+
+### 10. Lazy Loading for Heavy Modules
+
+**Status:** Not Started
+
+Only load modules when first used to improve shell startup time:
+
+```bash
+# Stub functions that trigger lazy load
+awsswitch() { _load_aws_helpers; awsswitch "$@"; }
+```
+
+**Target:** Shell loads in <100ms even with all features enabled.
+
+---
+
 ## Design Decisions
 
 ### Path Convention: `~/workspace/dotfiles`
@@ -196,7 +321,7 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 | 1.8.0 | Windows support, git safety hooks, dotclaude integration |
 | **2.0.0** | **Unified setup wizard, state management, macOS CLI** |
 | 2.0.1 | CLI help improvements, Docker container enhancements |
-| **2.1.0** | **Smart secrets onboarding, vault config file, Docker taxonomy** |
+| **2.1.0** | **Smart secrets onboarding, vault config file, Docker taxonomy, Feature Registry** |
 
 ---
 
@@ -214,4 +339,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ---
 
-*Last updated: 2025-12-04*
+*Last updated: 2025-12-05*

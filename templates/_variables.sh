@@ -125,8 +125,16 @@ typeset -ga SSH_HOSTS=(
 # These fill in blanks with sensible defaults
 # ============================================================
 get_computed_defaults() {
-    # Set path defaults based on workspace
-    local workspace="${TMPL_AUTO[workspace]:-$HOME/workspace}"
+    # Set path defaults based on workspace target
+    # Priority: TMPL_AUTO[workspace] > WORKSPACE_TARGET > $HOME/workspace
+    local workspace
+    if [[ -n "${TMPL_AUTO[workspace]:-}" ]]; then
+        workspace="${TMPL_AUTO[workspace]}"
+    elif [[ -n "${WORKSPACE_TARGET:-}" ]]; then
+        workspace="${WORKSPACE_TARGET/#\~/$HOME}"
+    else
+        workspace="$HOME/workspace"
+    fi
 
     [[ -z "${TMPL_DEFAULTS[projects_dir]}" ]] && TMPL_DEFAULTS[projects_dir]="$workspace/projects"
     [[ -z "${TMPL_DEFAULTS[notes_dir]}" ]] && TMPL_DEFAULTS[notes_dir]="$workspace/notes"

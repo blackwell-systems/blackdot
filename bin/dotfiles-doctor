@@ -11,33 +11,30 @@
 # ============================================================
 set -uo pipefail
 
-# Find dotfiles directory
-if [[ -n "${DOTFILES_DIR:-}" ]]; then
-    DOTFILES_DIR="$DOTFILES_DIR"
-elif [[ -d "$HOME/workspace/dotfiles" ]]; then
-    DOTFILES_DIR="$HOME/workspace/dotfiles"
-elif [[ -d "/workspace/dotfiles" ]]; then
-    DOTFILES_DIR="/workspace/dotfiles"
-else
-    # Source error handling if available
-    if [[ -f "$HOME/workspace/dotfiles/lib/_errors.sh" ]]; then
-        source "$HOME/workspace/dotfiles/lib/_errors.sh"
-        error_msg \
-            "Could not find dotfiles directory" \
-            "DOTFILES_DIR not set and standard locations not found" \
-            "Cannot run health checks" \
-            "Set dotfiles directory:
-   → export DOTFILES_DIR=/path/to/dotfiles
-   → dotfiles doctor
+# Find dotfiles directory using paths helper
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "$(dirname "$SCRIPT_DIR")/lib/_paths.sh" ]]; then
+    source "$(dirname "$SCRIPT_DIR")/lib/_paths.sh"
+    DOTFILES_DIR="${DOTFILES_DIR:-$(get_dotfiles_dir 2>/dev/null || echo "")}"
+fi
 
-Or: Clone dotfiles first
-   → git clone https://github.com/blackwell-systems/dotfiles ~/workspace/dotfiles" \
-            "https://github.com/blackwell-systems/dotfiles"
+# Fallback to manual detection if _paths.sh not available or failed
+if [[ -z "${DOTFILES_DIR:-}" || ! -d "${DOTFILES_DIR:-}" ]]; then
+    if [[ -n "${DOTFILES_DIR:-}" && -d "${DOTFILES_DIR}" ]]; then
+        : # Already set and valid
+    elif [[ -d "/workspace/dotfiles" ]]; then
+        DOTFILES_DIR="/workspace/dotfiles"
+    elif [[ -d "$HOME/workspace/dotfiles" ]]; then
+        DOTFILES_DIR="$HOME/workspace/dotfiles"
     else
         echo "Error: Could not find dotfiles directory"
-        echo "Expected: ~/workspace/dotfiles or /workspace/dotfiles"
+        echo "Expected: /workspace/dotfiles or ~/workspace/dotfiles"
+        echo ""
+        echo "Set DOTFILES_DIR or WORKSPACE_TARGET environment variable:"
+        echo "  export DOTFILES_DIR=/path/to/dotfiles"
+        echo "  export WORKSPACE_TARGET=~/code"
+        exit 1
     fi
-    exit 1
 fi
 
 # Colors
@@ -209,11 +206,30 @@ check_symlink() {
 
 check_symlink "~/.zshrc" "$HOME/.zshrc" "zsh/zshrc"
 check_symlink "~/.p10k.zsh" "$HOME/.p10k.zsh" "zsh/p10k.zsh"
-check_symlink "~/.claude" "$HOME/.claude" "$HOME/workspace/.claude"
 
-# Check /workspace symlink
+# Check ~/.claude symlink (workspace-target aware)
+local claude_ws_target
+if type get_workspace_target &>/dev/null; then
+    claude_ws_target="$(get_workspace_target)/.claude"
+else
+    claude_ws_target="$HOME/workspace/.claude"
+fi
+check_symlink "~/.claude" "$HOME/.claude" "$claude_ws_target"
+
+# Check /workspace symlink (target-aware)
 if [[ -L "/workspace" ]]; then
-    pass "/workspace symlink exists"
+    local actual_target expected_target
+    actual_target=$(readlink /workspace 2>/dev/null)
+    if type get_workspace_target &>/dev/null; then
+        expected_target=$(get_workspace_target)
+    else
+        expected_target="$HOME/workspace"
+    fi
+    if [[ "$actual_target" == "$expected_target" ]]; then
+        pass "/workspace symlink correct -> $expected_target"
+    else
+        warn "/workspace -> $actual_target (expected: $expected_target)"
+    fi
 else
     warn "/workspace symlink not configured (optional for multi-machine)"
 fi

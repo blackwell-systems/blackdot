@@ -17,16 +17,23 @@
 # ============================================================
 set -uo pipefail
 
-# Determine dotfiles directory
-if [[ -n "${DOTFILES_DIR:-}" ]]; then
-    DOTFILES_DIR="$DOTFILES_DIR"
-elif [[ -d "$HOME/workspace/dotfiles" ]]; then
-    DOTFILES_DIR="$HOME/workspace/dotfiles"
-elif [[ -d "/workspace/dotfiles" ]]; then
-    DOTFILES_DIR="/workspace/dotfiles"
-else
-    echo "Error: DOTFILES_DIR not set and standard locations not found" >&2
-    exit 1
+# Find dotfiles directory using paths helper
+SCRIPT_DIR="$(cd "$(dirname "${0:A}")" && pwd)"
+if [[ -f "$(dirname "$SCRIPT_DIR")/lib/_paths.sh" ]]; then
+    source "$(dirname "$SCRIPT_DIR")/lib/_paths.sh"
+    DOTFILES_DIR="${DOTFILES_DIR:-$(get_dotfiles_dir 2>/dev/null || echo "")}"
+fi
+
+# Fallback if helper not available
+if [[ -z "${DOTFILES_DIR:-}" || ! -d "${DOTFILES_DIR:-}" ]]; then
+    if [[ -d "/workspace/dotfiles" ]]; then
+        DOTFILES_DIR="/workspace/dotfiles"
+    elif [[ -d "$HOME/workspace/dotfiles" ]]; then
+        DOTFILES_DIR="$HOME/workspace/dotfiles"
+    else
+        echo "Error: DOTFILES_DIR not set and standard locations not found" >&2
+        exit 1
+    fi
 fi
 
 # Source shared libraries
