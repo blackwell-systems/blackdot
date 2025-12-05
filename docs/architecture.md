@@ -239,6 +239,7 @@ graph LR
     B --> C[status]
     B --> D[doctor]
     B --> M[features]
+    B --> N[config]
     B --> E[vault]
     B --> F[backup]
     B --> G[diff]
@@ -252,6 +253,10 @@ graph LR
     M --> M2[enable]
     M --> M3[disable]
     M --> M4[preset]
+
+    N --> N1[layers]
+    N --> N2[get]
+    N --> N3[set]
 
     E --> E1[pull]
     E --> E2[push]
@@ -332,11 +337,15 @@ dotfiles/
 ├── lib/                    # Shared libraries
 │   ├── _logging.sh         # Logging functions
 │   ├── _config.sh          # JSON config abstraction
-│   ├── _features.sh        # Feature registry (opt-in features)
+│   ├── _config_layers.sh   # Configuration Layers (5-layer priority)
+│   ├── _cli_features.sh    # CLI Feature Awareness
+│   ├── _features.sh        # Feature Registry (control plane)
 │   ├── _drift.sh           # Fast drift detection (shell startup)
 │   ├── _state.sh           # Setup state management
 │   ├── _vault.sh           # Vault abstraction layer
-│   └── _templates.sh       # Template engine
+│   ├── _templates.sh       # Template engine
+│   ├── _errors.sh          # Error handling
+│   └── _paths.sh           # Path utilities
 │
 ├── vault/
 │   ├── _common.sh          # Config loader & validation
