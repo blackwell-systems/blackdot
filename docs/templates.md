@@ -239,6 +239,90 @@ Use `{{ variable }}` to insert a variable value:
 
 Both `{{ var }}` (with spaces) and `{{var}}` (without spaces) work.
 
+### Pipeline Filters
+
+Transform variable values using filters with the pipe (`|`) syntax:
+
+```
+{{ variable | filter }}
+{{ variable | filter "argument" }}
+{{ variable | filter1 | filter2 }}
+```
+
+#### Available Filters
+
+| Filter | Description | Example |
+|--------|-------------|---------|
+| `upper` | Convert to UPPERCASE | `{{ hostname \| upper }}` → `MACBOOK-PRO` |
+| `lower` | Convert to lowercase | `{{ hostname \| lower }}` → `macbook-pro` |
+| `capitalize` | Capitalize first letter | `{{ name \| capitalize }}` → `John` |
+| `trim` | Remove leading/trailing whitespace | `{{ value \| trim }}` |
+| `default "value"` | Use fallback if variable is empty | `{{ editor \| default "vim" }}` |
+| `replace "old,new"` | Replace all occurrences | `{{ email \| replace "@,_at_" }}` → `user_at_example.com` |
+| `append "text"` | Append text to value | `{{ name \| append ".local" }}` |
+| `prepend "text"` | Prepend text to value | `{{ name \| prepend "user-" }}` |
+| `quote` | Wrap in double quotes | `{{ path \| quote }}` → `"/path/to/file"` |
+| `squote` | Wrap in single quotes | `{{ path \| squote }}` → `'/path/to/file'` |
+| `truncate N` | Truncate to N characters | `{{ hostname \| truncate 5 }}` → `macbo` |
+| `length` | Return string length | `{{ name \| length }}` → `4` |
+| `basename` | Extract filename from path | `{{ home \| basename }}` → `john` |
+| `dirname` | Extract directory from path | `{{ home \| dirname }}` → `/Users` |
+
+#### Chained Filters
+
+Apply multiple filters in sequence:
+
+```
+# Uppercase hostname truncated to 8 characters
+Host: {{ hostname | upper | truncate 8 }}
+
+# Default value, then uppercase
+Editor: {{ VISUAL | default "vim" | upper }}
+```
+
+#### Common Use Cases
+
+**Default values for optional settings:**
+```
+export EDITOR="{{ editor | default "vim" }}"
+export AWS_PROFILE="{{ aws_profile | default "default" }}"
+```
+
+**Path manipulation:**
+```
+# Extract just the username from home path
+User: {{ home | basename }}
+# → john
+
+# Get parent directory
+Parent: {{ workspace | dirname }}
+# → /Users/john
+```
+
+**Consistent formatting:**
+```
+# Hostname as uppercase identifier
+export MACHINE_ID="{{ hostname | upper | replace "-,_" }}"
+# → MACBOOK_PRO
+
+# Email obfuscation in comments
+# Contact: {{ git_email | replace "@, [at] " }}
+# → john [at] example.com
+```
+
+**String wrapping:**
+```
+# For shell safety
+alias home='cd {{ home | squote }}'
+```
+
+#### Viewing Available Filters
+
+```bash
+# Show all filters with descriptions
+dotfiles template filters
+```
+
 ### Conditional Blocks
 
 #### Simple Truthy Check

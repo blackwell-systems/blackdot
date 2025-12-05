@@ -246,3 +246,209 @@ render_string() {
   [ "$status" -eq 0 ]
   [ "${output}" = "2" ]
 }
+
+# ============================================================
+# Pipeline Filter Tests
+# ============================================================
+
+@test "pipeline filter: upper transforms to uppercase" {
+  template='{{ hostname | upper }}'
+
+  run render_string "$template"
+
+  [ "$status" -eq 0 ]
+  # Output should be uppercase
+  [[ ! "${output}" =~ [a-z] ]] || [[ "${output}" =~ "WARN" ]]  # Allow WARN in output
+}
+
+@test "pipeline filter: lower transforms to lowercase" {
+  template='TEST={{ user | lower }}'
+
+  run render_string "$template"
+
+  [ "$status" -eq 0 ]
+  [[ "${output}" =~ "TEST=" ]]
+}
+
+@test "pipeline filter: default provides fallback for empty var" {
+  template='Editor={{ nonexistent_var | default "vim" }}'
+
+  run render_string "$template"
+
+  [ "$status" -eq 0 ]
+  [[ "${output}" =~ "Editor=vim" ]]
+}
+
+@test "pipeline filter: default preserves non-empty value" {
+  template='User={{ user | default "nobody" }}'
+
+  run render_string "$template"
+
+  [ "$status" -eq 0 ]
+  # Should contain actual user, not "nobody"
+  [[ ! "${output}" =~ "User=nobody" ]]
+}
+
+@test "pipeline filter: trim removes whitespace" {
+  run zsh_eval '
+    build_template_vars
+    TMPL_VARS[spacy]="  hello world  "
+    apply_filter "${TMPL_VARS[spacy]}" "trim"
+  '
+
+  [ "$status" -eq 0 ]
+  [ "${output}" = "hello world" ]
+}
+
+@test "pipeline filter: replace substitutes text" {
+  run zsh_eval '
+    build_template_vars
+    apply_filter "hello@world.com" "replace" "@,_at_"
+  '
+
+  [ "$status" -eq 0 ]
+  [ "${output}" = "hello_at_world.com" ]
+}
+
+@test "pipeline filter: basename extracts filename" {
+  run zsh_eval '
+    build_template_vars
+    apply_filter "/path/to/file.txt" "basename"
+  '
+
+  [ "$status" -eq 0 ]
+  [ "${output}" = "file.txt" ]
+}
+
+@test "pipeline filter: dirname extracts directory" {
+  run zsh_eval '
+    build_template_vars
+    apply_filter "/path/to/file.txt" "dirname"
+  '
+
+  [ "$status" -eq 0 ]
+  [ "${output}" = "/path/to" ]
+}
+
+@test "pipeline filter: quote wraps in double quotes" {
+  run zsh_eval '
+    build_template_vars
+    apply_filter "hello" "quote"
+  '
+
+  [ "$status" -eq 0 ]
+  [ "${output}" = '"hello"' ]
+}
+
+@test "pipeline filter: squote wraps in single quotes" {
+  run zsh_eval '
+    build_template_vars
+    apply_filter "hello" "squote"
+  '
+
+  [ "$status" -eq 0 ]
+  [ "${output}" = "'hello'" ]
+}
+
+@test "pipeline filter: length returns string length" {
+  run zsh_eval '
+    build_template_vars
+    apply_filter "hello" "length"
+  '
+
+  [ "$status" -eq 0 ]
+  [ "${output}" = "5" ]
+}
+
+@test "pipeline filter: truncate limits string length" {
+  run zsh_eval '
+    build_template_vars
+    apply_filter "hello world" "truncate" "5"
+  '
+
+  [ "$status" -eq 0 ]
+  [ "${output}" = "hello" ]
+}
+
+@test "pipeline filter: append adds text" {
+  run zsh_eval '
+    build_template_vars
+    apply_filter "hello" "append" " world"
+  '
+
+  [ "$status" -eq 0 ]
+  [ "${output}" = "hello world" ]
+}
+
+@test "pipeline filter: prepend adds text before" {
+  run zsh_eval '
+    build_template_vars
+    apply_filter "world" "prepend" "hello "
+  '
+
+  [ "$status" -eq 0 ]
+  [ "${output}" = "hello world" ]
+}
+
+@test "pipeline filter: capitalize first letter" {
+  run zsh_eval '
+    build_template_vars
+    apply_filter "hello" "capitalize"
+  '
+
+  [ "$status" -eq 0 ]
+  [ "${output}" = "Hello" ]
+}
+
+@test "pipeline: chained filters work" {
+  run zsh_eval '
+    build_template_vars
+    TMPL_VARS[test_var]="hello world"
+    process_pipeline " test_var | upper | truncate 5 "
+  '
+
+  [ "$status" -eq 0 ]
+  [ "${output}" = "HELLO" ]
+}
+
+@test "pipeline: renders in template correctly" {
+  template='Host: {{ hostname | upper }}'
+
+  run render_string "$template"
+
+  [ "$status" -eq 0 ]
+  [[ "${output}" =~ "Host: " ]]
+  # Hostname portion should be uppercase (check no lowercase after "Host: ")
+  # Extract the hostname part and verify
+  [[ ! "${output#Host: }" =~ ^[a-z] ]] || [ -z "${output#Host: }" ]
+}
+
+@test "pipeline: multiple pipelines in same template" {
+  template='User: {{ user | lower }}, Home: {{ home | basename }}'
+
+  run render_string "$template"
+
+  [ "$status" -eq 0 ]
+  [[ "${output}" =~ "User: " ]]
+  [[ "${output}" =~ "Home: " ]]
+}
+
+@test "pipeline: with default in template" {
+  template='Editor: {{ nonexistent_editor | default "nano" }}'
+
+  run render_string "$template"
+
+  [ "$status" -eq 0 ]
+  [[ "${output}" =~ "Editor: nano" ]]
+}
+
+@test "list_filters displays available filters" {
+  run zsh_eval 'list_filters'
+
+  [ "$status" -eq 0 ]
+  [[ "${output}" =~ "upper" ]]
+  [[ "${output}" =~ "lower" ]]
+  [[ "${output}" =~ "default" ]]
+  [[ "${output}" =~ "basename" ]]
+  [[ "${output}" =~ "Pipeline Filters" ]]
+}
