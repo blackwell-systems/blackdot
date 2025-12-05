@@ -127,6 +127,8 @@ Setup complete!
 
 Quick commands:
   dotfiles status   - Visual dashboard
+  dotfiles sync     - Smart bidirectional vault sync
+  dotfiles drift    - Compare local vs vault
   dotfiles doctor   - Health check
   dotfiles help     - All commands
 ```
