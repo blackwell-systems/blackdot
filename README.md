@@ -1020,7 +1020,9 @@ See [Brewfile](Brewfile) for complete package list.
 
 - **[Complete Guide](docs/README-FULL.md)** - Everything in detail (2,300+ lines)
 - **[Vault System](docs/vault-README.md)** - Multi-backend secrets management
+- **[Backup System](docs/backup.md)** - Snapshot and restore configuration
 - **[Hook System](docs/hooks.md)** - Lifecycle hooks for custom behavior
+- **[Configuration Layers](docs/configuration-layers.md)** - Hierarchical config resolution
 - **[Templates](docs/templates.md)** - Machine-specific configuration
 - **[Architecture](docs/architecture.md)** - System design and components
 - **[CLI Reference](docs/cli-reference.md)** - All commands and flags
