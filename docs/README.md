@@ -12,7 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
 
-> A dotfiles management framework built on **Feature Registry**, **Configuration Layers**, and **CLI Feature Awareness**. Multi-vault secrets, portable Claude Code sessions, machine-specific templates, and self-healing configuration.
+> A dotfiles management framework built on **Feature Registry**, **Configuration Layers**, and **Claude Code Integration**. Multi-vault secrets, portable sessions, machine-specific templates, and self-healing configuration.
 
 [Changelog](https://github.com/blackwell-systems/dotfiles/blob/main/CHANGELOG.md) | [GitHub](https://github.com/blackwell-systems/dotfiles)
 
@@ -77,9 +77,9 @@ The setup wizard also prompts for workspace directory (Step 1 of 7).
 ## Core Features
 
 **Framework Systems:**
-- **Feature Registry** – Central control plane for all functionality (`dotfiles features`)
+- **Feature Registry** – Modular control plane for all functionality (`dotfiles features`)
 - **Configuration Layers** – 5-layer priority: env → project → machine → user → defaults
-- **CLI Feature Awareness** – Adaptive CLI that shows only enabled feature commands
+- **Claude Code Integration** – Portable sessions, dotclaude profiles, git safety hooks
 
 **Capabilities:**
 - **Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with Bitwarden, 1Password, or pass

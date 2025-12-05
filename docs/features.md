@@ -355,18 +355,21 @@ config_get_layered "vault.backend"  # Checks all layers in priority order
 
 See [Architecture](architecture.md#configuration-layers) for details.
 
-### CLI Feature Awareness
+### Claude Code Integration
 
-The CLI Feature Awareness system (`lib/_cli_features.sh`) adapts the CLI based on enabled features:
+The Claude Code integration provides portable AI-assisted development across machines:
 
-- Help output hides commands for disabled features
-- Tab completion excludes disabled feature commands
-- Running a disabled command shows an enable hint
+- **Portable sessions** – `/workspace` symlink for consistent paths everywhere
+- **Profile management** – [dotclaude](https://github.com/blackwell-systems/dotclaude) for multiple contexts
+- **Git safety hooks** – PreToolUse blocks dangerous commands like `git push --force`
+- **Multi-backend** – Works with Anthropic Max, AWS Bedrock, Google Vertex AI
 
 ```bash
-dotfiles help                    # Shows only enabled feature commands
-dotfiles features enable vault   # Enables vault, CLI shows vault commands
+dotfiles setup   # Step 6: Claude Code integration
+dotfiles doctor  # Validates Claude setup
 ```
+
+See [Claude Code + dotclaude](claude-code.md) for the full guide.
 
 ---
 

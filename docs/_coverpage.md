@@ -8,12 +8,11 @@
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
 ```
 
-- **Feature Registry** - Central control plane for all functionality
-- **Configuration Layers** - 5-layer priority hierarchy for settings
-- **CLI Feature Awareness** - Adaptive CLI based on enabled features
-- **Multi-Vault Backend** - Bitwarden, 1Password, or pass
-- **Portable Sessions** - Claude Code sessions work across machines
-- **Self-Healing** - Auto-repair permissions and symlinks
+- **Claude Code Integration** - Portable sessions, dotclaude profiles, git safety hooks
+- **Multi-Vault Secrets** - Bitwarden, 1Password, or pass with unified API
+- **Feature Registry** - Modular control plane with presets
+- **Configuration Layers** - Multi-machine settings that just work
+- **Self-Healing** - Health checks with auto-fix
 - **Cross-Platform** - macOS • Linux • Windows • WSL2 • Docker
 
 [Get Started](#one-line-install)
