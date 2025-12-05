@@ -218,8 +218,13 @@ if ! $MINIMAL; then
         echo -e "${CYAN}Starting setup wizard...${NC}"
         echo ""
 
-        # Source zsh and run setup
-        exec zsh -c "source $HOME/.zshrc 2>/dev/null; cd $INSTALL_DIR && $INSTALL_DIR/bin/dotfiles-setup"
+        # Run setup directly without sourcing zshrc (avoids shell config issues)
+        # Setup script handles its own environment
+        cd "$INSTALL_DIR" && "$INSTALL_DIR/bin/dotfiles-setup"
+
+        echo ""
+        echo "To load your new shell configuration:"
+        echo -e "  ${CYAN}exec zsh${NC}"
     else
         echo ""
         echo "You can run the setup wizard later with:"
