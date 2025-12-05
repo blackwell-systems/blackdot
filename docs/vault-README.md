@@ -172,7 +172,7 @@ export DOTFILES_VAULT_BACKEND=pass
 
 ---
 
-## Location Management (v3.1+)
+## Location Management
 
 The vault setup wizard v2 introduces location-based organization. Instead of scanning your entire vault, you tell the system where your dotfiles secrets are stored.
 
