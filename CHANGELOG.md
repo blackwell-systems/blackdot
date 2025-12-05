@@ -7,6 +7,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Vault Setup Wizard v2** - Complete redesign of vault onboarding flow
+  - Educational phase explains how vault storage works before any configuration
+  - Three setup modes: Existing (import from vault), Fresh (create new), Manual (configure yourself)
+  - User guides system to their secrets location (folder/vault/directory) instead of random scanning
+  - Backend-specific location support:
+    - Bitwarden: folders
+    - 1Password: vaults and tags (planned)
+    - pass: directories
+  - Respects existing naming conventions in vault
+  - Works on new machines (vault-first discovery)
+  - See: `docs/design/vault-setup-wizard-v2.md` for full design rationale
+
+- **Vault Location Management** - Unified location handling across backends
+  - `vault_location` field in vault-items.json schema
+  - `vault_get_location()`, `vault_set_location()` in abstraction layer
+  - `vault_list_locations()`, `vault_list_items_in_location()`, `vault_create_location()`
+  - Backward compatible: no `vault_location` = legacy behavior (global search)
+
+- **Bitwarden Folder Support** - Organize vault items in Bitwarden folders
+  - `vault_backend_list_locations()` - List all folders
+  - `vault_backend_location_exists()` - Check if folder exists
+  - `vault_backend_create_location()` - Create new folder
+  - `vault_backend_list_items_in_location()` - List items in folder or by prefix
+  - `vault_backend_create_item_in_location()` - Create item in specific folder
+
+- **pass Directory Support** - Location-aware operations for pass backend
+  - `vault_backend_list_locations()` - List top-level directories
+  - `vault_backend_location_exists()` - Check if directory exists
+  - `vault_backend_create_location()` - Create new directory
+  - `vault_backend_list_items_in_location()` - List items in directory
+  - `vault_backend_create_item_in_location()` - Create item in specific directory
+
+- **Input Validation & Sanitization** - Defensive input handling in setup wizard
+  - `sanitize_input()` - Remove control characters, null bytes, trim whitespace
+  - `validate_location_name()` - Validate folder/vault/directory names (no path traversal)
+  - `validate_file_path()` - Validate local file paths
+  - `validate_item_name()` - Validate vault item names match naming convention
+  - `prompt_location_name()` - Validated prompt for location names
+  - `prompt_file_path()` - Validated prompt for file paths
+
+### Fixed
+- **Underscore in vault item names** - Regex now allows underscores in item names
+  - Pattern changed from `^[A-Z][A-Za-z0-9-]*$` to `^[A-Z][A-Za-z0-9_-]*$`
+  - Fixes validation error for items like `SSH-Enterprise_Ghub`
+  - Updated both `lib/_vault.sh` and `vault/vault-items.schema.json`
+
+### Changed
+- **Schema relaxed** - `vault_items` no longer required in vault-items.json
+  - Allows minimal config with just `vault_location` during initial setup
+  - Added support for `$schema` and `$comment` fields in JSON
+
+### Documentation
+- **Vault Setup Wizard v2 Design Document** - Comprehensive design at `docs/design/vault-setup-wizard-v2.md`
+  - Problem statement and design principles
+  - User flow diagrams for all three setup modes
+  - Backend-specific implementation plans
+  - Schema changes and migration paths
+  - Risk assessment and success criteria
+
+### Planned
+- **1Password Backend Location Support** - Vault and tag-based organization
+  - `vault_backend_list_locations()` for vaults
+  - Tag support as alternative location type
+  - Migration from `ONEPASSWORD_VAULT` env var to config
+  - See `docs/design/vault-setup-wizard-v2.md` for implementation plan
+
 ## [3.0.0] - 2025-01-04
 
 **🚨 BREAKING CHANGES - Major v3.0 Release**

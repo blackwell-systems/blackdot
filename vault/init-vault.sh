@@ -4,6 +4,17 @@
 # Vault Setup Wizard v2
 # Improved onboarding with location awareness and vault-first discovery
 # Usage: ./init-vault.sh [--force] [--reconfigure]
+#
+# IDEMPOTENCY:
+# - Safe to run multiple times
+# - Detects existing config and offers: add items / reconfigure / cancel
+# - Creates timestamped backups before any destructive operation
+# - Never overwrites without explicit user confirmation
+#
+# INPUT VALIDATION:
+# - All user inputs are sanitized (control chars, null bytes removed)
+# - Location names validated (no path traversal, valid chars only)
+# - File paths validated (must start with ~, /, or $)
 # ============================================================
 set -euo pipefail
 
@@ -60,6 +71,91 @@ print_section() {
     echo -e "${DIM}$(printf '─%.0s' {1..50})${NC}"
 }
 
+# ============================================================
+# Input Validation & Sanitization
+# ============================================================
+
+# Sanitize input: remove dangerous characters, trim whitespace
+sanitize_input() {
+    local input="$1"
+    # Remove leading/trailing whitespace
+    input="${input#"${input%%[![:space:]]*}"}"
+    input="${input%"${input##*[![:space:]]}"}"
+    # Remove null bytes and control characters (except newline/tab)
+    input=$(printf '%s' "$input" | tr -d '\000-\010\013\014\016-\037')
+    echo "$input"
+}
+
+# Validate vault location name (folder, vault, directory name)
+# Allows: alphanumeric, hyphens, underscores, forward slashes (for paths)
+validate_location_name() {
+    local name="$1"
+    local max_length="${2:-100}"
+
+    # Check length
+    if [[ ${#name} -gt $max_length ]]; then
+        warn "Name too long (max $max_length characters)"
+        return 1
+    fi
+
+    # Check for empty
+    if [[ -z "$name" ]]; then
+        warn "Name cannot be empty"
+        return 1
+    fi
+
+    # Check for valid characters (alphanumeric, hyphen, underscore, slash, dot)
+    if [[ ! "$name" =~ ^[A-Za-z0-9._/-]+$ ]]; then
+        warn "Invalid characters in name. Use only: letters, numbers, hyphens, underscores, dots, slashes"
+        return 1
+    fi
+
+    # Prevent path traversal
+    if [[ "$name" == *".."* ]]; then
+        warn "Path traversal (..) not allowed"
+        return 1
+    fi
+
+    # Prevent absolute paths (should be relative to vault)
+    if [[ "$name" == /* ]]; then
+        warn "Absolute paths not allowed. Use relative path."
+        return 1
+    fi
+
+    return 0
+}
+
+# Validate file path for local file mapping
+validate_file_path() {
+    local path="$1"
+
+    # Allow ~ or absolute paths starting with /
+    if [[ ! "$path" =~ ^[~/$] ]]; then
+        warn "Path must start with ~, /, or \$"
+        return 1
+    fi
+
+    # Prevent null bytes
+    if [[ "$path" == *$'\0'* ]]; then
+        warn "Invalid path"
+        return 1
+    fi
+
+    return 0
+}
+
+# Validate item name matches our naming convention
+validate_item_name() {
+    local name="$1"
+
+    if [[ ! "$name" =~ ^[A-Z][A-Za-z0-9_-]*$ ]]; then
+        warn "Item name must start with capital letter, contain only alphanumeric, hyphens, underscores"
+        return 1
+    fi
+
+    return 0
+}
+
 prompt_choice() {
     local prompt="$1"
     local default="$2"
@@ -67,7 +163,46 @@ prompt_choice() {
 
     echo -n -e "${CYAN}?${NC} $prompt ${DIM}[$default]${NC}: "
     read result
-    echo "${result:-$default}"
+    result=$(sanitize_input "${result:-$default}")
+    echo "$result"
+}
+
+# Prompt for location name with validation
+prompt_location_name() {
+    local prompt="$1"
+    local default="$2"
+    local result
+
+    while true; do
+        echo -n -e "${CYAN}?${NC} $prompt ${DIM}[$default]${NC}: "
+        read result
+        result=$(sanitize_input "${result:-$default}")
+
+        if validate_location_name "$result"; then
+            echo "$result"
+            return 0
+        fi
+        echo "  Please try again."
+    done
+}
+
+# Prompt for file path with validation
+prompt_file_path() {
+    local prompt="$1"
+    local default="$2"
+    local result
+
+    while true; do
+        echo -n -e "${CYAN}?${NC} $prompt ${DIM}[$default]${NC}: "
+        read result
+        result=$(sanitize_input "${result:-$default}")
+
+        if validate_file_path "$result"; then
+            echo "$result"
+            return 0
+        fi
+        echo "  Please try again."
+    done
 }
 
 prompt_yesno() {
@@ -81,7 +216,7 @@ prompt_yesno() {
         echo -n -e "${CYAN}?${NC} $prompt ${DIM}[y/N]${NC}: "
     fi
     read result
-    result="${result:-$default}"
+    result=$(sanitize_input "${result:-$default}")
     [[ "$result" =~ ^[Yy] ]]
 }
 
@@ -322,22 +457,22 @@ setup_existing() {
                     if [[ "$folders" == "[]" || -z "$folders" ]]; then
                         echo "  ${DIM}(no folders found)${NC}"
                         echo ""
-                        loc_value=$(prompt_choice "Enter folder name to create" "dotfiles")
+                        loc_value=$(prompt_location_name "Enter folder name to create" "dotfiles")
                     else
                         echo "$folders" | jq -r '.[]' | while read -r f; do
                             echo "  • $f"
                         done
                         echo ""
-                        loc_value=$(prompt_choice "Enter folder name" "dotfiles")
+                        loc_value=$(prompt_location_name "Enter folder name" "dotfiles")
                     fi
                     ;;
                 1password)
                     loc_type="vault"
-                    loc_value=$(prompt_choice "Enter vault name" "Personal")
+                    loc_value=$(prompt_location_name "Enter vault name" "Personal")
                     ;;
                 pass)
                     loc_type="directory"
-                    loc_value=$(prompt_choice "Enter directory path" "dotfiles")
+                    loc_value=$(prompt_location_name "Enter directory path" "dotfiles")
                     ;;
             esac
 
@@ -499,7 +634,7 @@ process_found_items() {
 
         echo -e "  ${BOLD}$name${NC}"
         local path
-        path=$(prompt_choice "    Local path" "$suggested_path")
+        path=$(prompt_file_path "    Local path" "$suggested_path")
 
         # Store mapping (will be written to config later)
         # For now just output
@@ -569,15 +704,15 @@ setup_fresh() {
             case "$SELECTED_BACKEND" in
                 bitwarden)
                     loc_type="folder"
-                    loc_value=$(prompt_choice "Enter folder name" "dotfiles")
+                    loc_value=$(prompt_location_name "Enter folder name" "dotfiles")
                     ;;
                 1password)
                     loc_type="vault"
-                    loc_value=$(prompt_choice "Enter vault name" "Personal")
+                    loc_value=$(prompt_location_name "Enter vault name" "Personal")
                     ;;
                 pass)
                     loc_type="directory"
-                    loc_value=$(prompt_choice "Enter directory path" "dotfiles")
+                    loc_value=$(prompt_location_name "Enter directory path" "dotfiles")
                     ;;
             esac
             ;;
