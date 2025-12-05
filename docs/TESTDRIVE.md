@@ -66,9 +66,12 @@ dotfiles vault help
 
 # View available backends
 ls vault/backends/
+
+# Preview what sync would do (dry run)
+dotfiles sync --help
 ```
 
-**What this shows:** Multi-backend secret management (Bitwarden, 1Password, pass) - no vendor lock-in.
+**What this shows:** Multi-backend secret management (Bitwarden, 1Password, pass) with smart bidirectional sync - no vendor lock-in.
 
 ---
 
@@ -153,6 +156,7 @@ exit
 dotfiles help
 dotfiles doctor
 dotfiles status
+dotfiles sync --help
 dotfiles packages --help
 dotfiles vault help
 
