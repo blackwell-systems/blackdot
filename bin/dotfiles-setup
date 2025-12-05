@@ -531,7 +531,7 @@ phase_vault() {
         read skip
         if [[ "${skip:-Y}" =~ ^[Yy]$ ]]; then
             warn "Skipped vault setup"
-            config_set "vault" "backend" "none"
+            config_set "vault.backend" "none"
             state_complete "vault"
             echo ""
             info "Run 'dotfiles vault init' anytime to configure vault"
@@ -555,7 +555,7 @@ phase_vault() {
     # Check if user chose to skip
     if [[ $choice -eq $((${#available[@]} + 1)) ]]; then
         warn "Skipped vault setup"
-        config_set "vault" "backend" "none"
+        config_set "vault.backend" "none"
         state_complete "vault"
         echo ""
         info "Run 'dotfiles vault init' anytime to configure vault"
@@ -569,7 +569,7 @@ phase_vault() {
     fi
 
     # Save preference
-    config_set "vault" "backend" "$selected"
+    config_set "vault.backend" "$selected"
     export DOTFILES_VAULT_BACKEND="$selected"
 
     info "Using vault backend: $selected"
