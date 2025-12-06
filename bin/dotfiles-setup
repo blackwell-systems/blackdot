@@ -191,7 +191,7 @@ show_status() {
                 echo -e "  ${GREEN}[✓]${NC} $label ${DIM}(→ $ws_target)${NC}"
             # Special handling for vault to show if skipped
             elif [[ "$phase" == "vault" ]]; then
-                local backend=$(config_get "vault" "backend" "")
+                local backend=$(config_get "vault.backend" "")
                 if [[ "$backend" == "none" ]]; then
                     echo -e "  ${YELLOW}[⊘]${NC} $label ${DIM}(Skipped - run 'dotfiles vault init')${NC}"
                 else
@@ -483,7 +483,7 @@ phase_vault() {
     echo "────────────────────────────────────"
 
     if state_completed "vault"; then
-        local backend=$(config_get "vault" "backend" "")
+        local backend=$(config_get "vault.backend" "")
         if [[ -n "$backend" ]] && [[ "$backend" != "none" ]]; then
             pass "Vault already configured ($backend)"
         elif [[ "$backend" == "none" ]]; then
@@ -1053,7 +1053,7 @@ main() {
         echo ""
 
         # Show dynamic next steps based on configuration
-        local vault_backend=$(config_get "vault" "backend" "")
+        local vault_backend=$(config_get "vault.backend" "")
         local template_configured=false
         if [[ -f "$DOTFILES_DIR/templates/_variables.local.sh" ]]; then
             template_configured=true
