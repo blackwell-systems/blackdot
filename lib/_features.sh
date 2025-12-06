@@ -37,6 +37,7 @@ typeset -gA FEATURE_REGISTRY=(
     ["config_layers"]="true|Hierarchical configuration resolution (env>project>machine>user)|optional|"
     ["cli_feature_filter"]="true|Filter CLI help and commands based on enabled features|optional|"
     ["hooks"]="true|Lifecycle hooks for custom behavior at key events|optional|"
+    ["encryption"]="false|Age encryption for sensitive files (templates, secrets)|optional|"
 
     # Integration features (third-party tool integrations)
     ["modern_cli"]="true|Modern CLI tools (eza, bat, ripgrep, fzf, zoxide)|integration|"
