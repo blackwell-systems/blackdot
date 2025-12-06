@@ -37,6 +37,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Styled: `dotfiles help`, `dotfiles macos`, `dotfiles vault`, `dotfiles template`
   - Styled: `dotfiles-backup`, `dotfiles-drift`, `dotfiles-lint`, `dotfiles-packages`, `dotfiles-migrate`
 
+### Changed
+
+- **Feature categories reorganized** - All third-party tool integrations now consistently in `integration` category
+  - Moved `aws_helpers` and `cdk_tools` from `optional` to `integration`
+  - `optional` category now only for dotfiles-specific features (vault, templates, hooks, etc.)
+  - `integration` category for all external tool helpers (aws, cdk, rust, go, nvm, sdkman, etc.)
+
 ### Fixed
 
 - **Metrics now saved after `dotfiles doctor`** - Health scores written to `~/.dotfiles-metrics.jsonl`
