@@ -125,6 +125,7 @@ cmd_unlock() {
             # Unlock with retry
             local attempts=0
             local max_attempts=5
+            local password=""
 
             while (( attempts < max_attempts )); do
                 ((attempts++))
@@ -134,7 +135,21 @@ cmd_unlock() {
                     warn "Incorrect password. Attempt $attempts of $max_attempts"
                 fi
 
-                session=$(bw unlock --raw 2>/dev/null)
+                # Prompt for password with hidden input
+                echo -n "Master password: "
+                read -s password
+                echo ""  # newline after hidden input
+
+                if [[ -z "$password" ]]; then
+                    warn "Password cannot be empty"
+                    continue
+                fi
+
+                # Unlock with the password
+                session=$(echo "$password" | bw unlock --raw 2>/dev/null)
+
+                # Clear password from memory
+                password=""
 
                 if [[ -n "$session" ]]; then
                     # Cache the session
@@ -160,10 +175,15 @@ cmd_unlock() {
                 return 1
             fi
 
+            info "Signing in to 1Password..."
+            info "(You may be prompted for biometric auth or password)"
+            echo ""
+
             session=$(op signin --raw 2>/dev/null)
 
             if [[ -n "$session" ]]; then
                 vault_cache_session "$session"
+                echo ""
                 pass "Vault unlocked successfully"
                 return 0
             else
