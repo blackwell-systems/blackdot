@@ -333,14 +333,16 @@ cdktools             # Show all CDK commands with status
 
 Other integrations to evaluate:
 
-| Tool | Type | Benefit |
-|------|------|---------|
-| `pyenv` | Lazy-load | Python version manager (~150ms startup) |
-| `kubectl` | Completions + aliases | k8s context/namespace helpers |
-| `direnv` | Auto-load | Per-directory `.envrc` files |
-| `uv` | Completions | Fast Python package manager |
-| `terraform` | Completions + aliases | IaC workflows |
-| `gh` | Completions | GitHub CLI |
+| Tool | Type | Benefit | Status |
+|------|------|---------|--------|
+| `ssh` | Config + agent | SSH config, keys, tunnels | See §11 |
+| `pyenv` | Lazy-load | Python version manager (~150ms startup) | |
+| `kubectl` | Completions + aliases | k8s context/namespace helpers | |
+| `docker` | Aliases + helpers | Container management shortcuts | |
+| `terraform` | Completions + aliases | IaC workflows | |
+| `direnv` | Auto-load | Per-directory `.envrc` files | |
+| `uv` | Completions | Fast Python package manager | |
+| `gh` | Completions | GitHub CLI | |
 
 **Decision:** Add as individual features (e.g., `kubectl_integration`, `pyenv_integration`) following the pattern of `nvm_integration` and `sdkman_integration`.
 
@@ -358,6 +360,66 @@ awsswitch() { _load_aws_helpers; awsswitch "$@"; }
 ```
 
 **Target:** Shell loads in <100ms even with all features enabled.
+
+---
+
+### 11. SSH Tools Integration
+
+**Status:** Planned
+
+SSH configuration, key management, agent handling, and tunnel utilities.
+
+**Feature:** `ssh_tools` (integration category)
+**File:** `zsh/zsh.d/64-ssh.zsh`
+
+**SSH Config Management:**
+```bash
+sshlist               # List all configured hosts from ~/.ssh/config
+sshgo <host>          # Quick connect with host completion
+sshedit               # Open SSH config in $EDITOR
+sshadd-host <name>    # Interactive wizard to add new host config
+```
+
+**SSH Key Management:**
+```bash
+sshkeys               # List all keys with fingerprints and comments
+sshgen <name>         # Generate new ED25519 key with proper permissions
+sshcopy <host>        # Copy public key to remote host (ssh-copy-id wrapper)
+sshfp [key]           # Show fingerprint(s) in multiple formats
+```
+
+**SSH Agent Commands:**
+```bash
+sshagent              # Start agent if not running, show loaded keys
+sshload [key]         # Add key to agent (default: all keys or specific)
+sshunload [key]       # Remove key from agent
+sshclear              # Remove all keys from agent
+```
+
+**SSH Tunnel Helpers:**
+```bash
+sshtunnel <host> <local> <remote>  # Create port forward
+sshsocks <host> [port]             # SOCKS5 proxy through host (default: 1080)
+sshtunnels                         # List active SSH tunnels
+```
+
+**Help Command:**
+```bash
+sshtools              # Show all SSH commands with styled help banner
+                      # Logo color: green (agent running) / yellow (no keys) / red (no agent)
+```
+
+**Tab Completions:**
+- `sshgo`: Complete from `~/.ssh/config` hosts
+- `sshcopy`: Complete from `~/.ssh/config` hosts
+- `sshload`: Complete from `~/.ssh/*.pub` key names
+- `sshtunnel`: Complete hosts
+
+**Status Display:**
+- Shows SSH agent status (running/stopped, PID)
+- Lists loaded keys count
+- Shows `~/.ssh/config` host count
+- Detects common SSH issues (no keys, agent not running)
 
 ---
 
@@ -414,4 +476,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ---
 
-*Last updated: 2025-12-05*
+*Last updated: 2025-12-06*
