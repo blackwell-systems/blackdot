@@ -712,6 +712,109 @@ Automatic virtual environment management when navigating directories.
 
 ---
 
+### 14. Template Auto-Discovery
+
+**Status:** Planned
+
+Automatically detect variables from existing config files and generate templates.
+
+**Discovery Command:**
+```bash
+dotfiles template discover [file]     # Analyze file(s) for variables
+dotfiles template discover            # Analyze all known config locations
+dotfiles template discover --apply    # Generate template + update variables
+```
+
+**Supported Config Formats:**
+| Format | Files | Detection |
+|--------|-------|-----------|
+| Git config | `~/.gitconfig` | email, name, signingkey, github user |
+| SSH config | `~/.ssh/config` | hosts → array, identity files |
+| AWS config | `~/.aws/config` | profiles, regions, SSO settings |
+| Shell rc | `~/.zshrc`, `~/.bashrc` | exports, paths |
+
+**Pattern Detection:**
+```bash
+# Automatically detected patterns:
+*@*.com, *@*.org           → {{ *_email }}
+/home/$USER/*, /Users/*    → {{ home }}/...
+[A-F0-9]{16,}              → {{ *_key }} (with secret warning)
+192.168.*, 10.*            → {{ *_ip }}
+github.com/username        → {{ github_user }}
+```
+
+**Example Output:**
+```bash
+$ dotfiles template discover ~/.gitconfig
+
+Analyzing ~/.gitconfig...
+
+Detected variables:
+  [user] email = "john@acme.com"
+         └── Suggested: {{ git_email }}
+  [user] name = "John Smith"
+         └── Suggested: {{ git_name }}
+  [user] signingkey = "ABC123DEF456"
+         └── Suggested: {{ git_signing_key }}
+  [github] user = "johnsmith"
+         └── Suggested: {{ github_user }}
+
+Actions:
+  [1] Generate template → templates/configs/gitconfig.tmpl
+  [2] Add variables → templates/_variables.local.sh
+  [3] Preview template
+  [4] Skip
+
+Choice [1-4]:
+```
+
+**SSH Config Discovery:**
+```bash
+$ dotfiles template discover ~/.ssh/config
+
+Analyzing ~/.ssh/config...
+
+Detected 5 hosts:
+  github       → github.com (git)
+  work-server  → server.company.com (deploy)
+  bastion      → bastion.company.com (admin)
+  prod-db      → db.prod.internal (ubuntu) [via bastion]
+  personal-vps → 123.45.67.89 (root)
+
+Actions:
+  [1] Generate ssh_hosts array → templates/_arrays.local.json
+  [2] Generate template → templates/configs/ssh-config.tmpl
+  [3] Preview
+  [4] Skip
+
+Choice [1-4]:
+```
+
+**Heuristics for Variable Detection:**
+- Contains `@` with domain → email
+- Path starts with `/home/` or `/Users/` → user-specific path
+- Matches hostname of current machine → machine-specific
+- Long hex/base64 string → key/token (warn about secrets)
+- IP address or internal domain → environment-specific
+
+**Safety Features:**
+- Always prompts before writing
+- Warns about potential secrets
+- Creates backup before overwriting
+- `--dry-run` flag for preview
+- Shows diff before applying
+
+**Cross-Machine Analysis (Future):**
+```bash
+# Compare configs from multiple machines
+dotfiles template diff-configs work.gitconfig personal.gitconfig
+
+# Output shows which values differ → should be variables
+# and which are the same → can be constants
+```
+
+---
+
 ## Design Decisions
 
 ### Path Convention: `~/workspace/dotfiles`
