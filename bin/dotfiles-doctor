@@ -375,10 +375,10 @@ if ! $QUICK_MODE; then
             if bw unlock --check >/dev/null 2>&1; then
                 pass "Vault is unlocked"
             else
-                warn "Vault is locked" "bw unlock && export BW_SESSION=\"\$(bw unlock --raw)\""
+                warn "Vault is locked" "dotfiles vault unlock"
             fi
         else
-            warn "Not logged in to Bitwarden" "bw login"
+            warn "Not logged in to Bitwarden" "bw login && dotfiles vault unlock"
         fi
     elif command -v op >/dev/null 2>&1; then
         section "Vault Status (1Password)"
@@ -386,7 +386,7 @@ if ! $QUICK_MODE; then
         if op account get >/dev/null 2>&1; then
             pass "Signed in to 1Password"
         else
-            warn "Not signed in to 1Password" "op signin"
+            warn "Not signed in to 1Password" "dotfiles vault unlock"
         fi
     elif command -v pass >/dev/null 2>&1; then
         section "Vault Status (pass)"
