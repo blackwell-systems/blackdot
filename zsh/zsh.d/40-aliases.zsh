@@ -457,10 +457,30 @@ dotfiles() {
                 delete)
                     "$VAULT_DIR/delete-vault-item.sh" "$@"
                     ;;
+                # Session management (delegates to dotfiles-vault)
+                unlock)
+                    "$DOTFILES_DIR/bin/dotfiles-vault" unlock "$@"
+                    ;;
+                lock)
+                    "$DOTFILES_DIR/bin/dotfiles-vault" lock "$@"
+                    ;;
+                quick)
+                    "$DOTFILES_DIR/bin/dotfiles-vault" quick "$@"
+                    ;;
+                backend)
+                    "$DOTFILES_DIR/bin/dotfiles-vault" backend "$@"
+                    ;;
+
                 help|--help|-h|"")
                     echo "${BOLD}${CYAN}dotfiles vault${NC} - Secret vault operations"
                     echo ""
                     echo "${BOLD}Usage:${NC} dotfiles vault <command> [options]"
+                    echo ""
+                    echo "${BOLD}Session:${NC}"
+                    echo "  ${GREEN}unlock${NC}           Unlock vault and cache session"
+                    echo "  ${GREEN}lock${NC}             Lock vault (clear cached session)"
+                    echo "  ${GREEN}quick${NC}            Quick status check (login/unlock only)"
+                    echo "  ${GREEN}backend${NC}          Show or set vault backend"
                     echo ""
                     echo "${BOLD}Setup & Sync:${NC}"
                     echo "  ${GREEN}setup${NC}            Setup vault backend (first-time setup)"
@@ -473,7 +493,7 @@ dotfiles() {
                     echo "  ${GREEN}sync${NC}             Bidirectional sync (smart push/pull)"
                     echo "                   ${DIM}--force-local: Push all local to vault${NC}"
                     echo "                   ${DIM}--force-vault: Pull all vault to local${NC}"
-                    echo "  ${GREEN}status${NC}           Show vault sync status"
+                    echo "  ${GREEN}status${NC}           Show vault sync status with drift detection"
                     echo ""
                     echo "${BOLD}Management:${NC}"
                     echo "  list             List all vault items"
@@ -484,15 +504,16 @@ dotfiles() {
                     echo ""
                     echo "${BOLD}Typical Workflow:${NC}"
                     echo "  ${DIM}First time:${NC}  dotfiles vault setup ${DIM}→ Choose backend & discover secrets${NC}"
+                    echo "  ${DIM}Unlock:${NC}      dotfiles vault unlock ${DIM}→ Unlock vault for operations${NC}"
                     echo "  ${DIM}Add secrets:${NC} dotfiles vault push  ${DIM}→ Push local changes to vault${NC}"
                     echo "  ${DIM}New machine:${NC} dotfiles vault pull  ${DIM}→ Pull secrets from vault${NC}"
                     echo "  ${DIM}Re-scan:${NC}     dotfiles vault scan  ${DIM}→ Find new SSH keys/configs${NC}"
                     echo ""
                     echo "${BOLD}Examples:${NC}"
-                    echo "  dotfiles vault setup          # First-time setup"
+                    echo "  dotfiles vault unlock         # Unlock vault"
+                    echo "  dotfiles vault status         # Full status with drift"
                     echo "  dotfiles vault pull           # Pull all secrets"
                     echo "  dotfiles vault push --all     # Push all to vault"
-                    echo "  dotfiles vault scan           # Re-scan for new items"
                     echo ""
                     echo "${DIM}Backup/restore: ${GREEN}dotfiles backup --help${NC}"
                     ;;
