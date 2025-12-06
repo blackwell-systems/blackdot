@@ -34,59 +34,57 @@ NC="${NC:-\033[0m}"
 # Usage
 # ============================================================
 usage() {
-    cat <<EOF
-${BOLD}Usage:${NC} dotfiles hook <command> [options]
-
-${BOLD}Commands:${NC}
-  list [point]          List hooks (all points or specific point)
-  run <point> [args]    Manually trigger hooks for a point
-  add <point> <script>  Add a hook script to a point
-  remove <point> <name> Remove a hook script
-  points                List all available hook points
-  test <point>          Test hooks for a point (verbose dry-run)
-
-${BOLD}Options:${NC}
-  --verbose, -v         Show detailed output
-  --no-hooks            Skip hook execution (for run command)
-  -h, --help            Show this help
-
-${BOLD}Hook Points:${NC}
-  ${CYAN}Lifecycle:${NC}      pre_install, post_install, pre_bootstrap, post_bootstrap,
-                  pre_upgrade, post_upgrade
-  ${CYAN}Vault:${NC}          pre_vault_pull, post_vault_pull, pre_vault_push, post_vault_push
-  ${CYAN}Doctor:${NC}         pre_doctor, post_doctor, doctor_check
-  ${CYAN}Shell:${NC}          shell_init, shell_exit, directory_change
-  ${CYAN}Setup:${NC}          pre_setup_phase, post_setup_phase, setup_complete
-
-${BOLD}Configuration:${NC}
-  Hooks directory:      ${DIM}\$HOME/.config/dotfiles/hooks/${NC}
-  JSON config:          ${DIM}\$HOME/.config/dotfiles/hooks.json${NC}
-
-${BOLD}Examples:${NC}
-  dotfiles hook list                          # List all hook points
-  dotfiles hook list post_vault_pull          # List hooks for specific point
-  dotfiles hook run post_vault_pull           # Run hooks for a point
-  dotfiles hook run --verbose post_vault_pull # Run with detailed output
-  dotfiles hook add post_vault_pull ~/my-hook.sh
-  dotfiles hook remove post_vault_pull my-hook.sh
-  dotfiles hook test post_vault_pull          # Test hooks (verbose)
-
-${BOLD}Hook Script Example:${NC}
-  ${DIM}~/.config/dotfiles/hooks/post_vault_pull/10-ssh-add.sh${NC}
-  #!/bin/bash
-  ssh-add ~/.ssh/id_ed25519 2>/dev/null
-
-${BOLD}JSON Config Example:${NC}
-  ${DIM}~/.config/dotfiles/hooks.json${NC}
-  {
-    "hooks": {
-      "post_vault_pull": [
-        {"name": "ssh-add", "command": "ssh-add ~/.ssh/id_ed25519", "enabled": true}
-      ]
-    },
-    "settings": {"fail_fast": false, "verbose": false, "timeout": 30}
-  }
-EOF
+    echo -e "${BOLD}Usage:${NC} dotfiles hook <command> [options]"
+    echo ""
+    echo -e "${BOLD}Commands:${NC}"
+    echo "  list [point]          List hooks (all points or specific point)"
+    echo "  run <point> [args]    Manually trigger hooks for a point"
+    echo "  add <point> <script>  Add a hook script to a point"
+    echo "  remove <point> <name> Remove a hook script"
+    echo "  points                List all available hook points"
+    echo "  test <point>          Test hooks for a point (verbose dry-run)"
+    echo ""
+    echo -e "${BOLD}Options:${NC}"
+    echo "  --verbose, -v         Show detailed output"
+    echo "  --no-hooks            Skip hook execution (for run command)"
+    echo "  -h, --help            Show this help"
+    echo ""
+    echo -e "${BOLD}Hook Points:${NC}"
+    echo -e "  ${CYAN}Lifecycle:${NC}      pre_install, post_install, pre_bootstrap, post_bootstrap,"
+    echo "                  pre_upgrade, post_upgrade"
+    echo -e "  ${CYAN}Vault:${NC}          pre_vault_pull, post_vault_pull, pre_vault_push, post_vault_push"
+    echo -e "  ${CYAN}Doctor:${NC}         pre_doctor, post_doctor, doctor_check"
+    echo -e "  ${CYAN}Shell:${NC}          shell_init, shell_exit, directory_change"
+    echo -e "  ${CYAN}Setup:${NC}          pre_setup_phase, post_setup_phase, setup_complete"
+    echo ""
+    echo -e "${BOLD}Configuration:${NC}"
+    echo -e "  Hooks directory:      ${DIM}\$HOME/.config/dotfiles/hooks/${NC}"
+    echo -e "  JSON config:          ${DIM}\$HOME/.config/dotfiles/hooks.json${NC}"
+    echo ""
+    echo -e "${BOLD}Examples:${NC}"
+    echo "  dotfiles hook list                          # List all hook points"
+    echo "  dotfiles hook list post_vault_pull          # List hooks for specific point"
+    echo "  dotfiles hook run post_vault_pull           # Run hooks for a point"
+    echo "  dotfiles hook run --verbose post_vault_pull # Run with detailed output"
+    echo "  dotfiles hook add post_vault_pull ~/my-hook.sh"
+    echo "  dotfiles hook remove post_vault_pull my-hook.sh"
+    echo "  dotfiles hook test post_vault_pull          # Test hooks (verbose)"
+    echo ""
+    echo -e "${BOLD}Hook Script Example:${NC}"
+    echo -e "  ${DIM}~/.config/dotfiles/hooks/post_vault_pull/10-ssh-add.sh${NC}"
+    echo "  #!/bin/bash"
+    echo "  ssh-add ~/.ssh/id_ed25519 2>/dev/null"
+    echo ""
+    echo -e "${BOLD}JSON Config Example:${NC}"
+    echo -e "  ${DIM}~/.config/dotfiles/hooks.json${NC}"
+    echo '  {'
+    echo '    "hooks": {'
+    echo '      "post_vault_pull": ['
+    echo '        {"name": "ssh-add", "command": "ssh-add ~/.ssh/id_ed25519", "enabled": true}'
+    echo '      ]'
+    echo '    },'
+    echo '    "settings": {"fail_fast": false, "verbose": false, "timeout": 30}'
+    echo '  }'
 }
 
 # ============================================================
