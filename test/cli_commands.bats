@@ -24,7 +24,7 @@ teardown() {
   run "$DOTFILES_DIR/bin/dotfiles-backup" --help
 
   [ "$status" -eq 0 ]
-  [[ "${output}" =~ "Usage" ]]
+  [[ "${output}" =~ "USAGE" ]]
   [[ "${output}" =~ "backup" ]]
 }
 
