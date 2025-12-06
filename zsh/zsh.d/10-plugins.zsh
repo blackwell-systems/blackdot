@@ -31,6 +31,16 @@ if command -v brew >/dev/null 2>&1; then
     source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
   fi
 
+  # zsh-you-should-use - Reminds you about aliases you have defined
+  # Great for learning your own aliases (awstools, cdktools, etc.)
+  if [ -f "$BREW_PREFIX/share/zsh-you-should-use/you-should-use.plugin.zsh" ]; then
+    source "$BREW_PREFIX/share/zsh-you-should-use/you-should-use.plugin.zsh"
+    # Show reminder BEFORE command output (default is after)
+    export YSU_MESSAGE_POSITION="before"
+    # Hardcore mode: prevent command from running if alias exists (disabled by default)
+    # export YSU_HARDCORE=1
+  fi
+
   # Powerlevel10k theme
   if [ -f "$BREW_PREFIX/share/powerlevel10k/powerlevel10k.zsh-theme" ]; then
     source "$BREW_PREFIX/share/powerlevel10k/powerlevel10k.zsh-theme"
