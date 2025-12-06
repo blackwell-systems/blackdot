@@ -4,10 +4,9 @@
 # AWS CDK aliases, helpers, and environment management
 # Provides shortcuts and utilities for CDK development workflows
 
-# Feature guard
-if [[ -f "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_features.sh" ]]; then
-    source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_features.sh"
-    feature_enabled "cdk_tools" || return 0
+# Feature guard: skip if cdk_tools is disabled
+if type feature_enabled &>/dev/null && ! feature_enabled "cdk_tools" 2>/dev/null; then
+    return 0
 fi
 
 # =========================
