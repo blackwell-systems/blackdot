@@ -69,6 +69,12 @@ HOOK_POINTS=(
 
     # Setup wizard
     pre_setup_phase post_setup_phase setup_complete
+
+    # Template operations
+    pre_template_render post_template_render
+
+    # Encryption operations
+    pre_encrypt post_decrypt
 )
 
 # Map hook points to parent features (for feature-gated execution)
@@ -77,6 +83,10 @@ typeset -gA HOOK_FEATURE_MAP=(
     ["post_vault_pull"]="vault"
     ["pre_vault_push"]="vault"
     ["post_vault_push"]="vault"
+    ["pre_template_render"]="templates"
+    ["post_template_render"]="templates"
+    ["pre_encrypt"]="encryption"
+    ["post_decrypt"]="encryption"
 )
 
 # ============================================================
