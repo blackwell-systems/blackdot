@@ -157,11 +157,60 @@ vault_login_check() {
     vault_backend_login_check
 }
 
-# Get session token
+# Get session token (may prompt for password if needed)
 # Usage: SESSION=$(vault_get_session)
 vault_get_session() {
     _ensure_backend_loaded || return 1
     vault_backend_get_session
+}
+
+# Check for valid cached session (non-interactive, never prompts)
+# Returns: session token if valid, empty string otherwise
+# Usage: SESSION=$(vault_check_session)
+vault_check_session() {
+    _ensure_backend_loaded || return 1
+
+    local session=""
+    local backend="${DOTFILES_VAULT_BACKEND:-}"
+
+    # Read cached session
+    session=$(vault_read_cached_session 2>/dev/null) || session=""
+
+    # Also check environment variable
+    if [[ -z "$session" ]]; then
+        case "$backend" in
+            bitwarden) session="${BW_SESSION:-}" ;;
+            1password) session="${OP_SERVICE_ACCOUNT_TOKEN:-}" ;;
+        esac
+    fi
+
+    # No session found
+    if [[ -z "$session" ]]; then
+        return 1
+    fi
+
+    # Validate session based on backend (non-interactive)
+    case "$backend" in
+        bitwarden)
+            if bw unlock --check --session "$session" >/dev/null 2>&1; then
+                echo "$session"
+                return 0
+            fi
+            ;;
+        1password)
+            if op account get --session "$session" >/dev/null 2>&1; then
+                echo "$session"
+                return 0
+            fi
+            ;;
+        pass)
+            # pass doesn't use sessions
+            echo ""
+            return 0
+            ;;
+    esac
+
+    return 1
 }
 
 # Sync vault with remote

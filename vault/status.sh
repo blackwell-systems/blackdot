@@ -43,8 +43,8 @@ pass "Backend: $BACKEND_NAME"
 if vault_login_check; then
     pass "Logged in: Yes"
 
-    # Check if vault is unlocked (session available)
-    SESSION=$(vault_get_session 2>/dev/null || echo "")
+    # Check if vault is unlocked (session available) - non-interactive check only
+    SESSION=$(vault_check_session 2>/dev/null || echo "")
     if [[ -n "$SESSION" ]]; then
         pass "Vault unlocked: Yes"
     else
