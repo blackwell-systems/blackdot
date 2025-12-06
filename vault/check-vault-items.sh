@@ -50,7 +50,7 @@ require_jq
 # Get session (use arg if provided, otherwise use common function)
 if [[ -n "$SESSION_ARG" ]]; then
     SESSION="$SESSION_ARG"
-    if ! bw unlock --check --session "$SESSION" >/dev/null 2>&1; then
+    if ! BW_SESSION="$SESSION" bw unlock --check >/dev/null 2>&1; then
         fail "Invalid session token provided"
         exit 1
     fi
@@ -63,7 +63,7 @@ sync_vault "$SESSION"
 
 # Get all item names
 info "Fetching item list..."
-ALL_ITEMS=$(bw list items --session "$SESSION" 2>/dev/null | jq -r '.[].name')
+ALL_ITEMS=$(BW_SESSION="$SESSION" bw list items 2>/dev/null | jq -r '.[].name')
 
 # Build required/optional lists from DOTFILES_ITEMS
 REQUIRED_ITEMS=()
