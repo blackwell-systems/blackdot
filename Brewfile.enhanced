@@ -55,6 +55,7 @@ brew "utf8proc"
 # Integrations
 brew "bitwarden-cli"    # Vault backend
 brew "awscli"           # AWS CLI
+brew "age"              # Modern file encryption
 
 # ============================================================
 # macOS essentials (GUI apps + font)

@@ -1,6 +1,29 @@
 #compdef dotfiles
-# ZSH completion for the unified dotfiles command
+# ============================================================
+# ZSH completion for the dotfiles command
+# Provides tab completion for all subcommands and options
+# ============================================================
 
+# Helper: Get list of features from registry
+_dotfiles_features_list() {
+    local -a features
+    if [[ -f "$DOTFILES_DIR/lib/_features.sh" ]]; then
+        # Extract feature names from FEATURE_REGISTRY
+        features=($(grep -oP '^\s*\["\K[^"]+' "$DOTFILES_DIR/lib/_features.sh" 2>/dev/null | head -30))
+    fi
+    if [[ ${#features[@]} -eq 0 ]]; then
+        # Fallback static list
+        features=(
+            vault templates hooks aws_helpers cdk_tools rust_tools go_tools
+            modern_cli nvm_integration sdkman_integration claude_integration
+            workspace_symlink git_hooks drift_check backup_auto health_metrics
+            macos_settings config_layers cli_feature_filter dotclaude
+        )
+    fi
+    echo "${features[@]}"
+}
+
+# Helper: Get vault items
 _dotfiles_vault_items() {
     local -a items
     items=(
@@ -8,78 +31,340 @@ _dotfiles_vault_items() {
         'AWS-Config:AWS config file'
         'AWS-Credentials:AWS credentials file'
         'Git-Config:Git configuration'
-        'Environment-Secrets:Environment secrets'
+        'SSH-GitHub:GitHub SSH key'
+        'SSH-GitLab:GitLab SSH key'
     )
     _describe 'vault item' items
 }
 
-_dotfiles_vault() {
-    local -a vault_commands
-    vault_commands=(
-        'restore:Restore all secrets from Bitwarden'
-        'sync:Sync local files to Bitwarden'
-        'list:List vault items'
-        'check:Validate vault items exist'
-        'validate:Validate vault item schema'
-        'create:Create new vault item'
-        'delete:Delete vault item'
-        'help:Show vault help'
+# Subcommand: features
+_dotfiles_features() {
+    local -a subcmds
+    subcmds=(
+        'list:List all features and their status'
+        'enable:Enable a feature'
+        'disable:Disable a feature'
+        'status:Show status of a specific feature'
+        'preset:Apply a feature preset'
+        'deps:Show feature dependencies'
+        'help:Show features help'
     )
 
-    case $words[2] in
-        sync)
-            _arguments \
-                '--all[Sync all items]' \
-                '--dry-run[Show what would be synced]' \
-                '*::item:_dotfiles_vault_items'
+    case $words[3] in
+        enable|disable|status|deps)
+            local -a features
+            features=($(_dotfiles_features_list))
+            _describe 'feature' features
             ;;
-        create|delete)
-            _dotfiles_vault_items
+        preset)
+            local -a presets
+            presets=(
+                'minimal:Shell and config layers only'
+                'developer:Common development tools'
+                'claude:Claude Code integration features'
+                'full:All features enabled'
+            )
+            _describe 'preset' presets
+            ;;
+        list)
+            _arguments \
+                '--all[Show all details including dependencies]' \
+                '--json[Output as JSON]' \
+                '--category[Filter by category]:category:(core optional integration)'
             ;;
         *)
-            _describe 'vault command' vault_commands
+            _describe 'features command' subcmds
             ;;
     esac
 }
 
+# Subcommand: vault
+_dotfiles_vault() {
+    local -a subcmds
+    subcmds=(
+        'init:Initialize vault backend'
+        'login:Login to vault'
+        'logout:Logout from vault'
+        'status:Show vault status'
+        'sync:Sync local files to vault'
+        'pull:Pull secrets from vault'
+        'push:Push secrets to vault'
+        'list:List vault items'
+        'get:Get a specific vault item'
+        'check:Validate vault items exist'
+        'setup:Interactive vault setup wizard'
+        'help:Show vault help'
+    )
+
+    case $words[3] in
+        init)
+            local -a backends
+            backends=(bitwarden 1password pass)
+            _describe 'backend' backends
+            ;;
+        get|sync|push|pull)
+            _dotfiles_vault_items
+            ;;
+        *)
+            _describe 'vault command' subcmds
+            ;;
+    esac
+}
+
+# Subcommand: template
+_dotfiles_template() {
+    local -a subcmds
+    subcmds=(
+        'init:Interactive template setup'
+        'render:Render templates to generated/'
+        'check:Validate template syntax'
+        'diff:Show differences vs generated'
+        'vars:List all template variables'
+        'filters:List available pipeline filters'
+        'arrays:Manage JSON/shell arrays'
+        'edit:Edit local variables file'
+        'link:Create symlinks from generated files'
+        'list:Show available templates'
+        'help:Show template help'
+    )
+
+    case $words[3] in
+        render|check|diff)
+            _arguments \
+                '--dry-run[Show what would be done]' \
+                '--force[Force re-render]' \
+                '--verbose[Show detailed output]' \
+                '*:template file:_files -g "*.tmpl"'
+            ;;
+        arrays)
+            _arguments \
+                '--export-json[Export shell arrays to JSON]' \
+                '--validate[Validate JSON arrays file]'
+            ;;
+        vars)
+            _arguments \
+                '--quiet[Minimal output]' \
+                '--json[Output as JSON]'
+            ;;
+        *)
+            _describe 'template command' subcmds
+            ;;
+    esac
+}
+
+# Subcommand: hook
+_dotfiles_hook() {
+    local -a subcmds
+    subcmds=(
+        'list:List registered hooks'
+        'run:Run a specific hook'
+        'add:Add a new hook'
+        'remove:Remove a hook'
+        'enable:Enable a hook'
+        'disable:Disable a hook'
+        'help:Show hook help'
+    )
+
+    local -a hook_points
+    hook_points=(
+        pre_install post_install pre_bootstrap post_bootstrap
+        pre_upgrade post_upgrade pre_vault_pull post_vault_pull
+        pre_vault_push post_vault_push pre_doctor post_doctor
+        doctor_check shell_init shell_exit directory_change
+        pre_setup_phase post_setup_phase setup_complete
+    )
+
+    case $words[3] in
+        run|add|remove|enable|disable)
+            _describe 'hook point' hook_points
+            ;;
+        list)
+            _arguments '--json[Output as JSON]'
+            ;;
+        *)
+            _describe 'hook command' subcmds
+            ;;
+    esac
+}
+
+# Subcommand: config
+_dotfiles_config() {
+    local -a subcmds
+    subcmds=(
+        'get:Get a config value'
+        'set:Set a config value'
+        'list:List all config values'
+        'layers:Show config with layer sources'
+        'edit:Edit config file'
+        'path:Show config file path'
+        'help:Show config help'
+    )
+
+    local -a config_keys
+    config_keys=(
+        'vault.backend' 'vault.auto_sync' 'vault.auto_backup'
+        'packages.tier' 'packages.auto_update'
+        'backup.enabled' 'backup.retention_days'
+        'paths.workspace_target' 'paths.dotfiles_dir'
+    )
+
+    case $words[3] in
+        get|set)
+            _describe 'config key' config_keys
+            ;;
+        *)
+            _describe 'config command' subcmds
+            ;;
+    esac
+}
+
+# Subcommand: backup
+_dotfiles_backup() {
+    local -a subcmds
+    subcmds=(
+        'create:Create a new backup'
+        'restore:Restore from backup'
+        'list:List available backups'
+        'clean:Remove old backups'
+        'help:Show backup help'
+    )
+
+    case $words[3] in
+        restore)
+            # Could complete from actual backup files
+            _arguments '*:backup:_files -g "*.tar.gz"'
+            ;;
+        create)
+            _arguments \
+                '--tag[Add a tag to backup]:tag:' \
+                '--dry-run[Show what would be backed up]'
+            ;;
+        clean)
+            _arguments '--keep[Number of backups to keep]:count:'
+            ;;
+        *)
+            _describe 'backup command' subcmds
+            ;;
+    esac
+}
+
+# Subcommand: doctor
+_dotfiles_doctor() {
+    _arguments \
+        '--fix[Auto-fix issues where possible]' \
+        '--json[Output as JSON]' \
+        '--verbose[Show detailed output]' \
+        '--help[Show help]'
+}
+
+# Subcommand: packages
+_dotfiles_packages() {
+    _arguments \
+        '--check[Check for missing packages]' \
+        '--install[Install missing packages]' \
+        '--outdated[Show outdated packages]' \
+        '--tier[Package tier]:tier:(minimal enhanced full)' \
+        '--help[Show help]'
+}
+
+# Subcommand: encrypt (age encryption)
+_dotfiles_encrypt() {
+    local -a subcmds
+    subcmds=(
+        'init:Initialize age encryption (generate keys)'
+        'encrypt:Encrypt a file'
+        'decrypt:Decrypt a file'
+        'edit:Decrypt, edit, re-encrypt a file'
+        'list:List encrypted files'
+        'status:Show encryption status'
+        'help:Show encryption help'
+    )
+
+    case $words[3] in
+        encrypt|decrypt|edit)
+            _files
+            ;;
+        *)
+            _describe 'encrypt command' subcmds
+            ;;
+    esac
+}
+
+# Main completion function
 _dotfiles() {
     local -a commands
     commands=(
         'status:Quick visual dashboard'
-        's:Quick visual dashboard (alias)'
-        'doctor:Run comprehensive health check'
-        'health:Run comprehensive health check (alias)'
-        'drift:Compare local files vs Bitwarden vault'
-        'diff:Preview changes before sync/restore'
-        'backup:Backup current configuration'
-        'vault:Bitwarden vault operations'
-        'upgrade:Pull latest and run bootstrap'
-        'update:Pull latest and run bootstrap (alias)'
-        'init:Initialize dotfiles on new machine'
-        'uninstall:Remove dotfiles configuration'
-        'cd:Change to dotfiles directory'
-        'edit:Open dotfiles in editor'
+        'setup:Interactive setup wizard'
+        'doctor:Run health checks'
+        'features:Feature registry management'
+        'config:Configuration management'
+        'vault:Vault operations'
+        'template:Template management'
+        'hook:Hook management'
+        'backup:Backup operations'
+        'packages:Package management'
+        'sync:Sync with git remote'
+        'drift:Check for configuration drift'
+        'diff:Preview changes'
+        'lint:Lint configuration files'
+        'encrypt:Age encryption operations'
+        'migrate:Migration utilities'
+        'uninstall:Remove dotfiles'
         'help:Show help'
     )
 
+    # Feature-aware filtering (optional - comment out if too slow)
+    # if type feature_enabled &>/dev/null; then
+    #     feature_enabled vault 2>/dev/null || commands=("${commands[@]:#vault:*}")
+    #     feature_enabled templates 2>/dev/null || commands=("${commands[@]:#template:*}")
+    #     feature_enabled hooks 2>/dev/null || commands=("${commands[@]:#hook:*}")
+    # fi
+
     case $words[2] in
-        doctor|health)
-            _arguments \
-                '--fix[Auto-fix permission issues]' \
-                '--help[Show help]'
+        features)   _dotfiles_features ;;
+        vault)      _dotfiles_vault ;;
+        template)   _dotfiles_template ;;
+        hook)       _dotfiles_hook ;;
+        config)     _dotfiles_config ;;
+        backup)     _dotfiles_backup ;;
+        doctor)     _dotfiles_doctor ;;
+        packages)   _dotfiles_packages ;;
+        encrypt)    _dotfiles_encrypt ;;
+        status|s)
+            _arguments '--json[Output as JSON]'
             ;;
-        vault)
-            _dotfiles_vault
-            ;;
-        backup)
+        setup)
             _arguments \
-                'restore:Restore from backup' \
-                '--list[List available backups]'
+                '--skip-packages[Skip package installation]' \
+                '--skip-vault[Skip vault setup]' \
+                '--non-interactive[Run non-interactively]'
+            ;;
+        sync)
+            _arguments \
+                '--pull[Pull from remote first]' \
+                '--push[Push to remote after]'
+            ;;
+        drift)
+            _arguments \
+                '--fix[Auto-fix drift]' \
+                '--verbose[Show details]'
             ;;
         diff)
             _arguments \
                 '--vault[Compare local vs vault]' \
-                '--restore[Show what restore would change]'
+                '--template[Compare template vs generated]'
+            ;;
+        migrate)
+            local -a migrate_cmds
+            migrate_cmds=(
+                'config:Migrate config format'
+                'vault-schema:Migrate vault schema'
+            )
+            _describe 'migrate command' migrate_cmds
+            ;;
+        help|-h|--help)
+            return 0
             ;;
         *)
             _describe 'command' commands
