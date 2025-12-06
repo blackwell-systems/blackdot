@@ -300,6 +300,7 @@ phase_workspace() {
     fi
 
     state_complete "workspace"
+    feature_enable "workspace_symlink"
     pass "Workspace configured: $final_target"
 }
 
@@ -714,6 +715,7 @@ phase_vault() {
     esac
 
     state_complete "vault"
+    feature_enable "vault"
     pass "Vault configured"
 }
 
@@ -921,6 +923,8 @@ phase_claude() {
     if command -v dotclaude &>/dev/null; then
         pass "dotclaude already installed"
         state_complete "claude"
+        feature_enable "claude_integration"
+        feature_enable "dotclaude"
         return 0
     fi
 
@@ -933,6 +937,8 @@ phase_claude() {
         if curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh | bash; then
             pass "dotclaude installed"
             state_complete "claude"
+            feature_enable "claude_integration"
+            feature_enable "dotclaude"
         else
             warn "dotclaude installation failed - continuing"
         fi
@@ -967,6 +973,7 @@ phase_template() {
         if "$DOTFILES_DIR/bin/dotfiles-template" init; then
             pass "Templates configured"
             state_complete "template"
+            feature_enable "templates"
             echo ""
             info "Run 'dotfiles template render' to generate configs from your templates"
         else
