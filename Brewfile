@@ -47,6 +47,7 @@ brew "lima"
 brew "powerlevel10k"
 brew "zsh-autosuggestions"
 brew "zsh-syntax-highlighting"
+brew "zsh-you-should-use"        # Alias reminder - helps learn your own aliases
 
 # Plumbing / libs / utils you already have or will likely want
 brew "gettext"
