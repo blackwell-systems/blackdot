@@ -337,11 +337,11 @@ Other integrations to evaluate:
 |------|------|---------|--------|
 | `ssh` | Config + agent | SSH config, keys, tunnels | See §11 |
 | `docker` | Aliases + networking | Container & network management | See §12 |
+| `uv` | Aliases + hooks | Python packages, venvs, auto-activation | See §13 |
 | `pyenv` | Lazy-load | Python version manager (~150ms startup) | |
 | `kubectl` | Completions + aliases | k8s context/namespace helpers | |
 | `terraform` | Completions + aliases | IaC workflows | |
 | `direnv` | Auto-load | Per-directory `.envrc` files | |
-| `uv` | Completions | Fast Python package manager | |
 | `gh` | Completions | GitHub CLI | |
 
 **Decision:** Add as individual features (e.g., `kubectl_integration`, `pyenv_integration`) following the pattern of `nvm_integration` and `sdkman_integration`.
@@ -575,6 +575,140 @@ app-network
 host
   └── monitoring      (host network)
 ```
+
+---
+
+### 13. UV Tools Integration
+
+**Status:** Planned
+
+Fast Python package manager, project manager, and Python version manager.
+
+**Feature:** `uv_tools` (integration category)
+**File:** `zsh/zsh.d/66-uv.zsh`
+
+**Package Aliases:**
+```bash
+uvi <pkg>             # uv pip install
+uviu <pkg>            # uv pip install --upgrade
+uva <pkg>             # uv add (to pyproject.toml)
+uvad <pkg>            # uv add --dev
+uvrm <pkg>            # uv remove
+uvs                   # uv sync
+uvl                   # uv lock
+```
+
+**Run Commands:**
+```bash
+uvr <script>          # uv run
+uvx <tool>            # uv tool run (like npx for Python)
+```
+
+**Virtual Environment:**
+```bash
+uvv [python]          # uv venv (optionally specify Python version)
+uvact                 # Activate .venv in current directory
+uvdeact               # Deactivate current venv
+```
+
+**Python Version Management:**
+```bash
+uvpy                  # uv python list (show installed)
+uvpy-install <ver>    # uv python install 3.12
+uvpy-rm <ver>         # uv python uninstall
+uvpy-pin <ver>        # uv python pin (set .python-version)
+```
+
+**Project Commands:**
+```bash
+uvinit [name]         # uv init (new project)
+uvbuild               # uv build
+uvpublish             # uv publish
+```
+
+**Tool Management:**
+```bash
+uvtool <name>         # uv tool install (global CLI tools)
+uvtools               # uv tool list
+uvtool-up <name>      # uv tool upgrade
+uvtool-rm <name>      # uv tool uninstall
+```
+
+**Utility Commands:**
+```bash
+uv-outdated           # Check for outdated dependencies
+uv-upgrade            # Upgrade all packages in project
+uvcache               # Show cache size and location
+uvclean               # uv cache clean
+```
+
+**Help Command:**
+```bash
+uvhelp                # Show all UV commands with styled help
+                      # Logo color: green (in venv) / yellow (uv installed) / red (not installed)
+```
+
+**Status Display:**
+- uv version
+- Active virtual environment (if any)
+- Python version in use
+- Project detection (pyproject.toml present)
+- Locked dependencies status
+
+**Tab Completions:**
+- `uva/uvrm`: Complete from pyproject.toml dependencies
+- `uvpy-install`: Complete from available Python versions
+- `uvtool/uvtool-rm`: Complete from installed tools
+- `uvr`: Complete from project scripts
+
+**UV Hooks (Auto-activation):**
+
+Automatic virtual environment management when navigating directories.
+
+```bash
+# Hook configuration in ~/.config/dotfiles/uv-hooks.json
+{
+  "auto_activate": true,
+  "auto_deactivate": true,
+  "create_if_missing": false,
+  "show_notifications": true
+}
+```
+
+**Directory Enter Hook** (`uv.dir_enter`):
+- Auto-activate `.venv` when entering directory with `pyproject.toml`
+- Optionally create venv if missing (`create_if_missing: true`)
+- Show notification: "Activated: myproject (.venv)"
+
+**Directory Leave Hook** (`uv.dir_leave`):
+- Auto-deactivate when leaving project directory
+- Only if the venv was auto-activated (not manually)
+
+**Post-sync Hook** (`uv.post_sync`):
+- Run custom commands after `uv sync`
+- Example: regenerate IDE stubs, update pre-commit
+
+**Post-add Hook** (`uv.post_add`):
+- Auto-run `uv lock` after `uv add`
+- Auto-run `uv sync` to install new dependency
+
+**Configuration file:** `~/.config/dotfiles/uv-hooks.json`
+```json
+{
+  "auto_activate": true,
+  "auto_deactivate": true,
+  "create_if_missing": false,
+  "post_sync": ["pre-commit install --install-hooks"],
+  "post_add": ["uv lock", "uv sync"],
+  "excluded_dirs": ["~/tmp", "~/Downloads"]
+}
+```
+
+**Integration with dotfiles hooks system:**
+- `uv.dir_enter` - triggered by chpwd hook
+- `uv.dir_leave` - triggered by chpwd hook
+- `uv.post_sync` - wraps `uv sync` command
+- `uv.post_add` - wraps `uv add` command
 
 ---
 
