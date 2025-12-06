@@ -30,6 +30,7 @@ typeset -gA FEATURE_REGISTRY=(
     ["vault"]="false|Multi-vault secret management (Bitwarden/1Password/pass)|optional|"
     ["templates"]="false|Machine-specific configuration templates|optional|"
     ["aws_helpers"]="true|AWS SSO profile management and helpers|optional|"
+    ["cdk_tools"]="true|AWS CDK aliases, helpers, and environment management|optional|aws_helpers"
     ["git_hooks"]="true|Git safety hooks (pre-commit, pre-push)|optional|"
     ["drift_check"]="env|Automatic drift detection on vault operations|optional|vault"
     ["backup_auto"]="false|Automatic backup before destructive operations|optional|"
@@ -415,9 +416,9 @@ feature_missing_deps() {
 
 typeset -gA FEATURE_PRESETS=(
     ["minimal"]="shell config_layers"
-    ["developer"]="shell vault aws_helpers git_hooks modern_cli config_layers"
+    ["developer"]="shell vault aws_helpers cdk_tools git_hooks modern_cli config_layers"
     ["claude"]="shell workspace_symlink claude_integration vault git_hooks modern_cli config_layers"
-    ["full"]="shell workspace_symlink claude_integration vault templates aws_helpers git_hooks drift_check backup_auto health_metrics config_layers modern_cli nvm_integration sdkman_integration"
+    ["full"]="shell workspace_symlink claude_integration vault templates aws_helpers cdk_tools git_hooks drift_check backup_auto health_metrics config_layers modern_cli nvm_integration sdkman_integration"
 )
 
 # Enable a preset
