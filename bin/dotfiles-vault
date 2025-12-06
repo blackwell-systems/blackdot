@@ -1,0 +1,455 @@
+#!/usr/bin/env zsh
+# ============================================================
+# FILE: bin/dotfiles-vault
+# Vault management CLI - unlock, status, validate, etc.
+# Usage:
+#   dotfiles vault unlock      # Unlock vault and cache session
+#   dotfiles vault status      # Check vault status
+#   dotfiles vault validate    # Validate vault-items.json schema
+#   dotfiles vault lock        # Clear cached session
+# ============================================================
+set -uo pipefail
+
+# Determine script location and source libraries
+SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+
+source "$DOTFILES_DIR/lib/_logging.sh"
+source "$DOTFILES_DIR/lib/_config.sh"
+source "$DOTFILES_DIR/lib/_vault.sh"
+
+# ============================================================
+# Usage
+# ============================================================
+usage() {
+    cat <<EOF
+Vault management - unlock, sync, restore, and more
+
+Usage: dotfiles vault <command> [OPTIONS]
+
+COMMANDS:
+    unlock      Unlock the vault and cache session
+    lock        Clear cached session (lock vault)
+    status      Full vault status with drift detection
+    quick       Quick status check (login/unlock only)
+
+    restore     Restore secrets from vault to local
+    push        Push local secrets to vault
+    sync        Bidirectional sync (detects direction)
+
+    list        List vault items
+    scan        Scan for local secrets to add to vault
+    check       Check required vault items exist
+
+    validate    Validate vault-items.json schema
+    backend     Show or set vault backend
+    init        Initialize vault setup
+
+OPTIONS:
+    --help, -h  Show this help
+
+EXAMPLES:
+    dotfiles vault unlock       # Unlock vault interactively
+    dotfiles vault status       # Full status with drift detection
+    dotfiles vault restore      # Pull secrets from vault
+    dotfiles vault push         # Push local secrets to vault
+    dotfiles vault list         # List items in vault
+EOF
+}
+
+# ============================================================
+# Commands
+# ============================================================
+
+cmd_unlock() {
+    local backend=$(config_get "vault.backend" "")
+
+    if [[ -z "$backend" || "$backend" == "none" ]]; then
+        warn "No vault backend configured"
+        info "Run 'dotfiles setup' to configure a vault backend"
+        return 1
+    fi
+
+    info "Vault backend: $backend"
+
+    # Load the backend
+    if ! vault_load_backend "$backend"; then
+        fail "Failed to load $backend backend"
+        return 1
+    fi
+
+    # Check if already unlocked
+    local session=""
+    session=$(vault_read_cached_session 2>/dev/null)
+
+    if [[ -n "$session" ]]; then
+        # Validate cached session
+        case "$backend" in
+            bitwarden)
+                if bw unlock --check --session "$session" &>/dev/null; then
+                    pass "Vault already unlocked"
+                    echo ""
+                    info "Session cached at: $VAULT_SESSION_FILE"
+                    return 0
+                fi
+                ;;
+            1password)
+                if op account get --session "$session" &>/dev/null; then
+                    pass "Vault already unlocked"
+                    return 0
+                fi
+                ;;
+        esac
+    fi
+
+    # Need to unlock
+    echo ""
+    info "Enter your master password to unlock:"
+    echo ""
+
+    case "$backend" in
+        bitwarden)
+            # Check login status first
+            if ! bw login --check &>/dev/null; then
+                warn "Not logged in to Bitwarden"
+                echo ""
+                echo -n "Log in now? [Y/n]: "
+                read response
+                if [[ "${response:-Y}" =~ ^[Yy]$ ]]; then
+                    bw login
+                else
+                    return 1
+                fi
+            fi
+
+            # Unlock with retry
+            local attempts=0
+            local max_attempts=5
+
+            while (( attempts < max_attempts )); do
+                ((attempts++))
+
+                if (( attempts > 1 )); then
+                    echo ""
+                    warn "Incorrect password. Attempt $attempts of $max_attempts"
+                fi
+
+                session=$(bw unlock --raw 2>/dev/null)
+
+                if [[ -n "$session" ]]; then
+                    # Cache the session
+                    vault_cache_session "$session"
+                    echo ""
+                    pass "Vault unlocked successfully"
+                    echo ""
+                    info "Session cached - subsequent commands will use this session"
+                    info "To use in current shell: export BW_SESSION=\"\$(cat $VAULT_SESSION_FILE)\""
+                    return 0
+                fi
+            done
+
+            fail "Failed to unlock vault after $max_attempts attempts"
+            return 1
+            ;;
+
+        1password)
+            # 1Password unlock
+            if ! command -v op &>/dev/null; then
+                fail "1Password CLI (op) not installed"
+                info "Install with: brew install --cask 1password-cli"
+                return 1
+            fi
+
+            session=$(op signin --raw 2>/dev/null)
+
+            if [[ -n "$session" ]]; then
+                vault_cache_session "$session"
+                pass "Vault unlocked successfully"
+                return 0
+            else
+                fail "Failed to unlock 1Password"
+                return 1
+            fi
+            ;;
+
+        pass)
+            # pass uses GPG - just verify it works
+            if ! command -v pass &>/dev/null; then
+                fail "pass not installed"
+                info "Install with: brew install pass"
+                return 1
+            fi
+
+            # Try to list entries (will prompt for GPG passphrase if needed)
+            if pass ls &>/dev/null; then
+                pass "Pass store accessible"
+                return 0
+            else
+                fail "Failed to access pass store"
+                return 1
+            fi
+            ;;
+
+        *)
+            fail "Unknown backend: $backend"
+            return 1
+            ;;
+    esac
+}
+
+cmd_lock() {
+    local backend=$(config_get "vault.backend" "")
+
+    # Clear cached session
+    if [[ -f "$VAULT_SESSION_FILE" ]]; then
+        rm -f "$VAULT_SESSION_FILE"
+        pass "Cleared cached session"
+    fi
+
+    # Backend-specific lock
+    case "$backend" in
+        bitwarden)
+            if bw lock &>/dev/null; then
+                pass "Bitwarden vault locked"
+            fi
+            ;;
+        1password)
+            if op signout &>/dev/null; then
+                pass "1Password signed out"
+            fi
+            ;;
+    esac
+
+    info "Vault locked"
+}
+
+# Quick status check (login/unlock only)
+cmd_quick() {
+    local backend=$(config_get "vault.backend" "")
+
+    echo "Vault Status"
+    echo "────────────"
+
+    # Backend info
+    if [[ -z "$backend" || "$backend" == "none" ]]; then
+        echo "  Backend:    Not configured"
+        echo ""
+        info "Run 'dotfiles setup' to configure a vault"
+        return 1
+    else
+        echo "  Backend:    $backend"
+    fi
+
+    # Load backend
+    if ! vault_load_backend "$backend" 2>/dev/null; then
+        echo "  Status:     Backend not available"
+        return 1
+    fi
+
+    # Check login/unlock status
+    case "$backend" in
+        bitwarden)
+            if ! command -v bw &>/dev/null; then
+                echo "  CLI:        Not installed"
+                echo ""
+                info "Install with: brew install bitwarden-cli"
+                return 1
+            fi
+
+            echo "  CLI:        $(bw --version 2>/dev/null || echo 'installed')"
+
+            if ! bw login --check &>/dev/null; then
+                echo "  Logged in:  No"
+                echo ""
+                info "Run: bw login"
+                return 1
+            fi
+            echo "  Logged in:  Yes"
+
+            # Check unlock status
+            local session=$(vault_read_cached_session 2>/dev/null)
+            if [[ -n "$session" ]] && bw unlock --check --session "$session" &>/dev/null; then
+                echo "  Unlocked:   Yes (session cached)"
+            elif bw unlock --check &>/dev/null 2>&1; then
+                echo "  Unlocked:   Yes"
+            else
+                echo "  Unlocked:   No"
+                echo ""
+                info "Run: dotfiles vault unlock"
+                return 1
+            fi
+            ;;
+
+        1password)
+            if ! command -v op &>/dev/null; then
+                echo "  CLI:        Not installed"
+                return 1
+            fi
+            echo "  CLI:        $(op --version 2>/dev/null)"
+
+            if op account get &>/dev/null; then
+                echo "  Status:     Signed in"
+            else
+                echo "  Status:     Not signed in"
+                info "Run: dotfiles vault unlock"
+                return 1
+            fi
+            ;;
+
+        pass)
+            if ! command -v pass &>/dev/null; then
+                echo "  CLI:        Not installed"
+                return 1
+            fi
+            echo "  CLI:        pass $(pass version 2>/dev/null | head -1 || echo 'installed')"
+
+            if pass ls &>/dev/null 2>&1; then
+                echo "  Status:     Accessible"
+            else
+                echo "  Status:     GPG key needed"
+            fi
+            ;;
+    esac
+
+    echo ""
+    pass "Vault is accessible"
+}
+
+# Full status with drift detection (delegates to vault/status.sh)
+cmd_status() {
+    exec "$DOTFILES_DIR/vault/status.sh" "$@"
+}
+
+cmd_validate() {
+    info "Validating vault configuration schema..."
+    echo ""
+
+    if vault_validate_schema; then
+        pass "Vault configuration is valid"
+        return 0
+    else
+        return 1
+    fi
+}
+
+cmd_backend() {
+    local new_backend="${1:-}"
+
+    if [[ -z "$new_backend" ]]; then
+        # Show current backend
+        local backend=$(config_get "vault.backend" "")
+        if [[ -z "$backend" || "$backend" == "none" ]]; then
+            echo "No vault backend configured"
+            echo ""
+            echo "Available backends:"
+            vault_list_backends
+        else
+            echo "Current backend: $backend"
+        fi
+    else
+        # Set new backend
+        local backends_dir="$DOTFILES_DIR/vault/backends"
+        if [[ ! -f "$backends_dir/${new_backend}.sh" ]]; then
+            fail "Unknown backend: $new_backend"
+            echo ""
+            echo "Available backends:"
+            vault_list_backends
+            return 1
+        fi
+
+        config_set "vault.backend" "$new_backend"
+        pass "Vault backend set to: $new_backend"
+    fi
+}
+
+# Delegate to existing vault scripts
+cmd_restore() {
+    exec "$DOTFILES_DIR/vault/restore.sh" "$@"
+}
+
+cmd_push() {
+    exec "$DOTFILES_DIR/vault/sync-to-vault.sh" "$@"
+}
+
+cmd_scan() {
+    exec "$DOTFILES_DIR/vault/discover-secrets.sh" "$@"
+}
+
+cmd_list() {
+    exec "$DOTFILES_DIR/vault/list-vault-items.sh" "$@"
+}
+
+cmd_check() {
+    exec "$DOTFILES_DIR/vault/check-vault-items.sh" "$@"
+}
+
+cmd_init() {
+    exec "$DOTFILES_DIR/vault/init-vault.sh" "$@"
+}
+
+cmd_sync() {
+    # Redirect to dotfiles sync which handles vault sync
+    exec "$DOTFILES_DIR/bin/dotfiles-sync" "$@"
+}
+
+# ============================================================
+# Main
+# ============================================================
+
+main() {
+    local cmd="${1:-}"
+    shift 2>/dev/null || true
+
+    case "$cmd" in
+        unlock)
+            cmd_unlock "$@"
+            ;;
+        lock)
+            cmd_lock "$@"
+            ;;
+        status)
+            cmd_status "$@"
+            ;;
+        quick)
+            cmd_quick "$@"
+            ;;
+        validate)
+            cmd_validate "$@"
+            ;;
+        backend)
+            cmd_backend "$@"
+            ;;
+        restore|pull)
+            cmd_restore "$@"
+            ;;
+        push)
+            cmd_push "$@"
+            ;;
+        list|ls)
+            cmd_list "$@"
+            ;;
+        check)
+            cmd_check "$@"
+            ;;
+        scan)
+            cmd_scan "$@"
+            ;;
+        init)
+            cmd_init "$@"
+            ;;
+        sync)
+            cmd_sync "$@"
+            ;;
+        --help|-h|help|"")
+            usage
+            ;;
+        *)
+            fail "Unknown command: $cmd"
+            echo ""
+            usage
+            return 1
+            ;;
+    esac
+}
+
+main "$@"
