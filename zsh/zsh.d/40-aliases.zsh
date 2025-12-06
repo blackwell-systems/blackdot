@@ -159,13 +159,13 @@ _dotfiles_help() {
     echo ""
 
     # Setup & Health (always visible)
-    echo "${BOLD}Setup & Health:${NC}"
-    echo "  setup             Interactive setup wizard (recommended)"
-    echo "  status, s         Quick visual dashboard"
-    echo "  doctor, health    Run comprehensive health check"
-    echo "  lint              Validate shell config syntax"
-    echo "  packages, pkg     Check/install Brewfile packages"
-    echo "  upgrade, update   Pull latest and run bootstrap"
+    echo "${BOLD}${CYAN}Setup & Health:${NC}"
+    echo "  ${YELLOW}setup${NC}             ${DIM}Interactive setup wizard (recommended)${NC}"
+    echo "  ${YELLOW}status${NC}, s         ${DIM}Quick visual dashboard${NC}"
+    echo "  ${YELLOW}doctor${NC}, health    ${DIM}Run comprehensive health check${NC}"
+    echo "  ${YELLOW}lint${NC}              ${DIM}Validate shell config syntax${NC}"
+    echo "  ${YELLOW}packages${NC}, pkg     ${DIM}Check/install Brewfile packages${NC}"
+    echo "  ${YELLOW}upgrade${NC}, update   ${DIM}Pull latest and run bootstrap${NC}"
     echo ""
 
     # Vault Operations (feature: vault)
@@ -178,16 +178,16 @@ _dotfiles_help() {
         if $show_all && type cli_feature_indicator &>/dev/null; then
             indicator=" $(cli_feature_indicator vault)"
         fi
-        echo "${BOLD}Vault Operations:${NC}${indicator}"
-        echo "  vault setup       Setup vault backend (first-time setup)"
-        echo "  vault pull        Pull secrets from vault"
-        echo "  vault push        Push secrets to vault"
-        echo "  vault sync        Bidirectional sync (smart direction)"
-        echo "  vault scan        Re-scan for new secrets"
-        echo "  vault list        List all vault items"
-        echo "  drift             Compare local files vs vault"
-        echo "  sync              Bidirectional vault sync (smart push/pull)"
-        echo "  diff              Preview changes before sync/restore"
+        echo "${BOLD}${CYAN}Vault Operations:${NC}${indicator}"
+        echo "  ${YELLOW}vault setup${NC}       ${DIM}Setup vault backend (first-time setup)${NC}"
+        echo "  ${YELLOW}vault pull${NC}        ${DIM}Pull secrets from vault${NC}"
+        echo "  ${YELLOW}vault push${NC}        ${DIM}Push secrets to vault${NC}"
+        echo "  ${YELLOW}vault sync${NC}        ${DIM}Bidirectional sync (smart direction)${NC}"
+        echo "  ${YELLOW}vault scan${NC}        ${DIM}Re-scan for new secrets${NC}"
+        echo "  ${YELLOW}vault list${NC}        ${DIM}List all vault items${NC}"
+        echo "  ${YELLOW}drift${NC}             ${DIM}Compare local files vs vault${NC}"
+        echo "  ${YELLOW}sync${NC}              ${DIM}Bidirectional vault sync (smart push/pull)${NC}"
+        echo "  ${YELLOW}diff${NC}              ${DIM}Preview changes before sync/restore${NC}"
         echo ""
     fi
 
@@ -201,20 +201,20 @@ _dotfiles_help() {
         if $show_all && type cli_feature_indicator &>/dev/null; then
             indicator=" $(cli_feature_indicator backup_auto)"
         fi
-        echo "${BOLD}Backup & Safety:${NC}${indicator}"
-        echo "  backup            Create backup of current config"
-        echo "  backup list       List all backups"
-        echo "  backup restore    Restore specific backup"
-        echo "  rollback          Instant rollback to last backup"
+        echo "${BOLD}${CYAN}Backup & Safety:${NC}${indicator}"
+        echo "  ${YELLOW}backup${NC}            ${DIM}Create backup of current config${NC}"
+        echo "  ${YELLOW}backup list${NC}       ${DIM}List all backups${NC}"
+        echo "  ${YELLOW}backup restore${NC}    ${DIM}Restore specific backup${NC}"
+        echo "  ${YELLOW}rollback${NC}          ${DIM}Instant rollback to last backup${NC}"
         echo ""
     fi
 
     # Feature Management (always visible)
-    echo "${BOLD}Feature Management:${NC}"
-    echo "  features          List all features and status"
-    echo "  features enable   Enable a feature"
-    echo "  features disable  Disable a feature"
-    echo "  features preset   Enable a preset (minimal/developer/claude/full)"
+    echo "${BOLD}${CYAN}Feature Management:${NC}"
+    echo "  ${YELLOW}features${NC}          ${DIM}List all features and status${NC}"
+    echo "  ${YELLOW}features enable${NC}   ${DIM}Enable a feature${NC}"
+    echo "  ${YELLOW}features disable${NC}  ${DIM}Disable a feature${NC}"
+    echo "  ${YELLOW}features preset${NC}   ${DIM}Enable a preset (minimal/developer/claude/full)${NC}"
     echo ""
 
     # Configuration (feature: config_layers)
@@ -227,11 +227,11 @@ _dotfiles_help() {
         if $show_all && type cli_feature_indicator &>/dev/null; then
             indicator=" $(cli_feature_indicator config_layers)"
         fi
-        echo "${BOLD}Configuration:${NC}${indicator}"
-        echo "  config get        Get config value (with layer resolution)"
-        echo "  config set        Set config value in specific layer"
-        echo "  config show       Show where a config value comes from"
-        echo "  config list       Show configuration layer status"
+        echo "${BOLD}${CYAN}Configuration:${NC}${indicator}"
+        echo "  ${YELLOW}config get${NC}        ${DIM}Get config value (with layer resolution)${NC}"
+        echo "  ${YELLOW}config set${NC}        ${DIM}Set config value in specific layer${NC}"
+        echo "  ${YELLOW}config show${NC}       ${DIM}Show where a config value comes from${NC}"
+        echo "  ${YELLOW}config list${NC}       ${DIM}Show configuration layer status${NC}"
         echo ""
     fi
 
@@ -245,8 +245,8 @@ _dotfiles_help() {
         if $show_all && type cli_feature_indicator &>/dev/null; then
             indicator=" $(cli_feature_indicator templates)"
         fi
-        echo "${BOLD}Templates:${NC}${indicator}"
-        echo "  template, tmpl    Machine-specific config templates"
+        echo "${BOLD}${CYAN}Templates:${NC}${indicator}"
+        echo "  ${YELLOW}template${NC}, tmpl    ${DIM}Machine-specific config templates${NC}"
         echo ""
     fi
 
@@ -261,8 +261,8 @@ _dotfiles_help() {
             if $show_all && type cli_feature_indicator &>/dev/null; then
                 indicator=" $(cli_feature_indicator macos_settings)"
             fi
-            echo "${BOLD}macOS Settings:${NC}${indicator}"
-            echo "  macos <cmd>       macOS system settings"
+            echo "${BOLD}${CYAN}macOS Settings:${NC}${indicator}"
+            echo "  ${YELLOW}macos${NC} <cmd>       ${DIM}macOS system settings${NC}"
             echo ""
         fi
     fi
@@ -277,18 +277,18 @@ _dotfiles_help() {
         if $show_all && type cli_feature_indicator &>/dev/null; then
             indicator=" $(cli_feature_indicator health_metrics)"
         fi
-        echo "${BOLD}Metrics:${NC}${indicator}"
-        echo "  metrics           Visualize health check metrics over time"
+        echo "${BOLD}${CYAN}Metrics:${NC}${indicator}"
+        echo "  ${YELLOW}metrics${NC}           ${DIM}Visualize health check metrics over time${NC}"
         echo ""
     fi
 
     # Other Commands (always visible)
-    echo "${BOLD}Other Commands:${NC}"
-    echo "  migrate           Migrate config to v3.0 (INI→JSON, vault v2→v3)"
-    echo "  uninstall         Remove dotfiles configuration"
-    echo "  cd                Change to dotfiles directory"
-    echo "  edit              Open dotfiles in editor"
-    echo "  help              Show this help"
+    echo "${BOLD}${CYAN}Other Commands:${NC}"
+    echo "  ${YELLOW}migrate${NC}           ${DIM}Migrate config to v3.0 (INI→JSON, vault v2→v3)${NC}"
+    echo "  ${YELLOW}uninstall${NC}         ${DIM}Remove dotfiles configuration${NC}"
+    echo "  ${YELLOW}cd${NC}                ${DIM}Change to dotfiles directory${NC}"
+    echo "  ${YELLOW}edit${NC}              ${DIM}Open dotfiles in editor${NC}"
+    echo "  ${YELLOW}help${NC}              ${DIM}Show this help${NC}"
     echo ""
 
     # Footer
@@ -387,22 +387,24 @@ dotfiles() {
                     "$DOTFILES_DIR/macos/discover-settings.sh" "$@"
                     ;;
                 help|--help|-h|"")
-                    echo "dotfiles macos - macOS system settings"
                     echo ""
-                    echo "Usage: dotfiles macos <command>"
+                    echo -e "${BOLD}${CYAN}dotfiles macos${NC} - ${DIM}macOS system settings${NC}"
                     echo ""
-                    echo "Commands:"
-                    echo "  apply       Apply settings from settings.sh"
-                    echo "  preview     Show settings that would be applied (dry-run)"
-                    echo "  discover    Discover/capture current macOS settings"
+                    echo -e "${BOLD}Usage:${NC} dotfiles macos <command>"
                     echo ""
-                    echo "Examples:"
-                    echo "  dotfiles macos preview    # See what would change"
-                    echo "  dotfiles macos apply      # Apply settings"
+                    echo -e "${BOLD}${CYAN}Commands:${NC}"
+                    echo -e "  ${YELLOW}apply${NC}       ${DIM}Apply settings from settings.sh${NC}"
+                    echo -e "  ${YELLOW}preview${NC}     ${DIM}Show settings that would be applied (dry-run)${NC}"
+                    echo -e "  ${YELLOW}discover${NC}    ${DIM}Discover/capture current macOS settings${NC}"
+                    echo ""
+                    echo -e "${BOLD}Examples:${NC}"
+                    echo -e "  dotfiles macos preview    ${DIM}# See what would change${NC}"
+                    echo -e "  dotfiles macos apply      ${DIM}# Apply settings${NC}"
+                    echo ""
                     ;;
                 *)
-                    echo "Unknown macos command: $subcmd"
-                    echo "Run 'dotfiles macos help' for usage"
+                    echo -e "${RED}Unknown macos command:${NC} $subcmd"
+                    echo -e "Run ${CYAN}dotfiles macos help${NC} for usage"
                     return 1
                     ;;
             esac
@@ -742,8 +744,8 @@ dotfiles() {
             _dotfiles_help "$@"
             ;;
         *)
-            echo "Unknown command: $cmd"
-            echo "Run 'dotfiles help' for usage"
+            echo -e "${RED}Unknown command:${NC} $cmd"
+            echo -e "Run ${CYAN}dotfiles help${NC} for usage"
             return 1
             ;;
     esac
