@@ -25,16 +25,19 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --help|-h)
-            echo "Compare local configuration files against vault"
             echo ""
-            echo "Usage: dotfiles drift [OPTIONS]"
+            echo -e "${BOLD}dotfiles drift${NC} - ${DIM}Compare local configuration files against vault${NC}"
             echo ""
-            echo "Options:"
-            echo "  --quick, -q   Fast check against cached state (no vault access)"
-            echo "  --help, -h    Show this help"
+            echo -e "${BOLD}${CYAN}USAGE${NC}"
+            echo -e "  ${YELLOW}dotfiles drift${NC}          ${DIM}Full check (connects to vault)${NC}"
+            echo -e "  ${YELLOW}dotfiles drift${NC} --quick  ${DIM}Fast check against cached state${NC}"
             echo ""
-            echo "Quick mode compares local files against the last vault pull."
-            echo "Full mode connects to vault and compares current vault contents."
+            echo -e "${BOLD}${CYAN}OPTIONS${NC}"
+            echo -e "  ${YELLOW}--quick${NC}, ${YELLOW}-q${NC}   ${DIM}Fast check against cached state (no vault access)${NC}"
+            echo -e "  ${YELLOW}--help${NC}, ${YELLOW}-h${NC}    ${DIM}Show this help${NC}"
+            echo ""
+            echo -e "${DIM}Quick mode compares local files against the last vault pull.${NC}"
+            echo -e "${DIM}Full mode connects to vault and compares current vault contents.${NC}"
             exit 0
             ;;
         *)

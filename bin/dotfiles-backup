@@ -270,23 +270,24 @@ case "${1:-}" in
         show_config
         ;;
     --help|-h|help)
-        echo "dotfiles backup - Backup and restore configuration"
         echo ""
-        echo "Usage:"
-        echo "  dotfiles backup              Create new backup"
-        echo "  dotfiles backup --list       List available backups"
-        echo "  dotfiles backup restore      Restore from latest backup"
-        echo "  dotfiles backup restore ID   Restore specific backup"
-        echo "  dotfiles backup --config     Show current configuration"
+        echo -e "${BOLD}dotfiles backup${NC} - ${DIM}Backup and restore configuration${NC}"
         echo ""
-        echo "Configuration (in ~/.config/dotfiles/config.json):"
-        echo "  backup.enabled        Enable backup system (default: true)"
-        echo "  backup.max_snapshots  Max backups to keep (default: 10)"
-        echo "  backup.retention_days Days to keep backups (default: 30)"
-        echo "  backup.compress       Use gzip compression (default: true)"
-        echo "  backup.location       Backup directory"
+        echo -e "${BOLD}${CYAN}USAGE${NC}"
+        echo -e "  ${YELLOW}dotfiles backup${NC}              ${DIM}Create new backup${NC}"
+        echo -e "  ${YELLOW}dotfiles backup${NC} --list       ${DIM}List available backups${NC}"
+        echo -e "  ${YELLOW}dotfiles backup${NC} restore      ${DIM}Restore from latest backup${NC}"
+        echo -e "  ${YELLOW}dotfiles backup${NC} restore ID   ${DIM}Restore specific backup${NC}"
+        echo -e "  ${YELLOW}dotfiles backup${NC} --config     ${DIM}Show current configuration${NC}"
         echo ""
-        echo "Current settings:"
+        echo -e "${BOLD}${CYAN}CONFIGURATION${NC} ${DIM}(~/.config/dotfiles/config.json)${NC}"
+        echo -e "  ${YELLOW}backup.enabled${NC}        ${DIM}Enable backup system (default: true)${NC}"
+        echo -e "  ${YELLOW}backup.max_snapshots${NC}  ${DIM}Max backups to keep (default: 10)${NC}"
+        echo -e "  ${YELLOW}backup.retention_days${NC} ${DIM}Days to keep backups (default: 30)${NC}"
+        echo -e "  ${YELLOW}backup.compress${NC}       ${DIM}Use gzip compression (default: true)${NC}"
+        echo -e "  ${YELLOW}backup.location${NC}       ${DIM}Backup directory${NC}"
+        echo ""
+        echo -e "${BOLD}Current Settings${NC}"
         show_config
         ;;
     -*)

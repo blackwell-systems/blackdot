@@ -37,20 +37,19 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --help|-h)
-            cat <<EOF
-dotfiles lint - Validate shell configuration syntax
-
-Usage:
-    dotfiles lint            Check all configs
-    dotfiles lint --fix      Auto-fix what's possible
-    dotfiles lint --verbose  Show detailed output
-
-Checks:
-    - ZSH syntax in zsh/zsh.d/*.zsh
-    - Bash syntax in bootstrap/*.sh, vault/*.sh
-    - Shellcheck warnings (if installed)
-
-EOF
+            echo ""
+            echo -e "${BOLD}dotfiles lint${NC} - ${DIM}Validate shell configuration syntax${NC}"
+            echo ""
+            echo -e "${BOLD}${CYAN}USAGE${NC}"
+            echo -e "  ${YELLOW}dotfiles lint${NC}            ${DIM}Check all configs${NC}"
+            echo -e "  ${YELLOW}dotfiles lint${NC} --fix      ${DIM}Auto-fix what's possible${NC}"
+            echo -e "  ${YELLOW}dotfiles lint${NC} --verbose  ${DIM}Show detailed output${NC}"
+            echo ""
+            echo -e "${BOLD}${CYAN}CHECKS${NC}"
+            echo -e "  ${DIM}•${NC} ZSH syntax in ${CYAN}zsh/zsh.d/*.zsh${NC}"
+            echo -e "  ${DIM}•${NC} Bash syntax in ${CYAN}bootstrap/*.sh${NC}, ${CYAN}vault/*.sh${NC}"
+            echo -e "  ${DIM}•${NC} Shellcheck warnings ${DIM}(if installed)${NC}"
+            echo ""
             exit 0
             ;;
         *)
