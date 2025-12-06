@@ -1127,6 +1127,480 @@ docker() {
 
 ---
 
+### 18. Age Encryption for Non-Vault Secrets
+
+**Status:** Planned (Priority 1)
+
+Native file encryption using `age` for secrets not managed by vault backends.
+
+**Problem:**
+- Vault backends only manage vault items
+- Arbitrary files with secrets can't be encrypted
+- Files not in vault = unencrypted in repo
+- chezmoi has this, we don't
+
+**Feature:** `encryption` (optional category)
+**File:** `lib/_encryption.sh`
+
+**Commands:**
+```bash
+dotfiles encrypt <file>           # Encrypt file with age
+dotfiles decrypt <file>           # Decrypt file
+dotfiles encrypt-edit <file>      # Decrypt, edit, re-encrypt
+dotfiles encrypt-list             # List encrypted files
+dotfiles encrypt-init             # Generate age key pair
+```
+
+**How it works:**
+```bash
+# Initialize (one-time)
+dotfiles encrypt-init
+# Creates ~/.config/dotfiles/age-key.txt (private key, mode 600)
+# Creates ~/.config/dotfiles/age-recipients.txt (public keys)
+
+# Encrypt a file
+dotfiles encrypt templates/_variables.local.sh
+# Creates templates/_variables.local.sh.age
+# Original deleted (or moved to .gitignore)
+
+# Decrypt (on this machine or any with the private key)
+dotfiles decrypt templates/_variables.local.sh.age
+```
+
+**Key Management:**
+- Private key stored locally OR synced via vault backend
+- Multiple recipients (public keys) for team sharing
+- Key stored in Bitwarden/1Password as "Age-Private-Key" item
+
+**Integration:**
+```bash
+# Auto-decrypt before template rendering
+dotfiles template render          # Decrypts .age files first
+
+# Auto-decrypt on vault pull (if key is in vault)
+dotfiles vault pull               # Includes age key restoration
+```
+
+**Files encrypted by default (suggestions):**
+- `templates/_variables.local.sh` → contains emails, signing keys
+- `templates/_arrays.local.json` → may contain hostnames/IPs
+- Any file matching `*.secret`, `*.private`, `*credentials*`
+
+---
+
+### 19. Shell Completions
+
+**Status:** Planned (Priority 1)
+
+Tab completion for `dotfiles` command and all subcommands.
+
+**Problem:**
+- `dotfiles <TAB>` does nothing
+- Users must remember subcommand names
+- chezmoi has completions, we don't
+
+**Files:**
+- `zsh/completions/_dotfiles` - ZSH completion script
+- `bash/completions/dotfiles` - Bash completion script
+
+**Completion Support:**
+```bash
+dotfiles <TAB>
+# Shows: backup config doctor drift features hook ...
+
+dotfiles features <TAB>
+# Shows: enable disable list preset status
+
+dotfiles features enable <TAB>
+# Shows: vault templates hooks aws_helpers cdk_tools ...
+
+dotfiles features preset <TAB>
+# Shows: minimal developer claude full
+
+dotfiles vault <TAB>
+# Shows: init login logout status sync get list push pull
+
+dotfiles template <TAB>
+# Shows: init render vars arrays validate diff link
+```
+
+**Dynamic Completions:**
+- `features enable/disable` - complete from available features
+- `vault get` - complete from vault item names
+- `hook run` - complete from registered hook points
+- `config get/set` - complete from config keys
+
+**Installation:**
+```bash
+# ZSH (automatic if fpath includes zsh/completions)
+# Bash
+source $DOTFILES_DIR/bash/completions/dotfiles
+
+# Or via package manager integration
+brew install dotfiles --with-completions  # future
+```
+
+**Implementation:**
+```zsh
+#compdef dotfiles
+
+_dotfiles() {
+    local -a commands
+    commands=(
+        'backup:Backup and restore operations'
+        'config:Configuration management'
+        'doctor:Health checks and repairs'
+        'features:Feature registry management'
+        'hook:Hook management'
+        'setup:Interactive setup wizard'
+        'status:Show system status'
+        'sync:Sync with remote'
+        'template:Template operations'
+        'vault:Vault operations'
+    )
+
+    # Filter by enabled features
+    if ! feature_enabled vault 2>/dev/null; then
+        commands=("${commands[@]:#vault:*}")
+    fi
+    # ... etc
+
+    _describe 'command' commands
+}
+```
+
+---
+
+### 20. Feature Registry Improvements
+
+**Status:** Planned (Priority 1)
+
+Add circular dependency detection and conflict prevention.
+
+**Problem:**
+- Circular dependencies could cause infinite loops
+- No warning when feature A depends on B depends on A
+- No conflict detection (mutually exclusive features)
+
+**Circular Dependency Detection:**
+```bash
+# In lib/_features.sh, add to dependency resolution:
+
+_detect_circular_deps() {
+    local feature="$1"
+    local -a visited=("${@:2}")
+
+    # Check if already in visit path = cycle
+    if [[ " ${visited[*]} " == *" $feature "* ]]; then
+        fail "Circular dependency detected: ${visited[*]} → $feature"
+        return 1
+    fi
+
+    # Add to path and check deps
+    visited+=("$feature")
+    local deps="${FEATURE_DEPS[$feature]:-}"
+    for dep in ${(s:,:)deps}; do
+        _detect_circular_deps "$dep" "${visited[@]}" || return 1
+    done
+}
+```
+
+**Conflict Detection:**
+```bash
+# New array for mutual exclusions
+declare -A FEATURE_CONFLICTS=(
+    [pass_vault]="bitwarden_vault,onepassword_vault"
+    [bitwarden_vault]="pass_vault,onepassword_vault"
+    # etc
+)
+
+# Check before enabling
+feature_enable() {
+    local feature="$1"
+    local conflicts="${FEATURE_CONFLICTS[$feature]:-}"
+    for conflict in ${(s:,:)conflicts}; do
+        if feature_enabled "$conflict"; then
+            fail "Cannot enable '$feature': conflicts with enabled feature '$conflict'"
+            return 1
+        fi
+    done
+    # ... proceed with enable
+}
+```
+
+**Validation Command:**
+```bash
+dotfiles features validate        # Check for cycles and conflicts
+dotfiles features graph           # Show dependency graph (ASCII art)
+```
+
+---
+
+### 21. Progress Indicators
+
+**Status:** Planned (Priority 2)
+
+Visual progress feedback for long-running operations.
+
+**Problem:**
+- `dotfiles packages --install` shows nothing during brew install
+- `dotfiles vault sync` gives no feedback during long syncs
+- Users don't know if operation is stuck or working
+
+**Implementation Options:**
+
+**Option A: Spinner**
+```bash
+# lib/_progress.sh
+
+spinner() {
+    local pid=$1
+    local msg="${2:-Working}"
+    local spin='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    local i=0
+
+    while kill -0 "$pid" 2>/dev/null; do
+        printf "\r${CYAN}${spin:$i:1}${NC} %s..." "$msg"
+        i=$(( (i + 1) % ${#spin} ))
+        sleep 0.1
+    done
+    printf "\r"
+}
+
+# Usage
+some_long_command &
+spinner $! "Installing packages"
+```
+
+**Option B: Progress bar (for countable operations)**
+```bash
+progress_bar() {
+    local current=$1
+    local total=$2
+    local width=40
+    local percent=$((current * 100 / total))
+    local filled=$((current * width / total))
+    local empty=$((width - filled))
+
+    printf "\r[%s%s] %3d%%" \
+        "$(printf '█%.0s' $(seq 1 $filled))" \
+        "$(printf '░%.0s' $(seq 1 $empty))" \
+        "$percent"
+}
+
+# Usage
+for i in {1..50}; do
+    progress_bar $i 50
+    do_something
+done
+```
+
+**Commands to enhance:**
+| Command | Progress Type |
+|---------|---------------|
+| `dotfiles packages --install` | Spinner + item count |
+| `dotfiles vault sync` | Spinner |
+| `dotfiles vault pull` | Progress bar (N items) |
+| `dotfiles backup create` | Spinner + size |
+| `dotfiles template render` | Progress bar (N templates) |
+
+**Configuration:**
+```json
+{
+  "ui": {
+    "progress": true,
+    "colors": true,
+    "unicode": true
+  }
+}
+```
+
+---
+
+### 22. Config Schema Validation
+
+**Status:** Planned (Priority 2)
+
+Validate config.json structure with helpful error messages.
+
+**Problem:**
+- Typos in config keys silently ignored
+- Wrong types cause cryptic failures
+- No documentation of valid keys/values
+
+**Schema Definition:**
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "version": { "type": "integer", "minimum": 3 },
+    "vault": {
+      "type": "object",
+      "properties": {
+        "backend": { "enum": ["bitwarden", "1password", "pass", null] },
+        "auto_sync": { "type": "boolean" },
+        "auto_backup": { "type": "boolean" }
+      }
+    },
+    "packages": {
+      "type": "object",
+      "properties": {
+        "tier": { "enum": ["minimal", "enhanced", "full"] }
+      }
+    },
+    "features": {
+      "type": "object",
+      "additionalProperties": { "type": "boolean" }
+    }
+  }
+}
+```
+
+**Validation Command:**
+```bash
+dotfiles config validate
+# ✓ Config is valid
+
+dotfiles config validate
+# ✗ Invalid config:
+#   - .vault.backend: "bitwarden_cli" is not valid (expected: bitwarden, 1password, pass)
+#   - .packages.tier: "medium" is not valid (expected: minimal, enhanced, full)
+#   - .features.valt: unknown feature (did you mean: vault?)
+```
+
+**Implementation:**
+```bash
+# Using ajv-cli or jq-based validation
+config_validate() {
+    local config="${1:-$CONFIG_FILE}"
+    local schema="$DOTFILES_DIR/lib/config-schema.json"
+
+    if command -v ajv >/dev/null 2>&1; then
+        ajv validate -s "$schema" -d "$config"
+    else
+        # Fallback: basic jq-based checks
+        _validate_with_jq "$config"
+    fi
+}
+```
+
+**Auto-validation:**
+- Run on `dotfiles config set` (before saving)
+- Run on `dotfiles doctor` (health check)
+- Optional: run on shell init (warn only)
+
+---
+
+### 23. Aliases Command
+
+**Status:** Planned (Priority 2)
+
+Dedicated command to list and search aliases, grouped by category.
+
+**Problem:**
+- Built-in `alias` command shows raw list
+- No grouping or categorization
+- Hard to discover aliases for specific tools
+- `zsh-you-should-use` helps learn, but need discovery too
+
+**Command:**
+```bash
+dotfiles aliases                  # List all aliases by category
+dotfiles aliases aws              # Show AWS-related aliases
+dotfiles aliases search <term>    # Search aliases by name or expansion
+dotfiles aliases --raw            # Plain list (for scripting)
+```
+
+**Output Format:**
+```bash
+$ dotfiles aliases
+
+AWS (8 aliases)
+  awsprofiles     List AWS profiles
+  awsswitch       Switch AWS profile (fzf)
+  awswho          Show current identity
+  awslogin        SSO login
+  ...
+
+CDK (12 aliases)
+  cdkd            cdk deploy
+  cdks            cdk synth
+  cdkdf           cdk diff
+  ...
+
+Rust (15 aliases)
+  cb              cargo build
+  cbr             cargo build --release
+  ct              cargo test
+  ...
+
+Go (12 aliases)
+  gob             go build
+  got             go test
+  gomod           go mod tidy
+  ...
+
+Git (8 aliases)
+  gst             git status
+  gco             git checkout
+  ...
+
+Docker (10 aliases)
+  dps             docker ps
+  dsh             Shell into container
+  ...
+
+General (5 aliases)
+  ll              eza -la
+  ...
+
+Total: 70 aliases
+```
+
+**Implementation:**
+```bash
+# bin/dotfiles-aliases
+
+show_aliases() {
+    local category="${1:-all}"
+
+    # Source category definitions
+    local -A ALIAS_CATEGORIES=(
+        [aws]="awsprofiles|awsswitch|awswho|awslogin|awsset|awsunset"
+        [cdk]="cdk*"
+        [rust]="cb|cbr|ct|cc|cf|cw*|cargo-*"
+        [go]="gob|got|gom*|gocover|goinit"
+        [docker]="dps|dsh|dex|dl*|drm|dc*|dnet*"
+        [git]="gst|gco|gcm|gaa|gp|gl"
+    )
+
+    # Get aliases and group
+    alias | while read line; do
+        # Parse and categorize
+        ...
+    done
+}
+```
+
+**Search Feature:**
+```bash
+$ dotfiles aliases search build
+  cb       cargo build
+  cbr      cargo build --release
+  gob      go build
+  dcb      docker compose build
+```
+
+**Integration with zsh-you-should-use:**
+```bash
+$ dotfiles aliases --ysu-stats
+# Shows which aliases you use most/least
+# Based on zsh-you-should-use reminder frequency
+```
+
+---
+
 ## Design Decisions
 
 ### Path Convention: `~/workspace/dotfiles`
