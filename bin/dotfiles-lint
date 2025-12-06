@@ -14,24 +14,9 @@
 # ============================================================
 set -uo pipefail
 
-# Find dotfiles directory using paths helper
-SCRIPT_DIR="$(cd "$(dirname "${0:A}")" && pwd)"
-if [[ -f "$(dirname "$SCRIPT_DIR")/lib/_paths.sh" ]]; then
-    source "$(dirname "$SCRIPT_DIR")/lib/_paths.sh"
-    DOTFILES_DIR="${DOTFILES_DIR:-$(get_dotfiles_dir 2>/dev/null || echo "")}"
-fi
-
-# Fallback if helper not available
-if [[ -z "${DOTFILES_DIR:-}" || ! -d "${DOTFILES_DIR:-}" ]]; then
-    if [[ -d "/workspace/dotfiles" ]]; then
-        DOTFILES_DIR="/workspace/dotfiles"
-    elif [[ -d "$HOME/workspace/dotfiles" ]]; then
-        DOTFILES_DIR="$HOME/workspace/dotfiles"
-    else
-        echo "Error: Could not find dotfiles directory"
-        exit 1
-    fi
-fi
+# Find dotfiles directory (same pattern as other bin/ scripts)
+SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Source logging functions
 source "$DOTFILES_DIR/lib/_logging.sh"
@@ -116,26 +101,43 @@ if [[ -f "$DOTFILES_DIR/zsh/zshrc" ]]; then
 fi
 
 # ============================================================
-# Bash Syntax Check
+# Shell Script Syntax Check (respects shebang)
 # ============================================================
 info "Checking Bash syntax..."
 
-BASH_FILES=(
+SHELL_FILES=(
     "$DOTFILES_DIR"/bootstrap/*.sh
     "$DOTFILES_DIR"/vault/*.sh
     "$DOTFILES_DIR"/lib/*.sh
 )
 
-for file in "${BASH_FILES[@]}"; do
+for file in "${SHELL_FILES[@]}"; do
     if [[ -f "$file" ]]; then
         ((CHECKED++))
-        if bash -n "$file" 2>/dev/null; then
-            $VERBOSE && pass "  $(basename "$file")"
+        # Check shebang to determine shell type
+        shebang=$(head -1 "$file" 2>/dev/null || echo "")
+
+        if [[ "$shebang" == *"zsh"* ]]; then
+            # ZSH file
+            if zsh -n "$file" 2>/dev/null; then
+                $VERBOSE && pass "  $(basename "$file") (zsh)"
+            else
+                fail "  $(basename "$file") - syntax error"
+                ((ERRORS++))
+                if $VERBOSE; then
+                    zsh -n "$file" 2>&1 | sed 's/^/    /'
+                fi
+            fi
         else
-            fail "  $(basename "$file") - syntax error"
-            ((ERRORS++))
-            if $VERBOSE; then
-                bash -n "$file" 2>&1 | sed 's/^/    /'
+            # Assume bash
+            if bash -n "$file" 2>/dev/null; then
+                $VERBOSE && pass "  $(basename "$file")"
+            else
+                fail "  $(basename "$file") - syntax error"
+                ((ERRORS++))
+                if $VERBOSE; then
+                    bash -n "$file" 2>&1 | sed 's/^/    /'
+                fi
             fi
         fi
     fi
