@@ -276,27 +276,63 @@ modules/
 
 ### 7. Hook System
 
-**Status:** Not Started
+**Status:** Complete (v3.0)
 
-Allow users to inject behavior at key lifecycle points:
-
-```bash
-# Hook points
-HOOK_POINTS=(
-    "pre_install" "post_install"
-    "pre_bootstrap" "post_bootstrap"
-    "pre_vault_pull" "post_vault_pull"
-    "pre_doctor" "post_doctor"
-    "shell_init" "shell_exit"
-)
-
-# User registration (~/.config/dotfiles/hooks.zsh)
-hook_register "post_vault_pull" "my_custom_function"
-```
+See [Hooks Documentation](hooks.md) for full details.
 
 ---
 
-### 8. Lazy Loading for Heavy Modules
+### 8. CDK Integration
+
+**Status:** Not Started
+
+Add AWS CDK shell integration for infrastructure-as-code workflows:
+
+**Aliases:**
+```bash
+alias cdkd='cdk deploy'
+alias cdks='cdk synth'
+alias cdkdf='cdk diff'
+alias cdkw='cdk watch'
+alias cdkls='cdk list'
+alias cdkdst='cdk destroy'
+```
+
+**Helper Functions:**
+```bash
+cdkall()    # Deploy all stacks
+cdkcheck()  # Diff then prompt to deploy
+cdkout()    # Show CloudFormation stack outputs
+cdk-env()   # Set CDK_DEFAULT_ACCOUNT/REGION from AWS profile
+```
+
+**Completions:**
+- `cdk completion` generates shell completions
+
+**Integration:** Pairs with existing `aws_helpers` feature.
+
+---
+
+### 9. Additional Tool Integrations
+
+**Status:** Consideration
+
+Other integrations to evaluate:
+
+| Tool | Type | Benefit |
+|------|------|---------|
+| `pyenv` | Lazy-load | Python version manager (~150ms startup) |
+| `kubectl` | Completions + aliases | k8s context/namespace helpers |
+| `direnv` | Auto-load | Per-directory `.envrc` files |
+| `uv` | Completions | Fast Python package manager |
+| `terraform` | Completions + aliases | IaC workflows |
+| `gh` | Completions | GitHub CLI |
+
+**Decision:** Add as individual features (e.g., `kubectl_integration`, `pyenv_integration`) following the pattern of `nvm_integration` and `sdkman_integration`.
+
+---
+
+### 10. Lazy Loading for Heavy Modules
 
 **Status:** Not Started
 
