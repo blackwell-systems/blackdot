@@ -114,16 +114,24 @@ awsclear() {
 
 # Show all AWS commands with banner
 awstools() {
+  # Colors
+  local green='\033[0;32m'
+  local red='\033[0;31m'
+  local yellow='\033[0;33m'
+  local cyan='\033[0;36m'
+  local bold='\033[1m'
+  local dim='\033[2m'
+  local nc='\033[0m'
+
   # Check auth status first to determine logo color
-  local logo_color
+  local logo_color is_authenticated
   if aws sts get-caller-identity &>/dev/null; then
-    logo_color='\033[0;32m'  # Green - authenticated
-    local is_authenticated=true
+    logo_color="$green"
+    is_authenticated=true
   else
-    logo_color='\033[0;31m'  # Red - not authenticated
-    local is_authenticated=false
+    logo_color="$red"
+    is_authenticated=false
   fi
-  local nc='\033[0m'  # No color
 
   echo ""
   echo -e "${logo_color}   █████╗ ██╗    ██╗███████╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗${nc}"
@@ -134,32 +142,40 @@ awstools() {
   echo -e "${logo_color}  ╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝       ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝${nc}"
   echo ""
 
-  echo "  ╭─────────────────────────────────────────────────────────────────╮"
-  echo "  │                    PROFILE MANAGEMENT                          │"
-  echo "  ├─────────────────────────────────────────────────────────────────┤"
-  echo "  │  awsprofiles        List all profiles (* = active)             │"
-  echo "  │  awsswitch          Fuzzy-select profile (fzf) + auto-login    │"
-  echo "  │  awsset <profile>   Set AWS_PROFILE for this shell             │"
-  echo "  │  awsunset           Clear AWS_PROFILE                          │"
-  echo "  ├─────────────────────────────────────────────────────────────────┤"
-  echo "  │                    AUTHENTICATION                              │"
-  echo "  ├─────────────────────────────────────────────────────────────────┤"
-  echo "  │  awslogin [profile] SSO login (defaults to current profile)    │"
-  echo "  │  awswho             Show current identity (account/user/ARN)   │"
-  echo "  ├─────────────────────────────────────────────────────────────────┤"
-  echo "  │                    ROLE ASSUMPTION                             │"
-  echo "  ├─────────────────────────────────────────────────────────────────┤"
-  echo "  │  awsassume <arn>    Assume role for cross-account access       │"
-  echo "  │  awsclear           Clear temporary assumed-role credentials   │"
-  echo "  ╰─────────────────────────────────────────────────────────────────╯"
+  # Profile Management
+  echo -e "  ${dim}╭─────────────────────────────────────────────────────────────────╮${nc}"
+  echo -e "  ${dim}│${nc}  ${bold}${cyan}PROFILE MANAGEMENT${nc}                                          ${dim}│${nc}"
+  echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
+  echo -e "  ${dim}│${nc}  ${yellow}awsprofiles${nc}        ${dim}List all profiles (* = active)${nc}             ${dim}│${nc}"
+  echo -e "  ${dim}│${nc}  ${yellow}awsswitch${nc}          ${dim}Fuzzy-select profile (fzf) + auto-login${nc}    ${dim}│${nc}"
+  echo -e "  ${dim}│${nc}  ${yellow}awsset${nc} <profile>   ${dim}Set AWS_PROFILE for this shell${nc}             ${dim}│${nc}"
+  echo -e "  ${dim}│${nc}  ${yellow}awsunset${nc}           ${dim}Clear AWS_PROFILE${nc}                          ${dim}│${nc}"
+  echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
+  echo -e "  ${dim}│${nc}  ${bold}${cyan}AUTHENTICATION${nc}                                              ${dim}│${nc}"
+  echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
+  echo -e "  ${dim}│${nc}  ${yellow}awslogin${nc} [profile] ${dim}SSO login (defaults to current profile)${nc}    ${dim}│${nc}"
+  echo -e "  ${dim}│${nc}  ${yellow}awswho${nc}             ${dim}Show current identity (account/user/ARN)${nc}   ${dim}│${nc}"
+  echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
+  echo -e "  ${dim}│${nc}  ${bold}${cyan}ROLE ASSUMPTION${nc}                                             ${dim}│${nc}"
+  echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
+  echo -e "  ${dim}│${nc}  ${yellow}awsassume${nc} <arn>    ${dim}Assume role for cross-account access${nc}       ${dim}│${nc}"
+  echo -e "  ${dim}│${nc}  ${yellow}awsclear${nc}           ${dim}Clear temporary assumed-role credentials${nc}   ${dim}│${nc}"
+  echo -e "  ${dim}╰─────────────────────────────────────────────────────────────────╯${nc}"
   echo ""
-  echo "  Current status:"
-  local profile="${AWS_PROFILE:-<not set>}"
-  echo "    AWS_PROFILE = $profile"
-  if [[ "$is_authenticated" == "true" ]]; then
-    echo -e "    Session     = \033[0;32m✓ authenticated\033[0m"
+
+  # Current Status
+  echo -e "  ${bold}Current Status${nc}"
+  echo -e "  ${dim}───────────────────────────────────────${nc}"
+  local profile="${AWS_PROFILE:-}"
+  if [[ -n "$profile" ]]; then
+    echo -e "    ${dim}Profile${nc}   ${cyan}$profile${nc}"
   else
-    echo -e "    Session     = \033[0;31m✗ not authenticated\033[0m (run awslogin)"
+    echo -e "    ${dim}Profile${nc}   ${dim}<not set>${nc}"
+  fi
+  if [[ "$is_authenticated" == "true" ]]; then
+    echo -e "    ${dim}Session${nc}   ${green}✓ authenticated${nc}"
+  else
+    echo -e "    ${dim}Session${nc}   ${red}✗ not authenticated${nc} ${dim}(run awslogin)${nc}"
   fi
   echo ""
 }
