@@ -22,39 +22,43 @@ source "$DOTFILES_DIR/lib/_vault.sh"
 # Usage
 # ============================================================
 usage() {
-    cat <<EOF
-Vault management - unlock, sync, restore, and more
-
-Usage: dotfiles vault <command> [OPTIONS]
-
-COMMANDS:
-    unlock      Unlock the vault and cache session
-    lock        Clear cached session (lock vault)
-    status      Full vault status with drift detection
-    quick       Quick status check (login/unlock only)
-
-    restore     Restore secrets from vault to local
-    push        Push local secrets to vault
-    sync        Bidirectional sync (detects direction)
-
-    list        List vault items
-    scan        Scan for local secrets to add to vault
-    check       Check required vault items exist
-
-    validate    Validate vault-items.json schema
-    backend     Show or set vault backend
-    init        Initialize vault setup
-
-OPTIONS:
-    --help, -h  Show this help
-
-EXAMPLES:
-    dotfiles vault unlock       # Unlock vault interactively
-    dotfiles vault status       # Full status with drift detection
-    dotfiles vault restore      # Pull secrets from vault
-    dotfiles vault push         # Push local secrets to vault
-    dotfiles vault list         # List items in vault
-EOF
+    echo ""
+    echo -e "${BOLD}dotfiles vault${NC} - ${DIM}Vault management - unlock, sync, restore, and more${NC}"
+    echo ""
+    echo -e "${BOLD}${CYAN}USAGE${NC}"
+    echo -e "  ${YELLOW}dotfiles vault${NC} <command> [OPTIONS]"
+    echo ""
+    echo -e "${BOLD}${CYAN}SESSION${NC}"
+    echo -e "  ${YELLOW}unlock${NC}      ${DIM}Unlock the vault and cache session${NC}"
+    echo -e "  ${YELLOW}lock${NC}        ${DIM}Clear cached session (lock vault)${NC}"
+    echo -e "  ${YELLOW}status${NC}      ${DIM}Full vault status with drift detection${NC}"
+    echo -e "  ${YELLOW}quick${NC}       ${DIM}Quick status check (login/unlock only)${NC}"
+    echo ""
+    echo -e "${BOLD}${CYAN}SYNC${NC}"
+    echo -e "  ${YELLOW}restore${NC}     ${DIM}Restore secrets from vault to local${NC}"
+    echo -e "  ${YELLOW}push${NC}        ${DIM}Push local secrets to vault${NC}"
+    echo -e "  ${YELLOW}sync${NC}        ${DIM}Bidirectional sync (detects direction)${NC}"
+    echo ""
+    echo -e "${BOLD}${CYAN}ITEMS${NC}"
+    echo -e "  ${YELLOW}list${NC}        ${DIM}List vault items${NC}"
+    echo -e "  ${YELLOW}scan${NC}        ${DIM}Scan for local secrets to add to vault${NC}"
+    echo -e "  ${YELLOW}check${NC}       ${DIM}Check required vault items exist${NC}"
+    echo ""
+    echo -e "${BOLD}${CYAN}CONFIG${NC}"
+    echo -e "  ${YELLOW}validate${NC}    ${DIM}Validate vault-items.json schema${NC}"
+    echo -e "  ${YELLOW}backend${NC}     ${DIM}Show or set vault backend${NC}"
+    echo -e "  ${YELLOW}init${NC}        ${DIM}Initialize vault setup${NC}"
+    echo ""
+    echo -e "${BOLD}${CYAN}OPTIONS${NC}"
+    echo -e "  ${YELLOW}--help${NC}, ${YELLOW}-h${NC}  ${DIM}Show this help${NC}"
+    echo ""
+    echo -e "${BOLD}${CYAN}EXAMPLES${NC}"
+    echo -e "  ${YELLOW}dotfiles vault unlock${NC}       ${DIM}# Unlock vault interactively${NC}"
+    echo -e "  ${YELLOW}dotfiles vault status${NC}       ${DIM}# Full status with drift detection${NC}"
+    echo -e "  ${YELLOW}dotfiles vault restore${NC}      ${DIM}# Pull secrets from vault${NC}"
+    echo -e "  ${YELLOW}dotfiles vault push${NC}         ${DIM}# Push local secrets to vault${NC}"
+    echo -e "  ${YELLOW}dotfiles vault list${NC}         ${DIM}# List items in vault${NC}"
+    echo ""
 }
 
 # ============================================================
