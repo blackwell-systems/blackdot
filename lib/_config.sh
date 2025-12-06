@@ -119,7 +119,8 @@ config_get_array() {
     [[ -f "$CONFIG_FILE" ]] || init_config
 
     # Get array as newline-separated values
-    jq -r ".$key[]? // empty" "$CONFIG_FILE" 2>/dev/null
+    # Note: Use ${key} not $key to prevent zsh from interpreting [] as array subscript
+    jq -r ".${key}[]? // empty" "$CONFIG_FILE" 2>/dev/null
 }
 
 # ============================================================
