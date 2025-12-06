@@ -114,16 +114,25 @@ awsclear() {
 
 # Show all AWS commands with banner
 awstools() {
-  cat << 'EOF'
+  # Check auth status first to determine logo color
+  local logo_color
+  if aws sts get-caller-identity &>/dev/null; then
+    logo_color='\033[0;32m'  # Green - authenticated
+    local is_authenticated=true
+  else
+    logo_color='\033[0;31m'  # Red - not authenticated
+    local is_authenticated=false
+  fi
+  local nc='\033[0m'  # No color
 
-   █████╗ ██╗    ██╗███████╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗
-  ██╔══██╗██║    ██║██╔════╝    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝
-  ███████║██║ █╗ ██║███████╗       ██║   ██║   ██║██║   ██║██║     ███████╗
-  ██╔══██║██║███╗██║╚════██║       ██║   ██║   ██║██║   ██║██║     ╚════██║
-  ██║  ██║╚███╔███╔╝███████║       ██║   ╚██████╔╝╚██████╔╝███████╗███████║
-  ╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝       ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
-
-EOF
+  echo ""
+  echo -e "${logo_color}   █████╗ ██╗    ██╗███████╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗${nc}"
+  echo -e "${logo_color}  ██╔══██╗██║    ██║██╔════╝    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝${nc}"
+  echo -e "${logo_color}  ███████║██║ █╗ ██║███████╗       ██║   ██║   ██║██║   ██║██║     ███████╗${nc}"
+  echo -e "${logo_color}  ██╔══██║██║███╗██║╚════██║       ██║   ██║   ██║██║   ██║██║     ╚════██║${nc}"
+  echo -e "${logo_color}  ██║  ██║╚███╔███╔╝███████║       ██║   ╚██████╔╝╚██████╔╝███████╗███████║${nc}"
+  echo -e "${logo_color}  ╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝       ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝${nc}"
+  echo ""
 
   echo "  ╭─────────────────────────────────────────────────────────────────╮"
   echo "  │                    PROFILE MANAGEMENT                          │"
@@ -147,10 +156,10 @@ EOF
   echo "  Current status:"
   local profile="${AWS_PROFILE:-<not set>}"
   echo "    AWS_PROFILE = $profile"
-  if aws sts get-caller-identity &>/dev/null; then
-    echo "    Session     = ✓ authenticated"
+  if [[ "$is_authenticated" == "true" ]]; then
+    echo -e "    Session     = \033[0;32m✓ authenticated\033[0m"
   else
-    echo "    Session     = ✗ not authenticated (run awslogin)"
+    echo -e "    Session     = \033[0;31m✗ not authenticated\033[0m (run awslogin)"
   fi
   echo ""
 }
