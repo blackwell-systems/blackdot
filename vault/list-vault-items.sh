@@ -28,7 +28,7 @@ echo "========================================"
 echo ""
 
 # Get all items
-ALL_ITEMS=$(bw list items --session "$SESSION" 2>/dev/null)
+ALL_ITEMS=$(BW_SESSION="$SESSION" bw list items 2>/dev/null)
 
 echo -e "${CYAN}=== Expected Dotfiles Items ===${NC}"
 echo ""
