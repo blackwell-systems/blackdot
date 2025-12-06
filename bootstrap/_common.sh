@@ -130,6 +130,33 @@ run_interactive_config() {
             export SKIP_CLAUDE_SETUP=true
         fi
 
+        # Package tier selection (if not already set via env var)
+        if [[ -z "${BREWFILE_TIER:-}" ]]; then
+            echo ""
+            echo -e "${CYAN}Which package tier would you like?${NC}"
+            echo ""
+            echo "  1) minimal    ~18 packages  (~2 min)   # Essentials only"
+            echo "  2) enhanced   ~43 packages  (~5 min)   # Modern tools, no containers  <- RECOMMENDED"
+            echo "  3) full       ~61 packages  (~10 min)  # Everything (Docker, etc.)"
+            echo ""
+            echo -en "${CYAN}Choice [1-3, default=2]: ${NC}"
+            read -r tier_choice
+            tier_choice=${tier_choice:-2}
+
+            case "$tier_choice" in
+                1)
+                    export BREWFILE_TIER="minimal"
+                    ;;
+                3)
+                    export BREWFILE_TIER="full"
+                    ;;
+                *)
+                    export BREWFILE_TIER="enhanced"
+                    ;;
+            esac
+            echo "Selected tier: $BREWFILE_TIER"
+        fi
+
         echo ""
     fi
 }

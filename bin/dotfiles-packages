@@ -7,8 +7,10 @@
 #   dotfiles packages --check      # Show what's missing
 #   dotfiles packages --install    # Install missing packages
 #   dotfiles packages --outdated   # Show outdated packages
+#   dotfiles packages --tier X     # Use specific tier (minimal/enhanced/full)
 #
 # Compares installed Homebrew packages against Brewfile
+# Respects saved tier preference from config.json
 # ============================================================
 set -uo pipefail
 
@@ -34,10 +36,16 @@ fi
 # Source logging functions
 source "$DOTFILES_DIR/lib/_logging.sh"
 
+# Source config for tier preference
+if [[ -f "$DOTFILES_DIR/lib/_config.sh" ]]; then
+    source "$DOTFILES_DIR/lib/_config.sh"
+fi
+
 # Flags
 CHECK_MODE=false
 INSTALL_MODE=false
 OUTDATED_MODE=false
+TIER_OVERRIDE=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -54,6 +62,15 @@ while [[ $# -gt 0 ]]; do
             OUTDATED_MODE=true
             shift
             ;;
+        --tier|-t)
+            if [[ -n "${2:-}" ]]; then
+                TIER_OVERRIDE="$2"
+                shift 2
+            else
+                fail "--tier requires an argument (minimal/enhanced/full)"
+                exit 1
+            fi
+            ;;
         --help|-h)
             echo ""
             echo -e "${BOLD}dotfiles packages${NC} - ${DIM}Package discovery and management${NC}"
@@ -63,11 +80,19 @@ while [[ $# -gt 0 ]]; do
             echo -e "  ${YELLOW}dotfiles packages${NC} --check      ${DIM}Show what's missing from Brewfile${NC}"
             echo -e "  ${YELLOW}dotfiles packages${NC} --install    ${DIM}Install missing packages${NC}"
             echo -e "  ${YELLOW}dotfiles packages${NC} --outdated   ${DIM}Show outdated packages${NC}"
+            echo -e "  ${YELLOW}dotfiles packages${NC} --tier X     ${DIM}Use specific tier (minimal/enhanced/full)${NC}"
+            echo ""
+            echo -e "${BOLD}${CYAN}TIERS${NC}"
+            echo -e "  ${YELLOW}minimal${NC}     ${DIM}~18 packages  - Essentials only${NC}"
+            echo -e "  ${YELLOW}enhanced${NC}    ${DIM}~43 packages  - Modern tools, no containers${NC}"
+            echo -e "  ${YELLOW}full${NC}        ${DIM}~61 packages  - Everything (Docker, etc.)${NC}"
             echo ""
             echo -e "${BOLD}${CYAN}EXAMPLES${NC}"
-            echo -e "  ${YELLOW}dotfiles packages --check${NC}      ${DIM}# See what needs installing${NC}"
-            echo -e "  ${YELLOW}dotfiles packages --install${NC}    ${DIM}# Install everything from Brewfile${NC}"
+            echo -e "  ${YELLOW}dotfiles packages --check${NC}              ${DIM}# See what needs installing${NC}"
+            echo -e "  ${YELLOW}dotfiles packages --install${NC}            ${DIM}# Install from saved tier${NC}"
+            echo -e "  ${YELLOW}dotfiles packages --install --tier minimal${NC}  ${DIM}# Install minimal tier${NC}"
             echo ""
+            echo -e "${DIM}Tier preference is saved during 'dotfiles setup' and persisted in config.json${NC}"
             exit 0
             ;;
         *)
@@ -84,16 +109,70 @@ if ! command -v brew &>/dev/null; then
     exit 1
 fi
 
-BREWFILE="$DOTFILES_DIR/Brewfile"
+# ============================================================
+# Determine which Brewfile to use
+# Priority: --tier flag > config.json > BREWFILE_TIER env > default (full)
+# ============================================================
+get_brewfile_tier() {
+    # 1. Command line override
+    if [[ -n "$TIER_OVERRIDE" ]]; then
+        echo "$TIER_OVERRIDE"
+        return
+    fi
 
+    # 2. Config file (from dotfiles setup)
+    if type config_get &>/dev/null; then
+        local saved_tier
+        saved_tier=$(config_get "packages.tier" "" 2>/dev/null)
+        if [[ -n "$saved_tier" ]]; then
+            echo "$saved_tier"
+            return
+        fi
+    fi
+
+    # 3. Environment variable
+    if [[ -n "${BREWFILE_TIER:-}" ]]; then
+        echo "$BREWFILE_TIER"
+        return
+    fi
+
+    # 4. Default
+    echo "full"
+}
+
+TIER=$(get_brewfile_tier)
+
+# Map tier to Brewfile
+case "$TIER" in
+    minimal)
+        BREWFILE="$DOTFILES_DIR/Brewfile.minimal"
+        ;;
+    enhanced)
+        BREWFILE="$DOTFILES_DIR/Brewfile.enhanced"
+        ;;
+    full|*)
+        BREWFILE="$DOTFILES_DIR/Brewfile"
+        TIER="full"  # Normalize unknown tiers to full
+        ;;
+esac
+
+# Check Brewfile exists
 if [[ ! -f "$BREWFILE" ]]; then
-    fail "Brewfile not found at $BREWFILE"
-    exit 1
+    # Fall back to main Brewfile if tier-specific doesn't exist
+    if [[ -f "$DOTFILES_DIR/Brewfile" ]]; then
+        warn "Brewfile for '$TIER' tier not found, using full Brewfile"
+        BREWFILE="$DOTFILES_DIR/Brewfile"
+        TIER="full"
+    else
+        fail "No Brewfile found at $BREWFILE"
+        exit 1
+    fi
 fi
 
 echo ""
 echo -e "${BOLD}Dotfiles Package Manager${NC}"
 echo "========================"
+echo -e "${DIM}Tier: $TIER ($(basename "$BREWFILE"))${NC}"
 echo ""
 
 # ============================================================
@@ -117,7 +196,7 @@ fi
 # ============================================================
 # Check/Install Mode
 # ============================================================
-info "Analyzing Brewfile..."
+info "Analyzing Brewfile ($TIER tier)..."
 
 # Get lists
 BREWFILE_FORMULAS=()
@@ -160,7 +239,7 @@ done
 # ============================================================
 if $CHECK_MODE || [[ ${#MISSING_FORMULAS[@]} -gt 0 || ${#MISSING_CASKS[@]} -gt 0 ]]; then
     echo ""
-    echo -e "${BOLD}Brewfile Summary:${NC}"
+    echo -e "${BOLD}Brewfile Summary ($TIER):${NC}"
     echo "  Formulas defined: ${#BREWFILE_FORMULAS[@]}"
     echo "  Casks defined: ${#BREWFILE_CASKS[@]}"
     echo ""
@@ -191,11 +270,11 @@ fi
 # ============================================================
 if $INSTALL_MODE; then
     if [[ ${#MISSING_FORMULAS[@]} -eq 0 && ${#MISSING_CASKS[@]} -eq 0 ]]; then
-        pass "All Brewfile packages are installed"
+        pass "All Brewfile packages are installed ($TIER tier)"
         exit 0
     fi
 
-    info "Installing missing packages..."
+    info "Installing missing packages from $TIER tier..."
     echo ""
 
     # Use brew bundle for proper installation
@@ -204,7 +283,7 @@ if $INSTALL_MODE; then
     else
         brew bundle install --file="$BREWFILE"
         if [[ $? -eq 0 ]]; then
-            pass "Packages installed successfully"
+            pass "Packages installed successfully ($TIER tier)"
         else
             fail "Some packages failed to install"
             exit 1
@@ -217,13 +296,15 @@ fi
 # Default: Summary
 # ============================================================
 if [[ ${#MISSING_FORMULAS[@]} -eq 0 && ${#MISSING_CASKS[@]} -eq 0 ]]; then
-    pass "All Brewfile packages are installed"
+    pass "All Brewfile packages are installed ($TIER tier)"
 else
     total_missing=$((${#MISSING_FORMULAS[@]} + ${#MISSING_CASKS[@]}))
-    warn "$total_missing package(s) missing"
+    warn "$total_missing package(s) missing from $TIER tier"
     echo ""
     echo "Run 'dotfiles packages --check' for details"
     echo "Run 'dotfiles packages --install' to install"
+    echo ""
+    echo -e "${DIM}Change tier with: dotfiles packages --tier minimal|enhanced|full${NC}"
 fi
 
 # ============================================================
