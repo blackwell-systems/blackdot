@@ -84,7 +84,7 @@ if $LIST_MODE; then
     echo ""
     echo "=== All Items in Vault ==="
     echo ""
-    bw list items --session "$SESSION" 2>/dev/null | jq -r '.[] | "\(.name) (\(.type | if . == 1 then "Login" elif . == 2 then "Secure Note" elif . == 3 then "Card" else "Other" end))"' | sort
+    BW_SESSION="$SESSION" bw list items 2>/dev/null | jq -r '.[] | "\(.name) (\(.type | if . == 1 then "Login" elif . == 2 then "Secure Note" elif . == 3 then "Card" else "Other" end))"' | sort
     echo ""
     exit 0
 fi
@@ -183,7 +183,7 @@ delete_item() {
     fi
 
     # Perform deletion
-    if bw delete item "$item_id" --session "$SESSION" >/dev/null 2>&1; then
+    if BW_SESSION="$SESSION" bw delete item "$item_id" >/dev/null 2>&1; then
         pass "Deleted '$item_name'"
         ((DELETED++))
     else

@@ -86,7 +86,7 @@ cmd_unlock() {
         # Validate cached session
         case "$backend" in
             bitwarden)
-                if bw unlock --check --session "$session" </dev/null &>/dev/null; then
+                if BW_SESSION="$session" bw unlock --check </dev/null &>/dev/null; then
                     pass "Vault already unlocked"
                     echo ""
                     info "Session cached at: $VAULT_SESSION_FILE"
@@ -289,9 +289,9 @@ cmd_quick() {
             # Check unlock status
             local session=""
             session=$(vault_read_cached_session 2>/dev/null) || session=""
-            if [[ -n "$session" ]] && bw unlock --check --session "$session" &>/dev/null; then
+            if [[ -n "$session" ]] && BW_SESSION="$session" bw unlock --check </dev/null &>/dev/null; then
                 echo "  Unlocked:   Yes (session cached)"
-            elif bw unlock --check &>/dev/null 2>&1; then
+            elif bw unlock --check </dev/null &>/dev/null 2>&1; then
                 echo "  Unlocked:   Yes"
             else
                 echo "  Unlocked:   No"
