@@ -128,7 +128,7 @@ cmd_unlock() {
             local password=""
 
             while (( attempts < max_attempts )); do
-                ((attempts++))
+                ((++attempts))
 
                 if (( attempts > 1 )); then
                     echo ""
