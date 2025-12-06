@@ -24,6 +24,7 @@
 |-------|-------------|
 | [Architecture](architecture.md) | Framework systems & design |
 | [Feature Registry](features.md) | Control plane for all features |
+| [Developer Tools](developer-tools.md) | AWS, CDK, Rust, Go, NVM, SDKMAN integrations |
 | [Hook System](hooks.md) | Lifecycle hooks for custom behavior |
 | [CLI Reference](cli-reference.md) | All commands, flags & environment variables |
 | [Full Documentation](README-FULL.md) | Complete 1,900+ line guide |
@@ -268,6 +269,7 @@ See [Full Documentation](README-FULL.md) for complete project structure and deta
 ## Next Steps
 
 - **[Full Documentation](README-FULL.md)** – Complete guide with all details
+- **[Developer Tools](developer-tools.md)** – AWS, CDK, Rust, Go integrations & 70+ aliases
 - **[Claude Code + dotclaude](claude-code.md)** – Portable sessions, profiles & safety hooks
 - **[Template System](templates.md)** – Configure per-machine settings
 - **[Troubleshooting](troubleshooting.md)** – Solutions to common issues
