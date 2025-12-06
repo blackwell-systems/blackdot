@@ -196,53 +196,51 @@ cmd_edit() {
 # ============================================================
 
 show_help() {
-    cat <<EOF
-${BOLD}dotfiles config${NC} - Configuration layers management
-
-${BOLD}USAGE${NC}
-    dotfiles config <command> [options]
-
-${BOLD}COMMANDS${NC}
-    ${CYAN}get${NC} <key> [default]       Get config value (with layer resolution)
-    ${CYAN}set${NC} <layer> <key> <value> Set config value in specific layer
-    ${CYAN}show${NC} <key>                Show value from all layers
-    ${CYAN}source${NC} <key> [default]    Get value with source information (JSON)
-    ${CYAN}list${NC}                      Show layer locations and status
-    ${CYAN}merged${NC}                    Show merged config from all layers
-    ${CYAN}init${NC} <layer> [id]         Initialize a config layer
-    ${CYAN}edit${NC} [layer]              Edit config file (default: user)
-
-${BOLD}LAYERS${NC} (in priority order)
-    ${YELLOW}env${NC}        Environment variables (DOTFILES_*)
-    ${YELLOW}project${NC}    Project-specific (.dotfiles.json)
-    ${YELLOW}machine${NC}    Machine-specific (~/.config/dotfiles/machine.json)
-    ${YELLOW}user${NC}       User preferences (~/.config/dotfiles/config.json)
-
-${BOLD}EXAMPLES${NC}
-    ${DIM}# Get a config value${NC}
-    dotfiles config get vault.backend bitwarden
-
-    ${DIM}# Set user preference${NC}
-    dotfiles config set user vault.backend 1password
-
-    ${DIM}# See where a value comes from${NC}
-    dotfiles config show vault.backend
-
-    ${DIM}# Override with environment variable${NC}
-    export DOTFILES_VAULT_BACKEND=pass
-    dotfiles config get vault.backend
-
-    ${DIM}# Initialize machine-specific config${NC}
-    dotfiles config init machine work-macbook
-
-    ${DIM}# Create project config${NC}
-    cd ~/projects/myapp
-    dotfiles config init project
-
-${BOLD}CONFIG KEY FORMAT${NC}
-    Keys use dot notation: vault.backend, features.debug, shell.theme
-    Environment variables: DOTFILES_VAULT_BACKEND, DOTFILES_FEATURES_DEBUG
-EOF
+    echo -e "${BOLD}dotfiles config${NC} - Configuration layers management"
+    echo ""
+    echo -e "${BOLD}USAGE${NC}"
+    echo "    dotfiles config <command> [options]"
+    echo ""
+    echo -e "${BOLD}COMMANDS${NC}"
+    echo -e "    ${CYAN}get${NC} <key> [default]       Get config value (with layer resolution)"
+    echo -e "    ${CYAN}set${NC} <layer> <key> <value> Set config value in specific layer"
+    echo -e "    ${CYAN}show${NC} <key>                Show value from all layers"
+    echo -e "    ${CYAN}source${NC} <key> [default]    Get value with source information (JSON)"
+    echo -e "    ${CYAN}list${NC}                      Show layer locations and status"
+    echo -e "    ${CYAN}merged${NC}                    Show merged config from all layers"
+    echo -e "    ${CYAN}init${NC} <layer> [id]         Initialize a config layer"
+    echo -e "    ${CYAN}edit${NC} [layer]              Edit config file (default: user)"
+    echo ""
+    echo -e "${BOLD}LAYERS${NC} (in priority order)"
+    echo -e "    ${YELLOW}env${NC}        Environment variables (DOTFILES_*)"
+    echo -e "    ${YELLOW}project${NC}    Project-specific (.dotfiles.json)"
+    echo -e "    ${YELLOW}machine${NC}    Machine-specific (~/.config/dotfiles/machine.json)"
+    echo -e "    ${YELLOW}user${NC}       User preferences (~/.config/dotfiles/config.json)"
+    echo ""
+    echo -e "${BOLD}EXAMPLES${NC}"
+    echo -e "    ${DIM}# Get a config value${NC}"
+    echo "    dotfiles config get vault.backend bitwarden"
+    echo ""
+    echo -e "    ${DIM}# Set user preference${NC}"
+    echo "    dotfiles config set user vault.backend 1password"
+    echo ""
+    echo -e "    ${DIM}# See where a value comes from${NC}"
+    echo "    dotfiles config show vault.backend"
+    echo ""
+    echo -e "    ${DIM}# Override with environment variable${NC}"
+    echo "    export DOTFILES_VAULT_BACKEND=pass"
+    echo "    dotfiles config get vault.backend"
+    echo ""
+    echo -e "    ${DIM}# Initialize machine-specific config${NC}"
+    echo "    dotfiles config init machine work-macbook"
+    echo ""
+    echo -e "    ${DIM}# Create project config${NC}"
+    echo "    cd ~/projects/myapp"
+    echo "    dotfiles config init project"
+    echo ""
+    echo -e "${BOLD}CONFIG KEY FORMAT${NC}"
+    echo "    Keys use dot notation: vault.backend, features.debug, shell.theme"
+    echo "    Environment variables: DOTFILES_VAULT_BACKEND, DOTFILES_FEATURES_DEBUG"
 }
 
 # ============================================================
