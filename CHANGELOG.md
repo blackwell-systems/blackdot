@@ -7,7 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-*No unreleased changes yet. All changes are part of v3.0.0.*
+### Added
+- **`dotfiles vault` CLI** - Unified vault management command wrapping all vault operations
+  - `dotfiles vault unlock` - Unlock vault with clear password prompt (hidden input)
+  - `dotfiles vault lock` - Lock vault and clear cached session
+  - `dotfiles vault status` - Full status with drift detection
+  - `dotfiles vault quick` - Quick status check (login/unlock only)
+  - `dotfiles vault restore/pull` - Restore secrets from vault
+  - `dotfiles vault push` - Push local secrets to vault
+  - `dotfiles vault list` - List vault items
+  - `dotfiles vault scan` - Scan for local secrets
+  - Provides clearer UX than raw `bw` commands
+
+- **`vault_check_session()`** - Non-interactive session validation in `lib/_vault.sh`
+  - Checks for valid cached session without prompting for password
+  - Used by status commands to avoid hanging on password input
+  - Validates session based on backend (Bitwarden, 1Password, pass)
+
+- **Feature preset selection in setup wizard** - Choose feature presets during setup
+  - Offers minimal, developer, claude, and full presets at end of setup
+  - Persists selected features to config.json
+
+### Fixed
+- **`dotfiles vault status` hanging** - Status command no longer prompts for password
+  - Changed from `vault_get_session()` (interactive) to `vault_check_session()` (non-interactive)
+  - Shows "Vault locked" with unlock instructions instead of hanging
+
+- **Vault unlock password prompt invisible** - Now shows clear "Master password: " prompt
+  - Uses `read -s` for hidden input
+  - Shows retry count on incorrect password
+  - 1Password shows info about biometric/password auth
+
+- **Color escape codes showing raw** - Fixed across multiple commands
+  - `dotfiles config list` - Changed printf to echo -e
+  - `dotfiles config help` - Changed heredoc to echo -e statements
+  - `dotfiles hook help` - Changed heredoc to echo -e statements
+
+- **`dotfiles lint` path detection** - Fixed "Could not find dotfiles directory" error
+  - Simplified path detection to match other scripts
+  - Added shebang-aware syntax checking (zsh files use `zsh -n`, bash use `bash -n`)
+
+- **Features not persisting after setup** - Setup phases now enable and persist features
+  - Added `feature_persist()` calls for workspace, vault, claude, templates phases
+  - Features are now saved to config.json when setup completes
 
 ---
 
