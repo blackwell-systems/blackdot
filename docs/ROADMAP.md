@@ -815,6 +815,126 @@ dotfiles template diff-configs work.gitconfig personal.gitconfig
 
 ---
 
+### 15. Template-Vault Integration
+
+**Status:** Planned
+
+Store template variables in vault for cross-machine portability and backup.
+
+**Problem:**
+- `_variables.local.sh` is gitignored (good)
+- But it's only stored locally (bad)
+- Lost if machine dies, not synced across machines
+- Contains sensitive data (emails, signing keys, tokens)
+
+**Solution:** Vault as the source of truth for template variables.
+
+**Vault Item Structure:**
+```json
+{
+  "name": "dotfiles-template-vars",
+  "type": "secureNote",
+  "notes": {
+    "git_name": "John Smith",
+    "git_email": "john@acme.com",
+    "git_signing_key": "ABC123DEF456",
+    "github_user": "johnsmith",
+    "machine_type": "work",
+    "aws_profile_default": "company-sso"
+  }
+}
+```
+
+**Commands:**
+```bash
+dotfiles template vault push          # Push _variables.local.sh to vault
+dotfiles template vault pull          # Pull from vault to _variables.local.sh
+dotfiles template vault sync          # Bidirectional sync with conflict detection
+dotfiles template vault diff          # Show differences between local and vault
+```
+
+**Workflow Options:**
+
+**Option A: Manual sync (explicit)**
+```bash
+# After editing variables locally
+dotfiles template vault push
+
+# On new machine
+dotfiles template vault pull
+dotfiles template render
+dotfiles template link
+```
+
+**Option B: Auto-sync (transparent)**
+```bash
+# Template render automatically pulls latest from vault
+dotfiles template render              # Pulls vars from vault first
+
+# Template edit automatically pushes
+dotfiles template edit                # Opens editor, pushes on save
+```
+
+**Option C: Vault as direct source (no local file)**
+```bash
+# Variables resolved directly from vault at render time
+# No _variables.local.sh needed
+# Requires vault to be unlocked for template operations
+```
+
+**Arrays Support:**
+```bash
+# ssh_hosts array also synced to vault
+dotfiles template vault push --include-arrays
+dotfiles template vault pull --include-arrays
+```
+
+**Vault Item:** `dotfiles-template-arrays`
+```json
+{
+  "ssh_hosts": [
+    {"name": "github", "hostname": "github.com", "user": "git"},
+    {"name": "work-server", "hostname": "server.company.com", "user": "deploy"}
+  ]
+}
+```
+
+**Conflict Resolution:**
+```bash
+$ dotfiles template vault sync
+
+Comparing local vs vault...
+
+Conflicts detected:
+  git_email:
+    local: "john@newcompany.com"
+    vault: "john@oldcompany.com"
+
+  [1] Keep local (push to vault)
+  [2] Keep vault (pull to local)
+  [3] Manual merge
+  [4] Abort
+
+Choice [1-4]:
+```
+
+**Integration with existing vault commands:**
+```bash
+dotfiles vault status
+# Shows:
+#   Template variables: ✓ synced (last: 2h ago)
+#   Template arrays: ✓ synced
+#   SSH keys: ✓ synced
+#   ...
+```
+
+**Security Considerations:**
+- Variables with `_key`, `_token`, `_secret` suffix get extra warning
+- Option to encrypt sensitive variables separately
+- Audit log of variable changes
+
+---
+
 ## Design Decisions
 
 ### Path Convention: `~/workspace/dotfiles`
