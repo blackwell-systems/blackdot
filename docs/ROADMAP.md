@@ -935,6 +935,107 @@ dotfiles vault status
 
 ---
 
+### 16. Curl Tools Integration
+
+**Status:** Planned
+
+HTTP request shortcuts, JSON helpers, and API testing utilities.
+
+**Feature:** `curl_tools` (integration category)
+**File:** `zsh/zsh.d/67-curl.zsh`
+
+**HTTP Method Shortcuts:**
+```bash
+GET <url>                     # curl -s <url>
+POST <url> [data]             # curl -X POST -d <data>
+PUT <url> [data]              # curl -X PUT -d <data>
+PATCH <url> [data]            # curl -X PATCH -d <data>
+DELETE <url>                  # curl -X DELETE
+HEAD <url>                    # curl -I (headers only)
+```
+
+**JSON Helpers:**
+```bash
+jget <url>                    # GET with Accept: application/json | jq
+jpost <url> <json>            # POST with Content-Type: application/json
+jput <url> <json>             # PUT JSON
+jpatch <url> <json>           # PATCH JSON
+```
+
+**Response Formatting:**
+```bash
+curl-pretty <url>             # Auto-detect JSON/XML, format nicely
+curl-headers <url>            # Show response headers only
+curl-status <url>             # Show just HTTP status code
+curl-time <url>               # Show timing breakdown (DNS, connect, transfer)
+```
+
+**Authentication Helpers:**
+```bash
+curl-bearer <token> <url>     # Authorization: Bearer <token>
+curl-basic <user:pass> <url>  # Basic auth
+curl-aws <url>                # Use current AWS credentials (sigv4)
+```
+
+**Debug & Development:**
+```bash
+curl-verbose <url>            # Full request/response with timing
+curl-save <url> <file>        # Save response body to file
+curl-follow <url>             # Follow redirects, show redirect chain
+curl-retry <url> [n]          # Retry with exponential backoff (default: 3)
+```
+
+**API Presets:**
+```bash
+# Save common API configurations
+curl-preset add <name> <base-url> [--header "..."]
+curl-preset use <name> <path>
+curl-preset list
+curl-preset remove <name>
+```
+
+**Example preset usage:**
+```bash
+# Define preset
+curl-preset add github "https://api.github.com" \
+    --header "Authorization: token $GITHUB_TOKEN" \
+    --header "Accept: application/vnd.github.v3+json"
+
+# Use preset
+curl-preset use github /user/repos
+curl-preset use github /repos/owner/repo/issues
+```
+
+**Preset storage:** `~/.config/dotfiles/curl-presets.json`
+```json
+{
+  "github": {
+    "base_url": "https://api.github.com",
+    "headers": {
+      "Authorization": "token ${GITHUB_TOKEN}",
+      "Accept": "application/vnd.github.v3+json"
+    }
+  },
+  "internal-api": {
+    "base_url": "https://api.internal.company.com",
+    "headers": {
+      "X-API-Key": "${INTERNAL_API_KEY}"
+    }
+  }
+}
+```
+
+**Help Command:**
+```bash
+curltools                     # Show all curl commands with styled help
+```
+
+**Tab Completions:**
+- `curl-preset use`: Complete from saved preset names
+- `curl-preset remove`: Complete from saved preset names
+
+---
+
 ## Design Decisions
 
 ### Path Convention: `~/workspace/dotfiles`
