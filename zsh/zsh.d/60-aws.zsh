@@ -179,3 +179,26 @@ awstools() {
   fi
   echo ""
 }
+
+# =========================
+# Zsh Completions
+# =========================
+
+# Helper: get AWS profiles for completion
+_aws_profiles() {
+    local profiles
+    profiles=(${(f)"$(aws configure list-profiles 2>/dev/null)"})
+    _describe 'AWS profiles' profiles
+}
+
+# Completion for awsset
+_awsset() {
+    _arguments '1:profile:_aws_profiles'
+}
+compdef _awsset awsset
+
+# Completion for awslogin
+_awslogin() {
+    _arguments '1:profile:_aws_profiles'
+}
+compdef _awslogin awslogin
