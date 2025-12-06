@@ -277,3 +277,62 @@ cdktools() {
 
     echo ""
 }
+
+# =========================
+# Zsh Completions
+# =========================
+
+# Helper: get AWS profiles for completion
+_cdk_aws_profiles() {
+    local profiles
+    profiles=(${(f)"$(aws configure list-profiles 2>/dev/null)"})
+    _describe 'AWS profiles' profiles
+}
+
+# Helper: get CDK stacks for completion
+_cdk_stacks() {
+    local stacks
+    if [[ -f "cdk.json" ]]; then
+        stacks=(${(f)"$(cdk list 2>/dev/null)"})
+        _describe 'CDK stacks' stacks
+    fi
+}
+
+# Helper: get CloudFormation stacks for completion
+_cf_stacks() {
+    local stacks
+    stacks=(${(f)"$(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE --query 'StackSummaries[].StackName' --output text 2>/dev/null | tr '\t' '\n')"})
+    _describe 'CloudFormation stacks' stacks
+}
+
+# Completion for cdk-env
+_cdk_env() {
+    _arguments '1:profile:_cdk_aws_profiles'
+}
+compdef _cdk_env cdk-env
+
+# Completion for cdkcheck
+_cdkcheck() {
+    _arguments '1:stack:_cdk_stacks'
+}
+compdef _cdkcheck cdkcheck
+
+# Completion for cdkhotswap
+_cdkhotswap() {
+    _arguments '1:stack:_cdk_stacks'
+}
+compdef _cdkhotswap cdkhotswap
+
+# Completion for cdkoutputs
+_cdkoutputs() {
+    _arguments '1:stack:_cf_stacks'
+}
+compdef _cdkoutputs cdkoutputs
+
+# Completion for cdkinit
+_cdkinit() {
+    local languages
+    languages=(typescript python java go csharp fsharp)
+    _describe 'CDK languages' languages
+}
+compdef _cdkinit cdkinit
