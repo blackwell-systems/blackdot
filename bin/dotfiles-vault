@@ -86,7 +86,7 @@ cmd_unlock() {
         # Validate cached session
         case "$backend" in
             bitwarden)
-                if bw unlock --check --session "$session" &>/dev/null; then
+                if bw unlock --check --session "$session" </dev/null &>/dev/null; then
                     pass "Vault already unlocked"
                     echo ""
                     info "Session cached at: $VAULT_SESSION_FILE"
@@ -110,7 +110,7 @@ cmd_unlock() {
     case "$backend" in
         bitwarden)
             # Check login status first
-            if ! bw login --check &>/dev/null; then
+            if ! bw login --check </dev/null &>/dev/null; then
                 warn "Not logged in to Bitwarden"
                 echo ""
                 echo -n "Log in now? [Y/n]: "
