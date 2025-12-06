@@ -336,9 +336,9 @@ Other integrations to evaluate:
 | Tool | Type | Benefit | Status |
 |------|------|---------|--------|
 | `ssh` | Config + agent | SSH config, keys, tunnels | See §11 |
+| `docker` | Aliases + networking | Container & network management | See §12 |
 | `pyenv` | Lazy-load | Python version manager (~150ms startup) | |
 | `kubectl` | Completions + aliases | k8s context/namespace helpers | |
-| `docker` | Aliases + helpers | Container management shortcuts | |
 | `terraform` | Completions + aliases | IaC workflows | |
 | `direnv` | Auto-load | Per-directory `.envrc` files | |
 | `uv` | Completions | Fast Python package manager | |
@@ -464,6 +464,117 @@ sshhook-remove <host> <pre|post>           # Remove hook
 - `ssh.pre_connect` hook type
 - `ssh.post_disconnect` hook type
 - Pattern matching for host names (glob support)
+
+---
+
+### 12. Docker Tools Integration
+
+**Status:** Planned
+
+Docker container management, compose workflows, and network utilities.
+
+**Feature:** `docker_tools` (integration category)
+**File:** `zsh/zsh.d/65-docker.zsh`
+
+**Container Aliases:**
+```bash
+dps               # docker ps
+dpsa              # docker ps -a
+di                # docker images
+dex               # docker exec -it <container> sh
+dl                # docker logs
+dlf               # docker logs -f (follow)
+dstop             # docker stop
+drm               # docker rm
+drmi              # docker rmi
+```
+
+**Docker Compose:**
+```bash
+dc                # docker compose
+dcu               # docker compose up
+dcud              # docker compose up -d
+dcd               # docker compose down
+dcr               # docker compose restart
+dcl               # docker compose logs -f
+dcps              # docker compose ps
+dcb               # docker compose build
+dcex              # docker compose exec
+```
+
+**Container Helpers:**
+```bash
+dsh <container>           # Shell into container (bash → sh fallback)
+dip <container>           # Get container IP address
+denv <container>          # Show container environment variables
+dports                    # Show all containers with exposed ports
+dstats                    # Pretty docker stats
+dvols                     # List volumes with sizes
+dinspect <c> [jq-path]    # Inspect with optional jq filtering
+```
+
+**Cleanup Commands:**
+```bash
+dclean                    # Remove stopped containers + dangling images
+dprune                    # docker system prune (interactive)
+dprune-all                # Aggressive cleanup (with confirmation)
+dnuke                     # Remove ALL containers/images (--confirm required)
+```
+
+**Network Commands:**
+```bash
+dnets                     # List networks with container counts
+dnetips                   # Show all container IPs grouped by network
+dnetmap                   # Visual map: networks → containers
+dnet <network>            # Inspect network (containers, IPs, gateway)
+dnetfind <container>      # Which networks is this container on?
+dnetcreate <name>         # Create bridge network
+dnetconnect <net> <ctr>   # Connect container to network
+dnetdisconnect <net> <ctr> # Disconnect container from network
+dnetprune                 # Remove unused networks
+```
+
+**Network Troubleshooting:**
+```bash
+dnetping <ctr1> <ctr2>    # Test connectivity between containers
+dnetdns                   # Show container DNS resolution
+dnetports                 # Show all port mappings across containers
+```
+
+**Help Command:**
+```bash
+dockertools               # Show all Docker commands with styled help
+                          # Logo color: green (daemon running) / red (not running)
+```
+
+**Status Display:**
+- Docker daemon status (running/stopped)
+- Running containers count
+- Total images and disk usage
+- Docker Compose version
+- Active networks count
+
+**Tab Completions:**
+- `dsh`: Complete from running container names
+- `dex`: Complete from running container names
+- `dl/dlf`: Complete from container names
+- `dnet*`: Complete from network names
+- `dnetconnect/dnetdisconnect`: Complete networks and containers
+
+**Example `dnetmap` output:**
+```
+bridge (default)
+  ├── nginx-proxy     172.17.0.2
+  └── redis           172.17.0.3
+
+app-network
+  ├── api             172.18.0.2
+  ├── worker          172.18.0.3
+  └── postgres        172.18.0.4
+
+host
+  └── monitoring      (host network)
+```
 
 ---
 
