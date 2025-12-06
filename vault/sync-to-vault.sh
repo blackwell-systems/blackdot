@@ -178,7 +178,7 @@ sync_item() {
     local new_json
     new_json=$(printf '%s' "$bw_json" | jq --arg notes "$local_content" '.notes = $notes')
 
-    if printf '%s' "$new_json" | bw encode | bw edit item "$item_id" --session "$SESSION" >/dev/null; then
+    if printf '%s' "$new_json" | bw encode | BW_SESSION="$SESSION" bw edit item "$item_id" >/dev/null; then
         pass "Updated '$item_name' from $local_file"
         ((SYNCED++))
     else

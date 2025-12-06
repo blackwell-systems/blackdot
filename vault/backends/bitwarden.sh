@@ -56,7 +56,7 @@ vault_backend_get_session() {
     fi
 
     # Validate existing session
-    if [[ -n "$session" ]] && bw unlock --check --session "$session" </dev/null >/dev/null 2>&1; then
+    if [[ -n "$session" ]] && BW_SESSION="$session" bw unlock --check </dev/null >/dev/null 2>&1; then
         echo "$session"
         return 0
     fi
@@ -95,7 +95,7 @@ vault_backend_sync() {
     fi
 
     info "Syncing Bitwarden vault..."
-    if ! bw sync --session "$session" </dev/null >/dev/null 2>&1; then
+    if ! BW_SESSION="$session" bw sync </dev/null >/dev/null 2>&1; then
         warn "Failed to sync Bitwarden vault (may be offline)"
         return 1
     fi
@@ -115,7 +115,7 @@ vault_backend_get_item() {
         return 1
     fi
 
-    bw get item "$item_name" --session "$session" 2>/dev/null || echo ""
+    BW_SESSION="$session" bw get item "$item_name" 2>/dev/null || echo ""
 }
 
 vault_backend_get_notes() {
@@ -133,7 +133,7 @@ vault_backend_item_exists() {
     local item_name="$1"
     local session="$2"
 
-    bw get item "$item_name" --session "$session" >/dev/null 2>&1
+    BW_SESSION="$session" bw get item "$item_name" >/dev/null 2>&1
 }
 
 vault_backend_get_item_id() {
@@ -155,7 +155,7 @@ vault_backend_list_items() {
         return 1
     fi
 
-    bw list items --session "$session" 2>/dev/null || echo "[]"
+    BW_SESSION="$session" bw list items 2>/dev/null || echo "[]"
 }
 
 # ============================================================
@@ -199,7 +199,7 @@ EOF
     json_with_content=$(printf '%s' "$json_template" | jq --arg notes "$content" '.notes = $notes')
 
     # Create the item
-    if printf '%s' "$json_with_content" | bw encode | bw create item --session "$session" >/dev/null 2>&1; then
+    if printf '%s' "$json_with_content" | bw encode | BW_SESSION="$session" bw create item >/dev/null 2>&1; then
         pass "Created item '$item_name' in Bitwarden"
         return 0
     else
@@ -241,7 +241,7 @@ vault_backend_update_item() {
     updated_json=$(printf '%s' "$current_json" | jq --arg notes "$content" '.notes = $notes')
 
     # Push update
-    if printf '%s' "$updated_json" | bw encode | bw edit item "$item_id" --session "$session" >/dev/null 2>&1; then
+    if printf '%s' "$updated_json" | bw encode | BW_SESSION="$session" bw edit item "$item_id" >/dev/null 2>&1; then
         pass "Updated item '$item_name' in Bitwarden"
         return 0
     else
@@ -269,7 +269,7 @@ vault_backend_delete_item() {
     fi
 
     # Delete the item
-    if bw delete item "$item_id" --session "$session" >/dev/null 2>&1; then
+    if BW_SESSION="$session" bw delete item "$item_id" >/dev/null 2>&1; then
         pass "Deleted item '$item_name' from Bitwarden"
         return 0
     else
@@ -308,7 +308,7 @@ vault_backend_health_check() {
     if [[ -f "$session_file" ]]; then
         local session
         session=$(cat "$session_file")
-        if bw unlock --check --session "$session" </dev/null >/dev/null 2>&1; then
+        if BW_SESSION="$session" bw unlock --check </dev/null >/dev/null 2>&1; then
             pass "Valid session cached"
         else
             warn "Cached session expired"
@@ -344,7 +344,7 @@ vault_backend_get_attachment() {
     fi
 
     # Get attachment
-    bw get attachment "$attachment_name" --itemid "$item_id" --session "$session" --raw 2>/dev/null
+    BW_SESSION="$session" bw get attachment "$attachment_name" --itemid "$item_id" --raw 2>/dev/null
 }
 
 # ============================================================
@@ -362,7 +362,7 @@ vault_backend_list_locations() {
         return 1
     fi
 
-    bw list folders --session "$session" 2>/dev/null | jq -r '[.[].name]' || echo "[]"
+    BW_SESSION="$session" bw list folders 2>/dev/null | jq -r '[.[].name]' || echo "[]"
 }
 
 # Check if a folder exists
@@ -374,7 +374,7 @@ vault_backend_location_exists() {
         return 1
     fi
 
-    bw list folders --session "$session" 2>/dev/null | \
+    BW_SESSION="$session" bw list folders 2>/dev/null | \
         jq -e ".[] | select(.name == \"$folder_name\")" >/dev/null 2>&1
 }
 
@@ -383,7 +383,7 @@ _bw_get_folder_id() {
     local folder_name="$1"
     local session="$2"
 
-    bw list folders --session "$session" 2>/dev/null | \
+    BW_SESSION="$session" bw list folders 2>/dev/null | \
         jq -r ".[] | select(.name == \"$folder_name\") | .id" 2>/dev/null
 }
 
@@ -405,7 +405,7 @@ vault_backend_create_location() {
 
     # Create the folder
     local folder_json="{\"name\": \"$folder_name\"}"
-    if echo "$folder_json" | bw encode | bw create folder --session "$session" >/dev/null 2>&1; then
+    if echo "$folder_json" | bw encode | BW_SESSION="$session" bw create folder >/dev/null 2>&1; then
         pass "Created folder '$folder_name' in Bitwarden"
         return 0
     else
@@ -445,7 +445,7 @@ vault_backend_list_items_in_location() {
             fi
 
             # List items in folder
-            bw list items --folderid "$folder_id" --session "$session" 2>/dev/null || echo "[]"
+            BW_SESSION="$session" bw list items --folderid "$folder_id" 2>/dev/null || echo "[]"
             ;;
 
         prefix)
@@ -455,7 +455,7 @@ vault_backend_list_items_in_location() {
                 return
             fi
 
-            bw list items --session "$session" 2>/dev/null | \
+            BW_SESSION="$session" bw list items 2>/dev/null | \
                 jq "[.[] | select(.name | startswith(\"$loc_value\"))]" || echo "[]"
             ;;
 
@@ -533,7 +533,7 @@ EOF
     json_with_content=$(printf '%s' "$json_template" | jq --arg notes "$content" '.notes = $notes')
 
     # Create the item
-    if printf '%s' "$json_with_content" | bw encode | bw create item --session "$session" >/dev/null 2>&1; then
+    if printf '%s' "$json_with_content" | bw encode | BW_SESSION="$session" bw create item >/dev/null 2>&1; then
         if [[ -n "$folder_name" ]]; then
             pass "Created item '$item_name' in folder '$folder_name'"
         else

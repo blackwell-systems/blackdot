@@ -190,7 +190,7 @@ if [[ "$MODE" == "create" ]]; then
             favorite: false
         }')
 
-    if printf '%s' "$NEW_ITEM_JSON" | bw encode | bw create item --session "$SESSION" >/dev/null; then
+    if printf '%s' "$NEW_ITEM_JSON" | bw encode | BW_SESSION="$SESSION" bw create item >/dev/null; then
         pass "Created '$ITEM_NAME'"
     else
         fail "Failed to create '$ITEM_NAME'"
@@ -200,7 +200,7 @@ else
     # Update existing item
     UPDATED_JSON=$(printf '%s' "$EXISTING_JSON" | jq --arg notes "$FILE_CONTENT" '.notes = $notes')
 
-    if printf '%s' "$UPDATED_JSON" | bw encode | bw edit item "$existing_id" --session "$SESSION" >/dev/null; then
+    if printf '%s' "$UPDATED_JSON" | bw encode | BW_SESSION="$SESSION" bw edit item "$existing_id" >/dev/null; then
         pass "Updated '$ITEM_NAME'"
     else
         fail "Failed to update '$ITEM_NAME'"
