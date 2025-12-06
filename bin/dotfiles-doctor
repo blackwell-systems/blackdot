@@ -662,6 +662,42 @@ fi
 echo -e "${BOLD}═══════════════════════════════════════════════════════════${NC}"
 echo ""
 
+# ============================================================
+# Save Metrics
+# ============================================================
+METRICS_FILE="$HOME/.dotfiles-metrics.jsonl"
+
+# Collect metadata
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%S+00:00")
+GIT_BRANCH=$(cd "$DOTFILES_DIR" && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+HOSTNAME=$(hostname -s 2>/dev/null || echo "unknown")
+OS=$(uname -s)
+FIXED_COUNT=0
+$FIX_MODE && FIXED_COUNT=$CHECKS_PASSED  # Rough estimate of fixed items
+
+# Write metrics as JSON line (if jq is available)
+if command -v jq >/dev/null 2>&1; then
+    jq -nc \
+        --arg ts "$TIMESTAMP" \
+        --argjson score "$HEALTH_SCORE" \
+        --argjson errors "$CHECKS_FAILED" \
+        --argjson warnings "$CHECKS_WARNED" \
+        --argjson fixed "$FIXED_COUNT" \
+        --arg branch "$GIT_BRANCH" \
+        --arg host "$HOSTNAME" \
+        --arg os "$OS" \
+        '{
+            timestamp: $ts,
+            health_score: $score,
+            errors: $errors,
+            warnings: $warnings,
+            fixed: $fixed,
+            git_branch: $branch,
+            hostname: $host,
+            os: $os
+        }' >> "$METRICS_FILE"
+fi
+
 # Exit with appropriate code
 if [[ $CHECKS_FAILED -gt 0 ]]; then
     exit 1
