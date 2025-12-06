@@ -97,29 +97,29 @@ cmd_list() {
     echo "───────────────────────────────────────────────────────────────"
 
     # Environment
-    printf "  %-12s %s\n" "env:" "${DIM}DOTFILES_* environment variables${NC}"
+    echo -e "  env:         ${DIM}DOTFILES_* environment variables${NC}"
 
     # Project
     local project_config
     project_config=$(_find_project_config) || true
     if [[ -n "$project_config" ]]; then
-        printf "  %-12s %s ${GREEN}✓${NC}\n" "project:" "$project_config"
+        echo -e "  project:     $project_config ${GREEN}✓${NC}"
     else
-        printf "  %-12s %s\n" "project:" "${DIM}.dotfiles.json (not found)${NC}"
+        echo -e "  project:     ${DIM}.dotfiles.json (not found)${NC}"
     fi
 
     # Machine
     if [[ -f "$CONFIG_LAYER_MACHINE" ]]; then
-        printf "  %-12s %s ${GREEN}✓${NC}\n" "machine:" "$CONFIG_LAYER_MACHINE"
+        echo -e "  machine:     $CONFIG_LAYER_MACHINE ${GREEN}✓${NC}"
     else
-        printf "  %-12s %s\n" "machine:" "${DIM}$CONFIG_LAYER_MACHINE (not found)${NC}"
+        echo -e "  machine:     ${DIM}$CONFIG_LAYER_MACHINE (not found)${NC}"
     fi
 
     # User
     if [[ -f "$CONFIG_LAYER_USER" ]]; then
-        printf "  %-12s %s ${GREEN}✓${NC}\n" "user:" "$CONFIG_LAYER_USER"
+        echo -e "  user:        $CONFIG_LAYER_USER ${GREEN}✓${NC}"
     else
-        printf "  %-12s %s\n" "user:" "${DIM}$CONFIG_LAYER_USER (not found)${NC}"
+        echo -e "  user:        ${DIM}$CONFIG_LAYER_USER (not found)${NC}"
     fi
 
     echo ""
