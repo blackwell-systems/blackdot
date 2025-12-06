@@ -206,7 +206,8 @@ encrypt_list() {
 
     echo "Encrypted files (.age):"
     find "$dotfiles_dir" -name "*.age" -type f 2>/dev/null | while read -r file; do
-        local size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
+        local size
+        size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
         printf "  %s (%d bytes)\n" "$file" "$size"
     done
 
@@ -246,7 +247,8 @@ encrypt_status() {
 
     # Count encrypted files
     local dotfiles_dir="${DOTFILES_DIR:-$HOME/workspace/dotfiles}"
-    local encrypted_count=$(find "$dotfiles_dir" -name "*.age" -type f 2>/dev/null | wc -l | tr -d ' ')
+    local encrypted_count
+    encrypted_count=$(find "$dotfiles_dir" -name "*.age" -type f 2>/dev/null | wc -l | tr -d ' ')
     echo "Encrypted files: $encrypted_count"
 }
 
