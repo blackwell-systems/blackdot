@@ -40,7 +40,7 @@ vault_backend_init() {
 # ============================================================
 
 vault_backend_login_check() {
-    bw login --check >/dev/null 2>&1
+    bw login --check </dev/null >/dev/null 2>&1
 }
 
 vault_backend_get_session() {
@@ -56,13 +56,13 @@ vault_backend_get_session() {
     fi
 
     # Validate existing session
-    if [[ -n "$session" ]] && bw unlock --check --session "$session" >/dev/null 2>&1; then
+    if [[ -n "$session" ]] && bw unlock --check --session "$session" </dev/null >/dev/null 2>&1; then
         echo "$session"
         return 0
     fi
 
     # Check if logged in
-    if ! bw login --check >/dev/null 2>&1; then
+    if ! bw login --check </dev/null >/dev/null 2>&1; then
         fail "Not logged in to Bitwarden. Please run: bw login"
         return 1
     fi
@@ -95,7 +95,7 @@ vault_backend_sync() {
     fi
 
     info "Syncing Bitwarden vault..."
-    if ! bw sync --session "$session" >/dev/null 2>&1; then
+    if ! bw sync --session "$session" </dev/null >/dev/null 2>&1; then
         warn "Failed to sync Bitwarden vault (may be offline)"
         return 1
     fi
@@ -296,7 +296,7 @@ vault_backend_health_check() {
     fi
 
     # Check logged in
-    if bw login --check >/dev/null 2>&1; then
+    if bw login --check </dev/null >/dev/null 2>&1; then
         pass "Logged in to Bitwarden"
     else
         warn "Not logged in to Bitwarden"
@@ -308,7 +308,7 @@ vault_backend_health_check() {
     if [[ -f "$session_file" ]]; then
         local session
         session=$(cat "$session_file")
-        if bw unlock --check --session "$session" >/dev/null 2>&1; then
+        if bw unlock --check --session "$session" </dev/null >/dev/null 2>&1; then
             pass "Valid session cached"
         else
             warn "Cached session expired"
