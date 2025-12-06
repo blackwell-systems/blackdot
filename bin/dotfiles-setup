@@ -1058,6 +1058,44 @@ main() {
         echo -e "${GREEN}${BOLD}╚════════════════════════════════════════════════════════════╝${NC}"
         echo ""
 
+        # Offer feature preset selection
+        echo -e "${BOLD}Feature Presets${NC}"
+        echo "Presets enable groups of shell features for different use cases."
+        echo ""
+        echo "  1) minimal    - Shell basics only (fastest startup)"
+        echo "  2) developer  - + vault, git hooks, modern CLI tools"
+        echo "  3) claude     - + Claude Code integration, workspace symlink"
+        echo "  4) full       - All features enabled"
+        echo "  5) Skip       - Configure features manually later"
+        echo ""
+        echo -n "Select a preset [3]: "
+        read preset_choice
+        preset_choice=${preset_choice:-3}
+
+        case "$preset_choice" in
+            1)
+                feature_preset_enable "minimal"
+                pass "Applied 'minimal' preset"
+                ;;
+            2)
+                feature_preset_enable "developer"
+                pass "Applied 'developer' preset"
+                ;;
+            3)
+                feature_preset_enable "claude"
+                pass "Applied 'claude' preset"
+                ;;
+            4)
+                feature_preset_enable "full"
+                pass "Applied 'full' preset"
+                ;;
+            5|*)
+                info "Skipped preset selection"
+                info "Configure later with: dotfiles features preset <name>"
+                ;;
+        esac
+        echo ""
+
         # Show dynamic next steps based on configuration
         local vault_backend=$(config_get "vault.backend" "")
         local template_configured=false
