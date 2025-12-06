@@ -60,7 +60,7 @@ error_msg() {
         echo -e "   ${BOLD}Fix:${NC}" >&2
         # Handle multiline fix commands
         while IFS= read -r line; do
-            if [[ "$line" =~ ^\  *→ ]]; then
+            if [[ "$line" == *"→"* ]]; then
                 # Command line (starts with →)
                 echo -e "   ${GREEN}${line}${NC}" >&2
             elif [[ "$line" =~ ^\ *Or: ]]; then
