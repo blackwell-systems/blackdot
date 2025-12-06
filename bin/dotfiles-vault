@@ -32,11 +32,17 @@ COMMANDS:
     lock        Clear cached session (lock vault)
     status      Full vault status with drift detection
     quick       Quick status check (login/unlock only)
+
+    restore     Restore secrets from vault to local
+    push        Push local secrets to vault
+    sync        Bidirectional sync (detects direction)
+
+    list        List vault items
+    scan        Scan for local secrets to add to vault
+    check       Check required vault items exist
+
     validate    Validate vault-items.json schema
     backend     Show or set vault backend
-    restore     Restore secrets from vault to local
-    sync        Bidirectional sync (use dotfiles sync)
-    scan        Scan for local secrets to add to vault
     init        Initialize vault setup
 
 OPTIONS:
@@ -45,8 +51,9 @@ OPTIONS:
 EXAMPLES:
     dotfiles vault unlock       # Unlock vault interactively
     dotfiles vault status       # Full status with drift detection
-    dotfiles vault restore      # Restore secrets from vault
-    dotfiles vault validate     # Validate vault config schema
+    dotfiles vault restore      # Pull secrets from vault
+    dotfiles vault push         # Push local secrets to vault
+    dotfiles vault list         # List items in vault
 EOF
 }
 
@@ -360,8 +367,20 @@ cmd_restore() {
     exec "$DOTFILES_DIR/vault/restore.sh" "$@"
 }
 
+cmd_push() {
+    exec "$DOTFILES_DIR/vault/sync-to-vault.sh" "$@"
+}
+
 cmd_scan() {
     exec "$DOTFILES_DIR/vault/discover-secrets.sh" "$@"
+}
+
+cmd_list() {
+    exec "$DOTFILES_DIR/vault/list-vault-items.sh" "$@"
+}
+
+cmd_check() {
+    exec "$DOTFILES_DIR/vault/check-vault-items.sh" "$@"
 }
 
 cmd_init() {
@@ -370,8 +389,6 @@ cmd_init() {
 
 cmd_sync() {
     # Redirect to dotfiles sync which handles vault sync
-    info "Use 'dotfiles sync' for bidirectional vault sync"
-    echo ""
     exec "$DOTFILES_DIR/bin/dotfiles-sync" "$@"
 }
 
@@ -402,8 +419,17 @@ main() {
         backend)
             cmd_backend "$@"
             ;;
-        restore)
+        restore|pull)
             cmd_restore "$@"
+            ;;
+        push)
+            cmd_push "$@"
+            ;;
+        list|ls)
+            cmd_list "$@"
+            ;;
+        check)
+            cmd_check "$@"
             ;;
         scan)
             cmd_scan "$@"
