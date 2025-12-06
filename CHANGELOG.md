@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **CDK Tools Integration** (`cdk_tools` feature)
+  - Aliases: `cdkd`, `cdks`, `cdkdf`, `cdkw`, `cdkls`, `cdkdst`, `cdkb`, `cdkda`, `cdkhs`, `cdkhsf`
+  - Helpers: `cdk-env`, `cdkall`, `cdkcheck`, `cdkhotswap`, `cdkoutputs`, `cdkinit`, `cdkctx`
+  - `cdktools` command with styled help and status display
+  - Tab completions for stack and profile arguments
+  - Status color: green (in project), cyan (installed), red (not installed)
+
+- **Rust Tools Integration** (`rust_tools` feature)
+  - Aliases: `cb`, `cr`, `ct`, `cc`, `ccl`, `cf`, `cbr`, `cw`, `cba`, `cclean`
+  - Helpers: `rust-update`, `rust-switch`, `rust-new`, `rust-lint`, `rust-fix`, `rust-outdated`, `rust-expand`
+  - `rusttools` command with styled help and status display
+  - Tab completions for toolchain switching
+
+- **Go Tools Integration** (`go_tools` feature)
+  - Aliases: `gob`, `gor`, `got`, `gotv`, `gof`, `gom`, `gov`, `gog`, `goi`
+  - Helpers: `gocover`, `goinit`, `go-new`, `go-lint`, `go-update`, `go-outdated`, `go-bench`, `go-build-all`
+  - `gotools` command with styled help and status display
+  - Shows module name and Go version requirements
+
+- **AWS Tools Tab Completions**
+  - `awsset <TAB>` and `awslogin <TAB>` complete with AWS profiles
+
+- **CLI Color Styling**
+  - Consistent color scheme across all dotfiles help commands
+  - Bold+Cyan headers, Yellow commands, Dim descriptions
+  - Styled: `dotfiles help`, `dotfiles macos`, `dotfiles vault`, `dotfiles template`
+  - Styled: `dotfiles-backup`, `dotfiles-drift`, `dotfiles-lint`, `dotfiles-packages`, `dotfiles-migrate`
+
+### Fixed
+
+- **Metrics now saved after `dotfiles doctor`** - Health scores written to `~/.dotfiles-metrics.jsonl`
+- **Vault unlock errexit issues** - Fixed silent exit on `((attempts++))` and session caching
+- **Vault session persistence** - Use `BW_SESSION` env var instead of `--session` flag
+
 ---
 
 ## [3.0.0] - 2024-12-05
