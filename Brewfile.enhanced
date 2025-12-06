@@ -31,6 +31,7 @@ brew "yq"               # jq for YAML files
 brew "powerlevel10k"
 brew "zsh-autosuggestions"
 brew "zsh-syntax-highlighting"
+brew "zsh-you-should-use"        # Alias reminder - helps learn your own aliases
 
 # System libraries (dependencies)
 brew "gettext"
