@@ -80,7 +80,7 @@ cmd_unlock() {
 
     # Check if already unlocked
     local session=""
-    session=$(vault_read_cached_session 2>/dev/null)
+    session=$(vault_read_cached_session 2>/dev/null) || session=""
 
     if [[ -n "$session" ]]; then
         # Validate cached session
@@ -287,7 +287,8 @@ cmd_quick() {
             echo "  Logged in:  Yes"
 
             # Check unlock status
-            local session=$(vault_read_cached_session 2>/dev/null)
+            local session=""
+            session=$(vault_read_cached_session 2>/dev/null) || session=""
             if [[ -n "$session" ]] && bw unlock --check --session "$session" &>/dev/null; then
                 echo "  Unlocked:   Yes (session cached)"
             elif bw unlock --check &>/dev/null 2>&1; then
