@@ -114,7 +114,7 @@ cmd_unlock() {
                 warn "Not logged in to Bitwarden"
                 echo ""
                 echo -n "Log in now? [Y/n]: "
-                read response
+                read response </dev/tty
                 if [[ "${response:-Y}" =~ ^[Yy]$ ]]; then
                     bw login
                 else
@@ -137,7 +137,7 @@ cmd_unlock() {
 
                 # Prompt for password with hidden input
                 echo -n "Master password: "
-                read -s password
+                read -s password </dev/tty
                 echo ""  # newline after hidden input
 
                 if [[ -z "$password" ]]; then
