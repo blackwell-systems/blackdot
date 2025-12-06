@@ -284,32 +284,46 @@ See [Hooks Documentation](hooks.md) for full details.
 
 ### 8. CDK Integration
 
-**Status:** Not Started
+**Status:** ✅ Implemented (v3.0)
 
-Add AWS CDK shell integration for infrastructure-as-code workflows:
+AWS CDK shell integration for infrastructure-as-code workflows.
+
+**Feature:** `cdk_tools` (depends on `aws_helpers`)
+**File:** `zsh/zsh.d/61-cdk.zsh`
 
 **Aliases:**
 ```bash
-alias cdkd='cdk deploy'
-alias cdks='cdk synth'
-alias cdkdf='cdk diff'
-alias cdkw='cdk watch'
-alias cdkls='cdk list'
-alias cdkdst='cdk destroy'
+cdkd          # cdk deploy
+cdks          # cdk synth
+cdkdf         # cdk diff
+cdkw          # cdk watch
+cdkls         # cdk list
+cdkdst        # cdk destroy
+cdkb          # cdk bootstrap
+cdkda         # cdk deploy --all
+cdkhs         # cdk deploy --hotswap
+cdkhsf        # cdk deploy --hotswap-fallback
 ```
 
 **Helper Functions:**
 ```bash
-cdkall()    # Deploy all stacks
-cdkcheck()  # Diff then prompt to deploy
-cdkout()    # Show CloudFormation stack outputs
-cdk-env()   # Set CDK_DEFAULT_ACCOUNT/REGION from AWS profile
+cdk-env [profile]    # Set CDK_DEFAULT_ACCOUNT/REGION from AWS profile
+cdk-env-clear        # Clear CDK environment variables
+cdkall               # Deploy all stacks with confirmation
+cdkcheck [stack]     # Diff then prompt to deploy
+cdkhotswap [stack]   # Fast deploy for Lambda/ECS updates
+cdkoutputs <stack>   # Show CloudFormation stack outputs
+cdkinit [lang]       # Initialize new CDK project (default: typescript)
+cdkctx               # Show CDK context values
+cdkctx-clear         # Clear CDK context cache
+cdktools             # Show all CDK commands with status
 ```
 
-**Completions:**
-- `cdk completion` generates shell completions
+**Status Display:**
+- Logo color: green (in CDK project) / cyan (CDK installed) / red (not installed)
+- Shows CDK version, project detection, language, and environment variables
 
-**Integration:** Pairs with existing `aws_helpers` feature.
+**Integration:** Requires `aws_helpers` feature. Included in `developer` and `full` presets.
 
 ---
 
