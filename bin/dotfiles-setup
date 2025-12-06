@@ -301,6 +301,7 @@ phase_workspace() {
 
     state_complete "workspace"
     feature_enable "workspace_symlink"
+    feature_persist "workspace_symlink" "true" 2>/dev/null || true
     pass "Workspace configured: $final_target"
 }
 
@@ -716,6 +717,7 @@ phase_vault() {
 
     state_complete "vault"
     feature_enable "vault"
+    feature_persist "vault" "true" 2>/dev/null || true
     pass "Vault configured"
 }
 
@@ -925,6 +927,8 @@ phase_claude() {
         state_complete "claude"
         feature_enable "claude_integration"
         feature_enable "dotclaude"
+        feature_persist "claude_integration" "true" 2>/dev/null || true
+        feature_persist "dotclaude" "true" 2>/dev/null || true
         return 0
     fi
 
@@ -939,6 +943,8 @@ phase_claude() {
             state_complete "claude"
             feature_enable "claude_integration"
             feature_enable "dotclaude"
+            feature_persist "claude_integration" "true" 2>/dev/null || true
+            feature_persist "dotclaude" "true" 2>/dev/null || true
         else
             warn "dotclaude installation failed - continuing"
         fi
@@ -974,6 +980,7 @@ phase_template() {
             pass "Templates configured"
             state_complete "template"
             feature_enable "templates"
+            feature_persist "templates" "true" 2>/dev/null || true
             echo ""
             info "Run 'dotfiles template render' to generate configs from your templates"
         else
@@ -1072,28 +1079,28 @@ main() {
         read preset_choice
         preset_choice=${preset_choice:-3}
 
+        local selected_preset=""
         case "$preset_choice" in
-            1)
-                feature_preset_enable "minimal"
-                pass "Applied 'minimal' preset"
-                ;;
-            2)
-                feature_preset_enable "developer"
-                pass "Applied 'developer' preset"
-                ;;
-            3)
-                feature_preset_enable "claude"
-                pass "Applied 'claude' preset"
-                ;;
-            4)
-                feature_preset_enable "full"
-                pass "Applied 'full' preset"
-                ;;
-            5|*)
-                info "Skipped preset selection"
-                info "Configure later with: dotfiles features preset <name>"
-                ;;
+            1) selected_preset="minimal" ;;
+            2) selected_preset="developer" ;;
+            3) selected_preset="claude" ;;
+            4) selected_preset="full" ;;
+            5|*) selected_preset="" ;;
         esac
+
+        if [[ -n "$selected_preset" ]]; then
+            # Enable and persist the preset
+            feature_preset_enable "$selected_preset"
+            # Persist each feature in the preset
+            local features="${FEATURE_PRESETS[$selected_preset]:-}"
+            for feature in ${(s: :)features}; do
+                feature_persist "$feature" "true" 2>/dev/null || true
+            done
+            pass "Applied '$selected_preset' preset"
+        else
+            info "Skipped preset selection"
+            info "Configure later with: dotfiles features preset <name> --persist"
+        fi
         echo ""
 
         # Show dynamic next steps based on configuration
