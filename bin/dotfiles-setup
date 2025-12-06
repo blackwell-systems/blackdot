@@ -932,14 +932,14 @@ phase_claude() {
         info "Installing dotclaude..."
         if curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh | bash; then
             pass "dotclaude installed"
+            state_complete "claude"
         else
             warn "dotclaude installation failed - continuing"
         fi
     else
         info "Skipped dotclaude installation"
+        info "You can install later with: curl -fsSL https://dotclaude.sh | bash"
     fi
-
-    state_complete "claude"
 }
 
 phase_template() {
@@ -966,6 +966,7 @@ phase_template() {
         # Run template init interactively
         if "$DOTFILES_DIR/bin/dotfiles-template" init; then
             pass "Templates configured"
+            state_complete "template"
             echo ""
             info "Run 'dotfiles template render' to generate configs from your templates"
         else
@@ -976,8 +977,6 @@ phase_template() {
         echo ""
         info "You can enable templates later with: dotfiles template init"
     fi
-
-    state_complete "template"
 }
 
 # ============================================================
@@ -1122,7 +1121,7 @@ main() {
         # Only show section if we have features to display
         if $has_features; then
             echo -e "  ${BLUE}ℹ Your new shell features:${NC}"
-            printf '%s\n' "${feature_lines[@]}"
+            printf '%b\n' "${feature_lines[@]}"
             echo ""
         fi
 
