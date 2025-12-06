@@ -1036,6 +1036,97 @@ curltools                     # Show all curl commands with styled help
 
 ---
 
+### 17. Lima Tools Integration
+
+**Status:** Planned
+
+Lima VM management for running Linux containers on macOS.
+
+**Feature:** `lima_tools` (integration category)
+**File:** `zsh/zsh.d/68-lima.zsh`
+
+**VM Management:**
+```bash
+lls                    # limactl list
+lstart [vm]            # limactl start (default: default)
+lstop [vm]             # limactl stop
+lrestart [vm]          # limactl stop && start
+lrm [vm]               # limactl delete (with confirmation)
+lsh [vm]               # limactl shell
+```
+
+**Quick Access:**
+```bash
+lima                   # Shell into default VM (built-in)
+ldocker [cmd]          # lima nerdctl (containerd)
+lk                     # Access k3s kubectl in VM
+lnerd [cmd]            # lima nerdctl shortcut
+```
+
+**VM Info & Debug:**
+```bash
+linfo [vm]             # Show VM details (CPU, memory, disk, mounts)
+llogs [vm]             # Show VM logs
+lip [vm]               # Get VM IP address
+lmounts [vm]           # Show mounted directories
+ldisk [vm]             # Show disk usage
+```
+
+**VM Creation:**
+```bash
+lnew <name> [template] # Create VM from template
+ltemplates             # List available templates
+lclone <src> <dst>     # Clone existing VM
+```
+
+**Common Templates:**
+- `default` - Basic Ubuntu with containerd
+- `docker` - Docker CE on Ubuntu
+- `k3s` - Lightweight Kubernetes
+- `podman` - Podman on Fedora
+- `archlinux` - Arch Linux
+
+**Bulk Operations:**
+```bash
+lstartall              # Start all stopped VMs
+lstopall               # Stop all running VMs
+lprune                 # Remove stopped VMs (with confirmation)
+```
+
+**Help Command:**
+```bash
+limatools              # Show all Lima commands with styled help
+                       # Logo color: green (VM running) / yellow (stopped) / red (not installed)
+```
+
+**Status Display:**
+- Lima version
+- Running VMs count / total
+- Default VM status and IP
+- Docker/containerd availability in VM
+- Mounted directories
+
+**Tab Completions:**
+- `lstart/lstop/lsh`: Complete from VM names
+- `lrm`: Complete from VM names
+- `lnew`: Complete from template names
+- `ldocker/lnerd`: Complete docker/nerdctl subcommands
+
+**Integration with Docker tools:**
+```bash
+# If lima_tools and docker_tools both enabled:
+# Auto-detect if Docker is via Lima and adjust commands
+docker() {
+    if limactl list -q 2>/dev/null | grep -q "^docker$"; then
+        lima nerdctl "$@"
+    else
+        command docker "$@"
+    fi
+}
+```
+
+---
+
 ## Design Decisions
 
 ### Path Convention: `~/workspace/dotfiles`
