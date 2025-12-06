@@ -52,10 +52,10 @@ if vault_login_check; then
         echo ""
         case "$DOTFILES_VAULT_BACKEND" in
             bitwarden)
-                echo -e "${DIM}Unlock:${NC} ${GREEN}bw unlock && export BW_SESSION=\"\$(bw unlock --raw)\"${NC}"
+                echo -e "${DIM}Unlock:${NC} ${GREEN}dotfiles vault unlock${NC}"
                 ;;
             1password)
-                echo -e "${DIM}Unlock:${NC} ${GREEN}eval \$(op signin)${NC}"
+                echo -e "${DIM}Unlock:${NC} ${GREEN}dotfiles vault unlock${NC}"
                 ;;
             pass)
                 echo -e "${DIM}Info:${NC} GPG agent handles unlocking automatically"
@@ -69,10 +69,10 @@ else
     echo ""
     case "$DOTFILES_VAULT_BACKEND" in
         bitwarden)
-            echo -e "${DIM}Login:${NC} ${GREEN}bw login${NC}"
+            echo -e "${DIM}Login:${NC} ${GREEN}bw login && dotfiles vault unlock${NC}"
             ;;
         1password)
-            echo -e "${DIM}Login:${NC} ${GREEN}op signin${NC}"
+            echo -e "${DIM}Login:${NC} ${GREEN}dotfiles vault unlock${NC}"
             ;;
         pass)
             echo -e "${DIM}Setup:${NC} ${GREEN}pass init <gpg-id>${NC}"
