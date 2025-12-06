@@ -38,9 +38,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Shows retry count on incorrect password
   - 1Password shows info about biometric/password auth
 
-- **Vault unlock silent exit** - Fixed script exiting before password prompt
+- **Vault unlock silent exit** - Fixed script exiting before password prompt (two issues)
   - `vault_read_cached_session` failure triggered errexit from sourced `_config.sh`
   - Now uses `|| session=""` pattern to handle expected failures gracefully
+  - `((attempts++))` with attempts=0 returns exit status 1, triggering errexit
+  - Changed to `((++attempts))` (pre-increment) to return success on first iteration
 
 - **Color escape codes showing raw** - Fixed across multiple commands
   - `dotfiles config list` - Changed printf to echo -e
