@@ -29,8 +29,6 @@ typeset -gA FEATURE_REGISTRY=(
     ["claude_integration"]="env|Claude Code integration and hooks|optional|workspace_symlink"
     ["vault"]="false|Multi-vault secret management (Bitwarden/1Password/pass)|optional|"
     ["templates"]="false|Machine-specific configuration templates|optional|"
-    ["aws_helpers"]="true|AWS SSO profile management and helpers|optional|"
-    ["cdk_tools"]="true|AWS CDK aliases, helpers, and environment management|optional|aws_helpers"
     ["git_hooks"]="true|Git safety hooks (pre-commit, pre-push)|optional|"
     ["drift_check"]="env|Automatic drift detection on vault operations|optional|vault"
     ["backup_auto"]="false|Automatic backup before destructive operations|optional|"
@@ -40,12 +38,14 @@ typeset -gA FEATURE_REGISTRY=(
     ["cli_feature_filter"]="true|Filter CLI help and commands based on enabled features|optional|"
     ["hooks"]="true|Lifecycle hooks for custom behavior at key events|optional|"
 
-    # Integration features (third-party tools, lazy-loaded)
+    # Integration features (third-party tool integrations)
     ["modern_cli"]="true|Modern CLI tools (eza, bat, ripgrep, fzf, zoxide)|integration|"
-    ["nvm_integration"]="true|Lazy-loaded NVM for Node.js version management|integration|"
-    ["sdkman_integration"]="true|Lazy-loaded SDKMAN for Java/Gradle/Kotlin|integration|"
+    ["aws_helpers"]="true|AWS SSO profile management and helpers|integration|"
+    ["cdk_tools"]="true|AWS CDK aliases, helpers, and environment management|integration|aws_helpers"
     ["rust_tools"]="true|Rust/Cargo aliases and helpers|integration|"
     ["go_tools"]="true|Go aliases and helpers|integration|"
+    ["nvm_integration"]="true|Lazy-loaded NVM for Node.js version management|integration|"
+    ["sdkman_integration"]="true|Lazy-loaded SDKMAN for Java/Gradle/Kotlin|integration|"
     ["dotclaude"]="false|dotclaude profile management for Claude Code|integration|claude_integration"
 )
 
