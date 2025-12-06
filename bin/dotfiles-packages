@@ -55,20 +55,19 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --help|-h)
-            cat <<EOF
-dotfiles packages - Package discovery and management
-
-Usage:
-    dotfiles packages              Show package status overview
-    dotfiles packages --check      Show what's missing from Brewfile
-    dotfiles packages --install    Install missing packages
-    dotfiles packages --outdated   Show outdated packages
-
-Examples:
-    dotfiles packages --check      # See what needs installing
-    dotfiles packages --install    # Install everything from Brewfile
-
-EOF
+            echo ""
+            echo -e "${BOLD}dotfiles packages${NC} - ${DIM}Package discovery and management${NC}"
+            echo ""
+            echo -e "${BOLD}${CYAN}USAGE${NC}"
+            echo -e "  ${YELLOW}dotfiles packages${NC}              ${DIM}Show package status overview${NC}"
+            echo -e "  ${YELLOW}dotfiles packages${NC} --check      ${DIM}Show what's missing from Brewfile${NC}"
+            echo -e "  ${YELLOW}dotfiles packages${NC} --install    ${DIM}Install missing packages${NC}"
+            echo -e "  ${YELLOW}dotfiles packages${NC} --outdated   ${DIM}Show outdated packages${NC}"
+            echo ""
+            echo -e "${BOLD}${CYAN}EXAMPLES${NC}"
+            echo -e "  ${YELLOW}dotfiles packages --check${NC}      ${DIM}# See what needs installing${NC}"
+            echo -e "  ${YELLOW}dotfiles packages --install${NC}    ${DIM}# Install everything from Brewfile${NC}"
+            echo ""
             exit 0
             ;;
         *)
