@@ -421,6 +421,50 @@ sshtools              # Show all SSH commands with styled help banner
 - Shows `~/.ssh/config` host count
 - Detects common SSH issues (no keys, agent not running)
 
+**SSH Hooks (Future Enhancement):**
+
+Host-specific pre/post connection hooks for automation and security.
+
+```bash
+# Hook management commands
+sshhook-add <host> <pre|post> <command>   # Add hook for host
+sshhook-list [host]                        # List hooks (all or per-host)
+sshhook-remove <host> <pre|post>           # Remove hook
+```
+
+**Pre-connect hooks** (run before SSH connection):
+- Auto-load specific SSH keys for specific hosts
+- VPN connectivity checks (e.g., require VPN for prod servers)
+- Environment variable setup
+- Notifications/logging for production access
+
+**Post-disconnect hooks** (run after SSH disconnects):
+- Clean up port forwards
+- Clear sensitive environment variables
+- Log session duration for auditing
+- Notifications
+
+**Configuration file:** `~/.config/dotfiles/ssh-hooks.json`
+```json
+{
+  "prod-*": {
+    "pre": ["vpn-check", "notify 'Connecting to production'"],
+    "post": ["notify 'Disconnected from production'"],
+    "keys": ["id_ed25519_prod"],
+    "tunnels": [{"local": 5432, "remote": 5432}]
+  },
+  "bastion": {
+    "pre": ["sshload id_bastion"],
+    "post": ["sshunload id_bastion"]
+  }
+}
+```
+
+**Integration with dotfiles hooks system:**
+- `ssh.pre_connect` hook type
+- `ssh.post_disconnect` hook type
+- Pattern matching for host names (glob support)
+
 ---
 
 ## Design Decisions
