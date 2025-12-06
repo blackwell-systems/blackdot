@@ -81,17 +81,21 @@ main() {
 
 # Show help
 if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
-    echo "Usage: dotfiles migrate [OPTIONS]"
     echo ""
-    echo "Migrate dotfiles configuration to v3.0"
+    echo -e "${BOLD}dotfiles migrate${NC} - ${DIM}Migrate dotfiles configuration to v3.0${NC}"
     echo ""
-    echo "Options:"
-    echo "  -y, --yes    Skip confirmation prompt"
-    echo "  -h, --help   Show this help"
+    echo -e "${BOLD}${CYAN}USAGE${NC}"
+    echo -e "  ${YELLOW}dotfiles migrate${NC}        ${DIM}Run migration interactively${NC}"
+    echo -e "  ${YELLOW}dotfiles migrate${NC} --yes  ${DIM}Skip confirmation prompt${NC}"
     echo ""
-    echo "This command runs:"
-    echo "  1. dotfiles-migrate-config       # INI → JSON"
-    echo "  2. dotfiles-migrate-vault-schema # v2 → v3"
+    echo -e "${BOLD}${CYAN}OPTIONS${NC}"
+    echo -e "  ${YELLOW}-y${NC}, ${YELLOW}--yes${NC}    ${DIM}Skip confirmation prompt${NC}"
+    echo -e "  ${YELLOW}-h${NC}, ${YELLOW}--help${NC}   ${DIM}Show this help${NC}"
+    echo ""
+    echo -e "${BOLD}${CYAN}MIGRATIONS${NC}"
+    echo -e "  ${DIM}1.${NC} ${CYAN}dotfiles-migrate-config${NC}       ${DIM}# INI → JSON${NC}"
+    echo -e "  ${DIM}2.${NC} ${CYAN}dotfiles-migrate-vault-schema${NC} ${DIM}# v2 → v3${NC}"
+    echo ""
     exit 0
 fi
 
