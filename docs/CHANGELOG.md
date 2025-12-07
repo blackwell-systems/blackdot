@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - User theme customization via `~/.config/dotfiles/theme.sh`
   - Backward compatible with legacy color names (`RED`, `GREEN`, `YELLOW`, etc.)
   - Updated developer tool modules: `awstools`, `cdktools`, `rusttools`, `gotools`, `pythontools`
+- **Feature Registry Circular Dependency Detection** - Prevents infinite loops from circular feature dependencies
+  - `_detect_circular_dep()` function detects cycles before enabling features
+  - `_check_conflicts()` prevents enabling mutually exclusive features
+  - `feature_validate()` validates entire registry for cycles and conflicts
+  - New CLI command: `dotfiles features validate`
+  - `FEATURE_CONFLICTS` array for defining mutually exclusive features
 - **Template Pipeline Filters** - Transform variable values with chainable filters
   - 14 built-in filters: `upper`, `lower`, `capitalize`, `trim`, `default`, `replace`, `append`, `prepend`, `quote`, `squote`, `truncate`, `length`, `basename`, `dirname`
   - Chainable syntax: `{{ hostname | upper | truncate 8 }}`

@@ -1221,9 +1221,9 @@ _dotfiles() {
 
 ### 20. Feature Registry Improvements
 
-**Status:** Planned (Priority 1)
+**Status:** ✅ Implemented (v3.0)
 
-Add circular dependency detection and conflict prevention.
+Circular dependency detection and conflict prevention.
 
 **Problem:**
 - Circular dependencies could cause infinite loops
