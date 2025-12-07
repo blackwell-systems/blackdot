@@ -43,6 +43,15 @@ fi
 # Configuration
 # ============================================================
 
+# Get the terminal device for output
+# Returns /dev/tty if available and working, empty string otherwise (use stdout)
+_get_tty() {
+    # Test if we can actually write to /dev/tty
+    if [[ -w /dev/tty ]] && printf '' >/dev/tty 2>/dev/null; then
+        echo "/dev/tty"
+    fi
+}
+
 # Check if we should show progress (TTY and not disabled)
 _progress_enabled() {
     # Force mode for testing
@@ -99,17 +108,27 @@ spinner_start() {
     spinner_stop 2>/dev/null
 
     # Start spinner in background subshell
+    # Note: Must write to /dev/tty explicitly for background subshell output to display
     (
         local frames="$(_get_spinner_frames)"
         local frame_count=${#frames}
         local i=0
+        local tty_dev="$(_get_tty)"
 
-        # Hide cursor
-        printf '\033[?25l'
+        # Hide cursor - write to tty if available, otherwise stdout
+        if [[ -n "$tty_dev" ]]; then
+            printf '\033[?25l' >"$tty_dev" 2>/dev/null || exit 0
+        else
+            printf '\033[?25l' 2>/dev/null || exit 0
+        fi
 
         while true; do
             local frame="${frames:$i:1}"
-            printf "\r${CLR_PRIMARY}%s${CLR_NC} %s..." "$frame" "$msg"
+            if [[ -n "$tty_dev" ]]; then
+                printf "\r${CLR_PRIMARY}%s${CLR_NC} %s..." "$frame" "$msg" >"$tty_dev" 2>/dev/null || exit 0
+            else
+                printf "\r${CLR_PRIMARY}%s${CLR_NC} %s..." "$frame" "$msg" 2>/dev/null || exit 0
+            fi
             i=$(( (i + 1) % frame_count ))
             sleep 0.1
         done
@@ -135,11 +154,16 @@ spinner_stop() {
     # Only clear if progress was enabled
     _progress_enabled || return 0
 
-    # Show cursor
-    printf '\033[?25h'
+    local tty_dev="$(_get_tty)"
 
-    # Clear the line
-    printf "\r\033[K"
+    # Show cursor
+    if [[ -n "$tty_dev" ]]; then
+        printf '\033[?25h' >"$tty_dev"
+        printf "\r\033[K" >"$tty_dev"
+    else
+        printf '\033[?25h'
+        printf "\r\033[K"
+    fi
 
     # Show success message if provided
     if [[ -n "$success_msg" ]]; then
@@ -295,7 +319,7 @@ steps_init() {
 # Usage: step "Downloading packages"
 step() {
     local msg="$1"
-    ((_STEP_CURRENT++))
+    _STEP_CURRENT=$((_STEP_CURRENT + 1))
 
     _progress_enabled || {
         printf "[%d/%d] %s\n" "$_STEP_CURRENT" "$_STEP_TOTAL" "$msg"
@@ -353,7 +377,12 @@ steps_done() {
 #   trap 'progress_cleanup' EXIT
 progress_cleanup() {
     spinner_stop 2>/dev/null
-    printf '\033[?25h' 2>/dev/null
+    local tty_dev="$(_get_tty)"
+    if [[ -n "$tty_dev" ]]; then
+        printf '\033[?25h' >"$tty_dev" 2>/dev/null
+    else
+        printf '\033[?25h' 2>/dev/null
+    fi
 }
 
 # Note: We don't set a global trap here to avoid conflicts
