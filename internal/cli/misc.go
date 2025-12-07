@@ -9,18 +9,7 @@ import (
 // These are stub commands for CLI commands that exist in bin/dotfiles-*
 // They will be implemented as the migration progresses
 
-func newDiffCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "diff",
-		Short: "Preview changes before sync/restore",
-		Long:  `Show differences between local files and vault state.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Diff Preview")
-			fmt.Println("(not yet implemented)")
-		},
-	}
-}
-
+// newDiffCmd is now in diff.go
 // newDriftCmd is now in drift.go
 
 func newEncryptCmd() *cobra.Command {
