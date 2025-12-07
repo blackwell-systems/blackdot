@@ -21,6 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `feature_validate()` validates entire registry for cycles and conflicts
   - New CLI command: `dotfiles features validate`
   - `FEATURE_CONFLICTS` array for defining mutually exclusive features
+- **SSH Tools Integration** (`zsh/zsh.d/65-ssh.zsh`) - Comprehensive SSH workflow helpers
+  - Config management: `sshlist`, `sshgo`, `sshedit`, `sshadd-host`
+  - Key management: `sshkeys`, `sshgen`, `sshcopy`, `sshfp`
+  - Agent commands: `sshagent`, `sshload`, `sshunload`, `sshclear`
+  - Tunnel helpers: `sshtunnel`, `sshsocks`, `sshtunnels`
+  - `sshtools` command with styled help and status display
+  - Tab completions for hosts and keys
+  - New feature: `ssh_tools` (included in `developer` and `full` presets)
 - **Template Pipeline Filters** - Transform variable values with chainable filters
   - 14 built-in filters: `upper`, `lower`, `capitalize`, `trim`, `default`, `replace`, `append`, `prepend`, `quote`, `squote`, `truncate`, `length`, `basename`, `dirname`
   - Chainable syntax: `{{ hostname | upper | truncate 8 }}`

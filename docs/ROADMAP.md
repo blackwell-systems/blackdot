@@ -365,12 +365,12 @@ awsswitch() { _load_aws_helpers; awsswitch "$@"; }
 
 ### 11. SSH Tools Integration
 
-**Status:** Planned
+**Status:** ✅ Implemented (v3.0)
 
 SSH configuration, key management, agent handling, and tunnel utilities.
 
 **Feature:** `ssh_tools` (integration category)
-**File:** `zsh/zsh.d/64-ssh.zsh`
+**File:** `zsh/zsh.d/65-ssh.zsh`
 
 **SSH Config Management:**
 ```bash
