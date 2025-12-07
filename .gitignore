@@ -34,3 +34,4 @@ generated/
 
 # Go binaries (built from cmd/)
 bin/dotfiles-go
+/dotfiles-go
