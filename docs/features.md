@@ -134,7 +134,7 @@ dotfiles features preset developer --persist
 | Preset | Features Enabled |
 |--------|------------------|
 | `minimal` | `shell`, `config_layers` |
-| `developer` | `shell`, `vault`, `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `git_hooks`, `modern_cli`, `config_layers` |
+| `developer` | `shell`, `vault`, `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `nvm_integration`, `sdkman_integration`, `git_hooks`, `modern_cli`, `config_layers` |
 | `claude` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `git_hooks`, `modern_cli`, `config_layers` |
 | `full` | All features |
 
