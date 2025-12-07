@@ -2614,15 +2614,233 @@ directly, while Zsh uses vault-items.json for item configuration. This is an
 intentional improvement - vaultmux provides cleaner abstraction.
 
 ### Phase 8: Template System (NEXT PRIORITY)
-**CRITICAL: Verify complete parity with lib/_templates.sh**
-- [x] ✅ internal/template/engine.go created
-- [ ] ⚠️  **VERIFY:** All template filters ported (upper, lower, default, etc.)
-- [ ] ⚠️  **VERIFY:** {{#if}}, {{#unless}}, {{#each}} work identically
-- [ ] ⚠️  **VERIFY:** Variable resolution from config
-- [ ] ⚠️  **VERIFY:** .template file handling
-- [ ] 🔄 **TEST:** Render existing templates with both versions
-- [ ] 🔄 **TEST:** Compare output byte-for-byte
-- [ ] 🔄 **TEST:** Template validation error messages match
+
+#### 8.1 Current Bash Implementation Analysis
+
+The existing `lib/_templates.sh` (1,299 lines) implements a custom Handlebars-like template engine:
+
+**Syntax Used in Existing Templates:**
+```handlebars
+{{ variable }}                       # Simple variable substitution
+{{ hostname | upper }}               # Pipeline filters
+{{ editor | default "vim" }}         # Filter with argument
+{{#if variable }}...{{/if}}          # Truthy conditional
+{{#if var == "value" }}...{{/if}}    # Comparison conditional (CUSTOM)
+{{#unless variable }}...{{/unless}}  # Negative conditional
+{{#else}}                            # Else branch
+{{#each ssh_hosts}}...{{/each}}      # Array iteration with named fields
+```
+
+**Implemented Filters (13 total):**
+| Filter | Usage | Description |
+|--------|-------|-------------|
+| `upper` | `{{ var \| upper }}` | Uppercase |
+| `lower` | `{{ var \| lower }}` | Lowercase |
+| `capitalize` | `{{ var \| capitalize }}` | First letter upper |
+| `trim` | `{{ var \| trim }}` | Strip whitespace |
+| `replace` | `{{ var \| replace "old,new" }}` | String replace |
+| `append` | `{{ var \| append "text" }}` | Append string |
+| `prepend` | `{{ var \| prepend "text" }}` | Prepend string |
+| `quote` | `{{ var \| quote }}` | Double-quote wrap |
+| `squote` | `{{ var \| squote }}` | Single-quote wrap |
+| `basename` | `{{ path \| basename }}` | Path basename |
+| `dirname` | `{{ path \| dirname }}` | Path dirname |
+| `default` | `{{ var \| default "val" }}` | Default value |
+| `length` | `{{ var \| length }}` | String length |
+| `truncate` | `{{ var \| truncate 10 }}` | Truncate to N chars |
+
+**Variable Resolution Order:**
+1. Environment variables (`DOTFILES_TMPL_*`)
+2. Local overrides (`_variables.local.sh`)
+3. Machine-type defaults (work/personal)
+4. Default values (`_variables.sh`)
+5. Auto-detected (hostname, os, arch, etc.)
+
+**Array System (for `{{#each}}`):**
+- Schema-defined fields: `ssh_hosts` = `name|hostname|user|identity|extra`
+- Pipe-delimited storage in shell arrays
+- JSON import support (`_arrays.local.json`)
+
+#### 8.2 Go Template Library Options
+
+| Option | Syntax Match | Pros | Cons |
+|--------|--------------|------|------|
+| **Go text/template** | ❌ Different | Stdlib, battle-tested | `{{.Var}}` syntax, `{{range}}` not `{{#each}}` |
+| **raymond (Handlebars)** | ✅ 90% match | Same syntax, helpers, mature | No inline comparisons |
+| **mustache** | ⚠️ 70% match | Simple, logic-less | No `{{#if x == y}}`, no else |
+| **Custom parser** | ✅ 100% match | Full control | 1000+ lines, bugs, maintenance |
+
+#### 8.3 Recommendation: Raymond + Compatibility Layer
+
+**Use [raymond](https://github.com/aymerick/raymond)** (Go Handlebars) with custom helpers:
+
+**What Raymond Supports Natively:**
+```handlebars
+{{ variable }}           ✅ Works
+{{#if variable}}         ✅ Works (truthy check)
+{{#unless variable}}     ✅ Works
+{{#each array}}          ✅ Works
+{{else}}                 ✅ Works
+{{{unescaped}}}          ✅ Works
+```
+
+**What Needs Custom Helpers:**
+
+1. **Comparison conditionals** - `{{#if machine_type == "work"}}`
+   ```go
+   // Register "eq" helper
+   raymond.RegisterHelper("eq", func(a, b string) bool {
+       return a == b
+   })
+   // Usage: {{#if (eq machine_type "work")}}
+   ```
+
+2. **Pipeline filters** - `{{ var | upper }}`
+   ```go
+   // Option A: Pre-process templates to convert syntax
+   // {{ var | upper }} → {{ upper var }}
+
+   // Option B: Register as helpers
+   raymond.RegisterHelper("upper", strings.ToUpper)
+   raymond.RegisterHelper("lower", strings.ToLower)
+   raymond.RegisterHelper("default", func(val, def string) string {
+       if val == "" { return def }
+       return val
+   })
+   ```
+
+3. **Nested field access in loops** - `{{ name }}` inside `{{#each}}`
+   ```go
+   // Raymond handles this natively with struct/map contexts
+   type SSHHost struct {
+       Name     string
+       Hostname string
+       User     string
+       Identity string
+       Extra    string
+   }
+   ```
+
+#### 8.4 Implementation Plan
+
+**Phase 8a: Core Engine (raymond-based)**
+```go
+// internal/template/engine.go
+type Engine struct {
+    raymond *raymond.Template
+    vars    map[string]interface{}
+}
+
+func (e *Engine) RegisterHelpers() {
+    // Comparison helpers
+    raymond.RegisterHelper("eq", func(a, b string) bool { return a == b })
+    raymond.RegisterHelper("ne", func(a, b string) bool { return a != b })
+
+    // Filter helpers (match bash filters exactly)
+    raymond.RegisterHelper("upper", strings.ToUpper)
+    raymond.RegisterHelper("lower", strings.ToLower)
+    raymond.RegisterHelper("default", defaultHelper)
+    raymond.RegisterHelper("trim", strings.TrimSpace)
+    raymond.RegisterHelper("quote", func(s string) string { return `"` + s + `"` })
+    // ... all 13 filters
+}
+```
+
+**Phase 8b: Syntax Preprocessor (optional)**
+
+If we want 100% backward compatibility without changing templates:
+```go
+// Convert: {{#if machine_type == "work"}}
+// To:      {{#if (eq machine_type "work")}}
+func preprocessTemplate(content string) string {
+    // Regex to find comparison patterns
+    re := regexp.MustCompile(`\{\{#if\s+(\w+)\s*==\s*"([^"]+)"\s*\}\}`)
+    return re.ReplaceAllString(content, `{{#if (eq $1 "$2")}}`)
+}
+
+// Convert: {{ var | filter }}
+// To:      {{ filter var }}
+func convertPipelines(content string) string {
+    re := regexp.MustCompile(`\{\{\s*(\w+)\s*\|\s*(\w+)\s*\}\}`)
+    return re.ReplaceAllString(content, `{{ $2 $1 }}`)
+}
+```
+
+**Phase 8c: Variable Resolution**
+```go
+// Mirror bash precedence exactly
+func (e *Engine) BuildVars() map[string]interface{} {
+    vars := make(map[string]interface{})
+
+    // 5. Auto-detected (lowest priority)
+    vars["hostname"] = hostname()
+    vars["os"] = detectOS()
+    // ...
+
+    // 4. Defaults from _variables.sh equivalent
+    mergeDefaults(vars)
+
+    // 3. Machine-type defaults
+    if vars["machine_type"] == "work" {
+        mergeWorkDefaults(vars)
+    }
+
+    // 2. Local overrides
+    mergeLocalOverrides(vars)
+
+    // 1. Environment variables (highest priority)
+    for _, env := range os.Environ() {
+        if strings.HasPrefix(env, "DOTFILES_TMPL_") {
+            // ...
+        }
+    }
+
+    return vars
+}
+```
+
+#### 8.5 Migration Path
+
+**Option A: Modify Templates (Recommended)**
+- Change `{{#if x == "y"}}` → `{{#if (eq x "y")}}`
+- Change `{{ x | filter }}` → `{{ filter x }}`
+- One-time migration, cleaner long-term
+- Templates become standard Handlebars
+
+**Option B: Preprocessor Compatibility**
+- Keep existing template syntax unchanged
+- Add preprocessing step before raymond
+- More complex, but zero template changes
+
+**Recommendation: Option A** - The template changes are minimal and make templates
+portable to any Handlebars implementation. The preprocessing adds complexity and
+potential edge cases.
+
+#### 8.6 Testing Strategy
+
+```bash
+# For each .tmpl file:
+# 1. Render with bash
+./lib/_templates.sh render templates/configs/gitconfig.tmpl > /tmp/bash.out
+
+# 2. Render with Go
+./bin/dotfiles-go template render templates/configs/gitconfig.tmpl > /tmp/go.out
+
+# 3. Compare
+diff /tmp/bash.out /tmp/go.out
+```
+
+#### 8.7 Checklist
+
+- [ ] Implement raymond-based Engine struct
+- [ ] Register all 13 filter helpers
+- [ ] Register comparison helpers (eq, ne)
+- [ ] Implement variable resolution with correct precedence
+- [ ] Implement array loading for `{{#each}}`
+- [ ] Add syntax preprocessor (if Option B chosen)
+- [ ] Test all 4 existing template files
+- [ ] Verify byte-for-byte output match
+- [ ] Document any intentional syntax changes
 
 ### Phase 9: Remaining Commands - Full Implementation
 - [ ] doctor: Health check logic from bin/dotfiles-doctor
