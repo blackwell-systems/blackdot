@@ -4,6 +4,90 @@
 > **Author:** Claude
 > **Created:** 2025-12-07
 > **Scope:** Complete rewrite of dotfiles CLI from Zsh to Go
+> **Vision:** The Chezmoi-Killer
+
+---
+
+## Vision: Why This Will Beat Chezmoi
+
+### The Problem with Chezmoi
+
+[Chezmoi](https://www.chezmoi.io/) is the current leader, but suffers from:
+
+1. **Ugly syntax** - Go templates: `{{- if eq .chezmoi.os "darwin" -}}`
+2. **Complex mental model** - Source state vs target state reconciliation
+3. **All-or-nothing** - No feature toggles, no presets for common setups
+4. **Verbose conventions** - `.chezmoiignore`, `.chezmoitemplate`, `.chezmoiexternal`
+5. **Shell as afterthought** - [Broken fish support](https://github.com/twpayne/chezmoi/issues/909), subshell issues
+6. **No extensibility** - Can't add plugins without forking
+7. **Onboarding friction** - Steep learning curve, "couldn't figure out templates"
+8. **[Performance issues](https://github.com/twpayne/chezmoi/issues/461)** - Reports of 29+ second operations
+
+### Our Killer Differentiators
+
+| Feature | Chezmoi | blackwell-dotfiles |
+|---------|---------|-------------------|
+| **Template syntax** | `{{if eq .os "darwin"}}` | `{{#if (eq os "darwin")}}` |
+| **Feature toggles** | ❌ None | ✅ `features enable/disable` |
+| **Presets** | ❌ None | ✅ minimal/developer/claude/full |
+| **Vault integration** | Separate syntax per provider | ✅ Unified vaultmux API |
+| **Config layers** | Machine only | ✅ env > project > machine > user |
+| **Plugin system** | ❌ None | ✅ Planned (hooks, extensions) |
+| **Shell integration** | Afterthought | ✅ Shell-first design |
+| **Naming conventions** | `.chezmoitemplate` | `*.tmpl` (standard) |
+| **Onboarding** | Read the docs | `dotfiles setup --preset X` |
+| **Multi-machine** | Templates only | ✅ Templates + feature toggles |
+
+### Target Users (Chezmoi Refugees)
+
+1. **Developers** frustrated with Go template syntax
+2. **Shell power users** who need first-class shell support
+3. **Teams** wanting presets for consistent developer environments
+4. **Security-conscious** users wanting unified vault management
+5. **Tinkerers** who want to extend without forking
+
+### Roadmap to Chezmoi-Killer Status
+
+```
+Phase 1: Feature Parity ✅
+├── Single Go binary
+├── Template system (Handlebars)
+├── Multi-vault support (vaultmux)
+├── Machine-specific configs
+└── Secret management
+
+Phase 2: Differentiation (Current)
+├── Feature registry with presets
+├── Layered configuration
+├── Dual-engine templates (Go + Bash)
+└── Shell-first integration
+
+Phase 3: Superiority (Next)
+├── Plugin/hook system
+├── Community preset marketplace
+├── `dotfiles import chezmoi` migration tool
+├── VS Code / IDE extensions
+└── Team sync features
+
+Phase 4: Dominance (Future)
+├── GUI companion app
+├── Cloud sync (optional)
+├── Dotfile analytics/insights
+└── Enterprise features (SSO, audit)
+```
+
+### Marketing Positioning
+
+```
+blackwell-dotfiles - The developer-first dotfiles manager
+
+✓ Beautiful Handlebars templates (not Go template soup)
+✓ Feature toggles and presets (not all-or-nothing)
+✓ Unified secret management (not provider-specific syntax)
+✓ Shell-first design (not an afterthought)
+✓ Plugin architecture (not fork-to-extend)
+✓ One-command setup: dotfiles setup --preset developer
+```
 
 ---
 
