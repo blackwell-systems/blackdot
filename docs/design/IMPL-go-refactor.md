@@ -2630,7 +2630,7 @@ brews:
 - [x] ✅ Full parity with shell color scheme ✓
 
 ### Phase 4: CLI Commands - Skeleton ✅ (COMPLETED)
-**All 19 commands implemented with basic structure:**
+**All 18 commands implemented (migrate dropped):**
 - [x] ✅ features (list, enable, disable, check, preset)
 - [x] ✅ config (get, set, list, validate)
 - [x] ✅ vault (unlock, lock, status, list, get, sync, backend, health)
@@ -2642,7 +2642,7 @@ brews:
 - [x] ✅ hook (list, run, validate)
 - [x] ✅ encrypt (age encryption)
 - [x] ✅ packages (check, install, sync)
-- [x] ✅ migrate (v2→v3)
+- [x] ⊘ migrate (v2→v3) - DROPPED: one-time migration, users on v3 don't need it
 - [x] ✅ lint (validate syntax)
 - [x] ✅ diff (preview changes)
 - [x] ✅ metrics (visualize trends)
@@ -2696,6 +2696,32 @@ brews:
 **Design Note:** Go implementation uses vaultmux library which queries backends
 directly, while Zsh uses vault-items.json for item configuration. This is an
 intentional improvement - vaultmux provides cleaner abstraction.
+
+### Phase 7b: Full Command Implementations ✅ (COMPLETED 2025-12-07)
+**All bin/dotfiles-* commands fully implemented in Go:**
+
+| Command | Go File | Lines | Status |
+|---------|---------|-------|--------|
+| `diff` | `internal/cli/diff.go` | ~250 | ✅ Complete |
+| `doctor` | `internal/cli/doctor.go` | ~780 | ✅ Complete |
+| `drift` | `internal/cli/drift.go` | ~300 | ✅ Complete |
+| `encrypt` | `internal/cli/encrypt.go` | ~400 | ✅ Complete |
+| `hook` | `internal/cli/hook.go` | ~450 | ✅ Complete |
+| `lint` | `internal/cli/lint.go` | ~350 | ✅ Complete |
+| `metrics` | `internal/cli/metrics.go` | ~300 | ✅ Complete |
+| `packages` | `internal/cli/packages.go` | ~350 | ✅ Complete |
+| `setup` | `internal/cli/setup.go` | ~1180 | ✅ Complete |
+| `sync` | `internal/cli/sync.go` | ~530 | ✅ Complete |
+| `uninstall` | `internal/cli/uninstall.go` | ~300 | ✅ Complete |
+
+**Dropped Commands:**
+- `migrate` - One-time v2→v3 migration, users on v3 don't need it
+
+**Testing Notes:**
+- All commands tested with edge cases
+- `--status` and `--reset` flags verified for setup
+- Invalid JSON handling verified
+- State persistence verified
 
 ### Phase 8: Template System (NEXT PRIORITY)
 

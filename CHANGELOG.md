@@ -136,6 +136,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Drift state tracking for baseline comparison
   - Updates config timestamps after successful sync
 
+- **Go Setup Command** (`internal/cli/setup.go`)
+  - Full 7-phase interactive setup wizard in Go
+  - `--status/-s`: Show current setup status without running wizard
+  - `--reset/-r`: Reset state and re-run setup from beginning
+  - State inference: auto-detects existing installations from filesystem
+  - Progress bars with Unicode visualization (█░)
+  - Phase completion persistence to config.json
+  - Feature preset selection (minimal/developer/claude/full)
+  - Next steps guidance based on configuration
+  - Vault backend detection (bitwarden, 1password, pass)
+  - Claude/dotclaude integration detection
+  - Template system detection
+
 - **Interactive Template Setup** (`dotfiles template init`)
   - Prompts for essential variables: git name, email, machine type, GitHub username
   - Auto-detects defaults from `git config --global`
