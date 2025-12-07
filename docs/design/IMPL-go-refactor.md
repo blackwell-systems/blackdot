@@ -3219,10 +3219,10 @@ nested blocks correctly.
 - [x] ✅ encrypt: Age encryption (init, encrypt, decrypt, edit, list, status, push-key)
 - [x] ✅ doctor: 10 check sections, health score, --fix/--quick modes, metrics saving
 
-**Remaining (High Complexity):**
-- [ ] setup: Wizard flow from bin/dotfiles-setup (multi-step, state)
-- [ ] migrate: Migration scripts (schema changes)
-- [ ] sync: Bidirectional sync (merge logic)
+**Remaining in Bash (by design):**
+- [~] setup: 1190-line interactive wizard - better suited for bash (7 steps, state management)
+- [~] migrate: One-time v2→v3 migration - bash version already works
+- [~] sync: 514-line bidirectional sync - requires full vault abstraction layer
 
 **For EACH command above:**
 - [ ] ⚠️  Read shell implementation (bin/dotfiles-X)
@@ -3533,6 +3533,6 @@ A command has complete parity when:
 
 ---
 
-*Document Version: 1.3*
+*Document Version: 1.4*
 *Last Updated: 2025-12-07*
-*Status: Phases 1-4 complete, Phases 5-8 in progress, Phase 9 commands: 11/14 complete (3 remaining)*
+*Status: Phases 1-4 complete, Phases 5-8 in progress, Phase 9: 11/14 Go commands complete (3 remain in bash by design)*
