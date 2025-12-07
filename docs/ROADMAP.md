@@ -190,23 +190,7 @@ dotfiles template discover --apply    # Generate template + update variables
 
 ---
 
-### 10. Template-Vault Integration
-
-**Status:** Planned
-
-Store template variables in vault for cross-machine portability and backup.
-
-**Commands:**
-```bash
-dotfiles template vault push          # Push _variables.local.sh to vault
-dotfiles template vault pull          # Pull from vault to _variables.local.sh
-dotfiles template vault sync          # Bidirectional sync with conflict detection
-dotfiles template vault diff          # Show differences between local and vault
-```
-
----
-
-### 11. Curl Tools Integration
+### 10. Curl Tools Integration
 
 **Status:** Planned
 
@@ -232,7 +216,7 @@ curl-preset list
 
 ---
 
-### 12. Lima Tools Integration
+### 11. Lima Tools Integration
 
 **Status:** Planned
 
@@ -252,7 +236,7 @@ ldocker [cmd]          # lima nerdctl (containerd)
 
 ---
 
-### 13. Config Schema Validation
+### 12. Config Schema Validation
 
 **Status:** Planned
 
@@ -275,7 +259,7 @@ dotfiles config validate
 
 ---
 
-### 14. Aliases Command
+### 13. Aliases Command
 
 **Status:** Planned
 

@@ -17,6 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Offers editor for advanced configuration after essentials
   - Replaces "copy example file and edit" workflow with guided setup
 
+- **Template-Vault Integration** (`dotfiles template vault`)
+  - Push/pull template variables to/from vault for cross-machine portability
+  - `vault push` - Backup local config to vault
+  - `vault pull` - Restore config from vault on new machines
+  - `vault diff` - Show differences between local and vault
+  - `vault sync` - Bidirectional sync with conflict detection
+  - `vault status` - Show sync status at a glance
+  - Supports all vault backends (bitwarden, 1password, pass)
+  - Automatic backup on pull, conflict resolution options
+
 - **Short alias `d` for `dotfiles` command**
   - Quick access: `d status`, `d doctor`, `d features`, etc.
 
