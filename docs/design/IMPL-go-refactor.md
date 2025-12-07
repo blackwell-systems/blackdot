@@ -3462,6 +3462,14 @@ require (
 - Config system: Cross-compatible (Go writes ↔ Zsh reads)
 - Vault commands: All 8 subcommands tested with pass backend
 
+**PRIORITY 2.5: Edge Case Testing** ✅ DONE (2025-12-07)
+- Extensive testing of diff, hook, encrypt commands
+- Bugs found and fixed:
+  - `diff`: Exit code 0 when vault not unlocked → now returns non-zero
+  - `diff`: `--sync` and `--restore` could be used together → added mutual exclusion
+  - `encrypt status`: Exit code 0 when age not installed → now returns non-zero
+- Hook command: All edge cases pass (invalid points, missing scripts, failing hooks, spaces in paths, JSON config)
+
 ### ⚠️  Next Priority
 
 **PRIORITY 3: Template System Implementation**
@@ -3525,6 +3533,6 @@ A command has complete parity when:
 
 ---
 
-*Document Version: 1.1*
+*Document Version: 1.2*
 *Last Updated: 2025-12-07*
-*Status: Phases 1-4 complete, Phases 5-8 in progress*
+*Status: Phases 1-4 complete, Phases 5-8 in progress, Phase 9 medium-complexity commands complete (10/14)*
