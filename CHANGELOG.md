@@ -34,6 +34,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 20 parity tests verifying Go output matches bash output
   - Both engines coexist for safe transition (strangler fig pattern)
 
+- **Go Lint Command** (`internal/cli/lint.go`)
+  - Checks ZSH syntax: `zsh/zsh.d/*.zsh`, `zshrc`, `p10k.zsh`
+  - Checks Bash syntax: `bootstrap/*.sh`, `vault/*.sh`, `lib/*.sh`
+  - Validates config files (Brewfile existence)
+  - Runs shellcheck if available (on `bootstrap/*.sh`)
+  - Matches bash `dotfiles-lint` output format (55 files checked)
+  - `--verbose` and `--fix` flags supported
+
+- **Go Backup Command** (`internal/cli/backup.go`)
+  - Create, list, restore, clean subcommands
+  - Uses tar.gz compression matching bash format
+  - Backup naming: `backup-YYYYMMDD-HHMMSS.tar.gz` (matches bash)
+  - Cross-compatible: Can restore bash-created backups
+  - Supports both `backup-` and `backup_` naming conventions
+  - Finds latest backup by modification time
+  - Handles bash wrapper directory format in archives
+
 - **Interactive Template Setup** (`dotfiles template init`)
   - Prompts for essential variables: git name, email, machine type, GitHub username
   - Auto-detects defaults from `git config --global`

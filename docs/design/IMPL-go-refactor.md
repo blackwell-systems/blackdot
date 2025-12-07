@@ -3205,20 +3205,28 @@ nested blocks correctly.
 - [ ] Consider removing bash template engine entirely
 
 ### Phase 9: Remaining Commands - Full Implementation
-- [ ] doctor: Health check logic from bin/dotfiles-doctor
-- [ ] setup: Wizard flow from bin/dotfiles-setup
-- [ ] backup: Snapshot logic from bin/dotfiles-backup
-- [ ] drift: Detection from bin/dotfiles-drift
-- [ ] hook: Hook execution from bin/dotfiles-hook
-- [ ] encrypt: Age encryption from bin/dotfiles-encrypt
+
+**Completed:**
+- [x] ✅ lint: Shell syntax checking (55 files, matches bash output)
+- [x] ✅ backup: Create/list/restore/clean with cross-compatibility
+
+**Remaining (Low Complexity):**
+- [ ] metrics: Reads JSONL, displays stats (mostly display)
+- [ ] uninstall: Remove symlinks, cleanup (simple file ops)
+- [ ] status: Dashboard display (read config, format output)
+
+**Remaining (Medium Complexity):**
+- [ ] diff: Change preview (compare files)
+- [ ] drift: Detection from bin/dotfiles-drift (compare local vs vault)
 - [ ] packages: Brewfile logic from bin/dotfiles-packages
-- [ ] migrate: Migration scripts
-- [ ] lint: Shellcheck integration
-- [ ] diff: Change preview
-- [ ] metrics: Metrics visualization
-- [ ] sync: Bidirectional sync
-- [ ] uninstall: Cleanup
-- [ ] status: Dashboard display
+
+**Remaining (High Complexity):**
+- [ ] doctor: Health check logic from bin/dotfiles-doctor (many checks, --fix mode)
+- [ ] setup: Wizard flow from bin/dotfiles-setup (multi-step, state)
+- [ ] hook: Hook execution from bin/dotfiles-hook (script discovery)
+- [ ] encrypt: Age encryption from bin/dotfiles-encrypt (crypto)
+- [ ] migrate: Migration scripts (schema changes)
+- [ ] sync: Bidirectional sync (merge logic)
 
 **For EACH command above:**
 - [ ] ⚠️  Read shell implementation (bin/dotfiles-X)
