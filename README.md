@@ -1,4 +1,4 @@
-# Dotfiles & Vault Setup
+# Dotfiles Management Framework
 
 [![Blackwell Systems™](https://raw.githubusercontent.com/blackwell-systems/blackwell-docs-theme/main/badge-trademark.svg)](https://github.com/blackwell-systems)
 [![Shell](https://img.shields.io/badge/Shell-Zsh-89e051?logo=zsh&logoColor=white)](https://www.zsh.org/)
@@ -892,6 +892,47 @@ Shows which Brewfile packages are installed, missing, or outdated. Works across 
 
 </details>
 
+<details>
+<summary><b>Developer Tools Integrations</b> - 90+ aliases across all major toolchains</summary>
+
+Comprehensive productivity integrations for AWS, CDK, Rust, Go, Python, Node.js (NVM), and Java (SDKMAN). All features are opt-in via Feature Registry.
+
+**AWS Tools** (`aws_helpers`):
+```bash
+awsswitch      # Interactive profile picker with auto-login
+awsprofiles    # List all profiles
+awswho         # Current identity (account, user, ARN)
+awsassume      # Assume role
+awslogin       # SSO login with profile picker
+```
+
+**CDK Tools** (`cdk_tools`): 10 aliases + helpers for AWS CDK deployments (`cdkd`, `cdks`, `cdkdf`, `cdkw`), stack management, hotswap deploys
+
+**Rust Tools** (`rust_tools`): 10 aliases for cargo workflows (`cb`, `cr`, `ct`, `cc`, `cf`), toolchain switching, expand macros, outdated checks
+
+**Go Tools** (`go_tools`): 9 aliases for Go development (`gob`, `gor`, `got`, `gof`, `gom`), coverage, benchmarks, linting
+
+**Python Tools** (`python_tools`):
+- **uv** integration: 10 aliases for fast package management (`uvs`, `uvr`, `uva`, `uvl`, `uvu`)
+- **pytest** integration: 8 aliases (`pt`, `ptv`, `ptx`, `ptc`, `pts`)
+- **Auto-venv**: Prompts to activate virtualenv on `cd` (configurable: notify/auto/off)
+
+**NVM** (`nvm_integration`): Lazy-loaded Node.js version management, auto-switches based on `.nvmrc`
+
+**SDKMAN** (`sdkman_integration`): Lazy-loaded Java SDK management (Java, Gradle, Maven, Kotlin, Scala, etc.)
+
+All tools include shell completions and helper functions. See [Developer Tools Documentation](docs/developer-tools.md) for full reference.
+
+Enable individual tools:
+```bash
+dotfiles features enable rust_tools
+dotfiles features enable python_tools
+# Or use presets:
+dotfiles features preset developer  # Enables all dev tools
+```
+
+</details>
+
 ### Additional Features
 
 <details>
@@ -1115,6 +1156,7 @@ See [Brewfile](Brewfile) for complete package list.
 - **[Vault System](docs/vault-README.md)** - Multi-backend secrets management
 - **[Backup System](docs/backup.md)** - Snapshot and restore configuration
 - **[Hook System](docs/hooks.md)** - Lifecycle hooks for custom behavior
+- **[Developer Tools](docs/developer-tools.md)** - AWS, CDK, Rust, Go, Python, NVM, SDKMAN integrations
 - **[Configuration Layers](docs/configuration-layers.md)** - Hierarchical config resolution
 - **[Templates](docs/templates.md)** - Machine-specific configuration
 - **[Architecture](docs/architecture.md)** - System design and components
