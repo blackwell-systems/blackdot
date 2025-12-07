@@ -51,6 +51,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Finds latest backup by modification time
   - Handles bash wrapper directory format in archives
 
+- **Go Metrics Command** (`internal/cli/metrics.go`)
+  - JSONL metrics visualization from `~/.dotfiles-metrics.jsonl`
+  - Three modes: summary (default), `--graph` (ASCII bar chart), `--all` (full list)
+  - Statistics: average score, total errors/warnings/fixed, perfect runs %
+  - Trend analysis: compares last 5 vs previous 5 health checks
+  - Platform distribution display
+  - Color-coded output matching bash behavior
+
+- **Go Uninstall Command** (`internal/cli/uninstall.go`)
+  - `--dry-run/-n`: Preview what would be removed
+  - `--keep-secrets/-k`: Preserve SSH/AWS/Git configs
+  - Removes symlinks: `.zshrc`, `.p10k.zsh`, ghostty config, `.claude`
+  - Removes config files: metrics file, backups directory
+  - Interactive confirmation for secrets and repository deletion
+  - Output matches bash implementation exactly
+
+- **Go Status Command** (`internal/cli/status.go`)
+  - City skyline ASCII art visual dashboard
+  - Checks symlink status (zshrc, claude, /workspace)
+  - SSH keys loaded count
+  - AWS authentication status
+  - Lima VM status (macOS only)
+  - Claude profile detection (dotclaude integration)
+  - Suggested fixes for any detected issues
+
+- **Go Packages Command** (`internal/cli/packages.go`)
+  - `--check/-c`: Show what's missing from Brewfile
+  - `--install/-i`: Install missing packages via brew bundle
+  - `--outdated/-o`: Show outdated Homebrew packages
+  - `--tier/-t`: Select tier (minimal/enhanced/full)
+  - Tier priority: flag > config.json > BREWFILE_TIER env > default
+  - Parses Brewfile for formulas and casks
+  - Compares against installed packages
+
 - **Interactive Template Setup** (`dotfiles template init`)
   - Prompts for essential variables: git name, email, machine type, GitHub username
   - Auto-detects defaults from `git config --global`

@@ -81,18 +81,7 @@ func newMigrateCmd() *cobra.Command {
 	return cmd
 }
 
-func newPackagesCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:     "packages",
-		Aliases: []string{"pkg"},
-		Short:   "Check/install Brewfile packages",
-		Long:    `Manage Homebrew packages defined in Brewfile.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Packages")
-			fmt.Println("(not yet implemented)")
-		},
-	}
-}
+// newPackagesCmd is now in packages.go
 
 func newSetupCmd() *cobra.Command {
 	return &cobra.Command{
