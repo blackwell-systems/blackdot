@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Developer Tools Documentation** (`docs/developer-tools.md`)
+  - Comprehensive 400+ line guide covering AWS, CDK, Rust, Go, NVM, SDKMAN integrations
+  - All aliases and helper commands documented with examples
+  - Example workflows for each tool suite
+  - Feature flags for enabling/disabling tool integrations
+  - Added to Docsify coverpage, sidebar, and README Quick Navigation
+
+- **ZSH Hooks Documentation** (`docs/hooks.md`)
+  - New "Understanding ZSH Hooks" section explaining native ZSH hook functions
+  - Coverage of `precmd_functions`, `preexec_functions`, `chpwd_functions`, `zshexit_functions`, `periodic_functions`, `zshaddhistory_functions`
+  - Common patterns: auto-venv activation, command timing, history filtering
+  - How dotfiles hooks map to native ZSH mechanisms
+  - Performance considerations and best practices
+  - Using native ZSH hooks alongside dotfiles hooks
+
 - **CDK Tools Integration** (`cdk_tools` feature)
   - Aliases: `cdkd`, `cdks`, `cdkdf`, `cdkw`, `cdkls`, `cdkdst`, `cdkb`, `cdkda`, `cdkhs`, `cdkhsf`
   - Helpers: `cdk-env`, `cdkall`, `cdkcheck`, `cdkhotswap`, `cdkoutputs`, `cdkinit`, `cdkctx`
@@ -45,6 +60,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `integration` category for all external tool helpers (aws, cdk, rust, go, nvm, sdkman, etc.)
 
 ### Fixed
+
+- **Hook command early loop exit** (`bin/dotfiles-hook`)
+  - Fixed `((i++))` returning falsy value when i=0, causing loop to exit prematurely
+  - Changed to safe increment pattern: `i=$((i + 1))` and `count=$((count + 1))`
+  - `dotfiles hook list` now correctly shows all hooks and categories
+
+- **Missing Template & Encryption hook categories** (`bin/dotfiles-hook`)
+  - Added Template hooks (`pre_template_render`, `post_template_render`) to list and points
+  - Added Encryption hooks (`pre_encrypt`, `post_decrypt`) to list and points
+  - Updated usage help text with all 7 hook categories
 
 - **Metrics now saved after `dotfiles doctor`** - Health scores written to `~/.dotfiles-metrics.jsonl`
 - **Vault unlock errexit issues** - Fixed silent exit on `((attempts++))` and session caching
