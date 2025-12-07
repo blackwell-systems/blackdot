@@ -162,91 +162,85 @@ rust-expand() {
 # =========================
 
 rusttools() {
-    # Colors
-    local orange='\033[0;33m'
-    local red='\033[0;31m'
-    local green='\033[0;32m'
-    local cyan='\033[0;36m'
-    local bold='\033[1m'
-    local dim='\033[2m'
-    local nc='\033[0m'
+    # Source theme colors
+    source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
 
     # Check if Rust is installed and if we're in a Rust project
     local logo_color has_rust in_project
     if command -v rustc &>/dev/null; then
         has_rust=true
         if [[ -f "Cargo.toml" ]]; then
-            logo_color="$orange"
+            logo_color="$CLR_RUST"
             in_project=true
         else
-            logo_color="$cyan"
+            logo_color="$CLR_PRIMARY"
             in_project=false
         fi
     else
         has_rust=false
         in_project=false
-        logo_color="$red"
+        logo_color="$CLR_ERROR"
     fi
 
     echo ""
-    echo -e "${logo_color}  ██████╗ ██╗   ██╗███████╗████████╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗${nc}"
-    echo -e "${logo_color}  ██╔══██╗██║   ██║██╔════╝╚══██╔══╝    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝${nc}"
-    echo -e "${logo_color}  ██████╔╝██║   ██║███████╗   ██║          ██║   ██║   ██║██║   ██║██║     ███████╗${nc}"
-    echo -e "${logo_color}  ██╔══██╗██║   ██║╚════██║   ██║          ██║   ██║   ██║██║   ██║██║     ╚════██║${nc}"
-    echo -e "${logo_color}  ██║  ██║╚██████╔╝███████║   ██║          ██║   ╚██████╔╝╚██████╔╝███████╗███████║${nc}"
-    echo -e "${logo_color}  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝          ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝${nc}"
+    echo -e "${logo_color}  ██████╗ ██╗   ██╗███████╗████████╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗${CLR_NC}"
+    echo -e "${logo_color}  ██╔══██╗██║   ██║██╔════╝╚══██╔══╝    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝${CLR_NC}"
+    echo -e "${logo_color}  ██████╔╝██║   ██║███████╗   ██║          ██║   ██║   ██║██║   ██║██║     ███████╗${CLR_NC}"
+    echo -e "${logo_color}  ██╔══██╗██║   ██║╚════██║   ██║          ██║   ██║   ██║██║   ██║██║     ╚════██║${CLR_NC}"
+    echo -e "${logo_color}  ██║  ██║╚██████╔╝███████║   ██║          ██║   ╚██████╔╝╚██████╔╝███████╗███████║${CLR_NC}"
+    echo -e "${logo_color}  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝          ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝${CLR_NC}"
     echo ""
 
     # Aliases section
-    echo -e "  ${dim}╭─────────────────────────────────────────────────────────────────╮${nc}"
-    echo -e "  ${dim}│${nc}  ${bold}${cyan}CARGO ALIASES${nc}                                                ${dim}│${nc}"
-    echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}cb${nc}                 ${dim}cargo build${nc}                               ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}cr${nc}                 ${dim}cargo run${nc}                                 ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}ct${nc}                 ${dim}cargo test${nc}                                ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}cc${nc}                 ${dim}cargo check${nc}                               ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}ccl${nc}                ${dim}cargo clippy${nc}                              ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}cf${nc}                 ${dim}cargo fmt${nc}                                 ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}cbr${nc}                ${dim}cargo build --release${nc}                     ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}cw${nc}                 ${dim}cargo watch${nc}                               ${dim}│${nc}"
-    echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
-    echo -e "  ${dim}│${nc}  ${bold}${cyan}HELPER FUNCTIONS${nc}                                            ${dim}│${nc}"
-    echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}rust-update${nc}        ${dim}Update Rust toolchain (rustup update)${nc}     ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}rust-switch${nc} <tc>   ${dim}Switch toolchain (stable/nightly/beta)${nc}    ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}rust-new${nc} <name>    ${dim}Create new Rust project${nc}                   ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}rust-lint${nc}          ${dim}Run check + clippy${nc}                        ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}rust-fix${nc}           ${dim}Format + clippy auto-fix${nc}                  ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}rust-outdated${nc}      ${dim}Show outdated dependencies${nc}                ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}rust-expand${nc}        ${dim}Expand macros (debugging)${nc}                 ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${orange}rust-tools-install${nc} ${dim}Install common Rust tools${nc}                 ${dim}│${nc}"
-    echo -e "  ${dim}╰─────────────────────────────────────────────────────────────────╯${nc}"
+    echo -e "  ${CLR_BOX}╭─────────────────────────────────────────────────────────────────╮${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_HEADER}CARGO ALIASES${CLR_NC}                                                ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}├─────────────────────────────────────────────────────────────────┤${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}cb${CLR_NC}                 ${CLR_MUTED}cargo build${CLR_NC}                               ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}cr${CLR_NC}                 ${CLR_MUTED}cargo run${CLR_NC}                                 ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}ct${CLR_NC}                 ${CLR_MUTED}cargo test${CLR_NC}                                ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}cc${CLR_NC}                 ${CLR_MUTED}cargo check${CLR_NC}                               ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}ccl${CLR_NC}                ${CLR_MUTED}cargo clippy${CLR_NC}                              ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}cf${CLR_NC}                 ${CLR_MUTED}cargo fmt${CLR_NC}                                 ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}cbr${CLR_NC}                ${CLR_MUTED}cargo build --release${CLR_NC}                     ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}cw${CLR_NC}                 ${CLR_MUTED}cargo watch${CLR_NC}                               ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}├─────────────────────────────────────────────────────────────────┤${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_HEADER}HELPER FUNCTIONS${CLR_NC}                                            ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}├─────────────────────────────────────────────────────────────────┤${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}rust-update${CLR_NC}        ${CLR_MUTED}Update Rust toolchain (rustup update)${CLR_NC}     ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}rust-switch${CLR_NC} <tc>   ${CLR_MUTED}Switch toolchain (stable/nightly/beta)${CLR_NC}    ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}rust-new${CLR_NC} <name>    ${CLR_MUTED}Create new Rust project${CLR_NC}                   ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}rust-lint${CLR_NC}          ${CLR_MUTED}Run check + clippy${CLR_NC}                        ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}rust-fix${CLR_NC}           ${CLR_MUTED}Format + clippy auto-fix${CLR_NC}                  ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}rust-outdated${CLR_NC}      ${CLR_MUTED}Show outdated dependencies${CLR_NC}                ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}rust-expand${CLR_NC}        ${CLR_MUTED}Expand macros (debugging)${CLR_NC}                 ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_RUST}rust-tools-install${CLR_NC} ${CLR_MUTED}Install common Rust tools${CLR_NC}                 ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}╰─────────────────────────────────────────────────────────────────╯${CLR_NC}"
     echo ""
 
     # Current Status
-    echo -e "  ${bold}Current Status${nc}"
-    echo -e "  ${dim}───────────────────────────────────────${nc}"
+    echo -e "  ${CLR_BOLD}Current Status${CLR_NC}"
+    echo -e "  ${CLR_MUTED}───────────────────────────────────────${CLR_NC}"
 
     if [[ "$has_rust" == "true" ]]; then
         local rust_version toolchain
         rust_version=$(rustc --version 2>/dev/null | cut -d' ' -f2)
         toolchain=$(rustup show active-toolchain 2>/dev/null | cut -d' ' -f1)
-        echo -e "    ${dim}Rust${nc}      ${green}✓ installed${nc} ${dim}($rust_version)${nc}"
-        echo -e "    ${dim}Toolchain${nc} ${cyan}$toolchain${nc}"
+        echo -e "    ${CLR_MUTED}Rust${CLR_NC}      ${CLR_SUCCESS}✓ installed${CLR_NC} ${CLR_MUTED}($rust_version)${CLR_NC}"
+        echo -e "    ${CLR_MUTED}Toolchain${CLR_NC} ${CLR_PRIMARY}$toolchain${CLR_NC}"
     else
-        echo -e "    ${dim}Rust${nc}      ${red}✗ not installed${nc} ${dim}(curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh)${nc}"
+        echo -e "    ${CLR_MUTED}Rust${CLR_NC}      ${CLR_ERROR}✗ not installed${CLR_NC} ${CLR_MUTED}(curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh)${CLR_NC}"
     fi
 
     if [[ "$in_project" == "true" ]]; then
-        echo -e "    ${dim}Project${nc}   ${green}✓ Cargo.toml found${nc}"
+        echo -e "    ${CLR_MUTED}Project${CLR_NC}   ${CLR_SUCCESS}✓ Cargo.toml found${CLR_NC}"
         # Try to get package name
         local pkg_name
         pkg_name=$(grep -m1 '^name' Cargo.toml 2>/dev/null | cut -d'"' -f2)
         if [[ -n "$pkg_name" ]]; then
-            echo -e "    ${dim}Package${nc}   ${cyan}$pkg_name${nc}"
+            echo -e "    ${CLR_MUTED}Package${CLR_NC}   ${CLR_PRIMARY}$pkg_name${CLR_NC}"
         fi
     else
-        echo -e "    ${dim}Project${nc}   ${dim}not in Rust project${nc}"
+        echo -e "    ${CLR_MUTED}Project${CLR_NC}   ${CLR_MUTED}not in Rust project${CLR_NC}"
     fi
 
     echo ""
