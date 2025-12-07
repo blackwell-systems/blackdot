@@ -914,7 +914,7 @@ process_conditionals() {
 
                 if [[ ${#next_if} -lt ${#next_endif} ]]; then
                     # Next is an {{#if
-                    block+="${remaining%%\{\{#if *}}"
+                    block+="${remaining%%\{\{#if *}"
                     remaining="${remaining#*\{\{#if }"
                     local nested_cond="${remaining%%\}\}*}"
                     remaining="${remaining#*\}\}}"
@@ -932,6 +932,10 @@ process_conditionals() {
             elif [[ "$remaining" == *'{{/if}}'* ]]; then
                 block+="${remaining%%\{\{/if\}\}*}"
                 remaining="${remaining#*\{\{/if\}\}}"
+                # Preserve nested {{/if}} tags (same logic as main branch)
+                if (( depth > 1 )); then
+                    block+="{{/if}}"
+                fi
                 (( depth-- ))
             else
                 # No more tags found
