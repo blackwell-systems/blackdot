@@ -175,104 +175,97 @@ cdkctx-clear() {
 # =========================
 
 cdktools() {
-    # Colors
-    local green='\033[0;32m'
-    local red='\033[0;31m'
-    local yellow='\033[0;33m'
-    local cyan='\033[0;36m'
-    local magenta='\033[0;35m'
-    local bold='\033[1m'
-    local dim='\033[2m'
-    local nc='\033[0m'
+    # Source theme colors
+    source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
 
     # Check if CDK is installed and if we're in a CDK project
     local logo_color has_cdk in_project
     if command -v cdk &>/dev/null; then
         has_cdk=true
         if [[ -f "cdk.json" ]]; then
-            logo_color="$green"
+            logo_color="$CLR_CDK"
             in_project=true
         else
-            logo_color="$cyan"
+            logo_color="$CLR_PRIMARY"
             in_project=false
         fi
     else
         has_cdk=false
         in_project=false
-        logo_color="$red"
+        logo_color="$CLR_ERROR"
     fi
 
     echo ""
-    echo -e "${logo_color}   ██████╗██████╗ ██╗  ██╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗${nc}"
-    echo -e "${logo_color}  ██╔════╝██╔══██╗██║ ██╔╝    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝${nc}"
-    echo -e "${logo_color}  ██║     ██║  ██║█████╔╝        ██║   ██║   ██║██║   ██║██║     ███████╗${nc}"
-    echo -e "${logo_color}  ██║     ██║  ██║██╔═██╗        ██║   ██║   ██║██║   ██║██║     ╚════██║${nc}"
-    echo -e "${logo_color}  ╚██████╗██████╔╝██║  ██╗       ██║   ╚██████╔╝╚██████╔╝███████╗███████║${nc}"
-    echo -e "${logo_color}   ╚═════╝╚═════╝ ╚═╝  ╚═╝       ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝${nc}"
+    echo -e "${logo_color}   ██████╗██████╗ ██╗  ██╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗${CLR_NC}"
+    echo -e "${logo_color}  ██╔════╝██╔══██╗██║ ██╔╝    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝${CLR_NC}"
+    echo -e "${logo_color}  ██║     ██║  ██║█████╔╝        ██║   ██║   ██║██║   ██║██║     ███████╗${CLR_NC}"
+    echo -e "${logo_color}  ██║     ██║  ██║██╔═██╗        ██║   ██║   ██║██║   ██║██║     ╚════██║${CLR_NC}"
+    echo -e "${logo_color}  ╚██████╗██████╔╝██║  ██╗       ██║   ╚██████╔╝╚██████╔╝███████╗███████║${CLR_NC}"
+    echo -e "${logo_color}   ╚═════╝╚═════╝ ╚═╝  ╚═╝       ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝${CLR_NC}"
     echo ""
 
     # Aliases section
-    echo -e "  ${dim}╭─────────────────────────────────────────────────────────────────╮${nc}"
-    echo -e "  ${dim}│${nc}  ${bold}${cyan}ALIASES${nc}                                                      ${dim}│${nc}"
-    echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdkd${nc}               ${dim}cdk deploy${nc}                                 ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdks${nc}               ${dim}cdk synth${nc}                                  ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdkdf${nc}              ${dim}cdk diff${nc}                                   ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdkw${nc}               ${dim}cdk watch${nc}                                  ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdkls${nc}              ${dim}cdk list${nc}                                   ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdkdst${nc}             ${dim}cdk destroy${nc}                                ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdkb${nc}               ${dim}cdk bootstrap${nc}                              ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdkda${nc}              ${dim}cdk deploy --all${nc}                           ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdkhs${nc}              ${dim}cdk deploy --hotswap${nc}                       ${dim}│${nc}"
-    echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
-    echo -e "  ${dim}│${nc}  ${bold}${cyan}HELPER FUNCTIONS${nc}                                            ${dim}│${nc}"
-    echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdk-env${nc} [profile]  ${dim}Set CDK_DEFAULT_ACCOUNT/REGION from AWS${nc}    ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdk-env-clear${nc}      ${dim}Clear CDK environment variables${nc}            ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdkall${nc}             ${dim}Deploy all stacks${nc}                          ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdkcheck${nc} [stack]   ${dim}Diff then prompt to deploy${nc}                 ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdkhotswap${nc} [stack] ${dim}Fast deploy for Lambda/ECS${nc}                 ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdkoutputs${nc} <stack> ${dim}Show CloudFormation stack outputs${nc}          ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdkinit${nc} [lang]     ${dim}Initialize new CDK project${nc}                 ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdkctx${nc}             ${dim}Show CDK context values${nc}                    ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}cdkctx-clear${nc}       ${dim}Clear CDK context cache${nc}                    ${dim}│${nc}"
-    echo -e "  ${dim}╰─────────────────────────────────────────────────────────────────╯${nc}"
+    echo -e "  ${CLR_BOX}╭─────────────────────────────────────────────────────────────────╮${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_HEADER}ALIASES${CLR_NC}                                                      ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}├─────────────────────────────────────────────────────────────────┤${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdkd${CLR_NC}               ${CLR_MUTED}cdk deploy${CLR_NC}                                 ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdks${CLR_NC}               ${CLR_MUTED}cdk synth${CLR_NC}                                  ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdkdf${CLR_NC}              ${CLR_MUTED}cdk diff${CLR_NC}                                   ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdkw${CLR_NC}               ${CLR_MUTED}cdk watch${CLR_NC}                                  ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdkls${CLR_NC}              ${CLR_MUTED}cdk list${CLR_NC}                                   ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdkdst${CLR_NC}             ${CLR_MUTED}cdk destroy${CLR_NC}                                ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdkb${CLR_NC}               ${CLR_MUTED}cdk bootstrap${CLR_NC}                              ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdkda${CLR_NC}              ${CLR_MUTED}cdk deploy --all${CLR_NC}                           ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdkhs${CLR_NC}              ${CLR_MUTED}cdk deploy --hotswap${CLR_NC}                       ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}├─────────────────────────────────────────────────────────────────┤${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_HEADER}HELPER FUNCTIONS${CLR_NC}                                            ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}├─────────────────────────────────────────────────────────────────┤${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdk-env${CLR_NC} [profile]  ${CLR_MUTED}Set CDK_DEFAULT_ACCOUNT/REGION from AWS${CLR_NC}    ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdk-env-clear${CLR_NC}      ${CLR_MUTED}Clear CDK environment variables${CLR_NC}            ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdkall${CLR_NC}             ${CLR_MUTED}Deploy all stacks${CLR_NC}                          ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdkcheck${CLR_NC} [stack]   ${CLR_MUTED}Diff then prompt to deploy${CLR_NC}                 ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdkhotswap${CLR_NC} [stack] ${CLR_MUTED}Fast deploy for Lambda/ECS${CLR_NC}                 ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdkoutputs${CLR_NC} <stack> ${CLR_MUTED}Show CloudFormation stack outputs${CLR_NC}          ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdkinit${CLR_NC} [lang]     ${CLR_MUTED}Initialize new CDK project${CLR_NC}                 ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdkctx${CLR_NC}             ${CLR_MUTED}Show CDK context values${CLR_NC}                    ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}cdkctx-clear${CLR_NC}       ${CLR_MUTED}Clear CDK context cache${CLR_NC}                    ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}╰─────────────────────────────────────────────────────────────────╯${CLR_NC}"
     echo ""
 
     # Current Status
-    echo -e "  ${bold}Current Status${nc}"
-    echo -e "  ${dim}───────────────────────────────────────${nc}"
+    echo -e "  ${CLR_BOLD}Current Status${CLR_NC}"
+    echo -e "  ${CLR_MUTED}───────────────────────────────────────${CLR_NC}"
 
     if [[ "$has_cdk" == "true" ]]; then
         local cdk_version
         cdk_version=$(cdk --version 2>/dev/null | head -1)
-        echo -e "    ${dim}CDK${nc}       ${green}✓ installed${nc} ${dim}($cdk_version)${nc}"
+        echo -e "    ${CLR_MUTED}CDK${CLR_NC}       ${CLR_SUCCESS}✓ installed${CLR_NC} ${CLR_MUTED}($cdk_version)${CLR_NC}"
     else
-        echo -e "    ${dim}CDK${nc}       ${red}✗ not installed${nc} ${dim}(npm install -g aws-cdk)${nc}"
+        echo -e "    ${CLR_MUTED}CDK${CLR_NC}       ${CLR_ERROR}✗ not installed${CLR_NC} ${CLR_MUTED}(npm install -g aws-cdk)${CLR_NC}"
     fi
 
     if [[ "$in_project" == "true" ]]; then
-        echo -e "    ${dim}Project${nc}   ${green}✓ cdk.json found${nc}"
+        echo -e "    ${CLR_MUTED}Project${CLR_NC}   ${CLR_SUCCESS}✓ cdk.json found${CLR_NC}"
         # Show app language if detectable
         if [[ -f "package.json" ]]; then
-            echo -e "    ${dim}Language${nc}  ${cyan}TypeScript/JavaScript${nc}"
+            echo -e "    ${CLR_MUTED}Language${CLR_NC}  ${CLR_PRIMARY}TypeScript/JavaScript${CLR_NC}"
         elif [[ -f "requirements.txt" ]] || [[ -f "setup.py" ]]; then
-            echo -e "    ${dim}Language${nc}  ${cyan}Python${nc}"
+            echo -e "    ${CLR_MUTED}Language${CLR_NC}  ${CLR_PRIMARY}Python${CLR_NC}"
         elif [[ -f "pom.xml" ]]; then
-            echo -e "    ${dim}Language${nc}  ${cyan}Java${nc}"
+            echo -e "    ${CLR_MUTED}Language${CLR_NC}  ${CLR_PRIMARY}Java${CLR_NC}"
         elif [[ -f "go.mod" ]]; then
-            echo -e "    ${dim}Language${nc}  ${cyan}Go${nc}"
+            echo -e "    ${CLR_MUTED}Language${CLR_NC}  ${CLR_PRIMARY}Go${CLR_NC}"
         fi
     else
-        echo -e "    ${dim}Project${nc}   ${dim}not in CDK project${nc}"
+        echo -e "    ${CLR_MUTED}Project${CLR_NC}   ${CLR_MUTED}not in CDK project${CLR_NC}"
     fi
 
     # CDK environment
     if [[ -n "${CDK_DEFAULT_ACCOUNT:-}" ]]; then
-        echo -e "    ${dim}Account${nc}   ${cyan}$CDK_DEFAULT_ACCOUNT${nc}"
+        echo -e "    ${CLR_MUTED}Account${CLR_NC}   ${CLR_PRIMARY}$CDK_DEFAULT_ACCOUNT${CLR_NC}"
     fi
     if [[ -n "${CDK_DEFAULT_REGION:-}" ]]; then
-        echo -e "    ${dim}Region${nc}    ${cyan}$CDK_DEFAULT_REGION${nc}"
+        echo -e "    ${CLR_MUTED}Region${CLR_NC}    ${CLR_PRIMARY}$CDK_DEFAULT_REGION${CLR_NC}"
     fi
 
     echo ""
