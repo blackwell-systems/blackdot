@@ -14,7 +14,7 @@
 #   $CLR_WARNING, $CLR_INFO, $CLR_MUTED, $CLR_BOLD, $CLR_NC
 #
 # Tool brand colors:
-#   $CLR_RUST, $CLR_GO, $CLR_PYTHON, $CLR_AWS, $CLR_CDK
+#   $CLR_RUST, $CLR_GO, $CLR_PYTHON, $CLR_AWS, $CLR_CDK, $CLR_SSH
 # ============================================================
 
 # Prevent multiple sourcing
@@ -62,6 +62,7 @@ if [[ "$_colors_enabled" == "true" ]]; then
     CLR_CDK='\033[0;32m'          # Green (CDK/CloudFormation green)
     CLR_NODE='\033[0;32m'         # Green (Node.js green)
     CLR_JAVA='\033[0;31m'         # Red (Java red)
+    CLR_SSH='\033[0;35m'          # Magenta (SSH/security purple)
 
     # Box drawing colors (for styled help output)
     CLR_BOX='\033[2m'             # Dim for box borders
@@ -84,6 +85,7 @@ else
     CLR_CDK=''
     CLR_NODE=''
     CLR_JAVA=''
+    CLR_SSH=''
     CLR_BOX=''
     CLR_HEADER=''
 fi
@@ -101,7 +103,7 @@ fi
 # ============================================================
 export CLR_PRIMARY CLR_SECONDARY CLR_SUCCESS CLR_ERROR
 export CLR_WARNING CLR_INFO CLR_MUTED CLR_BOLD CLR_NC
-export CLR_RUST CLR_GO CLR_PYTHON CLR_AWS CLR_CDK CLR_NODE CLR_JAVA
+export CLR_RUST CLR_GO CLR_PYTHON CLR_AWS CLR_CDK CLR_NODE CLR_JAVA CLR_SSH
 export CLR_BOX CLR_HEADER
 
 # ============================================================

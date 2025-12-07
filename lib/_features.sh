@@ -46,6 +46,7 @@ typeset -gA FEATURE_REGISTRY=(
     ["rust_tools"]="true|Rust/Cargo aliases and helpers|integration|"
     ["go_tools"]="true|Go aliases and helpers|integration|"
     ["python_tools"]="true|Python/uv aliases, auto-venv, pytest helpers|integration|"
+    ["ssh_tools"]="true|SSH config, key management, agent, and tunnel helpers|integration|"
     ["nvm_integration"]="true|Lazy-loaded NVM for Node.js version management|integration|"
     ["sdkman_integration"]="true|Lazy-loaded SDKMAN for Java/Gradle/Kotlin|integration|"
     ["dotclaude"]="false|dotclaude profile management for Claude Code|integration|claude_integration"
@@ -544,9 +545,9 @@ feature_missing_deps() {
 
 typeset -gA FEATURE_PRESETS=(
     ["minimal"]="shell config_layers"
-    ["developer"]="shell vault aws_helpers cdk_tools rust_tools go_tools python_tools nvm_integration sdkman_integration git_hooks modern_cli config_layers"
+    ["developer"]="shell vault aws_helpers cdk_tools rust_tools go_tools python_tools ssh_tools nvm_integration sdkman_integration git_hooks modern_cli config_layers"
     ["claude"]="shell workspace_symlink claude_integration vault git_hooks modern_cli config_layers"
-    ["full"]="shell workspace_symlink claude_integration vault templates aws_helpers cdk_tools rust_tools go_tools python_tools git_hooks drift_check backup_auto health_metrics config_layers modern_cli nvm_integration sdkman_integration"
+    ["full"]="shell workspace_symlink claude_integration vault templates aws_helpers cdk_tools rust_tools go_tools python_tools ssh_tools git_hooks drift_check backup_auto health_metrics config_layers modern_cli nvm_integration sdkman_integration"
 )
 
 # Enable a preset

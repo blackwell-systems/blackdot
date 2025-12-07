@@ -15,10 +15,11 @@ The dotfiles framework provides deep integrations with modern developer tools. E
 | [Rust Tools](#rust-tools) | `rust_tools` | Build, test, clippy, fmt, cargo-watch |
 | [Go Tools](#go-tools) | `go_tools` | Build, test, coverage, module management |
 | [Python Tools](#python-tools) | `python_tools` | uv package manager, pytest, auto-venv |
+| [SSH Tools](#ssh-tools) | `ssh_tools` | Config, keys, agent, and tunnel management |
 | [NVM](#nvm-nodejs) | `nvm_integration` | Lazy-loaded Node.js version manager |
 | [SDKMAN](#sdkman-java) | `sdkman_integration` | Lazy-loaded Java/Gradle/Kotlin manager |
 
-**Total:** 90+ aliases across all toolchains, with shell completions and helpers.
+**Total:** 100+ aliases across all toolchains, with shell completions and helpers.
 
 ---
 
@@ -380,6 +381,97 @@ uvr python -m uvicorn main:app --reload
 # Run tests
 ptxv                 # Stop on first failure, verbose
 pt-cov               # Coverage with HTML report
+```
+
+---
+
+## SSH Tools
+
+```
+  ███████╗███████╗██╗  ██╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗
+  ██╔════╝██╔════╝██║  ██║    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝
+  ███████╗███████╗███████║       ██║   ██║   ██║██║   ██║██║     ███████╗
+  ╚════██║╚════██║██╔══██║       ██║   ██║   ██║██║   ██║██║     ╚════██║
+  ███████║███████║██║  ██║       ██║   ╚██████╔╝╚██████╔╝███████╗███████║
+  ╚══════╝╚══════╝╚═╝  ╚═╝       ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
+```
+
+**Feature:** `ssh_tools` | **File:** `zsh/zsh.d/65-ssh.zsh` | **Status:** `sshtools`
+
+### SSH Config Management
+
+| Command | Description |
+|---------|-------------|
+| `sshlist` | List all hosts from `~/.ssh/config` |
+| `sshgo <host>` | Quick connect with completion |
+| `sshedit` | Open SSH config in `$EDITOR` |
+| `sshadd-host <name>` | Interactive wizard to add new host |
+
+### SSH Key Management
+
+| Command | Description |
+|---------|-------------|
+| `sshkeys` | List all keys with fingerprints |
+| `sshgen <name>` | Generate new ED25519 key |
+| `sshcopy <host>` | Copy public key to remote host |
+| `sshfp [key]` | Show fingerprint(s) (SHA256/MD5) |
+
+### SSH Agent Commands
+
+| Command | Description |
+|---------|-------------|
+| `sshagent` | Start agent / show loaded keys |
+| `sshload [key]` | Add key to agent |
+| `sshunload <key>` | Remove key from agent |
+| `sshclear` | Remove all keys from agent |
+
+### SSH Tunnel Helpers
+
+| Command | Description |
+|---------|-------------|
+| `sshtunnel <host> <local> [remote]` | Create port forward |
+| `sshsocks <host> [port]` | SOCKS5 proxy (default: 1080) |
+| `sshtunnels` | List active SSH connections |
+
+### Features
+
+- **Agent detection:** Logo color indicates agent status (green=running, yellow=no keys, red=stopped)
+- **Tab completions:** `sshgo <TAB>` completes from configured hosts
+- **Key name resolution:** Commands find keys by name (`sshload github` finds `id_ed25519_github`)
+- **Interactive host setup:** `sshadd-host` guides through adding new SSH hosts
+
+### Example Workflow
+
+```bash
+# Start of day: check agent status
+sshagent
+# SSH Agent Status:
+#   PID: 12345
+#   Socket: /tmp/ssh-xxx/agent.12345
+# Loaded keys:
+#   (no keys loaded)
+
+# Load your work keys
+sshload github
+sshload work-server
+
+# Quick connect to a host
+sshgo prod-server
+
+# Create a tunnel for database access
+sshtunnel db-server 5432
+
+# List what's configured
+sshlist
+# SSH Hosts:
+#   github
+#   work-server
+#   prod-server
+#   db-server
+# Total: 4 hosts
+
+# Generate a new key for a project
+sshgen client-project "Client Project Deploy Key"
 ```
 
 ---
