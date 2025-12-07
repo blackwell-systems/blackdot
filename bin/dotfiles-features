@@ -334,6 +334,24 @@ cmd_check() {
     fi
 }
 
+cmd_validate() {
+    echo -e "${BOLD}Feature Registry Validation${NC}"
+    echo "═══════════════════════════════════════════════════════════════"
+    echo ""
+
+    feature_validate
+    local result=$?
+
+    echo ""
+    if [[ $result -eq 0 ]]; then
+        echo -e "${GREEN}✓${NC} Registry is valid - no circular dependencies or conflicts"
+    else
+        echo -e "${RED}✗${NC} Validation failed - see errors above"
+    fi
+
+    return $result
+}
+
 cmd_help() {
     cat << 'EOF'
 dotfiles features - Feature registry management
@@ -360,6 +378,9 @@ Commands:
 
   check <feature>     Check if a feature is enabled (for scripts)
                       Returns exit code 0 if enabled, 1 if disabled
+
+  validate            Validate feature registry for circular dependencies
+                      and conflicts. Returns exit code 0 if valid.
 
   help                Show this help
 
@@ -402,6 +423,7 @@ main() {
         disable|off)    cmd_disable "$@" ;;
         preset)         cmd_preset "$@" ;;
         check|test)     cmd_check "$@" ;;
+        validate)       cmd_validate "$@" ;;
         help|--help|-h) cmd_help ;;
         *)
             fail "Unknown command: $cmd"
