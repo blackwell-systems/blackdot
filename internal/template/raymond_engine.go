@@ -183,10 +183,20 @@ func (e *RaymondEngine) buildContext() map[string]interface{} {
 	return ctx
 }
 
+// preprocessTemplate converts bash-style syntax to standard Handlebars
+// This ensures compatibility with templates using {{#else}} instead of {{else}}
+func preprocessTemplate(input string) string {
+	// Convert {{#else}} to {{else}} (bash extension to standard Handlebars)
+	return strings.ReplaceAll(input, "{{#else}}", "{{else}}")
+}
+
 // Render processes a template string and returns the result
 func (e *RaymondEngine) Render(input string) (string, error) {
 	// Register helpers (once globally)
 	registerHelpers()
+
+	// Preprocess template for compatibility
+	input = preprocessTemplate(input)
 
 	// Build context with all variables
 	ctx := e.buildContext()
