@@ -107,12 +107,11 @@ spinner_start() {
     # Kill any existing spinner
     spinner_stop 2>/dev/null
 
-    # Show spinner message (keep it simple - fancy stuff is unreliable)
-    # Use print -rn for zsh compatibility (-r = raw, -n = no newline)
+    # Show spinner message (keep it simple)
     if _progress_unicode; then
-        print -rn -- "⠿ ${msg}..."
+        printf '%s' "⠿ ${msg}..."
     else
-        print -rn -- "* ${msg}..."
+        printf '%s' "* ${msg}..."
     fi
 
     # Mark that spinner is "running" (for spinner_stop to know)
@@ -126,9 +125,10 @@ spinner_start() {
 # Usage: spinner_stop [success_message]
 spinner_stop() {
     local success_msg="${1:-}"
+    local was_running="${_SPINNER_PID:-}"
 
-    # Nothing to stop if no spinner
-    [[ -z "${_SPINNER_PID:-}" ]] && return 0
+    # Nothing to stop if no spinner was running
+    [[ -z "$was_running" ]] && return 0
 
     # Kill spinner process if it's a real PID (not "static")
     if [[ "$_SPINNER_PID" != "static" ]] && kill -0 "$_SPINNER_PID" 2>/dev/null; then
@@ -137,10 +137,7 @@ spinner_stop() {
     fi
     _SPINNER_PID=""
 
-    # Only clear if progress was enabled
-    _progress_enabled || return 0
-
-    # Clear line and show result (simple approach)
+    # Always show output if spinner was running (don't re-check _progress_enabled)
     echo ""  # New line after spinner message
 
     # Show success message if provided
