@@ -120,7 +120,6 @@ echo ""
 echo ""
 echo "Test 8: ASCII mode (unicode disabled)"
 DOTFILES_UNICODE=false
-_SPINNER_FRAMES='|/-\'
 
 progress_init
 for i in {1..5}; do
