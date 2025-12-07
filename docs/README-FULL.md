@@ -2187,11 +2187,69 @@ dotfiles template init   # Setup machine-specific config templates
 dotfiles template vars   # List template variables and values
 dotfiles template render # Generate configs from templates
 dotfiles template link   # Symlink generated files to destinations
+dotfiles encrypt init    # Initialize age encryption (generate keys)
+dotfiles encrypt <file>  # Encrypt a file (creates .age, removes original)
+dotfiles encrypt decrypt <file>  # Decrypt a .age file
+dotfiles encrypt edit <file>     # Decrypt, edit in $EDITOR, re-encrypt
+dotfiles encrypt list    # List encrypted/unencrypted sensitive files
+dotfiles encrypt status  # Show encryption status and key info
+dotfiles encrypt push-key # Backup private key to vault
 dotfiles upgrade         # Pull latest, run bootstrap, verify
 dotfiles cd              # Navigate to dotfiles directory
 dotfiles edit            # Open dotfiles in $EDITOR
 dotfiles help            # Show all commands
 ```
+
+### File Encryption (Age)
+
+The dotfiles system includes file encryption using [age](https://github.com/FiloSottile/age) for securing sensitive configuration files that shouldn't be stored in plain text.
+
+**Setup:**
+
+```bash
+# Initialize encryption (one-time, generates key pair)
+dotfiles encrypt init
+
+# Back up your private key to vault (important!)
+dotfiles encrypt push-key
+```
+
+**Usage:**
+
+```bash
+# Encrypt sensitive files
+dotfiles encrypt templates/_variables.local.sh
+# Creates: templates/_variables.local.sh.age (original removed)
+
+# Decrypt when needed
+dotfiles encrypt decrypt templates/_variables.local.sh.age
+
+# Edit encrypted file directly (decrypts → edits → re-encrypts)
+dotfiles encrypt edit templates/_variables.local.sh.age
+
+# List all encrypted files
+dotfiles encrypt list
+```
+
+**Files automatically targeted for encryption:**
+
+- `*.secret`, `*.private`
+- `*credentials*`
+- `_variables.local.sh`, `_arrays.local.json`
+
+**Hook Integration:**
+
+- `pre_template_render`: Auto-decrypts `.age` files before template rendering
+- `post_vault_pull`: Restores age key from vault if missing locally
+
+**Key Storage:**
+
+| File | Location | Permissions |
+|------|----------|-------------|
+| Private key | `~/.config/dotfiles/age-key.txt` | 600 |
+| Public key | `~/.config/dotfiles/age-recipients.txt` | 644 |
+
+> **Important:** Without your private key, encrypted files cannot be recovered. Always back up to vault with `dotfiles encrypt push-key`.
 
 ### Health Check Details
 
