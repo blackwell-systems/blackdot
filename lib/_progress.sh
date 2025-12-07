@@ -107,33 +107,21 @@ spinner_start() {
     # Kill any existing spinner
     spinner_stop 2>/dev/null
 
-    # Compute values BEFORE forking (subshell function access can be unreliable)
-    local frames
-    if _progress_unicode; then
-        frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-    else
-        frames='|/-\'
+    # Show static spinner indicator (animation unreliable across platforms)
+    local esc=$'\033'
+
+    # Check if /dev/tty is actually writable (test with empty write)
+    if print -n '' >/dev/tty 2>/dev/null; then
+        print -n "${esc}[?25l" >/dev/tty  # Hide cursor
+        if _progress_unicode; then
+            print -n "\r${esc}[0;36m⠿${esc}[0m ${msg}..." >/dev/tty
+        else
+            print -n "\r${esc}[0;36m*${esc}[0m ${msg}..." >/dev/tty
+        fi
     fi
-    local tty_dev=""
-    [[ -w /dev/tty ]] && tty_dev="/dev/tty"
 
-    # Start spinner in background subshell
-    (
-        local frame_count=${#frames}
-        local i=0
-        local esc=$'\033'
-
-        # Hide cursor
-        print -n "${esc}[?25l" >/dev/tty 2>/dev/null
-
-        while true; do
-            local frame="${frames:$i:1}"
-            print -n "\r${esc}[0;36m${frame}${esc}[0m ${msg}..." >/dev/tty 2>/dev/null
-            i=$(( (i + 1) % frame_count ))
-            sleep 0.1
-        done
-    ) &
-    _SPINNER_PID=$!
+    # Mark that spinner is "running" (for spinner_stop to know)
+    _SPINNER_PID="static"
 
     # Ensure spinner is killed on script exit
     trap 'spinner_stop 2>/dev/null' EXIT INT TERM
@@ -144,8 +132,11 @@ spinner_start() {
 spinner_stop() {
     local success_msg="${1:-}"
 
-    # Kill spinner process if running
-    if [[ -n "${_SPINNER_PID:-}" ]] && kill -0 "$_SPINNER_PID" 2>/dev/null; then
+    # Nothing to stop if no spinner
+    [[ -z "${_SPINNER_PID:-}" ]] && return 0
+
+    # Kill spinner process if it's a real PID (not "static")
+    if [[ "$_SPINNER_PID" != "static" ]] && kill -0 "$_SPINNER_PID" 2>/dev/null; then
         kill "$_SPINNER_PID" 2>/dev/null
         wait "$_SPINNER_PID" 2>/dev/null
     fi
