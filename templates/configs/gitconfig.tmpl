@@ -87,7 +87,7 @@
     insteadOf = https://{{ github_enterprise_host }}/
 {{/if}}
 
-{{#if machine_type == "work" }}
+{{#if (eq machine_type "work") }}
 # Work-specific includes
 [includeIf "gitdir:{{ workspace }}/work/"]
     path = ~/.gitconfig-work

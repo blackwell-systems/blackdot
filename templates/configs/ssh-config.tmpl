@@ -49,7 +49,7 @@ Host {{ github_enterprise_host }}
 {{/if}}
 {{/if}}
 
-{{#if machine_type == "work" }}
+{{#if (eq machine_type "work") }}
 # -----------------------------------------------------------------------------
 # Work-Specific Hosts
 # Add your work servers here via _variables.local.sh
