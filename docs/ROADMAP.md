@@ -193,36 +193,6 @@ dotfiles features disable dev_tools     # Disable all developer tool integration
 - `sdkman_integration`
 - `modern_cli`
 
-**Implementation Options:**
-
-**Option A: Meta-feature in registry**
-```bash
-# In lib/_features.sh
-["dev_tools"]="false|All developer tool integrations|meta|aws_helpers,cdk_tools,rust_tools,go_tools,python_tools,nvm_integration,sdkman_integration,modern_cli"
-```
-- New category: `meta` for feature groups
-- Enabling/disabling propagates to all child features
-
-**Option B: Feature groups**
-```bash
-# New array for feature groups
-typeset -gA FEATURE_GROUPS=(
-    ["dev_tools"]="aws_helpers cdk_tools rust_tools go_tools python_tools nvm_integration sdkman_integration modern_cli"
-    ["cloud_tools"]="aws_helpers cdk_tools"
-    ["lang_tools"]="rust_tools go_tools python_tools"
-)
-
-# New command
-dotfiles features group enable dev_tools
-dotfiles features group disable lang_tools
-```
-
-**Benefits:**
-- Single toggle for all dev tooling
-- Cleaner onboarding: "Want dev tools? `dotfiles features enable dev_tools`"
-- Still allows individual feature control when needed
-- Could extend to other groups: `cloud_tools`, `lang_tools`, etc.
-
 ---
 
 ### 10. Template Auto-Discovery
@@ -236,24 +206,6 @@ Automatically detect variables from existing config files and generate templates
 dotfiles template discover [file]     # Analyze file(s) for variables
 dotfiles template discover            # Analyze all known config locations
 dotfiles template discover --apply    # Generate template + update variables
-```
-
-**Supported Config Formats:**
-| Format | Files | Detection |
-|--------|-------|-----------|
-| Git config | `~/.gitconfig` | email, name, signingkey, github user |
-| SSH config | `~/.ssh/config` | hosts → array, identity files |
-| AWS config | `~/.aws/config` | profiles, regions, SSO settings |
-| Shell rc | `~/.zshrc`, `~/.bashrc` | exports, paths |
-
-**Pattern Detection:**
-```bash
-# Automatically detected patterns:
-*@*.com, *@*.org           → {{ *_email }}
-/home/$USER/*, /Users/*    → {{ home }}/...
-[A-F0-9]{16,}              → {{ *_key }} (with secret warning)
-192.168.*, 10.*            → {{ *_ip }}
-github.com/username        → {{ github_user }}
 ```
 
 **Safety Features:**
@@ -271,39 +223,12 @@ github.com/username        → {{ github_user }}
 
 Store template variables in vault for cross-machine portability and backup.
 
-**Problem:**
-- `_variables.local.sh` is gitignored (good)
-- But it's only stored locally (bad)
-- Lost if machine dies, not synced across machines
-- Contains sensitive data (emails, signing keys, tokens)
-
-**Solution:** Vault as the source of truth for template variables.
-
 **Commands:**
 ```bash
 dotfiles template vault push          # Push _variables.local.sh to vault
 dotfiles template vault pull          # Pull from vault to _variables.local.sh
 dotfiles template vault sync          # Bidirectional sync with conflict detection
 dotfiles template vault diff          # Show differences between local and vault
-```
-
-**Conflict Resolution:**
-```bash
-$ dotfiles template vault sync
-
-Comparing local vs vault...
-
-Conflicts detected:
-  git_email:
-    local: "john@newcompany.com"
-    vault: "john@oldcompany.com"
-
-  [1] Keep local (push to vault)
-  [2] Keep vault (pull to local)
-  [3] Manual merge
-  [4] Abort
-
-Choice [1-4]:
 ```
 
 ---
@@ -321,27 +246,15 @@ HTTP request shortcuts, JSON helpers, and API testing utilities.
 ```bash
 GET <url>                     # curl -s <url>
 POST <url> [data]             # curl -X POST -d <data>
-PUT <url> [data]              # curl -X PUT -d <data>
-PATCH <url> [data]            # curl -X PATCH -d <data>
-DELETE <url>                  # curl -X DELETE
-HEAD <url>                    # curl -I (headers only)
-```
-
-**JSON Helpers:**
-```bash
 jget <url>                    # GET with Accept: application/json | jq
 jpost <url> <json>            # POST with Content-Type: application/json
-jput <url> <json>             # PUT JSON
-jpatch <url> <json>           # PATCH JSON
 ```
 
 **API Presets:**
 ```bash
-# Save common API configurations
 curl-preset add <name> <base-url> [--header "..."]
 curl-preset use <name> <path>
 curl-preset list
-curl-preset remove <name>
 ```
 
 ---
@@ -360,110 +273,13 @@ Lima VM management for running Linux containers on macOS.
 lls                    # limactl list
 lstart [vm]            # limactl start (default: default)
 lstop [vm]             # limactl stop
-lrestart [vm]          # limactl stop && start
-lrm [vm]               # limactl delete (with confirmation)
 lsh [vm]               # limactl shell
-```
-
-**Quick Access:**
-```bash
-lima                   # Shell into default VM (built-in)
 ldocker [cmd]          # lima nerdctl (containerd)
-lk                     # Access k3s kubectl in VM
-lnerd [cmd]            # lima nerdctl shortcut
 ```
 
 ---
 
-### 14. Age Encryption for Non-Vault Secrets (Priority 1)
-
-**Status:** Planned
-
-Native file encryption using `age` for secrets not managed by vault backends.
-
-**Problem:**
-- Vault backends only manage vault items
-- Arbitrary files with secrets can't be encrypted
-- Files not in vault = unencrypted in repo
-- chezmoi has this, we don't
-
-**Feature:** `encryption` (optional category)
-**File:** `lib/_encryption.sh`
-
-**Commands:**
-```bash
-dotfiles encrypt <file>           # Encrypt file with age
-dotfiles decrypt <file>           # Decrypt file
-dotfiles encrypt-edit <file>      # Decrypt, edit, re-encrypt
-dotfiles encrypt-list             # List encrypted files
-dotfiles encrypt-init             # Generate age key pair
-```
-
-**How it works:**
-```bash
-# Initialize (one-time)
-dotfiles encrypt-init
-# Creates ~/.config/dotfiles/age-key.txt (private key, mode 600)
-# Creates ~/.config/dotfiles/age-recipients.txt (public keys)
-
-# Encrypt a file
-dotfiles encrypt templates/_variables.local.sh
-# Creates templates/_variables.local.sh.age
-# Original deleted (or moved to .gitignore)
-
-# Decrypt (on this machine or any with the private key)
-dotfiles decrypt templates/_variables.local.sh.age
-```
-
-**Key Management:**
-- Private key stored locally OR synced via vault backend
-- Multiple recipients (public keys) for team sharing
-- Key stored in Bitwarden/1Password as "Age-Private-Key" item
-
----
-
-### 15. Shell Completions (Priority 1)
-
-**Status:** Planned
-
-Tab completion for `dotfiles` command and all subcommands.
-
-**Problem:**
-- `dotfiles <TAB>` does nothing
-- Users must remember subcommand names
-- chezmoi has completions, we don't
-
-**Files:**
-- `zsh/completions/_dotfiles` - ZSH completion script
-- `bash/completions/dotfiles` - Bash completion script
-
-**Completion Support:**
-```bash
-dotfiles <TAB>
-# Shows: backup config doctor drift features hook ...
-
-dotfiles features <TAB>
-# Shows: enable disable list preset status
-
-dotfiles features enable <TAB>
-# Shows: vault templates hooks aws_helpers cdk_tools ...
-
-dotfiles features preset <TAB>
-# Shows: minimal developer claude full
-
-dotfiles vault <TAB>
-# Shows: init login logout status sync get list push pull
-```
-
-**Dynamic Completions:**
-- `features enable/disable` - complete from available features
-- `vault get` - complete from vault item names
-- `hook run` - complete from registered hook points
-- `config get/set` - complete from config keys
-
----
-
-### 16. Progress Indicators (Priority 2)
+### 14. Progress Indicators (Priority 1)
 
 **Status:** Planned
 
@@ -474,65 +290,15 @@ Visual progress feedback for long-running operations.
 - `dotfiles vault sync` gives no feedback during long syncs
 - Users don't know if operation is stuck or working
 
-**Implementation Options:**
-
-**Option A: Spinner**
-```bash
-# lib/_progress.sh
-
-spinner() {
-    local pid=$1
-    local msg="${2:-Working}"
-    local spin='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-    local i=0
-
-    while kill -0 "$pid" 2>/dev/null; do
-        printf "\r${CYAN}${spin:$i:1}${NC} %s..." "$msg"
-        i=$(( (i + 1) % ${#spin} ))
-        sleep 0.1
-    done
-    printf "\r"
-}
-```
-
-**Option B: Progress bar (for countable operations)**
-```bash
-progress_bar() {
-    local current=$1
-    local total=$2
-    local width=40
-    local percent=$((current * 100 / total))
-    local filled=$((current * width / total))
-    local empty=$((width - filled))
-
-    printf "\r[%s%s] %3d%%" \
-        "$(printf '█%.0s' $(seq 1 $filled))" \
-        "$(printf '░%.0s' $(seq 1 $empty))" \
-        "$percent"
-}
-```
-
-**Commands to enhance:**
-| Command | Progress Type |
-|---------|---------------|
-| `dotfiles packages --install` | Spinner + item count |
-| `dotfiles vault sync` | Spinner |
-| `dotfiles vault pull` | Progress bar (N items) |
-| `dotfiles backup create` | Spinner + size |
-| `dotfiles template render` | Progress bar (N templates) |
+**Implementation:** See detailed design below.
 
 ---
 
-### 17. Config Schema Validation (Priority 2)
+### 15. Config Schema Validation (Priority 2)
 
 **Status:** Planned
 
 Validate config.json structure with helpful error messages.
-
-**Problem:**
-- Typos in config keys silently ignored
-- Wrong types cause cryptic failures
-- No documentation of valid keys/values
 
 **Validation Command:**
 ```bash
@@ -542,60 +308,26 @@ dotfiles config validate
 dotfiles config validate
 # ✗ Invalid config:
 #   - .vault.backend: "bitwarden_cli" is not valid (expected: bitwarden, 1password, pass)
-#   - .packages.tier: "medium" is not valid (expected: minimal, enhanced, full)
 #   - .features.valt: unknown feature (did you mean: vault?)
 ```
 
 **Auto-validation:**
 - Run on `dotfiles config set` (before saving)
 - Run on `dotfiles doctor` (health check)
-- Optional: run on shell init (warn only)
 
 ---
 
-### 18. Aliases Command (Priority 2)
+### 16. Aliases Command (Priority 2)
 
 **Status:** Planned
 
 Dedicated command to list and search aliases, grouped by category.
-
-**Problem:**
-- Built-in `alias` command shows raw list
-- No grouping or categorization
-- Hard to discover aliases for specific tools
-- `zsh-you-should-use` helps learn, but need discovery too
 
 **Command:**
 ```bash
 dotfiles aliases                  # List all aliases by category
 dotfiles aliases aws              # Show AWS-related aliases
 dotfiles aliases search <term>    # Search aliases by name or expansion
-dotfiles aliases --raw            # Plain list (for scripting)
-```
-
-**Output Format:**
-```bash
-$ dotfiles aliases
-
-AWS (8 aliases)
-  awsprofiles     List AWS profiles
-  awsswitch       Switch AWS profile (fzf)
-  awswho          Show current identity
-  awslogin        SSO login
-  ...
-
-CDK (12 aliases)
-  cdkd            cdk deploy
-  cdks            cdk synth
-  cdkdf           cdk diff
-  ...
-
-Docker (10 aliases)
-  dps             docker ps
-  dsh             Shell into container
-  ...
-
-Total: 70 aliases
 ```
 
 ---
@@ -635,7 +367,7 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 | **2.0.0** | **Unified setup wizard, state management, macOS CLI** |
 | 2.0.1 | CLI help improvements, Docker container enhancements |
 | **2.1.0** | **Smart secrets onboarding, vault config file, Docker taxonomy, Feature Registry** |
-| **3.0** | **Configuration Layers, CLI Feature Awareness, JSON config format, SSH/Docker Tools, Color Theming** |
+| **3.0** | **Configuration Layers, CLI Feature Awareness, JSON config, SSH/Docker Tools, Age Encryption, Shell Completions** |
 
 ---
 
