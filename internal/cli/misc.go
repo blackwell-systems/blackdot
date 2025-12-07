@@ -46,18 +46,7 @@ func newEncryptCmd() *cobra.Command {
 }
 
 // newLintCmd is now in lint.go
-
-func newMetricsCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "metrics",
-		Short: "Visualize health check metrics over time",
-		Long:  `Show health check metrics dashboard and historical trends.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Metrics Dashboard")
-			fmt.Println("(not yet implemented)")
-		},
-	}
-}
+// newMetricsCmd is now in metrics.go
 
 func newMigrateCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -141,19 +130,4 @@ Uses smart detection to determine whether to push or pull:
 	}
 }
 
-func newUninstallCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "uninstall",
-		Short: "Remove dotfiles configuration",
-		Long: `Uninstall dotfiles by removing symlinks and configurations.
-
-This does NOT delete:
-  - The dotfiles repository itself
-  - Secrets in vault
-  - Backups`,
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Uninstall")
-			fmt.Println("(not yet implemented)")
-		},
-	}
-}
+// newUninstallCmd is now in uninstall.go
