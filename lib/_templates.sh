@@ -183,6 +183,9 @@ build_auto_vars() {
         workspace_target="${WORKSPACE_TARGET:-${WORKSPACE:-$HOME/workspace}}"
     fi
 
+    # Preserve user-set machine_type if exists
+    local preserved_machine_type="${TMPL_AUTO[machine_type]:-}"
+
     TMPL_AUTO=(
         # System info
         [hostname]="$hostname_short"
@@ -198,8 +201,8 @@ build_auto_vars() {
         [workspace]="$workspace_target"
         [dotfiles_dir]="${DOTFILES_DIR}"
 
-        # Machine type
-        [machine_type]="$(detect_machine_type "$hostname_short")"
+        # Machine type - use user's value if set, otherwise auto-detect
+        [machine_type]="${preserved_machine_type:-$(detect_machine_type "$hostname_short")}"
 
         # Timestamps
         [date]="$(date +%Y-%m-%d)"
@@ -352,14 +355,17 @@ build_template_vars() {
     # Reset
     TMPL_VARS=()
 
-    # Layer 1: Auto-detected values (lowest priority)
+    # Layer 1: Load variable files FIRST
+    # This allows user's _variables.local.sh to set TMPL_AUTO[machine_type]
+    # before build_auto_vars runs (which preserves user-set values)
+    load_variable_files
+
+    # Layer 2: Auto-detected values (lowest priority)
+    # build_auto_vars preserves any user-set TMPL_AUTO values
     build_auto_vars
     for key in "${(@k)TMPL_AUTO}"; do
         TMPL_VARS[$key]="${TMPL_AUTO[$key]}"
     done
-
-    # Layer 2: Load variable files (sets TMPL_DEFAULTS, TMPL_WORK, TMPL_PERSONAL)
-    load_variable_files
 
     # Layer 3: Apply default values
     for key in "${(@k)TMPL_DEFAULTS}"; do
