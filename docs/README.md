@@ -132,12 +132,13 @@ Deep integrations with modern developer toolchains—not just aliases, but helpe
 | **CDK Tools** | Deploy, diff, synth, watch with smart defaults | `cdkd`, `cdkdf`, `cdks`, `cdkwatch` |
 | **Rust Tools** | Build, test, clippy, fmt, cargo-watch integration | `cb`, `ct`, `ccl`, `cf`, `cw` |
 | **Go Tools** | Build, test, coverage, module management | `gob`, `got`, `gotc`, `gomi` |
+| **Python Tools** | uv package manager, pytest, auto-venv activation | `uvs`, `uvr`, `uva`, `pt`, `ptx` |
 | **NVM** | Lazy-loaded Node.js version manager | Auto-loads on first `node`/`npm` call |
 | **SDKMAN** | Lazy-loaded Java/Gradle/Kotlin manager | Auto-loads on first `java`/`gradle` call |
 
 **Shell Completions:** Tab completion for all tool commands—`awsswitch <TAB>`, `dotfiles features <TAB>`.
 
-**70+ Aliases:** Opinionated shortcuts that follow consistent naming patterns across toolchains.
+**90+ Aliases:** Opinionated shortcuts that follow consistent naming patterns across toolchains.
 
 **Discoverability:** `zsh-you-should-use` plugin reminds you about aliases you're not using.
 
@@ -153,6 +154,9 @@ cwt                    # cargo watch -x test
 
 # Go: Coverage with browser
 gocover                # go test -cover + open HTML report
+
+# Python: Fast package management with uv
+uvs && uvr pytest      # Sync deps & run in project env
 ```
 
 **Feature-gated:** Each tool suite can be enabled/disabled independently:

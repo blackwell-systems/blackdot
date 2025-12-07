@@ -43,6 +43,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `gotools` command with styled help and status display
   - Shows module name and Go version requirements
 
+- **Python Tools Integration** (`python_tools` feature)
+  - Powered by [uv](https://github.com/astral-sh/uv) for fast Python package management
+  - uv aliases: `uvs`, `uvr`, `uva`, `uvad`, `uvrm`, `uvl`, `uvu`, `uvt`, `uvv`, `uvpy`
+  - pytest aliases: `pt`, `ptv`, `ptx`, `ptxv`, `ptc`, `ptl`, `pts`, `ptk`
+  - Auto-venv: Prompts to activate venv on `cd` (configurable: notify/auto/off)
+  - Helpers: `uv-new`, `uv-clean`, `uv-info`, `uv-python-setup`, `pt-watch`, `pt-cov`
+  - `pythontools` command with styled help and status display
+  - Tab completions for project templates and Python versions
+
 - **AWS Tools Tab Completions**
   - `awsset <TAB>` and `awslogin <TAB>` complete with AWS profiles
 
