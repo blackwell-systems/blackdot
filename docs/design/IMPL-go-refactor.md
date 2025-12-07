@@ -98,11 +98,11 @@ The Go binary **does not replace** your shell configuration. It **only replaces*
 │  lib/_*.sh  →  Go packages                                               │
 │  ├── _features.sh   →  internal/feature/                                 │
 │  ├── _config.sh     →  internal/config/                                  │
-│  ├── _vault.sh      →  pkg/vault/                                        │
+│  ├── _vault.sh      →  pkg/vaultmux/                                        │
 │  ├── _templates.sh  →  internal/template/                                │
 │  └── _state.sh      →  internal/config/state.go                          │
 │                                                                          │
-│  vault/backends/*.sh  →  pkg/vault/backends/                             │
+│  vault/backends/*.sh  →  pkg/vaultmux/backends/                             │
 │  ├── bitwarden.sh   →  bitwarden/bitwarden.go                            │
 │  ├── 1password.sh   →  onepassword/onepassword.go                        │
 │  └── pass.sh        →  pass/pass.go                                      │
@@ -277,26 +277,26 @@ eval "$(dotfiles shell-init zsh)"
                                  │
                                  ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
+│              github.com/blackwell-systems/vaultmux                       │
+│                      (SEPARATE MODULE/REPO)                              │
 │                                                                          │
-│                        pkg/vault (INDEPENDENT)                           │
+│  ┌──────────────┐   ┌────────────────────────────────────────────────┐  │
+│  │ vaultmux.go  │   │                 backends/                       │  │
+│  │              │   │  ┌───────────┐ ┌───────────┐ ┌───────────┐     │  │
+│  │ - Backend    │──▶│  │ bitwarden │ │ onepassword│ │   pass    │     │  │
+│  │ - Session    │   │  │   .go     │ │    .go    │ │   .go     │     │  │
+│  │ - Item       │   │  └───────────┘ └───────────┘ └───────────┘     │  │
+│  └──────────────┘   └────────────────────────────────────────────────┘  │
 │                                                                          │
-│  ┌─────────────┐   ┌─────────────────────────────────────────────────┐  │
-│  │   vault.go  │   │                  backends/                       │  │
-│  │             │   │  ┌───────────┐ ┌───────────┐ ┌───────────┐      │  │
-│  │ - Interface │──▶│  │ bitwarden │ │ onepassword│ │   pass    │      │  │
-│  │ - Factory   │   │  │   .go     │ │    .go    │ │   .go     │      │  │
-│  │ - Session   │   │  └───────────┘ └───────────┘ └───────────┘      │  │
-│  └─────────────┘   └─────────────────────────────────────────────────┘  │
-│                                                                          │
-│  Can be imported independently:                                          │
-│  import "github.com/user/dotfiles/pkg/vault"                            │
+│  Independent library - usable by ANY Go project:                         │
+│  import "github.com/blackwell-systems/vaultmux"                          │
 │                                                                          │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 2.2 Design Principles
 
-1. **Vault is a library first** - No dotfiles-specific logic in `pkg/vault`
+1. **Vaultmux is a library first** - No dotfiles-specific logic, separate repo
 2. **Internal packages are private** - `internal/` prevents external imports
 3. **Interfaces at boundaries** - Easy mocking for tests
 4. **Configuration by struct** - Type-safe config, no string keys
@@ -306,25 +306,36 @@ eval "$(dotfiles shell-init zsh)"
 
 ## 3. Package Structure
 
+### 3.1 Vaultmux (Independent Module)
+
+```
+github.com/blackwell-systems/vaultmux/    # SEPARATE REPO
+├── vaultmux.go              # Interface, types, errors
+├── factory.go               # Backend factory
+├── session.go               # Session management
+├── options.go               # Functional options pattern
+├── backends/
+│   ├── bitwarden/
+│   │   └── bitwarden.go
+│   ├── onepassword/
+│   │   └── onepassword.go
+│   └── pass/
+│       └── pass.go
+├── mock/
+│   └── mock.go              # Mock backend for testing
+├── go.mod                   # module github.com/blackwell-systems/vaultmux
+└── vaultmux_test.go
+```
+
+### 3.2 Dotfiles CLI (Uses Vaultmux as Dependency)
+
 ```
 dotfiles/
 ├── cmd/
 │   └── dotfiles/
 │       └── main.go                 # Entry point, cobra root
 │
-├── pkg/                            # PUBLIC - importable by others
-│   └── vault/
-│       ├── vault.go                # Interface, factory, errors
-│       ├── session.go              # Session management
-│       ├── options.go              # Functional options pattern
-│       ├── backends/
-│       │   ├── bitwarden/
-│       │   │   └── bitwarden.go
-│       │   ├── onepassword/
-│       │   │   └── onepassword.go
-│       │   └── pass/
-│       │       └── pass.go
-│       └── vault_test.go
+├── go.mod                          # require github.com/blackwell-systems/vaultmux
 │
 ├── internal/                       # PRIVATE - dotfiles-specific
 │   ├── cli/
@@ -397,20 +408,20 @@ dotfiles/
 
 ## 4. Component Deep Dives
 
-### 4.1 Vault Package (Independent)
+### 4.1 Vaultmux Package (github.com/blackwell-systems/vaultmux)
 
-The vault package is designed to be a **standalone library** that can be used outside of dotfiles.
+Vaultmux is designed as a **completely separate Go module** that can be used by any project.
 
 #### 4.1.1 Core Interface
 
 ```go
-// pkg/vault/vault.go
+// pkg/vaultmux/vaultmux.go
 
-package vault
+package vaultmux
 
 import (
     "context"
-    "io"
+    "time"
 )
 
 // Backend represents a secret storage backend.
@@ -486,7 +497,9 @@ type LocationManager interface {
 #### 4.1.2 Factory Pattern
 
 ```go
-// pkg/vault/vault.go
+// pkg/vaultmux/factory.go
+
+package vaultmux
 
 // BackendType identifies a vault backend.
 type BackendType string
@@ -533,7 +546,7 @@ func MustNew(cfg Config) Backend {
 #### 4.1.3 Pass Backend Implementation
 
 ```go
-// pkg/vault/backends/pass/pass.go
+// pkg/vaultmux/backends/pass/pass.go
 
 package pass
 
@@ -545,10 +558,10 @@ import (
     "path/filepath"
     "strings"
 
-    "github.com/user/dotfiles/pkg/vault"
+    "github.com/blackwell-systems/vaultmux"
 )
 
-// Backend implements vault.Backend for pass.
+// Backend implements vaultmux.Backend for pass.
 type Backend struct {
     storePath string
     prefix    string
@@ -597,12 +610,12 @@ func (b *Backend) IsAuthenticated(ctx context.Context) bool {
     return cmd.Run() == nil
 }
 
-func (b *Backend) Authenticate(ctx context.Context) (vault.Session, error) {
+func (b *Backend) Authenticate(ctx context.Context) (vaultmux.Session, error) {
     // pass doesn't use sessions - GPG agent handles auth
     return &passSession{}, nil
 }
 
-func (b *Backend) GetNotes(ctx context.Context, name string, _ vault.Session) (string, error) {
+func (b *Backend) GetNotes(ctx context.Context, name string, _ vaultmux.Session) (string, error) {
     path := b.itemPath(name)
     cmd := exec.CommandContext(ctx, "pass", "show", path)
     out, err := cmd.Output()
@@ -615,7 +628,7 @@ func (b *Backend) GetNotes(ctx context.Context, name string, _ vault.Session) (s
     return string(out), nil
 }
 
-func (b *Backend) ItemExists(ctx context.Context, name string, _ vault.Session) (bool, error) {
+func (b *Backend) ItemExists(ctx context.Context, name string, _ vaultmux.Session) (bool, error) {
     gpgPath := filepath.Join(b.storePath, b.prefix, name+".gpg")
     _, err := os.Stat(gpgPath)
     if os.IsNotExist(err) {
@@ -627,7 +640,7 @@ func (b *Backend) ItemExists(ctx context.Context, name string, _ vault.Session) 
     return true, nil
 }
 
-func (b *Backend) CreateItem(ctx context.Context, name, content string, _ vault.Session) error {
+func (b *Backend) CreateItem(ctx context.Context, name, content string, _ vaultmux.Session) error {
     exists, err := b.ItemExists(ctx, name, nil)
     if err != nil {
         return err
@@ -646,7 +659,7 @@ func (b *Backend) CreateItem(ctx context.Context, name, content string, _ vault.
     return nil
 }
 
-func (b *Backend) UpdateItem(ctx context.Context, name, content string, _ vault.Session) error {
+func (b *Backend) UpdateItem(ctx context.Context, name, content string, _ vaultmux.Session) error {
     exists, err := b.ItemExists(ctx, name, nil)
     if err != nil {
         return err
@@ -665,7 +678,7 @@ func (b *Backend) UpdateItem(ctx context.Context, name, content string, _ vault.
     return nil
 }
 
-func (b *Backend) DeleteItem(ctx context.Context, name string, _ vault.Session) error {
+func (b *Backend) DeleteItem(ctx context.Context, name string, _ vaultmux.Session) error {
     path := b.itemPath(name)
     cmd := exec.CommandContext(ctx, "pass", "rm", "-f", path)
     if err := cmd.Run(); err != nil {
@@ -678,7 +691,7 @@ func (b *Backend) itemPath(name string) string {
     return filepath.Join(b.prefix, name)
 }
 
-// passSession implements vault.Session for pass (no-op).
+// passSession implements vaultmux.Session for pass (no-op).
 type passSession struct{}
 
 func (s *passSession) Token() string                           { return "" }
@@ -689,7 +702,7 @@ func (s *passSession) Refresh(ctx context.Context) error       { return nil }
 #### 4.1.4 Bitwarden Backend Implementation
 
 ```go
-// pkg/vault/backends/bitwarden/bitwarden.go
+// pkg/vaultmux/backends/bitwarden/bitwarden.go
 
 package bitwarden
 
@@ -702,10 +715,10 @@ import (
     "strings"
     "time"
 
-    "github.com/user/dotfiles/pkg/vault"
+    "github.com/blackwell-systems/vaultmux"
 )
 
-// Backend implements vault.Backend for Bitwarden CLI.
+// Backend implements vaultmux.Backend for Bitwarden CLI.
 type Backend struct {
     sessionFile string
 }
@@ -740,7 +753,7 @@ func (b *Backend) IsAuthenticated(ctx context.Context) bool {
     return cmd.Run() == nil
 }
 
-func (b *Backend) Authenticate(ctx context.Context) (vault.Session, error) {
+func (b *Backend) Authenticate(ctx context.Context) (vaultmux.Session, error) {
     // Try cached session first
     if token, err := b.loadSession(); err == nil && token != "" {
         sess := &bwSession{token: token, backend: b}
@@ -780,12 +793,12 @@ func (b *Backend) Authenticate(ctx context.Context) (vault.Session, error) {
     return &bwSession{token: token, backend: b}, nil
 }
 
-func (b *Backend) Sync(ctx context.Context, session vault.Session) error {
+func (b *Backend) Sync(ctx context.Context, session vaultmux.Session) error {
     cmd := exec.CommandContext(ctx, "bw", "sync", "--session", session.Token())
     return cmd.Run()
 }
 
-func (b *Backend) GetItem(ctx context.Context, name string, session vault.Session) (*vault.Item, error) {
+func (b *Backend) GetItem(ctx context.Context, name string, session vaultmux.Session) (*vaultmux.Item, error) {
     cmd := exec.CommandContext(ctx, "bw", "get", "item", name, "--session", session.Token())
     out, err := cmd.Output()
     if err != nil {
@@ -806,15 +819,15 @@ func (b *Backend) GetItem(ctx context.Context, name string, session vault.Sessio
         return nil, err
     }
 
-    return &vault.Item{
+    return &vaultmux.Item{
         ID:    bwItem.ID,
         Name:  bwItem.Name,
-        Type:  vault.ItemType(bwItem.Type),
+        Type:  vaultmux.ItemType(bwItem.Type),
         Notes: bwItem.Notes,
     }, nil
 }
 
-func (b *Backend) GetNotes(ctx context.Context, name string, session vault.Session) (string, error) {
+func (b *Backend) GetNotes(ctx context.Context, name string, session vaultmux.Session) (string, error) {
     item, err := b.GetItem(ctx, name, session)
     if err != nil {
         return "", err
@@ -874,16 +887,16 @@ import (
     "fmt"
     "log"
 
-    "github.com/user/dotfiles/pkg/vault"
-    _ "github.com/user/dotfiles/pkg/vault/backends/pass" // Register backend
+    "github.com/blackwell-systems/vaultmux"
+    _ "github.com/user/dotfiles/pkg/vaultmux/backends/pass" // Register backend
 )
 
 func main() {
     ctx := context.Background()
 
     // Create vault client
-    v, err := vault.New(vault.Config{
-        Backend:   vault.BackendPass,
+    v, err := vaultmux.New(vaultmux.Config{
+        Backend:   vaultmux.BackendPass,
         StorePath: "/home/user/.password-store",
         Prefix:    "myapp",
     })
@@ -2319,23 +2332,23 @@ func TestFeaturesCommand(t *testing.T) {
 ### 6.3 Vault Backend Mocking
 
 ```go
-// pkg/vault/mock/mock.go
+// pkg/vaultmux/mock/mock.go
 
 package mock
 
 import (
     "context"
 
-    "github.com/user/dotfiles/pkg/vault"
+    "github.com/blackwell-systems/vaultmux"
 )
 
 // Backend is a mock vault backend for testing.
 type Backend struct {
-    items map[string]*vault.Item
+    items map[string]*vaultmux.Item
 }
 
 func New() *Backend {
-    return &Backend{items: make(map[string]*vault.Item)}
+    return &Backend{items: make(map[string]*vaultmux.Item)}
 }
 
 func (b *Backend) Name() string { return "mock" }
@@ -2344,19 +2357,19 @@ func (b *Backend) Init(ctx context.Context) error { return nil }
 func (b *Backend) Close() error { return nil }
 
 func (b *Backend) IsAuthenticated(ctx context.Context) bool { return true }
-func (b *Backend) Authenticate(ctx context.Context) (vault.Session, error) {
+func (b *Backend) Authenticate(ctx context.Context) (vaultmux.Session, error) {
     return &mockSession{}, nil
 }
 
-func (b *Backend) GetNotes(ctx context.Context, name string, _ vault.Session) (string, error) {
+func (b *Backend) GetNotes(ctx context.Context, name string, _ vaultmux.Session) (string, error) {
     if item, ok := b.items[name]; ok {
         return item.Notes, nil
     }
     return "", nil
 }
 
-func (b *Backend) CreateItem(ctx context.Context, name, content string, _ vault.Session) error {
-    b.items[name] = &vault.Item{Name: name, Notes: content}
+func (b *Backend) CreateItem(ctx context.Context, name, content string, _ vaultmux.Session) error {
+    b.items[name] = &vaultmux.Item{Name: name, Notes: content}
     return nil
 }
 
@@ -2469,7 +2482,7 @@ brews:
 
 ### Phase 1: Foundation (Weeks 1-2)
 - [ ] Set up Go module structure
-- [ ] Implement `pkg/vault` with pass backend
+- [ ] Implement `pkg/vaultmux` with pass backend
 - [ ] Implement `internal/config` (JSON read/write)
 - [ ] Basic CLI skeleton with cobra
 - [ ] `dotfiles version` command
@@ -2588,10 +2601,10 @@ cmd/dotfiles
 │   ├── internal/template
 │   ├── internal/doctor
 │   ├── internal/shell
-│   └── pkg/vault (independent)
+│   └── pkg/vaultmux (independent)
 │
-└── pkg/vault
-    └── pkg/vault/backends/*
+└── pkg/vaultmux
+    └── pkg/vaultmux/backends/*
 ```
 
 ## Appendix B: Go Dependencies
