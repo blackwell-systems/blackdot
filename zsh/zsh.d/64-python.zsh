@@ -316,15 +316,8 @@ uv-python-setup() {
 # =========================
 
 pythontools() {
-    # Colors
-    local yellow='\033[0;33m'
-    local blue='\033[0;34m'
-    local cyan='\033[0;36m'
-    local red='\033[0;31m'
-    local green='\033[0;32m'
-    local bold='\033[1m'
-    local dim='\033[2m'
-    local nc='\033[0m'
+    # Source theme colors
+    source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
 
     # Check if uv and Python are installed
     local logo_color has_uv has_python in_project in_venv
@@ -339,102 +332,102 @@ pythontools() {
     [[ -n "$VIRTUAL_ENV" ]] && in_venv=true
 
     if [[ "$has_uv" == "true" && "$in_project" == "true" ]]; then
-        logo_color="$yellow"
+        logo_color="$CLR_PYTHON"
     elif [[ "$has_uv" == "true" ]]; then
-        logo_color="$blue"
+        logo_color="$CLR_INFO"
     else
-        logo_color="$red"
+        logo_color="$CLR_ERROR"
     fi
 
     echo ""
-    echo -e "${logo_color}  ██████╗ ██╗   ██╗████████╗██╗  ██╗ ██████╗ ███╗   ██╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗${nc}"
-    echo -e "${logo_color}  ██╔══██╗╚██╗ ██╔╝╚══██╔══╝██║  ██║██╔═══██╗████╗  ██║    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝${nc}"
-    echo -e "${logo_color}  ██████╔╝ ╚████╔╝    ██║   ███████║██║   ██║██╔██╗ ██║       ██║   ██║   ██║██║   ██║██║     ███████╗${nc}"
-    echo -e "${logo_color}  ██╔═══╝   ╚██╔╝     ██║   ██╔══██║██║   ██║██║╚██╗██║       ██║   ██║   ██║██║   ██║██║     ╚════██║${nc}"
-    echo -e "${logo_color}  ██║        ██║      ██║   ██║  ██║╚██████╔╝██║ ╚████║       ██║   ╚██████╔╝╚██████╔╝███████╗███████║${nc}"
-    echo -e "${logo_color}  ╚═╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝       ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝${nc}"
-    echo -e "  ${dim}Powered by${nc} ${cyan}uv${nc}"
+    echo -e "${logo_color}  ██████╗ ██╗   ██╗████████╗██╗  ██╗ ██████╗ ███╗   ██╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗${CLR_NC}"
+    echo -e "${logo_color}  ██╔══██╗╚██╗ ██╔╝╚══██╔══╝██║  ██║██╔═══██╗████╗  ██║    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝${CLR_NC}"
+    echo -e "${logo_color}  ██████╔╝ ╚████╔╝    ██║   ███████║██║   ██║██╔██╗ ██║       ██║   ██║   ██║██║   ██║██║     ███████╗${CLR_NC}"
+    echo -e "${logo_color}  ██╔═══╝   ╚██╔╝     ██║   ██╔══██║██║   ██║██║╚██╗██║       ██║   ██║   ██║██║   ██║██║     ╚════██║${CLR_NC}"
+    echo -e "${logo_color}  ██║        ██║      ██║   ██║  ██║╚██████╔╝██║ ╚████║       ██║   ╚██████╔╝╚██████╔╝███████╗███████║${CLR_NC}"
+    echo -e "${logo_color}  ╚═╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝       ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝${CLR_NC}"
+    echo -e "  ${CLR_MUTED}Powered by${CLR_NC} ${CLR_PRIMARY}uv${CLR_NC}"
     echo ""
 
     # Aliases section
-    echo -e "  ${dim}╭─────────────────────────────────────────────────────────────────╮${nc}"
-    echo -e "  ${dim}│${nc}  ${bold}${yellow}UV ALIASES${nc}                                                   ${dim}│${nc}"
-    echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}uvs${nc}                ${dim}uv sync (sync from lock file)${nc}              ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}uvr${nc}                ${dim}uv run (run in project env)${nc}               ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}uva${nc}                ${dim}uv add (add dependency)${nc}                   ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}uvad${nc}               ${dim}uv add --dev${nc}                              ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}uvrm${nc}               ${dim}uv remove${nc}                                 ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}uvl${nc}                ${dim}uv lock${nc}                                   ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}uvu${nc}                ${dim}uv lock --upgrade${nc}                         ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}uvt${nc}                ${dim}uv tree (dependency tree)${nc}                 ${dim}│${nc}"
-    echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
-    echo -e "  ${dim}│${nc}  ${bold}${yellow}PYTEST ALIASES${nc}                                               ${dim}│${nc}"
-    echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}pt${nc}                 ${dim}pytest${nc}                                    ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}ptv${nc}                ${dim}pytest -v${nc}                                 ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}ptx${nc}                ${dim}pytest -x (stop on first fail)${nc}            ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}ptxv${nc}               ${dim}pytest -xvs (verbose, stop, output)${nc}       ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}ptc${nc}                ${dim}pytest --cov${nc}                              ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}ptl${nc}                ${dim}pytest --last-failed${nc}                      ${dim}│${nc}"
-    echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
-    echo -e "  ${dim}│${nc}  ${bold}${yellow}HELPER FUNCTIONS${nc}                                            ${dim}│${nc}"
-    echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}uv-new${nc} <name>      ${dim}Create new Python project${nc}                 ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}uv-clean${nc}           ${dim}Clean Python artifacts${nc}                    ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}uv-info${nc}            ${dim}Show Python/uv info${nc}                       ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}uv-python-setup${nc}    ${dim}Install and pin Python version${nc}            ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}pt-watch${nc}           ${dim}Run pytest in watch mode${nc}                  ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${yellow}pt-cov${nc}             ${dim}Coverage with HTML report${nc}                 ${dim}│${nc}"
-    echo -e "  ${dim}╰─────────────────────────────────────────────────────────────────╯${nc}"
+    echo -e "  ${CLR_BOX}╭─────────────────────────────────────────────────────────────────╮${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_HEADER}UV ALIASES${CLR_NC}                                                   ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}├─────────────────────────────────────────────────────────────────┤${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}uvs${CLR_NC}                ${CLR_MUTED}uv sync (sync from lock file)${CLR_NC}              ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}uvr${CLR_NC}                ${CLR_MUTED}uv run (run in project env)${CLR_NC}               ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}uva${CLR_NC}                ${CLR_MUTED}uv add (add dependency)${CLR_NC}                   ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}uvad${CLR_NC}               ${CLR_MUTED}uv add --dev${CLR_NC}                              ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}uvrm${CLR_NC}               ${CLR_MUTED}uv remove${CLR_NC}                                 ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}uvl${CLR_NC}                ${CLR_MUTED}uv lock${CLR_NC}                                   ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}uvu${CLR_NC}                ${CLR_MUTED}uv lock --upgrade${CLR_NC}                         ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}uvt${CLR_NC}                ${CLR_MUTED}uv tree (dependency tree)${CLR_NC}                 ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}├─────────────────────────────────────────────────────────────────┤${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_HEADER}PYTEST ALIASES${CLR_NC}                                               ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}├─────────────────────────────────────────────────────────────────┤${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}pt${CLR_NC}                 ${CLR_MUTED}pytest${CLR_NC}                                    ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}ptv${CLR_NC}                ${CLR_MUTED}pytest -v${CLR_NC}                                 ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}ptx${CLR_NC}                ${CLR_MUTED}pytest -x (stop on first fail)${CLR_NC}            ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}ptxv${CLR_NC}               ${CLR_MUTED}pytest -xvs (verbose, stop, output)${CLR_NC}       ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}ptc${CLR_NC}                ${CLR_MUTED}pytest --cov${CLR_NC}                              ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}ptl${CLR_NC}                ${CLR_MUTED}pytest --last-failed${CLR_NC}                      ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}├─────────────────────────────────────────────────────────────────┤${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_HEADER}HELPER FUNCTIONS${CLR_NC}                                            ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}├─────────────────────────────────────────────────────────────────┤${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}uv-new${CLR_NC} <name>      ${CLR_MUTED}Create new Python project${CLR_NC}                 ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}uv-clean${CLR_NC}           ${CLR_MUTED}Clean Python artifacts${CLR_NC}                    ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}uv-info${CLR_NC}            ${CLR_MUTED}Show Python/uv info${CLR_NC}                       ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}uv-python-setup${CLR_NC}    ${CLR_MUTED}Install and pin Python version${CLR_NC}            ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}pt-watch${CLR_NC}           ${CLR_MUTED}Run pytest in watch mode${CLR_NC}                  ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_SECONDARY}pt-cov${CLR_NC}             ${CLR_MUTED}Coverage with HTML report${CLR_NC}                 ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}╰─────────────────────────────────────────────────────────────────╯${CLR_NC}"
     echo ""
 
     # Auto-venv setting
-    echo -e "  ${bold}Auto-venv Mode${nc}"
-    echo -e "  ${dim}───────────────────────────────────────${nc}"
+    echo -e "  ${CLR_BOLD}Auto-venv Mode${CLR_NC}"
+    echo -e "  ${CLR_MUTED}───────────────────────────────────────${CLR_NC}"
     case "${PYTHON_AUTO_VENV:-notify}" in
-        auto)   echo -e "    ${dim}Mode${nc}      ${green}auto${nc} ${dim}(activates on cd)${nc}" ;;
-        off)    echo -e "    ${dim}Mode${nc}      ${red}off${nc} ${dim}(disabled)${nc}" ;;
-        *)      echo -e "    ${dim}Mode${nc}      ${yellow}notify${nc} ${dim}(prompts on cd)${nc}" ;;
+        auto)   echo -e "    ${CLR_MUTED}Mode${CLR_NC}      ${CLR_SUCCESS}auto${CLR_NC} ${CLR_MUTED}(activates on cd)${CLR_NC}" ;;
+        off)    echo -e "    ${CLR_MUTED}Mode${CLR_NC}      ${CLR_ERROR}off${CLR_NC} ${CLR_MUTED}(disabled)${CLR_NC}" ;;
+        *)      echo -e "    ${CLR_MUTED}Mode${CLR_NC}      ${CLR_WARNING}notify${CLR_NC} ${CLR_MUTED}(prompts on cd)${CLR_NC}" ;;
     esac
-    echo -e "    ${dim}Set with:${nc} export PYTHON_AUTO_VENV=auto|notify|off"
+    echo -e "    ${CLR_MUTED}Set with:${CLR_NC} export PYTHON_AUTO_VENV=auto|notify|off"
     echo ""
 
     # Current Status
-    echo -e "  ${bold}Current Status${nc}"
-    echo -e "  ${dim}───────────────────────────────────────${nc}"
+    echo -e "  ${CLR_BOLD}Current Status${CLR_NC}"
+    echo -e "  ${CLR_MUTED}───────────────────────────────────────${CLR_NC}"
 
     if [[ "$has_uv" == "true" ]]; then
         local uv_version
         uv_version=$(uv --version 2>/dev/null | cut -d' ' -f2)
-        echo -e "    ${dim}uv${nc}        ${green}✓ installed${nc} ${dim}($uv_version)${nc}"
+        echo -e "    ${CLR_MUTED}uv${CLR_NC}        ${CLR_SUCCESS}✓ installed${CLR_NC} ${CLR_MUTED}($uv_version)${CLR_NC}"
     else
-        echo -e "    ${dim}uv${nc}        ${red}✗ not installed${nc} ${dim}(curl -LsSf https://astral.sh/uv/install.sh | sh)${nc}"
+        echo -e "    ${CLR_MUTED}uv${CLR_NC}        ${CLR_ERROR}✗ not installed${CLR_NC} ${CLR_MUTED}(curl -LsSf https://astral.sh/uv/install.sh | sh)${CLR_NC}"
     fi
 
     if [[ "$has_python" == "true" ]]; then
         local py_version
         py_version=$(python3 --version 2>&1 | cut -d' ' -f2)
-        echo -e "    ${dim}Python${nc}    ${green}✓ installed${nc} ${dim}($py_version)${nc}"
+        echo -e "    ${CLR_MUTED}Python${CLR_NC}    ${CLR_SUCCESS}✓ installed${CLR_NC} ${CLR_MUTED}($py_version)${CLR_NC}"
     else
-        echo -e "    ${dim}Python${nc}    ${red}✗ not installed${nc}"
+        echo -e "    ${CLR_MUTED}Python${CLR_NC}    ${CLR_ERROR}✗ not installed${CLR_NC}"
     fi
 
     if [[ "$in_venv" == "true" ]]; then
-        echo -e "    ${dim}Venv${nc}      ${green}✓ active${nc} ${dim}($(basename "$VIRTUAL_ENV"))${nc}"
+        echo -e "    ${CLR_MUTED}Venv${CLR_NC}      ${CLR_SUCCESS}✓ active${CLR_NC} ${CLR_MUTED}($(basename "$VIRTUAL_ENV"))${CLR_NC}"
     else
-        echo -e "    ${dim}Venv${nc}      ${dim}none active${nc}"
+        echo -e "    ${CLR_MUTED}Venv${CLR_NC}      ${CLR_MUTED}none active${CLR_NC}"
     fi
 
     if [[ "$in_project" == "true" ]]; then
-        echo -e "    ${dim}Project${nc}   ${green}✓ pyproject.toml found${nc}"
+        echo -e "    ${CLR_MUTED}Project${CLR_NC}   ${CLR_SUCCESS}✓ pyproject.toml found${CLR_NC}"
         local pkg_name
         pkg_name=$(grep -m1 '^name' pyproject.toml 2>/dev/null | cut -d'"' -f2)
         if [[ -n "$pkg_name" ]]; then
-            echo -e "    ${dim}Package${nc}   ${cyan}$pkg_name${nc}"
+            echo -e "    ${CLR_MUTED}Package${CLR_NC}   ${CLR_PRIMARY}$pkg_name${CLR_NC}"
         fi
     else
-        echo -e "    ${dim}Project${nc}   ${dim}not in Python project${nc}"
+        echo -e "    ${CLR_MUTED}Project${CLR_NC}   ${CLR_MUTED}not in Python project${CLR_NC}"
     fi
 
     echo ""

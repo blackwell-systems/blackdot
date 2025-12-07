@@ -219,99 +219,94 @@ go-build-all() {
 # =========================
 
 gotools() {
-    # Colors
-    local cyan='\033[0;36m'
-    local red='\033[0;31m'
-    local green='\033[0;32m'
-    local bold='\033[1m'
-    local dim='\033[2m'
-    local nc='\033[0m'
+    # Source theme colors
+    source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
 
     # Check if Go is installed and if we're in a Go project
     local logo_color has_go in_project
     if command -v go &>/dev/null; then
         has_go=true
         if [[ -f "go.mod" ]]; then
-            logo_color="$cyan"
+            logo_color="$CLR_GO"
             in_project=true
         else
-            logo_color="$green"
+            logo_color="$CLR_SUCCESS"
             in_project=false
         fi
     else
         has_go=false
         in_project=false
-        logo_color="$red"
+        logo_color="$CLR_ERROR"
     fi
 
     echo ""
-    echo -e "${logo_color}   ██████╗  ██████╗     ████████╗ ██████╗  ██████╗ ██╗     ███████╗${nc}"
-    echo -e "${logo_color}  ██╔════╝ ██╔═══██╗    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝${nc}"
-    echo -e "${logo_color}  ██║  ███╗██║   ██║       ██║   ██║   ██║██║   ██║██║     ███████╗${nc}"
-    echo -e "${logo_color}  ██║   ██║██║   ██║       ██║   ██║   ██║██║   ██║██║     ╚════██║${nc}"
-    echo -e "${logo_color}  ╚██████╔╝╚██████╔╝       ██║   ╚██████╔╝╚██████╔╝███████╗███████║${nc}"
-    echo -e "${logo_color}   ╚═════╝  ╚═════╝        ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝${nc}"
+    echo -e "${logo_color}   ██████╗  ██████╗     ████████╗ ██████╗  ██████╗ ██╗     ███████╗${CLR_NC}"
+    echo -e "${logo_color}  ██╔════╝ ██╔═══██╗    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝${CLR_NC}"
+    echo -e "${logo_color}  ██║  ███╗██║   ██║       ██║   ██║   ██║██║   ██║██║     ███████╗${CLR_NC}"
+    echo -e "${logo_color}  ██║   ██║██║   ██║       ██║   ██║   ██║██║   ██║██║     ╚════██║${CLR_NC}"
+    echo -e "${logo_color}  ╚██████╔╝╚██████╔╝       ██║   ╚██████╔╝╚██████╔╝███████╗███████║${CLR_NC}"
+    echo -e "${logo_color}   ╚═════╝  ╚═════╝        ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝${CLR_NC}"
     echo ""
 
     # Aliases section
-    echo -e "  ${dim}╭─────────────────────────────────────────────────────────────────╮${nc}"
-    echo -e "  ${dim}│${nc}  ${bold}${cyan}GO ALIASES${nc}                                                   ${dim}│${nc}"
-    echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}gob${nc}                ${dim}go build${nc}                                  ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}gor${nc}                ${dim}go run .${nc}                                  ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}got${nc}                ${dim}go test ./...${nc}                             ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}gotv${nc}               ${dim}go test -v ./...${nc}                          ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}gof${nc}                ${dim}go fmt ./...${nc}                              ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}gom${nc}                ${dim}go mod tidy${nc}                               ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}gov${nc}                ${dim}go vet ./...${nc}                              ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}gog${nc}                ${dim}go get${nc}                                    ${dim}│${nc}"
-    echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
-    echo -e "  ${dim}│${nc}  ${bold}${cyan}HELPER FUNCTIONS${nc}                                            ${dim}│${nc}"
-    echo -e "  ${dim}├─────────────────────────────────────────────────────────────────┤${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}gocover${nc}            ${dim}Run tests with coverage report${nc}            ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}goinit${nc} [name]      ${dim}Initialize Go module${nc}                      ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}go-new${nc} <name>      ${dim}Create new Go project with structure${nc}      ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}go-lint${nc}            ${dim}Run vet + golangci-lint${nc}                   ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}go-update${nc}          ${dim}Update all dependencies${nc}                   ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}go-outdated${nc}        ${dim}Show outdated dependencies${nc}                ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}go-bench${nc} [pattern] ${dim}Run benchmarks${nc}                            ${dim}│${nc}"
-    echo -e "  ${dim}│${nc}  ${cyan}go-build-all${nc}       ${dim}Cross-compile for all platforms${nc}           ${dim}│${nc}"
-    echo -e "  ${dim}╰─────────────────────────────────────────────────────────────────╯${nc}"
+    echo -e "  ${CLR_BOX}╭─────────────────────────────────────────────────────────────────╮${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_HEADER}GO ALIASES${CLR_NC}                                                   ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}├─────────────────────────────────────────────────────────────────┤${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}gob${CLR_NC}                ${CLR_MUTED}go build${CLR_NC}                                  ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}gor${CLR_NC}                ${CLR_MUTED}go run .${CLR_NC}                                  ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}got${CLR_NC}                ${CLR_MUTED}go test ./...${CLR_NC}                             ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}gotv${CLR_NC}               ${CLR_MUTED}go test -v ./...${CLR_NC}                          ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}gof${CLR_NC}                ${CLR_MUTED}go fmt ./...${CLR_NC}                              ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}gom${CLR_NC}                ${CLR_MUTED}go mod tidy${CLR_NC}                               ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}gov${CLR_NC}                ${CLR_MUTED}go vet ./...${CLR_NC}                              ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}gog${CLR_NC}                ${CLR_MUTED}go get${CLR_NC}                                    ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}├─────────────────────────────────────────────────────────────────┤${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_HEADER}HELPER FUNCTIONS${CLR_NC}                                            ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}├─────────────────────────────────────────────────────────────────┤${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}gocover${CLR_NC}            ${CLR_MUTED}Run tests with coverage report${CLR_NC}            ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}goinit${CLR_NC} [name]      ${CLR_MUTED}Initialize Go module${CLR_NC}                      ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}go-new${CLR_NC} <name>      ${CLR_MUTED}Create new Go project with structure${CLR_NC}      ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}go-lint${CLR_NC}            ${CLR_MUTED}Run vet + golangci-lint${CLR_NC}                   ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}go-update${CLR_NC}          ${CLR_MUTED}Update all dependencies${CLR_NC}                   ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}go-outdated${CLR_NC}        ${CLR_MUTED}Show outdated dependencies${CLR_NC}                ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}go-bench${CLR_NC} [pattern] ${CLR_MUTED}Run benchmarks${CLR_NC}                            ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}│${CLR_NC}  ${CLR_GO}go-build-all${CLR_NC}       ${CLR_MUTED}Cross-compile for all platforms${CLR_NC}           ${CLR_BOX}│${CLR_NC}"
+    echo -e "  ${CLR_BOX}╰─────────────────────────────────────────────────────────────────╯${CLR_NC}"
     echo ""
 
     # Current Status
-    echo -e "  ${bold}Current Status${nc}"
-    echo -e "  ${dim}───────────────────────────────────────${nc}"
+    echo -e "  ${CLR_BOLD}Current Status${CLR_NC}"
+    echo -e "  ${CLR_MUTED}───────────────────────────────────────${CLR_NC}"
 
     if [[ "$has_go" == "true" ]]; then
         local go_version
         go_version=$(go version 2>/dev/null | cut -d' ' -f3)
-        echo -e "    ${dim}Go${nc}        ${green}✓ installed${nc} ${dim}($go_version)${nc}"
+        echo -e "    ${CLR_MUTED}Go${CLR_NC}        ${CLR_SUCCESS}✓ installed${CLR_NC} ${CLR_MUTED}($go_version)${CLR_NC}"
     else
-        echo -e "    ${dim}Go${nc}        ${red}✗ not installed${nc} ${dim}(brew install go)${nc}"
+        echo -e "    ${CLR_MUTED}Go${CLR_NC}        ${CLR_ERROR}✗ not installed${CLR_NC} ${CLR_MUTED}(brew install go)${CLR_NC}"
     fi
 
     if [[ "$in_project" == "true" ]]; then
-        echo -e "    ${dim}Project${nc}   ${green}✓ go.mod found${nc}"
+        echo -e "    ${CLR_MUTED}Project${CLR_NC}   ${CLR_SUCCESS}✓ go.mod found${CLR_NC}"
         # Try to get module name
         local mod_name
         mod_name=$(head -1 go.mod 2>/dev/null | cut -d' ' -f2)
         if [[ -n "$mod_name" ]]; then
-            echo -e "    ${dim}Module${nc}    ${cyan}$mod_name${nc}"
+            echo -e "    ${CLR_MUTED}Module${CLR_NC}    ${CLR_PRIMARY}$mod_name${CLR_NC}"
         fi
         # Show Go version from go.mod if present
         local mod_go_version
         mod_go_version=$(grep '^go ' go.mod 2>/dev/null | cut -d' ' -f2)
         if [[ -n "$mod_go_version" ]]; then
-            echo -e "    ${dim}Requires${nc}  ${dim}go $mod_go_version${nc}"
+            echo -e "    ${CLR_MUTED}Requires${CLR_NC}  ${CLR_MUTED}go $mod_go_version${CLR_NC}"
         fi
     else
-        echo -e "    ${dim}Project${nc}   ${dim}not in Go project${nc}"
+        echo -e "    ${CLR_MUTED}Project${CLR_NC}   ${CLR_MUTED}not in Go project${CLR_NC}"
     fi
 
     # Show if linter is available
     if command -v golangci-lint &>/dev/null; then
-        echo -e "    ${dim}Linter${nc}    ${green}✓ golangci-lint${nc}"
+        echo -e "    ${CLR_MUTED}Linter${CLR_NC}    ${CLR_SUCCESS}✓ golangci-lint${CLR_NC}"
     fi
 
     echo ""
