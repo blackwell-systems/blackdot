@@ -13,7 +13,7 @@
 export DOTFILES_MACHINE_TYPE="{{ machine_type }}"
 export DOTFILES_HOSTNAME="{{ hostname }}"
 
-{{#if machine_type == "work" }}
+{{#if (eq machine_type "work") }}
 # -----------------------------------------------------------------------------
 # Work Machine Configuration
 # -----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ export WORK_EMAIL="{{ git_email }}"
 alias work="cd {{ workspace }}/work"
 {{/if}}
 
-{{#if machine_type == "personal" }}
+{{#if (eq machine_type "personal") }}
 # -----------------------------------------------------------------------------
 # Personal Machine Configuration
 # -----------------------------------------------------------------------------
@@ -84,12 +84,12 @@ export GH_ENTERPRISE_USER="{{ github_enterprise_user }}"
 # -----------------------------------------------------------------------------
 # Feature Toggles
 # -----------------------------------------------------------------------------
-{{#if enable_k8s_prompt == "true" }}
+{{#if (eq enable_k8s_prompt "true") }}
 # Kubernetes prompt enabled
 export KUBE_PS1_ENABLED=on
 {{/if}}
 
-{{#if enable_aws_prompt == "true" }}
+{{#if (eq enable_aws_prompt "true") }}
 # AWS profile in prompt enabled
 export AWS_PROMPT_ENABLED=1
 {{/if}}
@@ -97,7 +97,7 @@ export AWS_PROMPT_ENABLED=1
 # -----------------------------------------------------------------------------
 # SDK Managers (loaded on demand)
 # -----------------------------------------------------------------------------
-{{#if enable_nvm == "true" }}
+{{#if (eq enable_nvm "true") }}
 # NVM (Node Version Manager) - lazy loaded
 export NVM_DIR="$HOME/.nvm"
 nvm() {
@@ -107,7 +107,7 @@ nvm() {
 }
 {{/if}}
 
-{{#if enable_pyenv == "true" }}
+{{#if (eq enable_pyenv "true") }}
 # pyenv - lazy loaded
 if command -v pyenv >/dev/null 2>&1; then
     export PYENV_ROOT="$HOME/.pyenv"
@@ -116,14 +116,14 @@ if command -v pyenv >/dev/null 2>&1; then
 fi
 {{/if}}
 
-{{#if enable_rbenv == "true" }}
+{{#if (eq enable_rbenv "true") }}
 # rbenv - lazy loaded
 if command -v rbenv >/dev/null 2>&1; then
     eval "$(rbenv init -)"
 fi
 {{/if}}
 
-{{#if enable_sdkman == "true" }}
+{{#if (eq enable_sdkman "true") }}
 # SDKMAN (Java) - lazy loaded
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
