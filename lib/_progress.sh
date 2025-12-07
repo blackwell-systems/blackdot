@@ -75,11 +75,16 @@ typeset -g _SPINNER_PID=""
 typeset -g _SPINNER_MSG=""
 
 # Spinner frames (braille dots animation)
-if _progress_unicode; then
-    _SPINNER_FRAMES='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-else
-    _SPINNER_FRAMES='|/-\'
-fi
+# Set dynamically to avoid escaping issues at source time
+_SPINNER_FRAMES=""
+
+_get_spinner_frames() {
+    if _progress_unicode; then
+        echo '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    else
+        echo '|/-\\'
+    fi
+}
 
 # Start a spinner in the background
 # Usage: spinner_start "message"
@@ -95,7 +100,7 @@ spinner_start() {
 
     # Start spinner in background subshell
     (
-        local frames="$_SPINNER_FRAMES"
+        local frames="$(_get_spinner_frames)"
         local frame_count=${#frames}
         local i=0
 
