@@ -4,13 +4,15 @@
 # Run: zsh test/test_progress.sh
 # ============================================================
 
-set -euo pipefail
-
+# Get directory paths
 SCRIPT_DIR="${0:A:h}"
 DOTFILES_DIR="${SCRIPT_DIR:h}"
 
 # Source the progress library
 source "$DOTFILES_DIR/lib/_progress.sh"
+
+# Set up cleanup trap
+trap 'progress_cleanup' EXIT INT TERM
 
 echo "=============================================="
 echo "Progress Indicator Test Suite"
