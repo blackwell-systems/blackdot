@@ -53,6 +53,12 @@ func runDiff(cmd *cobra.Command, args []string) error {
 	syncMode, _ := cmd.Flags().GetBool("sync")
 	restoreMode, _ := cmd.Flags().GetBool("restore")
 
+	// Check mutual exclusion
+	if syncMode && restoreMode {
+		fmt.Println(color.RedString("[ERROR]") + " --sync and --restore are mutually exclusive")
+		return fmt.Errorf("--sync and --restore are mutually exclusive")
+	}
+
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return fmt.Errorf("cannot determine home directory: %w", err)
@@ -81,7 +87,7 @@ func runDiff(cmd *cobra.Command, args []string) error {
 		fmt.Printf("%s Bitwarden not unlocked\n", red("[ERROR]"))
 		fmt.Println()
 		fmt.Println("Run: export BW_SESSION=\"$(bw unlock --raw)\"")
-		return nil
+		return fmt.Errorf("vault not unlocked")
 	}
 
 	if syncMode {
