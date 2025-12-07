@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Go CLI Foundation** (`go/cmd/dotfiles/`)
+  - Go module structure for CLI refactoring (strangler fig pattern)
+  - Working `dotfiles features` command in Go
+  - Vault CLI wired to vaultmux backend
+  - Phase A complete: Foundation for gradual bash→Go migration
+
+- **Standard Handlebars Template Syntax** (Phase B)
+  - Templates now use standard Handlebars syntax: `{{#if}}`, `{{#unless}}`, `{{#each}}`, `{{/if}}`
+  - Bash engine supports both legacy (`{% if %}`) and Handlebars syntax
+  - Migrated 4 template files to standard syntax:
+    - `templates/configs/99-local.zsh.tmpl`
+    - `templates/configs/gitconfig.tmpl`
+    - `templates/configs/ssh-config.tmpl`
+    - `templates/configs/claude.local.tmpl`
+  - All 364 tests passing with new syntax
+
 - **Interactive Template Setup** (`dotfiles template init`)
   - Prompts for essential variables: git name, email, machine type, GitHub username
   - Auto-detects defaults from `git config --global`
@@ -31,6 +47,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Quick access: `d status`, `d doctor`, `d features`, etc.
 
 ### Fixed
+
+- **Nested `{{#if}}` block extraction bug** (`lib/_templates.sh`)
+  - Fixed stray `}` character appearing in output when using nested conditionals
+  - Root cause: Two bugs in `process_conditionals` function:
+    1. Line 917: Extra `}` in pattern match was being concatenated as literal
+    2. Lines 935-938: Missing `{{/if}}` preservation in elif branch
+  - Templates like `A{{#if x}}B{{#if y}}C{{/if}}D{{/if}}E` now correctly produce `ABCDE`
+  - All nested conditional test cases pass
 
 - **Machine type preservation in template system**
   - User-set `TMPL_AUTO[machine_type]` in `_variables.local.sh` was being overwritten by auto-detection
