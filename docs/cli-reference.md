@@ -909,6 +909,7 @@ dotfiles tmpl <command>   # Alias
 | `edit` | - | Open _variables.local.sh in editor |
 | `link` | `symlink` | Create symlinks from generated files |
 | `list` | `ls` | List available templates |
+| `vault` | - | Sync template variables with vault |
 | `help` | `-h`, `--help` | Show help |
 
 ---
@@ -1041,6 +1042,59 @@ dotfiles template ls    # Alias
 - Up to date
 - Stale (needs re-rendering)
 - Not generated
+
+---
+
+### `dotfiles template vault`
+
+Sync template variables (`_variables.local.sh`) with your vault for cross-machine portability.
+
+```bash
+dotfiles template vault <command> [OPTIONS]
+```
+
+**Subcommands:**
+
+| Command | Description |
+|---------|-------------|
+| `push` | Push local variables to vault |
+| `pull` | Pull from vault to local file |
+| `diff` | Show differences between local and vault |
+| `sync` | Bidirectional sync with conflict detection |
+| `status` | Show sync status (default) |
+| `help` | Show help |
+
+**Options:**
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--force` | `-f` | Force overwrite without confirmation |
+| `--prefer-local` | - | On sync conflict, use local file |
+| `--prefer-vault` | - | On sync conflict, use vault item |
+| `--no-backup` | - | Don't backup local file on pull |
+
+**Examples:**
+
+```bash
+# Backup template variables to vault
+dotfiles template vault push
+
+# Restore on new machine
+dotfiles template vault pull
+
+# Check sync status
+dotfiles template vault status
+
+# See differences
+dotfiles template vault diff
+
+# Sync with conflict resolution
+dotfiles template vault sync --prefer-local
+```
+
+**Vault Item:** `Template-Variables`
+
+Works with all vault backends (Bitwarden, 1Password, pass).
 
 ---
 
