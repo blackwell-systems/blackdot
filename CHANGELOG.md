@@ -117,6 +117,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Pattern matching for files that should be encrypted
   - Vault integration for key backup/recovery
 
+- **Go Doctor Command** (`internal/cli/doctor.go`)
+  - 10 check sections: Version, Core Components, Required Commands, SSH, AWS, Vault, Shell, Claude, Templates
+  - Health score calculation (0-100) with color-coded interpretation
+  - `--fix/-f`: Auto-fix permission issues (SSH keys, AWS credentials)
+  - `--quick/-q`: Fast checks only (skip vault status)
+  - Failed checks and warnings tracking with fix suggestions
+  - Metrics saving to `~/.dotfiles-metrics.jsonl`
+  - Banner with ASCII art matching bash implementation
+
 - **Interactive Template Setup** (`dotfiles template init`)
   - Prompts for essential variables: git name, email, machine type, GitHub username
   - Auto-detects defaults from `git config --global`

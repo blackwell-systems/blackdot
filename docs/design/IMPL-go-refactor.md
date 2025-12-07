@@ -3217,9 +3217,9 @@ nested blocks correctly.
 - [x] ✅ diff: Change preview (--sync, --restore, item-specific)
 - [x] ✅ hook: Full hook system (list, run, add, remove, points, test subcommands)
 - [x] ✅ encrypt: Age encryption (init, encrypt, decrypt, edit, list, status, push-key)
+- [x] ✅ doctor: 10 check sections, health score, --fix/--quick modes, metrics saving
 
 **Remaining (High Complexity):**
-- [ ] doctor: Health check logic from bin/dotfiles-doctor (many checks, --fix mode)
 - [ ] setup: Wizard flow from bin/dotfiles-setup (multi-step, state)
 - [ ] migrate: Migration scripts (schema changes)
 - [ ] sync: Bidirectional sync (merge logic)
@@ -3533,6 +3533,6 @@ A command has complete parity when:
 
 ---
 
-*Document Version: 1.2*
+*Document Version: 1.3*
 *Last Updated: 2025-12-07*
-*Status: Phases 1-4 complete, Phases 5-8 in progress, Phase 9 medium-complexity commands complete (10/14)*
+*Status: Phases 1-4 complete, Phases 5-8 in progress, Phase 9 commands: 11/14 complete (3 remaining)*
