@@ -20,6 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Short alias `d` for `dotfiles` command**
   - Quick access: `d status`, `d doctor`, `d features`, etc.
 
+### Fixed
+
+- **Machine type preservation in template system**
+  - User-set `TMPL_AUTO[machine_type]` in `_variables.local.sh` was being overwritten by auto-detection
+  - Fixed variable loading order: now loads user files before auto-detection
+  - `build_auto_vars()` now preserves existing user-set values
+
 ---
 
 ## [3.1.0] - 2025-12-06
