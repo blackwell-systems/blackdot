@@ -750,3 +750,6 @@ dotfiles() {
             ;;
     esac
 }
+
+# Short alias for dotfiles command
+alias d=dotfiles
