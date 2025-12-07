@@ -8,28 +8,23 @@ This document outlines planned improvements and future work for the dotfiles sys
 
 ### 1. Interactive Template Setup
 
-**Status:** Consideration
+**Status:** ✅ Completed (v3.2.0)
 
-Add an interactive mode to `dotfiles template init` that prompts for common variables:
+The `dotfiles template init` command now provides interactive prompts:
 
 ```bash
-dotfiles template init --interactive
-# or make init more interactive by default
+dotfiles template init
+# Prompts for: git name, git email, machine type, GitHub username
+# Auto-detects defaults from git config
+# Generates _variables.local.sh with user values pre-filled
+# Offers editor for advanced configuration
 ```
 
-**Potential prompts:**
-- Git name and email
-- Machine type (work/personal)
-- GitHub username
-- AWS profile
-
-**Tradeoffs:**
-- **Pro:** Lower barrier for first-time users, no need to understand shell syntax
-- **Pro:** Consistent with `dotfiles setup` wizard pattern
-- **Con:** Current `init` already opens editor with well-commented example
-- **Con:** Most dotfiles users are comfortable editing files
-
-**Decision:** Consider implementing as lightweight prompts for essentials only, then open editor for advanced customization.
+**Implementation:**
+- Essential prompts only (4 fields), not overwhelming
+- Smart defaults from `git config --global`
+- Machine type shows detected value, user confirms or changes
+- Editor offered at end for advanced customization
 
 ---
 
