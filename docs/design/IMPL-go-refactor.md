@@ -2902,10 +2902,10 @@ where both engines work.
 │  ├── Keep old syntax working (backward compat) ✓            │
 │  └── 71 lines of changes to lib/_templates.sh               │
 │                                                              │
-│  Phase B: Migrate Templates                                  │
-│  ├── Run migration script on 4 .tmpl files                  │
-│  ├── Verify: Bash still renders correctly                   │
-│  └── Templates now use standard Handlebars                  │
+│  Phase B: Migrate Templates ✅ COMPLETED                     │
+│  ├── Run migration script on 4 .tmpl files ✓                │
+│  ├── Verify: Bash still renders correctly ✓                 │
+│  └── Templates now use standard Handlebars ✓                │
 │                                                              │
 │  Phase C: Implement Go Engine                                │
 │  ├── Add raymond dependency                                 │
@@ -3172,12 +3172,17 @@ diff /tmp/bash.out /tmp/go.out  # Should be identical
 - [x] Test: New syntax works (helper syntax, eq/ne conditionals, {{#else}})
 - [x] Commit: `da7e8f3 feat(templates): Add standard Handlebars syntax support`
 
-**Phase B: Template Migration**
-- [ ] Create migration script
-- [ ] Run on all 4 .tmpl files
-- [ ] Review changes manually
-- [ ] Test: Bash renders all templates correctly
-- [ ] Commit: `refactor(templates): Migrate to standard Handlebars syntax`
+**Phase B: Template Migration** ✅ COMPLETED
+- [x] Create migration script (`scripts/migrate-templates-to-handlebars.sh`)
+- [x] Run on all template files (3 files needed changes, 1 already compliant)
+- [x] Review changes manually - 10 patterns converted
+- [x] Test: All 4 templates produce identical output before/after
+- [x] Test: All 364 tests pass
+- [x] Commit: `d4ca0d0 refactor(templates): Migrate to standard Handlebars syntax`
+
+**Discovery:** Pre-existing bug found in bash template engine with nested `{{#if}}` blocks
+(stray `}` in output). This validates the move to Go's raymond library which handles
+nested blocks correctly.
 
 **Phase C: Go Implementation**
 - [ ] Add raymond dependency to go.mod
