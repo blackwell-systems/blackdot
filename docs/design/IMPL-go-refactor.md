@@ -2896,11 +2896,11 @@ where both engines work.
 │                    MIGRATION TIMELINE                        │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
-│  Phase A: Update Bash Engine                                 │
-│  ├── Add {{#if (eq var "value")}} support                   │
-│  ├── Add {{ helper arg }} support                           │
-│  ├── Keep old syntax working (backward compat)              │
-│  └── ~50 lines of changes to lib/_templates.sh              │
+│  Phase A: Update Bash Engine ✅ COMPLETED                    │
+│  ├── Add {{#if (eq var "value")}} support ✓                 │
+│  ├── Add {{ helper arg }} support ✓                         │
+│  ├── Keep old syntax working (backward compat) ✓            │
+│  └── 71 lines of changes to lib/_templates.sh               │
 │                                                              │
 │  Phase B: Migrate Templates                                  │
 │  ├── Run migration script on 4 .tmpl files                  │
@@ -2921,9 +2921,15 @@ where both engines work.
 └─────────────────────────────────────────────────────────────┘
 ```
 
-#### 8.6 Phase A: Bash Engine Updates
+#### 8.6 Phase A: Bash Engine Updates ✅ COMPLETED (2025-12-07)
 
 **File:** `lib/_templates.sh`
+
+**Implementation Notes:**
+- Added 71 lines to `lib/_templates.sh`
+- **Critical zsh regex fix:** Must use `[{][{]` instead of `\{\{` and `[(]`/`[)]` instead of `\(`/`\)` - zsh extended regex doesn't accept backslash escapes like bash
+- All 364 tests pass - zero regressions
+- Commit: `da7e8f3 feat(templates): Add standard Handlebars syntax support`
 
 **Change 1: Support `(eq var "value")` in conditionals (~15 lines)**
 
@@ -3157,14 +3163,14 @@ diff /tmp/bash.out /tmp/go.out  # Should be identical
 
 #### 8.11 Implementation Checklist
 
-**Phase A: Bash Updates**
-- [ ] Add `(eq var "value")` pattern to `evaluate_condition()`
-- [ ] Add `(ne var "value")` pattern to `evaluate_condition()`
-- [ ] Add `{{ helper arg }}` pattern to variable substitution
-- [ ] Add `{{ helper arg "default" }}` pattern
-- [ ] Test: Old syntax still works
-- [ ] Test: New syntax works
-- [ ] Commit: `feat(templates): Support Handlebars helper syntax in bash`
+**Phase A: Bash Updates** ✅ COMPLETED
+- [x] Add `(eq var "value")` pattern to `evaluate_condition()` - lines 667-676
+- [x] Add `(ne var "value")` pattern to `evaluate_condition()` - lines 678-687
+- [x] Add `{{ helper arg }}` pattern to variable substitution - lines 1118-1138
+- [x] Add `{{ helper arg "default" }}` pattern - lines 1106-1117
+- [x] Test: Old syntax still works (pipe filters, simple conditionals)
+- [x] Test: New syntax works (helper syntax, eq/ne conditionals, {{#else}})
+- [x] Commit: `da7e8f3 feat(templates): Add standard Handlebars syntax support`
 
 **Phase B: Template Migration**
 - [ ] Create migration script
