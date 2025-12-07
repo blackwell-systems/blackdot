@@ -516,7 +516,7 @@ func runEncryptStatus(cmd *cobra.Command, args []string) error {
 		fmt.Printf("age installed: %s\n", green(version))
 	} else {
 		fmt.Printf("age installed: %s (install with: brew install age)\n", red("NO"))
-		return nil
+		return fmt.Errorf("age not installed")
 	}
 
 	if isEncryptionInitialized() {
@@ -528,7 +528,7 @@ func runEncryptStatus(cmd *cobra.Command, args []string) error {
 	} else {
 		fmt.Printf("Keys initialized: %s\n", red("NO"))
 		fmt.Println("  Run: dotfiles-go encrypt init")
-		return nil
+		return fmt.Errorf("encryption not initialized")
 	}
 
 	fmt.Println()
