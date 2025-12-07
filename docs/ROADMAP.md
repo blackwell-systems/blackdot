@@ -1549,6 +1549,134 @@ $ dotfiles aliases --ysu-stats
 
 ---
 
+### 24. Color Theming System
+
+**Status:** Planned (Priority 2)
+
+Centralized color definitions for consistent theming across all terminal output.
+
+**Problem:**
+- Colors hardcoded in 28+ files with local variables
+- Each module (awstools, cdktools, rusttools, etc.) defines its own colors
+- No single place to change the color scheme
+- Inconsistent color usage across commands
+
+**Current State:**
+```zsh
+# Each module does this independently:
+rusttools() {
+    local orange='\033[0;33m'
+    local red='\033[0;31m'
+    local green='\033[0;32m'
+    ...
+}
+
+gotools() {
+    local cyan='\033[0;36m'
+    local red='\033[0;31m'
+    local green='\033[0;32m'
+    ...
+}
+```
+
+**Solution:** Centralized color theme library.
+
+**File:** `lib/_colors.sh`
+```zsh
+# ============================================================
+# Dotfiles Color Theme
+# Source this file to use consistent colors across all modules
+# ============================================================
+
+# Semantic colors (what the color means)
+export DOTFILES_COLOR_PRIMARY='\033[0;36m'    # cyan - main accent
+export DOTFILES_COLOR_SECONDARY='\033[0;33m'  # yellow/orange - secondary accent
+export DOTFILES_COLOR_SUCCESS='\033[0;32m'    # green - success/enabled
+export DOTFILES_COLOR_ERROR='\033[0;31m'      # red - errors/disabled
+export DOTFILES_COLOR_WARNING='\033[0;33m'    # yellow - warnings
+export DOTFILES_COLOR_INFO='\033[0;34m'       # blue - informational
+export DOTFILES_COLOR_MUTED='\033[2m'         # dim - secondary text
+export DOTFILES_COLOR_BOLD='\033[1m'
+export DOTFILES_COLOR_NC='\033[0m'            # no color (reset)
+
+# Tool-specific brand colors (optional overrides)
+export DOTFILES_COLOR_RUST='\033[0;33m'       # orange (Rust brand)
+export DOTFILES_COLOR_GO='\033[0;36m'         # cyan (Go brand)
+export DOTFILES_COLOR_PYTHON='\033[0;34m'     # blue (Python brand)
+export DOTFILES_COLOR_AWS='\033[0;33m'        # orange (AWS brand)
+export DOTFILES_COLOR_CDK='\033[0;32m'        # green (CDK brand)
+```
+
+**Usage in modules:**
+```zsh
+# Before (current)
+rusttools() {
+    local orange='\033[0;33m'
+    local red='\033[0;31m'
+    ...
+}
+
+# After (themed)
+rusttools() {
+    source "$DOTFILES_DIR/lib/_colors.sh"
+    local logo_color="$DOTFILES_COLOR_RUST"
+    local error="$DOTFILES_COLOR_ERROR"
+    ...
+}
+```
+
+**Theme Presets:**
+```bash
+dotfiles theme                    # Show current theme
+dotfiles theme list               # List available themes
+dotfiles theme set <name>         # Apply a theme
+dotfiles theme preview <name>     # Preview theme colors
+```
+
+**Built-in Themes:**
+| Theme | Description |
+|-------|-------------|
+| `default` | Current colors (cyan/green/red/yellow) |
+| `nord` | Nord color palette |
+| `dracula` | Dracula color palette |
+| `solarized` | Solarized dark |
+| `monokai` | Monokai colors |
+| `minimal` | Muted, low-contrast |
+
+**Custom Themes:**
+```bash
+# User theme file: ~/.config/dotfiles/theme.sh
+DOTFILES_COLOR_PRIMARY='\033[38;5;135m'   # Custom purple
+DOTFILES_COLOR_SUCCESS='\033[38;5;114m'   # Custom green
+# ... etc
+```
+
+**Configuration:**
+```json
+{
+  "ui": {
+    "theme": "default",
+    "colors": true,
+    "unicode": true
+  }
+}
+```
+
+**Migration Path:**
+1. Create `lib/_colors.sh` with default colors
+2. Update modules to source `_colors.sh` instead of local definitions
+3. Add `dotfiles theme` command
+4. Document custom theme creation
+
+**Benefits:**
+- Single file to change all colors
+- Consistent look across all commands
+- User-customizable themes
+- Brand colors for tool integrations
+- Supports 256-color and true color terminals
+
+---
+
 ## Design Decisions
 
 ### Path Convention: `~/workspace/dotfiles`
