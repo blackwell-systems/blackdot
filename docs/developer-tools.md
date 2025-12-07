@@ -16,10 +16,11 @@ The dotfiles framework provides deep integrations with modern developer tools. E
 | [Go Tools](#go-tools) | `go_tools` | Build, test, coverage, module management |
 | [Python Tools](#python-tools) | `python_tools` | uv package manager, pytest, auto-venv |
 | [SSH Tools](#ssh-tools) | `ssh_tools` | Config, keys, agent, and tunnel management |
+| [Docker Tools](#docker-tools) | `docker_tools` | Container, compose, and network management |
 | [NVM](#nvm-nodejs) | `nvm_integration` | Lazy-loaded Node.js version manager |
 | [SDKMAN](#sdkman-java) | `sdkman_integration` | Lazy-loaded Java/Gradle/Kotlin manager |
 
-**Total:** 100+ aliases across all toolchains, with shell completions and helpers.
+**Total:** 120+ aliases across all toolchains, with shell completions and helpers.
 
 ---
 
@@ -472,6 +473,98 @@ sshlist
 
 # Generate a new key for a project
 sshgen client-project "Client Project Deploy Key"
+```
+
+---
+
+## Docker Tools
+
+```
+  ██████╗  ██████╗  ██████╗██╗  ██╗███████╗██████╗     ████████╗ ██████╗  ██████╗ ██╗     ███████╗
+  ██╔══██╗██╔═══██╗██╔════╝██║ ██╔╝██╔════╝██╔══██╗    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝
+  ██║  ██║██║   ██║██║     █████╔╝ █████╗  ██████╔╝       ██║   ██║   ██║██║   ██║██║     ███████╗
+  ██║  ██║██║   ██║██║     ██╔═██╗ ██╔══╝  ██╔══██╗       ██║   ██║   ██║██║   ██║██║     ╚════██║
+  ██████╔╝╚██████╔╝╚██████╗██║  ██╗███████╗██║  ██║       ██║   ╚██████╔╝╚██████╔╝███████╗███████║
+  ╚═════╝  ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝       ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
+```
+
+**Feature:** `docker_tools` | **File:** `zsh/zsh.d/66-docker.zsh` | **Status:** `dockertools`
+
+### Container Commands
+
+| Alias | Description |
+|-------|-------------|
+| `dps` | `docker ps` |
+| `dpsa` | `docker ps -a` |
+| `di` | `docker images` |
+| `dsh <c>` | Shell into container (bash→sh fallback) |
+| `dex <c> [cmd]` | Execute command in container |
+| `dl` / `dlf` | `docker logs` / `logs -f` |
+| `dstop` / `dstart` | Stop / start container |
+| `drm` / `drmi` | Remove container / image |
+
+### Docker Compose
+
+| Alias | Description |
+|-------|-------------|
+| `dc` | `docker compose` |
+| `dcu` / `dcud` | `compose up` / `up -d` |
+| `dcd` | `compose down` |
+| `dcr` | `compose restart` |
+| `dcl` | `compose logs -f` |
+| `dcps` | `compose ps` |
+| `dcb` | `compose build` |
+| `dcex` | `compose exec` |
+
+### Inspection & Networking
+
+| Command | Description |
+|---------|-------------|
+| `dip <container>` | Get container IP address |
+| `denv <container>` | Show container env vars |
+| `dports` | Show all exposed ports |
+| `dstats` | Pretty docker stats |
+| `dvols` | List volumes |
+| `dnets` | List networks |
+| `dinspect <c> [jq]` | Inspect with jq filtering |
+
+### Cleanup Commands
+
+| Command | Description |
+|---------|-------------|
+| `dclean` | Remove stopped containers + dangling images |
+| `dprune` | Interactive system prune |
+| `dprune-all` | Aggressive cleanup (with confirmation) |
+
+### Features
+
+- **Daemon detection:** Logo color indicates Docker status (green=running with containers, cyan=running, red=stopped)
+- **Tab completions:** Container names auto-complete
+- **jq integration:** `dinspect myapp .NetworkSettings` for filtered inspection
+- **Compose v2:** All compose commands use `docker compose` (v2)
+
+### Example Workflow
+
+```bash
+# Check what's running
+dps
+dockertools              # Full status dashboard
+
+# Start a compose project
+dcud                     # docker compose up -d
+dcl                      # Follow logs
+
+# Debug a container
+dsh webapp              # Shell into container
+denv webapp             # Check environment
+dip webapp              # Get IP address
+
+# Inspect with filtering
+dinspect webapp .NetworkSettings.Networks
+
+# Cleanup
+dclean                  # Quick cleanup
+dprune                  # Interactive prune
 ```
 
 ---

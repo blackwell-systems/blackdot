@@ -469,12 +469,12 @@ sshhook-remove <host> <pre|post>           # Remove hook
 
 ### 12. Docker Tools Integration
 
-**Status:** Planned
+**Status:** ✅ Implemented (v3.0)
 
 Docker container management, compose workflows, and network utilities.
 
 **Feature:** `docker_tools` (integration category)
-**File:** `zsh/zsh.d/65-docker.zsh`
+**File:** `zsh/zsh.d/66-docker.zsh`
 
 **Container Aliases:**
 ```bash
