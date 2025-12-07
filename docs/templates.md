@@ -223,6 +223,49 @@ ssh_hosts (3 items):
   • work-server | server.company.com | deploy | ~/.ssh/id_work | ProxyJump bastion
 ```
 
+### `dotfiles template vault`
+
+Sync template variables with your vault for cross-machine portability:
+
+```bash
+# Push local variables to vault
+dotfiles template vault push
+
+# Pull from vault to local
+dotfiles template vault pull
+
+# Show differences between local and vault
+dotfiles template vault diff
+
+# Bidirectional sync with conflict detection
+dotfiles template vault sync
+
+# Check sync status
+dotfiles template vault status
+```
+
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `--force`, `-f` | Force overwrite without confirmation |
+| `--prefer-local` | On conflict, use local file |
+| `--prefer-vault` | On conflict, use vault item |
+| `--no-backup` | Don't backup local file on pull |
+
+**Example workflow:**
+
+```bash
+# First machine: backup your config to vault
+dotfiles template init
+dotfiles template vault push
+
+# New machine: restore from vault
+dotfiles vault pull           # Get vault access
+dotfiles template vault pull  # Pull template variables
+dotfiles template render      # Generate configs
+```
+
 ---
 
 ## Template Syntax
@@ -767,36 +810,42 @@ TMPL_AUTO[machine_type]="work"
 
 Template variables can be stored in your vault for portable restoration across machines. This enables a seamless new-machine workflow.
 
-### Variable File Locations
+### Quick Commands
 
-The template system checks two locations for variables (in order of priority):
+The template system has built-in vault commands:
 
-| Location | Purpose | Vault-Portable |
-|----------|---------|----------------|
-| `~/.config/dotfiles/template-variables.sh` | XDG standard location | ✓ Yes |
-| `templates/_variables.local.sh` | Traditional repo location | Depends on dotfiles path |
+```bash
+dotfiles template vault push      # Backup to vault
+dotfiles template vault pull      # Restore from vault
+dotfiles template vault diff      # Compare local vs vault
+dotfiles template vault sync      # Bidirectional sync
+dotfiles template vault status    # Show sync status
+```
 
-**For vault storage, use the XDG location** - it works regardless of where your dotfiles repo is installed.
+### Variable File Location
+
+The template vault commands sync `templates/_variables.local.sh`:
+
+| File | Purpose |
+|------|---------|
+| `templates/_variables.local.sh` | Your machine-specific template variables |
+| Vault: `Template-Variables` | Backup in vault (all backends supported) |
 
 ### Storing Template Variables in Vault
 
 ```bash
-# 1. Create/copy your variables to the XDG location
-mkdir -p ~/.config/dotfiles
-cp templates/_variables.local.sh ~/.config/dotfiles/template-variables.sh
+# After running `dotfiles template init`
+dotfiles template vault push      # Push to vault
 
-# 2. Push to vault
-dotfiles vault push Template-Variables
-
-# 3. Verify it's in your vault config
-cat ~/.config/dotfiles/vault-items.json | grep Template-Variables
+# Or check status first
+dotfiles template vault status    # Shows sync state
 ```
 
 ### Restoring on a New Machine
 
 ```bash
-# 1. Pull all secrets (including template variables)
-dotfiles vault pull
+# 1. Pull template variables from vault
+dotfiles template vault pull
 
 # 2. Render templates - uses variables from vault
 dotfiles template render
@@ -847,13 +896,16 @@ git clone https://github.com/you/dotfiles ~/dotfiles
 # 2. Bootstrap (installs dependencies, sets up vault)
 cd ~/dotfiles && ./install.sh
 
-# 3. Pull all secrets including template variables
+# 3. Pull SSH keys, AWS config, etc from vault
 dotfiles vault pull
 
-# 4. Render all templates
+# 4. Pull template variables from vault
+dotfiles template vault pull
+
+# 5. Render all templates
 dotfiles template render
 
-# 5. Create symlinks
+# 6. Create symlinks
 dotfiles template link
 
 # Done! All configs are now in place
