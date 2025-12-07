@@ -54,19 +54,27 @@ Core features cannot be disabled—they're essential for the dotfiles system to 
 | `workspace_symlink` | `/workspace` symlink for portable Claude sessions | - |
 | `claude_integration` | Claude Code integration and hooks | `workspace_symlink` |
 | `vault` | Multi-vault secret management (Bitwarden/1Password/pass) | - |
+| `encryption` | Age encryption for non-vault secrets (template vars, local configs) | - |
 | `templates` | Machine-specific configuration templates | - |
-| `aws_helpers` | AWS SSO profile management and helpers | - |
+| `hooks` | Lifecycle hooks for custom behavior at key events | - |
 | `git_hooks` | Git safety hooks (pre-commit, pre-push) | - |
 | `drift_check` | Automatic drift detection on vault operations | `vault` |
 | `backup_auto` | Automatic backup before destructive operations | - |
 | `health_metrics` | Health check metrics collection and trending | - |
 | `macos_settings` | macOS system preferences automation | - |
+| `config_layers` | Hierarchical configuration resolution (env>project>machine>user) | - |
+| `cli_feature_filter` | Filter CLI help and commands based on enabled features | - |
 
 ### Integrations
 
 | Feature | Description | Dependencies |
 |---------|-------------|--------------|
 | `modern_cli` | Modern CLI tools (eza, bat, ripgrep, fzf, zoxide) | - |
+| `aws_helpers` | AWS SSO profile management and helpers | - |
+| `cdk_tools` | AWS CDK aliases, helpers, and environment management | `aws_helpers` |
+| `rust_tools` | Rust/Cargo aliases and helpers (build, test, clippy, watch) | - |
+| `go_tools` | Go aliases and helpers (build, test, coverage, modules) | - |
+| `python_tools` | Python/uv aliases, pytest helpers, auto-venv activation | - |
 | `nvm_integration` | Lazy-loaded NVM for Node.js version management | - |
 | `sdkman_integration` | Lazy-loaded SDKMAN for Java/Gradle/Kotlin | - |
 | `dotclaude` | dotclaude profile management for Claude Code | `claude_integration` |
@@ -125,9 +133,9 @@ dotfiles features preset developer --persist
 
 | Preset | Features Enabled |
 |--------|------------------|
-| `minimal` | `shell` |
-| `developer` | `shell`, `vault`, `aws_helpers`, `git_hooks`, `modern_cli` |
-| `claude` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `git_hooks`, `modern_cli` |
+| `minimal` | `shell`, `config_layers` |
+| `developer` | `shell`, `vault`, `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `nvm_integration`, `sdkman_integration`, `git_hooks`, `modern_cli`, `config_layers` |
+| `claude` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `git_hooks`, `modern_cli`, `config_layers` |
 | `full` | All features |
 
 ### Check Feature Status

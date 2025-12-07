@@ -14,6 +14,7 @@ dotfiles sync            # Smart bidirectional vault sync
 dotfiles vault pull      # Pull secrets from vault
 dotfiles vault push      # Push local changes to vault
 dotfiles template init   # Setup machine-specific configs
+dotfiles encrypt init    # Initialize age encryption
 dotfiles help            # Show all commands
 ```
 
@@ -38,6 +39,7 @@ The unified command for managing your dotfiles. All subcommands are accessed via
 | `backup` | - | Backup and restore configuration |
 | `vault` | - | Secret vault operations |
 | `template` | `tmpl` | Machine-specific config templates |
+| `encrypt` | - | **Age Encryption** - encrypt sensitive files |
 | `lint` | - | Validate shell config syntax |
 | `migrate` | - | Migrate legacy config formats (INI→JSON) |
 | `packages` | `pkg` | Check/install Brewfile packages |
@@ -1039,6 +1041,223 @@ dotfiles template ls    # Alias
 - Up to date
 - Stale (needs re-rendering)
 - Not generated
+
+---
+
+## Encryption Commands
+
+### `dotfiles encrypt`
+
+Manage file encryption using the `age` tool. Encrypts sensitive files that aren't managed by vault (like template variables).
+
+```bash
+dotfiles encrypt <command> [OPTIONS]
+```
+
+**Subcommands:**
+
+| Command | Description |
+|---------|-------------|
+| `init` | Initialize encryption (generate age key pair) |
+| `encrypt <file>` | Encrypt a file (creates `.age` file, removes original) |
+| `decrypt <file>` | Decrypt a `.age` file |
+| `edit <file>` | Decrypt, open in $EDITOR, re-encrypt on save |
+| `list` | List encrypted and unencrypted sensitive files |
+| `status` | Show encryption status and key info |
+| `push-key` | Push private key to vault for backup/recovery |
+| `help` | Show help |
+
+**Options:**
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--keep` | `-k` | Keep original file when encrypting/decrypting |
+| `--force` | `-f` | Force operation (e.g., regenerate keys) |
+| `--dry-run` | `-n` | Show what would be done |
+
+---
+
+### `dotfiles encrypt init`
+
+Initialize age encryption by generating a new key pair.
+
+```bash
+dotfiles encrypt init [--force]
+```
+
+**What it creates:**
+- `~/.config/dotfiles/age-key.txt` - Private key (mode 600)
+- `~/.config/dotfiles/age-recipients.txt` - Public key
+
+**Example:**
+
+```bash
+dotfiles encrypt init          # Generate new key pair
+dotfiles encrypt init --force  # Regenerate keys (WARNING: loses access to encrypted files)
+```
+
+---
+
+### `dotfiles encrypt <file>`
+
+Encrypt a file using age.
+
+```bash
+dotfiles encrypt <file> [--keep]
+```
+
+**Behavior:**
+1. Encrypts file to `<file>.age`
+2. Removes original file (unless `--keep`)
+3. The `.age` file can be committed to git
+
+**Examples:**
+
+```bash
+# Encrypt template variables
+dotfiles encrypt templates/_variables.local.sh
+
+# Keep original file
+dotfiles encrypt templates/_arrays.local.json --keep
+
+# Preview
+dotfiles encrypt templates/_variables.local.sh --dry-run
+```
+
+---
+
+### `dotfiles encrypt decrypt <file>`
+
+Decrypt an `.age` file.
+
+```bash
+dotfiles encrypt decrypt <file.age> [--keep]
+```
+
+**Behavior:**
+1. Decrypts `<file>.age` to `<file>`
+2. Removes `.age` file (unless `--keep`)
+
+**Examples:**
+
+```bash
+# Decrypt template variables
+dotfiles encrypt decrypt templates/_variables.local.sh.age
+
+# Keep encrypted file
+dotfiles encrypt decrypt templates/_variables.local.sh.age --keep
+```
+
+---
+
+### `dotfiles encrypt edit`
+
+Edit an encrypted file in place.
+
+```bash
+dotfiles encrypt edit <file>
+```
+
+**Workflow:**
+1. Decrypts file to temporary location
+2. Opens in `$EDITOR`
+3. Re-encrypts on save
+
+**Example:**
+
+```bash
+dotfiles encrypt edit templates/_variables.local.sh.age
+```
+
+---
+
+### `dotfiles encrypt list`
+
+List encrypted files and files that should be encrypted.
+
+```bash
+dotfiles encrypt list
+```
+
+**Output shows:**
+- Files already encrypted (`.age` files)
+- Sensitive files that should be encrypted (matching patterns like `*.secret`, `_variables.local.sh`)
+
+---
+
+### `dotfiles encrypt status`
+
+Show encryption status and key information.
+
+```bash
+dotfiles encrypt status
+```
+
+**Output includes:**
+- Whether `age` is installed
+- Key initialization status
+- Public key (safe to share)
+- Count of encrypted files
+
+---
+
+### `dotfiles encrypt push-key`
+
+Push your private key to vault for backup and recovery on other machines.
+
+```bash
+dotfiles encrypt push-key
+```
+
+**Vault item:** `Age-Private-Key`
+
+**Recovery on new machine:**
+```bash
+dotfiles vault pull        # Restores age key via post_vault_pull hook
+dotfiles encrypt status    # Verify key restored
+```
+
+---
+
+### Encryption + Hooks Integration
+
+The encryption system integrates with dotfiles hooks:
+
+| Hook | When | Action |
+|------|------|--------|
+| `pre_template_render` | Before template rendering | Auto-decrypt `.age` files in templates/ |
+| `post_vault_pull` | After vault pull | Restore age key from vault if missing |
+| `pre_encrypt` | Before encryption | Custom pre-encrypt logic |
+| `post_decrypt` | After decryption | Custom post-decrypt logic |
+
+**Example workflow:**
+
+```bash
+# First machine: encrypt and commit
+dotfiles encrypt templates/_variables.local.sh
+dotfiles encrypt push-key
+git add templates/_variables.local.sh.age
+git commit -m "Add encrypted template vars"
+git push
+
+# New machine: clone and decrypt
+git pull
+dotfiles vault pull          # Restores age key
+dotfiles template render     # Auto-decrypts via hook
+```
+
+---
+
+### When to Use Encryption vs Vault
+
+| Use Case | Solution |
+|----------|----------|
+| SSH keys, AWS credentials | **Vault** (remote storage, pull on demand) |
+| Template variables (emails, signing keys) | **Encryption** (committed to git, encrypted) |
+| Files that need to be in git | **Encryption** |
+| Files that should never be in git | **Vault** |
+
+**Key insight:** Vault and encryption serve different purposes. Vault is for secrets that live remotely. Encryption is for secrets that live in your git repo.
 
 ---
 
