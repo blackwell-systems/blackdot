@@ -14,10 +14,11 @@ The dotfiles framework provides deep integrations with modern developer tools. E
 | [CDK Tools](#cdk-tools) | `cdk_tools` | Deploy, diff, synth with smart defaults |
 | [Rust Tools](#rust-tools) | `rust_tools` | Build, test, clippy, fmt, cargo-watch |
 | [Go Tools](#go-tools) | `go_tools` | Build, test, coverage, module management |
+| [Python Tools](#python-tools) | `python_tools` | uv package manager, pytest, auto-venv |
 | [NVM](#nvm-nodejs) | `nvm_integration` | Lazy-loaded Node.js version manager |
 | [SDKMAN](#sdkman-java) | `sdkman_integration` | Lazy-loaded Java/Gradle/Kotlin manager |
 
-**Total:** 70+ aliases across all toolchains, with shell completions and helpers.
+**Total:** 90+ aliases across all toolchains, with shell completions and helpers.
 
 ---
 
@@ -145,8 +146,16 @@ cdkdestroy MyStack
 
 ## Rust Tools
 
-**Feature:** `rust_tools`
-**File:** `zsh/zsh.d/60-rust.zsh`
+```
+  ██████╗ ██╗   ██╗███████╗████████╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗
+  ██╔══██╗██║   ██║██╔════╝╚══██╔══╝    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝
+  ██████╔╝██║   ██║███████╗   ██║          ██║   ██║   ██║██║   ██║██║     ███████╗
+  ██╔══██╗██║   ██║╚════██║   ██║          ██║   ██║   ██║██║   ██║██║     ╚════██║
+  ██║  ██║╚██████╔╝███████║   ██║          ██║   ╚██████╔╝╚██████╔╝███████╗███████║
+  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝          ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
+```
+
+**Feature:** `rust_tools` | **File:** `zsh/zsh.d/62-rust.zsh` | **Status:** `rusttools`
 
 ### Commands
 
@@ -200,8 +209,16 @@ cdoc
 
 ## Go Tools
 
-**Feature:** `go_tools`
-**File:** `zsh/zsh.d/65-go.zsh`
+```
+   ██████╗  ██████╗     ████████╗ ██████╗  ██████╗ ██╗     ███████╗
+  ██╔════╝ ██╔═══██╗    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝
+  ██║  ███╗██║   ██║       ██║   ██║   ██║██║   ██║██║     ███████╗
+  ██║   ██║██║   ██║       ██║   ██║   ██║██║   ██║██║     ╚════██║
+  ╚██████╔╝╚██████╔╝       ██║   ╚██████╔╝╚██████╔╝███████╗███████║
+   ╚═════╝  ╚═════╝        ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
+```
+
+**Feature:** `go_tools` | **File:** `zsh/zsh.d/63-go.zsh` | **Status:** `gotools`
 
 ### Commands
 
@@ -249,6 +266,104 @@ gomt
 # Lint before commit
 golint
 govet
+```
+
+---
+
+## Python Tools
+
+```
+  ██████╗ ██╗   ██╗████████╗██╗  ██╗ ██████╗ ███╗   ██╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗
+  ██╔══██╗╚██╗ ██╔╝╚══██╔══╝██║  ██║██╔═══██╗████╗  ██║    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝
+  ██████╔╝ ╚████╔╝    ██║   ███████║██║   ██║██╔██╗ ██║       ██║   ██║   ██║██║   ██║██║     ███████╗
+  ██╔═══╝   ╚██╔╝     ██║   ██╔══██║██║   ██║██║╚██╗██║       ██║   ██║   ██║██║   ██║██║     ╚════██║
+  ██║        ██║      ██║   ██║  ██║╚██████╔╝██║ ╚████║       ██║   ╚██████╔╝╚██████╔╝███████╗███████║
+  ╚═╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝       ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
+  Powered by uv
+```
+
+**Feature:** `python_tools` | **File:** `zsh/zsh.d/64-python.zsh` | **Status:** `pythontools`
+
+Python development powered by [uv](https://github.com/astral-sh/uv)—a fast Python package manager that handles:
+- Package management (replacing pip, pip-tools)
+- Virtual environments (replacing venv)
+- Python version management (replacing pyenv)
+
+### uv Aliases
+
+| Alias | Description |
+|-------|-------------|
+| `uvs` | `uv sync` - Sync from lock file |
+| `uvr` | `uv run` - Run in project environment |
+| `uva` | `uv add` - Add dependency |
+| `uvad` | `uv add --dev` - Add dev dependency |
+| `uvrm` | `uv remove` - Remove dependency |
+| `uvl` | `uv lock` - Update lock file |
+| `uvu` | `uv lock --upgrade` - Upgrade all |
+| `uvt` | `uv tree` - Show dependency tree |
+| `uvv` | `uv venv` - Create virtual environment |
+| `uvpyl` | `uv python list` - List Python versions |
+| `uvpyi` | `uv python install` - Install Python version |
+
+### Pytest Aliases
+
+| Alias | Description |
+|-------|-------------|
+| `pt` | `pytest` |
+| `ptv` | `pytest -v` - Verbose |
+| `ptx` | `pytest -x` - Stop on first failure |
+| `ptxv` | `pytest -xvs` - Verbose, stop, show output |
+| `ptc` | `pytest --cov` - With coverage |
+| `ptl` | `pytest --last-failed` - Only last failed |
+| `pts` | `pytest -s` - Show print statements |
+| `ptk` | `pytest -k` - Match expression |
+
+### Auto-venv Activation
+
+Automatically prompts to activate virtual environments when entering directories:
+
+```bash
+cd my-project/
+# 󰌠 Virtual environment detected: .venv
+# Activate? [Y/n]
+```
+
+**Configuration:**
+```bash
+export PYTHON_AUTO_VENV="notify"  # Prompt (default)
+export PYTHON_AUTO_VENV="auto"    # Auto-activate
+export PYTHON_AUTO_VENV="off"     # Disable
+```
+
+### Helper Functions
+
+| Function | Description |
+|----------|-------------|
+| `uv-new <name>` | Create new project (app/lib/script) |
+| `uv-clean` | Remove Python artifacts (__pycache__, etc.) |
+| `uv-info` | Show Python/uv environment info |
+| `uv-python-setup <ver>` | Install and pin Python version |
+| `pt-watch` | Run pytest in watch mode |
+| `pt-cov` | Coverage with HTML report |
+
+### Example Workflow
+
+```bash
+# Create new project
+uv-new my-api app
+cd my-api
+
+# Add dependencies
+uva fastapi uvicorn
+uvad pytest pytest-cov
+
+# Sync and run
+uvs
+uvr python -m uvicorn main:app --reload
+
+# Run tests
+ptxv                 # Stop on first failure, verbose
+pt-cov               # Coverage with HTML report
 ```
 
 ---
