@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Interactive Template Setup** (`dotfiles template init`)
+  - Prompts for essential variables: git name, email, machine type, GitHub username
+  - Auto-detects defaults from `git config --global`
+  - Machine type choice menu with detected value highlighted
+  - Generates `_variables.local.sh` with user's values pre-filled
+  - Offers editor for advanced configuration after essentials
+  - Replaces "copy example file and edit" workflow with guided setup
+
+- **Short alias `d` for `dotfiles` command**
+  - Quick access: `d status`, `d doctor`, `d features`, etc.
+
 ---
 
 ## [3.1.0] - 2025-12-06
