@@ -3218,11 +3218,13 @@ nested blocks correctly.
 - [x] ✅ hook: Full hook system (list, run, add, remove, points, test subcommands)
 - [x] ✅ encrypt: Age encryption (init, encrypt, decrypt, edit, list, status, push-key)
 - [x] ✅ doctor: 10 check sections, health score, --fix/--quick modes, metrics saving
+- [x] ✅ sync: Bidirectional vault sync (--dry-run, --force-local, --force-vault, checksums)
 
 **Remaining in Bash (by design):**
 - [~] setup: 1190-line interactive wizard - better suited for bash (7 steps, state management)
-- [~] migrate: One-time v2→v3 migration - bash version already works
-- [~] sync: 514-line bidirectional sync - requires full vault abstraction layer
+
+**Dropped from Go CLI:**
+- [x] migrate: One-time v2→v3 migration - not needed in Go (users already on v3)
 
 **For EACH command above:**
 - [ ] ⚠️  Read shell implementation (bin/dotfiles-X)
@@ -3533,6 +3535,6 @@ A command has complete parity when:
 
 ---
 
-*Document Version: 1.4*
+*Document Version: 1.5*
 *Last Updated: 2025-12-07*
-*Status: Phases 1-4 complete, Phases 5-8 in progress, Phase 9: 11/14 Go commands complete (3 remain in bash by design)*
+*Status: Phases 1-4 complete, Phases 5-8 in progress, Phase 9: 12 Go commands complete (setup in bash, migrate dropped)*

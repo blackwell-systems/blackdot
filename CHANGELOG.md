@@ -126,6 +126,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Metrics saving to `~/.dotfiles-metrics.jsonl`
   - Banner with ASCII art matching bash implementation
 
+- **Go Sync Command** (`internal/cli/sync.go`)
+  - Bidirectional vault sync with smart direction detection
+  - `--dry-run/-n`: Preview changes without making them
+  - `--force-local/-l`: Push all local changes to vault
+  - `--force-vault/-v`: Pull all vault content to local
+  - `--verbose`: Show detailed checksum comparison
+  - SHA256 checksums for reliable change detection
+  - Drift state tracking for baseline comparison
+  - Updates config timestamps after successful sync
+
 - **Interactive Template Setup** (`dotfiles template init`)
   - Prompts for essential variables: git name, email, machine type, GitHub username
   - Auto-detects defaults from `git config --global`
