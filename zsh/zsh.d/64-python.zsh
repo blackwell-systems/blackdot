@@ -214,6 +214,9 @@ EOF
 uv-clean() {
     echo "Cleaning Python artifacts..."
 
+    # Enable null_glob so unmatched patterns expand to nothing
+    setopt localoptions null_glob
+
     # Compiled files
     find . -type f -name "*.pyc" -delete 2>/dev/null
     find . -type f -name "*.pyo" -delete 2>/dev/null
