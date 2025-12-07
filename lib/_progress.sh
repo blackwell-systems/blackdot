@@ -115,19 +115,25 @@ spinner_start() {
         local i=0
         local tty_dev="$(_get_tty)"
 
+        # Pre-compute ANSI codes (escape sequences must be literal)
+        local esc=$'\033'
+        local hide_cursor="${esc}[?25l"
+        local clr_primary="${esc}[0;36m"
+        local clr_nc="${esc}[0m"
+
         # Hide cursor - write to tty if available, otherwise stdout
         if [[ -n "$tty_dev" ]]; then
-            printf '\033[?25l' >"$tty_dev" 2>/dev/null || exit 0
+            printf '%s' "$hide_cursor" >"$tty_dev" 2>/dev/null || exit 0
         else
-            printf '\033[?25l' 2>/dev/null || exit 0
+            printf '%s' "$hide_cursor" 2>/dev/null || exit 0
         fi
 
         while true; do
             local frame="${frames:$i:1}"
             if [[ -n "$tty_dev" ]]; then
-                printf "\r${CLR_PRIMARY}%s${CLR_NC} %s..." "$frame" "$msg" >"$tty_dev" 2>/dev/null || exit 0
+                printf '\r%s%s%s %s...' "$clr_primary" "$frame" "$clr_nc" "$msg" >"$tty_dev" 2>/dev/null || exit 0
             else
-                printf "\r${CLR_PRIMARY}%s${CLR_NC} %s..." "$frame" "$msg" 2>/dev/null || exit 0
+                printf '\r%s%s%s %s...' "$clr_primary" "$frame" "$clr_nc" "$msg" 2>/dev/null || exit 0
             fi
             i=$(( (i + 1) % frame_count ))
             sleep 0.1
@@ -155,19 +161,22 @@ spinner_stop() {
     _progress_enabled || return 0
 
     local tty_dev="$(_get_tty)"
+    local esc=$'\033'
+    local show_cursor="${esc}[?25h"
+    local clear_line="${esc}[K"
 
-    # Show cursor
+    # Show cursor and clear line
     if [[ -n "$tty_dev" ]]; then
-        printf '\033[?25h' >"$tty_dev"
-        printf "\r\033[K" >"$tty_dev"
+        printf '\r%s%s' "$show_cursor" "$clear_line" >"$tty_dev"
     else
-        printf '\033[?25h'
-        printf "\r\033[K"
+        printf '\r%s%s' "$show_cursor" "$clear_line"
     fi
 
     # Show success message if provided
     if [[ -n "$success_msg" ]]; then
-        printf "${CLR_SUCCESS}✓${CLR_NC} %s\n" "$success_msg"
+        local clr_success="${esc}[0;32m"
+        local clr_nc="${esc}[0m"
+        printf '%s✓%s %s\n' "$clr_success" "$clr_nc" "$success_msg"
     fi
 }
 
@@ -378,10 +387,11 @@ steps_done() {
 progress_cleanup() {
     spinner_stop 2>/dev/null
     local tty_dev="$(_get_tty)"
+    local show_cursor=$'\033[?25h'
     if [[ -n "$tty_dev" ]]; then
-        printf '\033[?25h' >"$tty_dev" 2>/dev/null
+        printf '%s' "$show_cursor" >"$tty_dev" 2>/dev/null
     else
-        printf '\033[?25h' 2>/dev/null
+        printf '%s' "$show_cursor" 2>/dev/null
     fi
 }
 
