@@ -105,7 +105,7 @@ spinner_start() {
     [[ -n "$_SPINNER_PID" ]] && spinner_stop 2>/dev/null
 
     # Show spinner message - always show, no fancy checks
-    printf '%s\n' "⠿ ${msg}..."
+    echo "* ${msg}..."
 
     # Mark that spinner is "running" (for spinner_stop to know)
     _SPINNER_PID="static"
@@ -132,7 +132,7 @@ spinner_stop() {
 
     # Show success message if provided
     if [[ -n "$success_msg" ]]; then
-        echo "✓ $success_msg"
+        echo "[done] $success_msg"
     fi
 }
 

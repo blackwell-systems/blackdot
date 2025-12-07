@@ -130,10 +130,10 @@ setup() {
     [[ -z "$_SPINNER_PID" ]]
 }
 
-@test "spinner_stop: with message shows checkmark" {
+@test "spinner_stop: with message shows completion" {
     spinner_start "test"
     result=$(spinner_stop "Done" 2>&1)
-    [[ "$result" == *"✓"* ]]
+    [[ "$result" == *"done"* ]] || [[ "$result" == *"✓"* ]]
     [[ "$result" == *"Done"* ]]
 }
 
