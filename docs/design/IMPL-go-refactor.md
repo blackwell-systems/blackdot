@@ -44,6 +44,148 @@ This document describes the architecture for rewriting the dotfiles system from 
 
 ---
 
+## 0. What Stays as Zsh vs What Moves to Go
+
+### Critical Understanding: Hybrid Architecture
+
+The Go binary **does not replace** your shell configuration. It **only replaces** the CLI tools.
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        STAYS AS ZSH (Shell Layer)                       │
+│                                                                          │
+│  zsh/zsh.d/                                                             │
+│  ├── 00-init.zsh        # Powerlevel10k, OS detection, brew setup       │
+│  ├── 10-plugins.zsh     # Zinit, plugin loading                         │
+│  ├── 20-env.zsh         # PATH, environment variables                   │
+│  ├── 30-tools.zsh       # Tool configs (fzf, zoxide, etc.)              │
+│  ├── 40-aliases.zsh     # Aliases + dotfiles dispatcher (THIN WRAPPER)  │
+│  ├── 50-functions.zsh   # Shell functions                               │
+│  ├── 60-aws.zsh         # AWS completions, aliases                      │
+│  ├── 61-cdk.zsh         # CDK aliases                                   │
+│  ├── 62-rust.zsh        # Cargo/rustup setup                            │
+│  ├── 63-go.zsh          # Go environment                                │
+│  ├── 64-python.zsh      # Python/uv/venv                                │
+│  ├── 65-ssh.zsh         # SSH agent, keys                               │
+│  ├── 66-docker.zsh      # Docker aliases                                │
+│  ├── 70-claude.zsh      # Claude Code integration                       │
+│  ├── 80-git.zsh         # Git aliases, functions                        │
+│  └── 90-integrations.zsh # NVM, SDKMAN, etc.                            │
+│  └── p10k.zsh           # Prompt theme                                  │
+│                                                                          │
+│  WHY: These configure the SHELL ITSELF. You can't do this from Go.      │
+│  - Environment variables must be set in shell                           │
+│  - Aliases are shell constructs                                          │
+│  - Completions run in shell context                                      │
+│  - Prompt is shell-native                                                │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      MOVES TO GO (CLI Tools Layer)                       │
+│                                                                          │
+│  bin/dotfiles-*  →  Single `dotfiles` Go binary                          │
+│  ├── dotfiles-features   →  dotfiles features                           │
+│  ├── dotfiles-config     →  dotfiles config                             │
+│  ├── dotfiles-vault      →  dotfiles vault                              │
+│  ├── dotfiles-template   →  dotfiles template                           │
+│  ├── dotfiles-doctor     →  dotfiles doctor                             │
+│  ├── dotfiles-setup      →  dotfiles setup                              │
+│  ├── dotfiles-sync       →  dotfiles sync                               │
+│  ├── dotfiles-backup     →  dotfiles backup                             │
+│  ├── dotfiles-drift      →  dotfiles drift                              │
+│  └── ... (19 total)                                                      │
+│                                                                          │
+│  lib/_*.sh  →  Go packages                                               │
+│  ├── _features.sh   →  internal/feature/                                 │
+│  ├── _config.sh     →  internal/config/                                  │
+│  ├── _vault.sh      →  pkg/vault/                                        │
+│  ├── _templates.sh  →  internal/template/                                │
+│  └── _state.sh      →  internal/config/state.go                          │
+│                                                                          │
+│  vault/backends/*.sh  →  pkg/vault/backends/                             │
+│  ├── bitwarden.sh   →  bitwarden/bitwarden.go                            │
+│  ├── 1password.sh   →  onepassword/onepassword.go                        │
+│  └── pass.sh        →  pass/pass.go                                      │
+│                                                                          │
+│  WHY: These are COMMANDS that can be any executable.                     │
+│  - No shell state needed                                                 │
+│  - Called as subprocesses                                                │
+│  - Return exit codes, output text                                        │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### The Bridge: Thin Shell Wrapper
+
+The `dotfiles` function in `40-aliases.zsh` becomes a **thin wrapper** that calls the Go binary:
+
+```zsh
+# BEFORE: 750-line shell dispatcher
+dotfiles() {
+    local cmd="${1:-help}"
+    shift 2>/dev/null || true
+    case "$cmd" in
+        vault)
+            # 100+ lines of subcommand handling
+            ;;
+        template)
+            # 80+ lines of subcommand handling
+            ;;
+        # ... etc
+    esac
+}
+
+# AFTER: 10-line thin wrapper
+dotfiles() {
+    if [[ -x "$DOTFILES_DIR/bin/dotfiles" ]]; then
+        "$DOTFILES_DIR/bin/dotfiles" "$@"
+    else
+        echo "dotfiles binary not found. Run: make build" >&2
+        return 1
+    fi
+}
+```
+
+### What This Means in Practice
+
+| Operation | Before (Shell) | After (Go) |
+|-----------|----------------|------------|
+| `dotfiles features list` | Zsh sources `_features.sh`, runs function | Go binary executes |
+| `dotfiles vault push` | Zsh sources `_vault.sh`, calls backend | Go binary with vault package |
+| `cd $WORKSPACE` | Zsh alias (stays as-is) | Zsh alias (unchanged) |
+| Prompt display | p10k.zsh (stays as-is) | p10k.zsh (unchanged) |
+| `aws sso login` | Zsh function/alias | Zsh function/alias |
+| Tab completion | Zsh compdef | Generated by `dotfiles completion zsh` |
+
+### Shell Modules That Query Go
+
+Some shell modules may need to query feature state:
+
+```zsh
+# 60-aws.zsh - Before
+if feature_enabled "aws_helpers"; then
+    # load aws stuff
+fi
+
+# 60-aws.zsh - After (calls Go binary)
+if dotfiles features check aws_helpers 2>/dev/null; then
+    # load aws stuff
+fi
+```
+
+Or use the generated shell integration:
+
+```zsh
+# In 00-init.zsh, after Go binary exists:
+eval "$(dotfiles shell-init zsh)"
+
+# This defines:
+# - feature_enabled() function that calls Go
+# - Completions
+# - Any shell helpers
+```
+
+---
+
 ## 1. Current Architecture Analysis
 
 ### 1.1 Codebase Metrics
