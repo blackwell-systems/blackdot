@@ -140,6 +140,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Go CLI exit codes and flag validation** (edge case testing)
+  - `diff`: Now returns non-zero exit code when vault is not unlocked
+  - `diff`: Added mutual exclusion check - `--sync` and `--restore` cannot be used together
+  - `encrypt status`: Now returns non-zero exit code when age is not installed or encryption not initialized
+
 - **Nested `{{#if}}` block extraction bug** (`lib/_templates.sh`)
   - Fixed stray `}` character appearing in output when using nested conditionals
   - Root cause: Two bugs in `process_conditionals` function:
