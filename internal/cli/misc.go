@@ -21,17 +21,7 @@ func newDiffCmd() *cobra.Command {
 	}
 }
 
-func newDriftCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "drift",
-		Short: "Compare local files vs vault",
-		Long:  `Detect configuration drift between local files and vault state.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Drift Detection")
-			fmt.Println("(not yet implemented)")
-		},
-	}
-}
+// newDriftCmd is now in drift.go
 
 func newEncryptCmd() *cobra.Command {
 	return &cobra.Command{

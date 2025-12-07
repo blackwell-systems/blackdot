@@ -85,6 +85,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Parses Brewfile for formulas and casks
   - Compares against installed packages
 
+- **Go Drift Command** (`internal/cli/drift.go`)
+  - `--quick/-q`: Fast check against cached state (no vault access)
+  - Full mode: Connects to vault and compares current contents
+  - SHA256 checksums for reliable drift detection
+  - Reads cached state from `~/.cache/dotfiles/vault-state.json`
+  - Tracks: SSH, AWS, Git configs, env secrets, template variables
+
 - **Interactive Template Setup** (`dotfiles template init`)
   - Prompts for essential variables: git name, email, machine type, GitHub username
   - Auto-detects defaults from `git config --global`
