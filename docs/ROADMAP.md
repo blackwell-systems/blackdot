@@ -580,139 +580,87 @@ host
 
 ### 13. UV Tools Integration
 
-**Status:** Planned
+**Status:** ✅ Implemented (v3.0) as `python_tools`
 
 Fast Python package manager, project manager, and Python version manager.
 
-**Feature:** `uv_tools` (integration category)
-**File:** `zsh/zsh.d/66-uv.zsh`
+**Feature:** `python_tools` (integration category)
+**File:** `zsh/zsh.d/64-python.zsh`
 
-**Package Aliases:**
-```bash
-uvi <pkg>             # uv pip install
-uviu <pkg>            # uv pip install --upgrade
-uva <pkg>             # uv add (to pyproject.toml)
-uvad <pkg>            # uv add --dev
-uvrm <pkg>            # uv remove
-uvs                   # uv sync
-uvl                   # uv lock
-```
+See [Developer Tools Documentation](developer-tools.md#python-tools) for full details.
 
-**Run Commands:**
-```bash
-uvr <script>          # uv run
-uvx <tool>            # uv tool run (like npx for Python)
-```
-
-**Virtual Environment:**
-```bash
-uvv [python]          # uv venv (optionally specify Python version)
-uvact                 # Activate .venv in current directory
-uvdeact               # Deactivate current venv
-```
-
-**Python Version Management:**
-```bash
-uvpy                  # uv python list (show installed)
-uvpy-install <ver>    # uv python install 3.12
-uvpy-rm <ver>         # uv python uninstall
-uvpy-pin <ver>        # uv python pin (set .python-version)
-```
-
-**Project Commands:**
-```bash
-uvinit [name]         # uv init (new project)
-uvbuild               # uv build
-uvpublish             # uv publish
-```
-
-**Tool Management:**
-```bash
-uvtool <name>         # uv tool install (global CLI tools)
-uvtools               # uv tool list
-uvtool-up <name>      # uv tool upgrade
-uvtool-rm <name>      # uv tool uninstall
-```
-
-**Utility Commands:**
-```bash
-uv-outdated           # Check for outdated dependencies
-uv-upgrade            # Upgrade all packages in project
-uvcache               # Show cache size and location
-uvclean               # uv cache clean
-```
-
-**Help Command:**
-```bash
-uvhelp                # Show all UV commands with styled help
-                      # Logo color: green (in venv) / yellow (uv installed) / red (not installed)
-```
-
-**Status Display:**
-- uv version
-- Active virtual environment (if any)
-- Python version in use
-- Project detection (pyproject.toml present)
-- Locked dependencies status
-
-**Tab Completions:**
-- `uva/uvrm`: Complete from pyproject.toml dependencies
-- `uvpy-install`: Complete from available Python versions
-- `uvtool/uvtool-rm`: Complete from installed tools
-- `uvr`: Complete from project scripts
-
-**UV Hooks (Auto-activation):**
-
-Automatic virtual environment management when navigating directories.
-
-```bash
-# Hook configuration in ~/.config/dotfiles/uv-hooks.json
-{
-  "auto_activate": true,
-  "auto_deactivate": true,
-  "create_if_missing": false,
-  "show_notifications": true
-}
-```
-
-**Directory Enter Hook** (`uv.dir_enter`):
-- Auto-activate `.venv` when entering directory with `pyproject.toml`
-- Optionally create venv if missing (`create_if_missing: true`)
-- Show notification: "Activated: myproject (.venv)"
-
-**Directory Leave Hook** (`uv.dir_leave`):
-- Auto-deactivate when leaving project directory
-- Only if the venv was auto-activated (not manually)
-
-**Post-sync Hook** (`uv.post_sync`):
-- Run custom commands after `uv sync`
-- Example: regenerate IDE stubs, update pre-commit
-
-**Post-add Hook** (`uv.post_add`):
-- Auto-run `uv lock` after `uv add`
-- Auto-run `uv sync` to install new dependency
-
-**Configuration file:** `~/.config/dotfiles/uv-hooks.json`
-```json
-{
-  "auto_activate": true,
-  "auto_deactivate": true,
-  "create_if_missing": false,
-  "post_sync": ["pre-commit install --install-hooks"],
-  "post_add": ["uv lock", "uv sync"],
-  "excluded_dirs": ["~/tmp", "~/Downloads"]
-}
-```
-
-**Integration with dotfiles hooks system:**
-- `uv.dir_enter` - triggered by chpwd hook
-- `uv.dir_leave` - triggered by chpwd hook
-- `uv.post_sync` - wraps `uv sync` command
-- `uv.post_add` - wraps `uv add` command
+**Implemented:**
+- uv aliases: `uvs`, `uvr`, `uva`, `uvad`, `uvrm`, `uvl`, `uvu`, `uvt`, `uvv`, `uvpy`
+- pytest aliases: `pt`, `ptv`, `ptx`, `ptxv`, `ptc`, `ptl`, `pts`, `ptk`
+- Auto-venv activation on `cd` (configurable: notify/auto/off)
+- Helper functions: `uv-new`, `uv-clean`, `uv-info`, `uv-python-setup`, `pt-watch`, `pt-cov`
+- `pythontools` command with styled help and status display
+- Tab completions for project templates and Python versions
 
 ---
 
-### 14. Template Auto-Discovery
+### 14. Developer Tools Meta-Feature
+
+**Status:** Planned
+
+Group all developer tool integrations as a single `dev_tools` meta-feature for easier enable/disable.
+
+**Problem:**
+- Users must enable/disable each tool individually (rust_tools, go_tools, python_tools, etc.)
+- No single command to enable/disable all developer tooling
+- Presets help but don't provide granular "all dev tools" control
+
+**Proposed Feature:** `dev_tools` (meta-feature)
+
+**Commands:**
+```bash
+dotfiles features enable dev_tools      # Enable all developer tool integrations
+dotfiles features disable dev_tools     # Disable all developer tool integrations
+```
+
+**Included Features:**
+- `aws_helpers`
+- `cdk_tools`
+- `rust_tools`
+- `go_tools`
+- `python_tools`
+- `nvm_integration`
+- `sdkman_integration`
+- `modern_cli`
+
+**Implementation Options:**
+
+**Option A: Meta-feature in registry**
+```bash
+# In lib/_features.sh
+["dev_tools"]="false|All developer tool integrations|meta|aws_helpers,cdk_tools,rust_tools,go_tools,python_tools,nvm_integration,sdkman_integration,modern_cli"
+```
+- New category: `meta` for feature groups
+- Enabling/disabling propagates to all child features
+
+**Option B: Feature groups**
+```bash
+# New array for feature groups
+typeset -gA FEATURE_GROUPS=(
+    ["dev_tools"]="aws_helpers cdk_tools rust_tools go_tools python_tools nvm_integration sdkman_integration modern_cli"
+    ["cloud_tools"]="aws_helpers cdk_tools"
+    ["lang_tools"]="rust_tools go_tools python_tools"
+)
+
+# New command
+dotfiles features group enable dev_tools
+dotfiles features group disable lang_tools
+```
+
+**Benefits:**
+- Single toggle for all dev tooling
+- Cleaner onboarding: "Want dev tools? `dotfiles features enable dev_tools`"
+- Still allows individual feature control when needed
+- Could extend to other groups: `cloud_tools`, `lang_tools`, etc.
+
+---
+
+### 15. Template Auto-Discovery
 
 **Status:** Planned
 
