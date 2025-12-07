@@ -9,6 +9,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Go Implementation - Phases 1-4 Complete** (Strangler Fig Migration)
+  - **Phase 1: Vaultmux v0.1.0** - Production-ready vault abstraction library
+    - Separate module at `github.com/blackwell-systems/vaultmux`
+    - Support for Bitwarden, 1Password, and pass backends
+    - 95.5% test coverage with comprehensive unit tests
+    - Session caching and management
+    - Published and released as independent Go library
+  - **Phase 2: Go CLI Structure** - Parallel implementation alongside shell
+    - `go.mod` initialized with Cobra framework and vaultmux dependency
+    - Entry point: `cmd/dotfiles/main.go` with version information
+    - Root command: `internal/cli/root.go` with global flags
+    - Builds to `bin/dotfiles-go` (separate from shell commands)
+    - NO changes to existing shell implementation (strangler fig pattern)
+  - **Phase 3: Color Theme System** - Complete parity with shell
+    - `internal/cli/output.go` mirrors `lib/_colors.sh` exactly
+    - Semantic colors: `ClrPrimary`, `ClrSuccess`, `ClrError`, `ClrWarning`, `ClrInfo`, `ClrMuted`, `ClrBold`
+    - Tool brand colors: `ClrRust`, `ClrGo`, `ClrPython`, `ClrAWS`, `ClrCDK`, `ClrNode`, `ClrJava`, `ClrSSH`, `ClrDocker`
+    - Backward compatibility: `Red`, `Green`, `Yellow`, `Blue`, `Cyan`, `Magenta`
+    - Logging functions: `Info()`, `Pass()`, `Warn()`, `Fail()`, `DryRun()`
+    - Terminal detection using `github.com/fatih/color`
+  - **Phase 4: All 19 Command Skeletons** - Cobra structure complete
+    - `features` - Manage dotfiles features (list, enable, disable, check, preset)
+    - `config` - Configuration management (get, set, list, validate)
+    - `vault` - Secret management (unlock, lock, status, list, get, sync, backend, health)
+    - `template` - Template system (render, list, diff, validate)
+    - `doctor` - Health checks (run, fix)
+    - `setup` - Interactive wizard
+    - `backup` - Snapshot management (create, restore, list)
+    - `drift` - Change detection (detect, show)
+    - `hook` - Lifecycle hooks (list, run, validate)
+    - `encrypt` - Age encryption for sensitive files
+    - `packages` - Brewfile package management (check, install, sync)
+    - `migrate` - Configuration migration (v2→v3)
+    - `lint` - Shell script validation
+    - `diff` - Change preview
+    - `metrics` - Health metrics visualization
+    - `sync` - Bidirectional vault sync
+    - `uninstall` - Cleanup and removal
+    - `status` - Quick status dashboard
+    - `version` - Build and version information
+  - **Phases 5-8 In Progress** - Implementation verification underway
+    - Feature registry needs parity check with `lib/_features.sh`
+    - Config system needs verification with existing JSON configs
+    - Vault integration needs testing with real backends
+    - Template system needs filter and conditional verification
+
 - **Interactive Template Setup** (`dotfiles template init`)
   - Prompts for essential variables: git name, email, machine type, GitHub username
   - Auto-detects defaults from `git config --global`
@@ -36,6 +82,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - User-set `TMPL_AUTO[machine_type]` in `_variables.local.sh` was being overwritten by auto-detection
   - Fixed variable loading order: now loads user files before auto-detection
   - `build_auto_vars()` now preserves existing user-set values
+
+### Changed
+
+- **Go Refactor Design Document** (`docs/design/IMPL-go-refactor.md`)
+  - Updated with Phases 1-4 completion status
+  - Reorganized phases to reflect strangler fig migration progress
+  - Added "Current Status" section tracking completed and in-progress work
+  - Added parity verification checklists for each command
+  - Defined "Complete Parity" criteria for migration success
+  - Added risk assessment and mitigation strategies
+  - Documented side-by-side testing approach for validation
+  - Updated from v1.0 to v1.1 with detailed status tracking
+
+### Maintenance
+
+- **Repository Commit History Cleanup**
+  - Removed incorrect author email addresses from entire git history (803 commits)
+  - Used `git filter-branch` to rewrite author metadata across all branches and tags
+  - Corrected 4 commits with work email to personal email (`blackwellsystems@protonmail.com`)
+  - Force-pushed cleaned history to GitHub with all 15 version tags updated
+  - Repository now has consistent author information throughout
+  - Claude-authored commits remain unchanged as intended
 
 ---
 
