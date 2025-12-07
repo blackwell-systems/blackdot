@@ -3209,16 +3209,14 @@ nested blocks correctly.
 **Completed:**
 - [x] ✅ lint: Shell syntax checking (55 files, matches bash output)
 - [x] ✅ backup: Create/list/restore/clean with cross-compatibility
-
-**Remaining (Low Complexity):**
-- [ ] metrics: Reads JSONL, displays stats (mostly display)
-- [ ] uninstall: Remove symlinks, cleanup (simple file ops)
-- [ ] status: Dashboard display (read config, format output)
+- [x] ✅ metrics: JSONL metrics visualization (summary, graph, all modes)
+- [x] ✅ uninstall: Clean removal with --dry-run and --keep-secrets
+- [x] ✅ status: City skyline dashboard with symlink/SSH/AWS/Lima checks
+- [x] ✅ packages: Brewfile parsing, tier support, install via brew bundle
 
 **Remaining (Medium Complexity):**
 - [ ] diff: Change preview (compare files)
 - [ ] drift: Detection from bin/dotfiles-drift (compare local vs vault)
-- [ ] packages: Brewfile logic from bin/dotfiles-packages
 
 **Remaining (High Complexity):**
 - [ ] doctor: Health check logic from bin/dotfiles-doctor (many checks, --fix mode)
