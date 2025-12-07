@@ -8,7 +8,7 @@
 
 [![Shell](https://img.shields.io/badge/Shell-Zsh-89e051?logo=zsh&logoColor=white)](https://www.zsh.org/)
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
-[![Tests](https://img.shields.io/badge/Tests-124-brightgreen)](../test/)
+[![Tests](https://img.shields.io/badge/Tests-334-brightgreen)](../test/)
 [![Version](https://img.shields.io/github/v/release/blackwell-systems/dotfiles)](https://github.com/blackwell-systems/dotfiles/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
@@ -177,8 +177,16 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 ├── lib/                                # Shared libraries
 │   ├── _logging.sh                     # Logging functions (info, pass, warn, fail)
 │   ├── _config.sh                      # JSON config abstraction
+│   ├── _config_layers.sh               # Layered config (env → project → machine → user)
+│   ├── _features.sh                    # Feature Registry (control plane)
+│   ├── _cli_features.sh                # CLI feature awareness helpers
 │   ├── _state.sh                       # Setup wizard state management
 │   ├── _vault.sh                       # Multi-backend vault abstraction
+│   ├── _drift.sh                       # Drift detection helpers
+│   ├── _hooks.sh                       # Hook system for lifecycle events
+│   ├── _paths.sh                       # Path resolution utilities
+│   ├── _errors.sh                      # Error handling utilities
+│   ├── _encryption.sh                  # Encryption helpers
 │   └── _templates.sh                   # Template engine
 │
 ├── lima/                               # Lima VM configuration
@@ -220,8 +228,23 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 │   └── config.kdl                      # Zellij keybindings and layout
 │
 └── zsh/                                # Zsh shell configuration
-    ├── zshrc                           # Main Zsh config (~820 lines)
-    └── p10k.zsh                        # Powerlevel10k theme configuration
+    ├── zshrc                           # Main Zsh config (sources zsh.d modules)
+    ├── p10k.zsh                        # Powerlevel10k theme configuration
+    └── zsh.d/                          # Modular shell configuration
+        ├── 00-init.zsh                 # Core initialization
+        ├── 10-plugins.zsh              # Plugin loading
+        ├── 20-env.zsh                  # Environment variables
+        ├── 30-tools.zsh                # Tool configuration
+        ├── 40-aliases.zsh              # General aliases
+        ├── 50-functions.zsh            # Helper functions
+        ├── 60-aws.zsh                  # AWS aliases and helpers
+        ├── 61-cdk.zsh                  # CDK aliases and helpers
+        ├── 62-rust.zsh                 # Rust/Cargo aliases
+        ├── 63-go.zsh                   # Go aliases and helpers
+        ├── 64-python.zsh               # Python/UV aliases and helpers
+        ├── 70-claude.zsh               # Claude Code integration
+        ├── 80-git.zsh                  # Git aliases
+        └── 90-integrations.zsh         # External tool integrations
 
 Deployed files (after bootstrap):
 ~/.zshrc                 → ~/workspace/dotfiles/zsh/zshrc (symlink)
@@ -236,7 +259,9 @@ Deployed files (after bootstrap):
 
 Key pieces:
 
-- **zsh/zshrc**: Main Zsh configuration file (~820 lines, well-organized sections)
+- **lib/_features.sh**: Feature Registry - the control plane for enabling/disabling functionality
+- **zsh/zsh.d/**: Modular shell configuration (14 modules loaded in numeric order)
+- **zsh/zshrc**: Main Zsh config that sources zsh.d modules
 - **zsh/p10k.zsh**: Powerlevel10k theme configuration
 - **ghostty/config**: Ghostty terminal configuration
 - **zellij/config.kdl**: Zellij multiplexer configuration
@@ -2048,6 +2073,66 @@ paste > output.txt
 
 - `btop` → Beautiful system monitor (htop replacement)
 
+### Developer Tools
+
+Deep integrations for language-specific development workflows. Each toolset provides aliases, helper functions, and a styled help command.
+
+**Python Tools (`pythontools`):**
+
+- `uv-init` → Create new Python project with uv
+- `uv-venv` → Create virtual environment
+- `uv-add` → Add dependencies
+- `uv-sync` → Sync dependencies
+- `uv-run` → Run command in venv
+- `uv-pip` → pip-compatible interface
+- `uv-test` → Run pytest
+- `uv-lint` → Run ruff linting
+- `uv-clean` → Clean Python artifacts
+- Auto-venv activation hook (configurable: notify/auto/off)
+
+**Rust Tools (`rusttools`):**
+
+- `cb` → cargo build
+- `cr` → cargo run
+- `ct` → cargo test
+- `cc` → cargo check
+- `cf` → cargo fmt
+- `ccl` → cargo clippy
+- `cbr` → cargo build --release
+- `cw` → cargo watch
+- `rust-update` → Update Rust toolchain
+- `rust-new <name>` → Create new Rust project
+- `rust-lint` → Run check + clippy
+
+**Go Tools (`gotools`):**
+
+- `gob` → go build
+- `gor` → go run .
+- `got` → go test ./...
+- `gof` → go fmt ./...
+- `gom` → go mod tidy
+- `gov` → go vet ./...
+- `gocover` → Run tests with coverage
+- `go-new <name>` → Create new Go project
+- `go-lint` → Run vet + golangci-lint
+- `go-build-all` → Cross-compile for all platforms
+
+**CDK Tools (`cdktools`):**
+
+- `cdkd` → cdk deploy
+- `cdks` → cdk synth
+- `cdkdf` → cdk diff
+- `cdkw` → cdk watch
+- `cdkls` → cdk list
+- `cdkb` → cdk bootstrap
+- `cdkda` → cdk deploy --all
+- `cdkhs` → cdk deploy --hotswap
+- `cdk-env [profile]` → Set CDK_DEFAULT_ACCOUNT/REGION
+- `cdkcheck [stack]` → Diff then prompt to deploy
+- `cdkhotswap [stack]` → Fast deploy for Lambda/ECS
+
+Each toolset command (e.g., `rusttools`, `gotools`, `pythontools`, `cdktools`) displays a styled ASCII art banner with all available aliases, helper functions, and current project status.
+
 ### Shell Performance
 
 NVM and SDKMAN are lazy-loaded to speed up shell startup. They only initialize when you actually use them:
@@ -2087,6 +2172,10 @@ dotfiles status          # Quick visual dashboard (color-coded)
 dotfiles doctor          # Comprehensive health check
 dotfiles doctor --fix    # Auto-repair permission issues
 dotfiles drift           # Compare local files vs vault
+dotfiles features        # List all features and their status
+dotfiles features enable X   # Enable feature X
+dotfiles features disable X  # Disable feature X
+dotfiles features preset Y   # Apply preset (minimal/developer/claude/full)
 dotfiles lint            # Validate shell config syntax
 dotfiles lint --fix      # Auto-fix script permissions
 dotfiles packages        # Check Brewfile package status
