@@ -2131,7 +2131,37 @@ Deep integrations for language-specific development workflows. Each toolset prov
 - `cdkcheck [stack]` → Diff then prompt to deploy
 - `cdkhotswap [stack]` → Fast deploy for Lambda/ECS
 
-Each toolset command (e.g., `rusttools`, `gotools`, `pythontools`, `cdktools`) displays a styled ASCII art banner with all available aliases, helper functions, and current project status.
+**SSH Tools (`sshtools`):**
+
+- `sshlist` → List configured hosts from ~/.ssh/config
+- `sshgo <host>` → Quick connect with completion
+- `sshedit` → Open SSH config in $EDITOR
+- `sshadd-host <name>` → Interactive wizard to add new host
+- `sshkeys` → List all keys with fingerprints
+- `sshgen <name>` → Generate new ED25519 key
+- `sshcopy <host>` → Copy public key to remote host
+- `sshagent` → Start agent / show loaded keys
+- `sshload [key]` → Add key to agent
+- `sshtunnel <h> <l> <r>` → Create port forward tunnel
+- `sshsocks <host>` → SOCKS5 proxy
+
+**Docker Tools (`dockertools`):**
+
+- `dps` / `dpsa` → docker ps / ps -a
+- `di` → docker images
+- `dsh <container>` → Shell into container
+- `dex <c> [cmd]` → Execute command in container
+- `dl` / `dlf` → docker logs / logs -f
+- `dc` → docker compose
+- `dcu` / `dcud` → compose up / up -d
+- `dcd` → compose down
+- `dcl` → compose logs -f
+- `dip <container>` → Get container IP
+- `dstats` → Pretty docker stats
+- `dclean` → Remove stopped + dangling
+- `dprune` → Interactive system prune
+
+Each toolset command (e.g., `rusttools`, `gotools`, `pythontools`, `cdktools`, `sshtools`, `dockertools`) displays a styled ASCII art banner with all available aliases, helper functions, and current project status.
 
 ### Shell Performance
 

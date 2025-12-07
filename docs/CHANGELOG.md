@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Box drawing: `CLR_BOX`, `CLR_HEADER` for styled help output
   - User theme customization via `~/.config/dotfiles/theme.sh`
   - Backward compatible with legacy color names (`RED`, `GREEN`, `YELLOW`, etc.)
-  - Updated developer tool modules: `awstools`, `cdktools`, `rusttools`, `gotools`, `pythontools`
+  - Updated developer tool modules: `awstools`, `cdktools`, `rusttools`, `gotools`, `pythontools`, `sshtools`, `dockertools`
 - **Feature Registry Circular Dependency Detection** - Prevents infinite loops from circular feature dependencies
   - `_detect_circular_dep()` function detects cycles before enabling features
   - `_check_conflicts()` prevents enabling mutually exclusive features
@@ -29,6 +29,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `sshtools` command with styled help and status display
   - Tab completions for hosts and keys
   - New feature: `ssh_tools` (included in `developer` and `full` presets)
+- **Docker Tools Integration** (`zsh/zsh.d/66-docker.zsh`) - Docker container and compose management
+  - Container commands: `dps`, `dpsa`, `di`, `dsh`, `dex`, `dl`, `dlf`, `dstop`, `dstart`, `drm`, `drmi`
+  - Compose aliases: `dc`, `dcu`, `dcud`, `dcd`, `dcr`, `dcl`, `dcps`, `dcb`, `dcex`
+  - Inspection: `dip`, `denv`, `dports`, `dstats`, `dvols`, `dnets`, `dinspect`
+  - Cleanup: `dclean`, `dprune`, `dprune-all`
+  - `dockertools` command with styled help and status display
+  - Tab completions for containers and images
+  - New feature: `docker_tools` (included in `developer` and `full` presets)
 - **Template Pipeline Filters** - Transform variable values with chainable filters
   - 14 built-in filters: `upper`, `lower`, `capitalize`, `trim`, `default`, `replace`, `append`, `prepend`, `quote`, `squote`, `truncate`, `length`, `basename`, `dirname`
   - Chainable syntax: `{{ hostname | upper | truncate 8 }}`
