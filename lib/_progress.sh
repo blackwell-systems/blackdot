@@ -107,17 +107,11 @@ spinner_start() {
     # Kill any existing spinner
     spinner_stop 2>/dev/null
 
-    # Show static spinner indicator (animation unreliable across platforms)
-    local esc=$'\033'
-
-    # Check if /dev/tty is actually writable (test with empty write)
-    if print -n '' >/dev/tty 2>/dev/null; then
-        print -n "${esc}[?25l" >/dev/tty  # Hide cursor
-        if _progress_unicode; then
-            print -n "\r${esc}[0;36m⠿${esc}[0m ${msg}..." >/dev/tty
-        else
-            print -n "\r${esc}[0;36m*${esc}[0m ${msg}..." >/dev/tty
-        fi
+    # Show spinner message (keep it simple - fancy stuff is unreliable)
+    if _progress_unicode; then
+        echo -n "⠿ ${msg}..."
+    else
+        echo -n "* ${msg}..."
     fi
 
     # Mark that spinner is "running" (for spinner_stop to know)
@@ -145,23 +139,12 @@ spinner_stop() {
     # Only clear if progress was enabled
     _progress_enabled || return 0
 
-    local tty_dev="$(_get_tty)"
-    local esc=$'\033'
-    local show_cursor="${esc}[?25h"
-    local clear_line="${esc}[K"
-
-    # Show cursor and clear line
-    if [[ -n "$tty_dev" ]]; then
-        printf '\r%s%s' "$show_cursor" "$clear_line" >"$tty_dev"
-    else
-        printf '\r%s%s' "$show_cursor" "$clear_line"
-    fi
+    # Clear line and show result (simple approach)
+    echo ""  # New line after spinner message
 
     # Show success message if provided
     if [[ -n "$success_msg" ]]; then
-        local clr_success="${esc}[0;32m"
-        local clr_nc="${esc}[0m"
-        printf '%s✓%s %s\n' "$clr_success" "$clr_nc" "$success_msg"
+        echo "✓ $success_msg"
     fi
 }
 
@@ -366,18 +349,13 @@ steps_done() {
 # Cleanup
 # ============================================================
 
-# Ensure cursor is shown on exit
+# Ensure clean state on exit
 # Call this manually or set up trap in your script:
 #   trap 'progress_cleanup' EXIT
 progress_cleanup() {
     spinner_stop 2>/dev/null
-    local tty_dev="$(_get_tty)"
-    local show_cursor=$'\033[?25h'
-    if [[ -n "$tty_dev" ]]; then
-        printf '%s' "$show_cursor" >"$tty_dev" 2>/dev/null
-    else
-        printf '%s' "$show_cursor" 2>/dev/null
-    fi
+    # Try to show cursor (best effort)
+    echo -ne '\033[?25h' 2>/dev/null || true
 }
 
 # Note: We don't set a global trap here to avoid conflicts
