@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Progress Indicators Library** (`lib/_progress.sh`) - Visual feedback for long-running operations
+  - Spinner: `spinner_start "message"` / `spinner_stop` for unknown-duration tasks
+  - Progress bar: `progress_bar current total "label"` with ETA calculation
+  - Stepped progress: `steps_init`, `step`, `step_done`, `step_fail` for multi-phase operations
+  - Helper: `run_with_spinner "message" command args...` for wrapping commands
+  - TTY detection: Auto-disables in non-interactive environments
+  - ASCII fallback: `DOTFILES_UNICODE=false` for terminals without Unicode support
+  - Configurable: `DOTFILES_PROGRESS=false` to disable globally
+  - 30 new tests in `test/progress.bats`
 - **Centralized Color Theming System** (`lib/_colors.sh`) - Consistent colors across all modules
   - Semantic colors: `CLR_PRIMARY`, `CLR_SECONDARY`, `CLR_SUCCESS`, `CLR_ERROR`, `CLR_WARNING`, `CLR_INFO`, `CLR_MUTED`, `CLR_BOLD`, `CLR_NC`
   - Tool brand colors: `CLR_RUST`, `CLR_GO`, `CLR_PYTHON`, `CLR_AWS`, `CLR_CDK`, `CLR_NODE`, `CLR_JAVA`
