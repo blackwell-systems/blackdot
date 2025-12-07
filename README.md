@@ -352,7 +352,7 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull   # No drift check (for CI/autom
 ## Features
 
 <details>
-<summary><b>View All Features (23)</b></summary>
+<summary><b>View All Features (24)</b></summary>
 
 ### Framework Systems
 
@@ -548,6 +548,40 @@ All credential types are stored as vault items (secure notes):
 - **AI Tools** - Claude Code profiles (optional)
 
 [Complete list and vault item formats →](vault/README.md#vault-items-complete-list)
+
+</details>
+
+<details>
+<summary><b>Age Encryption</b> - Encrypt non-vault secrets</summary>
+
+```bash
+dotfiles encrypt init              # Generate age key pair
+dotfiles encrypt <file>            # Encrypt a file
+dotfiles encrypt decrypt <file>    # Decrypt a file
+dotfiles encrypt edit <file>       # Decrypt, edit, re-encrypt
+dotfiles encrypt push-key          # Backup key to vault
+```
+
+**The problem:** Vault stores secrets remotely, but some files need to be committed to git (template variables, local configs with emails/signing keys).
+
+**The solution:** `age` encryption for files that live in your repo:
+- Template variables (`_variables.local.sh`) with emails, signing keys
+- Local config files with hostnames, IPs
+- Any `*.secret` or `*.private` files
+
+**Workflow:**
+```bash
+# Encrypt and commit
+dotfiles encrypt templates/_variables.local.sh
+git add templates/_variables.local.sh.age
+git commit -m "Add encrypted template vars"
+
+# On new machine
+dotfiles vault pull          # Restores age key via hook
+dotfiles template render     # Auto-decrypts via hook
+```
+
+**Key insight:** Vault is for secrets that live remotely. Encryption is for secrets that live in git.
 
 </details>
 

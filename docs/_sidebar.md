@@ -13,6 +13,7 @@
 
 - **Features**
   - [Feature Registry](features.md)
+  - [Developer Tools](developer-tools.md)
   - [Hook System](hooks.md)
   - [Configuration Layers](configuration-layers.md)
   - [Claude Code + dotclaude](claude-code.md)

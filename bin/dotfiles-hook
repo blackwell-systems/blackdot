@@ -56,6 +56,8 @@ usage() {
     echo -e "  ${CYAN}Doctor:${NC}         pre_doctor, post_doctor, doctor_check"
     echo -e "  ${CYAN}Shell:${NC}          shell_init, shell_exit, directory_change"
     echo -e "  ${CYAN}Setup:${NC}          pre_setup_phase, post_setup_phase, setup_complete"
+    echo -e "  ${CYAN}Template:${NC}       pre_template_render, post_template_render"
+    echo -e "  ${CYAN}Encryption:${NC}     pre_encrypt, post_decrypt"
     echo ""
     echo -e "${BOLD}Configuration:${NC}"
     echo -e "  Hooks directory:      ${DIM}\$HOME/.config/dotfiles/hooks/${NC}"
@@ -169,7 +171,7 @@ cmd_list() {
                     else
                         echo -e "  ${DIM}○${NC} $name ${DIM}(disabled, $type_label)${NC}"
                     fi
-                    ((i++))
+                    i=$((i + 1))
                 done
                 echo ""
             fi
@@ -196,6 +198,8 @@ cmd_list() {
             "Doctor:pre_doctor post_doctor doctor_check"
             "Shell:shell_init shell_exit directory_change"
             "Setup:pre_setup_phase post_setup_phase setup_complete"
+            "Template:pre_template_render post_template_render"
+            "Encryption:pre_encrypt post_decrypt"
         )
 
         local cat_entry cat_name cat_points p count s funcs_count json_count scripts
@@ -213,7 +217,7 @@ cmd_list() {
                 if [[ -d "${HOOKS_DIR}/${p}" ]]; then
                     scripts=("${HOOKS_DIR}/${p}"/*.{sh,zsh}(N))
                     for s in "${scripts[@]}"; do
-                        [[ -f "$s" ]] && ((count++))
+                        [[ -f "$s" ]] && count=$((count + 1))
                     done
                 fi
 
@@ -394,6 +398,16 @@ cmd_points() {
     echo "  pre_setup_phase   Before each wizard phase"
     echo "  post_setup_phase  After each wizard phase"
     echo "  setup_complete    After all phases done"
+    echo ""
+
+    echo -e "${CYAN}Template Hooks${NC}"
+    echo "  pre_template_render   Before template rendering (auto-decrypt .age files)"
+    echo "  post_template_render  After templates rendered (validation, notifications)"
+    echo ""
+
+    echo -e "${CYAN}Encryption Hooks${NC}"
+    echo "  pre_encrypt       Before file encryption (custom pre-processing)"
+    echo "  post_decrypt      After file decryption (permission fixes, validation)"
 }
 
 cmd_test() {
