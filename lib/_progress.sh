@@ -107,34 +107,28 @@ spinner_start() {
     # Kill any existing spinner
     spinner_stop 2>/dev/null
 
+    # Compute values BEFORE forking (subshell function access can be unreliable)
+    local frames
+    if _progress_unicode; then
+        frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    else
+        frames='|/-\'
+    fi
+    local tty_dev=""
+    [[ -w /dev/tty ]] && tty_dev="/dev/tty"
+
     # Start spinner in background subshell
-    # Note: Must write to /dev/tty explicitly for background subshell output to display
     (
-        local frames="$(_get_spinner_frames)"
         local frame_count=${#frames}
         local i=0
-        local tty_dev="$(_get_tty)"
-
-        # Pre-compute ANSI codes (escape sequences must be literal)
         local esc=$'\033'
-        local hide_cursor="${esc}[?25l"
-        local clr_primary="${esc}[0;36m"
-        local clr_nc="${esc}[0m"
 
-        # Hide cursor - write to tty if available, otherwise stdout
-        if [[ -n "$tty_dev" ]]; then
-            printf '%s' "$hide_cursor" >"$tty_dev" 2>/dev/null || exit 0
-        else
-            printf '%s' "$hide_cursor" 2>/dev/null || exit 0
-        fi
+        # Hide cursor
+        print -n "${esc}[?25l" >/dev/tty 2>/dev/null
 
         while true; do
             local frame="${frames:$i:1}"
-            if [[ -n "$tty_dev" ]]; then
-                printf '\r%s%s%s %s...' "$clr_primary" "$frame" "$clr_nc" "$msg" >"$tty_dev" 2>/dev/null || exit 0
-            else
-                printf '\r%s%s%s %s...' "$clr_primary" "$frame" "$clr_nc" "$msg" 2>/dev/null || exit 0
-            fi
+            print -n "\r${esc}[0;36m${frame}${esc}[0m ${msg}..." >/dev/tty 2>/dev/null
             i=$(( (i + 1) % frame_count ))
             sleep 0.1
         done
