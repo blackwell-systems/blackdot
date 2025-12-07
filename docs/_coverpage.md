@@ -9,7 +9,7 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 ```
 
 - **Claude Code Integration** - Portable sessions, dotclaude profiles, git safety hooks
-- **Developer Tool Integrations** - AWS, CDK, Rust, Go, NVM, SDKMAN with 70+ aliases
+- **Deep Developer Tool Integrations** - AWS, CDK, Rust, Go, Python, NVM, SDKMAN with 90+ aliases
 - **Multi-Vault Secrets** - Bitwarden, 1Password, or pass with unified API
 - **Feature Registry** - Modular control plane with presets
 - **Configuration Layers** - Multi-machine settings that just work
