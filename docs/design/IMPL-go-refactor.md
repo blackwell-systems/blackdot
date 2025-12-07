@@ -3216,11 +3216,11 @@ nested blocks correctly.
 - [x] ✅ drift: Quick mode (cached state) + full mode (vault connection)
 - [x] ✅ diff: Change preview (--sync, --restore, item-specific)
 - [x] ✅ hook: Full hook system (list, run, add, remove, points, test subcommands)
+- [x] ✅ encrypt: Age encryption (init, encrypt, decrypt, edit, list, status, push-key)
 
 **Remaining (High Complexity):**
 - [ ] doctor: Health check logic from bin/dotfiles-doctor (many checks, --fix mode)
 - [ ] setup: Wizard flow from bin/dotfiles-setup (multi-step, state)
-- [ ] encrypt: Age encryption from bin/dotfiles-encrypt (crypto)
 - [ ] migrate: Migration scripts (schema changes)
 - [ ] sync: Bidirectional sync (merge logic)
 

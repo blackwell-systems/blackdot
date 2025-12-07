@@ -11,19 +11,7 @@ import (
 
 // newDiffCmd is now in diff.go
 // newDriftCmd is now in drift.go
-
-func newEncryptCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "encrypt",
-		Short: "Encrypt sensitive files with age",
-		Long:  `Encrypt files using age encryption for secure storage.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Encryption")
-			fmt.Println("(not yet implemented)")
-		},
-	}
-}
-
+// newEncryptCmd is now in encrypt.go
 // newLintCmd is now in lint.go
 // newMetricsCmd is now in metrics.go
 

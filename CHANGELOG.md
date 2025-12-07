@@ -108,6 +108,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Timeout support and fail-fast option
   - Verbose mode for debugging hook execution
 
+- **Go Encrypt Command** (`internal/cli/encrypt.go`)
+  - Subcommands: init, file, decrypt, edit, list, status, push-key
+  - Age encryption (age-keygen, age) for secure file storage
+  - `--keep/-k`: Keep original when encrypting/decrypting
+  - `--dry-run/-n`: Preview what would be done
+  - `--force/-f`: Force key regeneration
+  - Pattern matching for files that should be encrypted
+  - Vault integration for key backup/recovery
+
 - **Interactive Template Setup** (`dotfiles template init`)
   - Prompts for essential variables: git name, email, machine type, GitHub username
   - Auto-detects defaults from `git config --global`
