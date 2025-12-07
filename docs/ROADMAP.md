@@ -6,29 +6,7 @@ This document outlines planned improvements and future work for the dotfiles sys
 
 ## Backlog
 
-### 1. Interactive Template Setup
-
-**Status:** ✅ Completed (v3.2.0)
-
-The `dotfiles template init` command now provides interactive prompts:
-
-```bash
-dotfiles template init
-# Prompts for: git name, git email, machine type, GitHub username
-# Auto-detects defaults from git config
-# Generates _variables.local.sh with user values pre-filled
-# Offers editor for advanced configuration
-```
-
-**Implementation:**
-- Essential prompts only (4 fields), not overwhelming
-- Smart defaults from `git config --global`
-- Machine type shows detected value, user confirms or changes
-- Editor offered at end for advanced customization
-
----
-
-### 2. MCP Server for Claude Code Integration
+### 1. MCP Server for Claude Code Integration
 
 **Status:** Concept - Not Started
 
@@ -52,7 +30,7 @@ dotfiles_doctor_fix()       // Auto-repair issues
 
 ---
 
-### 3. Session Management Improvements
+### 2. Session Management Improvements
 
 **Status:** Not Started
 
@@ -63,7 +41,7 @@ Improve Bitwarden session handling:
 
 ---
 
-### 4. API/Function Reference Documentation
+### 3. API/Function Reference Documentation
 
 **Status:** Not Started
 
@@ -76,7 +54,7 @@ Generate documentation for all exported functions:
 
 ---
 
-### 5. Plugin System
+### 4. Plugin System
 
 **Status:** Not Started
 
@@ -101,7 +79,7 @@ dotfiles plugin create <name>     # Scaffold new plugin
 
 ---
 
-### 6. Module System Refactor
+### 5. Module System Refactor
 
 **Status:** Not Started
 
@@ -124,7 +102,7 @@ modules/
 
 ---
 
-### 7. Additional Tool Integrations
+### 6. Additional Tool Integrations
 
 **Status:** Consideration
 
@@ -142,7 +120,7 @@ Other integrations to evaluate:
 
 ---
 
-### 8. Lazy Loading for Heavy Modules
+### 7. Lazy Loading for Heavy Modules
 
 **Status:** Not Started
 
@@ -157,7 +135,7 @@ awsswitch() { _load_aws_helpers; awsswitch "$@"; }
 
 ---
 
-### 9. Developer Tools Meta-Feature
+### 8. Developer Tools Meta-Feature
 
 **Status:** Planned
 
@@ -190,7 +168,7 @@ dotfiles features disable dev_tools     # Disable all developer tool integration
 
 ---
 
-### 10. Template Auto-Discovery
+### 9. Template Auto-Discovery
 
 **Status:** Planned
 
@@ -212,7 +190,7 @@ dotfiles template discover --apply    # Generate template + update variables
 
 ---
 
-### 11. Template-Vault Integration
+### 10. Template-Vault Integration
 
 **Status:** Planned
 
@@ -228,7 +206,7 @@ dotfiles template vault diff          # Show differences between local and vault
 
 ---
 
-### 12. Curl Tools Integration
+### 11. Curl Tools Integration
 
 **Status:** Planned
 
@@ -254,7 +232,7 @@ curl-preset list
 
 ---
 
-### 13. Lima Tools Integration
+### 12. Lima Tools Integration
 
 **Status:** Planned
 
@@ -274,7 +252,7 @@ ldocker [cmd]          # lima nerdctl (containerd)
 
 ---
 
-### 14. Config Schema Validation (Priority 2)
+### 13. Config Schema Validation
 
 **Status:** Planned
 
@@ -297,7 +275,7 @@ dotfiles config validate
 
 ---
 
-### 15. Aliases Command (Priority 2)
+### 14. Aliases Command
 
 **Status:** Planned
 
