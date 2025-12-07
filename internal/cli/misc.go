@@ -45,17 +45,7 @@ func newEncryptCmd() *cobra.Command {
 	}
 }
 
-func newLintCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "lint",
-		Short: "Validate shell config syntax",
-		Long:  `Run shellcheck and other linters on shell configuration files.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Linting")
-			fmt.Println("(not yet implemented)")
-		},
-	}
-}
+// newLintCmd is now in lint.go
 
 func newMetricsCmd() *cobra.Command {
 	return &cobra.Command{
