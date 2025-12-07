@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/aymerick/raymond v2.0.2+incompatible // indirect
 	github.com/blackwell-systems/vaultmux v0.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

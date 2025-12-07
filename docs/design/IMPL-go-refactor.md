@@ -2907,11 +2907,11 @@ where both engines work.
 │  ├── Verify: Bash still renders correctly ✓                 │
 │  └── Templates now use standard Handlebars ✓                │
 │                                                              │
-│  Phase C: Implement Go Engine                                │
-│  ├── Add raymond dependency                                 │
-│  ├── Register 13 filter helpers + eq/ne                     │
-│  ├── Implement variable resolution                          │
-│  └── Verify: Go output == Bash output                       │
+│  Phase C: Implement Go Engine ✅ COMPLETED                   │
+│  ├── Add raymond dependency ✓                               │
+│  ├── Register 15 helpers (eq/ne + 13 filters) ✓             │
+│  ├── Implement variable resolution ✓                        │
+│  └── 20 Go tests pass, parity with bash ✓                   │
 │                                                              │
 │  Phase D: (Future) Deprecate Old Syntax                      │
 │  ├── Remove {{ var | filter }} from bash                    │
@@ -3184,13 +3184,20 @@ diff /tmp/bash.out /tmp/go.out  # Should be identical
 (stray `}` in output). This validates the move to Go's raymond library which handles
 nested blocks correctly.
 
-**Phase C: Go Implementation**
-- [ ] Add raymond dependency to go.mod
-- [ ] Implement Engine struct with helpers
-- [ ] Implement variable resolution (5-layer precedence)
-- [ ] Implement array loading for `{{#each}}`
-- [ ] Test: Go output matches Bash output for all templates
-- [ ] Commit: `feat(go): Add raymond-based template engine`
+**Phase C: Go Implementation** ✅ COMPLETED (2025-12-07)
+- [x] Add raymond dependency to go.mod
+- [x] Implement RaymondEngine struct with helpers (internal/template/raymond_engine.go)
+- [x] Register all 15 helpers: eq, ne, upper, lower, capitalize, trim, replace, append, prepend, quote, squote, truncate, length, basename, dirname, default
+- [x] Implement variable resolution with env override (DOTFILES_TMPL_* prefix)
+- [x] Implement array loading for `{{#each}}` loops
+- [x] Test: 20 Go tests pass, parity with bash verified
+- [x] Commit: `feat(go): Add raymond-based template engine`
+
+**Implementation Notes:**
+- Used `sync.Once` for helper registration (raymond uses global registry)
+- Used `raymond.SafeString` for quote/squote helpers to prevent HTML escaping
+- Auto-detection of OS, hostname, user, home, shell variables
+- Both regex-based engine (engine.go) and raymond engine (raymond_engine.go) coexist for transition
 
 **Phase D: (Future) Cleanup**
 - [ ] Remove old syntax support from bash
