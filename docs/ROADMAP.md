@@ -279,22 +279,7 @@ ldocker [cmd]          # lima nerdctl (containerd)
 
 ---
 
-### 14. Progress Indicators (Priority 1)
-
-**Status:** Planned
-
-Visual progress feedback for long-running operations.
-
-**Problem:**
-- `dotfiles packages --install` shows nothing during brew install
-- `dotfiles vault sync` gives no feedback during long syncs
-- Users don't know if operation is stuck or working
-
-**Implementation:** See detailed design below.
-
----
-
-### 15. Config Schema Validation (Priority 2)
+### 14. Config Schema Validation (Priority 2)
 
 **Status:** Planned
 
@@ -317,7 +302,7 @@ dotfiles config validate
 
 ---
 
-### 16. Aliases Command (Priority 2)
+### 15. Aliases Command (Priority 2)
 
 **Status:** Planned
 
@@ -367,7 +352,7 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 | **2.0.0** | **Unified setup wizard, state management, macOS CLI** |
 | 2.0.1 | CLI help improvements, Docker container enhancements |
 | **2.1.0** | **Smart secrets onboarding, vault config file, Docker taxonomy, Feature Registry** |
-| **3.0** | **Configuration Layers, CLI Feature Awareness, JSON config, SSH/Docker Tools, Age Encryption, Shell Completions** |
+| **3.0** | **Configuration Layers, CLI Feature Awareness, JSON config, SSH/Docker Tools, Age Encryption, Shell Completions, Progress Indicators** |
 
 ---
 
