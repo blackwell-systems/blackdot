@@ -25,6 +25,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `templates/configs/claude.local.tmpl`
   - All 364 tests passing with new syntax
 
+- **Go Template Engine** (Phase C) (`internal/template/raymond_engine.go`)
+  - Raymond-based Handlebars engine for proper AST parsing
+  - 15 registered helpers: eq, ne, upper, lower, capitalize, trim, replace, append, prepend, quote, squote, truncate, length, basename, dirname, default
+  - Preprocessor converts `{{#else}}` to `{{else}}` for bash template compatibility
+  - Variable resolution with `DOTFILES_TMPL_*` environment override
+  - Auto-detection of hostname, os, user, home, shell
+  - 20 parity tests verifying Go output matches bash output
+  - Both engines coexist for safe transition (strangler fig pattern)
+
 - **Interactive Template Setup** (`dotfiles template init`)
   - Prompts for essential variables: git name, email, machine type, GitHub username
   - Auto-detects defaults from `git config --global`
