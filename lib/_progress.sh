@@ -108,10 +108,11 @@ spinner_start() {
     spinner_stop 2>/dev/null
 
     # Show spinner message (keep it simple - fancy stuff is unreliable)
+    # Use print -rn for zsh compatibility (-r = raw, -n = no newline)
     if _progress_unicode; then
-        echo -n "⠿ ${msg}..."
+        print -rn -- "⠿ ${msg}..."
     else
-        echo -n "* ${msg}..."
+        print -rn -- "* ${msg}..."
     fi
 
     # Mark that spinner is "running" (for spinner_stop to know)
