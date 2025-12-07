@@ -2478,47 +2478,195 @@ brews:
 
 ---
 
-## 8. Migration Phases
+## 8. Migration Strategy: Strangler Fig Pattern
 
-### Phase 1: Foundation (Weeks 1-2)
-- [ ] Set up Go module structure
-- [ ] Implement `pkg/vaultmux` with pass backend
-- [ ] Implement `internal/config` (JSON read/write)
-- [ ] Basic CLI skeleton with cobra
-- [ ] `dotfiles version` command
+### 8.1 The Strangler Fig Approach
 
-### Phase 2: Core Features (Weeks 3-4)
-- [ ] Implement `internal/feature` (registry, dependencies)
-- [ ] `dotfiles features` command (full parity)
-- [ ] `dotfiles config` command
-- [ ] Shell integration (`dotfiles shell-init`)
+**Named after the strangler fig tree** that grows around another tree, eventually replacing it.
 
-### Phase 3: Vault Integration (Weeks 5-6)
-- [ ] Bitwarden backend
-- [ ] 1Password backend
-- [ ] `dotfiles vault` command (full parity)
-- [ ] Session management
+**Key Principle:** Build the new system ALONGSIDE the old one. Switch over only when stable.
 
-### Phase 4: Template System (Weeks 7-8)
-- [ ] Template parser
-- [ ] Variable resolution
-- [ ] Conditionals and loops
-- [ ] Pipeline filters
-- [ ] `dotfiles template` command
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    PHASE 1-5: Parallel Development           │
+│                                                              │
+│  Shell Implementation          Go Implementation            │
+│  ┌─────────────────┐          ┌─────────────────┐          │
+│  │ bin/dotfiles-*  │          │ bin/dotfiles-go │          │
+│  │ lib/_*.sh       │  ←───→   │ cmd/dotfiles/   │          │
+│  │ (UNCHANGED)     │  coexist │ internal/       │          │
+│  │ (WORKING)       │          │ (NEW)           │          │
+│  └─────────────────┘          └─────────────────┘          │
+│         ↑                              ↑                    │
+│         │                              │                    │
+│    User calls                     Test separately          │
+│    as normal                      with -go suffix           │
+│                                                              │
+│  BENEFIT: Zero risk - if Go breaks, shell still works!     │
+└──────────────────────────────────────────────────────────────┘
 
-### Phase 5: Remaining Commands (Weeks 9-10)
-- [ ] `dotfiles doctor`
-- [ ] `dotfiles setup`
-- [ ] `dotfiles sync`
-- [ ] `dotfiles backup`
-- [ ] `dotfiles drift`
-- [ ] Remaining commands
+┌──────────────────────────────────────────────────────────────┐
+│                    PHASE 6: The Cutover                      │
+│                                                              │
+│  Add simple redirect in 40-aliases.zsh:                      │
+│                                                              │
+│  dotfiles() {                                                │
+│    if [[ -x "$DOTFILES_DIR/bin/dotfiles-go" ]]; then       │
+│      "$DOTFILES_DIR/bin/dotfiles-go" "$@"                  │
+│      return $?                                               │
+│    fi                                                        │
+│    # Shell fallback remains for safety                      │
+│  }                                                           │
+│                                                              │
+│  BENEFIT: One-line change, instant rollback possible        │
+└──────────────────────────────────────────────────────────────┘
+```
 
-### Phase 6: Polish & Migration (Weeks 11-12)
-- [ ] Shell-to-Go migration script
-- [ ] Documentation updates
-- [ ] Performance benchmarks
-- [ ] Release automation
+### 8.2 Safe Migration Phases
+
+### Phase 1: Foundation ✅ (COMPLETED)
+- [x] ✅ Create vaultmux as separate module
+- [x] ✅ Implement all three backends (pass, bitwarden, 1password)
+- [x] ✅ 95%+ test coverage, production-ready
+- [x] ✅ Released as v0.1.0
+
+**Next: Initialize Go in dotfiles repo (non-disruptive)**
+- [ ] Initialize Go module in dotfiles repo
+- [ ] Create cmd/dotfiles/main.go (new directory)
+- [ ] Create internal/cli/root.go (new directory)
+- [ ] Implement `dotfiles-go version` command
+- [ ] Build to bin/dotfiles-go (separate from shell)
+- [ ] NO CHANGES to existing shell files
+
+### Phase 2: Config System (Weeks 2-3)
+- [ ] Implement internal/config package
+- [ ] Read existing config.json (compatibility test)
+- [ ] Implement `dotfiles-go config get/set`
+- [ ] Test alongside shell version
+- [ ] NO CHANGES to existing shell files
+
+### Phase 3: Feature Registry (Weeks 4-5)
+- [ ] Implement internal/feature package
+- [ ] Port feature definitions from lib/_features.sh
+- [ ] Implement `dotfiles-go features list/enable/disable`
+- [ ] Implement `dotfiles-go features check` (for shell queries)
+- [ ] Test feature parity with shell version
+- [ ] NO CHANGES to existing shell files
+
+### Phase 4: Vault Integration (Weeks 6-7)
+- [ ] Import vaultmux (already done in Phase 1!)
+- [ ] Implement internal/cli/vault.go
+- [ ] Wire up vault commands to vaultmux
+- [ ] Implement `dotfiles-go vault push/pull/status`
+- [ ] Test all vault operations
+- [ ] NO CHANGES to existing shell files
+
+### Phase 5: Template System (Weeks 8-9)
+- [ ] Implement internal/template package
+- [ ] Port template logic from lib/_templates.sh
+- [ ] Implement `dotfiles-go template render/list/diff`
+- [ ] Test with existing .template files
+- [ ] NO CHANGES to existing shell files
+
+### Phase 6: Remaining Commands (Weeks 10-11)
+- [ ] Implement doctor, setup, sync, backup, drift
+- [ ] Implement remaining 14 commands
+- [ ] Full parity testing
+- [ ] NO CHANGES to existing shell files
+
+### Phase 7: The Cutover (Week 12+)
+**ONLY AFTER full parity achieved and tested:**
+- [ ] Update 40-aliases.zsh to prefer Go binary
+- [ ] Test extensively on your machines
+- [ ] Monitor for issues
+- [ ] Keep shell fallback for 1-2 weeks
+- [ ] Remove shell implementation after confidence
+
+### 8.3 Safety Features During Migration
+
+**1. Separate Binaries:**
+```bash
+bin/dotfiles-features    # Shell version (existing)
+bin/dotfiles-go          # Go version (new, parallel)
+```
+
+**2. Explicit Testing:**
+```bash
+# Test old way (guaranteed working)
+dotfiles features list
+
+# Test new way (development)
+dotfiles-go features list
+
+# Compare outputs
+diff <(dotfiles features list) <(dotfiles-go features list)
+```
+
+**3. Feature Flag Option (Optional):**
+```zsh
+# For power users who want to opt-in early
+if [[ "$DOTFILES_USE_GO" == "1" ]] && [[ -x "$DOTFILES_DIR/bin/dotfiles-go" ]]; then
+    alias dotfiles="dotfiles-go"
+fi
+```
+
+**4. Rollback is Trivial:**
+```bash
+# If Go version has issues, just remove it
+rm bin/dotfiles-go
+
+# Shell version continues working
+```
+
+### 8.4 Risk Mitigation
+
+| Risk | Traditional Approach | Strangler Fig Approach |
+|------|---------------------|------------------------|
+| **Breaking existing system** | High - rewrite in place | Zero - parallel development |
+| **Can't test thoroughly** | Limited - prod is test | Full - side-by-side comparison |
+| **Rollback complexity** | High - git revert | Trivial - delete binary |
+| **User disruption** | High - downtime | Zero - opt-in when ready |
+| **Lost work if failed** | High - throw away | Low - incremental progress |
+
+### 8.5 File Naming Convention
+
+During development:
+- Existing: `bin/dotfiles-features`, `lib/_features.sh` ← NEVER TOUCH
+- New: `cmd/dotfiles/main.go`, `internal/cli/features.go` ← BUILD IN PARALLEL
+- Binary: `bin/dotfiles-go` ← SEPARATE NAME
+
+After cutover:
+- Shell: Archive to `legacy/` or delete
+- Go binary: Rename to `bin/dotfiles` or alias
+
+### 8.6 Development Workflow
+
+```bash
+# 1. Work on Go code
+vim cmd/dotfiles/main.go
+
+# 2. Build separately
+go build -o bin/dotfiles-go ./cmd/dotfiles
+
+# 3. Test Go version
+./bin/dotfiles-go version
+
+# 4. Compare with shell
+dotfiles version  # Still works!
+
+# 5. Commit when satisfied
+git add cmd/ internal/ go.mod go.sum
+git commit -m "feat: Add Go version command (parallel implementation)"
+```
+
+### 8.7 Benefits of This Approach
+
+✅ **Zero downtime** - existing system never breaks
+✅ **Incremental progress** - commit working code as you go
+✅ **Easy comparison** - run both versions side-by-side
+✅ **Low pressure** - no rush to finish, existing system works
+✅ **Safe experimentation** - try ideas without risk
+✅ **Gradual confidence** - build trust in Go version slowly
 
 ---
 
