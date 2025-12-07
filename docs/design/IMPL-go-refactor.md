@@ -2799,48 +2799,308 @@ func (e *Engine) BuildVars() map[string]interface{} {
 }
 ```
 
-#### 8.5 Migration Path
+#### 8.5 Migration Strategy: Dual-Engine Compatibility
 
-**Option A: Modify Templates (Recommended)**
-- Change `{{#if x == "y"}}` → `{{#if (eq x "y")}}`
-- Change `{{ x | filter }}` → `{{ filter x }}`
-- One-time migration, cleaner long-term
-- Templates become standard Handlebars
+**Goal:** Both Bash and Go can render the same templates during transition.
 
-**Option B: Preprocessor Compatibility**
-- Keep existing template syntax unchanged
-- Add preprocessing step before raymond
-- More complex, but zero template changes
+**Approach:** Update Bash to support standard Handlebars syntax, then migrate
+templates, then implement Go with raymond. This gives a safe transition period
+where both engines work.
 
-**Recommendation: Option A** - The template changes are minimal and make templates
-portable to any Handlebars implementation. The preprocessing adds complexity and
-potential edge cases.
-
-#### 8.6 Testing Strategy
-
-```bash
-# For each .tmpl file:
-# 1. Render with bash
-./lib/_templates.sh render templates/configs/gitconfig.tmpl > /tmp/bash.out
-
-# 2. Render with Go
-./bin/dotfiles-go template render templates/configs/gitconfig.tmpl > /tmp/go.out
-
-# 3. Compare
-diff /tmp/bash.out /tmp/go.out
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    MIGRATION TIMELINE                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Phase A: Update Bash Engine                                 │
+│  ├── Add {{#if (eq var "value")}} support                   │
+│  ├── Add {{ helper arg }} support                           │
+│  ├── Keep old syntax working (backward compat)              │
+│  └── ~50 lines of changes to lib/_templates.sh              │
+│                                                              │
+│  Phase B: Migrate Templates                                  │
+│  ├── Run migration script on 4 .tmpl files                  │
+│  ├── Verify: Bash still renders correctly                   │
+│  └── Templates now use standard Handlebars                  │
+│                                                              │
+│  Phase C: Implement Go Engine                                │
+│  ├── Add raymond dependency                                 │
+│  ├── Register 13 filter helpers + eq/ne                     │
+│  ├── Implement variable resolution                          │
+│  └── Verify: Go output == Bash output                       │
+│                                                              │
+│  Phase D: (Future) Deprecate Old Syntax                      │
+│  ├── Remove {{ var | filter }} from bash                    │
+│  ├── Remove {{#if x == "y"}} from bash                      │
+│  └── Both engines now pure Handlebars                       │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-#### 8.7 Checklist
+#### 8.6 Phase A: Bash Engine Updates
 
-- [ ] Implement raymond-based Engine struct
-- [ ] Register all 13 filter helpers
-- [ ] Register comparison helpers (eq, ne)
-- [ ] Implement variable resolution with correct precedence
+**File:** `lib/_templates.sh`
+
+**Change 1: Support `(eq var "value")` in conditionals (~15 lines)**
+
+```bash
+# In evaluate_condition() - add at the beginning:
+evaluate_condition() {
+    local condition="$1"
+    condition="${condition## }"
+    condition="${condition%% }"
+
+    # NEW: Handle (eq var "value") helper syntax
+    if [[ "$condition" =~ ^\(eq[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*)[[:space:]]+\"([^\"]*)\"\)$ ]]; then
+        local var="${match[1]}"
+        local expected="${match[2]}"
+        local actual="${TMPL_VARS[$var]:-}"
+        [[ "$actual" == "$expected" ]]
+        return $?
+    fi
+
+    # NEW: Handle (ne var "value") helper syntax
+    if [[ "$condition" =~ ^\(ne[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*)[[:space:]]+\"([^\"]*)\"\)$ ]]; then
+        local var="${match[1]}"
+        local expected="${match[2]}"
+        local actual="${TMPL_VARS[$var]:-}"
+        [[ "$actual" != "$expected" ]]
+        return $?
+    fi
+
+    # EXISTING: Keep old syntax for backward compatibility
+    # ... rest of existing code unchanged
+}
+```
+
+**Change 2: Support `{{ helper arg }}` syntax (~25 lines)**
+
+```bash
+# In the variable substitution section - add helper detection:
+process_variable_expression() {
+    local expr="$1"
+    expr="${expr## }"
+    expr="${expr%% }"
+
+    # NEW: Handle {{ helper arg }} - e.g., {{ upper hostname }}
+    if [[ "$expr" =~ ^([a-z]+)[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*)$ ]]; then
+        local helper="${match[1]}"
+        local var="${match[2]}"
+        local value="${TMPL_VARS[$var]:-}"
+        apply_filter "$value" "$helper"
+        return
+    fi
+
+    # NEW: Handle {{ helper arg "default" }} - e.g., {{ default editor "vim" }}
+    if [[ "$expr" =~ ^([a-z]+)[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*)[[:space:]]+\"([^\"]*)\"$ ]]; then
+        local helper="${match[1]}"
+        local var="${match[2]}"
+        local arg="${match[3]}"
+        local value="${TMPL_VARS[$var]:-}"
+        apply_filter "$value" "$helper" "$arg"
+        return
+    fi
+
+    # NEW: Handle nested {{ helper (helper2 arg) }} - e.g., {{ truncate (upper hostname) 10 }}
+    if [[ "$expr" =~ ^([a-z]+)[[:space:]]+\(([a-z]+)[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*)\)[[:space:]]+([0-9]+)$ ]]; then
+        local outer="${match[1]}"
+        local inner="${match[2]}"
+        local var="${match[3]}"
+        local arg="${match[4]}"
+        local value="${TMPL_VARS[$var]:-}"
+        value=$(apply_filter "$value" "$inner")
+        apply_filter "$value" "$outer" "$arg"
+        return
+    fi
+
+    # EXISTING: Handle {{ var | filter }} pipeline syntax (keep for backward compat)
+    if has_pipeline "$expr"; then
+        process_pipeline "$expr"
+        return
+    fi
+
+    # EXISTING: Simple variable
+    echo "${TMPL_VARS[$expr]:-}"
+}
+```
+
+#### 8.7 Phase B: Template Migration Script
+
+```bash
+#!/bin/bash
+# scripts/migrate-templates-to-handlebars.sh
+set -euo pipefail
+
+for tmpl in templates/configs/*.tmpl; do
+    echo "Migrating: $tmpl"
+
+    # Backup
+    cp "$tmpl" "$tmpl.bak"
+
+    # 1. Convert comparisons: {{#if x == "y"}} → {{#if (eq x "y")}}
+    sed -i -E 's/\{\{#if ([a-z_]+) == "([^"]+)"/{{#if (eq \1 "\2")/g' "$tmpl"
+
+    # 2. Convert simple pipelines: {{ x | filter }} → {{ filter x }}
+    sed -i -E 's/\{\{ ([a-z_]+) \| ([a-z]+) \}\}/{{ \2 \1 }}/g' "$tmpl"
+
+    # 3. Convert pipelines with args: {{ x | default "y" }} → {{ default x "y" }}
+    sed -i -E 's/\{\{ ([a-z_]+) \| default "([^"]+)" \}\}/{{ default \1 "\2" }}/g' "$tmpl"
+
+    # 4. Convert chained: {{ x | upper | truncate 10 }} → {{ truncate (upper x) 10 }}
+    # (Manual review may be needed for complex chains)
+
+    echo "  Done"
+done
+
+echo ""
+echo "Migration complete. Review changes with: git diff templates/"
+echo "Backups saved as *.tmpl.bak"
+```
+
+**Expected changes to templates:**
+
+| File | Changes |
+|------|---------|
+| `gitconfig.tmpl` | ~5 comparisons, ~2 filters |
+| `ssh-config.tmpl` | ~3 comparisons, ~1 filter |
+| `99-local.zsh.tmpl` | ~8 comparisons |
+| `claude.local.tmpl` | ~2 comparisons |
+
+#### 8.8 Phase C: Go Engine Implementation
+
+```go
+// internal/template/engine.go
+package template
+
+import (
+    "os"
+    "path/filepath"
+    "strings"
+
+    "github.com/aymerick/raymond"
+)
+
+type Engine struct {
+    dotfilesDir string
+    vars        map[string]interface{}
+}
+
+func NewEngine(dotfilesDir string) *Engine {
+    e := &Engine{dotfilesDir: dotfilesDir}
+    e.registerHelpers()
+    return e
+}
+
+func (e *Engine) registerHelpers() {
+    // Comparison helpers
+    raymond.RegisterHelper("eq", func(a, b string) bool { return a == b })
+    raymond.RegisterHelper("ne", func(a, b string) bool { return a != b })
+
+    // String case helpers
+    raymond.RegisterHelper("upper", strings.ToUpper)
+    raymond.RegisterHelper("lower", strings.ToLower)
+    raymond.RegisterHelper("capitalize", func(s string) string {
+        if len(s) == 0 { return s }
+        return strings.ToUpper(s[:1]) + s[1:]
+    })
+
+    // String manipulation helpers
+    raymond.RegisterHelper("trim", strings.TrimSpace)
+    raymond.RegisterHelper("quote", func(s string) string { return `"` + s + `"` })
+    raymond.RegisterHelper("squote", func(s string) string { return "'" + s + "'" })
+    raymond.RegisterHelper("append", func(s, suffix string) string { return s + suffix })
+    raymond.RegisterHelper("prepend", func(s, prefix string) string { return prefix + s })
+
+    // Path helpers
+    raymond.RegisterHelper("basename", filepath.Base)
+    raymond.RegisterHelper("dirname", filepath.Dir)
+
+    // Default value helper
+    raymond.RegisterHelper("default", func(val, def string) string {
+        if val == "" { return def }
+        return val
+    })
+
+    // String info helpers
+    raymond.RegisterHelper("length", func(s string) int { return len(s) })
+    raymond.RegisterHelper("truncate", func(s string, n int) string {
+        if len(s) <= n { return s }
+        return s[:n]
+    })
+}
+
+func (e *Engine) Render(templatePath string) (string, error) {
+    content, err := os.ReadFile(templatePath)
+    if err != nil {
+        return "", err
+    }
+
+    vars := e.buildVars()
+    return raymond.Render(string(content), vars)
+}
+```
+
+#### 8.9 Syntax Compatibility Matrix
+
+| Syntax | Bash (Before) | Bash (After) | Go |
+|--------|---------------|--------------|-----|
+| `{{#if x == "y"}}` | ✅ | ✅ deprecated | ❌ |
+| `{{#if (eq x "y")}}` | ❌ | ✅ | ✅ |
+| `{{ x \| upper }}` | ✅ | ✅ deprecated | ❌ |
+| `{{ upper x }}` | ❌ | ✅ | ✅ |
+| `{{ x \| default "y" }}` | ✅ | ✅ deprecated | ❌ |
+| `{{ default x "y" }}` | ❌ | ✅ | ✅ |
+| `{{#if var}}` | ✅ | ✅ | ✅ |
+| `{{#each arr}}` | ✅ | ✅ | ✅ |
+| `{{else}}` | ✅ | ✅ | ✅ |
+
+#### 8.10 Testing Strategy
+
+```bash
+# Test each phase independently:
+
+# Phase A: Bash handles both syntaxes
+echo '{{ upper hostname }}' | ./test-bash-template.sh      # New syntax
+echo '{{ hostname | upper }}' | ./test-bash-template.sh    # Old syntax (still works)
+
+# Phase B: After migration, bash still works
+./bin/dotfiles-template render templates/configs/gitconfig.tmpl > /tmp/bash.out
+
+# Phase C: Go matches bash
+./bin/dotfiles-go template render templates/configs/gitconfig.tmpl > /tmp/go.out
+diff /tmp/bash.out /tmp/go.out  # Should be identical
+```
+
+#### 8.11 Implementation Checklist
+
+**Phase A: Bash Updates**
+- [ ] Add `(eq var "value")` pattern to `evaluate_condition()`
+- [ ] Add `(ne var "value")` pattern to `evaluate_condition()`
+- [ ] Add `{{ helper arg }}` pattern to variable substitution
+- [ ] Add `{{ helper arg "default" }}` pattern
+- [ ] Test: Old syntax still works
+- [ ] Test: New syntax works
+- [ ] Commit: `feat(templates): Support Handlebars helper syntax in bash`
+
+**Phase B: Template Migration**
+- [ ] Create migration script
+- [ ] Run on all 4 .tmpl files
+- [ ] Review changes manually
+- [ ] Test: Bash renders all templates correctly
+- [ ] Commit: `refactor(templates): Migrate to standard Handlebars syntax`
+
+**Phase C: Go Implementation**
+- [ ] Add raymond dependency to go.mod
+- [ ] Implement Engine struct with helpers
+- [ ] Implement variable resolution (5-layer precedence)
 - [ ] Implement array loading for `{{#each}}`
-- [ ] Add syntax preprocessor (if Option B chosen)
-- [ ] Test all 4 existing template files
-- [ ] Verify byte-for-byte output match
-- [ ] Document any intentional syntax changes
+- [ ] Test: Go output matches Bash output for all templates
+- [ ] Commit: `feat(go): Add raymond-based template engine`
+
+**Phase D: (Future) Cleanup**
+- [ ] Remove old syntax support from bash
+- [ ] Update documentation
+- [ ] Consider removing bash template engine entirely
 
 ### Phase 9: Remaining Commands - Full Implementation
 - [ ] doctor: Health check logic from bin/dotfiles-doctor
