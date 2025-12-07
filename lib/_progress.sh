@@ -349,17 +349,12 @@ steps_done() {
 # ============================================================
 
 # Ensure cursor is shown on exit
-_progress_cleanup() {
+# Call this manually or set up trap in your script:
+#   trap 'progress_cleanup' EXIT
+progress_cleanup() {
     spinner_stop 2>/dev/null
     printf '\033[?25h' 2>/dev/null
 }
 
-trap '_progress_cleanup' EXIT
-
-# ============================================================
-# Export functions
-# ============================================================
-
-export -f spinner_start spinner_stop run_with_spinner 2>/dev/null || true
-export -f progress_bar progress_init progress_done 2>/dev/null || true
-export -f steps_init step step_done step_fail steps_done 2>/dev/null || true
+# Note: We don't set a global trap here to avoid conflicts
+# with the sourcing script's traps. Set your own if needed.
