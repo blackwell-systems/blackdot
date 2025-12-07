@@ -99,6 +99,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Color-coded unified diff output with line limits
   - Session validation with helpful unlock instructions
 
+- **Go Hook Command** (`internal/cli/hook.go`)
+  - Subcommands: list, run, add, remove, points, test
+  - 7 hook categories: Lifecycle, Vault, Doctor, Shell, Setup, Template, Encryption
+  - 23 hook points with descriptions
+  - File-based hooks: `~/.config/dotfiles/hooks/<point>/*.sh`
+  - JSON-configured hooks: `~/.config/dotfiles/hooks.json`
+  - Timeout support and fail-fast option
+  - Verbose mode for debugging hook execution
+
 - **Interactive Template Setup** (`dotfiles template init`)
   - Prompts for essential variables: git name, email, machine type, GitHub username
   - Auto-detects defaults from `git config --global`

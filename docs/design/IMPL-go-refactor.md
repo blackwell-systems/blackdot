@@ -3215,11 +3215,11 @@ nested blocks correctly.
 - [x] ✅ packages: Brewfile parsing, tier support, install via brew bundle
 - [x] ✅ drift: Quick mode (cached state) + full mode (vault connection)
 - [x] ✅ diff: Change preview (--sync, --restore, item-specific)
+- [x] ✅ hook: Full hook system (list, run, add, remove, points, test subcommands)
 
 **Remaining (High Complexity):**
 - [ ] doctor: Health check logic from bin/dotfiles-doctor (many checks, --fix mode)
 - [ ] setup: Wizard flow from bin/dotfiles-setup (multi-step, state)
-- [ ] hook: Hook execution from bin/dotfiles-hook (script discovery)
 - [ ] encrypt: Age encryption from bin/dotfiles-encrypt (crypto)
 - [ ] migrate: Migration scripts (schema changes)
 - [ ] sync: Bidirectional sync (merge logic)
