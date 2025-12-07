@@ -101,24 +101,14 @@ spinner_start() {
     local msg="${1:-Working}"
     _SPINNER_MSG="$msg"
 
-    # Don't start if progress is disabled
-    _progress_enabled || return 0
-
     # Kill any existing spinner
-    spinner_stop 2>/dev/null
+    [[ -n "$_SPINNER_PID" ]] && spinner_stop 2>/dev/null
 
-    # Show spinner message (keep it simple)
-    if _progress_unicode; then
-        printf '%s' "⠿ ${msg}..."
-    else
-        printf '%s' "* ${msg}..."
-    fi
+    # Show spinner message - always show, no fancy checks
+    printf '%s\n' "⠿ ${msg}..."
 
     # Mark that spinner is "running" (for spinner_stop to know)
     _SPINNER_PID="static"
-
-    # Ensure spinner is killed on script exit
-    trap 'spinner_stop 2>/dev/null' EXIT INT TERM
 }
 
 # Stop the spinner
