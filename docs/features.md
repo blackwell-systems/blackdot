@@ -74,6 +74,7 @@ Core features cannot be disabled—they're essential for the dotfiles system to 
 | `cdk_tools` | AWS CDK aliases, helpers, and environment management | `aws_helpers` |
 | `rust_tools` | Rust/Cargo aliases and helpers (build, test, clippy, watch) | - |
 | `go_tools` | Go aliases and helpers (build, test, coverage, modules) | - |
+| `python_tools` | Python/uv aliases, pytest helpers, auto-venv activation | - |
 | `nvm_integration` | Lazy-loaded NVM for Node.js version management | - |
 | `sdkman_integration` | Lazy-loaded SDKMAN for Java/Gradle/Kotlin | - |
 | `dotclaude` | dotclaude profile management for Claude Code | `claude_integration` |
@@ -132,9 +133,9 @@ dotfiles features preset developer --persist
 
 | Preset | Features Enabled |
 |--------|------------------|
-| `minimal` | `shell` |
-| `developer` | `shell`, `vault`, `aws_helpers`, `git_hooks`, `modern_cli` |
-| `claude` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `git_hooks`, `modern_cli` |
+| `minimal` | `shell`, `config_layers` |
+| `developer` | `shell`, `vault`, `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `git_hooks`, `modern_cli`, `config_layers` |
+| `claude` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `git_hooks`, `modern_cli`, `config_layers` |
 | `full` | All features |
 
 ### Check Feature Status
