@@ -92,6 +92,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Reads cached state from `~/.cache/dotfiles/vault-state.json`
   - Tracks: SSH, AWS, Git configs, env secrets, template variables
 
+- **Go Diff Command** (`internal/cli/diff.go`)
+  - `--sync/-s`: Preview what sync would push to vault
+  - `--restore/-r`: Preview what restore would change locally
+  - Item-specific diff: `diff SSH-Config`, `diff Git-Config`, etc.
+  - Color-coded unified diff output with line limits
+  - Session validation with helpful unlock instructions
+
 - **Interactive Template Setup** (`dotfiles template init`)
   - Prompts for essential variables: git name, email, machine type, GitHub username
   - Auto-detects defaults from `git config --global`

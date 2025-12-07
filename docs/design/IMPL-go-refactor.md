@@ -3214,9 +3214,7 @@ nested blocks correctly.
 - [x] ✅ status: City skyline dashboard with symlink/SSH/AWS/Lima checks
 - [x] ✅ packages: Brewfile parsing, tier support, install via brew bundle
 - [x] ✅ drift: Quick mode (cached state) + full mode (vault connection)
-
-**Remaining (Medium Complexity):**
-- [ ] diff: Change preview (compare files)
+- [x] ✅ diff: Change preview (--sync, --restore, item-specific)
 
 **Remaining (High Complexity):**
 - [ ] doctor: Health check logic from bin/dotfiles-doctor (many checks, --fix mode)
