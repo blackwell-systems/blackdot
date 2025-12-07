@@ -24,6 +24,7 @@
 |-------|-------------|
 | [Architecture](architecture.md) | Framework systems & design |
 | [Feature Registry](features.md) | Control plane for all features |
+| [Developer Tools](developer-tools.md) | AWS, CDK, Rust, Go, NVM, SDKMAN integrations |
 | [Hook System](hooks.md) | Lifecycle hooks for custom behavior |
 | [CLI Reference](cli-reference.md) | All commands, flags & environment variables |
 | [Full Documentation](README-FULL.md) | Complete 1,900+ line guide |
@@ -84,6 +85,8 @@ The setup wizard also prompts for workspace directory (Step 1 of 7).
 
 **Capabilities:**
 - **Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with Bitwarden, 1Password, or pass
+- **Age encryption** – Encrypt non-vault secrets for git (template variables, local configs)
+- **Deep developer tool integrations** – AWS, CDK, Rust, Go, NVM, SDKMAN with 70+ aliases, helpers, and shell completions
 - **Portable Claude sessions** – `/workspace` symlink for consistent paths across machines
 - **Machine-specific templates** – Generate configs tailored to each machine
 - **Self-healing configuration** – Health checker with auto-fix, drift detection
@@ -116,6 +119,51 @@ dotfiles vault push Claude-Profiles  # Sync to vault for other machines
 **Without dotclaude?** No problem—portable sessions and git safety hooks work standalone. `dotfiles doctor` will gently suggest dotclaude if you're a Claude Code user.
 
 See [Claude Code + dotclaude Integration](claude-code.md) for the full guide including architecture diagrams.
+
+---
+
+## Developer Tool Integrations
+
+Deep integrations with modern developer toolchains—not just aliases, but helpers, completions, and workflow automation.
+
+| Tool Suite | Features | Key Commands |
+|------------|----------|--------------|
+| **AWS Tools** | Profile switching, SSO login, identity display, role assumption | `awsswitch`, `awslogin`, `awswho`, `awsassume` |
+| **CDK Tools** | Deploy, diff, synth, watch with smart defaults | `cdkd`, `cdkdf`, `cdks`, `cdkwatch` |
+| **Rust Tools** | Build, test, clippy, fmt, cargo-watch integration | `cb`, `ct`, `ccl`, `cf`, `cw` |
+| **Go Tools** | Build, test, coverage, module management | `gob`, `got`, `gotc`, `gomi` |
+| **Python Tools** | uv package manager, pytest, auto-venv activation | `uvs`, `uvr`, `uva`, `pt`, `ptx` |
+| **NVM** | Lazy-loaded Node.js version manager | Auto-loads on first `node`/`npm` call |
+| **SDKMAN** | Lazy-loaded Java/Gradle/Kotlin manager | Auto-loads on first `java`/`gradle` call |
+
+**Shell Completions:** Tab completion for all tool commands—`awsswitch <TAB>`, `dotfiles features <TAB>`.
+
+**90+ Aliases:** Opinionated shortcuts that follow consistent naming patterns across toolchains.
+
+**Discoverability:** `zsh-you-should-use` plugin reminds you about aliases you're not using.
+
+```bash
+# AWS: Interactive profile switching with fzf
+awsswitch              # Fuzzy-select profile, auto-login if expired
+
+# CDK: Deploy with approval confirmation
+cdkd                   # cdk deploy with standard flags
+
+# Rust: Watch mode for TDD
+cwt                    # cargo watch -x test
+
+# Go: Coverage with browser
+gocover                # go test -cover + open HTML report
+
+# Python: Fast package management with uv
+uvs && uvr pytest      # Sync deps & run in project env
+```
+
+**Feature-gated:** Each tool suite can be enabled/disabled independently:
+```bash
+dotfiles features disable rust_tools --persist
+dotfiles features enable cdk_tools --persist
+```
 
 ---
 
@@ -225,6 +273,7 @@ See [Full Documentation](README-FULL.md) for complete project structure and deta
 ## Next Steps
 
 - **[Full Documentation](README-FULL.md)** – Complete guide with all details
+- **[Developer Tools](developer-tools.md)** – AWS, CDK, Rust, Go integrations & 70+ aliases
 - **[Claude Code + dotclaude](claude-code.md)** – Portable sessions, profiles & safety hooks
 - **[Template System](templates.md)** – Configure per-machine settings
 - **[Troubleshooting](troubleshooting.md)** – Solutions to common issues

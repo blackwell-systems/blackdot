@@ -74,6 +74,168 @@ dotfiles hook test post_vault_pull
 | `post_setup_phase` | After each wizard phase | Phase-specific setup |
 | `setup_complete` | After all phases done | Final customization |
 
+### Template & Encryption Hooks
+
+| Hook | When | Use Case |
+|------|------|----------|
+| `pre_template_render` | Before template rendering | Auto-decrypt .age files |
+| `post_template_render` | After templates rendered | Validation, notifications |
+| `pre_encrypt` | Before file encryption | Custom pre-processing |
+| `post_decrypt` | After file decryption | Permission fixes, validation |
+
+---
+
+## Understanding ZSH Hooks
+
+ZSH provides native hook functions that execute at specific points in the shell lifecycle. The dotfiles hook system builds on these to provide a more structured, manageable approach.
+
+### Native ZSH Hook Functions
+
+ZSH has several built-in hook arrays that you can add functions to:
+
+| Hook Array | When It Runs | Example Use |
+|------------|--------------|-------------|
+| `precmd_functions` | Before each prompt is displayed | Update prompt, show git status |
+| `preexec_functions` | Before each command executes | Timing, logging |
+| `chpwd_functions` | After directory change (`cd`) | Auto-activate virtualenvs |
+| `zshexit_functions` | When shell exits | Cleanup, save history |
+| `periodic_functions` | Every `$PERIOD` seconds | Background checks |
+| `zshaddhistory_functions` | Before adding to history | Filter sensitive commands |
+
+### How Native ZSH Hooks Work
+
+```zsh
+# Method 1: Add function to hook array
+my_precmd() {
+    echo "About to show prompt"
+}
+precmd_functions+=( my_precmd )
+
+# Method 2: Use add-zsh-hook (recommended)
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd my_precmd
+add-zsh-hook chpwd my_chpwd_function
+
+# Remove a hook
+add-zsh-hook -d precmd my_precmd
+```
+
+### Common Native Hook Patterns
+
+**Auto-activate Python virtualenv on cd:**
+```zsh
+autoload -Uz add-zsh-hook
+
+_auto_venv() {
+    if [[ -f "venv/bin/activate" ]]; then
+        source venv/bin/activate
+    elif [[ -f ".venv/bin/activate" ]]; then
+        source .venv/bin/activate
+    elif [[ -n "$VIRTUAL_ENV" ]]; then
+        # Deactivate if we left a venv directory
+        deactivate 2>/dev/null
+    fi
+}
+add-zsh-hook chpwd _auto_venv
+```
+
+**Command timing with preexec/precmd:**
+```zsh
+autoload -Uz add-zsh-hook
+
+_timer_preexec() {
+    _cmd_start=$EPOCHREALTIME
+}
+
+_timer_precmd() {
+    if [[ -n "$_cmd_start" ]]; then
+        local elapsed=$(( EPOCHREALTIME - _cmd_start ))
+        if (( elapsed > 5 )); then
+            echo "Command took ${elapsed}s"
+        fi
+        unset _cmd_start
+    fi
+}
+
+add-zsh-hook preexec _timer_preexec
+add-zsh-hook precmd _timer_precmd
+```
+
+**Filter sensitive commands from history:**
+```zsh
+_filter_history() {
+    local cmd="$1"
+    # Don't save commands with secrets
+    [[ "$cmd" == *"password"* ]] && return 1
+    [[ "$cmd" == *"secret"* ]] && return 1
+    [[ "$cmd" == *"AWS_SECRET"* ]] && return 1
+    return 0
+}
+add-zsh-hook zshaddhistory _filter_history
+```
+
+### How Dotfiles Hooks Map to ZSH Hooks
+
+The dotfiles hook system provides a higher-level abstraction over native ZSH hooks:
+
+| Dotfiles Hook | Underlying ZSH Mechanism |
+|---------------|-------------------------|
+| `shell_init` | Sourced at end of `.zshrc` |
+| `shell_exit` | `zshexit_functions` array |
+| `directory_change` | `chpwd_functions` array |
+
+**Why use dotfiles hooks instead of native?**
+
+1. **File-based organization** - Hooks live in `~/.config/dotfiles/hooks/`, not scattered in `.zshrc`
+2. **Easy enable/disable** - Toggle with `dotfiles features` or JSON config
+3. **Ordering control** - Numeric prefixes (10-, 20-, 90-) guarantee execution order
+4. **Visibility** - `dotfiles hook list` shows all registered hooks
+5. **Testing** - `dotfiles hook test` validates hooks without running them
+6. **Feature gating** - Hooks respect the Feature Registry
+
+### Using Both Systems Together
+
+You can use native ZSH hooks alongside dotfiles hooks:
+
+```zsh
+# In ~/.zshrc.local - use native hooks for fast, inline operations
+autoload -Uz add-zsh-hook
+
+# Fast inline hook (native)
+_update_title() {
+    print -Pn "\e]0;%~\a"  # Set terminal title to current dir
+}
+add-zsh-hook precmd _update_title
+
+# Complex hook (dotfiles system) - lives in separate file
+# ~/.config/dotfiles/hooks/directory_change/10-project-env.zsh
+```
+
+**Best practice:** Use native hooks for simple, fast operations that need to run on every prompt. Use dotfiles hooks for more complex, configurable behavior.
+
+### Performance Considerations
+
+Native ZSH hooks run synchronously and can affect shell responsiveness:
+
+```zsh
+# BAD: Slow hook blocks every prompt
+_slow_precmd() {
+    git fetch origin 2>/dev/null  # Network call on every prompt!
+}
+
+# GOOD: Background the slow operation
+_fast_precmd() {
+    (git fetch origin 2>/dev/null &)
+}
+
+# BETTER: Only run periodically
+PERIOD=300  # Every 5 minutes
+_periodic_fetch() {
+    git fetch origin 2>/dev/null
+}
+add-zsh-hook periodic _periodic_fetch
+```
+
 ---
 
 ## Registration Methods

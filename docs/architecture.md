@@ -13,6 +13,7 @@ The dotfiles system is built on three core architectural systems:
 Additional systems:
 
 4. **Hook System** (`lib/_hooks.sh`) - Lifecycle hooks for custom behavior at key points
+5. **Encryption System** (`lib/_encryption.sh`) - Age-based file encryption for non-vault secrets
 
 These systems work together to provide a modular, extensible foundation for AI-assisted development across machines.
 
@@ -73,7 +74,7 @@ dotfiles features preset developer --persist
 | Category | Features |
 |----------|----------|
 | **Core** | `shell` (always enabled) |
-| **Optional** | `workspace_symlink`, `claude_integration`, `vault`, `hooks`, `templates`, `aws_helpers`, `git_hooks`, `drift_check`, `backup_auto`, `health_metrics`, `macos_settings` |
+| **Optional** | `workspace_symlink`, `claude_integration`, `vault`, `encryption`, `hooks`, `templates`, `aws_helpers`, `git_hooks`, `drift_check`, `backup_auto`, `health_metrics`, `macos_settings` |
 | **Integration** | `modern_cli`, `nvm_integration`, `sdkman_integration`, `dotclaude` |
 
 **Presets:**
