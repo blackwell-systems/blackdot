@@ -187,7 +187,7 @@ _feature_from_env() {
 
 # Enable a feature at runtime
 # Usage: feature_enable "vault"
-# Automatically enables dependencies
+# Automatically enables dependencies, checks for cycles and conflicts
 feature_enable() {
     local feature="$1"
 
@@ -196,13 +196,27 @@ feature_enable() {
         return 1
     fi
 
+    # Check for circular dependencies before enabling
+    if ! _detect_circular_dep "$feature"; then
+        return 1
+    fi
+
+    # Check for conflicts with already-enabled features
+    if ! _check_conflicts "$feature"; then
+        return 1
+    fi
+
     # Enable dependencies first
     local deps
     deps=$(_feature_meta "$feature" "deps")
     if [[ -n "$deps" ]]; then
-        for dep in ${(s: :)deps}; do
+        for dep in ${(s:,:)deps}; do
+            # Trim whitespace
+            dep="${dep// /}"
+            [[ -z "$dep" ]] && continue
+
             if ! feature_enabled "$dep"; then
-                feature_enable "$dep"
+                feature_enable "$dep" || return 1
             fi
         done
     fi
@@ -362,8 +376,118 @@ feature_status_all() {
 }
 
 # ============================================================
-# Dependency Resolution
+# Dependency Resolution & Validation
 # ============================================================
+
+# Detect circular dependencies
+# Usage: _detect_circular_dep "feature" "visited_features..."
+# Returns: 0 if no cycle, 1 if cycle detected (prints cycle path)
+_detect_circular_dep() {
+    local feature="$1"
+    shift
+    local -a visited=("$@")
+
+    # Check if already in visit path = cycle
+    local v
+    for v in "${visited[@]}"; do
+        if [[ "$v" == "$feature" ]]; then
+            # Found cycle - print the path
+            echo "Circular dependency detected: ${visited[*]} → $feature" >&2
+            return 1
+        fi
+    done
+
+    # Add to path and check deps recursively
+    visited+=("$feature")
+    local deps
+    deps=$(_feature_meta "$feature" "deps")
+
+    if [[ -n "$deps" ]]; then
+        local dep
+        for dep in ${(s:,:)deps}; do
+            # Trim whitespace
+            dep="${dep// /}"
+            [[ -z "$dep" ]] && continue
+
+            if ! _detect_circular_dep "$dep" "${visited[@]}"; then
+                return 1
+            fi
+        done
+    fi
+
+    return 0
+}
+
+# Validate all feature dependencies for cycles
+# Usage: feature_validate
+# Returns: 0 if valid, 1 if cycles found
+feature_validate() {
+    local has_errors=0
+    local feature
+
+    echo "Validating feature dependencies..."
+
+    for feature in "${(@k)FEATURE_REGISTRY}"; do
+        if ! _detect_circular_dep "$feature"; then
+            has_errors=1
+        fi
+    done
+
+    # Check for conflict violations (enabled features that conflict)
+    local conflicts enabled_conflicts=()
+    for feature in "${(@k)FEATURE_REGISTRY}"; do
+        if feature_enabled "$feature" 2>/dev/null; then
+            conflicts="${FEATURE_CONFLICTS[$feature]:-}"
+            if [[ -n "$conflicts" ]]; then
+                local conflict
+                for conflict in ${(s:,:)conflicts}; do
+                    conflict="${conflict// /}"
+                    if feature_enabled "$conflict" 2>/dev/null; then
+                        echo "Conflict: '$feature' and '$conflict' are both enabled but mutually exclusive" >&2
+                        has_errors=1
+                    fi
+                done
+            fi
+        fi
+    done
+
+    if [[ $has_errors -eq 0 ]]; then
+        echo "✓ All feature dependencies are valid"
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Feature conflicts (mutually exclusive features)
+# Format: feature -> "conflict1,conflict2,..."
+typeset -gA FEATURE_CONFLICTS=(
+    # Example: if we had multiple vault backends as separate features
+    # ["pass_vault"]="bitwarden_vault,onepassword_vault"
+)
+
+# Check if enabling a feature would create a conflict
+# Usage: _check_conflicts "feature"
+# Returns: 0 if no conflict, 1 if conflict exists
+_check_conflicts() {
+    local feature="$1"
+    local conflicts="${FEATURE_CONFLICTS[$feature]:-}"
+
+    if [[ -z "$conflicts" ]]; then
+        return 0
+    fi
+
+    local conflict
+    for conflict in ${(s:,:)conflicts}; do
+        conflict="${conflict// /}"
+        if feature_enabled "$conflict" 2>/dev/null; then
+            echo "ERROR: Cannot enable '$feature': conflicts with enabled feature '$conflict'" >&2
+            return 1
+        fi
+    done
+
+    return 0
+}
 
 # Check if all dependencies for a feature are met
 # Usage: feature_deps_met "claude_integration"
