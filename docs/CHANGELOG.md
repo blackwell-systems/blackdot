@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Centralized Color Theming System** (`lib/_colors.sh`) - Consistent colors across all modules
+  - Semantic colors: `CLR_PRIMARY`, `CLR_SECONDARY`, `CLR_SUCCESS`, `CLR_ERROR`, `CLR_WARNING`, `CLR_INFO`, `CLR_MUTED`, `CLR_BOLD`, `CLR_NC`
+  - Tool brand colors: `CLR_RUST`, `CLR_GO`, `CLR_PYTHON`, `CLR_AWS`, `CLR_CDK`, `CLR_NODE`, `CLR_JAVA`
+  - Box drawing: `CLR_BOX`, `CLR_HEADER` for styled help output
+  - User theme customization via `~/.config/dotfiles/theme.sh`
+  - Backward compatible with legacy color names (`RED`, `GREEN`, `YELLOW`, etc.)
+  - Updated developer tool modules: `awstools`, `cdktools`, `rusttools`, `gotools`, `pythontools`
 - **Template Pipeline Filters** - Transform variable values with chainable filters
   - 14 built-in filters: `upper`, `lower`, `capitalize`, `trim`, `default`, `replace`, `append`, `prepend`, `quote`, `squote`, `truncate`, `length`, `basename`, `dirname`
   - Chainable syntax: `{{ hostname | upper | truncate 8 }}`
