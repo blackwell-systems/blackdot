@@ -532,14 +532,14 @@ func vaultStatus() error {
 	sessionFile := getSessionFile()
 	fmt.Printf("Backend: %s\n", backendType)
 	fmt.Printf("Session file: %s\n", sessionFile)
-	fmt.Println()
 
-	// Load session from file BEFORE creating backend
-	hasSession := false
-	if sessionData, err := os.ReadFile(sessionFile); err == nil && len(sessionData) > 0 {
-		os.Setenv("BW_SESSION", strings.TrimSpace(string(sessionData)))
-		hasSession = true
+	// Check if session file exists
+	if info, err := os.Stat(sessionFile); err == nil {
+		fmt.Printf("Session cached: %s (%d bytes)\n", info.ModTime().Format("15:04:05"), info.Size())
+	} else {
+		fmt.Printf("Session cached: no\n")
 	}
+	fmt.Println()
 
 	backend, err := newVaultBackend()
 	if err != nil {
@@ -555,11 +555,9 @@ func vaultStatus() error {
 
 	Pass("Backend initialized: %s", backend.Name())
 
-	// Check authentication
-	if hasSession && backend.IsAuthenticated(ctx) {
+	// Check authentication - vaultmux handles reading session from cache
+	if backend.IsAuthenticated(ctx) {
 		Pass("Authenticated")
-	} else if hasSession {
-		Warn("Session expired - run 'dotfiles vault unlock'")
 	} else {
 		Warn("Not authenticated - run 'dotfiles vault unlock'")
 	}
@@ -591,19 +589,28 @@ func vaultUnlock() error {
 		return err
 	}
 
-	// Persist session token to file for subsequent commands
+	Pass("Vault unlocked")
+
+	// Debug: show if session file was created by vaultmux
 	sessionFile := getSessionFile()
-	token := session.Token()
-	if token != "" {
-		// Ensure directory exists
-		if err := os.MkdirAll(filepath.Dir(sessionFile), 0700); err != nil {
-			Warn("Failed to create session directory: %v", err)
-		} else if err := os.WriteFile(sessionFile, []byte(token), 0600); err != nil {
-			Warn("Failed to save session: %v", err)
+	if info, err := os.Stat(sessionFile); err == nil {
+		Info("Session cached: %s (%d bytes)", sessionFile, info.Size())
+	} else {
+		// vaultmux didn't save - try manual fallback
+		Warn("Session file not created by vaultmux, saving manually...")
+		token := session.Token()
+		if token != "" {
+			if err := os.MkdirAll(filepath.Dir(sessionFile), 0700); err != nil {
+				Warn("Failed to create session directory: %v", err)
+			} else if err := os.WriteFile(sessionFile, []byte(token), 0600); err != nil {
+				Warn("Failed to save session: %v", err)
+			} else {
+				Info("Session saved manually")
+			}
+		} else {
+			Warn("Session token is empty - cannot cache")
 		}
 	}
-
-	Pass("Vault unlocked")
 
 	if !session.ExpiresAt().IsZero() {
 		Info("Session expires: %s", session.ExpiresAt().Format(time.RFC3339))
