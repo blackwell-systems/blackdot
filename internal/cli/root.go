@@ -39,6 +39,10 @@ customize the available functionality.
 Run 'dotfiles help' for detailed command information.`,
 	SilenceUsage:  true,
 	SilenceErrors: true,
+	// Show help when called without subcommand
+	Run: func(cmd *cobra.Command, args []string) {
+		customHelpFunc(cmd, args)
+	},
 }
 
 // SetVersionInfo sets version information from build flags
@@ -50,7 +54,14 @@ func SetVersionInfo(version, commit, date string) {
 
 // Execute runs the root command
 func Execute() error {
-	return rootCmd.Execute()
+	err := rootCmd.Execute()
+	if err != nil {
+		// Print styled error message matching ZSH
+		Red.Fprintf(os.Stderr, "Unknown command: ")
+		fmt.Fprintln(os.Stderr, os.Args[1])
+		Dim.Fprintln(os.Stderr, "Run 'dotfiles help' for usage")
+	}
+	return err
 }
 
 func init() {
