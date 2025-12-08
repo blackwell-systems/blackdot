@@ -18,11 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed: `_logging.sh` now sourced in `00-init.zsh` for `pass`/`fail`/`warn`/`info` functions
 
 - **Cross-Platform Developer Tools** (`dotfiles tools`)
-  - New `tools` parent command with 6 tool categories
+  - New `tools` parent command with 8 tool categories
   - All tools work on Linux, macOS, and Windows
   - **Feature Flag Integration** - Tools respect their feature flags like ZSH:
     - `ssh` → `ssh_tools`, `aws` → `aws_helpers`, `cdk` → `cdk_tools`
     - `go` → `go_tools`, `rust` → `rust_tools`, `python` → `python_tools`
+    - `docker` → `docker_tools`, `claude` → `claude_integration`
     - Disabled tools show helpful error with enable command
   - **SSH Tools** (`dotfiles tools ssh`)
     - `keys` - List SSH keys with fingerprints
@@ -89,6 +90,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `clean` - Remove stopped containers and dangling images
     - `prune` - System prune (with `-a` for aggressive)
     - `status` - Color-coded ASCII art status banner
+  - **Claude Tools** (`dotfiles tools claude`)
+    - `status` - Show Claude Code configuration (Bedrock profile, SSO status, paths)
+    - `bedrock` - Print export commands for AWS Bedrock backend
+    - `max` - Print export commands for Anthropic Max backend
+    - `switch` - Interactive backend switcher
+    - `init` - Initialize ~/.claude/ from dotfiles templates (hooks, commands, settings)
+    - `env` - Show all Claude-related environment variables
+    - Full parity with ZSH claude integration (70-claude.zsh)
 
 - **PowerShell Module v1.1.0** (`powershell/`)
   - Cross-platform Windows support with **complete ZSH hooks parity**
