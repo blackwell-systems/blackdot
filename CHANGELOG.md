@@ -99,6 +99,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `env` - Show all Claude-related environment variables
     - Full parity with ZSH claude integration (70-claude.zsh)
 
+- **Binary Distribution** (GitHub Releases)
+  - Pre-built Go CLI binaries for all platforms
+  - Linux: amd64, arm64
+  - macOS: amd64 (Intel), arm64 (Apple Silicon)
+  - Windows: amd64, arm64
+  - SHA256 checksums for all binaries
+  - Automated via GitHub Actions on tag push
+
+- **PowerShell Module v1.2.0** (`powershell/`)
+  - **Claude tools integration** - Full parity with ZSH and Go CLI
+    - `claude-status` - Show Claude Code configuration
+    - `claude-bedrock` - Configure AWS Bedrock backend (`-Eval` to set env vars)
+    - `claude-max` - Configure Anthropic Max backend (`-Eval` to clear vars)
+    - `claude-switch` - Interactive backend switcher
+    - `claude-init` - Initialize ~/.claude/ from templates
+    - `claude-env` - Show Claude environment variables
+    - Aliases: `cb` (claude-bedrock), `cm` (claude-max)
+
 - **PowerShell Module v1.1.0** (`powershell/`)
   - Cross-platform Windows support with **complete ZSH hooks parity**
   - **Full Hook System** (24 hook points - identical to ZSH)
