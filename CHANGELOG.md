@@ -104,11 +104,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Installation Script** - `Install-Dotfiles.ps1` for easy setup
   - Short alias `d` for `dotfiles` command
 
-- **Go CLI Foundation** (`go/cmd/dotfiles/`)
-  - Go module structure for CLI refactoring (strangler fig pattern)
-  - Working `dotfiles features` command in Go
-  - Vault CLI wired to vaultmux backend
-  - Phase A complete: Foundation for gradual bash→Go migration
+- **Go CLI Complete** - All 11 core commands ported with verified parity
+  - `features` - Feature registry management (list, enable, disable, preset)
+  - `doctor` - Health checks with ASCII banner
+  - `lint` - Syntax validation (55 files)
+  - `hook` - Full hook system (list, run, add, remove, test)
+  - `encrypt` - Age encryption management
+  - `template` - Template rendering with RaymondEngine
+  - `vault` - All 8 vault subcommands
+  - `diff`, `drift`, `sync` - Vault operations
+  - `setup`, `uninstall`, `packages` - Setup wizard
+  - Side-by-side testing confirms identical behavior
 
 - **Standard Handlebars Template Syntax** (Phase B)
   - Templates now use standard Handlebars syntax: `{{#if}}`, `{{#unless}}`, `{{#each}}`, `{{/if}}`

@@ -280,7 +280,7 @@ The goal is **additive** - Windows users gain functionality, shell users lose no
 
 ### Remaining Open Questions
 1. **Shell-specific features** - Tools like `j` (project jumper) need directory changing
-2. **Configuration sharing** - Unified config reading between Go and shell
+2. ~~**Configuration sharing**~~ ✅ RESOLVED - Both Go and shell use same `config.json` format
 
 ### Potential Future Milestones
 - **Milestone 8: Docker Tools** - `docker ps`, `docker ip`, `docker clean`, `docker stats`
