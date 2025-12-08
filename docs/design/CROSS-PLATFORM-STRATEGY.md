@@ -1,7 +1,7 @@
 # Cross-Platform Strategy: Go CLI Expansion
 
 > **Date:** 2025-12-08
-> **Status:** Implemented (Milestones 1-8 Complete)
+> **Status:** Implemented (Milestones 1-9 Complete)
 
 ---
 
@@ -183,7 +183,7 @@ These should remain in shell config files.
 - [x] `tools ssh fp` (fingerprints in SHA256/MD5)
 - [x] `tools ssh copy` (copy key to remote)
 - [x] `tools ssh socks` (SOCKS5 proxy)
-- [ ] Windows testing
+- [x] Windows testing (PowerShell wrappers verified)
 
 ### Milestone 3: AWS Tools ✅ COMPLETE
 - [x] `tools aws profiles`
@@ -267,11 +267,13 @@ These should remain in shell config files.
 |-------|---------|----------|--------|
 | Core CLI | 100% Go | 100% Go | ✅ Complete |
 | Dev Tools | 100% Shell | Go + Shell wrappers | ✅ Complete (50+ tools) |
-| Aliases | Shell | Shell + PowerShell | ✅ Complete |
+| Aliases | Shell | Shell + PowerShell | ✅ Complete (85+ functions) |
 | Hooks | Shell only | Shell + PowerShell | ✅ Complete (24 hook points) |
-| Feature Flags | Shell only | Go + Shell | ✅ Complete (6 tool categories) |
+| Feature Flags | Shell only | Go + Shell | ✅ Complete (7 tool categories) |
 | Templates | Shell only | Go + Shell | ✅ Complete (RaymondEngine, 20 tests) |
 | Migration | N/A | `import chezmoi` | ✅ Complete (Go template → Handlebars) |
+| Package Mgmt | Homebrew | Homebrew + winget | ✅ Complete (Install-Packages.ps1) |
+| Node.js | NVM | NVM + fnm | ✅ Complete (cross-platform) |
 
 The goal is **additive** - Windows users gain functionality, shell users lose nothing.
 
@@ -297,6 +299,16 @@ The goal is **additive** - Windows users gain functionality, shell users lose no
 - [x] `tools docker prune` (system prune)
 - [x] `tools docker status` (ASCII art status banner)
 
+### Milestone 9: Windows Package Management ✅ COMPLETE
+- [x] `Install-Packages.ps1` - winget-based package installer (like `brew bundle`)
+- [x] `packages.json` - Declarative package manifest
+- [x] Three tiers: minimal, enhanced, full (matching Brewfile)
+- [x] fnm integration (cross-platform NVM alternative)
+- [x] zoxide integration (smart navigation)
+- [x] Docker wrapper functions (12 commands)
+- [x] Comprehensive Windows documentation
+- [x] PowerShell tested on Linux via PowerShell Core 7.5
+
 ### Potential Future Milestones
-- **Milestone 9: Shell Wrappers** - Thin ZSH wrappers that delegate to Go tools
-- **Milestone 10: Windows Testing** - Comprehensive Windows/PowerShell testing
+- **Milestone 10: Shell Wrappers** - Thin ZSH wrappers that delegate to Go tools
+- **Milestone 11: jabba Integration** - Cross-platform JDK version manager (SDKMAN alternative)
