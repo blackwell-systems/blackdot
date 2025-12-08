@@ -2,8 +2,8 @@ github.com/BurntSushi/toml v1.5.0 h1:W5quZX/G/csjUnuI8SUYlsHs9M38FC7znL0lIO+DvMg
 github.com/BurntSushi/toml v1.5.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
 github.com/aymerick/raymond v2.0.2+incompatible h1:VEp3GpgdAnv9B2GFyTvqgcKvY+mfKMjPOA3SbKLtnU0=
 github.com/aymerick/raymond v2.0.2+incompatible/go.mod h1:osfaiScAUVup+UC9Nfq76eWqDhXlp+4UYaA8uhTBO6g=
-github.com/blackwell-systems/vaultmux v0.3.0 h1:wjrgFHDlBOjZ8ymVnt0EiGmgT2w2dlBEu1DQy0a3dGI=
-github.com/blackwell-systems/vaultmux v0.3.0/go.mod h1:ZC60MY7TtoUdZ9QCOu+EuKjc6Va6+16QEpMhInMI0lo=
+github.com/blackwell-systems/vaultmux v0.3.1 h1:Jsc1JLmbs7Iftm6cxIU9a8hH5gzMOPcr1zNdOR+oZk8=
+github.com/blackwell-systems/vaultmux v0.3.1/go.mod h1:ZC60MY7TtoUdZ9QCOu+EuKjc6Va6+16QEpMhInMI0lo=
 github.com/cpuguy83/go-md2man/v2 v2.0.4/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/fatih/color v1.18.0 h1:S8gINlzdQ840/4pfAwic/ZE0djQEH3wM94VfqLTZcOM=
 github.com/fatih/color v1.18.0/go.mod h1:4FelSpRwEGDpQ12mAdzqdOukCy4u8WUtOY6lkT/6HfU=

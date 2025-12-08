@@ -7,7 +7,7 @@ toolchain go1.24.7
 require (
 	github.com/BurntSushi/toml v1.5.0
 	github.com/aymerick/raymond v2.0.2+incompatible
-	github.com/blackwell-systems/vaultmux v0.3.0
+	github.com/blackwell-systems/vaultmux v0.3.1
 	github.com/fatih/color v1.18.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
