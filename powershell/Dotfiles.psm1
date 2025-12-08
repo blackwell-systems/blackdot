@@ -888,6 +888,20 @@ function py-test { dotfiles tools python test @args }
 function py-cover { dotfiles tools python cover @args }
 function py-info { dotfiles tools python info @args }
 
+# Docker Tools
+function docker-ps { dotfiles tools docker ps @args }
+function docker-images { dotfiles tools docker images @args }
+function docker-ip { dotfiles tools docker ip @args }
+function docker-env { dotfiles tools docker env @args }
+function docker-ports { dotfiles tools docker ports @args }
+function docker-stats { dotfiles tools docker stats @args }
+function docker-vols { dotfiles tools docker vols @args }
+function docker-nets { dotfiles tools docker nets @args }
+function docker-inspect { dotfiles tools docker inspect @args }
+function docker-clean { dotfiles tools docker clean @args }
+function docker-prune { dotfiles tools docker prune @args }
+function docker-status { dotfiles tools docker status @args }
+
 #endregion
 
 #region Core Dotfiles Commands
@@ -1009,6 +1023,11 @@ Export-ModuleMember -Function @(
 
     # Python aliases
     'py-new', 'py-clean', 'py-venv', 'py-test', 'py-cover', 'py-info',
+
+    # Docker aliases
+    'docker-ps', 'docker-images', 'docker-ip', 'docker-env',
+    'docker-ports', 'docker-stats', 'docker-vols', 'docker-nets',
+    'docker-inspect', 'docker-clean', 'docker-prune', 'docker-status',
 
     # Core commands
     'dotfiles-status', 'dotfiles-doctor', 'dotfiles-setup',

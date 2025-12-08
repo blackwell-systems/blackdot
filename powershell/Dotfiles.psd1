@@ -72,6 +72,11 @@
         # Python aliases
         'py-new', 'py-clean', 'py-venv', 'py-test', 'py-cover', 'py-info',
 
+        # Docker aliases
+        'docker-ps', 'docker-images', 'docker-ip', 'docker-env',
+        'docker-ports', 'docker-stats', 'docker-vols', 'docker-nets',
+        'docker-inspect', 'docker-clean', 'docker-prune', 'docker-status',
+
         # Core commands
         'dotfiles-status', 'dotfiles-doctor', 'dotfiles-setup',
         'dotfiles-features', 'dotfiles-vault', 'dotfiles-hook'
