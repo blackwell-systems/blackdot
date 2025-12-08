@@ -12,16 +12,16 @@
 # Wrapped as functions for runtime feature guards.
 
 # eza - modern ls replacement (cross-platform)
+# Note: Using 'function' keyword to override existing aliases at parse time
 if command -v eza >/dev/null 2>&1; then
-  # Remove existing aliases to allow function definitions
   unalias ls ll la lt l lm lr 2>/dev/null
-  ls()  { require_feature "modern_cli" || return 1; eza --color=auto --group-directories-first "$@"; }
-  ll()  { require_feature "modern_cli" || return 1; eza -la --icons --group-directories-first --git "$@"; }
-  la()  { require_feature "modern_cli" || return 1; eza -a --icons --group-directories-first "$@"; }
-  lt()  { require_feature "modern_cli" || return 1; eza -la --icons --tree --level=2 "$@"; }
-  l()   { require_feature "modern_cli" || return 1; eza -1 "$@"; }
-  lm()  { require_feature "modern_cli" || return 1; eza -la --icons --sort=modified "$@"; }
-  lr()  { require_feature "modern_cli" || return 1; eza -la --icons --sort=size --reverse "$@"; }
+  function ls  { require_feature "modern_cli" || return 1; eza --color=auto --group-directories-first "$@"; }
+  function ll  { require_feature "modern_cli" || return 1; eza -la --icons --group-directories-first --git "$@"; }
+  function la  { require_feature "modern_cli" || return 1; eza -a --icons --group-directories-first "$@"; }
+  function lt  { require_feature "modern_cli" || return 1; eza -la --icons --tree --level=2 "$@"; }
+  function l   { require_feature "modern_cli" || return 1; eza -1 "$@"; }
+  function lm  { require_feature "modern_cli" || return 1; eza -la --icons --sort=modified "$@"; }
+  function lr  { require_feature "modern_cli" || return 1; eza -la --icons --sort=size --reverse "$@"; }
 fi
 
 # fzf - fuzzy finder
