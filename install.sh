@@ -92,8 +92,8 @@ install_go_binary() {
     # Create install directory
     mkdir -p "$install_dir"
 
-    # Download binary
-    local target="${install_dir}/dotfiles${suffix}"
+    # Download binary (named dotfiles-go to avoid shadowing ZSH alias)
+    local target="${install_dir}/dotfiles-go${suffix}"
     if command -v curl >/dev/null 2>&1; then
         curl -fsSL "$download_url" -o "$target" || {
             fail "Failed to download binary. Release may not exist yet."
@@ -220,7 +220,7 @@ if $BINARY_ONLY; then
     echo ""
     echo -e "${GREEN}${BOLD}Binary installation complete!${NC}"
     echo ""
-    echo "Run 'dotfiles version' to verify the installation."
+    echo "Run 'dotfiles-go version' to verify the installation."
     exit 0
 fi
 

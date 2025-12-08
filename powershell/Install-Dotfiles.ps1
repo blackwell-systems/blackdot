@@ -105,8 +105,8 @@ function Install-DotfilesBinary {
         New-Item -Path $InstallPath -ItemType Directory -Force | Out-Null
     }
 
-    # Download binary
-    $target = Join-Path $InstallPath "dotfiles$suffix"
+    # Download binary (named dotfiles-go to avoid shadowing shell aliases)
+    $target = Join-Path $InstallPath "dotfiles-go$suffix"
     try {
         Invoke-WebRequest -Uri $downloadUrl -OutFile $target -UseBasicParsing
     } catch {
@@ -174,7 +174,7 @@ if ($BinaryOnly) {
         Install-DotfilesBinary -InstallPath $BinaryPath -Version $Version
         Write-Host ""
         Write-Host "Binary installation complete!" -ForegroundColor Green
-        Write-Host "Run 'dotfiles version' to verify the installation." -ForegroundColor Cyan
+        Write-Host "Run 'dotfiles-go version' to verify the installation." -ForegroundColor Cyan
     } catch {
         Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
         exit 1
