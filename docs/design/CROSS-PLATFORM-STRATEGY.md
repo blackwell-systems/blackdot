@@ -170,16 +170,19 @@ These should remain in shell config files.
 
 ## Implementation Roadmap
 
-### Milestone 1: Foundation
-- [ ] Create `tools` parent command
-- [ ] Implement `tools ssh keys` (list keys with fingerprints)
-- [ ] Implement `tools ssh gen` (key generation)
-- [ ] Add shell wrapper pattern to aws.zsh as example
+### Milestone 1: Foundation ✅ COMPLETE
+- [x] Create `tools` parent command
+- [x] Implement `tools ssh keys` (list keys with fingerprints)
+- [x] Implement `tools ssh gen` (key generation)
+- [ ] Add shell wrapper pattern to ssh.zsh as example
 
-### Milestone 2: SSH Complete
-- [ ] `tools ssh list` (parse ~/.ssh/config)
-- [ ] `tools ssh tunnel` (port forwarding)
-- [ ] `tools ssh agent` (status, load, unload)
+### Milestone 2: SSH Complete ✅ COMPLETE
+- [x] `tools ssh list` (parse ~/.ssh/config)
+- [x] `tools ssh tunnel` (port forwarding)
+- [x] `tools ssh agent` (status, load, unload)
+- [x] `tools ssh fp` (fingerprints in SHA256/MD5)
+- [x] `tools ssh copy` (copy key to remote)
+- [x] `tools ssh socks` (SOCKS5 proxy)
 - [ ] Windows testing
 
 ### Milestone 3: AWS Tools
