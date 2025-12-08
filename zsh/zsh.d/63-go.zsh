@@ -3,49 +3,45 @@
 # =========================
 # Go aliases and helpers for Go development workflows
 # Provides shortcuts and utilities for go commands
-
-# Feature guard: skip if go_tools is disabled
-if type feature_enabled &>/dev/null && ! feature_enabled "go_tools" 2>/dev/null; then
-    return 0
-fi
+# Runtime guards allow enable/disable without shell reload
 
 # =========================
-# Go Aliases
+# Go Aliases (as functions for runtime guards)
 # =========================
 
 # Core go commands
-alias gob='go build'
-alias gor='go run .'
-alias got='go test ./...'
-alias gof='go fmt ./...'
-alias gom='go mod tidy'
-alias gov='go vet ./...'
-alias gog='go get'
-alias goi='go install'
+gob()  { require_feature "go_tools" || return 1; go build "$@"; }
+gor()  { require_feature "go_tools" || return 1; go run . "$@"; }
+got()  { require_feature "go_tools" || return 1; go test ./... "$@"; }
+gof()  { require_feature "go_tools" || return 1; go fmt ./... "$@"; }
+gom()  { require_feature "go_tools" || return 1; go mod tidy "$@"; }
+gov()  { require_feature "go_tools" || return 1; go vet ./... "$@"; }
+gog()  { require_feature "go_tools" || return 1; go get "$@"; }
+goi()  { require_feature "go_tools" || return 1; go install "$@"; }
 
 # Testing variations
-alias gotv='go test -v ./...'
-alias gotc='go test -cover ./...'
-alias gotr='go test -race ./...'
-alias gotb='go test -bench=. ./...'
+gotv() { require_feature "go_tools" || return 1; go test -v ./... "$@"; }
+gotc() { require_feature "go_tools" || return 1; go test -cover ./... "$@"; }
+gotr() { require_feature "go_tools" || return 1; go test -race ./... "$@"; }
+gotb() { require_feature "go_tools" || return 1; go test -bench=. ./... "$@"; }
 
 # Module commands
-alias gomi='go mod init'
-alias gomd='go mod download'
-alias gomv='go mod verify'
-alias gomw='go mod why'
-alias gomg='go mod graph'
+gomi() { require_feature "go_tools" || return 1; go mod init "$@"; }
+gomd() { require_feature "go_tools" || return 1; go mod download "$@"; }
+gomv() { require_feature "go_tools" || return 1; go mod verify "$@"; }
+gomw() { require_feature "go_tools" || return 1; go mod why "$@"; }
+gomg() { require_feature "go_tools" || return 1; go mod graph "$@"; }
 
 # Build variations
-alias gobr='go build -race'
-alias gobl='go build -ldflags="-s -w"'
+gobr() { require_feature "go_tools" || return 1; go build -race "$@"; }
+gobl() { require_feature "go_tools" || return 1; go build -ldflags="-s -w" "$@"; }
 
 # Other useful commands
-alias goc='go clean'
-alias godo='go doc'
-alias goenv='go env'
-alias golist='go list ./...'
-alias gowork='go work'
+goc()    { require_feature "go_tools" || return 1; go clean "$@"; }
+godo()   { require_feature "go_tools" || return 1; go doc "$@"; }
+goenv()  { require_feature "go_tools" || return 1; go env "$@"; }
+golist() { require_feature "go_tools" || return 1; go list ./... "$@"; }
+gowork() { require_feature "go_tools" || return 1; go work "$@"; }
 
 # =========================
 # Go Helper Functions
@@ -53,6 +49,7 @@ alias gowork='go work'
 
 # Run tests with coverage and open in browser
 gocover() {
+    require_feature "go_tools" || return 1
     local pkg="${1:-./...}"
     local coverfile="/tmp/coverage.out"
 
@@ -74,6 +71,7 @@ gocover() {
 
 # Initialize a new Go module
 goinit() {
+    require_feature "go_tools" || return 1
     local name="${1:-}"
 
     if [[ -z "$name" ]]; then
@@ -89,6 +87,7 @@ goinit() {
 
 # Create a new Go project with common structure
 go-new() {
+    require_feature "go_tools" || return 1
     local name="${1:-}"
 
     if [[ -z "$name" ]]; then
@@ -125,6 +124,7 @@ EOF
 
 # Run go vet and staticcheck/golangci-lint
 go-lint() {
+    require_feature "go_tools" || return 1
     echo "Running go vet..."
     go vet ./... || return 1
 
@@ -145,6 +145,7 @@ go-lint() {
 
 # Update all dependencies
 go-update() {
+    require_feature "go_tools" || return 1
     echo "Updating all dependencies..."
     go get -u ./...
     go mod tidy
@@ -154,6 +155,7 @@ go-update() {
 
 # Show outdated dependencies
 go-outdated() {
+    require_feature "go_tools" || return 1
     if ! command -v go-mod-outdated &>/dev/null; then
         echo "Installing go-mod-outdated..."
         go install github.com/psampaz/go-mod-outdated@latest
@@ -164,6 +166,7 @@ go-outdated() {
 
 # Generate mocks (if mockgen installed)
 go-mock() {
+    require_feature "go_tools" || return 1
     local source="${1:-}"
     local dest="${2:-}"
 
@@ -187,6 +190,7 @@ go-mock() {
 
 # Quick benchmark
 go-bench() {
+    require_feature "go_tools" || return 1
     local pattern="${1:-.}"
     local count="${2:-5}"
 
@@ -196,6 +200,7 @@ go-bench() {
 
 # Cross-compile for common platforms
 go-build-all() {
+    require_feature "go_tools" || return 1
     local name="${1:-$(basename "$(pwd)")}"
     local output_dir="${2:-dist}"
 
@@ -219,6 +224,7 @@ go-build-all() {
 # =========================
 
 gotools() {
+    require_feature "go_tools" || return 1
     # Source theme colors
     source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
 
