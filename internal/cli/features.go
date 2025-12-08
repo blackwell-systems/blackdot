@@ -496,7 +496,8 @@ func printShellReloadHint() {
 		fmt.Println("  Import-Module Dotfiles -Force")
 		Dim.Println("  (or restart PowerShell)")
 	} else {
-		fmt.Println("  exec zsh")
+		fmt.Println("  source ~/.zshrc")
+		Dim.Println("  (or exec zsh for full reload)")
 	}
 }
 
