@@ -15,6 +15,16 @@ fi
 OS="$(uname -s)"
 
 # =========================
+# Feature Registry (must load early for runtime feature guards)
+# =========================
+# Determine DOTFILES_DIR if not set (this file is in zsh/zsh.d/)
+_dotfiles_dir="${DOTFILES_DIR:-${${(%):-%x}:A:h:h:h}}"
+if [[ -f "$_dotfiles_dir/lib/_features.sh" ]]; then
+    source "$_dotfiles_dir/lib/_features.sh" 2>/dev/null || true
+fi
+unset _dotfiles_dir
+
+# =========================
 # OS-SPECIFIC SETUP
 # =========================
 case "$OS" in
