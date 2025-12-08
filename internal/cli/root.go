@@ -81,6 +81,8 @@ func init() {
 		newSetupCmd(),
 		newSyncCmd(),
 		newUninstallCmd(),
+		// Cross-platform developer tools
+		newToolsCmd(),
 		// Note: migrate command dropped - one-time v2→v3 migration handled by bash
 	)
 }
