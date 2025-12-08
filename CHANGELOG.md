@@ -125,6 +125,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Dry-run mode for previewing changes
   - Verbose mode for detailed progress
 
+- **Vault Create/Delete Commands** (`dotfiles vault create|delete`)
+  - `vault create <item-name> [content]` - Create new vault items
+    - Content from argument, file (`--file`), or stdin
+    - Dry-run mode (`-n`) to preview without changes
+    - Force mode (`-f`) to overwrite existing items
+  - `vault delete <item-name>...` - Delete vault items
+    - Bulk deletion of multiple items
+    - Protected items (SSH-*, AWS-*, Git-Config) require confirmation
+    - Dry-run mode for safe preview
+    - Force mode skips confirmation (except protected items)
+
 - **Standard Handlebars Template Syntax** (Phase B)
   - Templates now use standard Handlebars syntax: `{{#if}}`, `{{#unless}}`, `{{#each}}`, `{{/if}}`
   - Bash engine supports both legacy (`{% if %}`) and Handlebars syntax
