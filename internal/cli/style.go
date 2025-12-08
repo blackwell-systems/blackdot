@@ -99,6 +99,16 @@ func printRootHelp() {
 	printCmd("tools claude", "Claude Code backend configuration")
 	fmt.Println()
 
+	// Hooks
+	BoldCyan.Println("Hooks:")
+	printCmdAlias("hook", "hooks", "Hook system management")
+	printCmd("hook list", "List hooks (all points or specific)")
+	printCmd("hook run <point>", "Manually trigger hooks")
+	printCmd("hook add", "Add a hook script to a point")
+	printCmd("hook points", "List all available hook points")
+	printCmd("hook test", "Test hooks for a point (verbose)")
+	fmt.Println()
+
 	// Other Commands
 	BoldCyan.Println("Other Commands:")
 	printCmd("uninstall", "Remove dotfiles configuration")
