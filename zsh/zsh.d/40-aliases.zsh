@@ -628,7 +628,16 @@ dotfiles() {
 
         # Feature management
         features|feature|feat)
+            local subcmd="${1:-}"
             "$DOTFILES_DIR/bin/dotfiles-features" "$@"
+            local ret=$?
+            # Auto-reload shell after enable/disable/preset to apply changes
+            if [[ $ret -eq 0 && "$subcmd" =~ ^(enable|disable|preset)$ ]]; then
+                echo ""
+                echo "${YELLOW}Reloading shell to apply feature changes...${NC}"
+                exec zsh
+            fi
+            return $ret
             ;;
 
         # Configuration layers management
