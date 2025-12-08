@@ -75,6 +75,14 @@ typeset -gA CLI_COMMAND_HELP=(
     ["metrics"]="health_metrics|Metrics|Health check metrics visualization|
   metrics           Show metrics dashboard
   metrics history   Show historical trends"
+    ["encrypt"]="core|Security|Age encryption for sensitive files|
+  encrypt init        Initialize encryption (generate key pair)
+  encrypt <file>      Encrypt a file
+  encrypt decrypt     Decrypt an .age file
+  encrypt edit        Decrypt, edit, re-encrypt
+  encrypt list        List encrypted/unencrypted files
+  encrypt status      Show encryption status and key info
+  encrypt push-key    Backup private key to vault"
 )
 
 # Helper: Show help for a specific command
@@ -208,6 +216,14 @@ _dotfiles_help() {
         echo "  ${YELLOW}rollback${NC}          ${DIM}Instant rollback to last backup${NC}"
         echo ""
     fi
+
+    # Security (always visible)
+    echo "${BOLD}${CYAN}Security:${NC}"
+    echo "  ${YELLOW}encrypt${NC}           ${DIM}Age encryption management${NC}"
+    echo "  ${YELLOW}encrypt init${NC}      ${DIM}Initialize encryption (generate keys)${NC}"
+    echo "  ${YELLOW}encrypt edit${NC}      ${DIM}Decrypt, edit, re-encrypt a file${NC}"
+    echo "  ${YELLOW}encrypt status${NC}    ${DIM}Show encryption status and key info${NC}"
+    echo ""
 
     # Feature Management (always visible)
     echo "${BOLD}${CYAN}Feature Management:${NC}"
@@ -720,6 +736,11 @@ dotfiles() {
                 set -- "${CLI_FILTERED_ARGS[@]}"
             fi
             "$DOTFILES_DIR/bin/dotfiles-metrics" "$@"
+            ;;
+
+        # Encryption (age-based file encryption)
+        encrypt)
+            "$DOTFILES_DIR/bin/dotfiles-encrypt" "$@"
             ;;
 
         # Backup & Rollback (v3.0 top-level commands)
