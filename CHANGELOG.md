@@ -65,6 +65,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `cover` - Run pytest with coverage
     - `info` - Show Python environment info
 
+- **PowerShell Module** (`powershell/`)
+  - Cross-platform Windows support for dotfiles hooks and aliases
+  - **Lifecycle Hooks**
+    - `shell_init` - Runs on module import (PowerShell start)
+    - `shell_exit` - Runs on PowerShell exit (via `Register-EngineEvent`)
+    - `directory_change` - Runs after `cd` (via `Set-Location` wrapper)
+  - **Tool Aliases** - 50+ functions wrapping `dotfiles tools` commands
+    - SSH: `ssh-keys`, `ssh-gen`, `ssh-tunnel`, `ssh-status`
+    - AWS: `aws-profiles`, `aws-who`, `aws-login`, `aws-switch`, `aws-status`
+    - CDK: `cdk-init`, `cdk-env`, `cdk-outputs`, `cdk-status`
+    - Go: `go-new`, `go-test`, `go-lint`, `go-info`
+    - Rust: `rust-new`, `rust-lint`, `rust-info`
+    - Python: `py-new`, `py-test`, `py-info`
+  - **Environment Management** - Proper handling of env vars for `aws-switch`, `aws-assume`, `cdk-env`
+  - **Installation Script** - `Install-Dotfiles.ps1` for easy setup
+  - Short alias `d` for `dotfiles` command
+
 - **Go CLI Foundation** (`go/cmd/dotfiles/`)
   - Go module structure for CLI refactoring (strangler fig pattern)
   - Working `dotfiles features` command in Go

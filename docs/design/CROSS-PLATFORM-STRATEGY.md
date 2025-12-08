@@ -207,6 +207,26 @@ These should remain in shell config files.
 - [x] `tools cdk context` (show/clear context)
 - [x] `tools cdk status` (ASCII art banner)
 
+### Milestone 6: PowerShell Hooks 🔄 IN PROGRESS
+- [ ] Create `powershell/` directory with profile module
+- [ ] Implement `prompt` hook (like ZSH `precmd`)
+- [ ] Implement directory change hook (like ZSH `chpwd`)
+- [ ] Implement shell exit hook (like ZSH `zshexit`)
+- [ ] Wire hooks to call `dotfiles hook run <point>`
+- [ ] Generate aliases for all `dotfiles tools` commands
+- [ ] Installation script for PowerShell profile
+- [ ] Documentation for Windows users
+
+**PowerShell Hook Mapping:**
+
+| ZSH Hook | PowerShell Equivalent | Implementation |
+|----------|----------------------|----------------|
+| `shell_init` | Profile script | Source module in `$PROFILE` |
+| `precmd` | `prompt` function | Override `$function:prompt` |
+| `chpwd` | `Set-Location` wrapper | Intercept `cd`/`Set-Location` |
+| `zshexit` | `Register-EngineEvent PowerShell.Exiting` | Native event |
+| `preexec` | `PSReadLine` PreExecutionHandler | ReadLine hook |
+
 ---
 
 ## Success Metrics
@@ -220,7 +240,7 @@ These should remain in shell config files.
 
 ## Open Questions
 
-1. **Should Windows get PowerShell aliases?** Could generate `.ps1` with aliases that call the Go binary.
+1. ~~**Should Windows get PowerShell aliases?**~~ ✅ Yes - Milestone 6 addresses this
 
 2. **How to handle shell-specific features?** Some tools (like `j` project jumper) need shell integration for directory changing.
 
@@ -232,11 +252,11 @@ These should remain in shell config files.
 
 ## Summary
 
-| Layer | Current | Proposed |
-|-------|---------|----------|
-| Core CLI | 100% Go | 100% Go |
-| Dev Tools | 100% Shell | Go + Shell wrappers |
-| Aliases | Shell | Shell (keep) |
-| Hooks | Shell | Shell (keep) |
+| Layer | Current | Proposed | Status |
+|-------|---------|----------|--------|
+| Core CLI | 100% Go | 100% Go | ✅ Complete |
+| Dev Tools | 100% Shell | Go + Shell wrappers | ✅ Complete (50+ tools) |
+| Aliases | Shell | Shell + PowerShell | 🔄 PowerShell in progress |
+| Hooks | Shell only | Shell + PowerShell | 🔄 PowerShell in progress |
 
 The goal is **additive** - Windows users gain functionality, shell users lose nothing.
