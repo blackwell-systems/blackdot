@@ -918,8 +918,8 @@ function dotfiles-features {
         Wrapper for dotfiles features that auto-reloads module after changes
     .DESCRIPTION
         When enabling, disabling, or applying presets, the module is automatically
-        reloaded to apply the changes. This matches the ZSH behavior where
-        'exec zsh' is run after feature changes.
+        reloaded to apply the changes. This is safe in PowerShell (just reloads
+        the module). ZSH users need to manually run 'exec zsh'.
     #>
     param(
         [Parameter(Position = 0)]
@@ -954,7 +954,8 @@ function Invoke-Dotfiles {
         Main dotfiles wrapper with feature change detection
     .DESCRIPTION
         Wraps the dotfiles CLI. When 'features enable/disable/preset' is used,
-        auto-reloads the PowerShell module to apply changes.
+        auto-reloads the PowerShell module to apply changes. This is safe in
+        PowerShell (Import-Module -Force just reloads, doesn't replace shell).
     #>
     param(
         [Parameter(Position = 0)]
