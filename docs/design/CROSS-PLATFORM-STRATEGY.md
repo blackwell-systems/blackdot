@@ -1,7 +1,7 @@
 # Cross-Platform Strategy: Go CLI Expansion
 
 > **Date:** 2025-12-08
-> **Status:** Implemented (Milestones 1-6 Complete)
+> **Status:** Implemented (Milestones 1-7 Complete)
 
 ---
 
@@ -219,6 +219,15 @@ These should remain in shell config files.
 - [x] Full parity: all 24 hook points, file/function/JSON hooks
 - [x] Timeout support, fail-fast, feature gating
 
+### Milestone 7: Feature Flag Integration ✅ COMPLETE
+- [x] Add feature flag checking to Go tools (matches ZSH patterns)
+- [x] Map tool names to feature names:
+  - `ssh` → `ssh_tools`, `aws` → `aws_helpers`, `cdk` → `cdk_tools`
+  - `go` → `go_tools`, `rust` → `rust_tools`, `python` → `python_tools`
+- [x] Wrap all tool commands with feature check
+- [x] Show helpful error message when feature disabled
+- [x] Verify template system parity (RaymondEngine - 20 tests)
+
 **PowerShell Hook Mapping:**
 
 | ZSH Hook | PowerShell Equivalent | Implementation |
@@ -248,7 +257,7 @@ These should remain in shell config files.
 
 3. **Configuration sharing?** Should `tools aws` read from same config as shell functions?
 
-4. **Feature flags?** Should tools be feature-gated like other dotfiles features?
+4. ~~**Feature flags?** Should tools be feature-gated like other dotfiles features?~~ ✅ Yes - Milestone 7 implements this
 
 ---
 
@@ -260,5 +269,20 @@ These should remain in shell config files.
 | Dev Tools | 100% Shell | Go + Shell wrappers | ✅ Complete (50+ tools) |
 | Aliases | Shell | Shell + PowerShell | ✅ Complete |
 | Hooks | Shell only | Shell + PowerShell | ✅ Complete (24 hook points) |
+| Feature Flags | Shell only | Go + Shell | ✅ Complete (6 tool categories) |
+| Templates | Shell only | Go + Shell | ✅ Complete (RaymondEngine, 20 tests) |
 
 The goal is **additive** - Windows users gain functionality, shell users lose nothing.
+
+---
+
+## What's Next
+
+### Remaining Open Questions
+1. **Shell-specific features** - Tools like `j` (project jumper) need directory changing
+2. **Configuration sharing** - Unified config reading between Go and shell
+
+### Potential Future Milestones
+- **Milestone 8: Docker Tools** - `docker ps`, `docker ip`, `docker clean`, `docker stats`
+- **Milestone 9: Shell Wrappers** - Thin ZSH wrappers that delegate to Go tools
+- **Milestone 10: Windows Testing** - Comprehensive Windows/PowerShell testing

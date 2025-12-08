@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cross-Platform Developer Tools** (`dotfiles tools`)
   - New `tools` parent command with 6 tool categories
   - All tools work on Linux, macOS, and Windows
+  - **Feature Flag Integration** - Tools respect their feature flags like ZSH:
+    - `ssh` → `ssh_tools`, `aws` → `aws_helpers`, `cdk` → `cdk_tools`
+    - `go` → `go_tools`, `rust` → `rust_tools`, `python` → `python_tools`
+    - Disabled tools show helpful error with enable command
   - **SSH Tools** (`dotfiles tools ssh`)
     - `keys` - List SSH keys with fingerprints
     - `gen` - Generate ED25519 key pairs
