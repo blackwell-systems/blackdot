@@ -379,7 +379,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Short alias `d` for `dotfiles` command**
   - Quick access: `d status`, `d doctor`, `d features`, etc.
 
+- **macOS Settings Command** (`dotfiles macos`) - Go CLI
+  - Full parity with ZSH `dotfiles macos` command
+  - `apply` - Apply settings from macos/settings.sh
+  - `preview` - Dry-run showing what would change
+  - `discover` - Discover current macOS settings (with `--generate`, `--snapshot`, `--compare`)
+  - Feature-gated: Requires `macos_settings` feature enabled
+  - Only shows in help output on Darwin systems
+  - Wraps existing shell scripts in `macos/` directory
+
 ### Fixed
+
+- **Vault session caching** (`dotfiles vault unlock/status`)
+  - Fixed: `vault status` always showing "Not authenticated" even after successful unlock
+  - Root cause: Bitwarden CLI's `--session` argument doesn't work reliably; must use `BW_SESSION` env var
+  - Fix: Updated vaultmux v0.3.1 to use `BW_SESSION` environment variable instead of `--session` CLI argument
+  - Session token now properly persisted to JSON cache file and validated on status check
 
 - **Go CLI exit codes and flag validation** (edge case testing)
   - `diff`: Now returns non-zero exit code when vault is not unlocked
