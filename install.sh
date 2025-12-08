@@ -9,6 +9,7 @@
 #
 # Options:
 #   --minimal    Skip optional features (vault, Claude setup)
+#   --binary     Download pre-built Go binary (faster, no build required)
 #
 # ============================================================
 set -euo pipefail
@@ -48,6 +49,86 @@ run_hook() {
     " 2>/dev/null || true
 }
 
+# Download Go binary from GitHub releases
+install_go_binary() {
+    local install_dir="${1:-$HOME/.local/bin}"
+    local version="${DOTFILES_VERSION:-latest}"
+
+    # Detect OS
+    local os=""
+    case "$(uname -s)" in
+        Darwin) os="darwin" ;;
+        Linux)  os="linux" ;;
+        MINGW*|MSYS*|CYGWIN*) os="windows" ;;
+        *) fail "Unsupported OS for binary download"; return 1 ;;
+    esac
+
+    # Detect architecture
+    local arch=""
+    case "$(uname -m)" in
+        x86_64|amd64) arch="amd64" ;;
+        arm64|aarch64) arch="arm64" ;;
+        *) fail "Unsupported architecture: $(uname -m)"; return 1 ;;
+    esac
+
+    # Build binary name
+    local suffix=""
+    [[ "$os" == "windows" ]] && suffix=".exe"
+    local binary_name="dotfiles-${os}-${arch}${suffix}"
+
+    # GitHub release URL
+    local base_url="https://github.com/blackwell-systems/dotfiles/releases"
+    local download_url=""
+
+    if [[ "$version" == "latest" ]]; then
+        download_url="${base_url}/latest/download/${binary_name}"
+    else
+        download_url="${base_url}/download/${version}/${binary_name}"
+    fi
+
+    info "Downloading Go binary: $binary_name"
+    info "From: $download_url"
+
+    # Create install directory
+    mkdir -p "$install_dir"
+
+    # Download binary
+    local target="${install_dir}/dotfiles${suffix}"
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL "$download_url" -o "$target" || {
+            fail "Failed to download binary. Release may not exist yet."
+            fail "Try without --binary flag, or check: ${base_url}"
+            return 1
+        }
+    elif command -v wget >/dev/null 2>&1; then
+        wget -q "$download_url" -O "$target" || {
+            fail "Failed to download binary"
+            return 1
+        }
+    else
+        fail "Neither curl nor wget found"
+        return 1
+    fi
+
+    # Make executable
+    chmod +x "$target"
+
+    # Verify it works
+    if "$target" version >/dev/null 2>&1; then
+        pass "Installed dotfiles binary to: $target"
+
+        # Add to PATH hint if needed
+        if ! echo "$PATH" | grep -q "$install_dir"; then
+            warn "Add to your PATH: export PATH=\"$install_dir:\$PATH\""
+        fi
+        return 0
+    else
+        fail "Binary verification failed"
+        rm -f "$target"
+        return 1
+    fi
+}
+
 # Configuration
 REPO_URL="https://github.com/blackwell-systems/dotfiles.git"
 REPO_SSH="git@github.com:blackwell-systems/dotfiles.git"
@@ -62,6 +143,8 @@ INSTALL_DIR="$WORKSPACE_TARGET/dotfiles"
 # Parse arguments
 MINIMAL=false
 USE_SSH=false
+INSTALL_BINARY=false
+BINARY_ONLY=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -73,28 +156,40 @@ while [[ $# -gt 0 ]]; do
             USE_SSH=true
             shift
             ;;
+        --binary|-b)
+            INSTALL_BINARY=true
+            shift
+            ;;
+        --binary-only)
+            BINARY_ONLY=true
+            INSTALL_BINARY=true
+            shift
+            ;;
         --help|-h)
             echo "Dotfiles Installer"
             echo ""
             echo "Usage:"
             echo "  curl -fsSL <url> | bash                         # Full install (recommended)"
-            echo "  curl -fsSL <url> -o install.sh && bash install.sh [OPTIONS]"
+            echo "  curl -fsSL <url> | bash -s -- --binary          # Install with Go binary"
+            echo "  curl -fsSL <url> | bash -s -- --binary-only     # Just download Go binary"
             echo ""
             echo "Options:"
             echo "  --minimal, -m        Shell config only (skip: Homebrew, vault, Claude, /workspace)"
+            echo "  --binary, -b         Download pre-built Go binary (recommended)"
+            echo "  --binary-only        Just download the Go binary, skip repo clone"
             echo "  --ssh                Clone using SSH instead of HTTPS"
             echo "  --help, -h           Show this help"
             echo ""
-            echo "Modular Install:"
-            echo "  Everything is optional except shell config. Use --minimal for just ZSH,"
-            echo "  or customize with environment variables:"
+            echo "Environment Variables:"
+            echo "  WORKSPACE_TARGET     Clone location (default: ~/workspace)"
+            echo "  DOTFILES_VERSION     Binary version to download (default: latest)"
+            echo "  DOTFILES_BIN_DIR     Where to install binary (default: ~/.local/bin)"
             echo ""
-            echo "    WORKSPACE_TARGET=~/code ./install.sh             # Use ~/code instead of ~/workspace"
-            echo "    SKIP_WORKSPACE_SYMLINK=true ./bootstrap-mac.sh   # Skip /workspace symlink"
-            echo "    SKIP_CLAUDE_SETUP=true ./bootstrap-linux.sh      # Skip Claude integration"
+            echo "Examples:"
+            echo "  curl -fsSL <url> | bash -s -- --binary          # Full install with binary"
+            echo "  DOTFILES_VERSION=v3.1.0 ./install.sh --binary   # Specific version"
             echo ""
             echo "After installation, run 'dotfiles setup' to configure your environment."
-            echo "The setup wizard lets you enable/skip features interactively."
             exit 0
             ;;
         *)
@@ -118,6 +213,16 @@ EOF
 echo -e "${NC}"
 echo -e "${BOLD}Vault-backed configuration that travels with you${NC}"
 echo ""
+
+# Binary-only mode: just download the binary and exit
+if $BINARY_ONLY; then
+    install_go_binary "${DOTFILES_BIN_DIR:-$HOME/.local/bin}"
+    echo ""
+    echo -e "${GREEN}${BOLD}Binary installation complete!${NC}"
+    echo ""
+    echo "Run 'dotfiles version' to verify the installation."
+    exit 0
+fi
 
 # Detect OS
 OS="$(uname -s)"
@@ -196,6 +301,13 @@ info "Running bootstrap script..."
 echo ""
 
 ./"$BOOTSTRAP_SCRIPT"
+
+# Install Go binary if requested
+if $INSTALL_BINARY; then
+    echo ""
+    info "Installing Go binary..."
+    install_go_binary "${DOTFILES_BIN_DIR:-$HOME/.local/bin}" || warn "Binary installation failed, shell scripts will be used"
+fi
 
 # Run post-install hooks
 run_hook "post_install"

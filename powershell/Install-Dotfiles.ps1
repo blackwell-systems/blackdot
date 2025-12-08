@@ -17,6 +17,18 @@
 .PARAMETER Force
     Overwrite existing installation without prompting.
 
+.PARAMETER Binary
+    Also download the Go binary for native cross-platform commands.
+
+.PARAMETER BinaryOnly
+    Only download the Go binary, skip module installation.
+
+.PARAMETER BinaryPath
+    Where to install the binary. Defaults to ~/.local/bin or ~/bin.
+
+.PARAMETER Version
+    Version of the binary to download. Defaults to 'latest'.
+
 .EXAMPLE
     .\Install-Dotfiles.ps1
     Install the module and add to profile.
@@ -35,10 +47,94 @@ param(
 
     [switch]$NoProfile,
 
-    [switch]$Force
+    [switch]$Force,
+
+    [switch]$Binary,
+
+    [switch]$BinaryOnly,
+
+    [string]$BinaryPath,
+
+    [string]$Version = "latest"
 )
 
 $ErrorActionPreference = 'Stop'
+
+# Binary download function
+function Install-DotfilesBinary {
+    param(
+        [string]$InstallPath,
+        [string]$Version = "latest"
+    )
+
+    # Detect OS
+    $os = if ($IsWindows -or $env:OS -eq "Windows_NT") {
+        "windows"
+    } elseif ($IsMacOS) {
+        "darwin"
+    } elseif ($IsLinux) {
+        "linux"
+    } else {
+        throw "Unsupported OS for binary download"
+    }
+
+    # Detect architecture
+    $arch = switch ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture) {
+        "X64" { "amd64" }
+        "Arm64" { "arm64" }
+        default { throw "Unsupported architecture: $_" }
+    }
+
+    # Build binary name
+    $suffix = if ($os -eq "windows") { ".exe" } else { "" }
+    $binaryName = "dotfiles-$os-$arch$suffix"
+
+    # GitHub release URL
+    $baseUrl = "https://github.com/blackwell-systems/dotfiles/releases"
+    $downloadUrl = if ($Version -eq "latest") {
+        "$baseUrl/latest/download/$binaryName"
+    } else {
+        "$baseUrl/download/$Version/$binaryName"
+    }
+
+    Write-Host "Downloading Go binary: $binaryName" -ForegroundColor Cyan
+    Write-Host "From: $downloadUrl" -ForegroundColor Gray
+
+    # Create install directory
+    if (-not (Test-Path $InstallPath)) {
+        New-Item -Path $InstallPath -ItemType Directory -Force | Out-Null
+    }
+
+    # Download binary
+    $target = Join-Path $InstallPath "dotfiles$suffix"
+    try {
+        Invoke-WebRequest -Uri $downloadUrl -OutFile $target -UseBasicParsing
+    } catch {
+        throw "Failed to download binary. Release may not exist yet. Check: $baseUrl"
+    }
+
+    # Make executable on Unix
+    if ($os -ne "windows") {
+        chmod +x $target
+    }
+
+    # Verify it works
+    try {
+        $null = & $target version 2>&1
+        Write-Host "[OK] Installed dotfiles binary to: $target" -ForegroundColor Green
+    } catch {
+        Remove-Item $target -Force -ErrorAction SilentlyContinue
+        throw "Binary verification failed"
+    }
+
+    # PATH hint
+    $pathDirs = $env:PATH -split [IO.Path]::PathSeparator
+    if ($InstallPath -notin $pathDirs) {
+        Write-Host "[WARN] Add to your PATH: $InstallPath" -ForegroundColor Yellow
+    }
+
+    return $target
+}
 
 # Determine source path (where this script is located)
 $SourcePath = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -56,6 +152,35 @@ if (-not $ModulePath) {
 Write-Host "Dotfiles PowerShell Module Installer" -ForegroundColor Cyan
 Write-Host "=====================================" -ForegroundColor Cyan
 Write-Host ""
+
+# Determine binary install path
+if (-not $BinaryPath) {
+    $BinaryPath = if ($IsWindows -or $env:OS -eq "Windows_NT") {
+        # Windows: use ~/bin or ~/.local/bin
+        $localBin = Join-Path $HOME ".local\bin"
+        $homeBin = Join-Path $HOME "bin"
+        if (Test-Path $localBin) { $localBin }
+        elseif (Test-Path $homeBin) { $homeBin }
+        else { $localBin }
+    } else {
+        # Unix: prefer ~/.local/bin
+        Join-Path $HOME ".local/bin"
+    }
+}
+
+# Binary-only mode: just download the binary and exit
+if ($BinaryOnly) {
+    try {
+        Install-DotfilesBinary -InstallPath $BinaryPath -Version $Version
+        Write-Host ""
+        Write-Host "Binary installation complete!" -ForegroundColor Green
+        Write-Host "Run 'dotfiles version' to verify the installation." -ForegroundColor Cyan
+    } catch {
+        Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+        exit 1
+    }
+    exit 0
+}
 
 # Check if dotfiles CLI is available
 $dotfilesCli = Get-Command "dotfiles" -ErrorAction SilentlyContinue
@@ -110,6 +235,18 @@ foreach ($file in $filesToCopy) {
 
 Write-Host "[OK] Module installed successfully" -ForegroundColor Green
 Write-Host ""
+
+# Install Go binary if requested
+if ($Binary) {
+    Write-Host "Installing Go binary..." -ForegroundColor Cyan
+    try {
+        Install-DotfilesBinary -InstallPath $BinaryPath -Version $Version
+    } catch {
+        Write-Host "[WARN] Binary installation failed: $($_.Exception.Message)" -ForegroundColor Yellow
+        Write-Host "       Module will use shell scripts instead." -ForegroundColor Yellow
+    }
+    Write-Host ""
+}
 
 # Update PowerShell profile
 if (-not $NoProfile) {
@@ -173,6 +310,7 @@ Write-Host "    go-new, go-test, go-lint, go-info" -ForegroundColor Gray
 Write-Host "    rust-new, rust-lint, rust-info" -ForegroundColor Gray
 Write-Host "    py-new, py-test, py-info" -ForegroundColor Gray
 Write-Host "    docker-ps, docker-images, docker-clean, docker-status" -ForegroundColor Gray
+Write-Host "    claude-status, claude-bedrock, claude-max, claude-switch" -ForegroundColor Gray
 Write-Host ""
 Write-Host "  Node.js (fnm):" -ForegroundColor Yellow
 Write-Host "    fnm-install, fnm-use, fnm-list, Initialize-Fnm" -ForegroundColor Gray
