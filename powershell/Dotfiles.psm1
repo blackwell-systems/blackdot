@@ -909,11 +909,83 @@ function docker-status { dotfiles tools docker status @args }
 function dotfiles-status { dotfiles status @args }
 function dotfiles-doctor { dotfiles doctor @args }
 function dotfiles-setup { dotfiles setup @args }
-function dotfiles-features { dotfiles features @args }
 function dotfiles-vault { dotfiles vault @args }
 function dotfiles-hook { dotfiles hook @args }
 
-Set-Alias -Name d -Value dotfiles -Scope Global
+function dotfiles-features {
+    <#
+    .SYNOPSIS
+        Wrapper for dotfiles features that auto-reloads module after changes
+    .DESCRIPTION
+        When enabling, disabling, or applying presets, the module is automatically
+        reloaded to apply the changes. This matches the ZSH behavior where
+        'exec zsh' is run after feature changes.
+    #>
+    param(
+        [Parameter(Position = 0)]
+        [string]$Subcommand,
+
+        [Parameter(ValueFromRemainingArguments = $true)]
+        $RemainingArgs
+    )
+
+    # Run the actual command
+    if ($Subcommand) {
+        & dotfiles features $Subcommand @RemainingArgs
+    } else {
+        & dotfiles features
+    }
+    $exitCode = $LASTEXITCODE
+
+    # Auto-reload module after enable/disable/preset to apply changes
+    if ($exitCode -eq 0 -and $Subcommand -match '^(enable|disable|preset)$') {
+        Write-Host ""
+        Write-Host "Reloading module to apply feature changes..." -ForegroundColor Yellow
+        Import-Module Dotfiles -Force -Global
+    }
+
+    return $exitCode
+}
+
+# Wrapper function that handles feature commands with auto-reload
+function Invoke-Dotfiles {
+    <#
+    .SYNOPSIS
+        Main dotfiles wrapper with feature change detection
+    .DESCRIPTION
+        Wraps the dotfiles CLI. When 'features enable/disable/preset' is used,
+        auto-reloads the PowerShell module to apply changes.
+    #>
+    param(
+        [Parameter(Position = 0)]
+        [string]$Command,
+
+        [Parameter(ValueFromRemainingArguments = $true)]
+        $RemainingArgs
+    )
+
+    # Run the actual command
+    if ($Command) {
+        & dotfiles $Command @RemainingArgs
+    } else {
+        & dotfiles
+    }
+    $exitCode = $LASTEXITCODE
+
+    # Auto-reload after feature changes
+    if ($exitCode -eq 0 -and $Command -match '^(features?|feat)$') {
+        $subcmd = if ($RemainingArgs.Count -gt 0) { $RemainingArgs[0] } else { "" }
+        if ($subcmd -match '^(enable|disable|preset)$') {
+            Write-Host ""
+            Write-Host "Reloading module to apply feature changes..." -ForegroundColor Yellow
+            Import-Module Dotfiles -Force -Global
+        }
+    }
+
+    return $exitCode
+}
+
+Set-Alias -Name d -Value Invoke-Dotfiles -Scope Global
 
 #endregion
 
@@ -1118,7 +1190,10 @@ Export-ModuleMember -Function @(
 
     # Core commands
     'dotfiles-status', 'dotfiles-doctor', 'dotfiles-setup',
-    'dotfiles-features', 'dotfiles-vault', 'dotfiles-hook'
+    'dotfiles-features', 'dotfiles-vault', 'dotfiles-hook',
+
+    # Main wrapper (handles feature auto-reload)
+    'Invoke-Dotfiles'
 )
 
 Export-ModuleMember -Alias @('cd', 'd')
