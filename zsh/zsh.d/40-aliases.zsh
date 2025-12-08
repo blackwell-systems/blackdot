@@ -638,13 +638,16 @@ dotfiles() {
                     [[ "${2:-}" == "--persist" || "${2:-}" == "-p" ]] && persist=true
 
                     if [[ -n "$feat" ]] && feature_exists "$feat" 2>/dev/null; then
-                        feature_enable "$feat"
-                        if $persist; then
-                            feature_persist "$feat" "true"
-                            pass "Feature '$feat' enabled and saved to config"
+                        if feature_enable "$feat"; then
+                            if $persist; then
+                                feature_persist "$feat" "true"
+                                pass "Feature '$feat' enabled and saved to config"
+                            else
+                                pass "Feature '$feat' enabled (runtime only)"
+                                echo "${DIM}Use --persist to save to config file${NC}"
+                            fi
                         else
-                            pass "Feature '$feat' enabled (runtime only)"
-                            echo "${DIM}Use --persist to save to config file${NC}"
+                            fail "Failed to enable feature '$feat'"
                         fi
                     else
                         "$DOTFILES_DIR/bin/dotfiles-features" enable "$@"
