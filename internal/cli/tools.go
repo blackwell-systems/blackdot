@@ -78,9 +78,18 @@ func newToolsCmd() *cobra.Command {
 		},
 	}
 
-	// Override help to use styled version
-	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
-		printToolsHelp()
+	// Store default help before overriding
+	defaultHelp := cmd.HelpFunc()
+
+	// Override help only for the tools command itself, not subcommands
+	cmd.SetHelpFunc(func(c *cobra.Command, args []string) {
+		// Only use styled help for the parent "tools" command
+		if c.Name() == "tools" {
+			printToolsHelp()
+		} else {
+			// Use default Cobra help for subcommands
+			defaultHelp(c, args)
+		}
 	})
 
 	// Add tool subcommands with feature checks
