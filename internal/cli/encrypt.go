@@ -25,39 +25,6 @@ func newEncryptCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "encrypt",
 		Short: "Age encryption management for dotfiles",
-		Long: `Age encryption management for dotfiles.
-
-COMMANDS
-    init              Initialize age encryption (generate key pair)
-    encrypt <file>    Encrypt a file (creates <file>.age, removes original)
-    decrypt <file>    Decrypt a .age file (removes .age, restores original)
-    edit <file>       Decrypt, open in $EDITOR, re-encrypt on save
-    list              List encrypted and unencrypted sensitive files
-    status            Show encryption status and key info
-    push-key          Push private key to vault for backup/recovery
-
-OPTIONS
-    --keep, -k        Keep original file when encrypting/decrypting
-    --force, -f       Force operation (e.g., regenerate keys)
-    --dry-run, -n     Show what would be done
-
-EXAMPLES
-    # First-time setup
-    dotfiles-go encrypt init
-
-    # Encrypt sensitive template variables
-    dotfiles-go encrypt templates/_variables.local.sh
-
-    # Decrypt to view/use
-    dotfiles-go encrypt decrypt templates/_variables.local.sh.age
-
-    # Edit encrypted file directly
-    dotfiles-go encrypt edit templates/_variables.local.sh.age
-
-SECURITY NOTES
-    - Private key is stored in ~/.config/dotfiles/age-key.txt (mode 600)
-    - Back up your private key to vault: dotfiles-go encrypt push-key
-    - Without the private key, encrypted files cannot be recovered`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// If first arg is a file, treat as encrypt shortcut
 			if len(args) > 0 {
@@ -65,9 +32,15 @@ SECURITY NOTES
 					return runEncryptFile(cmd, args)
 				}
 			}
-			return cmd.Help()
+			printEncryptHelp()
+			return nil
 		},
 	}
+
+	// Set custom help function
+	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		printEncryptHelp()
+	})
 
 	// Add subcommands
 	initCmd := &cobra.Command{
@@ -592,4 +565,81 @@ func runEncryptPushKey(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+// printEncryptHelp prints styled help matching ZSH format
+func printEncryptHelp() {
+	// Title
+	BoldCyan.Print("dotfiles encrypt")
+	fmt.Print(" - Age encryption management\n")
+	fmt.Println()
+	Bold.Print("Usage:")
+	fmt.Print(" dotfiles encrypt <command> [options]\n")
+	fmt.Println()
+
+	// Commands
+	BoldCyan.Println("Commands:")
+	printCmd("init", "Initialize age encryption (generate key pair)")
+	printCmd("file <file>", "Encrypt a file (creates <file>.age)")
+	printCmd("decrypt <file>", "Decrypt a .age file (restores original)")
+	printCmd("edit <file>", "Decrypt, open in $EDITOR, re-encrypt on save")
+	printCmd("list", "List encrypted and unencrypted sensitive files")
+	printCmd("status", "Show encryption status and key info")
+	printCmd("push-key", "Push private key to vault for backup/recovery")
+	fmt.Println()
+
+	// Options
+	BoldCyan.Println("Options:")
+	fmt.Print("  ")
+	Yellow.Print("-k, --keep")
+	fmt.Print("      ")
+	Dim.Println("Keep original file when encrypting/decrypting")
+	fmt.Print("  ")
+	Yellow.Print("-f, --force")
+	fmt.Print("     ")
+	Dim.Println("Force operation (e.g., regenerate keys)")
+	fmt.Print("  ")
+	Yellow.Print("-n, --dry-run")
+	fmt.Print("   ")
+	Dim.Println("Show what would be done")
+	fmt.Println()
+
+	// Examples
+	BoldCyan.Println("Examples:")
+	Dim.Println("  # First-time setup")
+	fmt.Println("  dotfiles encrypt init")
+	fmt.Println()
+	Dim.Println("  # Encrypt sensitive template variables")
+	fmt.Println("  dotfiles encrypt templates/_variables.local.sh")
+	fmt.Println()
+	Dim.Println("  # Decrypt to view/use")
+	fmt.Println("  dotfiles encrypt decrypt templates/_variables.local.sh.age")
+	fmt.Println()
+	Dim.Println("  # Edit encrypted file directly")
+	fmt.Println("  dotfiles encrypt edit templates/_variables.local.sh.age")
+	fmt.Println()
+	Dim.Println("  # Backup key to vault")
+	fmt.Println("  dotfiles encrypt push-key")
+	fmt.Println()
+
+	// Hook Integration
+	BoldCyan.Println("Hook Integration:")
+	Dim.Println("  The encryption system integrates with dotfiles hooks:")
+	fmt.Println()
+	fmt.Print("  ")
+	Yellow.Print("pre_template_render")
+	fmt.Print("  ")
+	Dim.Println("Auto-decrypts .age files before rendering")
+	fmt.Print("  ")
+	Yellow.Print("post_vault_pull")
+	fmt.Print("      ")
+	Dim.Println("Restores age key from vault if missing locally")
+	fmt.Println()
+
+	// Security Notes
+	BoldCyan.Println("Security:")
+	Dim.Println("  - Private key stored in ~/.config/dotfiles/age-key.txt (mode 600)")
+	Dim.Println("  - Back up your private key: dotfiles encrypt push-key")
+	Dim.Println("  - Without the private key, encrypted files cannot be recovered")
+	Dim.Println("  - Public key can be safely shared for others to encrypt files for you")
 }
