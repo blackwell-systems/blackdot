@@ -42,32 +42,86 @@ func newDoctorCmd() *cobra.Command {
 		Use:     "doctor",
 		Aliases: []string{"health"},
 		Short:   "Comprehensive dotfiles health check",
-		Long: `Run comprehensive health checks on your dotfiles configuration.
-
-Modes:
-  (default)       Run all checks
-  --fix, -f       Auto-fix permission issues
-  --quick, -q     Fast checks only (skip vault)
-
-Checks include:
-  - Version & updates
-  - Core components (symlinks)
-  - Required commands
-  - SSH configuration
-  - AWS configuration
-  - Vault status
-  - Shell configuration
-  - Claude Code
-  - Template system`,
+		Long:    `Comprehensive dotfiles health check`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runDoctor(fixMode, quickMode)
 		},
 	}
 
+	// Override help to use styled version
+	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		printDoctorHelp()
+	})
+
 	cmd.Flags().BoolVarP(&fixMode, "fix", "f", false, "Auto-fix permission issues")
 	cmd.Flags().BoolVarP(&quickMode, "quick", "q", false, "Run quick checks only (skip vault)")
 
 	return cmd
+}
+
+// printDoctorHelp prints styled help matching ZSH doctor help
+func printDoctorHelp() {
+	// Title
+	BoldCyan.Print("dotfiles doctor")
+	fmt.Print(" - ")
+	Dim.Println("Comprehensive dotfiles health check")
+	fmt.Println()
+
+	// Usage
+	Bold.Print("Usage:")
+	fmt.Println(" dotfiles doctor [OPTIONS]")
+	fmt.Println()
+
+	// Options
+	BoldCyan.Println("Options:")
+	fmt.Print("  ")
+	Yellow.Print("--fix")
+	fmt.Print(", ")
+	Yellow.Print("-f")
+	fmt.Print("      ")
+	Dim.Println("Auto-fix permission issues")
+	fmt.Print("  ")
+	Yellow.Print("--quick")
+	fmt.Print(", ")
+	Yellow.Print("-q")
+	fmt.Print("    ")
+	Dim.Println("Run quick checks only (skip vault)")
+	fmt.Print("  ")
+	Yellow.Print("--help")
+	fmt.Print(", ")
+	Yellow.Print("-h")
+	fmt.Print("     ")
+	Dim.Println("Show this help")
+	fmt.Println()
+
+	// Checks section
+	BoldCyan.Println("Checks:")
+	Dim.Println("  - Version & updates")
+	Dim.Println("  - Core components (symlinks)")
+	Dim.Println("  - Required commands")
+	Dim.Println("  - SSH configuration")
+	Dim.Println("  - AWS configuration")
+	Dim.Println("  - Vault status")
+	Dim.Println("  - Shell configuration")
+	Dim.Println("  - Claude Code")
+	Dim.Println("  - Template system")
+	fmt.Println()
+
+	// Examples
+	BoldCyan.Println("Examples:")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles doctor")
+	fmt.Print("          ")
+	Dim.Println("# Run all checks")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles doctor --fix")
+	fmt.Print("    ")
+	Dim.Println("# Auto-fix permissions")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles doctor --quick")
+	fmt.Print("  ")
+	Dim.Println("# Fast checks only")
+	fmt.Println()
 }
 
 func runDoctor(fixMode, quickMode bool) error {

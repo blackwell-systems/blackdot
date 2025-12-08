@@ -30,18 +30,16 @@ func newConfigCmd() *cobra.Command {
 		Use:     "config",
 		Aliases: []string{"cfg"},
 		Short:   "Manage configuration",
-		Long: `Manage dotfiles configuration with layered resolution.
-
-Configuration layers (highest to lowest priority):
-  1. Environment variables (DOTFILES_*)
-  2. Project config (.dotfiles.json in repo)
-  3. Machine config (~/.config/dotfiles/machine.json)
-  4. User config (~/.config/dotfiles/config.json)
-  5. Built-in defaults`,
+		Long:    `Manage dotfiles configuration`,
 		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
+			printConfigHelp()
 		},
 	}
+
+	// Override help to use styled version
+	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		printConfigHelp()
+	})
 
 	cmd.AddCommand(
 		newConfigGetCmd(),
@@ -55,6 +53,80 @@ Configuration layers (highest to lowest priority):
 	)
 
 	return cmd
+}
+
+// printConfigHelp prints styled help matching ZSH style
+func printConfigHelp() {
+	// Title
+	BoldCyan.Print("dotfiles config")
+	fmt.Print(" - ")
+	Dim.Println("Manage configuration with layered resolution")
+	fmt.Println()
+
+	// Usage
+	Bold.Print("Usage:")
+	fmt.Println(" dotfiles config <command> [options]")
+	fmt.Println()
+
+	// Commands
+	BoldCyan.Println("Commands:")
+	fmt.Print("  ")
+	Yellow.Printf("%-14s", "get <key>")
+	Dim.Println("Get config value with layer resolution")
+	fmt.Print("  ")
+	Yellow.Printf("%-14s", "set")
+	Dim.Println("Set config value in specific layer")
+	fmt.Print("  ")
+	Yellow.Printf("%-14s", "show <key>")
+	Dim.Println("Show value from all layers")
+	fmt.Print("  ")
+	Yellow.Printf("%-14s", "source <key>")
+	Dim.Println("Get value with source information (JSON)")
+	fmt.Print("  ")
+	Yellow.Printf("%-14s", "list")
+	Dim.Println("Show configuration layer status")
+	fmt.Print("  ")
+	Yellow.Printf("%-14s", "merged")
+	Dim.Println("Show merged config from all layers")
+	fmt.Print("  ")
+	Yellow.Printf("%-14s", "init <layer>")
+	Dim.Println("Initialize a config layer")
+	fmt.Print("  ")
+	Yellow.Printf("%-14s", "edit [layer]")
+	Dim.Println("Edit config file (default: user)")
+	fmt.Println()
+
+	// Layers
+	BoldCyan.Println("Configuration Layers (highest to lowest priority):")
+	Dim.Println("  1. Environment variables (DOTFILES_*)")
+	Dim.Println("  2. Project config (.dotfiles.json in repo)")
+	Dim.Println("  3. Machine config (~/.config/dotfiles/machine.json)")
+	Dim.Println("  4. User config (~/.config/dotfiles/config.json)")
+	Dim.Println("  5. Built-in defaults")
+	fmt.Println()
+
+	// Examples
+	BoldCyan.Println("Examples:")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles config get vault.backend")
+	fmt.Print("       ")
+	Dim.Println("# Get value")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles config set user vault.backend 1password")
+	Dim.Println("")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles config show vault.backend")
+	fmt.Print("      ")
+	Dim.Println("# Show all layers")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles config list")
+	fmt.Print("                ")
+	Dim.Println("# Show layer status")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles config init machine work-mac")
+	fmt.Print("  ")
+	Dim.Println("# Init machine config")
+	fmt.Println()
 }
 
 func newConfigGetCmd() *cobra.Command {
