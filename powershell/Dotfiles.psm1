@@ -24,6 +24,9 @@ $script:DotfilesHooksEnabled = $true
 # Hook storage: registered PowerShell functions
 $script:RegisteredHooks = @{}
 
+# Cross-platform home directory (works on Windows, Linux, macOS)
+$script:HomeDir = if ($env:USERPROFILE) { $env:USERPROFILE } elseif ($env:HOME) { $env:HOME } else { "~" }
+
 # ============================================================
 # Configuration
 # ============================================================
@@ -67,17 +70,21 @@ $script:HOOK_FEATURE_MAP = @{
     'post_decrypt'          = 'encryption'
 }
 
-# Configuration paths
+# Configuration paths (cross-platform)
 $script:HOOKS_DIR = if ($env:DOTFILES_HOOKS_DIR) {
     $env:DOTFILES_HOOKS_DIR
+} elseif ($script:HomeDir) {
+    Join-Path $script:HomeDir ".config/dotfiles/hooks"
 } else {
-    Join-Path $env:USERPROFILE ".config\dotfiles\hooks"
+    $null
 }
 
 $script:HOOKS_CONFIG = if ($env:DOTFILES_HOOKS_CONFIG) {
     $env:DOTFILES_HOOKS_CONFIG
+} elseif ($script:HomeDir) {
+    Join-Path $script:HomeDir ".config/dotfiles/hooks.json"
 } else {
-    Join-Path $env:USERPROFILE ".config\dotfiles\hooks.json"
+    $null
 }
 
 # Settings (can be overridden by env vars or JSON config)
@@ -90,20 +97,24 @@ $script:HOOKS_TIMEOUT = if ($env:DOTFILES_HOOKS_TIMEOUT) { [int]$env:DOTFILES_HO
 function Get-DotfilesPath {
     <#
     .SYNOPSIS
-        Get the dotfiles installation directory
+        Get the dotfiles installation directory (cross-platform)
     #>
     if ($env:DOTFILES_DIR) {
         return $env:DOTFILES_DIR
     }
 
+    # Cross-platform candidates
+    $home = $script:HomeDir
+    if (-not $home) { return $null }
+
     $candidates = @(
-        "$env:USERPROFILE\workspace\dotfiles",
-        "$env:USERPROFILE\dotfiles",
-        "$env:USERPROFILE\.dotfiles"
+        (Join-Path $home "workspace/dotfiles"),
+        (Join-Path $home "dotfiles"),
+        (Join-Path $home ".dotfiles")
     )
 
     foreach ($path in $candidates) {
-        if (Test-Path $path) {
+        if ($path -and (Test-Path $path -ErrorAction SilentlyContinue)) {
             return $path
         }
     }
@@ -760,7 +771,14 @@ function Set-LocationWithHook {
     }
 }
 
-Set-Alias -Name cd -Value Set-LocationWithHook -Scope Global -Force
+# Try to override cd alias for directory change hooks
+# On some PowerShell versions, cd is AllScope and can't be overridden
+try {
+    Set-Alias -Name cd -Value Set-LocationWithHook -Scope Global -Force -ErrorAction Stop
+} catch {
+    # Silently continue - cd will use built-in behavior
+    # Users can call Set-LocationWithHook explicitly or use sl alias
+}
 
 #endregion
 
