@@ -192,7 +192,8 @@ vault_check_session() {
     # Validate session based on backend (non-interactive)
     case "$backend" in
         bitwarden)
-            if bw unlock --check --session "$session" >/dev/null 2>&1; then
+            # Use BW_SESSION env var (not --session flag) for --check
+            if BW_SESSION="$session" bw unlock --check </dev/null >/dev/null 2>&1; then
                 echo "$session"
                 return 0
             fi
