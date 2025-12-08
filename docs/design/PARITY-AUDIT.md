@@ -39,6 +39,23 @@
 |---------|-------------|
 | `status` | Visual dashboard - NEW |
 | `version` | Build info - NEW |
+| `tools` | Cross-platform developer tools - NEW |
+| `import-chezmoi` | Migrate from chezmoi - NEW |
+
+### Tools Subcommands (Cross-Platform)
+
+| Tool Category | Commands |
+|---------------|----------|
+| `tools ssh` | keys, gen, list, agent, fp, copy, tunnel, socks, status |
+| `tools aws` | profiles, who, login, switch, assume, clear, status |
+| `tools cdk` | init, env, env-clear, outputs, context, status |
+| `tools go` | new, init, test, cover, lint, outdated, update, build-all, bench, info |
+| `tools rust` | new, update, switch, lint, fix, outdated, expand, info |
+| `tools python` | new, clean, venv, test, cover, info |
+| `tools docker` | ps, images, ip, env, ports, stats, vols, nets, inspect, clean, prune, status |
+| `tools claude` | status, bedrock, max, switch, init, env |
+
+**Total:** 8 tool categories, 50+ subcommands
 
 ---
 
