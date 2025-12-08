@@ -1,7 +1,7 @@
 # Cross-Platform Strategy: Go CLI Expansion
 
 > **Date:** 2025-12-08
-> **Status:** Implemented (Milestones 1-7 Complete)
+> **Status:** Implemented (Milestones 1-8 Complete)
 
 ---
 
@@ -283,7 +283,20 @@ The goal is **additive** - Windows users gain functionality, shell users lose no
 1. **Shell-specific features** - Tools like `j` (project jumper) need directory changing
 2. ~~**Configuration sharing**~~ ✅ RESOLVED - Both Go and shell use same `config.json` format
 
+### Milestone 8: Docker Tools ✅ COMPLETE
+- [x] `tools docker ps` (list containers)
+- [x] `tools docker images` (list images)
+- [x] `tools docker ip` (get container IP)
+- [x] `tools docker env` (show container env vars)
+- [x] `tools docker ports` (show exposed ports)
+- [x] `tools docker stats` (resource usage)
+- [x] `tools docker vols` (list volumes)
+- [x] `tools docker nets` (list networks)
+- [x] `tools docker inspect` (with JSON path filtering)
+- [x] `tools docker clean` (remove stopped + dangling)
+- [x] `tools docker prune` (system prune)
+- [x] `tools docker status` (ASCII art status banner)
+
 ### Potential Future Milestones
-- **Milestone 8: Docker Tools** - `docker ps`, `docker ip`, `docker clean`, `docker stats`
 - **Milestone 9: Shell Wrappers** - Thin ZSH wrappers that delegate to Go tools
 - **Milestone 10: Windows Testing** - Comprehensive Windows/PowerShell testing

@@ -16,6 +16,7 @@ var toolFeatureMap = map[string]string{
 	"go":     "go_tools",
 	"rust":   "rust_tools",
 	"python": "python_tools",
+	"docker": "docker_tools",
 }
 
 // checkToolFeature verifies a tool's feature is enabled
@@ -83,9 +84,10 @@ Available tool categories:
   go      - Go development helpers
   rust    - Rust/Cargo development helpers
   python  - Python/uv development helpers
+  docker  - Docker container management and cleanup
 
 Each tool category respects its feature flag:
-  ssh_tools, aws_helpers, cdk_tools, go_tools, rust_tools, python_tools
+  ssh_tools, aws_helpers, cdk_tools, go_tools, rust_tools, python_tools, docker_tools
 
 Examples:
   dotfiles tools ssh keys           # List SSH keys with fingerprints
@@ -94,7 +96,9 @@ Examples:
   dotfiles tools cdk init           # Initialize CDK project
   dotfiles tools go new myproject   # Create new Go project
   dotfiles tools rust lint          # Run cargo check + clippy
-  dotfiles tools python new myapp   # Create new Python project`,
+  dotfiles tools python new myapp   # Create new Python project
+  dotfiles tools docker ps          # List running containers
+  dotfiles tools docker clean       # Remove stopped containers`,
 	}
 
 	// Add tool subcommands with feature checks
@@ -105,6 +109,7 @@ Examples:
 		wrapWithFeatureCheck("go", newToolsGoCmd()),
 		wrapWithFeatureCheck("rust", newToolsRustCmd()),
 		wrapWithFeatureCheck("python", newToolsPythonCmd()),
+		wrapWithFeatureCheck("docker", newDockerToolsCmd()),
 	)
 
 	return cmd
