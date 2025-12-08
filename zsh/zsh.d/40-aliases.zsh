@@ -631,15 +631,21 @@ dotfiles() {
             local subcmd="${1:-}"
             "$DOTFILES_DIR/bin/dotfiles-features" "$@"
             local ret=$?
-            # Auto-reload shell config after enable/disable/preset
-            # Using source instead of exec zsh - safer (doesn't kill shell on errors)
+            # After enable/disable/preset, need shell reload for changes to take effect
             if [[ $ret -eq 0 && "$subcmd" =~ ^(enable|disable|preset)$ ]]; then
                 echo ""
-                echo "${YELLOW}Reloading shell configuration...${NC}"
-                # Source zshrc to reload - this is safer than exec zsh
-                # If there are errors, they'll show but shell won't die
-                source "${ZDOTDIR:-$HOME}/.zshrc" 2>&1 | head -20
-                echo "${GREEN}Done.${NC} If issues occur, run: exec zsh"
+                # Test if shell can start cleanly before exec'ing
+                # Disable p10k instant prompt for test to avoid conflicts
+                if POWERLEVEL9K_INSTANT_PROMPT=off zsh -i -c 'exit 0' 2>/dev/null; then
+                    echo "${YELLOW}Feature updated. Reloading shell...${NC}"
+                    # Disable p10k instant prompt during reload to prevent conflicts
+                    # It will re-enable normally on next shell start
+                    export POWERLEVEL9K_INSTANT_PROMPT=off
+                    exec zsh -l
+                else
+                    echo "${RED}Warning: Shell config has errors. Not auto-reloading.${NC}"
+                    echo "Fix errors first, then run: ${CYAN}exec zsh${NC}"
+                fi
             fi
             return $ret
             ;;
