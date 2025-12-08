@@ -100,18 +100,18 @@ if [[ -f "$VAULT_ITEMS_FILE" ]]; then
     echo ""
     echo -e "${DIM}  Configured vault items:${NC}"
 
-    # Config items
+    # Config items (object keys are the item names)
     if [[ $ITEM_COUNT -gt 0 ]]; then
-        jq -r '.vault_items[] | "    • \(.name)"' "$VAULT_ITEMS_FILE" 2>/dev/null | head -10
+        jq -r '.vault_items | keys[] | "    • \(.)"' "$VAULT_ITEMS_FILE" 2>/dev/null | head -10
         if [[ $ITEM_COUNT -gt 10 ]]; then
             echo -e "${DIM}    ... and $((ITEM_COUNT - 10)) more${NC}"
         fi
     fi
 
-    # SSH keys
+    # SSH keys (object: key=name, value=path)
     if [[ $SSH_COUNT -gt 0 ]]; then
         echo -e "${DIM}  SSH Keys:${NC}"
-        jq -r '.ssh_keys[] | "    • \(.name) → \(.path)"' "$VAULT_ITEMS_FILE" 2>/dev/null
+        jq -r '.ssh_keys | to_entries[] | "    • \(.key) → \(.value)"' "$VAULT_ITEMS_FILE" 2>/dev/null
     fi
 else
     warn "No vault items configured"
