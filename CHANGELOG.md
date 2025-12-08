@@ -9,12 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Runtime Feature Guards** - All shell tool modules now support instant enable/disable
+  - No shell reload required when toggling features with `dotfiles features enable/disable`
+  - Converted modules: `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `docker_tools`, `ssh_tools`, `claude_integration`, `modern_cli`, `nvm_integration`, `sdkman_integration`
+  - Pattern: Aliases converted to wrapper functions with `require_feature` guards
+  - Blocked commands show helpful message: "Feature 'X' is disabled. Enable with: dotfiles features enable X"
+  - Fixed: `set -euo pipefail` removed from `_features.sh` (was killing interactive shells)
+  - Fixed: `_logging.sh` now sourced in `00-init.zsh` for `pass`/`fail`/`warn`/`info` functions
+
 - **Cross-Platform Developer Tools** (`dotfiles tools`)
-  - New `tools` parent command with 6 tool categories
+  - New `tools` parent command with 8 tool categories
   - All tools work on Linux, macOS, and Windows
   - **Feature Flag Integration** - Tools respect their feature flags like ZSH:
     - `ssh` → `ssh_tools`, `aws` → `aws_helpers`, `cdk` → `cdk_tools`
     - `go` → `go_tools`, `rust` → `rust_tools`, `python` → `python_tools`
+    - `docker` → `docker_tools`, `claude` → `claude_integration`
     - Disabled tools show helpful error with enable command
   - **SSH Tools** (`dotfiles tools ssh`)
     - `keys` - List SSH keys with fingerprints
@@ -81,6 +90,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `clean` - Remove stopped containers and dangling images
     - `prune` - System prune (with `-a` for aggressive)
     - `status` - Color-coded ASCII art status banner
+  - **Claude Tools** (`dotfiles tools claude`)
+    - `status` - Show Claude Code configuration (Bedrock profile, SSO status, paths)
+    - `bedrock` - Print export commands for AWS Bedrock backend
+    - `max` - Print export commands for Anthropic Max backend
+    - `switch` - Interactive backend switcher
+    - `init` - Initialize ~/.claude/ from dotfiles templates (hooks, commands, settings)
+    - `env` - Show all Claude-related environment variables
+    - Full parity with ZSH claude integration (70-claude.zsh)
+
+- **Binary Distribution** (GitHub Releases)
+  - Pre-built Go CLI binaries for all platforms
+  - Linux: amd64, arm64
+  - macOS: amd64 (Intel), arm64 (Apple Silicon)
+  - Windows: amd64, arm64
+  - SHA256 checksums for all binaries
+  - Automated via GitHub Actions on tag push
+
+- **PowerShell Module v1.2.0** (`powershell/`)
+  - **Claude tools integration** - Full parity with ZSH and Go CLI
+    - `claude-status` - Show Claude Code configuration
+    - `claude-bedrock` - Configure AWS Bedrock backend (`-Eval` to set env vars)
+    - `claude-max` - Configure Anthropic Max backend (`-Eval` to clear vars)
+    - `claude-switch` - Interactive backend switcher
+    - `claude-init` - Initialize ~/.claude/ from templates
+    - `claude-env` - Show Claude environment variables
+    - Aliases: `cb` (claude-bedrock), `cm` (claude-max)
 
 - **PowerShell Module v1.1.0** (`powershell/`)
   - Cross-platform Windows support with **complete ZSH hooks parity**

@@ -3,75 +3,71 @@
 # =========================
 # Python/uv aliases and helpers for Python development workflows
 # Provides shortcuts for uv package manager, pytest, and auto-venv activation
+# Runtime guards allow enable/disable without shell reload
 #
 # uv is the preferred Python toolchain - it handles:
 # - Package management (replacing pip, pip-tools)
 # - Virtual environments (replacing venv)
 # - Python version management (replacing pyenv)
 
-# Feature guard: skip if python_tools is disabled
-if type feature_enabled &>/dev/null && ! feature_enabled "python_tools" 2>/dev/null; then
-    return 0
-fi
-
 # =========================
-# uv Aliases
+# uv Aliases (as functions for runtime guards)
 # =========================
 
 # Core uv commands
-alias uvs='uv sync'                    # Sync dependencies from pyproject.toml/uv.lock
-alias uvr='uv run'                     # Run command in project environment
-alias uva='uv add'                     # Add dependency
-alias uvad='uv add --dev'              # Add dev dependency
-alias uvrm='uv remove'                 # Remove dependency
-alias uvl='uv lock'                    # Update lock file
-alias uvu='uv lock --upgrade'          # Upgrade all dependencies
-alias uvp='uv pip'                     # uv pip subcommand
-alias uvx='uvx'                        # Run tools (like npx for Python)
-alias uvi='uv init'                    # Initialize new project
-alias uvt='uv tree'                    # Show dependency tree
-alias uvv='uv venv'                    # Create virtual environment
-alias uvpy='uv python'                 # Python version management
+uvs()  { require_feature "python_tools" || return 1; uv sync "$@"; }
+uvr()  { require_feature "python_tools" || return 1; uv run "$@"; }
+uva()  { require_feature "python_tools" || return 1; uv add "$@"; }
+uvad() { require_feature "python_tools" || return 1; uv add --dev "$@"; }
+uvrm() { require_feature "python_tools" || return 1; uv remove "$@"; }
+uvl()  { require_feature "python_tools" || return 1; uv lock "$@"; }
+uvu()  { require_feature "python_tools" || return 1; uv lock --upgrade "$@"; }
+uvp()  { require_feature "python_tools" || return 1; uv pip "$@"; }
+uvx()  { require_feature "python_tools" || return 1; command uvx "$@"; }
+uvi()  { require_feature "python_tools" || return 1; uv init "$@"; }
+uvt()  { require_feature "python_tools" || return 1; uv tree "$@"; }
+uvv()  { require_feature "python_tools" || return 1; uv venv "$@"; }
+uvpy() { require_feature "python_tools" || return 1; uv python "$@"; }
 
 # Python version management
-alias uvpyl='uv python list'           # List available Python versions
-alias uvpyi='uv python install'        # Install Python version
-alias uvpyp='uv python pin'            # Pin Python version for project
+uvpyl() { require_feature "python_tools" || return 1; uv python list "$@"; }
+uvpyi() { require_feature "python_tools" || return 1; uv python install "$@"; }
+uvpyp() { require_feature "python_tools" || return 1; uv python pin "$@"; }
 
 # pip compatibility (via uv)
-alias uvpi='uv pip install'            # Install package
-alias uvpie='uv pip install -e .'      # Install current package in editable mode
-alias uvpir='uv pip install -r'        # Install from requirements file
-alias uvpu='uv pip uninstall'          # Uninstall package
-alias uvpl='uv pip list'               # List installed packages
-alias uvpf='uv pip freeze'             # Freeze dependencies
-alias uvpc='uv pip compile'            # Compile requirements
+uvpi()  { require_feature "python_tools" || return 1; uv pip install "$@"; }
+uvpie() { require_feature "python_tools" || return 1; uv pip install -e . "$@"; }
+uvpir() { require_feature "python_tools" || return 1; uv pip install -r "$@"; }
+uvpu()  { require_feature "python_tools" || return 1; uv pip uninstall "$@"; }
+uvpl()  { require_feature "python_tools" || return 1; uv pip list "$@"; }
+uvpf()  { require_feature "python_tools" || return 1; uv pip freeze "$@"; }
+uvpc()  { require_feature "python_tools" || return 1; uv pip compile "$@"; }
 
 # =========================
-# Python Aliases
+# Python Aliases (as functions)
 # =========================
 
-alias py='python3'
-alias py3='python3'
-alias py2='python2'
-alias ipy='ipython'
+py()  { require_feature "python_tools" || return 1; python3 "$@"; }
+py3() { require_feature "python_tools" || return 1; python3 "$@"; }
+py2() { require_feature "python_tools" || return 1; python2 "$@"; }
+ipy() { require_feature "python_tools" || return 1; ipython "$@"; }
 
 # =========================
-# Pytest Aliases
+# Pytest Aliases (as functions)
 # =========================
 
-alias pt='pytest'
-alias ptv='pytest -v'
-alias ptvv='pytest -vv'
-alias ptx='pytest -x'                  # Stop on first failure
-alias ptxv='pytest -xvs'               # Stop on first, verbose, show output
-alias ptc='pytest --cov'               # Coverage
-alias ptcr='pytest --cov --cov-report=html'  # Coverage with HTML report
-alias ptw='pytest-watch'               # Watch mode (requires pytest-watch)
-alias ptf='pytest --failed-first'      # Run failed tests first
-alias ptl='pytest --last-failed'       # Only run last failed tests
-alias pts='pytest -s'                  # Show print statements (no capture)
-alias ptk='pytest -k'                  # Run tests matching expression
+pt()   { require_feature "python_tools" || return 1; pytest "$@"; }
+ptv()  { require_feature "python_tools" || return 1; pytest -v "$@"; }
+ptvv() { require_feature "python_tools" || return 1; pytest -vv "$@"; }
+ptx()  { require_feature "python_tools" || return 1; pytest -x "$@"; }
+ptxv() { require_feature "python_tools" || return 1; pytest -xvs "$@"; }
+ptc()  { require_feature "python_tools" || return 1; pytest --cov "$@"; }
+ptcr() { require_feature "python_tools" || return 1; pytest --cov --cov-report=html "$@"; }
+ptw()  { require_feature "python_tools" || return 1; pytest-watch "$@"; }
+ptf()  { require_feature "python_tools" || return 1; pytest --failed-first "$@"; }
+ptl()  { require_feature "python_tools" || return 1; pytest --last-failed "$@"; }
+pts()  { require_feature "python_tools" || return 1; pytest -s "$@"; }
+ptk()  { require_feature "python_tools" || return 1; pytest -k "$@"; }
 
 # =========================
 # Auto-venv Activation
@@ -159,6 +155,7 @@ add-zsh-hook chpwd _python_auto_venv
 
 # Create new Python project with uv
 uv-new() {
+    require_feature "python_tools" || return 1
     local name="${1:-}"
     local template="${2:-app}"
 
@@ -212,6 +209,7 @@ EOF
 
 # Clean Python artifacts
 uv-clean() {
+    require_feature "python_tools" || return 1
     echo "Cleaning Python artifacts..."
 
     # Enable null_glob so unmatched patterns expand to nothing
@@ -236,6 +234,7 @@ uv-clean() {
 
 # Show Python/uv info
 uv-info() {
+    require_feature "python_tools" || return 1
     echo "Python Environment Info"
     echo "───────────────────────"
 
@@ -268,6 +267,7 @@ uv-info() {
 
 # Run pytest with common options
 pt-watch() {
+    require_feature "python_tools" || return 1
     if ! command -v pytest-watch &>/dev/null; then
         echo "Installing pytest-watch..."
         uv add --dev pytest-watch
@@ -277,6 +277,7 @@ pt-watch() {
 
 # Coverage report with browser
 pt-cov() {
+    require_feature "python_tools" || return 1
     local pkg="${1:-.}"
 
     pytest --cov="$pkg" --cov-report=html --cov-report=term
@@ -296,6 +297,7 @@ pt-cov() {
 
 # Install Python version with uv and set as default
 uv-python-setup() {
+    require_feature "python_tools" || return 1
     local version="${1:-3.12}"
 
     echo "Installing Python $version..."
@@ -316,6 +318,7 @@ uv-python-setup() {
 # =========================
 
 pythontools() {
+    require_feature "python_tools" || return 1
     # Source theme colors
     source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
 

@@ -3,49 +3,45 @@
 # =========================
 # Rust/Cargo aliases and helpers for Rust development workflows
 # Provides shortcuts and utilities for cargo commands
-
-# Feature guard: skip if rust_tools is disabled
-if type feature_enabled &>/dev/null && ! feature_enabled "rust_tools" 2>/dev/null; then
-    return 0
-fi
+# Runtime guards allow enable/disable without shell reload
 
 # =========================
-# Cargo Aliases
+# Cargo Aliases (as functions for runtime guards)
 # =========================
 
 # Core cargo commands
-alias cb='cargo build'
-alias cr='cargo run'
-alias ct='cargo test'
-alias cc='cargo check'
-alias ccl='cargo clippy'
-alias cf='cargo fmt'
-alias cdoc='cargo doc --open'
+cb()   { require_feature "rust_tools" || return 1; cargo build "$@"; }
+cr()   { require_feature "rust_tools" || return 1; cargo run "$@"; }
+ct()   { require_feature "rust_tools" || return 1; cargo test "$@"; }
+cc()   { require_feature "rust_tools" || return 1; cargo check "$@"; }
+ccl()  { require_feature "rust_tools" || return 1; cargo clippy "$@"; }
+cf()   { require_feature "rust_tools" || return 1; cargo fmt "$@"; }
+cdoc() { require_feature "rust_tools" || return 1; cargo doc --open "$@"; }
 
 # Build variations
-alias cbr='cargo build --release'
-alias crr='cargo run --release'
-alias cba='cargo build --all-features'
-alias cbra='cargo build --release --all-features'
+cbr()  { require_feature "rust_tools" || return 1; cargo build --release "$@"; }
+crr()  { require_feature "rust_tools" || return 1; cargo run --release "$@"; }
+cba()  { require_feature "rust_tools" || return 1; cargo build --all-features "$@"; }
+cbra() { require_feature "rust_tools" || return 1; cargo build --release --all-features "$@"; }
 
 # Testing variations
-alias ctq='cargo test --quiet'
-alias ctn='cargo test -- --nocapture'
-alias ctv='cargo test -- --show-output'
+ctq() { require_feature "rust_tools" || return 1; cargo test --quiet "$@"; }
+ctn() { require_feature "rust_tools" || return 1; cargo test -- --nocapture "$@"; }
+ctv() { require_feature "rust_tools" || return 1; cargo test -- --show-output "$@"; }
 
 # Other useful commands
-alias cu='cargo update'
-alias cadd='cargo add'
-alias crm='cargo remove'
-alias cclean='cargo clean'
-alias cfix='cargo fix --allow-dirty'
-alias caudit='cargo audit'
+cu()     { require_feature "rust_tools" || return 1; cargo update "$@"; }
+cadd()   { require_feature "rust_tools" || return 1; cargo add "$@"; }
+crm()    { require_feature "rust_tools" || return 1; cargo remove "$@"; }
+cclean() { require_feature "rust_tools" || return 1; cargo clean "$@"; }
+cfix()   { require_feature "rust_tools" || return 1; cargo fix --allow-dirty "$@"; }
+caudit() { require_feature "rust_tools" || return 1; cargo audit "$@"; }
 
 # Watch mode (requires cargo-watch)
-alias cw='cargo watch'
-alias cwr='cargo watch -x run'
-alias cwt='cargo watch -x test'
-alias cwc='cargo watch -x check'
+cw()  { require_feature "rust_tools" || return 1; cargo watch "$@"; }
+cwr() { require_feature "rust_tools" || return 1; cargo watch -x run "$@"; }
+cwt() { require_feature "rust_tools" || return 1; cargo watch -x test "$@"; }
+cwc() { require_feature "rust_tools" || return 1; cargo watch -x check "$@"; }
 
 # =========================
 # Rust Helper Functions
@@ -53,6 +49,7 @@ alias cwc='cargo watch -x check'
 
 # Update Rust toolchain
 rust-update() {
+    require_feature "rust_tools" || return 1
     echo "Updating Rust toolchain..."
     rustup update
     echo ""
@@ -62,6 +59,7 @@ rust-update() {
 
 # Switch Rust toolchain
 rust-switch() {
+    require_feature "rust_tools" || return 1
     local toolchain="${1:-}"
 
     if [[ -z "$toolchain" ]]; then
@@ -78,6 +76,7 @@ rust-switch() {
 
 # Install common Rust tools
 rust-tools-install() {
+    require_feature "rust_tools" || return 1
     echo "Installing common Rust development tools..."
 
     # Clippy and rustfmt (usually included)
@@ -92,6 +91,7 @@ rust-tools-install() {
 
 # Create new Rust project with common setup
 rust-new() {
+    require_feature "rust_tools" || return 1
     local name="${1:-}"
     local template="${2:-bin}"
 
@@ -114,6 +114,7 @@ rust-new() {
 
 # Run cargo check then clippy
 rust-lint() {
+    require_feature "rust_tools" || return 1
     echo "Running cargo check..."
     cargo check || return 1
 
@@ -124,6 +125,7 @@ rust-lint() {
 
 # Format and lint
 rust-fix() {
+    require_feature "rust_tools" || return 1
     echo "Formatting code..."
     cargo fmt
 
@@ -134,6 +136,7 @@ rust-fix() {
 
 # Show outdated dependencies
 rust-outdated() {
+    require_feature "rust_tools" || return 1
     if ! command -v cargo-outdated &>/dev/null; then
         echo "Installing cargo-outdated..."
         cargo install cargo-outdated
@@ -143,6 +146,7 @@ rust-outdated() {
 
 # Expand macros (useful for debugging)
 rust-expand() {
+    require_feature "rust_tools" || return 1
     local item="${1:-}"
 
     if ! command -v cargo-expand &>/dev/null; then
@@ -162,6 +166,7 @@ rust-expand() {
 # =========================
 
 rusttools() {
+    require_feature "rust_tools" || return 1
     # Source theme colors
     source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
 

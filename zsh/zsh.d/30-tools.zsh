@@ -3,21 +3,23 @@
 # =========================
 # Modern CLI tool configurations
 # Sets up eza, fzf, dust, yazi, yq, bat, and other modern replacements
+# Runtime guards allow enable/disable without shell reload
 
 # =========================
 # MODERN CLI TOOLS (eza, fzf, etc.)
 # =========================
 # These override basic coreutils with modern alternatives when available.
+# Wrapped as functions for runtime feature guards.
 
 # eza - modern ls replacement (cross-platform)
 if command -v eza >/dev/null 2>&1; then
-  alias ls='eza --color=auto --group-directories-first'
-  alias ll='eza -la --icons --group-directories-first --git'
-  alias la='eza -a --icons --group-directories-first'
-  alias lt='eza -la --icons --tree --level=2'
-  alias l='eza -1'
-  alias lm='eza -la --icons --sort=modified'
-  alias lr='eza -la --icons --sort=size --reverse'
+  ls()  { require_feature "modern_cli" || return 1; eza --color=auto --group-directories-first "$@"; }
+  ll()  { require_feature "modern_cli" || return 1; eza -la --icons --group-directories-first --git "$@"; }
+  la()  { require_feature "modern_cli" || return 1; eza -a --icons --group-directories-first "$@"; }
+  lt()  { require_feature "modern_cli" || return 1; eza -la --icons --tree --level=2 "$@"; }
+  l()   { require_feature "modern_cli" || return 1; eza -1 "$@"; }
+  lm()  { require_feature "modern_cli" || return 1; eza -la --icons --sort=modified "$@"; }
+  lr()  { require_feature "modern_cli" || return 1; eza -la --icons --sort=size --reverse "$@"; }
 fi
 
 # fzf - fuzzy finder
@@ -43,15 +45,16 @@ fi
 
 # dust - intuitive disk usage (du replacement)
 if command -v dust >/dev/null 2>&1; then
-  alias du='dust'
-  alias dus='dust -s'      # summary only
-  alias dud='dust -d 1'    # depth 1
+  du()  { require_feature "modern_cli" || return 1; dust "$@"; }
+  dus() { require_feature "modern_cli" || return 1; dust -s "$@"; }
+  dud() { require_feature "modern_cli" || return 1; dust -d 1 "$@"; }
 fi
 
 # yazi - terminal file manager (cd to directory on exit)
 if command -v yazi >/dev/null 2>&1; then
   # y: launch yazi and cd to directory when you quit
   y() {
+    require_feature "modern_cli" || return 1
     local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
     yazi "$@" --cwd-file="$tmp"
     if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
@@ -59,7 +62,7 @@ if command -v yazi >/dev/null 2>&1; then
     fi
     rm -f -- "$tmp"
   }
-  alias fm='y'  # muscle memory alias
+  fm() { require_feature "modern_cli" || return 1; y "$@"; }
 fi
 
 # yq - YAML processor (like jq for YAML)

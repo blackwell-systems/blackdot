@@ -3,46 +3,42 @@
 # =========================
 # Docker container management, compose workflows, and network utilities
 # Provides shortcuts and helpers for Docker workflows
-
-# Feature guard: skip if docker_tools is disabled
-if type feature_enabled &>/dev/null && ! feature_enabled "docker_tools" 2>/dev/null; then
-    return 0
-fi
+# Runtime guards allow enable/disable without shell reload
 
 # =========================
-# Container Aliases
+# Container Aliases (as functions for runtime guards)
 # =========================
 
-alias dps='docker ps'
-alias dpsa='docker ps -a'
-alias di='docker images'
-alias dl='docker logs'
-alias dlf='docker logs -f'
-alias dstop='docker stop'
-alias dstart='docker start'
-alias drestart='docker restart'
-alias drm='docker rm'
-alias drmi='docker rmi'
-alias dpull='docker pull'
-alias dpush='docker push'
-alias dbuild='docker build'
-alias dtag='docker tag'
+dps()      { require_feature "docker_tools" || return 1; docker ps "$@"; }
+dpsa()     { require_feature "docker_tools" || return 1; docker ps -a "$@"; }
+di()       { require_feature "docker_tools" || return 1; docker images "$@"; }
+dl()       { require_feature "docker_tools" || return 1; docker logs "$@"; }
+dlf()      { require_feature "docker_tools" || return 1; docker logs -f "$@"; }
+dstop()    { require_feature "docker_tools" || return 1; docker stop "$@"; }
+dstart()   { require_feature "docker_tools" || return 1; docker start "$@"; }
+drestart() { require_feature "docker_tools" || return 1; docker restart "$@"; }
+drm()      { require_feature "docker_tools" || return 1; docker rm "$@"; }
+drmi()     { require_feature "docker_tools" || return 1; docker rmi "$@"; }
+dpull()    { require_feature "docker_tools" || return 1; docker pull "$@"; }
+dpush()    { require_feature "docker_tools" || return 1; docker push "$@"; }
+dbuild()   { require_feature "docker_tools" || return 1; docker build "$@"; }
+dtag()     { require_feature "docker_tools" || return 1; docker tag "$@"; }
 
 # =========================
-# Docker Compose Aliases
+# Docker Compose Aliases (as functions)
 # =========================
 
-alias dc='docker compose'
-alias dcu='docker compose up'
-alias dcud='docker compose up -d'
-alias dcd='docker compose down'
-alias dcr='docker compose restart'
-alias dcl='docker compose logs -f'
-alias dcps='docker compose ps'
-alias dcb='docker compose build'
-alias dcex='docker compose exec'
-alias dcp='docker compose pull'
-alias dcrun='docker compose run --rm'
+dc()    { require_feature "docker_tools" || return 1; docker compose "$@"; }
+dcu()   { require_feature "docker_tools" || return 1; docker compose up "$@"; }
+dcud()  { require_feature "docker_tools" || return 1; docker compose up -d "$@"; }
+dcd()   { require_feature "docker_tools" || return 1; docker compose down "$@"; }
+dcr()   { require_feature "docker_tools" || return 1; docker compose restart "$@"; }
+dcl()   { require_feature "docker_tools" || return 1; docker compose logs -f "$@"; }
+dcps()  { require_feature "docker_tools" || return 1; docker compose ps "$@"; }
+dcb()   { require_feature "docker_tools" || return 1; docker compose build "$@"; }
+dcex()  { require_feature "docker_tools" || return 1; docker compose exec "$@"; }
+dcp()   { require_feature "docker_tools" || return 1; docker compose pull "$@"; }
+dcrun() { require_feature "docker_tools" || return 1; docker compose run --rm "$@"; }
 
 # =========================
 # Container Helper Functions
@@ -50,6 +46,7 @@ alias dcrun='docker compose run --rm'
 
 # Execute shell in container (tries bash, falls back to sh)
 dsh() {
+    require_feature "docker_tools" || return 1
     local container="${1:-}"
 
     if [[ -z "$container" ]]; then
@@ -66,6 +63,7 @@ dsh() {
 
 # Execute command in container
 dex() {
+    require_feature "docker_tools" || return 1
     local container="${1:-}"
     shift 2>/dev/null || true
 
@@ -86,6 +84,7 @@ dex() {
 
 # Get container IP address
 dip() {
+    require_feature "docker_tools" || return 1
     local container="${1:-}"
 
     if [[ -z "$container" ]]; then
@@ -98,6 +97,7 @@ dip() {
 
 # Show container environment variables
 denv() {
+    require_feature "docker_tools" || return 1
     local container="${1:-}"
 
     if [[ -z "$container" ]]; then
@@ -111,6 +111,7 @@ denv() {
 
 # Show all containers with exposed ports
 dports() {
+    require_feature "docker_tools" || return 1
     echo "Container Ports:"
     echo "──────────────────────────────────────"
     docker ps --format "table {{.Names}}\t{{.Ports}}" | tail -n +2 | while read line; do
@@ -120,16 +121,19 @@ dports() {
 
 # Pretty docker stats
 dstats() {
+    require_feature "docker_tools" || return 1
     docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}"
 }
 
 # Live docker stats
 dstatsf() {
+    require_feature "docker_tools" || return 1
     docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}"
 }
 
 # List volumes with details
 dvols() {
+    require_feature "docker_tools" || return 1
     echo "Docker Volumes:"
     echo "──────────────────────────────────────"
     docker volume ls --format "table {{.Name}}\t{{.Driver}}" | tail -n +2 | while read line; do
@@ -141,6 +145,7 @@ dvols() {
 
 # Inspect with optional jq filtering
 dinspect() {
+    require_feature "docker_tools" || return 1
     local container="${1:-}"
     local jq_path="${2:-}"
 
@@ -167,6 +172,7 @@ dinspect() {
 
 # List networks with details
 dnets() {
+    require_feature "docker_tools" || return 1
     echo "Docker Networks:"
     echo "──────────────────────────────────────"
     docker network ls --format "table {{.Name}}\t{{.Driver}}\t{{.Scope}}"
@@ -174,6 +180,7 @@ dnets() {
 
 # Show containers on a network
 dnetinspect() {
+    require_feature "docker_tools" || return 1
     local network="${1:-bridge}"
     echo "Containers on network '$network':"
     echo "──────────────────────────────────────"
@@ -186,6 +193,7 @@ dnetinspect() {
 
 # Remove stopped containers and dangling images
 dclean() {
+    require_feature "docker_tools" || return 1
     echo "Cleaning up Docker..."
     echo ""
 
@@ -213,6 +221,7 @@ dclean() {
 
 # Interactive system prune
 dprune() {
+    require_feature "docker_tools" || return 1
     echo "This will remove:"
     echo "  - All stopped containers"
     echo "  - All networks not used by containers"
@@ -224,6 +233,7 @@ dprune() {
 
 # Aggressive cleanup (with confirmation)
 dprune-all() {
+    require_feature "docker_tools" || return 1
     echo "WARNING: This will remove:"
     echo "  - All stopped containers"
     echo "  - All networks not used by containers"
@@ -245,6 +255,7 @@ dprune-all() {
 
 # Build with tag from current directory name
 dbuild-here() {
+    require_feature "docker_tools" || return 1
     local tag="${1:-$(basename $(pwd))}"
     echo "Building image: $tag"
     docker build -t "$tag" .
@@ -252,6 +263,7 @@ dbuild-here() {
 
 # Build with no cache
 dbuild-fresh() {
+    require_feature "docker_tools" || return 1
     local tag="${1:-$(basename $(pwd))}"
     echo "Building image (no cache): $tag"
     docker build --no-cache -t "$tag" .
@@ -262,6 +274,7 @@ dbuild-fresh() {
 # =========================
 
 dockertools() {
+    require_feature "docker_tools" || return 1
     # Source theme colors
     source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
 

@@ -3,6 +3,7 @@
 # =========================
 # AWS profile management, SSO authentication, and role assumption helpers
 # Provides tools for managing AWS profiles, SSO login, and cross-account access
+# Runtime guards allow enable/disable without shell reload
 
 # =========================
 # AWS Profile Management
@@ -10,6 +11,7 @@
 
 # List all configured AWS profiles
 awsprofiles() {
+  require_feature "aws_helpers" || return 1
   echo "Available AWS profiles:"
   aws configure list-profiles 2>/dev/null | while read -r profile; do
     if [[ "$profile" == "${AWS_PROFILE:-}" ]]; then
@@ -22,6 +24,7 @@ awsprofiles() {
 
 # Interactive profile selector (requires fzf)
 awsswitch() {
+  require_feature "aws_helpers" || return 1
   if ! command -v fzf >/dev/null 2>&1; then
     echo "fzf not installed. Use: awsset <profile>" >&2
     return 1
@@ -45,6 +48,7 @@ awsswitch() {
 
 # Set AWS profile for current shell
 awsset() {
+  require_feature "aws_helpers" || return 1
   if [[ -z "$1" ]]; then
     echo "Usage: awsset <profile>" >&2
     echo "Available profiles: $(aws configure list-profiles 2>/dev/null | tr '\n' ' ')" >&2
@@ -56,12 +60,14 @@ awsset() {
 
 # Unset AWS profile (return to default)
 awsunset() {
+  require_feature "aws_helpers" || return 1
   unset AWS_PROFILE
   echo "Cleared AWS_PROFILE (using default)"
 }
 
 # Show current AWS identity
 awswho() {
+  require_feature "aws_helpers" || return 1
   local profile="${AWS_PROFILE:-default}"
   echo "Profile: $profile"
   aws sts get-caller-identity --output table 2>/dev/null || echo "Not authenticated. Run: awslogin $profile"
@@ -69,6 +75,7 @@ awswho() {
 
 # SSO login helper
 awslogin() {
+  require_feature "aws_helpers" || return 1
   local p="${1:-${AWS_PROFILE:-dev-profile}}"
   echo "Logging in to AWS SSO profile: $p"
   aws sso login --profile "$p"
@@ -81,6 +88,7 @@ awslogin() {
 
 # Quick assume role (for cross-account access)
 awsassume() {
+  require_feature "aws_helpers" || return 1
   local role_arn="$1"
   local session_name="${2:-cli-session}"
 
@@ -106,6 +114,7 @@ awsassume() {
 
 # Clear assumed role credentials
 awsclear() {
+  require_feature "aws_helpers" || return 1
   unset AWS_ACCESS_KEY_ID
   unset AWS_SECRET_ACCESS_KEY
   unset AWS_SESSION_TOKEN
@@ -114,6 +123,7 @@ awsclear() {
 
 # Show all AWS commands with banner
 awstools() {
+  require_feature "aws_helpers" || return 1
   # Source theme colors
   source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
 
