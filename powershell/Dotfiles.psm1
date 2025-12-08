@@ -1004,9 +1004,11 @@ function claude-switch {
     }
 }
 
-# Claude convenience aliases (matching ZSH cb/cm)
-Set-Alias -Name cb -Value claude-bedrock -Scope Global -Force
-Set-Alias -Name cm -Value claude-max -Scope Global -Force
+# Claude convenience aliases (matching ZSH cbed/cmax/cm)
+# Note: Using 'cbed' instead of 'cb' to avoid collision with Rust's cargo-build alias
+Set-Alias -Name cbed -Value claude-bedrock -Scope Global -Force
+Set-Alias -Name cmax -Value claude-max -Scope Global -Force
+Set-Alias -Name cm -Value claude-max -Scope Global -Force  # Alias for cmax
 
 #endregion
 

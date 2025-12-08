@@ -9,39 +9,42 @@
 # Cargo Aliases (as functions for runtime guards)
 # =========================
 
+# Note: Using 'function' keyword to override existing aliases at parse time
+unalias cb cr ct cc ccl cf cdoc cbr crr cba cbra ctq ctn ctv cu cadd crm cclean cfix caudit cw cwr cwt cwc 2>/dev/null
+
 # Core cargo commands
-cb()   { require_feature "rust_tools" || return 1; cargo build "$@"; }
-cr()   { require_feature "rust_tools" || return 1; cargo run "$@"; }
-ct()   { require_feature "rust_tools" || return 1; cargo test "$@"; }
-cc()   { require_feature "rust_tools" || return 1; cargo check "$@"; }
-ccl()  { require_feature "rust_tools" || return 1; cargo clippy "$@"; }
-cf()   { require_feature "rust_tools" || return 1; cargo fmt "$@"; }
-cdoc() { require_feature "rust_tools" || return 1; cargo doc --open "$@"; }
+function cb   { require_feature "rust_tools" || return 1; cargo build "$@"; }
+function cr   { require_feature "rust_tools" || return 1; cargo run "$@"; }
+function ct   { require_feature "rust_tools" || return 1; cargo test "$@"; }
+function cc   { require_feature "rust_tools" || return 1; cargo check "$@"; }
+function ccl  { require_feature "rust_tools" || return 1; cargo clippy "$@"; }
+function cf   { require_feature "rust_tools" || return 1; cargo fmt "$@"; }
+function cdoc { require_feature "rust_tools" || return 1; cargo doc --open "$@"; }
 
 # Build variations
-cbr()  { require_feature "rust_tools" || return 1; cargo build --release "$@"; }
-crr()  { require_feature "rust_tools" || return 1; cargo run --release "$@"; }
-cba()  { require_feature "rust_tools" || return 1; cargo build --all-features "$@"; }
-cbra() { require_feature "rust_tools" || return 1; cargo build --release --all-features "$@"; }
+function cbr  { require_feature "rust_tools" || return 1; cargo build --release "$@"; }
+function crr  { require_feature "rust_tools" || return 1; cargo run --release "$@"; }
+function cba  { require_feature "rust_tools" || return 1; cargo build --all-features "$@"; }
+function cbra { require_feature "rust_tools" || return 1; cargo build --release --all-features "$@"; }
 
 # Testing variations
-ctq() { require_feature "rust_tools" || return 1; cargo test --quiet "$@"; }
-ctn() { require_feature "rust_tools" || return 1; cargo test -- --nocapture "$@"; }
-ctv() { require_feature "rust_tools" || return 1; cargo test -- --show-output "$@"; }
+function ctq { require_feature "rust_tools" || return 1; cargo test --quiet "$@"; }
+function ctn { require_feature "rust_tools" || return 1; cargo test -- --nocapture "$@"; }
+function ctv { require_feature "rust_tools" || return 1; cargo test -- --show-output "$@"; }
 
 # Other useful commands
-cu()     { require_feature "rust_tools" || return 1; cargo update "$@"; }
-cadd()   { require_feature "rust_tools" || return 1; cargo add "$@"; }
-crm()    { require_feature "rust_tools" || return 1; cargo remove "$@"; }
-cclean() { require_feature "rust_tools" || return 1; cargo clean "$@"; }
-cfix()   { require_feature "rust_tools" || return 1; cargo fix --allow-dirty "$@"; }
-caudit() { require_feature "rust_tools" || return 1; cargo audit "$@"; }
+function cu     { require_feature "rust_tools" || return 1; cargo update "$@"; }
+function cadd   { require_feature "rust_tools" || return 1; cargo add "$@"; }
+function crm    { require_feature "rust_tools" || return 1; cargo remove "$@"; }
+function cclean { require_feature "rust_tools" || return 1; cargo clean "$@"; }
+function cfix   { require_feature "rust_tools" || return 1; cargo fix --allow-dirty "$@"; }
+function caudit { require_feature "rust_tools" || return 1; cargo audit "$@"; }
 
 # Watch mode (requires cargo-watch)
-cw()  { require_feature "rust_tools" || return 1; cargo watch "$@"; }
-cwr() { require_feature "rust_tools" || return 1; cargo watch -x run "$@"; }
-cwt() { require_feature "rust_tools" || return 1; cargo watch -x test "$@"; }
-cwc() { require_feature "rust_tools" || return 1; cargo watch -x check "$@"; }
+function cw  { require_feature "rust_tools" || return 1; cargo watch "$@"; }
+function cwr { require_feature "rust_tools" || return 1; cargo watch -x run "$@"; }
+function cwt { require_feature "rust_tools" || return 1; cargo watch -x test "$@"; }
+function cwc { require_feature "rust_tools" || return 1; cargo watch -x check "$@"; }
 
 # =========================
 # Rust Helper Functions

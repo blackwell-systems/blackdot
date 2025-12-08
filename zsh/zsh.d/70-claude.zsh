@@ -182,5 +182,9 @@ claude-status() {
 }
 
 # Convenience wrapper functions
-cb() { require_feature "claude_integration" || return 1; claude-bedrock "$@"; }
-cm() { require_feature "claude_integration" || return 1; claude-max "$@"; }
+# Note: Using 'function' keyword to override existing aliases at parse time
+# Note: Using 'cbed' instead of 'cb' to avoid collision with Rust's cargo-build alias
+unalias cbed cmax cm 2>/dev/null
+function cbed { require_feature "claude_integration" || return 1; claude-bedrock "$@"; }
+function cmax { require_feature "claude_integration" || return 1; claude-max "$@"; }
+function cm   { require_feature "claude_integration" || return 1; claude-max "$@"; }  # Alias for cmax

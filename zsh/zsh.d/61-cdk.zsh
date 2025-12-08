@@ -9,20 +9,23 @@
 # CDK Aliases (as functions for runtime guards)
 # =========================
 
+# Note: Using 'function' keyword to override existing aliases at parse time
+unalias cdkd cdks cdkdf cdkw cdkls cdkdst cdkb cdkda cdkdfa cdkhs cdkhsf 2>/dev/null
+
 # Core CDK commands
-cdkd()   { require_feature "cdk_tools" || return 1; cdk deploy "$@"; }
-cdks()   { require_feature "cdk_tools" || return 1; cdk synth "$@"; }
-cdkdf()  { require_feature "cdk_tools" || return 1; cdk diff "$@"; }
-cdkw()   { require_feature "cdk_tools" || return 1; cdk watch "$@"; }
-cdkls()  { require_feature "cdk_tools" || return 1; cdk list "$@"; }
-cdkdst() { require_feature "cdk_tools" || return 1; cdk destroy "$@"; }
-cdkb()   { require_feature "cdk_tools" || return 1; cdk bootstrap "$@"; }
+function cdkd   { require_feature "cdk_tools" || return 1; cdk deploy "$@"; }
+function cdks   { require_feature "cdk_tools" || return 1; cdk synth "$@"; }
+function cdkdf  { require_feature "cdk_tools" || return 1; cdk diff "$@"; }
+function cdkw   { require_feature "cdk_tools" || return 1; cdk watch "$@"; }
+function cdkls  { require_feature "cdk_tools" || return 1; cdk list "$@"; }
+function cdkdst { require_feature "cdk_tools" || return 1; cdk destroy "$@"; }
+function cdkb   { require_feature "cdk_tools" || return 1; cdk bootstrap "$@"; }
 
 # Common variations
-cdkda()  { require_feature "cdk_tools" || return 1; cdk deploy --all "$@"; }
-cdkdfa() { require_feature "cdk_tools" || return 1; cdk diff --all "$@"; }
-cdkhs()  { require_feature "cdk_tools" || return 1; cdk deploy --hotswap "$@"; }
-cdkhsf() { require_feature "cdk_tools" || return 1; cdk deploy --hotswap-fallback "$@"; }
+function cdkda  { require_feature "cdk_tools" || return 1; cdk deploy --all "$@"; }
+function cdkdfa { require_feature "cdk_tools" || return 1; cdk diff --all "$@"; }
+function cdkhs  { require_feature "cdk_tools" || return 1; cdk deploy --hotswap "$@"; }
+function cdkhsf { require_feature "cdk_tools" || return 1; cdk deploy --hotswap-fallback "$@"; }
 
 # =========================
 # CDK Helper Functions
