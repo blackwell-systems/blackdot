@@ -7,8 +7,9 @@
 # - SKIP_* environment variables provide backward compatibility
 # - Features can be enabled/disabled at runtime
 # - Dependencies are resolved automatically
-
-set -euo pipefail
+#
+# NOTE: Do NOT use "set -euo pipefail" here - this file is sourced into
+# interactive shells and those options would kill the shell on any error.
 
 # ============================================================
 # Feature Definitions
