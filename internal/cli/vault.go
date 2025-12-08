@@ -591,6 +591,18 @@ func vaultUnlock() error {
 		return err
 	}
 
+	// Persist session token to file for subsequent commands
+	sessionFile := getSessionFile()
+	token := session.Token()
+	if token != "" {
+		// Ensure directory exists
+		if err := os.MkdirAll(filepath.Dir(sessionFile), 0700); err != nil {
+			Warn("Failed to create session directory: %v", err)
+		} else if err := os.WriteFile(sessionFile, []byte(token), 0600); err != nil {
+			Warn("Failed to save session: %v", err)
+		}
+	}
+
 	Pass("Vault unlocked")
 
 	if !session.ExpiresAt().IsZero() {
