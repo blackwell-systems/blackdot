@@ -328,6 +328,8 @@ _dotfiles_help() {
     fi
 
     echo "${DIM}Run 'dotfiles <command> --help' for detailed options.${NC}"
+    echo ""
+    echo "${DIM}Runtime: ZSH shell${NC}"
 }
 
 # Unified dotfiles command with subcommands
@@ -807,6 +809,11 @@ dotfiles() {
             ;;
         edit)
             ${EDITOR:-vim} "$DOTFILES_DIR"
+            ;;
+
+        # Version
+        version|--version|-V)
+            echo "dotfiles dev (ZSH shell)"
             ;;
 
         # Help

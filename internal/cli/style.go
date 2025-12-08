@@ -117,6 +117,8 @@ func printRootHelp() {
 	fmt.Println()
 
 	Dim.Println("Run 'dotfiles <command> --help' for detailed options.")
+	fmt.Println()
+	Dim.Printf("Runtime: Go CLI (%s)\n", versionStr)
 }
 
 // printCmd prints a command with description in ZSH style
