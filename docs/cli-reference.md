@@ -642,8 +642,92 @@ dotfiles vault <command> [OPTIONS]
 | `check` | Validate vault items exist |
 | `validate` | Validate vault item schema |
 | `create` | Create new vault item |
-| `delete` | Delete vault item |
+| `delete` | Delete vault item(s) |
 | `help` | Show help |
+
+---
+
+### vault create
+
+Create a new Secure Note item in the vault.
+
+```bash
+dotfiles vault create <item-name> [content] [OPTIONS]
+```
+
+**Options:**
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--dry-run` | `-n` | Preview without making changes |
+| `--force` | `-f` | Overwrite if item already exists |
+| `--file` | | Read content from file instead of argument |
+
+**Content Sources (in order of precedence):**
+1. Command line argument: `dotfiles vault create Name "content"`
+2. File: `dotfiles vault create Name --file ~/path/to/file`
+3. Stdin: `echo "content" | dotfiles vault create Name`
+
+**Examples:**
+
+```bash
+# Create from argument
+dotfiles vault create API-Key "sk-1234567890"
+
+# Create from file
+dotfiles vault create SSH-Config --file ~/.ssh/config
+
+# Create from stdin
+cat ~/.gitconfig | dotfiles vault create Git-Config
+
+# Preview what would be created
+dotfiles vault create --dry-run Test-Item "preview content"
+
+# Overwrite existing item
+dotfiles vault create --force API-Key "new-key"
+```
+
+---
+
+### vault delete
+
+Delete one or more items from the vault.
+
+```bash
+dotfiles vault delete <item-name>... [OPTIONS]
+```
+
+**Options:**
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--dry-run` | `-n` | Preview without making changes |
+| `--force` | `-f` | Skip confirmation prompts (except protected items) |
+
+**Protected Items:**
+
+These items require typing the item name to confirm deletion, even with `--force`:
+- `SSH-*` - SSH keys and configs
+- `AWS-*` - AWS credentials
+- `Git-Config` - Git configuration
+- `Environment-Secrets` - Environment variables
+
+**Examples:**
+
+```bash
+# Delete single item (with confirmation)
+dotfiles vault delete OLD-API-KEY
+
+# Delete multiple items with force
+dotfiles vault delete --force TEMP-1 TEMP-2 TEMP-3
+
+# Preview what would be deleted
+dotfiles vault delete --dry-run OLD-KEY
+
+# Protected item requires typing name even with force
+dotfiles vault delete SSH-Work
+# Type "SSH-Work" to confirm
+```
 
 ---
 

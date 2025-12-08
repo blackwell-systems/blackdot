@@ -1,12 +1,17 @@
 package cli
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/blackwell-systems/dotfiles/internal/config"
@@ -81,6 +86,15 @@ environment files, and custom secrets.`,
 		newVaultSyncCmd(),
 		newVaultGetCmd(),
 		newVaultHealthCmd(),
+		newVaultQuickCmd(),
+		newVaultRestoreCmd(),
+		newVaultPushCmd(),
+		newVaultScanCmd(),
+		newVaultCheckCmd(),
+		newVaultValidateCmd(),
+		newVaultInitCmd(),
+		newVaultCreateCmd(),
+		newVaultDeleteCmd(),
 	)
 
 	return cmd
@@ -197,6 +211,241 @@ func newVaultHealthCmd() *cobra.Command {
 			return vaultHealth()
 		},
 	}
+}
+
+func newVaultQuickCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "quick",
+		Short: "Quick status check (login/unlock only)",
+		Long: `Quick vault status check - only checks if vault is accessible.
+
+This is faster than 'vault status' as it skips drift detection
+and other detailed checks.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return vaultQuick()
+		},
+	}
+}
+
+func newVaultRestoreCmd() *cobra.Command {
+	var force bool
+	var dryRun bool
+
+	cmd := &cobra.Command{
+		Use:     "restore",
+		Aliases: []string{"pull"},
+		Short:   "Restore secrets from vault to local",
+		Long: `Restore secrets from vault to local machine.
+
+Restores:
+  - SSH keys and config
+  - AWS credentials
+  - Git configuration
+  - Environment secrets
+
+Options:
+  --force, -f    Skip drift check and overwrite local changes
+  --dry-run, -n  Show what would be restored without making changes`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return vaultRestore(force, dryRun)
+		},
+	}
+
+	cmd.Flags().BoolVarP(&force, "force", "f", false, "Skip drift check and overwrite local changes")
+	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "Show what would be restored")
+
+	return cmd
+}
+
+func newVaultPushCmd() *cobra.Command {
+	var force bool
+	var dryRun bool
+	var all bool
+
+	cmd := &cobra.Command{
+		Use:   "push [items...]",
+		Short: "Push local secrets to vault",
+		Long: `Push local secrets to vault.
+
+Items:
+  SSH-Config, AWS-Config, AWS-Credentials, Git-Config, Environment-Secrets
+
+Options:
+  --force, -f    Overwrite vault content without confirmation
+  --dry-run, -n  Show what would be pushed without making changes
+  --all, -a      Push all items`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return vaultPush(args, force, dryRun, all)
+		},
+	}
+
+	cmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite vault without confirmation")
+	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "Show what would be pushed")
+	cmd.Flags().BoolVarP(&all, "all", "a", false, "Push all items")
+
+	return cmd
+}
+
+func newVaultScanCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "scan",
+		Short: "Scan for local secrets to add to vault",
+		Long: `Scan for local secrets that could be added to vault.
+
+Discovers:
+  - SSH keys in ~/.ssh/
+  - AWS credentials in ~/.aws/
+  - Git configuration
+  - Environment files`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return vaultScan()
+		},
+	}
+}
+
+func newVaultCheckCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "check",
+		Short: "Check required vault items exist",
+		Long: `Check that all required vault items exist.
+
+Verifies items defined in vault-items.json exist in the vault.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return vaultCheck()
+		},
+	}
+}
+
+func newVaultValidateCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "validate",
+		Short: "Validate vault-items.json schema",
+		Long: `Validate the vault-items.json configuration file.
+
+Checks:
+  - JSON syntax
+  - Required fields
+  - Path validity
+  - Item name format`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return vaultValidate()
+		},
+	}
+}
+
+func newVaultInitCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "init",
+		Short: "Initialize vault setup",
+		Long: `Interactive vault setup wizard.
+
+Steps:
+  1. Select vault backend (bitwarden, 1password, pass)
+  2. Verify CLI tool is installed
+  3. Test authentication
+  4. Create vault-items.json if missing`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return vaultInit()
+		},
+	}
+}
+
+func newVaultCreateCmd() *cobra.Command {
+	var dryRun bool
+	var force bool
+	var fromFile string
+
+	cmd := &cobra.Command{
+		Use:   "create <item-name> [content]",
+		Short: "Create a new vault item",
+		Long: `Create a new Secure Note item in the vault.
+
+Content can be provided as:
+  - An argument: dotfiles vault create My-Item "content here"
+  - From a file: dotfiles vault create My-Item --file ~/path/to/file
+  - From stdin: echo "content" | dotfiles vault create My-Item
+
+Options:
+  --dry-run, -n  Show what would be created without making changes
+  --force, -f    Overwrite if item already exists
+  --file         Read content from file
+
+Examples:
+  dotfiles vault create API-Key "sk-1234567890"
+  dotfiles vault create SSH-Config --file ~/.ssh/config
+  dotfiles vault create --dry-run Git-Config --file ~/.gitconfig`,
+		Args: cobra.MinimumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			name := args[0]
+			var content string
+
+			if fromFile != "" {
+				// Read from file
+				data, err := os.ReadFile(fromFile)
+				if err != nil {
+					return fmt.Errorf("failed to read file: %w", err)
+				}
+				content = string(data)
+			} else if len(args) > 1 {
+				// Content provided as argument
+				content = args[1]
+			} else {
+				// Read from stdin
+				stat, _ := os.Stdin.Stat()
+				if (stat.Mode() & os.ModeCharDevice) == 0 {
+					data, err := io.ReadAll(os.Stdin)
+					if err != nil {
+						return fmt.Errorf("failed to read stdin: %w", err)
+					}
+					content = string(data)
+				} else {
+					return fmt.Errorf("content required: provide as argument, --file, or stdin")
+				}
+			}
+
+			return vaultCreate(name, content, dryRun, force)
+		},
+	}
+
+	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "Show what would be created")
+	cmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite if item exists")
+	cmd.Flags().StringVar(&fromFile, "file", "", "Read content from file")
+
+	return cmd
+}
+
+func newVaultDeleteCmd() *cobra.Command {
+	var dryRun bool
+	var force bool
+
+	cmd := &cobra.Command{
+		Use:   "delete <item-name>...",
+		Short: "Delete vault items",
+		Long: `Delete items from the vault.
+
+WARNING: Deletion is permanent and cannot be undone.
+
+Protected items (SSH-*, AWS-*, Git-Config, Environment-Secrets) require
+typing the item name to confirm, even with --force.
+
+Options:
+  --dry-run, -n  Show what would be deleted without making changes
+  --force, -f    Skip confirmation prompts (except protected items)
+
+Examples:
+  dotfiles vault delete TEST-NOTE
+  dotfiles vault delete --dry-run OLD-KEY
+  dotfiles vault delete --force TEMP-1 TEMP-2 TEMP-3`,
+		Args: cobra.MinimumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return vaultDelete(args, dryRun, force)
+		},
+	}
+
+	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "Show what would be deleted")
+	cmd.Flags().BoolVarP(&force, "force", "f", false, "Skip confirmation prompts")
+
+	return cmd
 }
 
 // ============================================================
@@ -510,5 +759,1294 @@ func vaultHealth() error {
 		Info("No cached session")
 	}
 
+	return nil
+}
+
+// vaultQuick provides a quick status check (login/unlock only)
+func vaultQuick() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	backendType := getVaultBackend()
+
+	fmt.Println("Vault Status")
+	fmt.Println("────────────")
+
+	if backendType == "" {
+		fmt.Println("  Backend:    Not configured")
+		fmt.Println()
+		Info("Run 'dotfiles setup' to configure a vault")
+		return fmt.Errorf("vault not configured")
+	}
+
+	fmt.Printf("  Backend:    %s\n", backendType)
+
+	backend, err := newVaultBackend()
+	if err != nil {
+		fmt.Println("  Status:     Backend not available")
+		return err
+	}
+	defer backend.Close()
+
+	if err := backend.Init(ctx); err != nil {
+		fmt.Println("  CLI:        Not installed")
+		fmt.Println()
+		switch backendType {
+		case vaultmux.BackendBitwarden:
+			Info("Install with: brew install bitwarden-cli")
+		case vaultmux.BackendOnePassword:
+			Info("Install with: brew install --cask 1password-cli")
+		case vaultmux.BackendPass:
+			Info("Install with: brew install pass")
+		}
+		return err
+	}
+
+	fmt.Printf("  CLI:        %s\n", backend.Name())
+
+	if backend.IsAuthenticated(ctx) {
+		fmt.Println("  Status:     Authenticated")
+		fmt.Println()
+		Pass("Vault is accessible")
+		return nil
+	}
+
+	fmt.Println("  Status:     Not authenticated")
+	fmt.Println()
+	Info("Run: dotfiles vault unlock")
+	return fmt.Errorf("vault not authenticated")
+}
+
+// vaultRestore restores secrets from vault to local machine
+func vaultRestore(force, dryRun bool) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer cancel()
+
+	PrintHeader("Vault Restore")
+
+	// Validate vault-items.json first
+	Info("Validating vault-items.json schema...")
+	if err := vaultValidate(); err != nil {
+		return err
+	}
+	fmt.Println()
+
+	backendType := getVaultBackend()
+	fmt.Printf("Backend: %s\n", backendType)
+
+	backend, err := newVaultBackend()
+	if err != nil {
+		Fail("Failed to create backend: %v", err)
+		return err
+	}
+	defer backend.Close()
+
+	if err := backend.Init(ctx); err != nil {
+		Fail("Backend not available: %v", err)
+		return err
+	}
+
+	session, err := backend.Authenticate(ctx)
+	if err != nil {
+		Fail("Authentication required: %v", err)
+		return err
+	}
+
+	// Sync with remote
+	Info("Syncing vault...")
+	if err := backend.Sync(ctx, session); err != nil {
+		Warn("Sync warning: %v", err)
+	}
+	Pass("Vault synced")
+	fmt.Println()
+
+	// Load vault items configuration
+	vaultItems, err := loadVaultItems()
+	if err != nil {
+		Fail("Failed to load vault-items.json: %v", err)
+		return err
+	}
+
+	if dryRun {
+		fmt.Println("=== Preview Mode - No changes will be made ===")
+		fmt.Println()
+	}
+
+	// Restore each item
+	restored := 0
+	skipped := 0
+	failed := 0
+
+	for name, item := range vaultItems {
+		path := expandPath(item.Path)
+
+		if dryRun {
+			if _, err := os.Stat(path); err == nil {
+				fmt.Printf("  %s → %s (exists, would overwrite)\n", name, path)
+			} else {
+				fmt.Printf("  %s → %s (new)\n", name, path)
+			}
+			restored++
+			continue
+		}
+
+		// Get item from vault
+		notes, err := backend.GetNotes(ctx, name, session)
+		if err != nil {
+			if errors.Is(err, vaultmux.ErrNotFound) {
+				if item.Required {
+					Fail("%s: not found in vault (required)", name)
+					failed++
+				} else {
+					Warn("%s: not found in vault (optional)", name)
+					skipped++
+				}
+				continue
+			}
+			Fail("%s: failed to get from vault: %v", name, err)
+			failed++
+			continue
+		}
+
+		// Create parent directory
+		dir := filepath.Dir(path)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			Fail("%s: failed to create directory: %v", name, err)
+			failed++
+			continue
+		}
+
+		// Determine file permissions
+		perm := os.FileMode(0644)
+		if item.Type == "sshkey" {
+			perm = 0600
+		}
+
+		// Write file
+		if err := os.WriteFile(path, []byte(notes), perm); err != nil {
+			Fail("%s: failed to write file: %v", name, err)
+			failed++
+			continue
+		}
+
+		Pass("%s → %s", name, path)
+		restored++
+	}
+
+	fmt.Println()
+	fmt.Println("========================================")
+	if dryRun {
+		fmt.Printf("DRY RUN: Would restore %d items\n", restored)
+	} else {
+		fmt.Printf("Restored: %d\n", restored)
+	}
+	fmt.Printf("Skipped: %d\n", skipped)
+	if failed > 0 {
+		Fail("Failed: %d", failed)
+		return fmt.Errorf("%d items failed to restore", failed)
+	}
+	fmt.Println("========================================")
+
+	return nil
+}
+
+// vaultPush pushes local secrets to vault
+func vaultPush(items []string, force, dryRun, all bool) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer cancel()
+
+	PrintHeader("Push to Vault")
+
+	// Validate vault-items.json first
+	Info("Validating vault-items.json schema...")
+	if err := vaultValidate(); err != nil {
+		return err
+	}
+	fmt.Println()
+
+	backendType := getVaultBackend()
+	fmt.Printf("Backend: %s\n", backendType)
+
+	backend, err := newVaultBackend()
+	if err != nil {
+		Fail("Failed to create backend: %v", err)
+		return err
+	}
+	defer backend.Close()
+
+	if err := backend.Init(ctx); err != nil {
+		Fail("Backend not available: %v", err)
+		return err
+	}
+
+	session, err := backend.Authenticate(ctx)
+	if err != nil {
+		Fail("Authentication required: %v", err)
+		return err
+	}
+
+	// Sync with remote
+	Info("Syncing vault...")
+	if err := backend.Sync(ctx, session); err != nil {
+		Warn("Sync warning: %v", err)
+	}
+	Pass("Vault synced")
+	fmt.Println()
+
+	// Load syncable items
+	syncableItems, err := loadSyncableItems()
+	if err != nil {
+		Fail("Failed to load syncable items: %v", err)
+		return err
+	}
+
+	// Determine which items to sync
+	var itemsToSync map[string]string
+	if all {
+		itemsToSync = syncableItems
+	} else if len(items) > 0 {
+		itemsToSync = make(map[string]string)
+		for _, name := range items {
+			if path, ok := syncableItems[name]; ok {
+				itemsToSync[name] = path
+			} else {
+				Fail("Unknown item: %s", name)
+				fmt.Println("Valid items:")
+				for k := range syncableItems {
+					fmt.Printf("  %s\n", k)
+				}
+				return fmt.Errorf("unknown item: %s", name)
+			}
+		}
+	} else {
+		Warn("No items specified. Use --all or specify items to sync.")
+		fmt.Println()
+		fmt.Println("Valid items:")
+		for k, v := range syncableItems {
+			fmt.Printf("  %-25s %s\n", k, v)
+		}
+		return nil
+	}
+
+	if dryRun {
+		fmt.Println("=== Preview Mode - No changes will be made ===")
+		fmt.Println()
+	}
+
+	// Push each item
+	synced := 0
+	skipped := 0
+	failed := 0
+
+	for name, pathTemplate := range itemsToSync {
+		path := expandPath(pathTemplate)
+
+		fmt.Printf("--- %s ---\n", name)
+
+		// Check if local file exists
+		localContent, err := os.ReadFile(path)
+		if err != nil {
+			Warn("Local file not found: %s", path)
+			skipped++
+			continue
+		}
+
+		// Get current vault content
+		vaultContent, err := backend.GetNotes(ctx, name, session)
+		if err != nil && !errors.Is(err, vaultmux.ErrNotFound) {
+			Fail("Failed to get vault item: %v", err)
+			failed++
+			continue
+		}
+
+		// Compare
+		if string(localContent) == vaultContent {
+			Pass("Already in sync: %s", path)
+			skipped++
+			continue
+		}
+
+		if dryRun {
+			fmt.Printf("Would update '%s' from %s\n", name, path)
+			synced++
+			continue
+		}
+
+		// Update vault
+		if vaultContent == "" {
+			// Create new item
+			if err := backend.CreateItem(ctx, name, string(localContent), session); err != nil {
+				Fail("Failed to create '%s': %v", name, err)
+				failed++
+				continue
+			}
+			Pass("Created '%s' from %s", name, path)
+		} else {
+			// Update existing item
+			if err := backend.UpdateItem(ctx, name, string(localContent), session); err != nil {
+				Fail("Failed to update '%s': %v", name, err)
+				failed++
+				continue
+			}
+			Pass("Updated '%s' from %s", name, path)
+		}
+		synced++
+		fmt.Println()
+	}
+
+	fmt.Println()
+	fmt.Println("========================================")
+	if dryRun {
+		fmt.Printf("DRY RUN: Would sync %d items\n", synced)
+	} else {
+		fmt.Printf("Synced: %d\n", synced)
+	}
+	fmt.Printf("Skipped (no changes): %d\n", skipped)
+	if failed > 0 {
+		Fail("Failed: %d", failed)
+		return fmt.Errorf("%d items failed to push", failed)
+	}
+	fmt.Println("========================================")
+
+	return nil
+}
+
+// vaultScan scans for local secrets to add to vault
+func vaultScan() error {
+	PrintHeader("Secret Discovery")
+
+	fmt.Println("Scanning for secrets in standard locations...")
+	fmt.Println()
+
+	type discoveredItem struct {
+		Name     string
+		Path     string
+		Type     string
+		Required bool
+	}
+
+	var discovered []discoveredItem
+
+	homeDir, _ := os.UserHomeDir()
+
+	// Scan SSH keys
+	Info("Scanning ~/.ssh/ for SSH keys...")
+	sshDir := filepath.Join(homeDir, ".ssh")
+	if entries, err := os.ReadDir(sshDir); err == nil {
+		for _, entry := range entries {
+			if entry.IsDir() {
+				continue
+			}
+			name := entry.Name()
+			// Skip known non-key files
+			if name == "known_hosts" || name == "config" || name == "authorized_keys" ||
+				strings.HasSuffix(name, ".pub") {
+				continue
+			}
+
+			// Check if it looks like a private key
+			keyPath := filepath.Join(sshDir, name)
+			content, err := os.ReadFile(keyPath)
+			if err != nil {
+				continue
+			}
+			if strings.HasPrefix(string(content), "-----BEGIN") &&
+				strings.Contains(string(content), "PRIVATE KEY") {
+				// Generate vault name from filename
+				vaultName := normalizeSSHKeyName(name)
+				Pass("  Found: %s → %s", name, vaultName)
+				discovered = append(discovered, discoveredItem{
+					Name:     vaultName,
+					Path:     "~/.ssh/" + name,
+					Type:     "sshkey",
+					Required: true,
+				})
+			}
+		}
+	}
+	fmt.Println()
+
+	// Scan AWS configs
+	Info("Checking for AWS configs...")
+	awsDir := filepath.Join(homeDir, ".aws")
+	if _, err := os.Stat(filepath.Join(awsDir, "credentials")); err == nil {
+		Pass("  Found: ~/.aws/credentials")
+		discovered = append(discovered, discoveredItem{
+			Name:     "AWS-Credentials",
+			Path:     "~/.aws/credentials",
+			Type:     "file",
+			Required: true,
+		})
+	}
+	if _, err := os.Stat(filepath.Join(awsDir, "config")); err == nil {
+		Pass("  Found: ~/.aws/config")
+		discovered = append(discovered, discoveredItem{
+			Name:     "AWS-Config",
+			Path:     "~/.aws/config",
+			Type:     "file",
+			Required: true,
+		})
+	}
+	fmt.Println()
+
+	// Scan Git config
+	Info("Checking for Git config...")
+	if _, err := os.Stat(filepath.Join(homeDir, ".gitconfig")); err == nil {
+		Pass("  Found: ~/.gitconfig")
+		discovered = append(discovered, discoveredItem{
+			Name:     "Git-Config",
+			Path:     "~/.gitconfig",
+			Type:     "file",
+			Required: true,
+		})
+	}
+	fmt.Println()
+
+	// Scan SSH config
+	Info("Checking for SSH config...")
+	if _, err := os.Stat(filepath.Join(homeDir, ".ssh", "config")); err == nil {
+		Pass("  Found: ~/.ssh/config")
+		discovered = append(discovered, discoveredItem{
+			Name:     "SSH-Config",
+			Path:     "~/.ssh/config",
+			Type:     "file",
+			Required: true,
+		})
+	}
+	fmt.Println()
+
+	// Scan other common secrets
+	Info("Checking for other secrets...")
+	otherSecrets := map[string]string{
+		"Claude-Profiles":       filepath.Join(homeDir, ".claude", "profiles.json"),
+		"NPM-Config":            filepath.Join(homeDir, ".npmrc"),
+		"PyPI-Config":           filepath.Join(homeDir, ".pypirc"),
+		"Docker-Config":         filepath.Join(homeDir, ".docker", "config.json"),
+		"Environment-Secrets":   filepath.Join(homeDir, ".local", "env.secrets"),
+		"Template-Variables":    filepath.Join(homeDir, ".config", "dotfiles", "template-variables.sh"),
+	}
+	for name, path := range otherSecrets {
+		if _, err := os.Stat(path); err == nil {
+			shortPath := strings.Replace(path, homeDir, "~", 1)
+			Pass("  Found: %s", shortPath)
+			discovered = append(discovered, discoveredItem{
+				Name:     name,
+				Path:     shortPath,
+				Type:     "file",
+				Required: false,
+			})
+		}
+	}
+	fmt.Println()
+
+	if len(discovered) == 0 {
+		Warn("No secrets found in standard locations")
+		return nil
+	}
+
+	// Generate JSON output
+	fmt.Println("========================================")
+	fmt.Printf("Discovered %d items\n", len(discovered))
+	fmt.Println("========================================")
+	fmt.Println()
+
+	// Build vault-items structure
+	vaultItemsJSON := map[string]interface{}{
+		"$schema":  "https://json-schema.org/draft/2020-12/schema",
+		"$comment": "Generated by dotfiles vault scan",
+	}
+
+	sshKeys := make(map[string]string)
+	vaultItems := make(map[string]map[string]interface{})
+	syncableItems := make(map[string]string)
+
+	for _, item := range discovered {
+		vaultItems[item.Name] = map[string]interface{}{
+			"path":     item.Path,
+			"type":     item.Type,
+			"required": item.Required,
+		}
+
+		if item.Type == "sshkey" {
+			sshKeys[item.Name] = item.Path
+		} else {
+			syncableItems[item.Name] = item.Path
+		}
+	}
+
+	vaultItemsJSON["ssh_keys"] = sshKeys
+	vaultItemsJSON["vault_items"] = vaultItems
+	vaultItemsJSON["syncable_items"] = syncableItems
+
+	jsonBytes, _ := json.MarshalIndent(vaultItemsJSON, "", "  ")
+	fmt.Println("Preview of vault-items.json:")
+	fmt.Println()
+	fmt.Println(string(jsonBytes))
+	fmt.Println()
+
+	configDir := os.Getenv("XDG_CONFIG_HOME")
+	if configDir == "" {
+		configDir = filepath.Join(homeDir, ".config")
+	}
+	vaultItemsPath := filepath.Join(configDir, "dotfiles", "vault-items.json")
+
+	Info("To save this configuration:")
+	fmt.Printf("  Save to: %s\n", vaultItemsPath)
+
+	return nil
+}
+
+// vaultCheck checks required vault items exist
+func vaultCheck() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	PrintHeader("Check Vault Items")
+
+	backend, err := newVaultBackend()
+	if err != nil {
+		Fail("Failed to create backend: %v", err)
+		return err
+	}
+	defer backend.Close()
+
+	if err := backend.Init(ctx); err != nil {
+		Fail("Backend not available: %v", err)
+		return err
+	}
+
+	session, err := backend.Authenticate(ctx)
+	if err != nil {
+		Fail("Authentication required: %v", err)
+		return err
+	}
+
+	// Sync vault
+	Info("Syncing vault...")
+	if err := backend.Sync(ctx, session); err != nil {
+		Warn("Sync warning: %v", err)
+	}
+	fmt.Println()
+
+	// Load vault items
+	vaultItems, err := loadVaultItems()
+	if err != nil {
+		Fail("Failed to load vault-items.json: %v", err)
+		return err
+	}
+
+	// Get all items from vault
+	Info("Fetching item list...")
+	items, err := backend.ListItems(ctx, session)
+	if err != nil {
+		Fail("Failed to list items: %v", err)
+		return err
+	}
+
+	// Build a set of vault item names
+	vaultItemNames := make(map[string]bool)
+	for _, item := range items {
+		vaultItemNames[item.Name] = true
+	}
+
+	fmt.Println()
+	fmt.Println("=== Required Items ===")
+	missing := 0
+	for name, item := range vaultItems {
+		if !item.Required {
+			continue
+		}
+		if vaultItemNames[name] {
+			Pass("%s", name)
+		} else {
+			Fail("[MISSING] %s", name)
+			missing++
+		}
+	}
+
+	fmt.Println()
+	fmt.Println("=== Optional Items ===")
+	for name, item := range vaultItems {
+		if item.Required {
+			continue
+		}
+		if vaultItemNames[name] {
+			Pass("%s", name)
+		} else {
+			Warn("%s - not found (optional)", name)
+		}
+	}
+
+	fmt.Println()
+	fmt.Println("========================================")
+	if missing == 0 {
+		Pass("All required vault items present!")
+		fmt.Println("You can safely run: dotfiles vault restore")
+		return nil
+	}
+
+	Fail("Missing %d required item(s)", missing)
+	fmt.Println()
+	fmt.Println("To create missing items:")
+	fmt.Println("  dotfiles vault push ITEM-NAME")
+	return fmt.Errorf("%d required items missing", missing)
+}
+
+// vaultValidate validates the vault-items.json schema
+func vaultValidate() error {
+	Info("Validating vault configuration schema...")
+	fmt.Println()
+
+	// Find vault-items.json
+	configDir := os.Getenv("XDG_CONFIG_HOME")
+	if configDir == "" {
+		configDir = filepath.Join(os.Getenv("HOME"), ".config")
+	}
+
+	vaultItemsPath := filepath.Join(configDir, "dotfiles", "vault-items.json")
+
+	// Check if file exists
+	if _, err := os.Stat(vaultItemsPath); os.IsNotExist(err) {
+		Fail("vault-items.json not found at %s", vaultItemsPath)
+		fmt.Println()
+		Info("Copy the example file:")
+		fmt.Printf("  cp %s/vault/vault-items.example.json %s\n", DotfilesDir(), vaultItemsPath)
+		return err
+	}
+
+	// Read the file
+	data, err := os.ReadFile(vaultItemsPath)
+	if err != nil {
+		Fail("Failed to read vault-items.json: %v", err)
+		return err
+	}
+
+	// Parse JSON
+	var config map[string]interface{}
+	if err := json.Unmarshal(data, &config); err != nil {
+		Fail("Invalid JSON syntax: %v", err)
+		return err
+	}
+	Pass("JSON syntax valid")
+
+	// Check required sections
+	errors := 0
+
+	// Check vault_items section
+	if vaultItems, ok := config["vault_items"].(map[string]interface{}); ok {
+		Pass("vault_items section found (%d items)", len(vaultItems))
+
+		// Validate each item
+		for name, itemData := range vaultItems {
+			item, ok := itemData.(map[string]interface{})
+			if !ok {
+				Fail("  %s: invalid item format", name)
+				errors++
+				continue
+			}
+
+			// Check required fields
+			if _, ok := item["path"]; !ok {
+				Fail("  %s: missing 'path' field", name)
+				errors++
+			}
+
+			// Validate type if present
+			if itemType, ok := item["type"].(string); ok {
+				validTypes := []string{"file", "sshkey", "env", "directory"}
+				isValid := false
+				for _, t := range validTypes {
+					if t == itemType {
+						isValid = true
+						break
+					}
+				}
+				if !isValid {
+					Warn("  %s: unknown type '%s'", name, itemType)
+				}
+			}
+		}
+	} else {
+		Warn("vault_items section not found")
+	}
+
+	// Check ssh_keys section (optional)
+	if sshKeys, ok := config["ssh_keys"].(map[string]interface{}); ok {
+		Pass("ssh_keys section found (%d keys)", len(sshKeys))
+	}
+
+	// Check syncable_items section (optional)
+	if syncable, ok := config["syncable_items"].(map[string]interface{}); ok {
+		Pass("syncable_items section found (%d items)", len(syncable))
+	}
+
+	fmt.Println()
+	if errors > 0 {
+		Fail("Validation failed with %d errors", errors)
+		return fmt.Errorf("validation failed")
+	}
+
+	Pass("Vault configuration is valid")
+	return nil
+}
+
+// vaultInit initializes vault setup
+func vaultInit() error {
+	PrintHeader("Vault Setup Wizard")
+
+	reader := bufio.NewReader(os.Stdin)
+
+	// Check for existing config
+	configDir := os.Getenv("XDG_CONFIG_HOME")
+	if configDir == "" {
+		configDir = filepath.Join(os.Getenv("HOME"), ".config")
+	}
+	vaultConfigPath := filepath.Join(configDir, "dotfiles", "vault-items.json")
+
+	if _, err := os.Stat(vaultConfigPath); err == nil {
+		Info("Existing configuration found: %s", vaultConfigPath)
+		fmt.Println()
+		fmt.Println("What would you like to do?")
+		fmt.Println("  1) Add new items (keep existing, scan for more)")
+		fmt.Println("  2) Reconfigure (backup current, start fresh)")
+		fmt.Println("  3) Cancel (keep current config)")
+		fmt.Println()
+		fmt.Print("Your choice [1]: ")
+		choice, _ := reader.ReadString('\n')
+		choice = strings.TrimSpace(choice)
+		if choice == "" {
+			choice = "1"
+		}
+
+		switch choice {
+		case "1":
+			// Run scan with merge
+			return vaultScan()
+		case "2":
+			// Backup and continue
+			backup := vaultConfigPath + ".backup." + time.Now().Format("20060102150405")
+			if err := os.Rename(vaultConfigPath, backup); err != nil {
+				Fail("Failed to backup config: %v", err)
+				return err
+			}
+			Info("Backed up to: %s", backup)
+		default:
+			Info("Keeping current configuration")
+			return nil
+		}
+	}
+
+	// Show education
+	fmt.Println()
+	fmt.Println("This wizard helps you set up vault integration for your secrets.")
+	fmt.Println()
+	fmt.Println("The system stores your secrets as individual items in your")
+	fmt.Println("password vault. Each file (SSH key, config) becomes one item.")
+	fmt.Println()
+	fmt.Println("Supported backends:")
+	fmt.Println("  • bitwarden  - Bitwarden CLI (bw)")
+	fmt.Println("  • 1password  - 1Password CLI (op)")
+	fmt.Println("  • pass       - pass (GPG-based password manager)")
+	fmt.Println()
+
+	// Step 1: Select backend
+	fmt.Println("Step 1: Select Vault Backend")
+	fmt.Println("────────────────────────────")
+	fmt.Println()
+
+	// Detect available backends
+	available := []string{}
+	backendNames := map[string]string{
+		"bitwarden": "Bitwarden",
+		"1password": "1Password",
+		"pass":      "pass (GPG-based)",
+	}
+
+	if _, err := exec.LookPath("bw"); err == nil {
+		available = append(available, "bitwarden")
+	}
+	if _, err := exec.LookPath("op"); err == nil {
+		available = append(available, "1password")
+	}
+	if _, err := exec.LookPath("pass"); err == nil {
+		available = append(available, "pass")
+	}
+
+	if len(available) == 0 {
+		Warn("No vault CLI detected.")
+		fmt.Println()
+		fmt.Println("Install one of the supported backends:")
+		fmt.Println("  brew install bitwarden-cli")
+		fmt.Println("  brew install 1password-cli")
+		fmt.Println("  brew install pass")
+		return fmt.Errorf("no vault backend available")
+	}
+
+	fmt.Println("Available backends:")
+	for i, backend := range available {
+		fmt.Printf("  %d) %s\n", i+1, backendNames[backend])
+	}
+	fmt.Printf("  %d) Skip (configure later)\n", len(available)+1)
+	fmt.Println()
+
+	fmt.Print("Select backend [1]: ")
+	choiceStr, _ := reader.ReadString('\n')
+	choiceStr = strings.TrimSpace(choiceStr)
+	if choiceStr == "" {
+		choiceStr = "1"
+	}
+
+	var selectedBackend string
+	choice := 0
+	fmt.Sscanf(choiceStr, "%d", &choice)
+
+	if choice == len(available)+1 {
+		cfg := config.DefaultManager()
+		cfg.Set("vault.backend", "none")
+		Info("Vault setup skipped. Run 'dotfiles vault init' anytime.")
+		return nil
+	} else if choice >= 1 && choice <= len(available) {
+		selectedBackend = available[choice-1]
+	} else {
+		Fail("Invalid selection")
+		return fmt.Errorf("invalid selection")
+	}
+
+	// Save backend
+	cfg := config.DefaultManager()
+	if err := cfg.Set("vault.backend", selectedBackend); err != nil {
+		Fail("Failed to save config: %v", err)
+		return err
+	}
+	Pass("Backend set to: %s", backendNames[selectedBackend])
+	fmt.Println()
+
+	// Step 2: Test authentication
+	fmt.Println("Step 2: Authentication")
+	fmt.Println("──────────────────────")
+	fmt.Println()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	backend, err := newVaultBackend()
+	if err != nil {
+		Fail("Failed to create backend: %v", err)
+		return err
+	}
+	defer backend.Close()
+
+	if err := backend.Init(ctx); err != nil {
+		Fail("Backend CLI not available: %v", err)
+		return err
+	}
+
+	if !backend.IsAuthenticated(ctx) {
+		Warn("Not authenticated to %s", backend.Name())
+		fmt.Println()
+		fmt.Println("Please authenticate first:")
+		switch selectedBackend {
+		case "bitwarden":
+			fmt.Println("  bw login")
+			fmt.Println("  dotfiles vault unlock")
+		case "1password":
+			fmt.Println("  op signin")
+		case "pass":
+			fmt.Println("  pass init <gpg-id>")
+		}
+		fmt.Println()
+		fmt.Println("Then run setup again:")
+		fmt.Println("  dotfiles vault init")
+		return fmt.Errorf("authentication required")
+	}
+
+	Pass("Authenticated to %s", backend.Name())
+	fmt.Println()
+
+	// Step 3: Setup type
+	fmt.Println("Step 3: Setup Type")
+	fmt.Println("──────────────────")
+	fmt.Println()
+	fmt.Println("How would you like to set up vault integration?")
+	fmt.Println()
+	fmt.Println("  1) Fresh - Scan local files, create new items")
+	fmt.Println("  2) Manual - Create template config, edit manually")
+	fmt.Println()
+	fmt.Print("Your choice [1]: ")
+
+	setupChoice, _ := reader.ReadString('\n')
+	setupChoice = strings.TrimSpace(setupChoice)
+	if setupChoice == "" || setupChoice == "1" {
+		// Run discovery
+		return vaultScan()
+	}
+
+	// Manual setup - copy example file
+	exampleFile := filepath.Join(DotfilesDir(), "vault", "vault-items.example.json")
+	if _, err := os.Stat(exampleFile); err == nil {
+		os.MkdirAll(filepath.Dir(vaultConfigPath), 0755)
+		data, _ := os.ReadFile(exampleFile)
+		os.WriteFile(vaultConfigPath, data, 0644)
+		Pass("Created config from template")
+	} else {
+		// Create minimal config
+		minimalConfig := `{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Created by vault setup wizard",
+  "ssh_keys": {},
+  "vault_items": {},
+  "syncable_items": {}
+}
+`
+		os.MkdirAll(filepath.Dir(vaultConfigPath), 0755)
+		os.WriteFile(vaultConfigPath, []byte(minimalConfig), 0644)
+		Pass("Created minimal config")
+	}
+
+	fmt.Println()
+	fmt.Println("Configuration created at:")
+	fmt.Printf("  %s\n", vaultConfigPath)
+	fmt.Println()
+	fmt.Println("Edit this file to define your vault items:")
+	fmt.Println("  $EDITOR " + vaultConfigPath)
+	fmt.Println()
+	fmt.Println("When ready, run:")
+	fmt.Println("  dotfiles vault restore  - Restore from vault")
+	fmt.Println("  dotfiles vault push     - Backup to vault")
+
+	return nil
+}
+
+// ============================================================
+// Helper Functions
+// ============================================================
+
+// VaultItem represents an item in vault-items.json
+type VaultItem struct {
+	Path     string `json:"path"`
+	Type     string `json:"type"`
+	Required bool   `json:"required"`
+}
+
+// loadVaultItems loads the vault_items section from vault-items.json
+func loadVaultItems() (map[string]VaultItem, error) {
+	configDir := os.Getenv("XDG_CONFIG_HOME")
+	if configDir == "" {
+		configDir = filepath.Join(os.Getenv("HOME"), ".config")
+	}
+	vaultItemsPath := filepath.Join(configDir, "dotfiles", "vault-items.json")
+
+	data, err := os.ReadFile(vaultItemsPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var config struct {
+		VaultItems map[string]VaultItem `json:"vault_items"`
+	}
+
+	if err := json.Unmarshal(data, &config); err != nil {
+		return nil, err
+	}
+
+	return config.VaultItems, nil
+}
+
+// loadSyncableItems loads the syncable_items section from vault-items.json
+func loadSyncableItems() (map[string]string, error) {
+	configDir := os.Getenv("XDG_CONFIG_HOME")
+	if configDir == "" {
+		configDir = filepath.Join(os.Getenv("HOME"), ".config")
+	}
+	vaultItemsPath := filepath.Join(configDir, "dotfiles", "vault-items.json")
+
+	data, err := os.ReadFile(vaultItemsPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var config struct {
+		SyncableItems map[string]string `json:"syncable_items"`
+		VaultItems    map[string]struct {
+			Path string `json:"path"`
+		} `json:"vault_items"`
+	}
+
+	if err := json.Unmarshal(data, &config); err != nil {
+		return nil, err
+	}
+
+	// If syncable_items exists, use it; otherwise derive from vault_items
+	if len(config.SyncableItems) > 0 {
+		return config.SyncableItems, nil
+	}
+
+	// Derive from vault_items
+	result := make(map[string]string)
+	for name, item := range config.VaultItems {
+		result[name] = item.Path
+	}
+	return result, nil
+}
+
+// expandPath expands ~ to home directory in a path
+func expandPath(path string) string {
+	if strings.HasPrefix(path, "~/") {
+		home, _ := os.UserHomeDir()
+		return filepath.Join(home, path[2:])
+	}
+	if strings.HasPrefix(path, "$HOME/") {
+		home, _ := os.UserHomeDir()
+		return filepath.Join(home, path[6:])
+	}
+	return path
+}
+
+// normalizeSSHKeyName generates a vault item name from an SSH key filename
+func normalizeSSHKeyName(filename string) string {
+	// id_ed25519_github → SSH-Github
+	// id_rsa_work → SSH-Work
+	// id_ed25519 → SSH-Personal
+
+	re := regexp.MustCompile(`^id_[^_]+_(.+)$`)
+	if matches := re.FindStringSubmatch(filename); len(matches) == 2 {
+		name := matches[1]
+		// Capitalize first letter
+		if len(name) > 0 {
+			name = strings.ToUpper(name[:1]) + name[1:]
+		}
+		return "SSH-" + name
+	}
+
+	// Generic key (id_ed25519, id_rsa, etc.)
+	if strings.HasPrefix(filename, "id_") {
+		return "SSH-Personal"
+	}
+
+	// Use filename as-is
+	return "SSH-" + strings.Title(filename)
+}
+
+// vaultCreate creates a new vault item
+func vaultCreate(name, content string, dryRun, force bool) error {
+	PrintHeader("Create Vault Item")
+
+	// Handle dry-run without connecting to backend
+	if dryRun {
+		fmt.Println("(DRY RUN - no changes will be made)")
+		fmt.Println()
+		fmt.Printf("Item name: %s\n", name)
+		fmt.Printf("Content size: %d bytes\n", len(content))
+		fmt.Println()
+		fmt.Printf("Would create/update '%s'\n", name)
+		fmt.Println()
+		fmt.Println("Preview (first 5 lines):")
+		fmt.Println("---")
+		lines := strings.Split(content, "\n")
+		for i, line := range lines {
+			if i >= 5 {
+				break
+			}
+			fmt.Println(line)
+		}
+		fmt.Println("---")
+		Pass("Dry run complete")
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	backend, err := newVaultBackend()
+	if err != nil {
+		return fmt.Errorf("failed to create backend: %w", err)
+	}
+	defer backend.Close()
+
+	if err := backend.Init(ctx); err != nil {
+		return fmt.Errorf("backend not available: %w", err)
+	}
+
+	session, err := backend.Authenticate(ctx)
+	if err != nil {
+		return fmt.Errorf("authentication failed: %w", err)
+	}
+
+	// Sync first
+	Info("Syncing vault...")
+	if err := backend.Sync(ctx, session); err != nil {
+		Warn("Sync failed: %v", err)
+	}
+
+	// Check if item exists
+	existing, _ := backend.GetNotes(ctx, name, session)
+	if existing != "" {
+		Warn("Item '%s' already exists (%d chars)", name, len(existing))
+		if !force {
+			Fail("Use --force to overwrite")
+			return fmt.Errorf("item exists, use --force to overwrite")
+		}
+		Info("Will overwrite existing item (--force)")
+	}
+
+	fmt.Printf("Item name: %s\n", name)
+	fmt.Printf("Content size: %d bytes\n", len(content))
+
+	if existing != "" {
+		// Update existing
+		if err := backend.UpdateItem(ctx, name, content, session); err != nil {
+			return fmt.Errorf("failed to update item: %w", err)
+		}
+		Pass("Updated '%s'", name)
+	} else {
+		// Create new
+		if err := backend.CreateItem(ctx, name, content, session); err != nil {
+			return fmt.Errorf("failed to create item: %w", err)
+		}
+		Pass("Created '%s'", name)
+	}
+
+	fmt.Println()
+	fmt.Println("Verify with: dotfiles vault list")
+
+	return nil
+}
+
+// isProtectedItem checks if an item is a protected dotfiles item
+func isProtectedItem(name string) bool {
+	protected := []string{
+		"SSH-", "AWS-", "Git-Config", "Environment-Secrets",
+	}
+	for _, prefix := range protected {
+		if strings.HasPrefix(name, prefix) || name == prefix {
+			return true
+		}
+	}
+	return false
+}
+
+// vaultDelete deletes vault items
+func vaultDelete(names []string, dryRun, force bool) error {
+	PrintHeader("Delete from Vault")
+
+	// Handle dry-run without connecting to backend
+	if dryRun {
+		fmt.Println("(DRY RUN - no changes will be made)")
+		fmt.Println()
+		for _, name := range names {
+			fmt.Printf("--- %s ---\n", name)
+			fmt.Printf("Would delete '%s'\n", name)
+			if isProtectedItem(name) {
+				Warn("Protected item - would require confirmation to delete")
+			}
+			fmt.Println()
+		}
+		Pass("Dry run complete")
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	backend, err := newVaultBackend()
+	if err != nil {
+		return fmt.Errorf("failed to create backend: %w", err)
+	}
+	defer backend.Close()
+
+	if err := backend.Init(ctx); err != nil {
+		return fmt.Errorf("backend not available: %w", err)
+	}
+
+	session, err := backend.Authenticate(ctx)
+	if err != nil {
+		return fmt.Errorf("authentication failed: %w", err)
+	}
+
+	// Sync first
+	Info("Syncing vault...")
+	if err := backend.Sync(ctx, session); err != nil {
+		Warn("Sync failed: %v", err)
+	}
+
+	var deleted, skipped, failed int
+
+	for _, name := range names {
+		fmt.Printf("--- %s ---\n", name)
+
+		// Check if item exists
+		existing, _ := backend.GetNotes(ctx, name, session)
+		if existing == "" {
+			Warn("Item '%s' not found", name)
+			skipped++
+			fmt.Println()
+			continue
+		}
+
+		fmt.Printf("  Size: %d chars\n", len(existing))
+
+		// Check if protected
+		if isProtectedItem(name) {
+			fmt.Println()
+			Warn("⚠ This is a protected dotfiles item!")
+			fmt.Println("Deleting this will break your dotfiles restore.")
+			fmt.Println()
+
+			// Always require confirmation for protected items
+			fmt.Print("Type the item name to confirm deletion: ")
+			reader := bufio.NewReader(os.Stdin)
+			confirm, _ := reader.ReadString('\n')
+			confirm = strings.TrimSpace(confirm)
+			if confirm != name {
+				Warn("Confirmation failed - skipping")
+				skipped++
+				fmt.Println()
+				continue
+			}
+		} else {
+			// Non-protected: respect --force
+			if !force {
+				fmt.Printf("Delete '%s'? [y/N] ", name)
+				reader := bufio.NewReader(os.Stdin)
+				confirm, _ := reader.ReadString('\n')
+				confirm = strings.TrimSpace(confirm)
+				if !strings.EqualFold(confirm, "y") {
+					Warn("Cancelled")
+					skipped++
+					fmt.Println()
+					continue
+				}
+			}
+		}
+
+		// Perform deletion
+		if err := backend.DeleteItem(ctx, name, session); err != nil {
+			Fail("Failed to delete '%s': %v", name, err)
+			failed++
+		} else {
+			Pass("Deleted '%s'", name)
+			deleted++
+		}
+		fmt.Println()
+	}
+
+	// Summary
+	fmt.Println("========================================")
+	if dryRun {
+		fmt.Println("DRY RUN SUMMARY:")
+		fmt.Printf("  Would delete: %d\n", deleted)
+	} else {
+		fmt.Println("SUMMARY:")
+		fmt.Printf("  Deleted: %d\n", deleted)
+	}
+	fmt.Printf("  Skipped: %d\n", skipped)
+	if failed > 0 {
+		Fail("Failed: %d", failed)
+	}
+	fmt.Println("========================================")
+
+	if failed > 0 {
+		return fmt.Errorf("%d items failed to delete", failed)
+	}
 	return nil
 }

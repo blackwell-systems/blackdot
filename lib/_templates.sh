@@ -664,7 +664,29 @@ evaluate_condition() {
     condition="${condition## }"
     condition="${condition%% }"
 
-    # Handle: var == "value" or var == 'value'
+    # NEW: Handle Handlebars helper syntax: (eq var "value")
+    # Note: Use [()] character classes - zsh regex doesn't accept \( or \) escapes
+    if [[ "$condition" =~ ^[(]eq[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*)[[:space:]]+\"([^\"]*)\"[)]$ ]]; then
+        local var="${match[1]}"
+        local expected="${match[2]}"
+        local actual="${TMPL_VARS[$var]:-}"
+        debug "Condition (eq helper): $var == '$expected' (actual: '$actual')"
+        [[ "$actual" == "$expected" ]]
+        return $?
+    fi
+
+    # NEW: Handle Handlebars helper syntax: (ne var "value")
+    # Note: Use [()] character classes - zsh regex doesn't accept \( or \) escapes
+    if [[ "$condition" =~ ^[(]ne[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*)[[:space:]]+\"([^\"]*)\"[)]$ ]]; then
+        local var="${match[1]}"
+        local expected="${match[2]}"
+        local actual="${TMPL_VARS[$var]:-}"
+        debug "Condition (ne helper): $var != '$expected' (actual: '$actual')"
+        [[ "$actual" != "$expected" ]]
+        return $?
+    fi
+
+    # EXISTING: Handle: var == "value" or var == 'value'
     if [[ "$condition" =~ ^([a-zA-Z_][a-zA-Z0-9_]*)[[:space:]]*==[[:space:]]*[\"\']([^\"\']*)[\"\']$ ]]; then
         local var="${match[1]}"
         local expected="${match[2]}"
@@ -892,7 +914,7 @@ process_conditionals() {
 
                 if [[ ${#next_if} -lt ${#next_endif} ]]; then
                     # Next is an {{#if
-                    block+="${remaining%%\{\{#if *}}"
+                    block+="${remaining%%\{\{#if *}"
                     remaining="${remaining#*\{\{#if }"
                     local nested_cond="${remaining%%\}\}*}"
                     remaining="${remaining#*\}\}}"
@@ -910,6 +932,10 @@ process_conditionals() {
             elif [[ "$remaining" == *'{{/if}}'* ]]; then
                 block+="${remaining%%\{\{/if\}\}*}"
                 remaining="${remaining#*\{\{/if\}\}}"
+                # Preserve nested {{/if}} tags (same logic as main branch)
+                if (( depth > 1 )); then
+                    block+="{{/if}}"
+                fi
                 (( depth-- ))
             else
                 # No more tags found
@@ -1071,6 +1097,54 @@ render_template() {
             pipeline_result=$(process_pipeline "$expr")
             content="${before}${pipeline_result}${after}"
         else
+            break
+        fi
+    done
+
+    # NEW: Process Handlebars helper syntax: {{ helper arg }} and {{ helper arg "default" }}
+    # This handles syntax like {{ upper hostname }} or {{ default editor "vim" }}
+    local helper_iteration=0
+    local max_helper_iterations=100
+
+    while (( helper_iteration++ < max_helper_iterations )); do
+        local helper_found=false
+
+        # Pattern 1: {{ helper arg "value" }} - e.g., {{ default editor "vim" }}
+        # Note: Use [{}] character classes - zsh regex doesn't accept \{ escapes
+        if [[ "$content" =~ [{][{][[:space:]]*([a-z]+)[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*)[[:space:]]+\"([^\"]*)\"[[:space:]]*[}][}] ]]; then
+            local full_match="${MATCH}"
+            local helper="${match[1]}"
+            local var="${match[2]}"
+            local arg="${match[3]}"
+            local value="${TMPL_VARS[$var]:-}"
+            local result=$(apply_filter "$value" "$helper" "$arg")
+            content="${content/$full_match/$result}"
+            helper_found=true
+            debug "Helper (with arg): {{ $helper $var \"$arg\" }} = '$result'"
+        # Pattern 2: {{ helper arg }} - e.g., {{ upper hostname }}
+        # Note: Use [{}] character classes - zsh regex doesn't accept \{ escapes
+        elif [[ "$content" =~ [{][{][[:space:]]*([a-z]+)[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*)[[:space:]]*[}][}] ]]; then
+            local full_match="${MATCH}"
+            local helper="${match[1]}"
+            local var="${match[2]}"
+            # Check if this is actually a helper (not a variable that looks like "helper var")
+            # Only process if the first word is a known filter
+            case "$helper" in
+                upper|lower|capitalize|trim|quote|squote|basename|dirname|length|default|truncate|append|prepend|replace)
+                    local value="${TMPL_VARS[$var]:-}"
+                    local result=$(apply_filter "$value" "$helper")
+                    content="${content/$full_match/$result}"
+                    helper_found=true
+                    debug "Helper: {{ $helper $var }} = '$result'"
+                    ;;
+                *)
+                    # Not a known helper, skip (will be handled by simple substitution or left as unresolved)
+                    break
+                    ;;
+            esac
+        fi
+
+        if ! $helper_found; then
             break
         fi
     done

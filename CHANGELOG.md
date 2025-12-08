@@ -9,51 +9,309 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Go Implementation - Phases 1-4 Complete** (Strangler Fig Migration)
-  - **Phase 1: Vaultmux v0.1.0** - Production-ready vault abstraction library
-    - Separate module at `github.com/blackwell-systems/vaultmux`
-    - Support for Bitwarden, 1Password, and pass backends
-    - 95.5% test coverage with comprehensive unit tests
-    - Session caching and management
-    - Published and released as independent Go library
-  - **Phase 2: Go CLI Structure** - Parallel implementation alongside shell
-    - `go.mod` initialized with Cobra framework and vaultmux dependency
-    - Entry point: `cmd/dotfiles/main.go` with version information
-    - Root command: `internal/cli/root.go` with global flags
-    - Builds to `bin/dotfiles-go` (separate from shell commands)
-    - NO changes to existing shell implementation (strangler fig pattern)
-  - **Phase 3: Color Theme System** - Complete parity with shell
-    - `internal/cli/output.go` mirrors `lib/_colors.sh` exactly
-    - Semantic colors: `ClrPrimary`, `ClrSuccess`, `ClrError`, `ClrWarning`, `ClrInfo`, `ClrMuted`, `ClrBold`
-    - Tool brand colors: `ClrRust`, `ClrGo`, `ClrPython`, `ClrAWS`, `ClrCDK`, `ClrNode`, `ClrJava`, `ClrSSH`, `ClrDocker`
-    - Backward compatibility: `Red`, `Green`, `Yellow`, `Blue`, `Cyan`, `Magenta`
-    - Logging functions: `Info()`, `Pass()`, `Warn()`, `Fail()`, `DryRun()`
-    - Terminal detection using `github.com/fatih/color`
-  - **Phase 4: All 19 Command Skeletons** - Cobra structure complete
-    - `features` - Manage dotfiles features (list, enable, disable, check, preset)
-    - `config` - Configuration management (get, set, list, validate)
-    - `vault` - Secret management (unlock, lock, status, list, get, sync, backend, health)
-    - `template` - Template system (render, list, diff, validate)
-    - `doctor` - Health checks (run, fix)
-    - `setup` - Interactive wizard
-    - `backup` - Snapshot management (create, restore, list)
-    - `drift` - Change detection (detect, show)
-    - `hook` - Lifecycle hooks (list, run, validate)
-    - `encrypt` - Age encryption for sensitive files
-    - `packages` - Brewfile package management (check, install, sync)
-    - `migrate` - Configuration migration (v2→v3)
-    - `lint` - Shell script validation
-    - `diff` - Change preview
-    - `metrics` - Health metrics visualization
-    - `sync` - Bidirectional vault sync
-    - `uninstall` - Cleanup and removal
-    - `status` - Quick status dashboard
-    - `version` - Build and version information
-  - **Phases 5-8 In Progress** - Implementation verification underway
-    - Feature registry needs parity check with `lib/_features.sh`
-    - Config system needs verification with existing JSON configs
-    - Vault integration needs testing with real backends
-    - Template system needs filter and conditional verification
+- **Cross-Platform Developer Tools** (`dotfiles tools`)
+  - New `tools` parent command with 6 tool categories
+  - All tools work on Linux, macOS, and Windows
+  - **Feature Flag Integration** - Tools respect their feature flags like ZSH:
+    - `ssh` → `ssh_tools`, `aws` → `aws_helpers`, `cdk` → `cdk_tools`
+    - `go` → `go_tools`, `rust` → `rust_tools`, `python` → `python_tools`
+    - Disabled tools show helpful error with enable command
+  - **SSH Tools** (`dotfiles tools ssh`)
+    - `keys` - List SSH keys with fingerprints
+    - `gen` - Generate ED25519 key pairs
+    - `list` - List configured SSH hosts
+    - `agent` - Show SSH agent status
+    - `fp` - Show fingerprints in SHA256/MD5 formats
+    - `copy` - Copy public key to remote host
+    - `tunnel` - Create SSH port forward tunnel
+    - `socks` - Create SOCKS5 proxy
+    - `status` - Color-coded ASCII art status banner
+  - **AWS Tools** (`dotfiles tools aws`)
+    - `profiles` - List all AWS profiles
+    - `who` - Show current AWS identity
+    - `login` - SSO login to AWS profile
+    - `switch` - Set AWS_PROFILE (prints export command)
+    - `assume` - Assume IAM role for cross-account access
+    - `clear` - Clear temporary credentials
+    - `status` - Color-coded ASCII art status banner
+  - **CDK Tools** (`dotfiles tools cdk`)
+    - `init` - Initialize new CDK project
+    - `env` - Set CDK_DEFAULT_ACCOUNT/REGION from AWS profile
+    - `env-clear` - Clear CDK environment variables
+    - `outputs` - Show CloudFormation stack outputs
+    - `context` - Show or clear CDK context
+    - `status` - Color-coded ASCII art status banner
+  - **Go Tools** (`dotfiles tools go`)
+    - `new` - Create new Go project with standard structure
+    - `init` - Initialize Go module
+    - `test` - Run tests with options
+    - `cover` - Run tests with coverage report
+    - `lint` - Run go vet and golangci-lint
+    - `outdated` - Show outdated dependencies
+    - `update` - Update all dependencies
+    - `build-all` - Cross-compile for all platforms
+    - `bench` - Run benchmarks
+    - `info` - Show Go environment info
+  - **Rust Tools** (`dotfiles tools rust`)
+    - `new` - Create new Rust project
+    - `update` - Update Rust toolchain
+    - `switch` - Switch Rust toolchain
+    - `lint` - Run cargo check + clippy
+    - `fix` - Format and auto-fix with clippy
+    - `outdated` - Show outdated dependencies
+    - `expand` - Expand macros (for debugging)
+    - `info` - Show Rust environment info
+  - **Python Tools** (`dotfiles tools python`)
+    - `new` - Create new Python project with uv
+    - `clean` - Clean Python artifacts
+    - `venv` - Create virtual environment
+    - `test` - Run pytest
+    - `cover` - Run pytest with coverage
+    - `info` - Show Python environment info
+  - **Docker Tools** (`dotfiles tools docker`)
+    - `ps` - List containers (with `-a` for all)
+    - `images` - List Docker images
+    - `ip` - Get container IP address
+    - `env` - Show container environment variables
+    - `ports` - Show all container ports
+    - `stats` - Show resource usage (with `-f` for live)
+    - `vols` - List volumes
+    - `nets` - List networks (with `--inspect` for details)
+    - `inspect` - Inspect container with JSON path filtering
+    - `clean` - Remove stopped containers and dangling images
+    - `prune` - System prune (with `-a` for aggressive)
+    - `status` - Color-coded ASCII art status banner
+
+- **PowerShell Module v1.1.0** (`powershell/`)
+  - Cross-platform Windows support with **complete ZSH hooks parity**
+  - **Full Hook System** (24 hook points - identical to ZSH)
+    - Lifecycle: `pre_install`, `post_install`, `pre_bootstrap`, `post_bootstrap`, `pre_upgrade`, `post_upgrade`
+    - Vault: `pre_vault_pull`, `post_vault_pull`, `pre_vault_push`, `post_vault_push`
+    - Doctor: `pre_doctor`, `post_doctor`, `doctor_check`
+    - Shell: `shell_init`, `shell_exit`, `directory_change`
+    - Setup: `pre_setup_phase`, `post_setup_phase`, `setup_complete`
+    - Template: `pre_template_render`, `post_template_render`
+    - Encryption: `pre_encrypt`, `post_decrypt`
+  - **Hook Registration Methods**
+    - File-based: `~/.config/dotfiles/hooks/<point>/*.ps1`
+    - Function-based: `Register-DotfilesHook -Point "..." -ScriptBlock {...}`
+    - JSON config: Same `hooks.json` format as ZSH
+  - **Hook Features**
+    - Timeout support via PowerShell Jobs
+    - Fail-fast option (`HOOKS_FAIL_FAST`)
+    - Verbose mode (`HOOKS_VERBOSE`)
+    - Feature gating (checks parent features)
+  - **Hook Management Functions**
+    - `Register-DotfilesHook` / `Unregister-DotfilesHook`
+    - `Invoke-DotfilesHook` (hook_run equivalent)
+    - `Get-DotfilesHook` / `Get-DotfilesHookPoints`
+    - `Add-DotfilesHook` / `Remove-DotfilesHook` / `Test-DotfilesHook`
+  - **Tool Aliases** - 50+ functions wrapping `dotfiles tools` commands
+    - SSH: `ssh-keys`, `ssh-gen`, `ssh-tunnel`, `ssh-status`
+    - AWS: `aws-profiles`, `aws-who`, `aws-login`, `aws-switch`, `aws-status`
+    - CDK: `cdk-init`, `cdk-env`, `cdk-outputs`, `cdk-status`
+    - Go: `go-new`, `go-test`, `go-lint`, `go-info`
+    - Rust: `rust-new`, `rust-lint`, `rust-info`
+    - Python: `py-new`, `py-test`, `py-info`
+  - **Environment Management** - Proper handling of env vars for `aws-switch`, `aws-assume`, `cdk-env`
+  - **Installation Script** - `Install-Dotfiles.ps1` for easy setup
+  - Short alias `d` for `dotfiles` command
+
+- **Windows Package Management** (`powershell/Install-Packages.ps1`)
+  - winget-based package installer (equivalent to `brew bundle`)
+  - Three tiers matching Brewfile: `minimal`, `enhanced`, `full`
+  - Installs: bat, fd, ripgrep, fzf, eza, zoxide, glow, dust, jq
+  - Development: Go, Rust, Python, fnm (Node.js)
+  - Cloud: AWS CLI, Bitwarden CLI, 1Password CLI, age
+  - Optional: Docker Desktop, VS Code, Windows Terminal
+  - Dry-run mode with `-DryRun` flag
+
+- **fnm Integration** (Cross-platform Node.js version manager)
+  - Replaces NVM on Windows (NVM is Unix-only)
+  - Functions: `fnm-install`, `fnm-use`, `fnm-list`, `Initialize-Fnm`
+  - Auto-switches when entering directories with `.nvmrc` or `.node-version`
+  - Auto-initialized on module load
+
+- **Zoxide Integration** (Smart directory navigation)
+  - Auto-initialized on module load
+  - `z` command for jumping to directories
+  - `Initialize-Zoxide` for manual init
+
+- **Docker Tools for PowerShell**
+  - 12 wrapper functions: `docker-ps`, `docker-images`, `docker-ip`, `docker-env`,
+    `docker-ports`, `docker-stats`, `docker-vols`, `docker-nets`,
+    `docker-inspect`, `docker-clean`, `docker-prune`, `docker-status`
+
+- **Windows Documentation**
+  - `docs/windows-setup.md` - Complete Windows setup guide
+  - Updated `powershell/README.md` with all 85+ functions
+  - Windows section added to main README
+
+- **Go CLI Complete** - All 11 core commands ported with verified parity
+  - `features` - Feature registry management (list, enable, disable, preset)
+  - `doctor` - Health checks with ASCII banner
+  - `lint` - Syntax validation (55 files)
+  - `hook` - Full hook system (list, run, add, remove, test)
+  - `encrypt` - Age encryption management
+  - `template` - Template rendering with RaymondEngine
+  - `vault` - All 8 vault subcommands
+  - `diff`, `drift`, `sync` - Vault operations
+  - `setup`, `uninstall`, `packages` - Setup wizard
+  - Side-by-side testing confirms identical behavior
+
+- **Chezmoi Import Tool** (`dotfiles import chezmoi`)
+  - Migrate from chezmoi repositories to blackwell-dotfiles
+  - Converts Go template syntax to Handlebars automatically
+  - Handles chezmoi prefixes: `dot_`, `private_`, `executable_`, `symlink_`, etc.
+  - Converts `.chezmoi.os`, `.chezmoi.hostname`, etc. to standard variables
+  - Parses chezmoi.toml config for template variables
+  - Dry-run mode for previewing changes
+  - Verbose mode for detailed progress
+
+- **Vault Create/Delete Commands** (`dotfiles vault create|delete`)
+  - `vault create <item-name> [content]` - Create new vault items
+    - Content from argument, file (`--file`), or stdin
+    - Dry-run mode (`-n`) to preview without changes
+    - Force mode (`-f`) to overwrite existing items
+  - `vault delete <item-name>...` - Delete vault items
+    - Bulk deletion of multiple items
+    - Protected items (SSH-*, AWS-*, Git-Config) require confirmation
+    - Dry-run mode for safe preview
+    - Force mode skips confirmation (except protected items)
+
+- **Standard Handlebars Template Syntax** (Phase B)
+  - Templates now use standard Handlebars syntax: `{{#if}}`, `{{#unless}}`, `{{#each}}`, `{{/if}}`
+  - Bash engine supports both legacy (`{% if %}`) and Handlebars syntax
+  - Migrated 4 template files to standard syntax:
+    - `templates/configs/99-local.zsh.tmpl`
+    - `templates/configs/gitconfig.tmpl`
+    - `templates/configs/ssh-config.tmpl`
+    - `templates/configs/claude.local.tmpl`
+  - All 364 tests passing with new syntax
+
+- **Go Template Engine** (Phase C) (`internal/template/raymond_engine.go`)
+  - Raymond-based Handlebars engine for proper AST parsing
+  - 15 registered helpers: eq, ne, upper, lower, capitalize, trim, replace, append, prepend, quote, squote, truncate, length, basename, dirname, default
+  - Preprocessor converts `{{#else}}` to `{{else}}` for bash template compatibility
+  - Variable resolution with `DOTFILES_TMPL_*` environment override
+  - Auto-detection of hostname, os, user, home, shell
+  - 20 parity tests verifying Go output matches bash output
+  - Both engines coexist for safe transition (strangler fig pattern)
+
+- **Go Lint Command** (`internal/cli/lint.go`)
+  - Checks ZSH syntax: `zsh/zsh.d/*.zsh`, `zshrc`, `p10k.zsh`
+  - Checks Bash syntax: `bootstrap/*.sh`, `vault/*.sh`, `lib/*.sh`
+  - Validates config files (Brewfile existence)
+  - Runs shellcheck if available (on `bootstrap/*.sh`)
+  - Matches bash `dotfiles-lint` output format (55 files checked)
+  - `--verbose` and `--fix` flags supported
+
+- **Go Backup Command** (`internal/cli/backup.go`)
+  - Create, list, restore, clean subcommands
+  - Uses tar.gz compression matching bash format
+  - Backup naming: `backup-YYYYMMDD-HHMMSS.tar.gz` (matches bash)
+  - Cross-compatible: Can restore bash-created backups
+  - Supports both `backup-` and `backup_` naming conventions
+  - Finds latest backup by modification time
+  - Handles bash wrapper directory format in archives
+
+- **Go Metrics Command** (`internal/cli/metrics.go`)
+  - JSONL metrics visualization from `~/.dotfiles-metrics.jsonl`
+  - Three modes: summary (default), `--graph` (ASCII bar chart), `--all` (full list)
+  - Statistics: average score, total errors/warnings/fixed, perfect runs %
+  - Trend analysis: compares last 5 vs previous 5 health checks
+  - Platform distribution display
+  - Color-coded output matching bash behavior
+
+- **Go Uninstall Command** (`internal/cli/uninstall.go`)
+  - `--dry-run/-n`: Preview what would be removed
+  - `--keep-secrets/-k`: Preserve SSH/AWS/Git configs
+  - Removes symlinks: `.zshrc`, `.p10k.zsh`, ghostty config, `.claude`
+  - Removes config files: metrics file, backups directory
+  - Interactive confirmation for secrets and repository deletion
+  - Output matches bash implementation exactly
+
+- **Go Status Command** (`internal/cli/status.go`)
+  - City skyline ASCII art visual dashboard
+  - Checks symlink status (zshrc, claude, /workspace)
+  - SSH keys loaded count
+  - AWS authentication status
+  - Lima VM status (macOS only)
+  - Claude profile detection (dotclaude integration)
+  - Suggested fixes for any detected issues
+
+- **Go Packages Command** (`internal/cli/packages.go`)
+  - `--check/-c`: Show what's missing from Brewfile
+  - `--install/-i`: Install missing packages via brew bundle
+  - `--outdated/-o`: Show outdated Homebrew packages
+  - `--tier/-t`: Select tier (minimal/enhanced/full)
+  - Tier priority: flag > config.json > BREWFILE_TIER env > default
+  - Parses Brewfile for formulas and casks
+  - Compares against installed packages
+
+- **Go Drift Command** (`internal/cli/drift.go`)
+  - `--quick/-q`: Fast check against cached state (no vault access)
+  - Full mode: Connects to vault and compares current contents
+  - SHA256 checksums for reliable drift detection
+  - Reads cached state from `~/.cache/dotfiles/vault-state.json`
+  - Tracks: SSH, AWS, Git configs, env secrets, template variables
+
+- **Go Diff Command** (`internal/cli/diff.go`)
+  - `--sync/-s`: Preview what sync would push to vault
+  - `--restore/-r`: Preview what restore would change locally
+  - Item-specific diff: `diff SSH-Config`, `diff Git-Config`, etc.
+  - Color-coded unified diff output with line limits
+  - Session validation with helpful unlock instructions
+
+- **Go Hook Command** (`internal/cli/hook.go`)
+  - Subcommands: list, run, add, remove, points, test
+  - 7 hook categories: Lifecycle, Vault, Doctor, Shell, Setup, Template, Encryption
+  - 23 hook points with descriptions
+  - File-based hooks: `~/.config/dotfiles/hooks/<point>/*.sh`
+  - JSON-configured hooks: `~/.config/dotfiles/hooks.json`
+  - Timeout support and fail-fast option
+  - Verbose mode for debugging hook execution
+
+- **Go Encrypt Command** (`internal/cli/encrypt.go`)
+  - Subcommands: init, file, decrypt, edit, list, status, push-key
+  - Age encryption (age-keygen, age) for secure file storage
+  - `--keep/-k`: Keep original when encrypting/decrypting
+  - `--dry-run/-n`: Preview what would be done
+  - `--force/-f`: Force key regeneration
+  - Pattern matching for files that should be encrypted
+  - Vault integration for key backup/recovery
+
+- **Go Doctor Command** (`internal/cli/doctor.go`)
+  - 10 check sections: Version, Core Components, Required Commands, SSH, AWS, Vault, Shell, Claude, Templates
+  - Health score calculation (0-100) with color-coded interpretation
+  - `--fix/-f`: Auto-fix permission issues (SSH keys, AWS credentials)
+  - `--quick/-q`: Fast checks only (skip vault status)
+  - Failed checks and warnings tracking with fix suggestions
+  - Metrics saving to `~/.dotfiles-metrics.jsonl`
+  - Banner with ASCII art matching bash implementation
+
+- **Go Sync Command** (`internal/cli/sync.go`)
+  - Bidirectional vault sync with smart direction detection
+  - `--dry-run/-n`: Preview changes without making them
+  - `--force-local/-l`: Push all local changes to vault
+  - `--force-vault/-v`: Pull all vault content to local
+  - `--verbose`: Show detailed checksum comparison
+  - SHA256 checksums for reliable change detection
+  - Drift state tracking for baseline comparison
+  - Updates config timestamps after successful sync
+
+- **Go Setup Command** (`internal/cli/setup.go`)
+  - Full 7-phase interactive setup wizard in Go
+  - `--status/-s`: Show current setup status without running wizard
+  - `--reset/-r`: Reset state and re-run setup from beginning
+  - State inference: auto-detects existing installations from filesystem
+  - Progress bars with Unicode visualization (█░)
+  - Phase completion persistence to config.json
+  - Feature preset selection (minimal/developer/claude/full)
+  - Next steps guidance based on configuration
+  - Vault backend detection (bitwarden, 1password, pass)
+  - Claude/dotclaude integration detection
+  - Template system detection
 
 - **Interactive Template Setup** (`dotfiles template init`)
   - Prompts for essential variables: git name, email, machine type, GitHub username
@@ -78,32 +336,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Go CLI exit codes and flag validation** (edge case testing)
+  - `diff`: Now returns non-zero exit code when vault is not unlocked
+  - `diff`: Added mutual exclusion check - `--sync` and `--restore` cannot be used together
+  - `encrypt status`: Now returns non-zero exit code when age is not installed or encryption not initialized
+
+- **Nested `{{#if}}` block extraction bug** (`lib/_templates.sh`)
+  - Fixed stray `}` character appearing in output when using nested conditionals
+  - Root cause: Two bugs in `process_conditionals` function:
+    1. Line 917: Extra `}` in pattern match was being concatenated as literal
+    2. Lines 935-938: Missing `{{/if}}` preservation in elif branch
+  - Templates like `A{{#if x}}B{{#if y}}C{{/if}}D{{/if}}E` now correctly produce `ABCDE`
+  - All nested conditional test cases pass
+
 - **Machine type preservation in template system**
   - User-set `TMPL_AUTO[machine_type]` in `_variables.local.sh` was being overwritten by auto-detection
   - Fixed variable loading order: now loads user files before auto-detection
   - `build_auto_vars()` now preserves existing user-set values
-
-### Changed
-
-- **Go Refactor Design Document** (`docs/design/IMPL-go-refactor.md`)
-  - Updated with Phases 1-4 completion status
-  - Reorganized phases to reflect strangler fig migration progress
-  - Added "Current Status" section tracking completed and in-progress work
-  - Added parity verification checklists for each command
-  - Defined "Complete Parity" criteria for migration success
-  - Added risk assessment and mitigation strategies
-  - Documented side-by-side testing approach for validation
-  - Updated from v1.0 to v1.1 with detailed status tracking
-
-### Maintenance
-
-- **Repository Commit History Cleanup**
-  - Removed incorrect author email addresses from entire git history (803 commits)
-  - Used `git filter-branch` to rewrite author metadata across all branches and tags
-  - Corrected 4 commits with work email to personal email (`blackwellsystems@protonmail.com`)
-  - Force-pushed cleaned history to GitHub with all 15 version tags updated
-  - Repository now has consistent author information throughout
-  - Claude-authored commits remain unchanged as intended
 
 ---
 

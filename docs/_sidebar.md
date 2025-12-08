@@ -3,6 +3,7 @@
 - **Getting Started**
   - [Dotfiles](/)
   - [Docker Containers](docker.md)
+  - [Windows Setup](windows-setup.md)
   - [One-Line Install](/#one-line-install)
   - [Quick Start](/#quick-start-manual)
   - [Platform Support](/#platform-support)
