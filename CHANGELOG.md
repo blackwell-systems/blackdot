@@ -65,12 +65,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `cover` - Run pytest with coverage
     - `info` - Show Python environment info
 
-- **PowerShell Module** (`powershell/`)
-  - Cross-platform Windows support for dotfiles hooks and aliases
-  - **Lifecycle Hooks**
-    - `shell_init` - Runs on module import (PowerShell start)
-    - `shell_exit` - Runs on PowerShell exit (via `Register-EngineEvent`)
-    - `directory_change` - Runs after `cd` (via `Set-Location` wrapper)
+- **PowerShell Module v1.1.0** (`powershell/`)
+  - Cross-platform Windows support with **complete ZSH hooks parity**
+  - **Full Hook System** (24 hook points - identical to ZSH)
+    - Lifecycle: `pre_install`, `post_install`, `pre_bootstrap`, `post_bootstrap`, `pre_upgrade`, `post_upgrade`
+    - Vault: `pre_vault_pull`, `post_vault_pull`, `pre_vault_push`, `post_vault_push`
+    - Doctor: `pre_doctor`, `post_doctor`, `doctor_check`
+    - Shell: `shell_init`, `shell_exit`, `directory_change`
+    - Setup: `pre_setup_phase`, `post_setup_phase`, `setup_complete`
+    - Template: `pre_template_render`, `post_template_render`
+    - Encryption: `pre_encrypt`, `post_decrypt`
+  - **Hook Registration Methods**
+    - File-based: `~/.config/dotfiles/hooks/<point>/*.ps1`
+    - Function-based: `Register-DotfilesHook -Point "..." -ScriptBlock {...}`
+    - JSON config: Same `hooks.json` format as ZSH
+  - **Hook Features**
+    - Timeout support via PowerShell Jobs
+    - Fail-fast option (`HOOKS_FAIL_FAST`)
+    - Verbose mode (`HOOKS_VERBOSE`)
+    - Feature gating (checks parent features)
+  - **Hook Management Functions**
+    - `Register-DotfilesHook` / `Unregister-DotfilesHook`
+    - `Invoke-DotfilesHook` (hook_run equivalent)
+    - `Get-DotfilesHook` / `Get-DotfilesHookPoints`
+    - `Add-DotfilesHook` / `Remove-DotfilesHook` / `Test-DotfilesHook`
   - **Tool Aliases** - 50+ functions wrapping `dotfiles tools` commands
     - SSH: `ssh-keys`, `ssh-gen`, `ssh-tunnel`, `ssh-status`
     - AWS: `aws-profiles`, `aws-who`, `aws-login`, `aws-switch`, `aws-status`
