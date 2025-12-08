@@ -48,6 +48,11 @@ categories: core, optional, and integration.`,
 		},
 	}
 
+	// Override help to use styled version
+	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		printFeaturesHelp()
+	})
+
 	// Subcommands
 	cmd.AddCommand(
 		newFeaturesListCmd(),
@@ -60,6 +65,125 @@ categories: core, optional, and integration.`,
 	)
 
 	return cmd
+}
+
+// printFeaturesHelp prints styled help matching ZSH features help
+func printFeaturesHelp() {
+	// Title
+	BoldCyan.Print("dotfiles features")
+	fmt.Print(" - ")
+	Dim.Println("Feature registry management")
+	fmt.Println()
+
+	// Usage
+	Bold.Print("Usage:")
+	fmt.Println(" dotfiles features <command> [options]")
+	fmt.Println()
+
+	// Commands section
+	BoldCyan.Println("Commands:")
+	printFeaturesCmd("list [category]", "List all features and their status")
+	Dim.Println("                      Categories: core, optional, integration")
+	Dim.Println("                      --all: Show dependencies")
+	Dim.Println("                      --json: Output as JSON")
+	fmt.Println()
+	printFeaturesCmd("status [feature]", "Show feature status (all or specific)")
+	fmt.Println()
+	printFeaturesCmd("enable <feature>", "Enable a feature")
+	Dim.Println("                      --persist: Save to config file")
+	fmt.Println()
+	printFeaturesCmd("disable <feature>", "Disable a feature")
+	Dim.Println("                      --persist: Save to config file")
+	fmt.Println()
+	printFeaturesCmd("preset <name>", "Enable a preset (group of features)")
+	Dim.Println("                      --list: Show available presets")
+	Dim.Println("                      --persist: Save to config file")
+	fmt.Println()
+	printFeaturesCmd("check <feature>", "Check if a feature is enabled (for scripts)")
+	Dim.Println("                      Returns exit code 0 if enabled, 1 if disabled")
+	fmt.Println()
+	printFeaturesCmd("validate", "Validate feature registry for circular dependencies")
+	Dim.Println("                      and conflicts. Returns exit code 0 if valid.")
+	fmt.Println()
+	printFeaturesCmd("help", "Show this help")
+	fmt.Println()
+
+	// Presets section
+	BoldCyan.Println("Available Presets:")
+	fmt.Print("  ")
+	Yellow.Print("minimal")
+	fmt.Print("     ")
+	Dim.Println("Shell only (fastest startup)")
+	fmt.Print("  ")
+	Yellow.Print("developer")
+	fmt.Print("   ")
+	Dim.Println("vault, aws_helpers, git_hooks, modern_cli")
+	fmt.Print("  ")
+	Yellow.Print("claude")
+	fmt.Print("      ")
+	Dim.Println("workspace_symlink, claude_integration, vault, git_hooks")
+	fmt.Print("  ")
+	Yellow.Print("full")
+	fmt.Print("        ")
+	Dim.Println("All features enabled")
+	fmt.Println()
+
+	// Examples section
+	BoldCyan.Println("Examples:")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles features")
+	fmt.Print("                      ")
+	Dim.Println("# List all features")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles features list optional")
+	fmt.Print("        ")
+	Dim.Println("# List optional features only")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles features enable vault")
+	fmt.Print("         ")
+	Dim.Println("# Enable vault (runtime)")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles features enable vault -p")
+	fmt.Print("      ")
+	Dim.Println("# Enable and persist")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles features preset developer")
+	fmt.Print("     ")
+	Dim.Println("# Enable developer preset")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles features check vault && ...")
+	fmt.Print("  ")
+	Dim.Println("# Conditional execution")
+	fmt.Println()
+
+	// Environment Variables section
+	BoldCyan.Println("Environment Variables:")
+	Dim.Println("  Features can also be controlled via environment variables:")
+	fmt.Print("    ")
+	Yellow.Print("SKIP_WORKSPACE_SYMLINK=true")
+	fmt.Print("    ")
+	Dim.Println("Disable workspace_symlink")
+	fmt.Print("    ")
+	Yellow.Print("SKIP_CLAUDE_SETUP=true")
+	fmt.Print("         ")
+	Dim.Println("Disable claude_integration")
+	fmt.Print("    ")
+	Yellow.Print("DOTFILES_SKIP_DRIFT_CHECK=1")
+	fmt.Print("    ")
+	Dim.Println("Disable drift_check")
+	fmt.Print("    ")
+	Yellow.Print("DOTFILES_FEATURE_<NAME>=true")
+	fmt.Print("   ")
+	Dim.Println("Enable/disable any feature")
+	fmt.Println()
+}
+
+// printFeaturesCmd prints a features subcommand with description
+func printFeaturesCmd(name, desc string) {
+	fmt.Print("  ")
+	Yellow.Printf("%-20s", name)
+	fmt.Print(" ")
+	Dim.Println(desc)
 }
 
 func newFeaturesListCmd() *cobra.Command {
