@@ -54,23 +54,14 @@ func newBackupCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "backup",
 		Short: "Manage backups",
-		Long: `Create, list, and restore backups of your dotfiles configuration.
-
-Backups include:
-  - SSH config and known_hosts
-  - Git configuration
-  - AWS credentials (if present)
-  - Zsh configuration
-  - Dotfiles config.json
-  - Template variables
-
-Examples:
-  dotfiles-go backup              # Create a new backup
-  dotfiles-go backup list         # List all backups
-  dotfiles-go backup restore      # Restore latest backup
-  dotfiles-go backup clean        # Remove old backups`,
-		RunE: runBackupCreate,
+		Long:  `Manage dotfiles backups`,
+		RunE:  runBackupCreate,
 	}
+
+	// Override help to use styled version
+	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		printBackupHelp()
+	})
 
 	cmd.AddCommand(
 		&cobra.Command{
@@ -89,8 +80,8 @@ Examples:
 			Long: `Restore a backup. If no backup-id is given, restores the latest.
 
 Examples:
-  dotfiles-go backup restore                  # Restore latest
-  dotfiles-go backup restore 20231207_120000  # Restore specific`,
+  dotfiles backup restore                  # Restore latest
+  dotfiles backup restore 20231207_120000  # Restore specific`,
 			RunE: runBackupRestore,
 		},
 		&cobra.Command{
@@ -101,6 +92,66 @@ Examples:
 	)
 
 	return cmd
+}
+
+// printBackupHelp prints styled help matching ZSH style
+func printBackupHelp() {
+	// Title
+	BoldCyan.Print("dotfiles backup")
+	fmt.Print(" - ")
+	Dim.Println("Manage dotfiles backups")
+	fmt.Println()
+
+	// Usage
+	Bold.Print("Usage:")
+	fmt.Println(" dotfiles backup [command]")
+	fmt.Println()
+
+	// Commands
+	BoldCyan.Println("Commands:")
+	fmt.Print("  ")
+	Yellow.Printf("%-12s", "create")
+	Dim.Println("Create backup of current config")
+	fmt.Print("  ")
+	Yellow.Printf("%-12s", "list")
+	Dim.Println("List all backups")
+	fmt.Print("  ")
+	Yellow.Printf("%-12s", "restore")
+	Dim.Println("Restore specific backup")
+	fmt.Print("  ")
+	Yellow.Printf("%-12s", "clean")
+	Dim.Println("Remove old backups (keeps newest 10)")
+	fmt.Println()
+
+	// Backed up files
+	BoldCyan.Println("Backed Up Files:")
+	Dim.Println("  - SSH config and known_hosts")
+	Dim.Println("  - Git configuration")
+	Dim.Println("  - AWS credentials (if present)")
+	Dim.Println("  - Zsh configuration")
+	Dim.Println("  - Dotfiles config.json")
+	Dim.Println("  - Template variables")
+	fmt.Println()
+
+	// Examples
+	BoldCyan.Println("Examples:")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles backup")
+	fmt.Print("              ")
+	Dim.Println("# Create a new backup")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles backup list")
+	fmt.Print("         ")
+	Dim.Println("# List all backups")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles backup restore")
+	fmt.Print("      ")
+	Dim.Println("# Restore latest backup")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles backup clean")
+	fmt.Print("        ")
+	Dim.Println("# Remove old backups")
+	fmt.Println()
 }
 
 func runBackupCreate(cmd *cobra.Command, args []string) error {

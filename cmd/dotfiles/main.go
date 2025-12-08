@@ -27,6 +27,7 @@ func main() {
 
 	// Execute root command
 	if err := cli.Execute(); err != nil {
+		// Error already printed by CLI, just exit
 		os.Exit(1)
 	}
 }

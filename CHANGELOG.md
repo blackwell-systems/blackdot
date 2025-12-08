@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Go CLI Help Styling** - All commands now match ZSH help output exactly
+  - Custom `printXxxHelp()` functions for vault, features, doctor, tools, backup, config, encrypt
+  - Consistent styling: bold cyan titles, yellow commands, dim descriptions
+  - Unknown command error handling matches ZSH: "Unknown command: X" with help hint
+
+- **ZSH encrypt command** - Age encryption now accessible via `dotfiles encrypt`
+  - Wired `bin/dotfiles-encrypt` into the dotfiles() function
+  - Added Security section to help output
+  - Commands: init, encrypt, decrypt, edit, list, status, push-key
+
 - **Runtime Feature Guards** - All shell tool modules now support instant enable/disable
   - No shell reload required when toggling features with `dotfiles features enable/disable`
   - Converted modules: `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `docker_tools`, `ssh_tools`, `claude_integration`, `modern_cli`, `nvm_integration`, `sdkman_integration`
