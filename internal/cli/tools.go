@@ -18,16 +18,31 @@ other platforms.
 
 Available tool categories:
   ssh     - SSH key and connection management
+  aws     - AWS profile and authentication management
+  cdk     - AWS CDK development helpers
+  go      - Go development helpers
+  rust    - Rust/Cargo development helpers
+  python  - Python/uv development helpers
 
 Examples:
-  dotfiles tools ssh keys         # List SSH keys with fingerprints
-  dotfiles tools ssh gen github   # Generate new ED25519 key
-  dotfiles tools ssh list         # List configured SSH hosts
-  dotfiles tools ssh agent        # Show SSH agent status`,
+  dotfiles tools ssh keys           # List SSH keys with fingerprints
+  dotfiles tools ssh status         # Show SSH status with ASCII art
+  dotfiles tools aws profiles       # List AWS profiles
+  dotfiles tools cdk init           # Initialize CDK project
+  dotfiles tools go new myproject   # Create new Go project
+  dotfiles tools rust lint          # Run cargo check + clippy
+  dotfiles tools python new myapp   # Create new Python project`,
 	}
 
 	// Add tool subcommands
-	cmd.AddCommand(newToolsSSHCmd())
+	cmd.AddCommand(
+		newToolsSSHCmd(),
+		newToolsAWSCmd(),
+		newToolsCDKCmd(),
+		newToolsGoCmd(),
+		newToolsRustCmd(),
+		newToolsPythonCmd(),
+	)
 
 	return cmd
 }

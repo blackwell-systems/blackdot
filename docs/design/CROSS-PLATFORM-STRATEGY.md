@@ -185,17 +185,27 @@ These should remain in shell config files.
 - [x] `tools ssh socks` (SOCKS5 proxy)
 - [ ] Windows testing
 
-### Milestone 3: AWS Tools
-- [ ] `tools aws profiles`
-- [ ] `tools aws switch`
-- [ ] `tools aws who`
-- [ ] `tools aws login` (SSO flow)
+### Milestone 3: AWS Tools ✅ COMPLETE
+- [x] `tools aws profiles`
+- [x] `tools aws switch`
+- [x] `tools aws who`
+- [x] `tools aws login` (SSO flow)
+- [x] `tools aws assume` (role assumption)
+- [x] `tools aws clear` (clear temp creds)
+- [x] `tools aws status` (ASCII art banner)
 
-### Milestone 4: Scaffolding
-- [ ] Embed templates in binary
-- [ ] `tools scaffold go`
-- [ ] `tools scaffold rust`
-- [ ] `tools scaffold python`
+### Milestone 4: Language Tools ✅ COMPLETE
+- [x] `tools go new/init/test/cover/lint/update/outdated/build-all/bench/info`
+- [x] `tools rust new/update/switch/lint/fix/outdated/expand/info`
+- [x] `tools python new/clean/venv/test/cover/info`
+
+### Milestone 5: CDK Tools ✅ COMPLETE
+- [x] `tools cdk init` (initialize project)
+- [x] `tools cdk env` (set CDK environment from AWS profile)
+- [x] `tools cdk env-clear` (clear CDK environment)
+- [x] `tools cdk outputs` (show CloudFormation outputs)
+- [x] `tools cdk context` (show/clear context)
+- [x] `tools cdk status` (ASCII art banner)
 
 ---
 

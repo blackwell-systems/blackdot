@@ -9,6 +9,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Cross-Platform Developer Tools** (`dotfiles tools`)
+  - New `tools` parent command with 6 tool categories
+  - All tools work on Linux, macOS, and Windows
+  - **SSH Tools** (`dotfiles tools ssh`)
+    - `keys` - List SSH keys with fingerprints
+    - `gen` - Generate ED25519 key pairs
+    - `list` - List configured SSH hosts
+    - `agent` - Show SSH agent status
+    - `fp` - Show fingerprints in SHA256/MD5 formats
+    - `copy` - Copy public key to remote host
+    - `tunnel` - Create SSH port forward tunnel
+    - `socks` - Create SOCKS5 proxy
+    - `status` - Color-coded ASCII art status banner
+  - **AWS Tools** (`dotfiles tools aws`)
+    - `profiles` - List all AWS profiles
+    - `who` - Show current AWS identity
+    - `login` - SSO login to AWS profile
+    - `switch` - Set AWS_PROFILE (prints export command)
+    - `assume` - Assume IAM role for cross-account access
+    - `clear` - Clear temporary credentials
+    - `status` - Color-coded ASCII art status banner
+  - **CDK Tools** (`dotfiles tools cdk`)
+    - `init` - Initialize new CDK project
+    - `env` - Set CDK_DEFAULT_ACCOUNT/REGION from AWS profile
+    - `env-clear` - Clear CDK environment variables
+    - `outputs` - Show CloudFormation stack outputs
+    - `context` - Show or clear CDK context
+    - `status` - Color-coded ASCII art status banner
+  - **Go Tools** (`dotfiles tools go`)
+    - `new` - Create new Go project with standard structure
+    - `init` - Initialize Go module
+    - `test` - Run tests with options
+    - `cover` - Run tests with coverage report
+    - `lint` - Run go vet and golangci-lint
+    - `outdated` - Show outdated dependencies
+    - `update` - Update all dependencies
+    - `build-all` - Cross-compile for all platforms
+    - `bench` - Run benchmarks
+    - `info` - Show Go environment info
+  - **Rust Tools** (`dotfiles tools rust`)
+    - `new` - Create new Rust project
+    - `update` - Update Rust toolchain
+    - `switch` - Switch Rust toolchain
+    - `lint` - Run cargo check + clippy
+    - `fix` - Format and auto-fix with clippy
+    - `outdated` - Show outdated dependencies
+    - `expand` - Expand macros (for debugging)
+    - `info` - Show Rust environment info
+  - **Python Tools** (`dotfiles tools python`)
+    - `new` - Create new Python project with uv
+    - `clean` - Clean Python artifacts
+    - `venv` - Create virtual environment
+    - `test` - Run pytest
+    - `cover` - Run pytest with coverage
+    - `info` - Show Python environment info
+
 - **Go CLI Foundation** (`go/cmd/dotfiles/`)
   - Go module structure for CLI refactoring (strangler fig pattern)
   - Working `dotfiles features` command in Go

@@ -15,6 +15,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh"
 )
@@ -50,6 +51,7 @@ Commands:
 		newSSHCopyCmd(),
 		newSSHTunnelCmd(),
 		newSSHSocksCmd(),
+		newSSHStatusCmdLocal(),
 	)
 
 	return cmd
@@ -738,4 +740,103 @@ func runSSHSocks(host, port string) error {
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()
+}
+
+// newSSHStatusCmdLocal creates SSH status command with banner
+func newSSHStatusCmdLocal() *cobra.Command {
+	return &cobra.Command{
+		Use:   "status",
+		Short: "Show SSH status with banner",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runSSHStatusLocal()
+		},
+	}
+}
+
+func runSSHStatusLocal() error {
+	home, _ := os.UserHomeDir()
+	sshDir := filepath.Join(home, ".ssh")
+
+	// Check agent status
+	authSock := os.Getenv("SSH_AUTH_SOCK")
+	agentRunning := authSock != ""
+	keysLoaded := 0
+
+	if agentRunning {
+		if out, err := exec.Command("ssh-add", "-l").Output(); err == nil {
+			lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+			for _, l := range lines {
+				if l != "" && !strings.Contains(l, "no identities") {
+					keysLoaded++
+				}
+			}
+		}
+	}
+
+	// Choose color
+	var logoColor *color.Color
+	if agentRunning && keysLoaded > 0 {
+		logoColor = color.New(color.FgGreen)
+	} else if agentRunning {
+		logoColor = color.New(color.FgYellow)
+	} else {
+		logoColor = color.New(color.FgRed)
+	}
+
+	// Print banner
+	fmt.Println()
+	logoColor.Println("  ███████╗███████╗██╗  ██╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗")
+	logoColor.Println("  ██╔════╝██╔════╝██║  ██║    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝")
+	logoColor.Println("  ███████╗███████╗███████║       ██║   ██║   ██║██║   ██║██║     ███████╗")
+	logoColor.Println("  ╚════██║╚════██║██╔══██║       ██║   ██║   ██║██║   ██║██║     ╚════██║")
+	logoColor.Println("  ███████║███████║██║  ██║       ██║   ╚██████╔╝╚██████╔╝███████╗███████║")
+	logoColor.Println("  ╚══════╝╚══════╝╚═╝  ╚═╝       ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝")
+	fmt.Println()
+
+	bold := color.New(color.Bold)
+	dim := color.New(color.Faint)
+	green := color.New(color.FgGreen)
+	red := color.New(color.FgRed)
+	yellow := color.New(color.FgYellow)
+	cyan := color.New(color.FgCyan)
+
+	bold.Println("  Current Status")
+	dim.Println("  ───────────────────────────────────────")
+
+	if agentRunning {
+		agentPID := os.Getenv("SSH_AGENT_PID")
+		if agentPID == "" {
+			agentPID = "?"
+		}
+		fmt.Printf("    %s     %s %s\n", dim.Sprint("Agent"), green.Sprint("● running"), dim.Sprintf("(PID: %s)", agentPID))
+
+		if keysLoaded > 0 {
+			fmt.Printf("    %s      %s\n", dim.Sprint("Keys"), green.Sprintf("%d loaded", keysLoaded))
+		} else {
+			fmt.Printf("    %s      %s %s\n", dim.Sprint("Keys"), yellow.Sprint("0 loaded"), dim.Sprint("(run 'sshload')"))
+		}
+	} else {
+		fmt.Printf("    %s     %s %s\n", dim.Sprint("Agent"), red.Sprint("○ not running"), dim.Sprint("(run 'sshagent')"))
+	}
+
+	// Count hosts
+	hostCount := 0
+	configPath := filepath.Join(sshDir, "config")
+	if file, err := os.Open(configPath); err == nil {
+		defer file.Close()
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			if strings.HasPrefix(strings.TrimSpace(scanner.Text()), "Host ") {
+				hostCount++
+			}
+		}
+	}
+	fmt.Printf("    %s     %s\n", dim.Sprint("Hosts"), cyan.Sprintf("%d configured", hostCount))
+
+	// Count available keys
+	keyFiles, _ := filepath.Glob(filepath.Join(sshDir, "*.pub"))
+	fmt.Printf("    %s      %s\n", dim.Sprint("Keys"), cyan.Sprintf("%d available", len(keyFiles)))
+
+	fmt.Println()
+	return nil
 }
