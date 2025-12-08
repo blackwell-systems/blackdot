@@ -342,6 +342,7 @@ jobs:
           # The vault directory contains documentation and templates with example key formats
           # The .pre-commit-hook.sample contains regex patterns to DETECT secrets (not actual secrets)
           # The test/mocks directory contains intentionally fake credentials for testing
+          # The tools_ssh.go contains SSH key type identifiers (constants like "ssh-rsa", "ssh-ed25519")
           if grep -r -E "(ssh-rsa|ssh-ed25519|BEGIN.*PRIVATE KEY)" \
               --exclude-dir=.git \
               --exclude-dir=.github \
@@ -349,11 +350,13 @@ jobs:
               --exclude-dir=mocks \
               --exclude="*.md" \
               --exclude=".pre-commit-hook.sample" \
+              --exclude="tools_ssh.go" \
               . ; then
             echo "❌ Found potential secrets in repository!"
             echo "⚠️  Note: vault/ directory is excluded (contains templates/docs)"
             echo "⚠️  Note: test/mocks/ directory is excluded (contains fake test credentials)"
             echo "⚠️  Note: .pre-commit-hook.sample is excluded (contains detection patterns)"
+            echo "⚠️  Note: tools_ssh.go is excluded (contains SSH key type identifiers)"
             echo "⚠️  If these are false positives, update the workflow exclude list"
             exit 1
           fi
