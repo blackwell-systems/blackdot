@@ -3492,6 +3492,25 @@ Implemented 50+ cross-platform developer tools in Go under `dotfiles tools`:
 - Status commands with dynamic color-coded ASCII art banners
 - Shell commands that modify environment print export/unset commands for `eval "$()"`
 
+### ✅ PowerShell Hooks Parity (2025-12-08)
+Complete parity between ZSH and PowerShell hooks systems:
+
+| ZSH | PowerShell | Status |
+|-----|------------|--------|
+| `hook_register()` | `Register-DotfilesHook` | ✅ |
+| `hook_unregister()` | `Unregister-DotfilesHook` | ✅ |
+| `hook_run()` | `Invoke-DotfilesHook` | ✅ |
+| `hook_list()` | `Get-DotfilesHook` | ✅ |
+| `hook_points()` | `Get-DotfilesHookPoints` | ✅ |
+| `hook_valid_point()` | `Test-HookPoint` | ✅ |
+| File-based hooks | `*.ps1` in hooks dir | ✅ |
+| JSON config | Same format | ✅ |
+| Timeout | PowerShell Jobs | ✅ |
+| Fail-fast | Same env var | ✅ |
+| Feature gating | Checks parent features | ✅ |
+
+All 24 hook points supported with identical behavior.
+
 ### 🔄 In Progress
 - **Phase 8:** Template System - needs implementation verification
 
@@ -3579,6 +3598,6 @@ A command has complete parity when:
 
 ---
 
-*Document Version: 1.6*
+*Document Version: 1.7*
 *Last Updated: 2025-12-08*
-*Status: Phases 1-7 complete, Phase 8 in progress. 50+ cross-platform developer tools in Go (SSH, AWS, CDK, Go, Rust, Python). 12 core commands in Go (setup in bash, migrate dropped).*
+*Status: Phases 1-7 complete, Phase 8 in progress. 50+ cross-platform developer tools in Go. PowerShell hooks with complete ZSH parity (24 hook points). 12 core commands in Go.*
