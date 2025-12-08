@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -92,6 +93,8 @@ environment files, and custom secrets.`,
 		newVaultCheckCmd(),
 		newVaultValidateCmd(),
 		newVaultInitCmd(),
+		newVaultCreateCmd(),
+		newVaultDeleteCmd(),
 	)
 
 	return cmd
@@ -345,6 +348,104 @@ Steps:
 			return vaultInit()
 		},
 	}
+}
+
+func newVaultCreateCmd() *cobra.Command {
+	var dryRun bool
+	var force bool
+	var fromFile string
+
+	cmd := &cobra.Command{
+		Use:   "create <item-name> [content]",
+		Short: "Create a new vault item",
+		Long: `Create a new Secure Note item in the vault.
+
+Content can be provided as:
+  - An argument: dotfiles vault create My-Item "content here"
+  - From a file: dotfiles vault create My-Item --file ~/path/to/file
+  - From stdin: echo "content" | dotfiles vault create My-Item
+
+Options:
+  --dry-run, -n  Show what would be created without making changes
+  --force, -f    Overwrite if item already exists
+  --file         Read content from file
+
+Examples:
+  dotfiles vault create API-Key "sk-1234567890"
+  dotfiles vault create SSH-Config --file ~/.ssh/config
+  dotfiles vault create --dry-run Git-Config --file ~/.gitconfig`,
+		Args: cobra.MinimumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			name := args[0]
+			var content string
+
+			if fromFile != "" {
+				// Read from file
+				data, err := os.ReadFile(fromFile)
+				if err != nil {
+					return fmt.Errorf("failed to read file: %w", err)
+				}
+				content = string(data)
+			} else if len(args) > 1 {
+				// Content provided as argument
+				content = args[1]
+			} else {
+				// Read from stdin
+				stat, _ := os.Stdin.Stat()
+				if (stat.Mode() & os.ModeCharDevice) == 0 {
+					data, err := io.ReadAll(os.Stdin)
+					if err != nil {
+						return fmt.Errorf("failed to read stdin: %w", err)
+					}
+					content = string(data)
+				} else {
+					return fmt.Errorf("content required: provide as argument, --file, or stdin")
+				}
+			}
+
+			return vaultCreate(name, content, dryRun, force)
+		},
+	}
+
+	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "Show what would be created")
+	cmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite if item exists")
+	cmd.Flags().StringVar(&fromFile, "file", "", "Read content from file")
+
+	return cmd
+}
+
+func newVaultDeleteCmd() *cobra.Command {
+	var dryRun bool
+	var force bool
+
+	cmd := &cobra.Command{
+		Use:   "delete <item-name>...",
+		Short: "Delete vault items",
+		Long: `Delete items from the vault.
+
+WARNING: Deletion is permanent and cannot be undone.
+
+Protected items (SSH-*, AWS-*, Git-Config, Environment-Secrets) require
+typing the item name to confirm, even with --force.
+
+Options:
+  --dry-run, -n  Show what would be deleted without making changes
+  --force, -f    Skip confirmation prompts (except protected items)
+
+Examples:
+  dotfiles vault delete TEST-NOTE
+  dotfiles vault delete --dry-run OLD-KEY
+  dotfiles vault delete --force TEMP-1 TEMP-2 TEMP-3`,
+		Args: cobra.MinimumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return vaultDelete(args, dryRun, force)
+		},
+	}
+
+	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "Show what would be deleted")
+	cmd.Flags().BoolVarP(&force, "force", "f", false, "Skip confirmation prompts")
+
+	return cmd
 }
 
 // ============================================================
@@ -1724,4 +1825,228 @@ func normalizeSSHKeyName(filename string) string {
 
 	// Use filename as-is
 	return "SSH-" + strings.Title(filename)
+}
+
+// vaultCreate creates a new vault item
+func vaultCreate(name, content string, dryRun, force bool) error {
+	PrintHeader("Create Vault Item")
+
+	// Handle dry-run without connecting to backend
+	if dryRun {
+		fmt.Println("(DRY RUN - no changes will be made)")
+		fmt.Println()
+		fmt.Printf("Item name: %s\n", name)
+		fmt.Printf("Content size: %d bytes\n", len(content))
+		fmt.Println()
+		fmt.Printf("Would create/update '%s'\n", name)
+		fmt.Println()
+		fmt.Println("Preview (first 5 lines):")
+		fmt.Println("---")
+		lines := strings.Split(content, "\n")
+		for i, line := range lines {
+			if i >= 5 {
+				break
+			}
+			fmt.Println(line)
+		}
+		fmt.Println("---")
+		Pass("Dry run complete")
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	backend, err := newVaultBackend()
+	if err != nil {
+		return fmt.Errorf("failed to create backend: %w", err)
+	}
+	defer backend.Close()
+
+	if err := backend.Init(ctx); err != nil {
+		return fmt.Errorf("backend not available: %w", err)
+	}
+
+	session, err := backend.Authenticate(ctx)
+	if err != nil {
+		return fmt.Errorf("authentication failed: %w", err)
+	}
+
+	// Sync first
+	Info("Syncing vault...")
+	if err := backend.Sync(ctx, session); err != nil {
+		Warn("Sync failed: %v", err)
+	}
+
+	// Check if item exists
+	existing, _ := backend.GetNotes(ctx, name, session)
+	if existing != "" {
+		Warn("Item '%s' already exists (%d chars)", name, len(existing))
+		if !force {
+			Fail("Use --force to overwrite")
+			return fmt.Errorf("item exists, use --force to overwrite")
+		}
+		Info("Will overwrite existing item (--force)")
+	}
+
+	fmt.Printf("Item name: %s\n", name)
+	fmt.Printf("Content size: %d bytes\n", len(content))
+
+	if existing != "" {
+		// Update existing
+		if err := backend.UpdateItem(ctx, name, content, session); err != nil {
+			return fmt.Errorf("failed to update item: %w", err)
+		}
+		Pass("Updated '%s'", name)
+	} else {
+		// Create new
+		if err := backend.CreateItem(ctx, name, content, session); err != nil {
+			return fmt.Errorf("failed to create item: %w", err)
+		}
+		Pass("Created '%s'", name)
+	}
+
+	fmt.Println()
+	fmt.Println("Verify with: dotfiles vault list")
+
+	return nil
+}
+
+// isProtectedItem checks if an item is a protected dotfiles item
+func isProtectedItem(name string) bool {
+	protected := []string{
+		"SSH-", "AWS-", "Git-Config", "Environment-Secrets",
+	}
+	for _, prefix := range protected {
+		if strings.HasPrefix(name, prefix) || name == prefix {
+			return true
+		}
+	}
+	return false
+}
+
+// vaultDelete deletes vault items
+func vaultDelete(names []string, dryRun, force bool) error {
+	PrintHeader("Delete from Vault")
+
+	// Handle dry-run without connecting to backend
+	if dryRun {
+		fmt.Println("(DRY RUN - no changes will be made)")
+		fmt.Println()
+		for _, name := range names {
+			fmt.Printf("--- %s ---\n", name)
+			fmt.Printf("Would delete '%s'\n", name)
+			if isProtectedItem(name) {
+				Warn("Protected item - would require confirmation to delete")
+			}
+			fmt.Println()
+		}
+		Pass("Dry run complete")
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	backend, err := newVaultBackend()
+	if err != nil {
+		return fmt.Errorf("failed to create backend: %w", err)
+	}
+	defer backend.Close()
+
+	if err := backend.Init(ctx); err != nil {
+		return fmt.Errorf("backend not available: %w", err)
+	}
+
+	session, err := backend.Authenticate(ctx)
+	if err != nil {
+		return fmt.Errorf("authentication failed: %w", err)
+	}
+
+	// Sync first
+	Info("Syncing vault...")
+	if err := backend.Sync(ctx, session); err != nil {
+		Warn("Sync failed: %v", err)
+	}
+
+	var deleted, skipped, failed int
+
+	for _, name := range names {
+		fmt.Printf("--- %s ---\n", name)
+
+		// Check if item exists
+		existing, _ := backend.GetNotes(ctx, name, session)
+		if existing == "" {
+			Warn("Item '%s' not found", name)
+			skipped++
+			fmt.Println()
+			continue
+		}
+
+		fmt.Printf("  Size: %d chars\n", len(existing))
+
+		// Check if protected
+		if isProtectedItem(name) {
+			fmt.Println()
+			Warn("⚠ This is a protected dotfiles item!")
+			fmt.Println("Deleting this will break your dotfiles restore.")
+			fmt.Println()
+
+			// Always require confirmation for protected items
+			fmt.Print("Type the item name to confirm deletion: ")
+			reader := bufio.NewReader(os.Stdin)
+			confirm, _ := reader.ReadString('\n')
+			confirm = strings.TrimSpace(confirm)
+			if confirm != name {
+				Warn("Confirmation failed - skipping")
+				skipped++
+				fmt.Println()
+				continue
+			}
+		} else {
+			// Non-protected: respect --force
+			if !force {
+				fmt.Printf("Delete '%s'? [y/N] ", name)
+				reader := bufio.NewReader(os.Stdin)
+				confirm, _ := reader.ReadString('\n')
+				confirm = strings.TrimSpace(confirm)
+				if !strings.EqualFold(confirm, "y") {
+					Warn("Cancelled")
+					skipped++
+					fmt.Println()
+					continue
+				}
+			}
+		}
+
+		// Perform deletion
+		if err := backend.DeleteItem(ctx, name, session); err != nil {
+			Fail("Failed to delete '%s': %v", name, err)
+			failed++
+		} else {
+			Pass("Deleted '%s'", name)
+			deleted++
+		}
+		fmt.Println()
+	}
+
+	// Summary
+	fmt.Println("========================================")
+	if dryRun {
+		fmt.Println("DRY RUN SUMMARY:")
+		fmt.Printf("  Would delete: %d\n", deleted)
+	} else {
+		fmt.Println("SUMMARY:")
+		fmt.Printf("  Deleted: %d\n", deleted)
+	}
+	fmt.Printf("  Skipped: %d\n", skipped)
+	if failed > 0 {
+		Fail("Failed: %d", failed)
+	}
+	fmt.Println("========================================")
+
+	if failed > 0 {
+		return fmt.Errorf("%d items failed to delete", failed)
+	}
+	return nil
 }

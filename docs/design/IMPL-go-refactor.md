@@ -3586,6 +3586,31 @@ dotfiles import chezmoi --source ~/chezmoi # Custom source
 dotfiles import chezmoi --dry-run          # Preview only
 ```
 
+### ✅ PRIORITY 6: Vault Create/Delete Commands (DONE 2025-12-08)
+
+Added missing vault management commands for complete CRUD support:
+
+**`dotfiles vault create <item-name> [content]`**
+- Create new Secure Note items in vault
+- Content from: argument, `--file`, or stdin
+- `--dry-run` / `-n` - Preview without changes
+- `--force` / `-f` - Overwrite existing items
+
+**`dotfiles vault delete <item-name>...`**
+- Delete one or more vault items
+- Protected items (SSH-*, AWS-*, Git-Config, Environment-Secrets) require confirmation
+- `--dry-run` / `-n` - Preview without changes
+- `--force` / `-f` - Skip confirmation (except protected items)
+
+Usage:
+```bash
+dotfiles vault create API-Key "sk-1234567890"
+dotfiles vault create SSH-Config --file ~/.ssh/config
+echo "secret" | dotfiles vault create My-Secret
+dotfiles vault delete --dry-run OLD-KEY
+dotfiles vault delete --force TEMP-1 TEMP-2 TEMP-3
+```
+
 ### ⚠️  Remaining Open Questions
 
 1. **Configuration Sharing** - ✅ RESOLVED: Both Go and shell use same `config.json` format
