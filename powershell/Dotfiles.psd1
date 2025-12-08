@@ -1,0 +1,96 @@
+@{
+    # Module manifest for Dotfiles PowerShell module
+
+    # Script module file associated with this manifest
+    RootModule = 'Dotfiles.psm1'
+
+    # Version number of this module
+    ModuleVersion = '1.0.0'
+
+    # ID used to uniquely identify this module
+    GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+
+    # Author of this module
+    Author = 'Dotfiles'
+
+    # Company or vendor of this module
+    CompanyName = 'Blackwell Systems'
+
+    # Copyright statement for this module
+    Copyright = '(c) 2025 Blackwell Systems. MIT License.'
+
+    # Description of the functionality provided by this module
+    Description = 'Cross-platform dotfiles integration for PowerShell. Provides hooks, aliases, and tools for Windows users.'
+
+    # Minimum version of the PowerShell engine required by this module
+    PowerShellVersion = '5.1'
+
+    # Functions to export from this module
+    FunctionsToExport = @(
+        # Hooks
+        'Invoke-DotfilesHook',
+        'Enable-DotfilesHooks',
+        'Disable-DotfilesHooks',
+
+        # Utilities
+        'Get-DotfilesPath',
+        'Test-DotfilesCli',
+        'Initialize-Dotfiles',
+
+        # CD wrapper
+        'Set-LocationWithHook',
+
+        # SSH aliases
+        'ssh-keys', 'ssh-gen', 'ssh-list', 'ssh-agent-status',
+        'ssh-fp', 'ssh-tunnel', 'ssh-socks', 'ssh-status',
+
+        # AWS aliases
+        'aws-profiles', 'aws-who', 'aws-login', 'aws-switch',
+        'aws-assume', 'aws-clear', 'aws-status',
+
+        # CDK aliases
+        'cdk-init', 'cdk-env', 'cdk-env-clear',
+        'cdk-outputs', 'cdk-context', 'cdk-status',
+
+        # Go aliases
+        'go-new', 'go-init', 'go-test', 'go-cover', 'go-lint',
+        'go-outdated', 'go-update', 'go-build-all', 'go-bench', 'go-info',
+
+        # Rust aliases
+        'rust-new', 'rust-update', 'rust-switch', 'rust-lint',
+        'rust-fix', 'rust-outdated', 'rust-expand', 'rust-info',
+
+        # Python aliases
+        'py-new', 'py-clean', 'py-venv', 'py-test', 'py-cover', 'py-info',
+
+        # Core commands
+        'dotfiles-status', 'dotfiles-doctor', 'dotfiles-setup',
+        'dotfiles-features', 'dotfiles-vault', 'dotfiles-hook'
+    )
+
+    # Cmdlets to export from this module
+    CmdletsToExport = @()
+
+    # Variables to export from this module
+    VariablesToExport = @()
+
+    # Aliases to export from this module
+    AliasesToExport = @('cd', 'd')
+
+    # Private data to pass to the module specified in RootModule
+    PrivateData = @{
+        PSData = @{
+            # Tags applied to this module for module discovery
+            Tags = @('dotfiles', 'hooks', 'aws', 'ssh', 'development', 'cross-platform')
+
+            # A URL to the license for this module
+            LicenseUri = 'https://github.com/blackwell-systems/dotfiles/blob/main/LICENSE'
+
+            # A URL to the main website for this project
+            ProjectUri = 'https://github.com/blackwell-systems/dotfiles'
+
+            # Release notes for this module
+            ReleaseNotes = 'Initial release of PowerShell hooks and aliases for dotfiles cross-platform support.'
+        }
+    }
+}
