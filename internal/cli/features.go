@@ -301,6 +301,7 @@ func enableFeature(name string, persist bool) error {
 			return err
 		}
 		Pass("Feature '%s' enabled and saved to config", name)
+		printShellReloadHint()
 	} else {
 		Pass("Feature '%s' enabled (runtime only)", name)
 		PrintHint("Use --persist to save to config file")
@@ -336,6 +337,7 @@ func disableFeature(name string, persist bool) error {
 			return err
 		}
 		Pass("Feature '%s' disabled and saved to config", name)
+		printShellReloadHint()
 	} else {
 		Pass("Feature '%s' disabled (runtime only)", name)
 		PrintHint("Use --persist to save to config file")
@@ -389,6 +391,10 @@ func applyPreset(name string, persist bool) error {
 	fmt.Println("Enabled features:")
 	for _, fname := range preset.Features {
 		Green.Printf("  ● %s\n", fname)
+	}
+
+	if persist {
+		printShellReloadHint()
 	}
 
 	return nil
@@ -476,4 +482,13 @@ func persistFeatureState(reg *feature.Registry) error {
 	userConfig.Features = reg.SaveState()
 
 	return cfg.Save(userConfig)
+}
+
+// printShellReloadHint prints a hint to reload the shell after feature changes
+// The shell wrapper (zsh) does this automatically, but if using Go CLI directly
+// the user needs to know to reload for changes to take effect.
+func printShellReloadHint() {
+	fmt.Println()
+	Yellow.Println("Reload your shell to apply changes:")
+	fmt.Println("  exec zsh")
 }
