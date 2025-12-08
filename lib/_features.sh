@@ -224,6 +224,8 @@ feature_enable() {
     fi
 
     FEATURE_STATE[$feature]="true"
+    # Export as env var so subprocesses (like dotfiles features list) can see it
+    export "DOTFILES_FEATURE_${(U)feature}=true"
 }
 
 # Disable a feature at runtime
@@ -246,6 +248,8 @@ feature_disable() {
     fi
 
     FEATURE_STATE[$feature]="false"
+    # Export as env var so subprocesses (like dotfiles features list) can see it
+    export "DOTFILES_FEATURE_${(U)feature}=false"
 }
 
 # Runtime feature guard for use inside shell functions
