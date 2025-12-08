@@ -3,6 +3,7 @@
 # =========================
 # Tool integrations and lazy loaders
 # Manages SDKMAN, NVM, zoxide, glow, update checker, syntax highlighting, and local overrides
+# Runtime guards allow enable/disable without shell reload
 
 # Load your custom env block if it exists
 if [ -f "$HOME/.local/bin/env" ]; then
@@ -16,17 +17,47 @@ export SDKMAN_DIR="$HOME/.sdkman"
 
 # Lazy load: only initialize SDKMAN when sdk/java/gradle/maven/kotlin are called
 _lazy_load_sdkman() {
-  unfunction sdk java gradle mvn kotlin groovy scala 2>/dev/null
   if [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]]; then
     source "$SDKMAN_DIR/bin/sdkman-init.sh"
   fi
 }
 
-# Create lazy wrapper functions
-for cmd in sdk java gradle mvn kotlin groovy scala; do
-  eval "$cmd() { _lazy_load_sdkman && $cmd \"\$@\" }"
-done
-unset cmd
+# SDKMAN wrapper functions with runtime guards
+sdk() {
+  require_feature "sdkman_integration" || return 1
+  unfunction sdk 2>/dev/null
+  _lazy_load_sdkman && sdk "$@"
+}
+java() {
+  require_feature "sdkman_integration" || return 1
+  unfunction java 2>/dev/null
+  _lazy_load_sdkman && java "$@"
+}
+gradle() {
+  require_feature "sdkman_integration" || return 1
+  unfunction gradle 2>/dev/null
+  _lazy_load_sdkman && gradle "$@"
+}
+mvn() {
+  require_feature "sdkman_integration" || return 1
+  unfunction mvn 2>/dev/null
+  _lazy_load_sdkman && mvn "$@"
+}
+kotlin() {
+  require_feature "sdkman_integration" || return 1
+  unfunction kotlin 2>/dev/null
+  _lazy_load_sdkman && kotlin "$@"
+}
+groovy() {
+  require_feature "sdkman_integration" || return 1
+  unfunction groovy 2>/dev/null
+  _lazy_load_sdkman && groovy "$@"
+}
+scala() {
+  require_feature "sdkman_integration" || return 1
+  unfunction scala 2>/dev/null
+  _lazy_load_sdkman && scala "$@"
+}
 
 # Best Western config
 export ENV=prod
@@ -39,23 +70,53 @@ export BWH_CONFIG_DIR="$HOME/.config/bwh"
 export NVM_DIR="$HOME/.nvm"
 
 _lazy_load_nvm() {
-  unfunction nvm node npm npx yarn pnpm corepack 2>/dev/null
   if [[ -s "$NVM_DIR/nvm.sh" ]]; then
     source "$NVM_DIR/nvm.sh"
     [[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
   fi
 }
 
-# Create lazy wrapper functions for node ecosystem commands
-for cmd in nvm node npm npx yarn pnpm corepack; do
-  eval "$cmd() { _lazy_load_nvm && $cmd \"\$@\" }"
-done
-unset cmd
+# NVM wrapper functions with runtime guards
+nvm() {
+  require_feature "nvm_integration" || return 1
+  unfunction nvm 2>/dev/null
+  _lazy_load_nvm && nvm "$@"
+}
+node() {
+  require_feature "nvm_integration" || return 1
+  unfunction node 2>/dev/null
+  _lazy_load_nvm && node "$@"
+}
+npm() {
+  require_feature "nvm_integration" || return 1
+  unfunction npm 2>/dev/null
+  _lazy_load_nvm && npm "$@"
+}
+npx() {
+  require_feature "nvm_integration" || return 1
+  unfunction npx 2>/dev/null
+  _lazy_load_nvm && npx "$@"
+}
+yarn() {
+  require_feature "nvm_integration" || return 1
+  unfunction yarn 2>/dev/null
+  _lazy_load_nvm && yarn "$@"
+}
+pnpm() {
+  require_feature "nvm_integration" || return 1
+  unfunction pnpm 2>/dev/null
+  _lazy_load_nvm && pnpm "$@"
+}
+corepack() {
+  require_feature "nvm_integration" || return 1
+  unfunction corepack 2>/dev/null
+  _lazy_load_nvm && corepack "$@"
+}
 
 # Auto-switch node version when entering directory with .nvmrc
-# (only triggers if nvm is needed)
+# (only triggers if nvm is needed and feature is enabled)
 _nvm_auto_switch() {
-  if [[ -f .nvmrc ]] && command -v nvm &>/dev/null; then
+  if [[ -f .nvmrc ]] && feature_enabled "nvm_integration" 2>/dev/null && command -v nvm &>/dev/null; then
     nvm use 2>/dev/null
   fi
 }
