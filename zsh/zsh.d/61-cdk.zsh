@@ -9,6 +9,9 @@
 # CDK Aliases (as functions for runtime guards)
 # =========================
 
+# Remove existing aliases to allow function definitions
+unalias cdkd cdks cdkdf cdkw cdkls cdkdst cdkb cdkda cdkdfa cdkhs cdkhsf 2>/dev/null
+
 # Core CDK commands
 cdkd()   { require_feature "cdk_tools" || return 1; cdk deploy "$@"; }
 cdks()   { require_feature "cdk_tools" || return 1; cdk synth "$@"; }

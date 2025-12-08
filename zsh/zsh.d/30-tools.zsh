@@ -13,6 +13,8 @@
 
 # eza - modern ls replacement (cross-platform)
 if command -v eza >/dev/null 2>&1; then
+  # Remove existing aliases to allow function definitions
+  unalias ls ll la lt l lm lr 2>/dev/null
   ls()  { require_feature "modern_cli" || return 1; eza --color=auto --group-directories-first "$@"; }
   ll()  { require_feature "modern_cli" || return 1; eza -la --icons --group-directories-first --git "$@"; }
   la()  { require_feature "modern_cli" || return 1; eza -a --icons --group-directories-first "$@"; }

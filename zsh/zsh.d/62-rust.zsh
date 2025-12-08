@@ -9,6 +9,9 @@
 # Cargo Aliases (as functions for runtime guards)
 # =========================
 
+# Remove existing aliases to allow function definitions
+unalias cb cr ct cc ccl cf cdoc cbr crr cba cbra ctq ctn ctv cu cadd crm cclean cfix caudit cw cwr cwt cwc 2>/dev/null
+
 # Core cargo commands
 cb()   { require_feature "rust_tools" || return 1; cargo build "$@"; }
 cr()   { require_feature "rust_tools" || return 1; cargo run "$@"; }
