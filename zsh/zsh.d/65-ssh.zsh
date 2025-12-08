@@ -3,11 +3,9 @@
 # =========================
 # SSH configuration, key management, agent handling, and tunnel utilities
 # Provides shortcuts and helpers for SSH workflows
-
-# Feature guard: skip if ssh_tools is disabled
-if type feature_enabled &>/dev/null && ! feature_enabled "ssh_tools" 2>/dev/null; then
-    return 0
-fi
+#
+# NOTE: Uses runtime feature guards - functions check feature_enabled when called,
+# not at load time. This allows features to be enabled/disabled without shell reload.
 
 # =========================
 # SSH Config Management
@@ -15,6 +13,7 @@ fi
 
 # List all configured hosts from ~/.ssh/config
 sshlist() {
+    require_feature "ssh_tools" || return 1
     if [[ ! -f ~/.ssh/config ]]; then
         echo "No SSH config found at ~/.ssh/config"
         return 1
@@ -29,6 +28,7 @@ sshlist() {
 
 # Quick connect with optional command
 sshgo() {
+    require_feature "ssh_tools" || return 1
     local host="${1:-}"
     shift 2>/dev/null || true
 
@@ -48,11 +48,13 @@ sshgo() {
 
 # Open SSH config in editor
 sshedit() {
+    require_feature "ssh_tools" || return 1
     ${EDITOR:-vim} ~/.ssh/config
 }
 
 # Add new host to SSH config interactively
 sshadd-host() {
+    require_feature "ssh_tools" || return 1
     local name="${1:-}"
 
     if [[ -z "$name" ]]; then
@@ -98,6 +100,7 @@ sshadd-host() {
 
 # List all SSH keys with fingerprints
 sshkeys() {
+    require_feature "ssh_tools" || return 1
     local key_dir="${1:-$HOME/.ssh}"
 
     echo "SSH Keys in $key_dir:"
@@ -125,6 +128,7 @@ sshkeys() {
 
 # Generate new ED25519 key
 sshgen() {
+    require_feature "ssh_tools" || return 1
     local name="${1:-}"
     local comment="${2:-}"
 
@@ -161,6 +165,7 @@ sshgen() {
 
 # Copy public key to remote host
 sshcopy() {
+    require_feature "ssh_tools" || return 1
     local host="${1:-}"
     local key="${2:-}"
 
@@ -180,6 +185,7 @@ sshcopy() {
 
 # Show fingerprint(s) in multiple formats
 sshfp() {
+    require_feature "ssh_tools" || return 1
     local key="${1:-}"
 
     if [[ -z "$key" ]]; then
@@ -218,6 +224,7 @@ sshfp() {
 
 # Start agent if not running, show loaded keys
 sshagent() {
+    require_feature "ssh_tools" || return 1
     # Check if agent is running
     if [[ -z "$SSH_AUTH_SOCK" ]] || ! ssh-add -l &>/dev/null; then
         echo "Starting SSH agent..."
@@ -243,6 +250,7 @@ sshagent() {
 
 # Add key to agent
 sshload() {
+    require_feature "ssh_tools" || return 1
     local key="${1:-}"
 
     if [[ -z "$key" ]]; then
@@ -274,6 +282,7 @@ sshload() {
 
 # Remove key from agent
 sshunload() {
+    require_feature "ssh_tools" || return 1
     local key="${1:-}"
 
     if [[ -z "$key" ]]; then
@@ -294,6 +303,7 @@ sshunload() {
 
 # Remove all keys from agent
 sshclear() {
+    require_feature "ssh_tools" || return 1
     echo "Removing all keys from SSH agent..."
     ssh-add -D
     echo "Done. No keys loaded."
@@ -305,6 +315,7 @@ sshclear() {
 
 # Create port forward tunnel
 sshtunnel() {
+    require_feature "ssh_tools" || return 1
     local host="${1:-}"
     local local_port="${2:-}"
     local remote_port="${3:-}"
@@ -330,6 +341,7 @@ sshtunnel() {
 
 # SOCKS5 proxy through host
 sshsocks() {
+    require_feature "ssh_tools" || return 1
     local host="${1:-}"
     local port="${2:-1080}"
 
@@ -350,6 +362,7 @@ sshsocks() {
 
 # List active SSH connections/tunnels
 sshtunnels() {
+    require_feature "ssh_tools" || return 1
     echo "Active SSH Connections:"
     echo "──────────────────────────────────────"
 
@@ -371,6 +384,7 @@ sshtunnels() {
 # =========================
 
 sshtools() {
+    require_feature "ssh_tools" || return 1
     # Source theme colors
     source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
 

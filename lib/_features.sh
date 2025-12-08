@@ -248,6 +248,24 @@ feature_disable() {
     FEATURE_STATE[$feature]="false"
 }
 
+# Runtime feature guard for use inside shell functions
+# Usage: require_feature "ssh_tools" || return 1
+# Returns 1 if feature is disabled (with user-friendly message)
+require_feature() {
+    local feature="$1"
+    local silent="${2:-false}"
+
+    if feature_enabled "$feature"; then
+        return 0
+    fi
+
+    if [[ "$silent" != "true" ]]; then
+        echo "Feature '$feature' is disabled." >&2
+        echo "Enable with: dotfiles features enable $feature" >&2
+    fi
+    return 1
+}
+
 # Persist feature state to config file
 # Usage: feature_persist "vault" "true"
 feature_persist() {
