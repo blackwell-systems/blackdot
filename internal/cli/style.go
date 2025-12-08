@@ -61,6 +61,14 @@ func printRootHelp() {
 	printCmd("rollback", "Instant rollback to last backup")
 	fmt.Println()
 
+	// Security
+	BoldCyan.Println("Security:")
+	printCmd("encrypt", "Age encryption management")
+	printCmd("encrypt init", "Initialize encryption (generate keys)")
+	printCmd("encrypt edit", "Decrypt, edit, re-encrypt a file")
+	printCmd("encrypt status", "Show encryption status and key info")
+	fmt.Println()
+
 	// Feature Management
 	BoldCyan.Println("Feature Management:")
 	printCmd("features", "List all features and status")
