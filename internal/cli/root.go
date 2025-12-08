@@ -56,6 +56,9 @@ func Execute() error {
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	// Use custom help function matching ZSH style
+	rootCmd.SetHelpFunc(customHelpFunc)
+
 	// Global flags available to all commands
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 	rootCmd.PersistentFlags().BoolVar(&force, "force", false, "bypass feature checks")
