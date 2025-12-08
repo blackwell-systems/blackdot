@@ -3611,6 +3611,26 @@ dotfiles vault delete --dry-run OLD-KEY
 dotfiles vault delete --force TEMP-1 TEMP-2 TEMP-3
 ```
 
+### ✅ PRIORITY 7: Docker Tools (DONE 2025-12-08)
+
+Cross-platform Docker container management tools:
+
+**`dotfiles tools docker`** subcommands:
+- `ps [-a]` - List containers (all with `-a`)
+- `images` - List Docker images
+- `ip <container>` - Get container IP address
+- `env <container>` - Show container environment variables
+- `ports` - Show all container ports
+- `stats [-f]` - Resource usage (live with `-f`)
+- `vols` - List volumes
+- `nets [--inspect NAME]` - List networks (or inspect one)
+- `inspect <container> [--path .Key]` - Inspect with JSON path filtering
+- `clean [--dry-run]` - Remove stopped containers and dangling images
+- `prune [-a] [-f]` - System prune (aggressive with `-a`)
+- `status` - Color-coded ASCII art status banner
+
+Feature-gated via `docker_tools` feature flag (matches ZSH 66-docker.zsh).
+
 ### ⚠️  Remaining Open Questions
 
 1. **Configuration Sharing** - ✅ RESOLVED: Both Go and shell use same `config.json` format

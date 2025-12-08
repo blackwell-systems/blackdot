@@ -68,6 +68,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `test` - Run pytest
     - `cover` - Run pytest with coverage
     - `info` - Show Python environment info
+  - **Docker Tools** (`dotfiles tools docker`)
+    - `ps` - List containers (with `-a` for all)
+    - `images` - List Docker images
+    - `ip` - Get container IP address
+    - `env` - Show container environment variables
+    - `ports` - Show all container ports
+    - `stats` - Show resource usage (with `-f` for live)
+    - `vols` - List volumes
+    - `nets` - List networks (with `--inspect` for details)
+    - `inspect` - Inspect container with JSON path filtering
+    - `clean` - Remove stopped containers and dangling images
+    - `prune` - System prune (with `-a` for aggressive)
+    - `status` - Color-coded ASCII art status banner
 
 - **PowerShell Module v1.1.0** (`powershell/`)
   - Cross-platform Windows support with **complete ZSH hooks parity**
