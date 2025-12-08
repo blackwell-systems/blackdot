@@ -102,7 +102,7 @@
     VariablesToExport = @()
 
     # Aliases to export from this module
-    AliasesToExport = @('cd', 'd', 'cb', 'cm')
+    AliasesToExport = @('cd', 'd', 'cbed', 'cmax', 'cm')
 
     # Private data to pass to the module specified in RootModule
     PrivateData = @{
@@ -126,7 +126,7 @@
 - claude-switch: Interactive backend switcher
 - claude-init: Initialize ~/.claude/ from templates
 - claude-env: Show Claude environment variables
-- Aliases: cb (claude-bedrock), cm (claude-max)
+- Aliases: cbed (claude-bedrock), cmax/cm (claude-max)
 
 ## 1.1.0
 - Complete parity with ZSH hooks implementation
