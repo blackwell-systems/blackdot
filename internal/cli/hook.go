@@ -130,33 +130,19 @@ func newHookCmd() *cobra.Command {
 		Use:     "hook",
 		Aliases: []string{"hooks"},
 		Short:   "Hook system management",
-		Long: `Hook system management command.
-
-Commands:
-  list [point]          List hooks (all points or specific point)
-  run <point> [args]    Manually trigger hooks for a point
-  add <point> <script>  Add a hook script to a point
-  remove <point> <name> Remove a hook script
-  points                List all available hook points
-  test <point>          Test hooks for a point (verbose dry-run)
-
-Hook Points:
-  Lifecycle:      pre_install, post_install, pre_bootstrap, post_bootstrap,
-                  pre_upgrade, post_upgrade
-  Vault:          pre_vault_pull, post_vault_pull, pre_vault_push, post_vault_push
-  Doctor:         pre_doctor, post_doctor, doctor_check
-  Shell:          shell_init, shell_exit, directory_change
-  Setup:          pre_setup_phase, post_setup_phase, setup_complete
-  Template:       pre_template_render, post_template_render
-  Encryption:     pre_encrypt, post_decrypt
-
-Configuration:
-  Hooks directory:      ~/.config/dotfiles/hooks/
-  JSON config:          ~/.config/dotfiles/hooks.json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 {
+				printHookHelp()
+				return nil
+			}
 			return runHookList(args)
 		},
 	}
+
+	// Set custom help function
+	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		printHookHelp()
+	})
 
 	listCmd := &cobra.Command{
 		Use:     "list [point]",
@@ -686,4 +672,87 @@ func runHookTest(args []string) error {
 
 	fmt.Printf("%s All hooks completed successfully\n", color.GreenString("[OK]"))
 	return nil
+}
+
+// printHookHelp prints styled help matching ZSH format
+func printHookHelp() {
+	// Title
+	BoldCyan.Print("dotfiles hook")
+	fmt.Print(" - Hook system management\n")
+	fmt.Println()
+	Bold.Print("Usage:")
+	fmt.Print(" dotfiles hook <command> [options]\n")
+	fmt.Println()
+
+	// Commands
+	BoldCyan.Println("Commands:")
+	printCmd("list [point]", "List hooks (all points or specific point)")
+	printCmd("run <point>", "Manually trigger hooks for a point")
+	printCmd("add <point> <script>", "Add a hook script to a point")
+	printCmd("remove <point> <name>", "Remove a hook script")
+	printCmd("points", "List all available hook points")
+	printCmd("test <point>", "Test hooks for a point (verbose dry-run)")
+	fmt.Println()
+
+	// Hook Points by Category
+	BoldCyan.Println("Hook Points:")
+	fmt.Println()
+
+	for _, cat := range hookCategories {
+		fmt.Print("  ")
+		Yellow.Print(cat.Name)
+		fmt.Println()
+		for _, p := range cat.Points {
+			fmt.Print("    ")
+			Dim.Printf("%-24s", p.Name)
+			Dim.Println(p.Desc)
+		}
+		fmt.Println()
+	}
+
+	// Configuration
+	BoldCyan.Println("Configuration:")
+	fmt.Print("  ")
+	Yellow.Print("Hooks directory")
+	fmt.Print("   ")
+	Dim.Println("~/.config/dotfiles/hooks/")
+	fmt.Print("  ")
+	Yellow.Print("JSON config")
+	fmt.Print("       ")
+	Dim.Println("~/.config/dotfiles/hooks.json")
+	fmt.Println()
+
+	// Examples
+	BoldCyan.Println("Examples:")
+	Dim.Println("  # List all hooks")
+	fmt.Println("  dotfiles hook list")
+	fmt.Println()
+	Dim.Println("  # List hooks for specific point")
+	fmt.Println("  dotfiles hook list post_vault_pull")
+	fmt.Println()
+	Dim.Println("  # Run hooks manually")
+	fmt.Println("  dotfiles hook run shell_init --verbose")
+	fmt.Println()
+	Dim.Println("  # Add a hook script")
+	fmt.Println("  dotfiles hook add post_vault_pull ~/scripts/ssh-add-keys.sh")
+	fmt.Println()
+
+	// Environment Variables
+	BoldCyan.Println("Environment Variables:")
+	fmt.Print("  ")
+	Yellow.Print("DOTFILES_HOOKS_DISABLED")
+	fmt.Print("  ")
+	Dim.Println("Disable all hooks (true/false)")
+	fmt.Print("  ")
+	Yellow.Print("DOTFILES_HOOKS_VERBOSE")
+	fmt.Print("   ")
+	Dim.Println("Enable verbose output (true/false)")
+	fmt.Print("  ")
+	Yellow.Print("DOTFILES_HOOKS_FAIL_FAST")
+	fmt.Print("  ")
+	Dim.Println("Stop on first failure (true/false)")
+	fmt.Print("  ")
+	Yellow.Print("DOTFILES_HOOKS_TIMEOUT")
+	fmt.Print("    ")
+	Dim.Println("Hook timeout in seconds (default: 30)")
 }
