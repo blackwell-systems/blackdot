@@ -3474,6 +3474,24 @@ require (
 - **Phase 6:** Config System - Read/write cross-compatible ✓
 - **Phase 7:** Vault Integration - pass backend fully tested ✓
 
+### ✅ Cross-Platform Developer Tools (2025-12-08)
+Implemented 50+ cross-platform developer tools in Go under `dotfiles tools`:
+
+| Category | Commands | Features |
+|----------|----------|----------|
+| **SSH** | keys, gen, list, agent, fp, copy, tunnel, socks, status | ED25519 key generation, OpenSSH format, color-coded ASCII banner |
+| **AWS** | profiles, who, login, switch, assume, clear, status | SSO flow, role assumption, color-coded status based on auth |
+| **CDK** | init, env, env-clear, outputs, context, status | Project detection, environment setup from AWS profile |
+| **Go** | new, init, test, cover, lint, outdated, update, build-all, bench, info | Cross-compile support, module management |
+| **Rust** | new, update, switch, lint, fix, outdated, expand, info | Toolchain management, clippy integration |
+| **Python** | new, clean, venv, test, cover, info | uv-powered, template options (app/lib/script) |
+
+**Implementation details:**
+- Pure Go SSH key handling using `golang.org/x/crypto/ssh`
+- ED25519 key generation with OpenSSH-compatible format
+- Status commands with dynamic color-coded ASCII art banners
+- Shell commands that modify environment print export/unset commands for `eval "$()"`
+
 ### 🔄 In Progress
 - **Phase 8:** Template System - needs implementation verification
 
@@ -3561,6 +3579,6 @@ A command has complete parity when:
 
 ---
 
-*Document Version: 1.5*
-*Last Updated: 2025-12-07*
-*Status: Phases 1-4 complete, Phases 5-8 in progress, Phase 9: 12 Go commands complete (setup in bash, migrate dropped)*
+*Document Version: 1.6*
+*Last Updated: 2025-12-08*
+*Status: Phases 1-7 complete, Phase 8 in progress. 50+ cross-platform developer tools in Go (SSH, AWS, CDK, Go, Rust, Python). 12 core commands in Go (setup in bash, migrate dropped).*
