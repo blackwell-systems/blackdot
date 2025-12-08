@@ -128,11 +128,24 @@ func printMacOSHelp() {
 	}
 }
 
-// checkMacOS ensures we're running on macOS
+// checkMacOS ensures we're running on macOS and feature is enabled
 func checkMacOS() error {
 	if runtime.GOOS != "darwin" {
 		return fmt.Errorf("this command only runs on macOS")
 	}
+
+	// Check if feature is enabled (unless --force is set)
+	if !force {
+		reg := initRegistry()
+		if !reg.Enabled("macos_settings") {
+			Fail("Feature 'macos_settings' is not enabled")
+			fmt.Println()
+			Info("Enable with: dotfiles features enable macos_settings")
+			Info("Or run with --force to bypass")
+			return fmt.Errorf("feature not enabled")
+		}
+	}
+
 	return nil
 }
 
