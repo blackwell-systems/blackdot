@@ -529,9 +529,17 @@ func vaultStatus() error {
 	PrintHeader("Vault Status")
 
 	backendType := getVaultBackend()
+	sessionFile := getSessionFile()
 	fmt.Printf("Backend: %s\n", backendType)
-	fmt.Printf("Session file: %s\n", getSessionFile())
+	fmt.Printf("Session file: %s\n", sessionFile)
 	fmt.Println()
+
+	// Load session from file BEFORE creating backend
+	hasSession := false
+	if sessionData, err := os.ReadFile(sessionFile); err == nil && len(sessionData) > 0 {
+		os.Setenv("BW_SESSION", strings.TrimSpace(string(sessionData)))
+		hasSession = true
+	}
 
 	backend, err := newVaultBackend()
 	if err != nil {
@@ -547,18 +555,11 @@ func vaultStatus() error {
 
 	Pass("Backend initialized: %s", backend.Name())
 
-	// Check authentication by reading session file and setting BW_SESSION
-	sessionFile := getSessionFile()
-	if sessionData, err := os.ReadFile(sessionFile); err == nil && len(sessionData) > 0 {
-		// Set BW_SESSION for the status check
-		os.Setenv("BW_SESSION", strings.TrimSpace(string(sessionData)))
-
-		// Now check if authenticated
-		if backend.IsAuthenticated(ctx) {
-			Pass("Authenticated")
-		} else {
-			Warn("Session expired - run 'dotfiles vault unlock'")
-		}
+	// Check authentication
+	if hasSession && backend.IsAuthenticated(ctx) {
+		Pass("Authenticated")
+	} else if hasSession {
+		Warn("Session expired - run 'dotfiles vault unlock'")
 	} else {
 		Warn("Not authenticated - run 'dotfiles vault unlock'")
 	}
