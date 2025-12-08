@@ -628,7 +628,53 @@ dotfiles() {
 
         # Feature management
         features|feature|feat)
-            "$DOTFILES_DIR/bin/dotfiles-features" "$@"
+            local subcmd="${1:-list}"
+            case "$subcmd" in
+                enable|on)
+                    # Run enable in current shell to update FEATURE_STATE
+                    shift
+                    local feat="${1:-}"
+                    local persist=false
+                    [[ "${2:-}" == "--persist" || "${2:-}" == "-p" ]] && persist=true
+
+                    if [[ -n "$feat" ]] && feature_exists "$feat" 2>/dev/null; then
+                        feature_enable "$feat"
+                        if $persist; then
+                            feature_persist "$feat" "true"
+                            pass "Feature '$feat' enabled and saved to config"
+                        else
+                            pass "Feature '$feat' enabled (runtime only)"
+                            echo "${DIM}Use --persist to save to config file${NC}"
+                        fi
+                    else
+                        "$DOTFILES_DIR/bin/dotfiles-features" enable "$@"
+                    fi
+                    ;;
+                disable|off)
+                    # Run disable in current shell to update FEATURE_STATE
+                    shift
+                    local feat="${1:-}"
+                    local persist=false
+                    [[ "${2:-}" == "--persist" || "${2:-}" == "-p" ]] && persist=true
+
+                    if [[ -n "$feat" ]] && feature_exists "$feat" 2>/dev/null; then
+                        feature_disable "$feat"
+                        if $persist; then
+                            feature_persist "$feat" "false"
+                            pass "Feature '$feat' disabled and saved to config"
+                        else
+                            pass "Feature '$feat' disabled (runtime only)"
+                            echo "${DIM}Use --persist to save to config file${NC}"
+                        fi
+                    else
+                        "$DOTFILES_DIR/bin/dotfiles-features" disable "$@"
+                    fi
+                    ;;
+                *)
+                    # All other commands run as subprocess (list, status, etc.)
+                    "$DOTFILES_DIR/bin/dotfiles-features" "$@"
+                    ;;
+            esac
             ;;
 
         # Configuration layers management
