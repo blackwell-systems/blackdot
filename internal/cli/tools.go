@@ -72,39 +72,16 @@ func newToolsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "tools",
 		Short: "Cross-platform developer tools",
-		Long: `Cross-platform developer tools that work on any platform.
-
-These tools provide functionality traditionally only available through
-shell scripts, but implemented in Go for portability to Windows and
-other platforms.
-
-Available tool categories:
-  ssh     - SSH key and connection management
-  aws     - AWS profile and authentication management
-  cdk     - AWS CDK development helpers
-  go      - Go development helpers
-  rust    - Rust/Cargo development helpers
-  python  - Python/uv development helpers
-  docker  - Docker container management and cleanup
-  claude  - Claude Code configuration and backend management
-
-Each tool category respects its feature flag:
-  ssh_tools, aws_helpers, cdk_tools, go_tools, rust_tools, python_tools,
-  docker_tools, claude_integration
-
-Examples:
-  dotfiles tools ssh keys           # List SSH keys with fingerprints
-  dotfiles tools ssh status         # Show SSH status with ASCII art
-  dotfiles tools aws profiles       # List AWS profiles
-  dotfiles tools cdk init           # Initialize CDK project
-  dotfiles tools go new myproject   # Create new Go project
-  dotfiles tools rust lint          # Run cargo check + clippy
-  dotfiles tools python new myapp   # Create new Python project
-  dotfiles tools docker ps          # List running containers
-  dotfiles tools docker clean       # Remove stopped containers
-  dotfiles tools claude status      # Show Claude Code configuration
-  dotfiles tools claude bedrock     # Configure for AWS Bedrock backend`,
+		Long:  `Cross-platform developer tools`,
+		Run: func(cmd *cobra.Command, args []string) {
+			printToolsHelp()
+		},
 	}
+
+	// Override help to use styled version
+	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		printToolsHelp()
+	})
 
 	// Add tool subcommands with feature checks
 	cmd.AddCommand(
@@ -119,4 +96,75 @@ Examples:
 	)
 
 	return cmd
+}
+
+// printToolsHelp prints styled help matching ZSH style
+func printToolsHelp() {
+	// Title
+	BoldCyan.Print("dotfiles tools")
+	fmt.Print(" - ")
+	Dim.Println("Cross-platform developer tools")
+	fmt.Println()
+
+	// Usage
+	Bold.Print("Usage:")
+	fmt.Println(" dotfiles tools <category> <command> [options]")
+	fmt.Println()
+
+	// Categories
+	BoldCyan.Println("Categories:")
+	printToolsCmd("ssh", "SSH key and connection management")
+	printToolsCmd("aws", "AWS profile and authentication")
+	printToolsCmd("cdk", "AWS CDK development helpers")
+	printToolsCmd("go", "Go development helpers")
+	printToolsCmd("rust", "Rust/Cargo development helpers")
+	printToolsCmd("python", "Python/uv development helpers")
+	printToolsCmd("docker", "Docker container management")
+	printToolsCmd("claude", "Claude Code configuration")
+	fmt.Println()
+
+	// Feature flags
+	BoldCyan.Println("Feature Flags:")
+	Dim.Println("  Each category respects its feature flag:")
+	Dim.Println("  ssh_tools, aws_helpers, cdk_tools, go_tools,")
+	Dim.Println("  rust_tools, python_tools, docker_tools, claude_integration")
+	fmt.Println()
+
+	// Examples
+	BoldCyan.Println("Examples:")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles tools ssh keys")
+	fmt.Print("           ")
+	Dim.Println("# List SSH keys with fingerprints")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles tools ssh status")
+	fmt.Print("         ")
+	Dim.Println("# Show SSH status with ASCII art")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles tools aws profiles")
+	fmt.Print("       ")
+	Dim.Println("# List AWS profiles")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles tools docker ps")
+	fmt.Print("          ")
+	Dim.Println("# List running containers")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles tools docker clean")
+	fmt.Print("       ")
+	Dim.Println("# Remove stopped containers")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles tools claude status")
+	fmt.Print("      ")
+	Dim.Println("# Show Claude configuration")
+	fmt.Println()
+
+	Dim.Println("Run 'dotfiles tools <category> --help' for category details.")
+}
+
+// printToolsCmd prints a tools category with description
+func printToolsCmd(name, desc string) {
+	fmt.Print("  ")
+	Yellow.Printf("%-10s", name)
+	fmt.Print(" ")
+	Dim.Println(desc)
 }

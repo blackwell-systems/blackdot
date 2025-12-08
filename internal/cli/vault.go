@@ -65,17 +65,16 @@ func newVaultCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "vault",
 		Short: "Manage secrets vault",
-		Long: `Manage secrets using the multi-vault backend system.
-
-Supported backends: Bitwarden, 1Password, pass
-
-The vault system allows syncing secrets between your local machine
-and a secure vault backend, with support for SSH keys, AWS credentials,
-environment files, and custom secrets.`,
+		Long:  `Secret vault operations`,
 		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
+			printVaultHelp()
 		},
 	}
+
+	// Override help to use our styled version
+	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		printVaultHelp()
+	})
 
 	cmd.AddCommand(
 		newVaultStatusCmd(),
@@ -446,6 +445,99 @@ Examples:
 	cmd.Flags().BoolVarP(&force, "force", "f", false, "Skip confirmation prompts")
 
 	return cmd
+}
+
+// ============================================================
+// Help Functions
+// ============================================================
+
+// printVaultHelp prints styled help matching ZSH vault help exactly
+func printVaultHelp() {
+	// Title
+	BoldCyan.Print("dotfiles vault")
+	fmt.Print(" - ")
+	Dim.Println("Vault management - unlock, sync, restore, and more")
+	fmt.Println()
+
+	// Usage
+	BoldCyan.Println("USAGE")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles vault")
+	fmt.Println(" <command> [OPTIONS]")
+	fmt.Println()
+
+	// Session section
+	BoldCyan.Println("SESSION")
+	printVaultCmd("unlock", "Unlock the vault and cache session")
+	printVaultCmd("lock", "Clear cached session (lock vault)")
+	printVaultCmd("status", "Full vault status with drift detection")
+	printVaultCmd("quick", "Quick status check (login/unlock only)")
+	fmt.Println()
+
+	// Sync section
+	BoldCyan.Println("SYNC")
+	printVaultCmd("restore", "Restore secrets from vault to local")
+	printVaultCmd("push", "Push local secrets to vault")
+	printVaultCmd("sync", "Bidirectional sync (detects direction)")
+	fmt.Println()
+
+	// Items section
+	BoldCyan.Println("ITEMS")
+	printVaultCmd("list", "List vault items")
+	printVaultCmd("create", "Create a new vault item")
+	printVaultCmd("delete", "Delete vault item(s)")
+	printVaultCmd("scan", "Scan for local secrets to add to vault")
+	printVaultCmd("check", "Check required vault items exist")
+	fmt.Println()
+
+	// Config section
+	BoldCyan.Println("CONFIG")
+	printVaultCmd("validate", "Validate vault-items.json schema")
+	printVaultCmd("backend", "Show or set vault backend")
+	printVaultCmd("init", "Initialize vault setup")
+	fmt.Println()
+
+	// Options
+	BoldCyan.Println("OPTIONS")
+	fmt.Print("  ")
+	Yellow.Print("--help")
+	fmt.Print(", ")
+	Yellow.Print("-h")
+	fmt.Print("  ")
+	Dim.Println("Show this help")
+	fmt.Println()
+
+	// Examples
+	BoldCyan.Println("EXAMPLES")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles vault unlock")
+	fmt.Print("       ")
+	Dim.Println("# Unlock vault interactively")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles vault status")
+	fmt.Print("       ")
+	Dim.Println("# Full status with drift detection")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles vault restore")
+	fmt.Print("      ")
+	Dim.Println("# Pull secrets from vault")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles vault push")
+	fmt.Print("         ")
+	Dim.Println("# Push local secrets to vault")
+	fmt.Print("  ")
+	Yellow.Print("dotfiles vault list")
+	fmt.Print("         ")
+	Dim.Println("# List items in vault")
+	fmt.Println()
+}
+
+// printVaultCmd prints a vault subcommand with description
+func printVaultCmd(name, desc string) {
+	fmt.Print("  ")
+	Yellow.Printf("%-11s", name)
+	fmt.Print(" ")
+	Dim.Println(desc)
 }
 
 // ============================================================
