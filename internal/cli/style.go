@@ -4,6 +4,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"runtime"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -98,6 +99,16 @@ func printRootHelp() {
 	printCmd("tools docker", "Docker management shortcuts")
 	printCmd("tools claude", "Claude Code backend configuration")
 	fmt.Println()
+
+	// macOS Settings (only show on Darwin)
+	if runtime.GOOS == "darwin" {
+		BoldCyan.Println("macOS Settings:")
+		printCmd("macos", "macOS system settings")
+		printCmd("macos apply", "Apply settings from settings.sh")
+		printCmd("macos preview", "Preview changes (dry-run)")
+		printCmd("macos discover", "Discover current settings")
+		fmt.Println()
+	}
 
 	// Hooks
 	BoldCyan.Println("Hooks:")

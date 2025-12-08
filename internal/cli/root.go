@@ -97,6 +97,8 @@ func init() {
 		newUninstallCmd(),
 		// Cross-platform developer tools
 		newToolsCmd(),
+		// Platform-specific
+		newMacOSCmd(),
 		// Import from other dotfile managers
 		newImportCmd(),
 		// Note: migrate command dropped - one-time v2→v3 migration handled by bash
