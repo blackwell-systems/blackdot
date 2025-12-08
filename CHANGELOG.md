@@ -117,6 +117,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Installation Script** - `Install-Dotfiles.ps1` for easy setup
   - Short alias `d` for `dotfiles` command
 
+- **Windows Package Management** (`powershell/Install-Packages.ps1`)
+  - winget-based package installer (equivalent to `brew bundle`)
+  - Three tiers matching Brewfile: `minimal`, `enhanced`, `full`
+  - Installs: bat, fd, ripgrep, fzf, eza, zoxide, glow, dust, jq
+  - Development: Go, Rust, Python, fnm (Node.js)
+  - Cloud: AWS CLI, Bitwarden CLI, 1Password CLI, age
+  - Optional: Docker Desktop, VS Code, Windows Terminal
+  - Dry-run mode with `-DryRun` flag
+
+- **fnm Integration** (Cross-platform Node.js version manager)
+  - Replaces NVM on Windows (NVM is Unix-only)
+  - Functions: `fnm-install`, `fnm-use`, `fnm-list`, `Initialize-Fnm`
+  - Auto-switches when entering directories with `.nvmrc` or `.node-version`
+  - Auto-initialized on module load
+
+- **Zoxide Integration** (Smart directory navigation)
+  - Auto-initialized on module load
+  - `z` command for jumping to directories
+  - `Initialize-Zoxide` for manual init
+
+- **Docker Tools for PowerShell**
+  - 12 wrapper functions: `docker-ps`, `docker-images`, `docker-ip`, `docker-env`,
+    `docker-ports`, `docker-stats`, `docker-vols`, `docker-nets`,
+    `docker-inspect`, `docker-clean`, `docker-prune`, `docker-status`
+
+- **Windows Documentation**
+  - `docs/windows-setup.md` - Complete Windows setup guide
+  - Updated `powershell/README.md` with all 85+ functions
+  - Windows section added to main README
+
 - **Go CLI Complete** - All 11 core commands ported with verified parity
   - `features` - Feature registry management (list, enable, disable, preset)
   - `doctor` - Health checks with ASCII banner
