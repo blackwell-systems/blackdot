@@ -174,6 +174,14 @@ Write-Host "    rust-new, rust-lint, rust-info" -ForegroundColor Gray
 Write-Host "    py-new, py-test, py-info" -ForegroundColor Gray
 Write-Host "    docker-ps, docker-images, docker-clean, docker-status" -ForegroundColor Gray
 Write-Host ""
+Write-Host "  Node.js (fnm):" -ForegroundColor Yellow
+Write-Host "    fnm-install, fnm-use, fnm-list, Initialize-Fnm" -ForegroundColor Gray
+Write-Host ""
+Write-Host "  Navigation:" -ForegroundColor Yellow
+Write-Host "    z (zoxide) - smart directory jumping, Initialize-Zoxide" -ForegroundColor Gray
+Write-Host ""
 Write-Host "  Shortcut:" -ForegroundColor Yellow
 Write-Host "    d  - Alias for 'dotfiles'" -ForegroundColor Gray
+Write-Host ""
+Write-Host "Install packages: .\Install-Packages.ps1" -ForegroundColor Cyan
 Write-Host ""

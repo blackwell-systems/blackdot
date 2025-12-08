@@ -1,0 +1,44 @@
+{
+  "$schema": "https://aka.ms/winget-packages.schema.2.0.json",
+  "description": "Dotfiles Windows packages - equivalent to Brewfile",
+  "creationDate": "2025-12-08",
+  "sources": [
+    {
+      "packages": [
+        { "id": "Git.Git", "comment": "Version control" },
+        { "id": "GitHub.cli", "comment": "GitHub CLI (gh)" },
+        { "id": "Microsoft.PowerShell", "comment": "PowerShell 7+" },
+
+        { "id": "sharkdp.bat", "comment": "Modern cat with syntax highlighting" },
+        { "id": "sharkdp.fd", "comment": "Fast find alternative" },
+        { "id": "BurntSushi.ripgrep.MSVC", "comment": "Fast grep (rg)" },
+        { "id": "junegunn.fzf", "comment": "Fuzzy finder" },
+        { "id": "ajeetdsouza.zoxide", "comment": "Smarter cd (z command)" },
+        { "id": "eza-community.eza", "comment": "Modern ls replacement" },
+        { "id": "stedolan.jq", "comment": "JSON processor" },
+        { "id": "charmbracelet.glow", "comment": "Markdown renderer" },
+        { "id": "bootandy.dust", "comment": "Disk usage analyzer" },
+
+        { "id": "Amazon.AWSCLI", "comment": "AWS CLI v2" },
+        { "id": "Bitwarden.CLI", "comment": "Bitwarden vault CLI" },
+        { "id": "AgileBits.1Password.CLI", "comment": "1Password vault CLI" },
+        { "id": "FiloSottile.age", "comment": "Modern file encryption" },
+
+        { "id": "Docker.DockerDesktop", "comment": "Docker Desktop" },
+        { "id": "GoLang.Go", "comment": "Go programming language" },
+        { "id": "Rustlang.Rustup", "comment": "Rust toolchain installer" },
+        { "id": "Python.Python.3.12", "comment": "Python 3.12" },
+
+        { "id": "Schniz.fnm", "comment": "Fast Node Manager (cross-platform NVM alternative)" },
+
+        { "id": "Microsoft.VisualStudioCode", "comment": "VS Code editor" },
+        { "id": "Microsoft.WindowsTerminal", "comment": "Windows Terminal" }
+      ],
+      "sourceDetails": {
+        "name": "winget",
+        "type": "Microsoft.Winget.Source",
+        "argument": "https://cdn.winget.microsoft.com/cache"
+      }
+    }
+  ]
+}

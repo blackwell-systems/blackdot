@@ -103,6 +103,70 @@ If Go isn't installed, download a pre-built binary:
 
 ---
 
+## Package Installation
+
+Similar to `brew bundle` on macOS/Linux, Windows has a package installer script:
+
+```powershell
+# Full installation (all packages)
+cd $HOME\workspace\dotfiles\powershell
+.\Install-Packages.ps1
+
+# Minimal (essential CLI tools only)
+.\Install-Packages.ps1 -Tier minimal
+
+# Enhanced (modern CLI + dev languages, no Docker/editors)
+.\Install-Packages.ps1 -Tier enhanced
+
+# Preview what would be installed
+.\Install-Packages.ps1 -DryRun
+```
+
+### Package Tiers
+
+| Tier | Packages | Use Case |
+|------|----------|----------|
+| **minimal** | git, gh, pwsh, bat, ripgrep, fzf, jq | Essential CLI tools |
+| **enhanced** | + fd, eza, zoxide, glow, dust, AWS CLI, Go, Rust, Python, fnm | Developer workstation |
+| **full** | + Docker Desktop, VS Code, Windows Terminal, 1Password CLI | Complete setup |
+
+### What Gets Installed
+
+| Category | Packages |
+|----------|----------|
+| **CLI Tools** | bat, fd, ripgrep, fzf, eza, zoxide, glow, dust, jq |
+| **Development** | Go, Rust, Python, fnm (Node.js manager) |
+| **Cloud** | AWS CLI, Bitwarden CLI, 1Password CLI, age (encryption) |
+| **Containers** | Docker Desktop |
+| **Editors** | VS Code, Windows Terminal |
+
+---
+
+## Node.js Version Management (fnm)
+
+Instead of NVM (Unix-only), use **fnm** (Fast Node Manager) - cross-platform:
+
+```powershell
+# Install fnm
+winget install Schniz.fnm
+
+# Or via the package script
+.\Install-Packages.ps1 -Tier enhanced
+
+# Install Node.js LTS
+fnm-install lts-latest
+
+# Switch versions
+fnm-use 20
+
+# List installed versions
+fnm-list
+```
+
+fnm auto-switches Node versions when entering directories with `.nvmrc` or `.node-version` files.
+
+---
+
 ## What Gets Installed
 
 ### PowerShell Module Features
@@ -116,6 +180,8 @@ If Go isn't installed, download a pre-built binary:
 | **Rust** | `rust-new`, `rust-lint`, `rust-info` | Rust development tools |
 | **Python** | `py-new`, `py-test`, `py-info` | Python development tools |
 | **Docker** | `docker-ps`, `docker-images`, `docker-clean`, `docker-status` | Docker management |
+| **Node.js** | `fnm-install`, `fnm-use`, `fnm-list`, `Initialize-Fnm` | Node version management |
+| **Navigation** | `z` (via zoxide), `Initialize-Zoxide` | Smart directory jumping |
 | **Hooks** | `Invoke-DotfilesHook`, `Register-DotfilesHook` | 24 hook points |
 
 ### Go CLI Features

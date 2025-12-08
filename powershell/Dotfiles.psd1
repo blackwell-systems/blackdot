@@ -77,6 +77,12 @@
         'docker-ports', 'docker-stats', 'docker-vols', 'docker-nets',
         'docker-inspect', 'docker-clean', 'docker-prune', 'docker-status',
 
+        # Node.js (fnm) integration
+        'Initialize-Fnm', 'fnm-install', 'fnm-use', 'fnm-list',
+
+        # Zoxide integration
+        'Initialize-Zoxide',
+
         # Core commands
         'dotfiles-status', 'dotfiles-doctor', 'dotfiles-setup',
         'dotfiles-features', 'dotfiles-vault', 'dotfiles-hook'

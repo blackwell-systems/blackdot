@@ -971,7 +971,88 @@ function Initialize-Dotfiles {
     # Run shell_init hook
     Invoke-DotfilesHook -Point "shell_init" | Out-Null
 
+    # Initialize zoxide if available (smarter cd)
+    if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+        Invoke-Expression (& { (zoxide init powershell | Out-String) })
+    }
+
+    # Initialize fnm if available (Node.js version manager)
+    if (Get-Command fnm -ErrorAction SilentlyContinue) {
+        fnm env --use-on-cd | Out-String | Invoke-Expression
+    }
+
     Write-Verbose "Dotfiles PowerShell module initialized"
+}
+
+#endregion
+
+#region Tool Integrations
+
+function Initialize-Fnm {
+    <#
+    .SYNOPSIS
+        Initialize fnm (Fast Node Manager) for the current session
+    .DESCRIPTION
+        Loads fnm environment and enables auto-switching when entering
+        directories with .nvmrc or .node-version files.
+    #>
+    if (-not (Get-Command fnm -ErrorAction SilentlyContinue)) {
+        Write-Host "fnm not found. Install with: winget install Schniz.fnm" -ForegroundColor Yellow
+        return
+    }
+    fnm env --use-on-cd | Out-String | Invoke-Expression
+    Write-Host "fnm initialized" -ForegroundColor Green
+}
+
+function fnm-install {
+    <#
+    .SYNOPSIS
+        Install a Node.js version using fnm
+    #>
+    param([string]$Version = "lts-latest")
+    if (-not (Get-Command fnm -ErrorAction SilentlyContinue)) {
+        Write-Host "fnm not found. Install with: winget install Schniz.fnm" -ForegroundColor Yellow
+        return
+    }
+    fnm install $Version
+}
+
+function fnm-use {
+    <#
+    .SYNOPSIS
+        Switch to a Node.js version using fnm
+    #>
+    param([string]$Version)
+    if (-not (Get-Command fnm -ErrorAction SilentlyContinue)) {
+        Write-Host "fnm not found. Install with: winget install Schniz.fnm" -ForegroundColor Yellow
+        return
+    }
+    fnm use $Version
+}
+
+function fnm-list {
+    <#
+    .SYNOPSIS
+        List installed Node.js versions
+    #>
+    if (-not (Get-Command fnm -ErrorAction SilentlyContinue)) {
+        Write-Host "fnm not found. Install with: winget install Schniz.fnm" -ForegroundColor Yellow
+        return
+    }
+    fnm list
+}
+
+function Initialize-Zoxide {
+    <#
+    .SYNOPSIS
+        Initialize zoxide (smarter cd) for the current session
+    #>
+    if (-not (Get-Command zoxide -ErrorAction SilentlyContinue)) {
+        Write-Host "zoxide not found. Install with: winget install ajeetdsouza.zoxide" -ForegroundColor Yellow
+        return
+    }
+    Invoke-Expression (& { (zoxide init powershell | Out-String) })
+    Write-Host "zoxide initialized (use 'z' to jump to directories)" -ForegroundColor Green
 }
 
 #endregion
@@ -1028,6 +1109,12 @@ Export-ModuleMember -Function @(
     'docker-ps', 'docker-images', 'docker-ip', 'docker-env',
     'docker-ports', 'docker-stats', 'docker-vols', 'docker-nets',
     'docker-inspect', 'docker-clean', 'docker-prune', 'docker-status',
+
+    # Node.js (fnm) integration
+    'Initialize-Fnm', 'fnm-install', 'fnm-use', 'fnm-list',
+
+    # Zoxide integration
+    'Initialize-Zoxide',
 
     # Core commands
     'dotfiles-status', 'dotfiles-doctor', 'dotfiles-setup',
