@@ -85,7 +85,10 @@
 
         # Core commands
         'dotfiles-status', 'dotfiles-doctor', 'dotfiles-setup',
-        'dotfiles-features', 'dotfiles-vault', 'dotfiles-hook'
+        'dotfiles-features', 'dotfiles-vault', 'dotfiles-hook',
+
+        # Main wrapper (handles feature auto-reload)
+        'Invoke-Dotfiles'
     )
 
     # Cmdlets to export from this module

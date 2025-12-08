@@ -490,5 +490,18 @@ func persistFeatureState(reg *feature.Registry) error {
 func printShellReloadHint() {
 	fmt.Println()
 	Yellow.Println("Reload your shell to apply changes:")
-	fmt.Println("  exec zsh")
+
+	// Detect platform and show appropriate reload command
+	if isWindows() {
+		fmt.Println("  Import-Module Dotfiles -Force")
+		Dim.Println("  (or restart PowerShell)")
+	} else {
+		fmt.Println("  source ~/.zshrc")
+		Dim.Println("  (or exec zsh for full reload)")
+	}
+}
+
+// isWindows returns true if running on Windows
+func isWindows() bool {
+	return os.PathSeparator == '\\' && os.PathListSeparator == ';'
 }

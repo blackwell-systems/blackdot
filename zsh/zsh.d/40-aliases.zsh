@@ -631,11 +631,15 @@ dotfiles() {
             local subcmd="${1:-}"
             "$DOTFILES_DIR/bin/dotfiles-features" "$@"
             local ret=$?
-            # Auto-reload shell after enable/disable/preset to apply changes
+            # Auto-reload shell config after enable/disable/preset
+            # Using source instead of exec zsh - safer (doesn't kill shell on errors)
             if [[ $ret -eq 0 && "$subcmd" =~ ^(enable|disable|preset)$ ]]; then
                 echo ""
-                echo "${YELLOW}Reloading shell to apply feature changes...${NC}"
-                exec zsh
+                echo "${YELLOW}Reloading shell configuration...${NC}"
+                # Source zshrc to reload - this is safer than exec zsh
+                # If there are errors, they'll show but shell won't die
+                source "${ZDOTDIR:-$HOME}/.zshrc" 2>&1 | head -20
+                echo "${GREEN}Done.${NC} If issues occur, run: exec zsh"
             fi
             return $ret
             ;;
