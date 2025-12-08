@@ -3,30 +3,26 @@
 # =========================
 # AWS CDK aliases, helpers, and environment management
 # Provides shortcuts and utilities for CDK development workflows
-
-# Feature guard: skip if cdk_tools is disabled
-if type feature_enabled &>/dev/null && ! feature_enabled "cdk_tools" 2>/dev/null; then
-    return 0
-fi
+# Runtime guards allow enable/disable without shell reload
 
 # =========================
-# CDK Aliases
+# CDK Aliases (as functions for runtime guards)
 # =========================
 
 # Core CDK commands
-alias cdkd='cdk deploy'
-alias cdks='cdk synth'
-alias cdkdf='cdk diff'
-alias cdkw='cdk watch'
-alias cdkls='cdk list'
-alias cdkdst='cdk destroy'
-alias cdkb='cdk bootstrap'
+cdkd()   { require_feature "cdk_tools" || return 1; cdk deploy "$@"; }
+cdks()   { require_feature "cdk_tools" || return 1; cdk synth "$@"; }
+cdkdf()  { require_feature "cdk_tools" || return 1; cdk diff "$@"; }
+cdkw()   { require_feature "cdk_tools" || return 1; cdk watch "$@"; }
+cdkls()  { require_feature "cdk_tools" || return 1; cdk list "$@"; }
+cdkdst() { require_feature "cdk_tools" || return 1; cdk destroy "$@"; }
+cdkb()   { require_feature "cdk_tools" || return 1; cdk bootstrap "$@"; }
 
 # Common variations
-alias cdkda='cdk deploy --all'
-alias cdkdfa='cdk diff --all'
-alias cdkhs='cdk deploy --hotswap'
-alias cdkhsf='cdk deploy --hotswap-fallback'
+cdkda()  { require_feature "cdk_tools" || return 1; cdk deploy --all "$@"; }
+cdkdfa() { require_feature "cdk_tools" || return 1; cdk diff --all "$@"; }
+cdkhs()  { require_feature "cdk_tools" || return 1; cdk deploy --hotswap "$@"; }
+cdkhsf() { require_feature "cdk_tools" || return 1; cdk deploy --hotswap-fallback "$@"; }
 
 # =========================
 # CDK Helper Functions
@@ -34,6 +30,7 @@ alias cdkhsf='cdk deploy --hotswap-fallback'
 
 # Set CDK environment variables from current AWS profile
 cdk-env() {
+    require_feature "cdk_tools" || return 1
     local profile="${1:-${AWS_PROFILE:-}}"
 
     if [[ -z "$profile" ]]; then
@@ -66,6 +63,7 @@ cdk-env() {
 
 # Clear CDK environment variables
 cdk-env-clear() {
+    require_feature "cdk_tools" || return 1
     unset CDK_DEFAULT_ACCOUNT
     unset CDK_DEFAULT_REGION
     echo "Cleared CDK_DEFAULT_ACCOUNT and CDK_DEFAULT_REGION"
@@ -73,6 +71,7 @@ cdk-env-clear() {
 
 # Deploy all stacks (with optional confirmation)
 cdkall() {
+    require_feature "cdk_tools" || return 1
     local confirm="${1:---require-approval broadening}"
     echo "Deploying all stacks..."
     cdk deploy --all $confirm "$@"
@@ -80,6 +79,7 @@ cdkall() {
 
 # Diff then prompt to deploy
 cdkcheck() {
+    require_feature "cdk_tools" || return 1
     local stack="${1:-}"
 
     echo "Running diff..."
@@ -106,6 +106,7 @@ cdkcheck() {
 
 # Hotswap deploy for faster Lambda/ECS updates
 cdkhotswap() {
+    require_feature "cdk_tools" || return 1
     local stack="${1:-}"
 
     if [[ -n "$stack" ]]; then
@@ -119,6 +120,7 @@ cdkhotswap() {
 
 # Show CloudFormation stack outputs
 cdkoutputs() {
+    require_feature "cdk_tools" || return 1
     local stack="${1:-}"
 
     if [[ -z "$stack" ]]; then
@@ -138,6 +140,7 @@ cdkoutputs() {
 
 # Initialize a new CDK project
 cdkinit() {
+    require_feature "cdk_tools" || return 1
     local lang="${1:-typescript}"
 
     echo "Initializing CDK project with language: $lang"
@@ -152,6 +155,7 @@ cdkinit() {
 
 # Show CDK context values
 cdkctx() {
+    require_feature "cdk_tools" || return 1
     if [[ -f "cdk.context.json" ]]; then
         echo "CDK Context (cdk.context.json):"
         cat cdk.context.json | jq .
@@ -162,6 +166,7 @@ cdkctx() {
 
 # Clear CDK context cache
 cdkctx-clear() {
+    require_feature "cdk_tools" || return 1
     if [[ -f "cdk.context.json" ]]; then
         rm cdk.context.json
         echo "Cleared cdk.context.json"
@@ -175,6 +180,7 @@ cdkctx-clear() {
 # =========================
 
 cdktools() {
+    require_feature "cdk_tools" || return 1
     # Source theme colors
     source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
 
