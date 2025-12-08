@@ -1106,6 +1106,27 @@ WORKSPACE_TARGET=~/code git clone git@github.com:blackwell-systems/dotfiles.git 
 dotfiles setup
 ```
 
+### Windows (PowerShell)
+
+Native Windows users should use the PowerShell module:
+
+```powershell
+# 1. Clone the repository
+git clone https://github.com/blackwell-systems/dotfiles.git $HOME\workspace\dotfiles
+
+# 2. Install PowerShell module
+cd $HOME\workspace\dotfiles\powershell
+.\Install-Dotfiles.ps1
+
+# 3. Restart PowerShell and verify
+Import-Module Dotfiles
+dotfiles-status
+```
+
+**You get:** SSH, AWS, Docker, Go, Rust, Python tool aliases, hook system, and full CLI access.
+
+**Full guide:** [Windows Setup Guide](docs/windows-setup.md)
+
 > **💡 Why `/workspace` symlink?**
 >
 > Bootstrap creates `/workspace → ~/workspace` symlink to enable **Claude Code session portability** across machines.
