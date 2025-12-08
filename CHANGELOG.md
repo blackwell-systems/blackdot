@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Runtime Feature Guards** - All shell tool modules now support instant enable/disable
+  - No shell reload required when toggling features with `dotfiles features enable/disable`
+  - Converted modules: `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `docker_tools`, `ssh_tools`, `claude_integration`, `modern_cli`, `nvm_integration`, `sdkman_integration`
+  - Pattern: Aliases converted to wrapper functions with `require_feature` guards
+  - Blocked commands show helpful message: "Feature 'X' is disabled. Enable with: dotfiles features enable X"
+  - Fixed: `set -euo pipefail` removed from `_features.sh` (was killing interactive shells)
+  - Fixed: `_logging.sh` now sourced in `00-init.zsh` for `pass`/`fail`/`warn`/`info` functions
+
 - **Cross-Platform Developer Tools** (`dotfiles tools`)
   - New `tools` parent command with 6 tool categories
   - All tools work on Linux, macOS, and Windows
