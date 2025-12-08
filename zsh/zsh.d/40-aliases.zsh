@@ -628,26 +628,7 @@ dotfiles() {
 
         # Feature management
         features|feature|feat)
-            local subcmd="${1:-}"
             "$DOTFILES_DIR/bin/dotfiles-features" "$@"
-            local ret=$?
-            # After enable/disable/preset, need shell reload for changes to take effect
-            if [[ $ret -eq 0 && "$subcmd" =~ ^(enable|disable|preset)$ ]]; then
-                echo ""
-                # Test if shell can start cleanly before exec'ing
-                # Disable p10k instant prompt for test to avoid conflicts
-                if POWERLEVEL9K_INSTANT_PROMPT=off zsh -i -c 'exit 0' 2>/dev/null; then
-                    echo "${YELLOW}Feature updated. Reloading shell...${NC}"
-                    # Disable p10k instant prompt during reload to prevent conflicts
-                    # It will re-enable normally on next shell start
-                    export POWERLEVEL9K_INSTANT_PROMPT=off
-                    exec zsh -l
-                else
-                    echo "${RED}Warning: Shell config has errors. Not auto-reloading.${NC}"
-                    echo "Fix errors first, then run: ${CYAN}exec zsh${NC}"
-                fi
-            fi
-            return $ret
             ;;
 
         # Configuration layers management
