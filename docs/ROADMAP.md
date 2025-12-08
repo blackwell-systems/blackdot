@@ -293,6 +293,24 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 
 ---
 
+## Recently Completed (2025-12-08)
+
+### Go CLI - Full Cross-Platform Parity
+
+- **100% command parity** with bash implementation (16/16 commands, 34/34 subcommands)
+- **Cross-platform tools** (`dotfiles tools`) with 8 categories, 50+ commands
+- **Runtime feature guards** in ZSH - enable/disable features without shell reload
+- **Binary distribution** - GitHub Actions builds for Linux/macOS/Windows x amd64/arm64
+- **PowerShell module v1.2.0** - Claude tools with `-Eval` support
+
+### Claude Integration
+
+- **Go CLI:** `dotfiles tools claude` (status, bedrock, max, switch, init, env)
+- **ZSH:** claude-bedrock, claude-max, claude-run, claude-status with runtime guards
+- **PowerShell:** claude-status, claude-bedrock -Eval, claude-max -Eval, claude-switch
+
+---
+
 ## Version History
 
 | Version | Focus |
@@ -310,6 +328,7 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 | 2.0.1 | CLI help improvements, Docker container enhancements |
 | **2.1.0** | **Smart secrets onboarding, vault config file, Docker taxonomy, Feature Registry** |
 | **3.0** | **Configuration Layers, CLI Feature Awareness, JSON config, SSH/Docker Tools, Age Encryption, Shell Completions, Progress Indicators** |
+| **3.1** | **Go CLI full parity, cross-platform tools, Claude integration, binary releases** |
 
 ---
 
@@ -327,4 +346,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ---
 
-*Last updated: 2025-12-07*
+*Last updated: 2025-12-08*

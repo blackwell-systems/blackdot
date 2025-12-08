@@ -17,6 +17,7 @@ var toolFeatureMap = map[string]string{
 	"rust":   "rust_tools",
 	"python": "python_tools",
 	"docker": "docker_tools",
+	"claude": "claude_integration",
 }
 
 // checkToolFeature verifies a tool's feature is enabled
@@ -85,9 +86,11 @@ Available tool categories:
   rust    - Rust/Cargo development helpers
   python  - Python/uv development helpers
   docker  - Docker container management and cleanup
+  claude  - Claude Code configuration and backend management
 
 Each tool category respects its feature flag:
-  ssh_tools, aws_helpers, cdk_tools, go_tools, rust_tools, python_tools, docker_tools
+  ssh_tools, aws_helpers, cdk_tools, go_tools, rust_tools, python_tools,
+  docker_tools, claude_integration
 
 Examples:
   dotfiles tools ssh keys           # List SSH keys with fingerprints
@@ -98,7 +101,9 @@ Examples:
   dotfiles tools rust lint          # Run cargo check + clippy
   dotfiles tools python new myapp   # Create new Python project
   dotfiles tools docker ps          # List running containers
-  dotfiles tools docker clean       # Remove stopped containers`,
+  dotfiles tools docker clean       # Remove stopped containers
+  dotfiles tools claude status      # Show Claude Code configuration
+  dotfiles tools claude bedrock     # Configure for AWS Bedrock backend`,
 	}
 
 	// Add tool subcommands with feature checks
@@ -110,6 +115,7 @@ Examples:
 		wrapWithFeatureCheck("rust", newToolsRustCmd()),
 		wrapWithFeatureCheck("python", newToolsPythonCmd()),
 		wrapWithFeatureCheck("docker", newDockerToolsCmd()),
+		wrapWithFeatureCheck("claude", newToolsClaudeCmd()),
 	)
 
 	return cmd

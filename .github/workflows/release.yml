@@ -42,15 +42,89 @@ jobs:
           done
           echo "All scripts valid!"
 
+  build-binaries:
+    name: Build Go Binaries
+    needs: validate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            suffix: ""
+          - goos: linux
+            goarch: arm64
+            suffix: ""
+          - goos: darwin
+            goarch: amd64
+            suffix: ""
+          - goos: darwin
+            goarch: arm64
+            suffix: ""
+          - goos: windows
+            goarch: amd64
+            suffix: ".exe"
+          - goos: windows
+            goarch: arm64
+            suffix: ".exe"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Get version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          BINARY_NAME="dotfiles-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}"
+
+          go build -ldflags="-s -w -X main.Version=${VERSION}" \
+            -o "dist/${BINARY_NAME}" \
+            ./cmd/dotfiles/
+
+          # Create checksum for this binary
+          cd dist && sha256sum "${BINARY_NAME}" > "${BINARY_NAME}.sha256"
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/
+          retention-days: 1
+
   release:
     name: Create Release
-    needs: validate
+    needs: build-binaries
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Download all binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: binaries
+          pattern: binary-*
+          merge-multiple: true
 
       - name: Get version
         id: version
@@ -86,7 +160,16 @@ jobs:
           echo "## Installation" >> release_notes.md
           echo "" >> release_notes.md
           echo '```bash' >> release_notes.md
+          echo '# One-line installer (recommended)' >> release_notes.md
           echo 'curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash' >> release_notes.md
+          echo '' >> release_notes.md
+          echo '# Or download binary directly' >> release_notes.md
+          echo '# Linux (amd64): dotfiles-linux-amd64' >> release_notes.md
+          echo '# Linux (arm64): dotfiles-linux-arm64' >> release_notes.md
+          echo '# macOS (Intel): dotfiles-darwin-amd64' >> release_notes.md
+          echo '# macOS (Apple Silicon): dotfiles-darwin-arm64' >> release_notes.md
+          echo '# Windows (amd64): dotfiles-windows-amd64.exe' >> release_notes.md
+          echo '# Windows (arm64): dotfiles-windows-arm64.exe' >> release_notes.md
           echo '```' >> release_notes.md
           echo "" >> release_notes.md
           echo "## Documentation" >> release_notes.md
@@ -113,9 +196,13 @@ jobs:
             -o dotfiles-${VERSION#v}.zip \
             HEAD
 
-          # Create checksums
-          sha256sum dotfiles-${VERSION#v}.tar.gz > SHA256SUMS.txt
+          # Create combined checksums file
+          echo "# Source Archives" > SHA256SUMS.txt
+          sha256sum dotfiles-${VERSION#v}.tar.gz >> SHA256SUMS.txt
           sha256sum dotfiles-${VERSION#v}.zip >> SHA256SUMS.txt
+          echo "" >> SHA256SUMS.txt
+          echo "# Go Binaries" >> SHA256SUMS.txt
+          cat binaries/*.sha256 >> SHA256SUMS.txt
           cat SHA256SUMS.txt
 
       - name: Create GitHub Release
@@ -129,6 +216,7 @@ jobs:
           files: |
             dotfiles-*.tar.gz
             dotfiles-*.zip
+            binaries/dotfiles-*
             SHA256SUMS.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

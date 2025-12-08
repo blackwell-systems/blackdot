@@ -3,6 +3,7 @@
 # =========================
 # Claude Code wrapper function and routing logic
 # Provides portable session management and model routing (Bedrock vs Max)
+# Runtime guards allow enable/disable without shell reload
 #
 # Configuration: Set these in ~/.claude.local or your environment:
 #   CLAUDE_BEDROCK_PROFILE  - AWS SSO profile name (required for Bedrock)
@@ -11,11 +12,6 @@
 #   CLAUDE_BEDROCK_FAST_MODEL - Fast model for small tasks (has default)
 #
 # See ~/.claude.local.example for a template.
-
-# Feature guard: skip if claude_integration is disabled
-if type feature_enabled &>/dev/null && ! feature_enabled "claude_integration" 2>/dev/null; then
-    return 0
-fi
 
 # =========================
 # Configuration (env var overrides)
@@ -41,6 +37,7 @@ export CLAUDE_CODE_MAX_OUTPUT_TOKENS="${CLAUDE_CODE_MAX_OUTPUT_TOKENS:-60000}"
 # When in ~/workspace/*, transparently cd to /workspace/* before running claude.
 # This ensures Claude Code sessions are portable across macOS, Lima, and WSL.
 claude() {
+  require_feature "claude_integration" || return 1
   if [[ "$PWD" == "$HOME/workspace"* && -d "/workspace" ]]; then
     local canonical_path="/workspace${PWD#$HOME/workspace}"
     if [[ -d "$canonical_path" ]]; then
@@ -93,6 +90,7 @@ _ensure_aws_sso() {
 # --- claude-bedrock ---
 # Run Claude Code via AWS Bedrock (requires CLAUDE_BEDROCK_PROFILE)
 claude-bedrock() {
+  require_feature "claude_integration" || return 1
   # Pre-flight: ensure SSO session is valid
   _ensure_aws_sso || return 1
 
@@ -107,6 +105,7 @@ claude-bedrock() {
 # --- claude-max ---
 # Run Claude Code via Anthropic Max subscription (clears Bedrock env)
 claude-max() {
+  require_feature "claude_integration" || return 1
   # Clear Bedrock routing vars
   unset CLAUDE_CODE_USE_BEDROCK
   unset AWS_PROFILE
@@ -130,6 +129,7 @@ claude-max() {
 # --- claude-run ---
 # Unified command to run Claude with a specific backend
 claude-run() {
+  require_feature "claude_integration" || return 1
   local MODE="$1"
   shift
 
@@ -156,6 +156,7 @@ claude-run() {
 # --- claude-status ---
 # Show current Claude configuration
 claude-status() {
+  require_feature "claude_integration" || return 1
   echo "Claude Code Configuration"
   echo "========================="
   echo ""
@@ -180,6 +181,6 @@ claude-status() {
   fi
 }
 
-# Convenience aliases
-alias cb='claude-bedrock'
-alias cm='claude-max'
+# Convenience wrapper functions
+cb() { require_feature "claude_integration" || return 1; claude-bedrock "$@"; }
+cm() { require_feature "claude_integration" || return 1; claude-max "$@"; }

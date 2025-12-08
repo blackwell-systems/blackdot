@@ -5,7 +5,7 @@
     RootModule = 'Dotfiles.psm1'
 
     # Version number of this module
-    ModuleVersion = '1.1.0'
+    ModuleVersion = '1.2.0'
 
     # ID used to uniquely identify this module
     GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
@@ -77,6 +77,10 @@
         'docker-ports', 'docker-stats', 'docker-vols', 'docker-nets',
         'docker-inspect', 'docker-clean', 'docker-prune', 'docker-status',
 
+        # Claude aliases
+        'claude-status', 'claude-env', 'claude-init',
+        'claude-bedrock', 'claude-max', 'claude-switch',
+
         # Node.js (fnm) integration
         'Initialize-Fnm', 'fnm-install', 'fnm-use', 'fnm-list',
 
@@ -98,7 +102,7 @@
     VariablesToExport = @()
 
     # Aliases to export from this module
-    AliasesToExport = @('cd', 'd')
+    AliasesToExport = @('cd', 'd', 'cb', 'cm')
 
     # Private data to pass to the module specified in RootModule
     PrivateData = @{
@@ -114,6 +118,16 @@
 
             # Release notes for this module
             ReleaseNotes = @'
+## 1.2.0
+- Claude tools integration (full parity with ZSH and Go CLI)
+- claude-status: Show Claude Code configuration
+- claude-bedrock: Configure AWS Bedrock backend (-Eval to set env vars)
+- claude-max: Configure Anthropic Max backend (-Eval to clear vars)
+- claude-switch: Interactive backend switcher
+- claude-init: Initialize ~/.claude/ from templates
+- claude-env: Show Claude environment variables
+- Aliases: cb (claude-bedrock), cm (claude-max)
+
 ## 1.1.0
 - Complete parity with ZSH hooks implementation
 - All 24 hook points supported

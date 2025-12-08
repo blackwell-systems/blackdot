@@ -902,6 +902,112 @@ function docker-clean { dotfiles tools docker clean @args }
 function docker-prune { dotfiles tools docker prune @args }
 function docker-status { dotfiles tools docker status @args }
 
+# Claude Tools
+function claude-status { dotfiles tools claude status @args }
+function claude-env { dotfiles tools claude env @args }
+function claude-init { dotfiles tools claude init @args }
+function claude-bedrock {
+    <#
+    .SYNOPSIS
+        Configure environment for AWS Bedrock backend
+    .DESCRIPTION
+        Sets environment variables for Claude Code to use AWS Bedrock.
+        Use -Eval to set the variables in the current session.
+    #>
+    param(
+        [switch]$Eval
+    )
+
+    if ($Eval) {
+        # Get the exports and set them
+        $output = dotfiles tools claude bedrock --eval 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error $output
+            return
+        }
+        foreach ($line in $output -split "`n") {
+            if ($line -match '^export\s+(\w+)=''?([^'']*?)''?$') {
+                $varName = $matches[1]
+                $varValue = $matches[2]
+                Set-Item -Path "Env:$varName" -Value $varValue
+                Write-Host "Set $varName" -ForegroundColor Green
+            }
+        }
+        Write-Host "`nClaude Code configured for AWS Bedrock" -ForegroundColor Cyan
+    } else {
+        dotfiles tools claude bedrock @args
+    }
+}
+function claude-max {
+    <#
+    .SYNOPSIS
+        Configure environment for Anthropic Max backend
+    .DESCRIPTION
+        Clears Bedrock-related environment variables to use Max subscription.
+        Use -Eval to clear the variables in the current session.
+    #>
+    param(
+        [switch]$Eval
+    )
+
+    if ($Eval) {
+        # Get the unsets and apply them
+        $output = dotfiles tools claude max --eval 2>&1
+        foreach ($line in $output -split "`n") {
+            if ($line -match '^unset\s+(\w+)$') {
+                $varName = $matches[1]
+                Remove-Item -Path "Env:$varName" -ErrorAction SilentlyContinue
+                Write-Host "Cleared $varName" -ForegroundColor Yellow
+            }
+        }
+        Write-Host "`nClaude Code configured for Anthropic Max" -ForegroundColor Cyan
+    } else {
+        dotfiles tools claude max @args
+    }
+}
+function claude-switch {
+    <#
+    .SYNOPSIS
+        Switch Claude Code backend interactively or by name
+    .EXAMPLE
+        claude-switch              # Interactive selection
+        claude-switch bedrock      # Switch to Bedrock
+        claude-switch max          # Switch to Max
+    #>
+    param(
+        [Parameter(Position = 0)]
+        [ValidateSet('bedrock', 'max')]
+        [string]$Backend
+    )
+
+    if ($Backend) {
+        switch ($Backend) {
+            'bedrock' { claude-bedrock -Eval }
+            'max' { claude-max -Eval }
+        }
+    } else {
+        Write-Host "Claude Code Backend Selection" -ForegroundColor Cyan
+        Write-Host "=============================" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "1) bedrock - AWS Bedrock"
+        Write-Host "2) max     - Anthropic Max subscription"
+        Write-Host ""
+        $choice = Read-Host "Select backend [1-2]"
+
+        switch ($choice) {
+            '1' { claude-bedrock -Eval }
+            'bedrock' { claude-bedrock -Eval }
+            '2' { claude-max -Eval }
+            'max' { claude-max -Eval }
+            default { Write-Error "Invalid selection: $choice" }
+        }
+    }
+}
+
+# Claude convenience aliases (matching ZSH cb/cm)
+Set-Alias -Name cb -Value claude-bedrock -Scope Global -Force
+Set-Alias -Name cm -Value claude-max -Scope Global -Force
+
 #endregion
 
 #region Core Dotfiles Commands
