@@ -116,6 +116,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `setup`, `uninstall`, `packages` - Setup wizard
   - Side-by-side testing confirms identical behavior
 
+- **Chezmoi Import Tool** (`dotfiles import chezmoi`)
+  - Migrate from chezmoi repositories to blackwell-dotfiles
+  - Converts Go template syntax to Handlebars automatically
+  - Handles chezmoi prefixes: `dot_`, `private_`, `executable_`, `symlink_`, etc.
+  - Converts `.chezmoi.os`, `.chezmoi.hostname`, etc. to standard variables
+  - Parses chezmoi.toml config for template variables
+  - Dry-run mode for previewing changes
+  - Verbose mode for detailed progress
+
 - **Standard Handlebars Template Syntax** (Phase B)
   - Templates now use standard Handlebars syntax: `{{#if}}`, `{{#unless}}`, `{{#each}}`, `{{/if}}`
   - Bash engine supports both legacy (`{% if %}`) and Handlebars syntax

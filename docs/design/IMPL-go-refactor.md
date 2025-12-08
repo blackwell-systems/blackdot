@@ -62,10 +62,10 @@ Phase 2: Differentiation (Current)
 ├── Dual-engine templates (Go + Bash)
 └── Shell-first integration
 
-Phase 3: Superiority (Next)
-├── Plugin/hook system
+Phase 3: Superiority (In Progress)
+├── Plugin/hook system ✅
 ├── Community preset marketplace
-├── `dotfiles import chezmoi` migration tool
+├── `dotfiles import chezmoi` migration tool ✅
 ├── VS Code / IDE extensions
 └── Team sync features
 
@@ -3566,6 +3566,25 @@ All 11 core commands verified for Go/Shell parity:
 - Exit codes match (0 success, 1 error)
 - All flags work identically
 - Error messages match
+
+### ✅ PRIORITY 5: Chezmoi Import Tool (DONE 2025-12-08)
+
+**`dotfiles import chezmoi`** - Migration tool for chezmoi users
+
+Converts:
+- File prefixes: `dot_` → `.`, `private_` → permissions, `executable_` → +x
+- Go templates to Handlebars: `{{ if eq .chezmoi.os "darwin" }}` → `{{#if (eq os "darwin")}}`
+- Variable syntax: `{{ .var }}` → `{{ var }}`
+- Filter syntax: `{{ .var | filter }}` → `{{ filter var }}`
+- Control structures: `{{ range }}` → `{{#each}}`, `{{ end }}` → proper closing tags
+- chezmoi.toml config to template variables
+
+Usage:
+```bash
+dotfiles import chezmoi                    # Import from default location
+dotfiles import chezmoi --source ~/chezmoi # Custom source
+dotfiles import chezmoi --dry-run          # Preview only
+```
 
 ### ⚠️  Remaining Open Questions
 
