@@ -635,8 +635,12 @@ dotfiles() {
             if [[ $ret -eq 0 && "$subcmd" =~ ^(enable|disable|preset)$ ]]; then
                 echo ""
                 # Test if shell can start cleanly before exec'ing
-                if zsh -i -c 'exit 0' 2>/dev/null; then
+                # Disable p10k instant prompt for test to avoid conflicts
+                if POWERLEVEL9K_INSTANT_PROMPT=off zsh -i -c 'exit 0' 2>/dev/null; then
                     echo "${YELLOW}Feature updated. Reloading shell...${NC}"
+                    # Disable p10k instant prompt during reload to prevent conflicts
+                    # It will re-enable normally on next shell start
+                    export POWERLEVEL9K_INSTANT_PROMPT=off
                     exec zsh -l
                 else
                     echo "${RED}Warning: Shell config has errors. Not auto-reloading.${NC}"
