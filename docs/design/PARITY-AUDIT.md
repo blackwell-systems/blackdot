@@ -1,8 +1,8 @@
 # Go vs Bash CLI Parity Audit
 
-> **Date:** 2025-12-07
+> **Date:** 2025-12-08
 > **Auditor:** Claude
-> **Status:** Complete
+> **Status:** COMPLETE - Full Parity Achieved
 
 ---
 
@@ -13,7 +13,7 @@
 | Command | Go Version | Status |
 |---------|------------|--------|
 | `dotfiles-backup` | ✅ | Full parity |
-| `dotfiles-config` | ⚠️ | 5/8 subcommands |
+| `dotfiles-config` | ✅ | Full parity (8/8 subcommands) |
 | `dotfiles-diff` | ✅ | Full parity |
 | `dotfiles-doctor` | ✅ | Full parity |
 | `dotfiles-drift` | ✅ | Full parity |
@@ -29,9 +29,9 @@
 | `dotfiles-packages` | ✅ | Full parity |
 | `dotfiles-setup` | ✅ | Full parity |
 | `dotfiles-sync` | ✅ | Full parity |
-| `dotfiles-template` | ⚠️ | 6/11 subcommands |
+| `dotfiles-template` | ✅ | Full parity (11/11 subcommands) |
 | `dotfiles-uninstall` | ✅ | Full parity |
-| `dotfiles-vault` | ⚠️ | 8/13 subcommands |
+| `dotfiles-vault` | ✅ | Full parity (15/15 subcommands) |
 
 ### Go-Only Commands (Enhancements)
 
@@ -44,11 +44,14 @@
 
 ## 2. Detailed Flag/Subcommand Comparison
 
-### Full Parity Commands (13)
+### Full Parity Commands (16)
+
+All commands now have full parity with their bash counterparts.
 
 | Command | Notes |
 |---------|-------|
 | `backup` | Go uses explicit subcommands (create, list, restore, clean) |
+| `config` | All 8 subcommands implemented |
 | `diff` | Flags: `--sync/-s`, `--restore/-r` |
 | `doctor` | Flags: `--fix/-f`, `--quick/-q` |
 | `drift` | Flags: `--quick/-q` |
@@ -60,40 +63,44 @@
 | `packages` | Flags: `--check/-c`, `--install/-i`, `--outdated/-o`, `--tier/-t` |
 | `setup` | Flags: `--status/-s`, `--reset/-r` |
 | `sync` | Flags: `--dry-run/-n`, `--force-local/-l`, `--force-vault/-v`, `--verbose`, `--all/-a` |
+| `template` | All 11 subcommands implemented including vault sync |
 | `uninstall` | Flags: `--dry-run/-n`, `--keep-secrets/-k` |
+| `vault` | All 15 subcommands implemented |
 
-### Partial Parity Commands (3)
+---
 
-#### config (5/8 subcommands)
+## 3. Subcommand Details
+
+### config (8/8 subcommands) ✅
 
 | Subcommand | Go | Description |
 |------------|-----|-------------|
-| `get` | ✅ | Get config value |
-| `set` | ✅ | Set config value |
+| `get` | ✅ | Get config value with layer resolution |
+| `set` | ✅ | Set config value in specific layer |
 | `show` | ✅ | Show value from all layers |
 | `list` | ✅ | Show layer status |
-| `merged` | ✅ | Show merged config |
-| `source` | ❌ | Get value with source info (JSON) |
-| `init` | ❌ | Initialize a config layer |
-| `edit` | ❌ | Edit config file in $EDITOR |
+| `merged` | ✅ | Show merged config from all layers |
+| `source` | ✅ | Get value with source info (JSON output) |
+| `init` | ✅ | Initialize machine or project config |
+| `edit` | ✅ | Edit config file in $EDITOR |
 
-#### template (6/11 subcommands)
+### template (11/11 subcommands) ✅
 
 | Subcommand | Go | Description |
 |------------|-----|-------------|
-| `init` | ✅ | Interactive setup |
-| `render` | ✅ | Render templates |
-| `diff` | ✅ | Show differences |
-| `vars` | ✅ | List variables |
-| `link` | ✅ | Create symlinks |
+| `init` | ✅ | Interactive setup - creates _variables.local.sh |
+| `render` | ✅ | Render templates to generated/ |
+| `check` | ✅ | Validate template syntax |
+| `diff` | ✅ | Show differences from rendered |
+| `vars` | ✅ | List all variables |
+| `filters` | ✅ | List available pipeline filters |
+| `edit` | ✅ | Open _variables.local.sh in $EDITOR |
+| `link` | ✅ | Create symlinks from generated/ |
 | `list` | ✅ | Show available templates |
-| `check` | ❌ | Validate template syntax |
-| `filters` | ❌ | List available filters |
-| `edit` | ❌ | Open in $EDITOR |
-| `arrays` | ❌ | Manage JSON/shell arrays |
-| `vault` | ❌ | Sync variables with vault |
+| `arrays` | ✅ | Manage JSON/shell arrays for {{#each}} |
+| `vault` | ✅ | Sync variables with vault (push/pull/diff/sync/status) |
 
-#### vault (8/13 subcommands)
+### vault (15/15 subcommands) ✅
 
 | Subcommand | Go | Description |
 |------------|-----|-------------|
@@ -101,92 +108,62 @@
 | `lock` | ✅ | Lock vault |
 | `status` | ✅ | Show vault status |
 | `list` | ✅ | List vault items |
-| `get` | ✅ | Get a vault item (Go only) |
-| `sync` | ✅ | Sync vault |
+| `get` | ✅ | Get a vault item |
+| `sync` | ✅ | Sync vault with remote |
 | `backend` | ✅ | Show/set backend |
-| `health` | ✅ | Health check (Go only) |
-| `quick` | ❌ | Quick status check |
-| `restore` | ❌ | Restore secrets from vault |
-| `push` | ❌ | Push secrets to vault |
-| `scan` | ❌ | Scan for local secrets |
-| `check` | ❌ | Check vault items exist |
-| `validate` | ❌ | Validate schema |
-| `init` | ❌ | Initialize vault setup |
+| `health` | ✅ | Health check |
+| `quick` | ✅ | Quick status check (login/unlock only) |
+| `restore` | ✅ | Restore secrets from vault (--force, --dry-run) |
+| `push` | ✅ | Push secrets to vault (--force, --dry-run, --all) |
+| `scan` | ✅ | Scan for local secrets to add |
+| `check` | ✅ | Check required vault items exist |
+| `validate` | ✅ | Validate vault-items.json schema |
+| `init` | ✅ | Initialize vault setup wizard |
 
 ---
 
-## 3. Parity Score
+## 4. Parity Score
 
-### Command-Level
-- Full parity: **13/16 (81%)**
-- Partial parity: **3/16 (19%)**
-
-### Subcommand-Level
-- config: **5/8 (62%)**
-- template: **6/11 (55%)**
-- vault: **8/13 (62%)**
-- Total missing: **15 subcommands**
+### Final Results
+- **Command-Level Parity:** 16/16 (100%)
+- **Subcommand-Level Parity:** 34/34 (100%)
+- **All implementations are native Go** (no shell script delegation)
 
 ---
 
-## 4. Recommendations
+## 5. Implementation Summary
 
-### Priority 1 - Critical for Full Replacement
-These are needed before Go can fully replace bash:
+All 15 missing subcommands were implemented on 2025-12-08:
 
-| Subcommand | Reason |
-|------------|--------|
-| `vault restore` | Users need this to pull secrets on new machines |
-| `vault push` | Users need this to backup secrets |
-| `vault init` | First-time vault setup |
+### Vault (7 new subcommands)
+- `quick` - Native Go implementation for fast status check
+- `restore` - Full restore with backup, permissions, dry-run support
+- `push` - Push with sync comparison, create/update logic
+- `scan` - Secret discovery scanning SSH, AWS, Git configs
+- `check` - Verify required items exist in vault
+- `validate` - JSON schema validation with detailed errors
+- `init` - Interactive setup wizard with backend detection
 
-### Priority 2 - Useful but Can Fallback
-These improve UX but bash fallback works:
+### Config (3 new subcommands)
+- `source` - Returns JSON with value and source layer
+- `init` - Creates machine.json or .dotfiles.json
+- `edit` - Opens config in $EDITOR
 
-| Subcommand | Reason |
-|------------|--------|
-| `config edit` | Convenience - can use $EDITOR directly |
-| `config init` | Can create machine.json manually |
-| `template edit` | Convenience - can use $EDITOR directly |
-| `template check` | Syntax validation (render catches errors) |
-| `vault validate` | Schema validation (sync checks this) |
-
-### Priority 3 - Nice to Have
-These are optional enhancements:
-
-| Subcommand | Reason |
-|------------|--------|
-| `config source` | Debug tool - shows where config comes from |
-| `vault quick` | Faster status check (status works fine) |
-| `vault scan` | Secret discovery (manual is fine) |
-| `vault check` | Item existence (restore catches this) |
-| `template filters` | Reference doc (can use help text) |
-| `template arrays` | Array management (can edit JSON) |
-| `template vault` | Variable sync (can use vault restore/push) |
-
----
-
-## 5. Action Items
-
-### Immediate (to claim "full parity")
-- [ ] Implement `vault restore`
-- [ ] Implement `vault push`
-- [ ] Implement `vault init`
-
-### Before Deprecating Bash
-- [ ] Implement `config edit`
-- [ ] Implement `template check`
-- [ ] Add `vault validate`
-
-### Optional Enhancements
-- [ ] `config source` (debugging)
-- [ ] `vault quick` (performance)
-- [ ] `template filters` (documentation)
+### Template (5 new subcommands)
+- `check` - Validates template syntax by test-rendering
+- `filters` - Lists 16 available pipeline filters
+- `edit` - Opens _variables.local.sh in $EDITOR
+- `arrays` - Lists/validates JSON arrays for {{#each}}
+- `vault` - Full sync with push/pull/diff/sync/status
 
 ---
 
 ## 6. Conclusion
 
-The Go CLI has achieved **81% command-level parity** with the bash implementation. All daily-use commands have full parity. The remaining gaps are primarily in advanced vault and template management features that can fall back to bash if needed.
+The Go CLI has achieved **100% parity** with the bash implementation. All commands and subcommands are now available in Go with native implementations. The Go CLI can now fully replace the bash implementation for all use cases.
 
-**Recommended next step:** Implement `vault restore`, `vault push`, and `vault init` to enable full standalone Go operation.
+**Key achievements:**
+- All vault operations work without shell delegation
+- Config layering fully implemented (env > project > machine > user)
+- Template vault sync for machine-portable configurations
+- Native Go implementations for better portability and testing
