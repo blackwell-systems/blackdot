@@ -271,6 +271,7 @@ These should remain in shell config files.
 | Hooks | Shell only | Shell + PowerShell | ✅ Complete (24 hook points) |
 | Feature Flags | Shell only | Go + Shell | ✅ Complete (6 tool categories) |
 | Templates | Shell only | Go + Shell | ✅ Complete (RaymondEngine, 20 tests) |
+| Migration | N/A | `import chezmoi` | ✅ Complete (Go template → Handlebars) |
 
 The goal is **additive** - Windows users gain functionality, shell users lose nothing.
 

@@ -83,6 +83,8 @@ func init() {
 		newUninstallCmd(),
 		// Cross-platform developer tools
 		newToolsCmd(),
+		// Import from other dotfile managers
+		newImportCmd(),
 		// Note: migrate command dropped - one-time v2→v3 migration handled by bash
 	)
 }
