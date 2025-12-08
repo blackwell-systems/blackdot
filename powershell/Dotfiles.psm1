@@ -5,7 +5,8 @@
 
 .DESCRIPTION
     This module provides PowerShell equivalents of ZSH dotfiles functionality:
-    - Lifecycle hooks (shell_init, directory_change, shell_exit)
+    - Full lifecycle hooks system (24 hook points)
+    - File-based, function-based, and JSON-configured hooks
     - Aliases for dotfiles tools commands
     - Integration with the Go CLI
 
@@ -14,11 +15,77 @@
     Requires: dotfiles Go CLI in PATH
 #>
 
+# ============================================================
 # Module-level state
+# ============================================================
 $script:DotfilesLastDirectory = $null
 $script:DotfilesHooksEnabled = $true
 
-#region Configuration
+# Hook storage: registered PowerShell functions
+$script:RegisteredHooks = @{}
+
+# ============================================================
+# Configuration
+# ============================================================
+
+# All valid hook points (must match ZSH exactly)
+$script:HOOK_POINTS = @(
+    # Lifecycle
+    'pre_install', 'post_install',
+    'pre_bootstrap', 'post_bootstrap',
+    'pre_upgrade', 'post_upgrade',
+
+    # Vault
+    'pre_vault_pull', 'post_vault_pull',
+    'pre_vault_push', 'post_vault_push',
+
+    # Doctor
+    'pre_doctor', 'post_doctor', 'doctor_check',
+
+    # Shell
+    'shell_init', 'shell_exit', 'directory_change',
+
+    # Setup
+    'pre_setup_phase', 'post_setup_phase', 'setup_complete',
+
+    # Template
+    'pre_template_render', 'post_template_render',
+
+    # Encryption
+    'pre_encrypt', 'post_decrypt'
+)
+
+# Hook point to parent feature mapping
+$script:HOOK_FEATURE_MAP = @{
+    'pre_vault_pull'        = 'vault'
+    'post_vault_pull'       = 'vault'
+    'pre_vault_push'        = 'vault'
+    'post_vault_push'       = 'vault'
+    'pre_template_render'   = 'templates'
+    'post_template_render'  = 'templates'
+    'pre_encrypt'           = 'encryption'
+    'post_decrypt'          = 'encryption'
+}
+
+# Configuration paths
+$script:HOOKS_DIR = if ($env:DOTFILES_HOOKS_DIR) {
+    $env:DOTFILES_HOOKS_DIR
+} else {
+    Join-Path $env:USERPROFILE ".config\dotfiles\hooks"
+}
+
+$script:HOOKS_CONFIG = if ($env:DOTFILES_HOOKS_CONFIG) {
+    $env:DOTFILES_HOOKS_CONFIG
+} else {
+    Join-Path $env:USERPROFILE ".config\dotfiles\hooks.json"
+}
+
+# Settings (can be overridden by env vars or JSON config)
+$script:HOOKS_FAIL_FAST = if ($env:DOTFILES_HOOKS_FAIL_FAST -eq 'true') { $true } else { $false }
+$script:HOOKS_VERBOSE = if ($env:DOTFILES_HOOKS_VERBOSE -eq 'true') { $true } else { $false }
+$script:HOOKS_TIMEOUT = if ($env:DOTFILES_HOOKS_TIMEOUT) { [int]$env:DOTFILES_HOOKS_TIMEOUT } else { 30 }
+
+#region Utility Functions
 
 function Get-DotfilesPath {
     <#
@@ -29,7 +96,6 @@ function Get-DotfilesPath {
         return $env:DOTFILES_DIR
     }
 
-    # Default locations
     $candidates = @(
         "$env:USERPROFILE\workspace\dotfiles",
         "$env:USERPROFILE\dotfiles",
@@ -53,57 +119,591 @@ function Test-DotfilesCli {
     $null -ne (Get-Command "dotfiles" -ErrorAction SilentlyContinue)
 }
 
-#endregion
-
-#region Hook System
-
-function Invoke-DotfilesHook {
+function Test-HookPoint {
     <#
     .SYNOPSIS
-        Run a dotfiles hook point
+        Validate a hook point name
+    #>
+    param([string]$Point)
+
+    return $script:HOOK_POINTS -contains $Point
+}
+
+#endregion
+
+#region Hook System Core
+
+function Register-DotfilesHook {
+    <#
+    .SYNOPSIS
+        Register a PowerShell function as a hook
 
     .PARAMETER Point
-        The hook point to run (e.g., shell_init, directory_change)
+        The hook point to register for
 
-    .PARAMETER DryRun
-        Preview what would run without executing
+    .PARAMETER ScriptBlock
+        The script block to execute
+
+    .PARAMETER Name
+        Optional name for the hook (defaults to auto-generated)
+
+    .EXAMPLE
+        Register-DotfilesHook -Point "post_vault_pull" -ScriptBlock { ssh-add ~/.ssh/id_ed25519 }
     #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
-        [ValidateSet(
-            'shell_init', 'shell_exit', 'directory_change',
-            'pre_vault_pull', 'post_vault_pull',
-            'pre_vault_push', 'post_vault_push',
-            'pre_doctor', 'post_doctor', 'doctor_check',
-            'pre_template_render', 'post_template_render',
-            'pre_encrypt', 'post_decrypt'
-        )]
         [string]$Point,
 
-        [switch]$DryRun
+        [Parameter(Mandatory)]
+        [scriptblock]$ScriptBlock,
+
+        [string]$Name
     )
 
-    if (-not $script:DotfilesHooksEnabled) {
-        Write-Verbose "Hooks disabled, skipping: $Point"
+    if (-not (Test-HookPoint $Point)) {
+        Write-Error "Invalid hook point: $Point. Valid points: $($script:HOOK_POINTS -join ', ')"
         return
     }
 
-    if (-not (Test-DotfilesCli)) {
-        Write-Verbose "dotfiles CLI not found, skipping hook: $Point"
+    if (-not $Name) {
+        $Name = "hook-$(Get-Random)"
+    }
+
+    if (-not $script:RegisteredHooks.ContainsKey($Point)) {
+        $script:RegisteredHooks[$Point] = @()
+    }
+
+    # Check for duplicate (idempotent)
+    $existing = $script:RegisteredHooks[$Point] | Where-Object { $_.Name -eq $Name }
+    if ($existing) {
+        if ($script:HOOKS_VERBOSE) {
+            Write-Verbose "Hook already registered: $Point -> $Name"
+        }
         return
     }
 
-    $args = @("hook", "run", $Point)
-    if ($DryRun) {
-        $args += "--dry-run"
+    $script:RegisteredHooks[$Point] += @{
+        Name = $Name
+        ScriptBlock = $ScriptBlock
     }
 
-    try {
-        & dotfiles @args
+    if ($script:HOOKS_VERBOSE) {
+        Write-Verbose "Registered hook: $Point -> $Name"
     }
-    catch {
-        Write-Warning "Hook '$Point' failed: $_"
+}
+
+function Unregister-DotfilesHook {
+    <#
+    .SYNOPSIS
+        Unregister a hook by name
+
+    .PARAMETER Point
+        The hook point
+
+    .PARAMETER Name
+        The hook name to remove
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Point,
+
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    if ($script:RegisteredHooks.ContainsKey($Point)) {
+        $script:RegisteredHooks[$Point] = $script:RegisteredHooks[$Point] | Where-Object { $_.Name -ne $Name }
+    }
+}
+
+function Invoke-DotfilesHook {
+    <#
+    .SYNOPSIS
+        Run all hooks for a point
+
+    .PARAMETER Point
+        The hook point to run
+
+    .PARAMETER Arguments
+        Additional arguments to pass to hooks
+
+    .PARAMETER Verbose
+        Show detailed output
+
+    .PARAMETER NoHooks
+        Skip hook execution entirely
+
+    .EXAMPLE
+        Invoke-DotfilesHook -Point "shell_init"
+        Invoke-DotfilesHook -Point "post_vault_pull" -Verbose
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Point,
+
+        [object[]]$Arguments = @(),
+
+        [switch]$NoHooks,
+
+        [switch]$VerboseOutput
+    )
+
+    $localVerbose = $VerboseOutput -or $script:HOOKS_VERBOSE
+
+    # Skip if --no-hooks
+    if ($NoHooks) {
+        if ($localVerbose) { Write-Host "hook_run: skipped via -NoHooks" -ForegroundColor Gray }
+        return $true
+    }
+
+    # Master disable check
+    if (-not $script:DotfilesHooksEnabled -or $env:DOTFILES_HOOKS_DISABLED -eq 'true') {
+        if ($localVerbose) { Write-Host "hook_run: hooks disabled globally" -ForegroundColor Gray }
+        return $true
+    }
+
+    # Validate hook point
+    if (-not (Test-HookPoint $Point)) {
+        Write-Error "Invalid hook point: $Point"
+        return $false
+    }
+
+    # Check parent feature (if dotfiles CLI available)
+    $parentFeature = $script:HOOK_FEATURE_MAP[$Point]
+    if ($parentFeature -and (Test-DotfilesCli)) {
+        $featureCheck = & dotfiles features check $parentFeature 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            if ($localVerbose) {
+                Write-Host "hook_run: parent feature '$parentFeature' disabled for $Point" -ForegroundColor Gray
+            }
+            return $true
+        }
+    }
+
+    if ($localVerbose) {
+        Write-Host "hook_run: running hooks for $Point" -ForegroundColor Cyan
+    }
+
+    $failed = $false
+
+    # 1. Run file-based hooks (from hooks directory)
+    $pointDir = Join-Path $script:HOOKS_DIR $Point
+    if (Test-Path $pointDir) {
+        $scripts = Get-ChildItem -Path $pointDir -Filter "*.ps1" | Sort-Object Name
+
+        foreach ($scriptFile in $scripts) {
+            if ($localVerbose) {
+                Write-Host "  Executing: $($scriptFile.Name)" -ForegroundColor Gray
+            }
+
+            try {
+                $job = Start-Job -FilePath $scriptFile.FullName -ArgumentList $Arguments
+                $completed = Wait-Job $job -Timeout $script:HOOKS_TIMEOUT
+
+                if (-not $completed) {
+                    Stop-Job $job
+                    Remove-Job $job -Force
+                    Write-Warning "Hook timed out: $($scriptFile.Name)"
+                    $failed = $true
+                } else {
+                    $result = Receive-Job $job
+                    Remove-Job $job
+                    if ($job.State -eq 'Failed') {
+                        Write-Warning "Hook failed: $($scriptFile.Name)"
+                        $failed = $true
+                    }
+                }
+
+                if ($failed -and $script:HOOKS_FAIL_FAST) {
+                    Write-Host "hook_run: stopping (fail_fast=true)" -ForegroundColor Red
+                    return $false
+                }
+            }
+            catch {
+                Write-Warning "Hook failed: $($scriptFile.Name) - $_"
+                $failed = $true
+                if ($script:HOOKS_FAIL_FAST) {
+                    return $false
+                }
+            }
+        }
+    }
+
+    # 2. Run registered PowerShell function hooks
+    if ($script:RegisteredHooks.ContainsKey($Point)) {
+        foreach ($hook in $script:RegisteredHooks[$Point]) {
+            if ($localVerbose) {
+                Write-Host "  Executing function: $($hook.Name)" -ForegroundColor Gray
+            }
+
+            try {
+                & $hook.ScriptBlock @Arguments
+            }
+            catch {
+                Write-Warning "Hook function failed: $($hook.Name) - $_"
+                $failed = $true
+                if ($script:HOOKS_FAIL_FAST) {
+                    return $false
+                }
+            }
+        }
+    }
+
+    # 3. Run JSON-configured hooks
+    if (Test-Path $script:HOOKS_CONFIG) {
+        try {
+            $config = Get-Content $script:HOOKS_CONFIG -Raw | ConvertFrom-Json
+            $pointHooks = $config.hooks.$Point
+
+            if ($pointHooks) {
+                foreach ($hookDef in $pointHooks) {
+                    # Check if enabled
+                    if ($null -ne $hookDef.enabled -and -not $hookDef.enabled) {
+                        continue
+                    }
+
+                    $hookName = if ($hookDef.name) { $hookDef.name } else { "json-hook" }
+
+                    if ($localVerbose) {
+                        Write-Host "  Executing JSON hook: $hookName" -ForegroundColor Gray
+                    }
+
+                    try {
+                        if ($hookDef.command) {
+                            Invoke-Expression $hookDef.command
+                        }
+                        elseif ($hookDef.script) {
+                            $scriptPath = $hookDef.script -replace '~', $env:USERPROFILE
+                            if (Test-Path $scriptPath) {
+                                & $scriptPath @Arguments
+                            } else {
+                                Write-Warning "Hook script not found: $scriptPath"
+                                $failed = $true
+                            }
+                        }
+                    }
+                    catch {
+                        if (-not $hookDef.fail_ok) {
+                            Write-Warning "JSON hook failed: $hookName - $_"
+                            $failed = $true
+                            if ($script:HOOKS_FAIL_FAST) {
+                                return $false
+                            }
+                        } elseif ($localVerbose) {
+                            Write-Host "  $hookName failed but fail_ok=true" -ForegroundColor Yellow
+                        }
+                    }
+                }
+            }
+        }
+        catch {
+            if ($localVerbose) {
+                Write-Host "  Could not parse hooks.json: $_" -ForegroundColor Yellow
+            }
+        }
+    }
+
+    # 4. Also call Go CLI hook run (for file-based .sh/.zsh hooks)
+    if (Test-DotfilesCli) {
+        try {
+            $verboseFlag = if ($localVerbose) { "--verbose" } else { "" }
+            if ($verboseFlag) {
+                & dotfiles hook run $verboseFlag $Point @Arguments 2>&1 | Out-Null
+            } else {
+                & dotfiles hook run $Point @Arguments 2>&1 | Out-Null
+            }
+        }
+        catch {
+            # Ignore CLI errors for shell hooks
+        }
+    }
+
+    return -not $failed
+}
+
+function Get-DotfilesHook {
+    <#
+    .SYNOPSIS
+        List hooks for a point or all points
+
+    .PARAMETER Point
+        Optional specific hook point to list
+    #>
+    [CmdletBinding()]
+    param(
+        [string]$Point
+    )
+
+    if ($Point) {
+        if (-not (Test-HookPoint $Point)) {
+            Write-Error "Invalid hook point: $Point"
+            return
+        }
+
+        Write-Host "`nHooks for: $Point" -ForegroundColor Cyan
+        Write-Host ("=" * 60)
+
+        $hasHooks = $false
+
+        # File-based hooks
+        $pointDir = Join-Path $script:HOOKS_DIR $Point
+        if (Test-Path $pointDir) {
+            $scripts = Get-ChildItem -Path $pointDir -Filter "*.ps1" -ErrorAction SilentlyContinue
+            if ($scripts) {
+                Write-Host "`nFile-based hooks: ($pointDir)" -ForegroundColor Yellow
+                foreach ($s in $scripts) {
+                    $hasHooks = $true
+                    Write-Host "  + $($s.Name)" -ForegroundColor Green
+                }
+            }
+        }
+
+        # Registered functions
+        if ($script:RegisteredHooks.ContainsKey($Point) -and $script:RegisteredHooks[$Point].Count -gt 0) {
+            Write-Host "`nRegistered functions:" -ForegroundColor Yellow
+            foreach ($h in $script:RegisteredHooks[$Point]) {
+                $hasHooks = $true
+                Write-Host "  + $($h.Name)" -ForegroundColor Green
+            }
+        }
+
+        # JSON config
+        if (Test-Path $script:HOOKS_CONFIG) {
+            try {
+                $config = Get-Content $script:HOOKS_CONFIG -Raw | ConvertFrom-Json
+                $pointHooks = $config.hooks.$Point
+                if ($pointHooks) {
+                    Write-Host "`nJSON configured: ($($script:HOOKS_CONFIG))" -ForegroundColor Yellow
+                    foreach ($h in $pointHooks) {
+                        $hasHooks = $true
+                        $status = if ($h.enabled -eq $false) { "o" } else { "+" }
+                        $color = if ($h.enabled -eq $false) { "Gray" } else { "Green" }
+                        $name = if ($h.name) { $h.name } else { "unnamed" }
+                        Write-Host "  $status $name" -ForegroundColor $color
+                    }
+                }
+            }
+            catch {}
+        }
+
+        if (-not $hasHooks) {
+            Write-Host "`nNo hooks registered for this point." -ForegroundColor Gray
+        }
+    }
+    else {
+        # List all hook points
+        Write-Host "`nHook System" -ForegroundColor Cyan
+        Write-Host ("=" * 60)
+
+        $categories = @{
+            'Lifecycle' = @('pre_install', 'post_install', 'pre_bootstrap', 'post_bootstrap', 'pre_upgrade', 'post_upgrade')
+            'Vault' = @('pre_vault_pull', 'post_vault_pull', 'pre_vault_push', 'post_vault_push')
+            'Doctor' = @('pre_doctor', 'post_doctor', 'doctor_check')
+            'Shell' = @('shell_init', 'shell_exit', 'directory_change')
+            'Setup' = @('pre_setup_phase', 'post_setup_phase', 'setup_complete')
+            'Template' = @('pre_template_render', 'post_template_render')
+            'Encryption' = @('pre_encrypt', 'post_decrypt')
+        }
+
+        foreach ($cat in $categories.Keys) {
+            Write-Host "`n$cat" -ForegroundColor Cyan
+            Write-Host ("-" * 60)
+
+            foreach ($p in $categories[$cat]) {
+                $count = 0
+
+                # Count file-based
+                $pointDir = Join-Path $script:HOOKS_DIR $p
+                if (Test-Path $pointDir) {
+                    $count += (Get-ChildItem -Path $pointDir -Filter "*.ps1" -ErrorAction SilentlyContinue).Count
+                }
+
+                # Count registered
+                if ($script:RegisteredHooks.ContainsKey($p)) {
+                    $count += $script:RegisteredHooks[$p].Count
+                }
+
+                # Count JSON
+                if (Test-Path $script:HOOKS_CONFIG) {
+                    try {
+                        $config = Get-Content $script:HOOKS_CONFIG -Raw | ConvertFrom-Json
+                        if ($config.hooks.$p) {
+                            $count += $config.hooks.$p.Count
+                        }
+                    }
+                    catch {}
+                }
+
+                if ($count -gt 0) {
+                    Write-Host "  + $($p.PadRight(25)) $count hook(s)" -ForegroundColor Green
+                }
+                else {
+                    Write-Host "  o $($p.PadRight(25)) no hooks" -ForegroundColor Gray
+                }
+            }
+        }
+    }
+}
+
+function Get-DotfilesHookPoints {
+    <#
+    .SYNOPSIS
+        List all available hook points with descriptions
+    #>
+    Write-Host "`nAvailable Hook Points" -ForegroundColor Cyan
+    Write-Host ("=" * 60)
+
+    $descriptions = @{
+        'pre_install' = 'Before install.sh runs'
+        'post_install' = 'After install.sh completes'
+        'pre_bootstrap' = 'Before bootstrap script'
+        'post_bootstrap' = 'After bootstrap completes'
+        'pre_upgrade' = 'Before dotfiles upgrade'
+        'post_upgrade' = 'After upgrade completes'
+        'pre_vault_pull' = 'Before restoring secrets'
+        'post_vault_pull' = 'After secrets restored (e.g., ssh-add)'
+        'pre_vault_push' = 'Before syncing to vault'
+        'post_vault_push' = 'After vault sync'
+        'pre_doctor' = 'Before health check'
+        'post_doctor' = 'After health check'
+        'doctor_check' = 'During doctor (custom checks)'
+        'shell_init' = 'Shell startup (PowerShell profile load)'
+        'shell_exit' = 'Shell exit'
+        'directory_change' = 'After cd (auto-activate envs)'
+        'pre_setup_phase' = 'Before each wizard phase'
+        'post_setup_phase' = 'After each wizard phase'
+        'setup_complete' = 'After all phases done'
+        'pre_template_render' = 'Before template rendering'
+        'post_template_render' = 'After templates rendered'
+        'pre_encrypt' = 'Before file encryption'
+        'post_decrypt' = 'After file decryption'
+    }
+
+    $categories = @(
+        @{ Name = 'Lifecycle'; Points = @('pre_install', 'post_install', 'pre_bootstrap', 'post_bootstrap', 'pre_upgrade', 'post_upgrade') }
+        @{ Name = 'Vault'; Points = @('pre_vault_pull', 'post_vault_pull', 'pre_vault_push', 'post_vault_push') }
+        @{ Name = 'Doctor'; Points = @('pre_doctor', 'post_doctor', 'doctor_check') }
+        @{ Name = 'Shell'; Points = @('shell_init', 'shell_exit', 'directory_change') }
+        @{ Name = 'Setup'; Points = @('pre_setup_phase', 'post_setup_phase', 'setup_complete') }
+        @{ Name = 'Template'; Points = @('pre_template_render', 'post_template_render') }
+        @{ Name = 'Encryption'; Points = @('pre_encrypt', 'post_decrypt') }
+    )
+
+    foreach ($cat in $categories) {
+        Write-Host "`n$($cat.Name) Hooks" -ForegroundColor Cyan
+        foreach ($p in $cat.Points) {
+            Write-Host "  $($p.PadRight(25)) $($descriptions[$p])" -ForegroundColor Gray
+        }
+    }
+}
+
+function Add-DotfilesHook {
+    <#
+    .SYNOPSIS
+        Add a hook script to a point
+
+    .PARAMETER Point
+        The hook point
+
+    .PARAMETER ScriptPath
+        Path to the script to add
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Point,
+
+        [Parameter(Mandatory)]
+        [string]$ScriptPath
+    )
+
+    if (-not (Test-HookPoint $Point)) {
+        Write-Error "Invalid hook point: $Point"
+        return
+    }
+
+    if (-not (Test-Path $ScriptPath)) {
+        Write-Error "Script not found: $ScriptPath"
+        return
+    }
+
+    $pointDir = Join-Path $script:HOOKS_DIR $Point
+    if (-not (Test-Path $pointDir)) {
+        New-Item -Path $pointDir -ItemType Directory -Force | Out-Null
+    }
+
+    $destPath = Join-Path $pointDir (Split-Path $ScriptPath -Leaf)
+    Copy-Item -Path $ScriptPath -Destination $destPath -Force
+
+    Write-Host "Added hook: $destPath" -ForegroundColor Green
+    Write-Host "Hook will run during: $Point" -ForegroundColor Gray
+}
+
+function Remove-DotfilesHook {
+    <#
+    .SYNOPSIS
+        Remove a hook script from a point
+
+    .PARAMETER Point
+        The hook point
+
+    .PARAMETER Name
+        The hook script name to remove
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Point,
+
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $hookPath = Join-Path $script:HOOKS_DIR $Point $Name
+
+    if (Test-Path $hookPath) {
+        Remove-Item $hookPath -Force
+        Write-Host "Removed hook: $hookPath" -ForegroundColor Green
+    }
+    else {
+        Write-Error "Hook not found: $hookPath"
+    }
+}
+
+function Test-DotfilesHook {
+    <#
+    .SYNOPSIS
+        Test hooks for a point (verbose dry-run style)
+
+    .PARAMETER Point
+        The hook point to test
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Point
+    )
+
+    Write-Host "`nTesting hooks for: $Point" -ForegroundColor Cyan
+    Write-Host ("=" * 60)
+
+    Get-DotfilesHook -Point $Point
+
+    Write-Host "`n" + ("-" * 60)
+    Write-Host "Executing with verbose:" -ForegroundColor Yellow
+    Write-Host ""
+
+    $result = Invoke-DotfilesHook -Point $Point -VerboseOutput
+
+    Write-Host ""
+    if ($result) {
+        Write-Host "All hooks completed successfully" -ForegroundColor Green
+    }
+    else {
+        Write-Host "One or more hooks failed" -ForegroundColor Red
     }
 }
 
@@ -144,7 +744,6 @@ function Set-LocationWithHook {
 
     $previousLocation = Get-Location
 
-    # Call the original Set-Location
     if ($Path) {
         Microsoft.PowerShell.Management\Set-Location -Path $Path -PassThru:$PassThru
     }
@@ -154,15 +753,13 @@ function Set-LocationWithHook {
 
     $currentLocation = Get-Location
 
-    # Trigger hook if directory actually changed
     if ($previousLocation.Path -ne $currentLocation.Path) {
         $env:DOTFILES_PREVIOUS_DIR = $previousLocation.Path
         $env:DOTFILES_CURRENT_DIR = $currentLocation.Path
-        Invoke-DotfilesHook -Point "directory_change"
+        Invoke-DotfilesHook -Point "directory_change" | Out-Null
     }
 }
 
-# Create alias to override cd
 Set-Alias -Name cd -Value Set-LocationWithHook -Scope Global -Force
 
 #endregion
@@ -171,31 +768,7 @@ Set-Alias -Name cd -Value Set-LocationWithHook -Scope Global -Force
 
 $null = Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
     if ($script:DotfilesHooksEnabled) {
-        Invoke-DotfilesHook -Point "shell_exit"
-    }
-}
-
-#endregion
-
-#region Prompt Hook (like precmd)
-
-# Store the original prompt function
-$script:OriginalPrompt = $function:prompt
-
-function prompt {
-    <#
-    .SYNOPSIS
-        Custom prompt that can trigger pre-prompt hooks
-    #>
-
-    # You could add a precmd-like hook here if needed
-    # For now, just call the original prompt
-
-    if ($script:OriginalPrompt) {
-        & $script:OriginalPrompt
-    }
-    else {
-        "PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) "
+        Invoke-DotfilesHook -Point "shell_exit" | Out-Null
     }
 }
 
@@ -212,6 +785,7 @@ function ssh-fp { dotfiles tools ssh fp @args }
 function ssh-tunnel { dotfiles tools ssh tunnel @args }
 function ssh-socks { dotfiles tools ssh socks @args }
 function ssh-status { dotfiles tools ssh status @args }
+function ssh-copy { dotfiles tools ssh copy @args }
 
 # AWS Tools
 function aws-profiles { dotfiles tools aws profiles @args }
@@ -220,7 +794,6 @@ function aws-login { dotfiles tools aws login @args }
 function aws-switch {
     $result = dotfiles tools aws switch @args
     if ($LASTEXITCODE -eq 0 -and $result) {
-        # Execute the export command (convert to PowerShell syntax)
         $result | ForEach-Object {
             if ($_ -match '^export (\w+)=(.*)$') {
                 Set-Item -Path "env:$($Matches[1])" -Value $Matches[2]
@@ -308,12 +881,43 @@ function dotfiles-features { dotfiles features @args }
 function dotfiles-vault { dotfiles vault @args }
 function dotfiles-hook { dotfiles hook @args }
 
-# Short alias
 Set-Alias -Name d -Value dotfiles -Scope Global
 
 #endregion
 
 #region Module Initialization
+
+function Initialize-DotfilesHooks {
+    <#
+    .SYNOPSIS
+        Initialize hooks system from JSON config
+    #>
+
+    if (Test-Path $script:HOOKS_CONFIG) {
+        try {
+            $config = Get-Content $script:HOOKS_CONFIG -Raw | ConvertFrom-Json
+
+            if ($config.settings) {
+                if ($null -ne $config.settings.fail_fast) {
+                    $script:HOOKS_FAIL_FAST = $config.settings.fail_fast
+                }
+                if ($null -ne $config.settings.verbose) {
+                    $script:HOOKS_VERBOSE = $config.settings.verbose
+                }
+                if ($null -ne $config.settings.timeout) {
+                    $script:HOOKS_TIMEOUT = [int]$config.settings.timeout
+                }
+            }
+
+            if ($script:HOOKS_VERBOSE) {
+                Write-Host "hook_init: initialized (fail_fast=$($script:HOOKS_FAIL_FAST), verbose=$($script:HOOKS_VERBOSE), timeout=$($script:HOOKS_TIMEOUT))" -ForegroundColor Gray
+            }
+        }
+        catch {
+            Write-Verbose "Could not load hooks config: $_"
+        }
+    }
+}
 
 function Initialize-Dotfiles {
     <#
@@ -324,14 +928,16 @@ function Initialize-Dotfiles {
     if (-not (Test-DotfilesCli)) {
         Write-Warning "dotfiles CLI not found in PATH. Some features will be unavailable."
         Write-Warning "Install from: https://github.com/blackwell-systems/dotfiles"
-        return
     }
+
+    # Initialize hooks configuration
+    Initialize-DotfilesHooks
 
     # Store initial directory
     $script:DotfilesLastDirectory = Get-Location
 
     # Run shell_init hook
-    Invoke-DotfilesHook -Point "shell_init"
+    Invoke-DotfilesHook -Point "shell_init" | Out-Null
 
     Write-Verbose "Dotfiles PowerShell module initialized"
 }
@@ -341,22 +947,31 @@ function Initialize-Dotfiles {
 #region Exports
 
 Export-ModuleMember -Function @(
-    # Hooks
+    # Hook system
+    'Register-DotfilesHook',
+    'Unregister-DotfilesHook',
     'Invoke-DotfilesHook',
+    'Get-DotfilesHook',
+    'Get-DotfilesHookPoints',
+    'Add-DotfilesHook',
+    'Remove-DotfilesHook',
+    'Test-DotfilesHook',
     'Enable-DotfilesHooks',
     'Disable-DotfilesHooks',
 
     # Utilities
     'Get-DotfilesPath',
     'Test-DotfilesCli',
+    'Test-HookPoint',
     'Initialize-Dotfiles',
+    'Initialize-DotfilesHooks',
 
     # CD wrapper
     'Set-LocationWithHook',
 
     # SSH aliases
     'ssh-keys', 'ssh-gen', 'ssh-list', 'ssh-agent-status',
-    'ssh-fp', 'ssh-tunnel', 'ssh-socks', 'ssh-status',
+    'ssh-fp', 'ssh-tunnel', 'ssh-socks', 'ssh-status', 'ssh-copy',
 
     # AWS aliases
     'aws-profiles', 'aws-who', 'aws-login', 'aws-switch',

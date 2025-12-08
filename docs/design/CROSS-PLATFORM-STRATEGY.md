@@ -1,7 +1,7 @@
 # Cross-Platform Strategy: Go CLI Expansion
 
 > **Date:** 2025-12-08
-> **Status:** Implemented (Milestones 1-5 Complete)
+> **Status:** Implemented (Milestones 1-6 Complete)
 
 ---
 
@@ -207,15 +207,17 @@ These should remain in shell config files.
 - [x] `tools cdk context` (show/clear context)
 - [x] `tools cdk status` (ASCII art banner)
 
-### Milestone 6: PowerShell Hooks 🔄 IN PROGRESS
-- [ ] Create `powershell/` directory with profile module
-- [ ] Implement `prompt` hook (like ZSH `precmd`)
-- [ ] Implement directory change hook (like ZSH `chpwd`)
-- [ ] Implement shell exit hook (like ZSH `zshexit`)
-- [ ] Wire hooks to call `dotfiles hook run <point>`
-- [ ] Generate aliases for all `dotfiles tools` commands
-- [ ] Installation script for PowerShell profile
-- [ ] Documentation for Windows users
+### Milestone 6: PowerShell Hooks ✅ COMPLETE
+- [x] Create `powershell/` directory with profile module
+- [x] Implement `prompt` hook (like ZSH `precmd`)
+- [x] Implement directory change hook (like ZSH `chpwd`)
+- [x] Implement shell exit hook (like ZSH `zshexit`)
+- [x] Wire hooks to call `dotfiles hook run <point>`
+- [x] Generate aliases for all `dotfiles tools` commands
+- [x] Installation script for PowerShell profile
+- [x] Documentation for Windows users
+- [x] Full parity: all 24 hook points, file/function/JSON hooks
+- [x] Timeout support, fail-fast, feature gating
 
 **PowerShell Hook Mapping:**
 
@@ -256,7 +258,7 @@ These should remain in shell config files.
 |-------|---------|----------|--------|
 | Core CLI | 100% Go | 100% Go | ✅ Complete |
 | Dev Tools | 100% Shell | Go + Shell wrappers | ✅ Complete (50+ tools) |
-| Aliases | Shell | Shell + PowerShell | 🔄 PowerShell in progress |
-| Hooks | Shell only | Shell + PowerShell | 🔄 PowerShell in progress |
+| Aliases | Shell | Shell + PowerShell | ✅ Complete |
+| Hooks | Shell only | Shell + PowerShell | ✅ Complete (24 hook points) |
 
 The goal is **additive** - Windows users gain functionality, shell users lose nothing.
