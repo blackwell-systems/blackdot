@@ -29,52 +29,45 @@ The Go CLI rewrite is **essentially complete**. All 19+ commands have been porte
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│  Phase 1: Installation Integration                          │
-│  Phase 2: Shell Switchover                                  │
-│  Phase 3: Deprecation & Cleanup                             │
-│  Phase 4: Future Enhancements (optional)                    │
+│  Phase 1: Installation Integration        ✅ (mostly done) │
+│  Phase 2: Shell Switchover                ⏳ (next)        │
+│  Phase 3: Deprecation & Cleanup           ⏳               │
+│  Phase 4: Future Enhancements (optional)  ⏳               │
 └────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Phase 1: Installation Integration
+## Phase 1: Installation Integration ✅ COMPLETE
 
 **Goal:** Make Go binary the default for new installs
 
-### 1.1 Update Bootstrap Script
+### 1.1 Bootstrap Script ✅
+
+`install.sh` already supports binary download:
 
 ```bash
-# install.sh should:
-# 1. Detect platform (darwin/linux, amd64/arm64)
-# 2. Download pre-built binary from GitHub releases
-# 3. Install to $DOTFILES_DIR/bin/dotfiles
-# 4. Fall back to `go build` if binary unavailable
+# Install with Go binary (recommended)
+curl -fsSL <url> | bash -s -- --binary
+
+# Binary-only mode (just the CLI, no repo)
+curl -fsSL <url> | bash -s -- --binary-only
+
+# Specific version
+DOTFILES_VERSION=v3.1.0 ./install.sh --binary
 ```
 
-**Tasks:**
-- [ ] Update `install.sh` to download Go binary from releases
-- [ ] Add platform detection logic
-- [ ] Add checksum verification
-- [ ] Test on fresh macOS and Linux systems
+**Features implemented:**
+- [x] Platform detection (darwin/linux/windows, amd64/arm64)
+- [x] Downloads from GitHub releases
+- [x] Installs to `~/.local/bin/dotfiles-go`
+- [x] Fallback to shell if binary download fails
 
-### 1.2 Update Makefile
+### 1.2 Remaining Tasks
 
-```makefile
-# Current: builds shell scripts
-# Target: builds Go binary
-
-install: build
-    cp bin/dotfiles $(DESTDIR)/bin/
-
-build:
-    go build -o bin/dotfiles ./cmd/dotfiles
-```
-
-**Tasks:**
-- [ ] Update `make install` to build and install Go binary
-- [ ] Keep `make build-shell` for legacy support (temporary)
-- [ ] Update `make test` to run Go tests
+- [ ] Add checksum verification for downloaded binaries
+- [ ] Make `--binary` the default (currently opt-in)
+- [ ] Update Makefile `install` target to build Go binary
 
 ---
 
