@@ -38,6 +38,120 @@ The Go CLI rewrite is **essentially complete**. All 19+ commands have been porte
 
 ---
 
+## What MUST Stay in Shell (Cannot Be Go)
+
+**This is fundamental.** Some things can NEVER move to Go because they require modifying the current shell process. A Go binary runs as a subprocess and cannot change the parent shell's state.
+
+### Forever Shell (ZSH/PowerShell)
+
+| Category | Examples | Why It Can't Be Go |
+|----------|----------|-------------------|
+| **Environment Variables** | `export PATH=...`, `export AWS_PROFILE=...` | Go subprocess can't modify parent's env |
+| **Current Directory** | `cd`, `pushd`, `popd` | Go can't change parent's working directory |
+| **Shell Aliases** | `alias ll='ls -la'` | Aliases are shell constructs |
+| **Shell Functions** | `mkcd() { mkdir -p "$1" && cd "$1"; }` | Functions that use `cd` or `export` |
+| **Prompt/Theme** | Starship, Powerlevel10k, oh-my-posh | Must run in shell context |
+| **Completions** | Tab completion handlers | Run in shell context |
+| **Shell Hooks** | `chpwd`, `precmd`, `$PROMPT_COMMAND` | Shell-native events |
+| **Sourcing Files** | `source ~/.zshrc` | Shell operation |
+
+### What This Means in Practice
+
+**Commands that PRINT but can't APPLY:**
+```bash
+# Go binary can PRINT what to do...
+$ dotfiles tools aws switch prod
+export AWS_PROFILE=prod
+export AWS_REGION=us-east-1
+
+# ...but user must EVAL to apply it:
+$ eval "$(dotfiles tools aws switch prod)"
+```
+
+**Shell wrapper pattern:**
+```zsh
+# ZSH wrapper that applies Go output
+aws-switch() {
+    eval "$(dotfiles tools aws switch "$@")"
+}
+```
+
+```powershell
+# PowerShell wrapper that applies Go output
+function aws-switch {
+    $output = dotfiles tools aws switch @args
+    Invoke-Expression $output
+}
+```
+
+### Files That Stay Forever
+
+```
+zsh/zsh.d/
+├── 00-init.zsh          # PATH, DOTFILES_DIR, instant prompt
+├── 10-plugins.zsh       # Zinit plugin loading
+├── 20-env.zsh           # Environment variables
+├── 30-tools.zsh         # Tool init (fzf, zoxide, starship)
+├── 40-aliases.zsh       # Aliases + dotfiles wrapper
+├── 50-functions.zsh     # Shell functions (mkcd, etc.)
+├── 60-aws.zsh           # AWS env management (export)
+├── 61-cdk.zsh           # CDK env management (export)
+├── ...
+└── p10k.zsh             # Prompt theme
+
+powershell/
+├── Dotfiles.psm1        # Module with wrappers
+└── profile.ps1          # $PROFILE configuration
+```
+
+### What CAN Be Go (The CLI)
+
+Everything that:
+- Reads/writes files
+- Calls external APIs
+- Processes data
+- Displays output
+- Doesn't need to modify parent shell state
+
+```
+Go Binary Handles:
+├── dotfiles features    # Read/write config.json
+├── dotfiles vault       # API calls to vault backends
+├── dotfiles doctor      # System checks, display results
+├── dotfiles template    # File processing
+├── dotfiles tools *     # Cross-platform utilities
+└── ... all other commands
+```
+
+### The Bridge: Shell Wrappers Call Go
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  User types: aws-switch prod                                │
+└─────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Shell function (ZSH/PowerShell)                            │
+│  aws-switch() { eval "$(dotfiles tools aws switch "$@")"; } │
+└─────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Go binary outputs:                                         │
+│  export AWS_PROFILE=prod                                    │
+│  export AWS_REGION=us-east-1                                │
+└─────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│  eval applies it to current shell                           │
+│  ✓ AWS_PROFILE is now "prod" in this shell                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Phase 1: Installation Integration ✅ COMPLETE
 
 **Goal:** Make Go binary the default for new installs
