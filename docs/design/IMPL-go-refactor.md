@@ -377,55 +377,144 @@ sshtools gen mykey    # Generate key
 
 ---
 
-## Phase 3: Deprecation & Cleanup
+## Phase 3: Production Release (v1.0 Target)
 
-**Goal:** Remove shell implementation after Go is proven stable
+**Goal:** Clean, production-ready architecture where the Go binary is the primary interface.
 
-### 3.1 Deprecation Timeline
-
-| Week | Action |
-|------|--------|
-| 0 | Deploy Go binary as default |
-| 1-2 | Monitor for issues, keep shell fallback |
-| 3-4 | Remove shell fallback from 40-aliases.zsh |
-| 5+ | Archive/delete bin/dotfiles-* shell scripts |
-
-### 3.2 Files to Archive/Delete
+### 3.1 Production Architecture
 
 ```
-# Shell scripts to remove after Go is stable
-bin/dotfiles-backup
-bin/dotfiles-config
-bin/dotfiles-diff
-bin/dotfiles-doctor
-bin/dotfiles-drift
-bin/dotfiles-encrypt
-bin/dotfiles-features
-bin/dotfiles-hook
-bin/dotfiles-lint
-bin/dotfiles-metrics
-bin/dotfiles-migrate
-bin/dotfiles-packages
-bin/dotfiles-setup     # Keep - interactive wizard better in shell
-bin/dotfiles-status
-bin/dotfiles-sync
-bin/dotfiles-template
-bin/dotfiles-uninstall
-bin/dotfiles-vault
-
-# Libraries to archive
-lib/_features.sh
-lib/_config.sh
-lib/_vault.sh
-lib/_templates.sh
-lib/_state.sh
+┌─────────────────────────────────────────────────────────────────────┐
+│                     PRODUCTION TARGET (v1.0)                         │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ~/.local/bin/                                                       │
+│  └── dotfiles              ← Go binary (THE CLI, renamed from        │
+│                              dotfiles-go)                            │
+│                                                                      │
+│  ~/workspace/dotfiles/     ← Optional repo (for shell integration)   │
+│  ├── zsh/zsh.d/                                                      │
+│  │   ├── 00-init.zsh       PATH, DOTFILES_DIR, instant prompt        │
+│  │   ├── 30-tools.zsh      Tool initializers (fzf, zoxide)           │
+│  │   └── 40-aliases.zsh    MINIMAL: only env/cd wrappers             │
+│  └── powershell/                                                     │
+│      └── Dotfiles.psm1     MINIMAL: only env/cd wrappers             │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-### 3.3 Template Syntax Cleanup (Phase 8D)
+**Key changes from current state:**
 
-**Optional:** Deprecate old template syntax
+| Current (Transition) | Production (v1.0) |
+|---------------------|-------------------|
+| Binary: `dotfiles-go` | Binary: `dotfiles` |
+| ZSH function intercepts all commands | Binary called directly |
+| Shell fallback exists (`DOTFILES_USE_GO=0`) | No shell fallback |
+| `--binary-only` = special mode | Binary-first is default |
+| Heavy shell wrappers | Minimal wrappers (env/cd only) |
 
-The bash template engine currently supports both:
+### 3.2 What Shell Wrappers MUST Remain
+
+These commands require shell wrappers because they modify the parent shell's environment:
+
+```zsh
+# ZSH wrappers that CANNOT be pure Go (must eval output)
+aws-switch() { eval "$(dotfiles tools aws switch "$@")"; }
+cdk-env()    { eval "$(dotfiles tools cdk env "$@")"; }
+mkcd()       { mkdir -p "$1" && cd "$1"; }
+
+# Everything else: call binary directly, no wrapper needed
+# dotfiles doctor, dotfiles features, dotfiles vault, etc.
+```
+
+```powershell
+# PowerShell equivalents
+function aws-switch { Invoke-Expression (dotfiles tools aws switch @args) }
+function cdk-env    { Invoke-Expression (dotfiles tools cdk env @args) }
+```
+
+### 3.3 Installation Modes (Production)
+
+**Mode 1: Binary Only (default for CI/Docker/minimal users)**
+```bash
+# Unix
+curl -fsSL <url> | bash -s -- --binary-only
+# Result: ~/.local/bin/dotfiles (just works)
+
+# Windows
+.\Install-Dotfiles.ps1 -BinaryOnly
+# Result: ~/.local/bin/dotfiles.exe (just works)
+```
+
+**Mode 2: Full (binary + shell integration)**
+```bash
+# Unix
+curl -fsSL <url> | bash
+# Result: Binary + repo + ZSH config + shell wrappers
+
+# Windows
+.\Install-Dotfiles.ps1
+# Result: Binary + repo + PowerShell module
+```
+
+### 3.4 Migration Tasks
+
+**3.4.1 Rename Binary**
+- [ ] Change `dotfiles-go` → `dotfiles` in install.sh
+- [ ] Change `dotfiles-go` → `dotfiles` in Install-Dotfiles.ps1
+- [ ] Update GitHub Actions to produce `dotfiles-{os}-{arch}` (no `-go` suffix)
+- [ ] Update Makefile: `make build` outputs `bin/dotfiles`
+
+**3.4.2 Simplify Shell Wrappers**
+- [ ] Remove `dotfiles()` function that intercepts all commands
+- [ ] Remove `_dotfiles_shell()` fallback function
+- [ ] Remove `DOTFILES_USE_GO` environment variable
+- [ ] Keep only env/cd wrappers in 40-aliases.zsh
+- [ ] Keep only env/cd wrappers in Dotfiles.psm1
+
+**3.4.3 Delete Deprecated Shell Scripts**
+```
+bin/dotfiles-backup      → DELETE (Go: dotfiles backup)
+bin/dotfiles-config      → DELETE (Go: dotfiles config)
+bin/dotfiles-diff        → DELETE (Go: dotfiles diff)
+bin/dotfiles-doctor      → DELETE (Go: dotfiles doctor)
+bin/dotfiles-drift       → DELETE (Go: dotfiles drift)
+bin/dotfiles-encrypt     → DELETE (Go: dotfiles encrypt)
+bin/dotfiles-features    → DELETE (Go: dotfiles features)
+bin/dotfiles-hook        → DELETE (Go: dotfiles hook)
+bin/dotfiles-lint        → DELETE (Go: dotfiles lint)
+bin/dotfiles-metrics     → DELETE (Go: dotfiles metrics)
+bin/dotfiles-migrate     → DELETE (Go: dotfiles migrate)
+bin/dotfiles-packages    → DELETE (Go: dotfiles packages)
+bin/dotfiles-setup       → KEEP (interactive wizard, shell-native)
+bin/dotfiles-status      → DELETE (Go: dotfiles status)
+bin/dotfiles-sync        → DELETE (Go: dotfiles sync)
+bin/dotfiles-template    → DELETE (Go: dotfiles template)
+bin/dotfiles-uninstall   → DELETE (Go: dotfiles uninstall)
+bin/dotfiles-vault       → DELETE (Go: dotfiles vault)
+```
+
+**3.4.4 Archive Shell Libraries**
+```
+lib/_features.sh   → Archive (Go handles feature registry)
+lib/_config.sh     → Archive (Go handles config)
+lib/_vault.sh      → Archive (Go handles vault via vaultmux)
+lib/_templates.sh  → Archive (Go handles templates)
+lib/_state.sh      → KEEP (setup wizard state, used by bin/dotfiles-setup)
+lib/_logging.sh    → KEEP (used by remaining shell scripts)
+lib/_hooks.sh      → KEEP (shell hook system)
+lib/_colors.sh     → KEEP (used by remaining shell scripts)
+```
+
+**3.4.5 Update Documentation**
+- [ ] Update README.md with new installation commands
+- [ ] Update docs/getting-started.md
+- [ ] Remove references to `dotfiles-go` binary name
+- [ ] Document that shell integration is optional
+
+### 3.5 Template Syntax Cleanup (Optional)
+
+The Go template engine supports both syntaxes:
 - New: `{{#if (eq os "darwin")}}` (Handlebars)
 - Old: `{{?OS_TYPE="darwin"}}` (legacy)
 
@@ -433,6 +522,16 @@ The bash template engine currently supports both:
 - [ ] Run `dotfiles template lint` to find old syntax usage
 - [ ] Migrate remaining templates to Handlebars syntax
 - [ ] Consider removing old syntax support from Go engine
+
+### 3.6 Success Criteria
+
+Phase 3 is complete when:
+- [ ] `dotfiles` command runs Go binary directly (no shell interception)
+- [ ] All shell scripts in `bin/dotfiles-*` deleted (except setup)
+- [ ] Shell wrappers only exist for env/cd commands
+- [ ] Binary-only installation is clean and documented
+- [ ] All tests pass
+- [ ] Documentation updated
 
 ---
 
