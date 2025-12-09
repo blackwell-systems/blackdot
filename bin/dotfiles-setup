@@ -317,7 +317,9 @@ phase_symlinks() {
     echo ""
     echo "Files to link:"
     echo "  ~/.zshrc     → $DOTFILES_DIR/zsh/zshrc"
-    echo "  ~/.p10k.zsh  → $DOTFILES_DIR/zsh/p10k.zsh"
+    echo ""
+    echo "Optional (you'll be prompted):"
+    echo "  ~/.p10k.zsh  → Powerlevel10k theme config"
     echo ""
 
     echo -n "Create symlinks? [Y/n]: "
