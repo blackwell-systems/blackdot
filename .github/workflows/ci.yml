@@ -197,8 +197,8 @@ jobs:
         # We just verify the command runs and produces output
         run: ${{ matrix.binary }} doctor || echo "Doctor reported issues (expected in CI)"
 
-      - name: Test config show
-        run: ${{ matrix.binary }} config show
+      - name: Test config list
+        run: ${{ matrix.binary }} config list
 
       - name: Test template list
         run: ${{ matrix.binary }} template list
