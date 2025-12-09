@@ -625,9 +625,11 @@ Comprehensive audit of cross-platform support status:
 
 #### Known Limitations
 
-1. **Claude hooks** (`claude/hooks/*.sh`) - Shell scripts, need Windows `.ps1` equivalents
+1. ~~**Claude hooks** (`claude/hooks/*.sh`) - Shell scripts, need Windows `.ps1` equivalents~~
+   - **RESOLVED**: PowerShell equivalents added (`*.ps1` alongside `*.sh`)
 2. **Bootstrap** (`bootstrap-dotfiles.sh`) - Unix only, Windows uses `Install-Dotfiles.ps1`
 3. **Package managers** - Homebrew (Unix) vs winget (Windows) - handled separately
+4. **Workspace symlink** - Unix: `/workspace`, Windows: `C:\workspace` junction (both supported)
 
 ---
 
