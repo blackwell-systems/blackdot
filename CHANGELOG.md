@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Rollback Command** - Instant rollback to last backup with safety confirmation
+  - Go CLI: New `rollback` command with `--to`, `--list`, `-y/--yes` flags
+  - ZSH: Fixed `rollback` to handle `--help`, `--list`, added confirmation prompt
+  - Both versions now prompt `[y/N]` before restoring (only "y"/"yes" proceeds)
+  - Use `-y` flag to skip confirmation for scripts/automation
+
 - **Go CLI Help Styling** - All commands now match ZSH help output exactly
   - Custom `printXxxHelp()` functions for vault, features, doctor, tools, backup, config, encrypt
   - Consistent styling: bold cyan titles, yellow commands, dim descriptions
