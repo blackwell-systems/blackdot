@@ -92,8 +92,8 @@ install_go_binary() {
     # Create install directory
     mkdir -p "$install_dir"
 
-    # Download binary (named dotfiles-go to avoid shadowing ZSH alias)
-    local target="${install_dir}/dotfiles-go${suffix}"
+    # Download binary
+    local target="${install_dir}/dotfiles${suffix}"
     if command -v curl >/dev/null 2>&1; then
         curl -fsSL "$download_url" -o "$target" || {
             fail "Failed to download binary. Release may not exist yet."
@@ -220,7 +220,7 @@ if $BINARY_ONLY; then
     echo ""
     echo -e "${GREEN}${BOLD}Binary installation complete!${NC}"
     echo ""
-    echo "Run 'dotfiles-go version' to verify the installation."
+    echo "Run 'dotfiles version' to verify the installation."
     exit 0
 fi
 
@@ -355,9 +355,15 @@ if ! $MINIMAL; then
         echo -e "${CYAN}Starting setup wizard...${NC}"
         echo ""
 
-        # Run setup directly without sourcing zshrc (avoids shell config issues)
-        # Setup script handles its own environment
-        cd "$INSTALL_DIR" && "$INSTALL_DIR/bin/dotfiles-setup"
+        # Run setup - prefer Go binary when available for cross-platform support
+        cd "$INSTALL_DIR"
+        if [[ -x "$INSTALL_DIR/bin/dotfiles" ]]; then
+            "$INSTALL_DIR/bin/dotfiles" setup
+        elif [[ -x "${DOTFILES_BIN_DIR:-$HOME/.local/bin}/dotfiles" ]]; then
+            "${DOTFILES_BIN_DIR:-$HOME/.local/bin}/dotfiles" setup
+        else
+            "$INSTALL_DIR/bin/dotfiles-setup"
+        fi
 
         echo ""
         echo "To load your new shell configuration:"

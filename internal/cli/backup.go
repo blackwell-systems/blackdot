@@ -324,7 +324,7 @@ func runBackupList(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println()
-	fmt.Println("Restore with: dotfiles-go backup restore [backup-name]")
+	fmt.Println("Restore with: dotfiles backup restore [backup-name]")
 	fmt.Printf("Location: %s\n", cfg.backupDir)
 	return nil
 }

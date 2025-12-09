@@ -58,7 +58,7 @@ func ExportVar(name, value string) string {
 }
 
 // EvalOutput generates output suitable for eval in shell
-// Example: eval "$(dotfiles-go env)"
+// Example: eval "$(dotfiles env)"
 func EvalOutput(vars map[string]string) string {
 	var lines []string
 	for name, value := range vars {
@@ -166,7 +166,7 @@ func CommonIntegrations() []*Integration {
 func GenerateFeatureCheck(featureName string) string {
 	return fmt.Sprintf(`
 # Feature check for %s
-if dotfiles-go features check %s >/dev/null 2>&1; then
+if dotfiles features check %s >/dev/null 2>&1; then
     _DOTFILES_FEATURE_%s=1
 else
     _DOTFILES_FEATURE_%s=0

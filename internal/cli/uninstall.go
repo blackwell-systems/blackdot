@@ -45,9 +45,9 @@ Options:
   --keep-secrets, -k Keep SSH keys and AWS credentials
 
 Examples:
-  dotfiles-go uninstall              # Interactive uninstall
-  dotfiles-go uninstall --dry-run    # Preview what would be removed
-  dotfiles-go uninstall -k           # Keep secrets`,
+  dotfiles uninstall              # Interactive uninstall
+  dotfiles uninstall --dry-run    # Preview what would be removed
+  dotfiles uninstall -k           # Keep secrets`,
 		RunE: runUninstall,
 	}
 

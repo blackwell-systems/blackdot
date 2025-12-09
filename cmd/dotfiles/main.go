@@ -1,11 +1,9 @@
 // Package main provides the entry point for the dotfiles CLI.
 //
-// This is the Go implementation of the dotfiles management system,
-// designed to run alongside the existing Zsh implementation during
-// the migration period (strangler fig pattern).
+// This is the Go implementation of the dotfiles management system.
 //
-// Build: go build -o bin/dotfiles-go ./cmd/dotfiles
-// Usage: dotfiles-go <command> [flags]
+// Build: go build -o bin/dotfiles ./cmd/dotfiles
+// Usage: dotfiles <command> [flags]
 package main
 
 import (

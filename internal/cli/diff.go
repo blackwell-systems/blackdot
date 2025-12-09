@@ -36,10 +36,10 @@ Items:
   SSH-Config, AWS-Config, AWS-Credentials, Git-Config, Environment-Secrets
 
 Examples:
-  dotfiles-go diff              # Show all differences
-  dotfiles-go diff --sync       # Preview what sync would push
-  dotfiles-go diff --restore    # Preview what restore would change
-  dotfiles-go diff SSH-Config   # Show diff for specific item`,
+  dotfiles diff              # Show all differences
+  dotfiles diff --sync       # Preview what sync would push
+  dotfiles diff --restore    # Preview what restore would change
+  dotfiles diff SSH-Config   # Show diff for specific item`,
 		RunE: runDiff,
 	}
 

@@ -227,7 +227,7 @@ func runEncryptInit(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println()
 	fmt.Println("IMPORTANT: Back up your private key to your vault:")
-	fmt.Println("  dotfiles-go encrypt push-key")
+	fmt.Println("  dotfiles encrypt push-key")
 
 	return nil
 }
@@ -238,7 +238,7 @@ func runEncryptFile(cmd *cobra.Command, args []string) error {
 
 	if len(args) == 0 {
 		fmt.Println(color.RedString("[FAIL]") + " No file specified")
-		fmt.Println("Usage: dotfiles-go encrypt file <file>")
+		fmt.Println("Usage: dotfiles encrypt file <file>")
 		return fmt.Errorf("no file specified")
 	}
 
@@ -257,7 +257,7 @@ func runEncryptFile(cmd *cobra.Command, args []string) error {
 
 	if !isEncryptionInitialized() {
 		fmt.Println(color.RedString("[FAIL]") + " Encryption not initialized")
-		fmt.Println("Run: dotfiles-go encrypt init")
+		fmt.Println("Run: dotfiles encrypt init")
 		return fmt.Errorf("encryption not initialized")
 	}
 
@@ -295,7 +295,7 @@ func runDecryptFile(cmd *cobra.Command, args []string) error {
 
 	if len(args) == 0 {
 		fmt.Println(color.RedString("[FAIL]") + " No file specified")
-		fmt.Println("Usage: dotfiles-go encrypt decrypt <file.age>")
+		fmt.Println("Usage: dotfiles encrypt decrypt <file.age>")
 		return fmt.Errorf("no file specified")
 	}
 
@@ -314,7 +314,7 @@ func runDecryptFile(cmd *cobra.Command, args []string) error {
 
 	if !isEncryptionInitialized() {
 		fmt.Println(color.RedString("[FAIL]") + " Encryption not initialized")
-		fmt.Println("Run: dotfiles-go encrypt init")
+		fmt.Println("Run: dotfiles encrypt init")
 		return fmt.Errorf("encryption not initialized")
 	}
 
@@ -349,7 +349,7 @@ func runDecryptFile(cmd *cobra.Command, args []string) error {
 func runEncryptEdit(cmd *cobra.Command, args []string) error {
 	if len(args) == 0 {
 		fmt.Println(color.RedString("[FAIL]") + " No file specified")
-		fmt.Println("Usage: dotfiles-go encrypt edit <file>")
+		fmt.Println("Usage: dotfiles encrypt edit <file>")
 		return fmt.Errorf("no file specified")
 	}
 
@@ -500,7 +500,7 @@ func runEncryptStatus(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		fmt.Printf("Keys initialized: %s\n", red("NO"))
-		fmt.Println("  Run: dotfiles-go encrypt init")
+		fmt.Println("  Run: dotfiles encrypt init")
 		return fmt.Errorf("encryption not initialized")
 	}
 
