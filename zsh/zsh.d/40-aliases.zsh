@@ -225,6 +225,15 @@ _dotfiles_help() {
     echo "  ${YELLOW}encrypt status${NC}    ${DIM}Show encryption status and key info${NC}"
     echo ""
 
+    # Hooks (always visible)
+    echo "${BOLD}${CYAN}Hooks:${NC}"
+    echo "  ${YELLOW}hook, hooks${NC}       ${DIM}Hook system management${NC}"
+    echo "  ${YELLOW}hook list${NC}         ${DIM}List hooks (all points or specific)${NC}"
+    echo "  ${YELLOW}hook run <point>${NC}  ${DIM}Manually trigger hooks${NC}"
+    echo "  ${YELLOW}hook add${NC}          ${DIM}Add a hook script to a point${NC}"
+    echo "  ${YELLOW}hook points${NC}       ${DIM}List all available hook points${NC}"
+    echo ""
+
     # Feature Management (always visible)
     echo "${BOLD}${CYAN}Feature Management:${NC}"
     echo "  ${YELLOW}features${NC}          ${DIM}List all features and status${NC}"
@@ -743,6 +752,11 @@ dotfiles() {
         # Encryption (age-based file encryption)
         encrypt)
             "$DOTFILES_DIR/bin/dotfiles-encrypt" "$@"
+            ;;
+
+        # Hook system management
+        hook|hooks)
+            "$DOTFILES_DIR/bin/dotfiles-hook" "$@"
             ;;
 
         # Backup & Rollback (v3.0 top-level commands)
