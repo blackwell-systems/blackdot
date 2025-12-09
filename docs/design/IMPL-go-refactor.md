@@ -409,9 +409,9 @@ The bash template engine currently supports both:
 - Old: `{{?OS_TYPE="darwin"}}` (legacy)
 
 **Tasks:**
-- [ ] Run `dotfiles template lint` to find old syntax usage
-- [ ] Migrate remaining templates to Handlebars syntax
-- [ ] Consider removing old syntax support from Go engine
+- [x] Run `dotfiles template lint` to find old syntax usage (none found)
+- [x] Migrate remaining templates to Handlebars syntax (already migrated)
+- [x] Consider removing old syntax support from Go engine (none exists)
 
 ---
 
