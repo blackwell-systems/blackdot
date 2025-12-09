@@ -290,7 +290,7 @@ eval "$(dotfiles shell-init zsh)"
 - [ ] Implement `dotfiles shell-init zsh` command
 - [ ] Update shell modules to use Go binary
 
-### 2.4 Tool Group Aliases
+### 2.4 Tool Group Aliases ✅
 
 Expose `dotfiles tools X` as convenient `Xtools` commands:
 
@@ -339,8 +339,8 @@ sshtools gen mykey    # Generate key
 - Works alongside individual aliases (`ssh-keys`, `aws-profiles`, etc.)
 
 **Tasks:**
-- [ ] Add tool group functions to `zsh/zsh.d/40-aliases.zsh`
-- [ ] Add tool group functions to `powershell/Dotfiles.psm1`
+- [x] Add tool group functions to `zsh/zsh.d/40-aliases.zsh` ✅
+- [x] Add tool group functions to `powershell/Dotfiles.psm1` ✅
 - [ ] Update individual aliases (`ssh-keys`, etc.) to call Go binary
 
 ---
