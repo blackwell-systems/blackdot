@@ -228,7 +228,6 @@ irm https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/Install.ps
 
 - [ ] Add checksum verification for downloaded binaries
 - [ ] Make `--binary` the default (currently opt-in)
-- [ ] Update Makefile `install` target to build Go binary
 
 ---
 
