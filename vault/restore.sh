@@ -176,7 +176,9 @@ for key_item in "${(@k)SSH_KEYS}"; do
 done
 
 if [[ "$has_files_to_backup" == "true" ]]; then
-    if "$DOTFILES_ROOT/bin/dotfiles-backup" create >/dev/null 2>&1; then
+    # Use Go binary if available, otherwise skip backup
+    local backup_cmd="$DOTFILES_ROOT/bin/dotfiles"
+    if [[ -x "$backup_cmd" ]] && "$backup_cmd" backup create >/dev/null 2>&1; then
         backup_dir="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/backups"
         latest_backup=$(ls -t "$backup_dir" 2>/dev/null | head -1)
         if [[ -n "$latest_backup" ]]; then

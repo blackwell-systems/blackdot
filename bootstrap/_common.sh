@@ -281,7 +281,7 @@ link_dotfiles() {
 # Template rendering (machine-specific configs)
 # ============================================================
 render_templates() {
-    local template_script="$DOTFILES_DIR/bin/dotfiles-template"
+    local dotfiles_bin="$DOTFILES_DIR/bin/dotfiles"
     local local_vars="$DOTFILES_DIR/templates/_variables.local.sh"
 
     # Check if template system is configured
@@ -292,11 +292,11 @@ render_templates() {
     fi
 
     # Render templates if configured
-    if [[ -x "$template_script" ]]; then
+    if [[ -x "$dotfiles_bin" ]]; then
         echo "Rendering machine-specific templates..."
-        "$template_script" render --force
+        "$dotfiles_bin" template render --force
     else
-        echo "Template script not found or not executable: $template_script"
+        echo "dotfiles binary not found: $dotfiles_bin"
     fi
 }
 

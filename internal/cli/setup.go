@@ -918,14 +918,13 @@ func phaseSecrets(cfg *SetupConfig) error {
 
 	switch choice {
 	case "1":
-		// Run drift check
-		driftCmd := filepath.Join(dotfilesDir, "bin", "dotfiles-drift")
-		if _, err := os.Stat(driftCmd); err == nil {
-			cmd := exec.Command("bash", driftCmd)
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			cmd.Run()
-		}
+		// Run drift check using Go CLI
+		home, _ := os.UserHomeDir()
+		green := color.New(color.FgGreen).SprintFunc()
+		yellow := color.New(color.FgYellow).SprintFunc()
+		cyan := color.New(color.FgCyan).SprintFunc()
+		dim := color.New(color.Faint).SprintFunc()
+		runDriftFull(home, green, yellow, cyan, dim)
 	case "2":
 		// Push to vault
 		syncScript := filepath.Join(dotfilesDir, "vault", "sync-to-vault.sh")
