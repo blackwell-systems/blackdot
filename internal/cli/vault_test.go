@@ -306,7 +306,7 @@ func TestVaultItemsPath(t *testing.T) {
 	initConfig()
 
 	// Vault items should be in vault/ subdirectory
-	expected := "/test/dotfiles/vault"
+	expected := filepath.FromSlash("/test/dotfiles/vault")
 	vaultDir := filepath.Join(DotfilesDir(), "vault")
 	if vaultDir != expected {
 		t.Errorf("expected vault dir '%s', got '%s'", expected, vaultDir)

@@ -112,12 +112,17 @@ func (m *Manager) ProjectConfigPath() string {
 		return ""
 	}
 
-	for dir != "/" {
+	for {
 		path := filepath.Join(dir, ProjectConfigFile)
 		if _, err := os.Stat(path); err == nil {
 			return path
 		}
-		dir = filepath.Dir(dir)
+		parent := filepath.Dir(dir)
+		// Stop when we've reached the root (parent equals current)
+		if parent == dir {
+			break
+		}
+		dir = parent
 	}
 	return ""
 }
