@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Shell Init Command** - New `dotfiles shell-init` for shell function initialization
+  - Outputs `feature_enabled`, `require_feature`, `feature_exists`, `feature_status` functions
+  - Supports zsh, bash, fish, and PowerShell
+  - Usage: `eval "$(dotfiles shell-init zsh)"` in shell config
+  - Replaces deleted `lib/_features.sh` with Go-backed implementation
+  - Updated `00-init.zsh` to use shell-init instead of sourcing deleted libs
+
 - **Cross-Platform CI** - New GitHub Actions workflow for Go testing
   - Tests on ubuntu-latest, macos-latest, windows-latest
   - Builds binaries for all platform/arch combinations
