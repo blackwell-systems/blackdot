@@ -198,6 +198,7 @@ jobs:
       - name: Test doctor command
         # Doctor returns non-zero when health checks fail (expected in CI)
         # We just verify the command runs and produces output
+        shell: bash
         run: ${{ matrix.binary }} doctor || echo "Doctor reported issues (expected in CI)"
 
       - name: Test config list
