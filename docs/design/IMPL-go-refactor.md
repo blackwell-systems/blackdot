@@ -472,7 +472,36 @@ curl -fsSL <url> | bash
 - [ ] Keep only env/cd wrappers in 40-aliases.zsh
 - [ ] Keep only env/cd wrappers in Dotfiles.psm1
 
-**3.4.3 Delete Deprecated Shell Scripts**
+**3.4.3 Implement Setup Wizard in Go**
+
+The current `bin/dotfiles-setup` is ZSH-only, which breaks:
+- Windows PowerShell users
+- Binary-only users
+- Linux users without ZSH
+
+**Required:** Implement `dotfiles setup` command in Go for cross-platform support.
+
+**Phases to implement:**
+- [ ] `dotfiles setup` - Main entry point with progress tracking
+- [ ] Phase 1: Workspace configuration
+- [ ] Phase 2: Symlinks (with platform-specific paths)
+- [ ] Phase 3: Packages (brew on Unix, winget on Windows)
+- [ ] Phase 4: Vault configuration
+- [ ] Phase 5: Secrets setup
+- [ ] Phase 6: Claude configuration
+- [ ] Phase 7: Template rendering
+
+**State management:**
+- Reuse existing `config.json` state tracking
+- `dotfiles setup --status` shows progress
+- `dotfiles setup --reset` clears state
+
+**Platform-specific handling:**
+- Unix: Symlink `.zshrc`, prompt for p10k config
+- Windows: Skip ZSH, prompt for Starship config
+- Both: Prompt for theme config choice
+
+**3.4.4 Delete Deprecated Shell Scripts**
 ```
 bin/dotfiles-backup      → DELETE (Go: dotfiles backup)
 bin/dotfiles-config      → DELETE (Go: dotfiles config)
@@ -486,7 +515,7 @@ bin/dotfiles-lint        → DELETE (Go: dotfiles lint)
 bin/dotfiles-metrics     → DELETE (Go: dotfiles metrics)
 bin/dotfiles-migrate     → DELETE (Go: dotfiles migrate)
 bin/dotfiles-packages    → DELETE (Go: dotfiles packages)
-bin/dotfiles-setup       → KEEP (interactive wizard, shell-native)
+bin/dotfiles-setup       → DELETE (Go: dotfiles setup) ← NEW
 bin/dotfiles-status      → DELETE (Go: dotfiles status)
 bin/dotfiles-sync        → DELETE (Go: dotfiles sync)
 bin/dotfiles-template    → DELETE (Go: dotfiles template)
@@ -494,19 +523,19 @@ bin/dotfiles-uninstall   → DELETE (Go: dotfiles uninstall)
 bin/dotfiles-vault       → DELETE (Go: dotfiles vault)
 ```
 
-**3.4.4 Archive Shell Libraries**
+**3.4.5 Archive Shell Libraries**
 ```
 lib/_features.sh   → Archive (Go handles feature registry)
 lib/_config.sh     → Archive (Go handles config)
 lib/_vault.sh      → Archive (Go handles vault via vaultmux)
 lib/_templates.sh  → Archive (Go handles templates)
-lib/_state.sh      → KEEP (setup wizard state, used by bin/dotfiles-setup)
-lib/_logging.sh    → KEEP (used by remaining shell scripts)
+lib/_state.sh      → Archive (Go handles setup state)
+lib/_logging.sh    → KEEP (used by bootstrap scripts)
 lib/_hooks.sh      → KEEP (shell hook system)
-lib/_colors.sh     → KEEP (used by remaining shell scripts)
+lib/_colors.sh     → KEEP (used by bootstrap scripts)
 ```
 
-**3.4.5 Update Documentation**
+**3.4.6 Update Documentation**
 - [ ] Update README.md with new installation commands
 - [ ] Update docs/getting-started.md
 - [ ] Remove references to `dotfiles-go` binary name
