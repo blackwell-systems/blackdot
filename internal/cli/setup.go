@@ -13,6 +13,37 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Platform detection helpers (isWindows is defined in features.go)
+
+func workspaceSymlinkPath() string {
+	if isWindows() {
+		return `C:\workspace`
+	}
+	return "/workspace"
+}
+
+func defaultWorkspaceDir() string {
+	home, _ := os.UserHomeDir()
+	if isWindows() {
+		return filepath.Join(home, "workspace")
+	}
+	return filepath.Join(home, "workspace")
+}
+
+func shellConfigName() string {
+	if isWindows() {
+		return "PowerShell profile"
+	}
+	return ".zshrc"
+}
+
+func packageManagerName() string {
+	if isWindows() {
+		return "winget"
+	}
+	return "Homebrew"
+}
+
 // Setup phases
 var setupPhases = []string{"workspace", "symlinks", "packages", "vault", "secrets", "claude", "template"}
 
@@ -24,15 +55,18 @@ func titleCase(s string) string {
 	return strings.ToUpper(s[:1]) + s[1:]
 }
 
-// Phase descriptions
-var phaseDescriptions = map[string]string{
-	"workspace": "Configure workspace directory",
-	"symlinks":  "Link shell config files",
-	"packages":  "Install Homebrew packages",
-	"vault":     "Configure secret backend",
-	"secrets":   "Manage SSH keys, AWS, Git config",
-	"claude":    "Claude Code integration",
-	"template":  "Machine-specific configs",
+// getPhaseDescriptions returns platform-aware phase descriptions
+func getPhaseDescriptions() map[string]string {
+	pkgMgr := packageManagerName()
+	return map[string]string{
+		"workspace": "Configure workspace directory",
+		"symlinks":  "Link shell config files",
+		"packages":  fmt.Sprintf("Install %s packages", pkgMgr),
+		"vault":     "Configure secret backend",
+		"secrets":   "Manage SSH keys, AWS, Git config",
+		"claude":    "Claude Code integration",
+		"template":  "Machine-specific configs",
+	}
 }
 
 func newSetupCmd() *cobra.Command {
@@ -154,7 +188,7 @@ func runSetup(reset, statusOnly bool) error {
 	fmt.Println("Let's complete your setup...")
 	fmt.Println()
 
-	// Show overview
+	// Show overview (platform-aware)
 	fmt.Println(cyan("═══════════════════════════════════════════════════════════════"))
 	fmt.Println(bold("                    Setup Wizard Overview"))
 	fmt.Println(cyan("═══════════════════════════════════════════════════════════════"))
@@ -162,13 +196,25 @@ func runSetup(reset, statusOnly bool) error {
 	fmt.Println(bold("This wizard will guide you through 7 steps:"))
 	fmt.Println()
 	fmt.Printf("  %s %s         - Configure workspace directory\n", cyan("1."), bold("Workspace"))
-	fmt.Printf("     %s\n", dim("Default: ~/workspace (target for /workspace symlink)"))
+	if isWindows() {
+		fmt.Printf("     %s\n", dim("Default: %USERPROFILE%\\workspace (target for C:\\workspace)"))
+	} else {
+		fmt.Printf("     %s\n", dim("Default: ~/workspace (target for /workspace symlink)"))
+	}
 	fmt.Println()
 	fmt.Printf("  %s %s          - Link shell config files\n", cyan("2."), bold("Symlinks"))
-	fmt.Printf("     %s\n", dim("~/.zshrc, ~/.p10k.zsh, ~/.claude"))
+	if isWindows() {
+		fmt.Printf("     %s\n", dim("PowerShell profile"))
+	} else {
+		fmt.Printf("     %s\n", dim("~/.zshrc, ~/.p10k.zsh, ~/.claude"))
+	}
 	fmt.Println()
-	fmt.Printf("  %s %s          - Install Homebrew packages\n", cyan("3."), bold("Packages"))
-	fmt.Printf("     %s\n", dim("Choose: minimal (18) | enhanced (43) | full (61)"))
+	fmt.Printf("  %s %s          - Install %s packages\n", cyan("3."), bold("Packages"), packageManagerName())
+	if isWindows() {
+		fmt.Printf("     %s\n", dim("Import from winget.json"))
+	} else {
+		fmt.Printf("     %s\n", dim("Choose: minimal (18) | enhanced (43) | full (61)"))
+	}
 	fmt.Println()
 	fmt.Printf("  %s %s             - Configure secret backend\n", cyan("4."), bold("Vault"))
 	fmt.Printf("     %s\n", dim("Bitwarden, 1Password, or pass"))
@@ -312,30 +358,53 @@ func needsSetup(cfg *SetupConfig) bool {
 func inferState(cfg *SetupConfig) {
 	home, _ := os.UserHomeDir()
 
-	// Infer workspace: if config exists or /workspace symlink exists
+	// Infer workspace: if config exists or workspace symlink exists
 	if !isPhaseCompleted(cfg, "workspace") {
 		if cfg.Paths.WorkspaceTarget != "" {
 			markPhaseComplete(cfg, "workspace")
-		} else if info, err := os.Lstat("/workspace"); err == nil && info.Mode()&os.ModeSymlink != 0 {
-			markPhaseComplete(cfg, "workspace")
-		}
-	}
-
-	// Infer symlinks: if ~/.zshrc points to our dotfiles
-	if !isPhaseCompleted(cfg, "symlinks") {
-		zshrcPath := filepath.Join(home, ".zshrc")
-		if target, err := os.Readlink(zshrcPath); err == nil {
-			if strings.Contains(target, "dotfiles/zsh/zshrc") {
-				markPhaseComplete(cfg, "symlinks")
+		} else {
+			symlinkPath := workspaceSymlinkPath()
+			if info, err := os.Lstat(symlinkPath); err == nil && info.Mode()&os.ModeSymlink != 0 {
+				markPhaseComplete(cfg, "workspace")
 			}
 		}
 	}
 
-	// Infer packages: if brew is available and a tier is set
+	// Infer symlinks: platform-specific shell config check
+	if !isPhaseCompleted(cfg, "symlinks") {
+		if isWindows() {
+			// Check PowerShell profile
+			psProfile := filepath.Join(home, "Documents", "PowerShell", "profile.ps1")
+			if _, err := os.Stat(psProfile); err == nil {
+				// Check if it references our dotfiles
+				if data, err := os.ReadFile(psProfile); err == nil {
+					if strings.Contains(string(data), "dotfiles") {
+						markPhaseComplete(cfg, "symlinks")
+					}
+				}
+			}
+		} else {
+			// Check ~/.zshrc points to our dotfiles
+			zshrcPath := filepath.Join(home, ".zshrc")
+			if target, err := os.Readlink(zshrcPath); err == nil {
+				if strings.Contains(target, "dotfiles/zsh/zshrc") {
+					markPhaseComplete(cfg, "symlinks")
+				}
+			}
+		}
+	}
+
+	// Infer packages: check if package manager is available and tier is set
 	if !isPhaseCompleted(cfg, "packages") {
 		if cfg.Packages.Tier != "" {
-			if _, err := exec.LookPath("brew"); err == nil {
-				markPhaseComplete(cfg, "packages")
+			if isWindows() {
+				if _, err := exec.LookPath("winget"); err == nil {
+					markPhaseComplete(cfg, "packages")
+				}
+			} else {
+				if _, err := exec.LookPath("brew"); err == nil {
+					markPhaseComplete(cfg, "packages")
+				}
 			}
 		}
 	}
@@ -357,9 +426,14 @@ func inferState(cfg *SetupConfig) {
 		}
 	}
 
-	// Infer template: if _variables.local.sh exists
+	// Infer template: if _variables.local.sh (Unix) or _variables.local.ps1 (Windows) exists
 	if !isPhaseCompleted(cfg, "template") {
-		templateFile := filepath.Join(DotfilesDir(), "templates", "_variables.local.sh")
+		var templateFile string
+		if isWindows() {
+			templateFile = filepath.Join(DotfilesDir(), "templates", "_variables.local.ps1")
+		} else {
+			templateFile = filepath.Join(DotfilesDir(), "templates", "_variables.local.sh")
+		}
 		if _, err := os.Stat(templateFile); err == nil {
 			markPhaseComplete(cfg, "template")
 		}
@@ -377,8 +451,9 @@ func showSetupStatus(cfg *SetupConfig) {
 	fmt.Println(bold("Current Status:"))
 	fmt.Println("───────────────")
 
+	phaseDescs := getPhaseDescriptions()
 	for _, phase := range setupPhases {
-		desc := phaseDescriptions[phase]
+		desc := phaseDescs[phase]
 		if isPhaseCompleted(cfg, phase) {
 			extra := ""
 			switch phase {
@@ -461,21 +536,29 @@ func phaseWorkspace(cfg *SetupConfig) error {
 	}
 
 	home, _ := os.UserHomeDir()
-	defaultTarget := filepath.Join(home, "workspace")
+	defaultTarget := defaultWorkspaceDir()
 	if envTarget := os.Getenv("WORKSPACE_TARGET"); envTarget != "" {
 		defaultTarget = envTarget
 	}
 
+	symlinkPath := workspaceSymlinkPath()
 	fmt.Println("The workspace directory is where dotfiles and projects are stored.")
-	fmt.Println("The /workspace symlink will point to this directory for Claude Code portability.")
+	fmt.Printf("The %s symlink will point to this directory for Claude Code portability.\n", symlinkPath)
 	fmt.Println()
 	fmt.Printf("Current target: %s\n", defaultTarget)
 	fmt.Println()
 	fmt.Println("Examples:")
-	fmt.Println("  ~/workspace     (default)")
-	fmt.Println("  ~/code")
-	fmt.Println("  ~/dev")
-	fmt.Println("  ~/projects")
+	if isWindows() {
+		fmt.Println("  %USERPROFILE%\\workspace     (default)")
+		fmt.Println("  C:\\code")
+		fmt.Println("  D:\\dev")
+		fmt.Println("  C:\\projects")
+	} else {
+		fmt.Println("  ~/workspace     (default)")
+		fmt.Println("  ~/code")
+		fmt.Println("  ~/dev")
+		fmt.Println("  ~/projects")
+	}
 	fmt.Println()
 	fmt.Printf("Workspace directory [%s]: ", defaultTarget)
 	userTarget := readInput()
@@ -484,9 +567,11 @@ func phaseWorkspace(cfg *SetupConfig) error {
 	if userTarget != "" {
 		finalTarget = userTarget
 	}
-	// Expand ~ if present
+	// Expand ~ if present (Unix) or %USERPROFILE% (Windows)
 	if strings.HasPrefix(finalTarget, "~/") {
 		finalTarget = filepath.Join(home, finalTarget[2:])
+	} else if isWindows() && strings.HasPrefix(strings.ToUpper(finalTarget), "%USERPROFILE%") {
+		finalTarget = filepath.Join(home, finalTarget[13:])
 	}
 
 	cfg.Paths.WorkspaceTarget = finalTarget
@@ -503,33 +588,37 @@ func phaseWorkspace(cfg *SetupConfig) error {
 		}
 	}
 
-	// Check/update /workspace symlink
-	if info, err := os.Lstat("/workspace"); err == nil && info.Mode()&os.ModeSymlink != 0 {
-		currentLink, _ := os.Readlink("/workspace")
+	// Check/update workspace symlink (platform-specific)
+	if info, err := os.Lstat(symlinkPath); err == nil && info.Mode()&os.ModeSymlink != 0 {
+		currentLink, _ := os.Readlink(symlinkPath)
 		if currentLink != finalTarget {
 			fmt.Println()
-			fmt.Printf("Current /workspace → %s\n", currentLink)
+			fmt.Printf("Current %s → %s\n", symlinkPath, currentLink)
 			fmt.Printf("Update symlink to → %s? [Y/n]: ", finalTarget)
 			if input := readInput(); input == "" || strings.EqualFold(input, "y") {
-				cmd := exec.Command("sudo", "ln", "-sfn", finalTarget, "/workspace")
-				if err := cmd.Run(); err != nil {
-					fmt.Printf("%s Failed to update symlink (may need sudo permissions)\n", yellow("!"))
+				if err := createWorkspaceSymlink(symlinkPath, finalTarget); err != nil {
+					fmt.Printf("%s Failed to update symlink: %v\n", yellow("!"), err)
 				} else {
-					fmt.Printf("%s Updated /workspace → %s\n", green("✓"), finalTarget)
+					fmt.Printf("%s Updated %s → %s\n", green("✓"), symlinkPath, finalTarget)
 				}
 			}
 		} else {
-			fmt.Printf("%s Symlink /workspace → %s already correct\n", green("✓"), finalTarget)
+			fmt.Printf("%s Symlink %s → %s already correct\n", green("✓"), symlinkPath, finalTarget)
 		}
-	} else if _, err := os.Stat("/workspace"); os.IsNotExist(err) {
+	} else if _, err := os.Stat(symlinkPath); os.IsNotExist(err) {
 		fmt.Println()
-		fmt.Printf("Create /workspace symlink to %s? [Y/n]: ", finalTarget)
+		fmt.Printf("Create %s symlink to %s? [Y/n]: ", symlinkPath, finalTarget)
 		if input := readInput(); input == "" || strings.EqualFold(input, "y") {
-			cmd := exec.Command("sudo", "ln", "-sfn", finalTarget, "/workspace")
-			if err := cmd.Run(); err != nil {
-				fmt.Printf("%s Failed to create symlink (may need sudo permissions)\n", yellow("!"))
+			if err := createWorkspaceSymlink(symlinkPath, finalTarget); err != nil {
+				fmt.Printf("%s Failed to create symlink: %v\n", yellow("!"), err)
+				if isWindows() {
+					fmt.Println("  Try running as Administrator, or create manually:")
+					fmt.Printf("  mklink /J %s %s\n", symlinkPath, finalTarget)
+				} else {
+					fmt.Println("  Try: sudo ln -sfn", finalTarget, symlinkPath)
+				}
 			} else {
-				fmt.Printf("%s Created /workspace → %s\n", green("✓"), finalTarget)
+				fmt.Printf("%s Created %s → %s\n", green("✓"), symlinkPath, finalTarget)
 			}
 		}
 	}
@@ -538,6 +627,27 @@ func phaseWorkspace(cfg *SetupConfig) error {
 	cfg.Features["workspace_symlink"] = true
 	fmt.Printf("%s Workspace configured: %s\n", green("✓"), finalTarget)
 	return nil
+}
+
+// createWorkspaceSymlink creates a symlink/junction at symlinkPath pointing to target
+func createWorkspaceSymlink(symlinkPath, target string) error {
+	if isWindows() {
+		// On Windows, try junction first (doesn't require admin for same drive)
+		// Then fall back to symlink (requires admin or developer mode)
+		cmd := exec.Command("cmd", "/c", "mklink", "/J", symlinkPath, target)
+		if err := cmd.Run(); err == nil {
+			return nil
+		}
+		// Try directory symlink as fallback
+		cmd = exec.Command("cmd", "/c", "mklink", "/D", symlinkPath, target)
+		return cmd.Run()
+	}
+	// Unix: use sudo ln
+	cmd := exec.Command("sudo", "ln", "-sfn", target, symlinkPath)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
 
 func phaseSymlinks(cfg *SetupConfig) error {
@@ -552,11 +662,20 @@ func phaseSymlinks(cfg *SetupConfig) error {
 	}
 
 	dotfilesDir := DotfilesDir()
+	home, _ := os.UserHomeDir()
 	fmt.Println("This will link your shell configuration files.")
 	fmt.Println()
 	fmt.Println("Files to link:")
-	fmt.Printf("  ~/.zshrc     → %s/zsh/zshrc\n", dotfilesDir)
-	fmt.Printf("  ~/.p10k.zsh  → %s/zsh/p10k.zsh\n", dotfilesDir)
+
+	if isWindows() {
+		// Windows: PowerShell profile
+		psProfileDir := filepath.Join(home, "Documents", "PowerShell")
+		fmt.Printf("  %s\\profile.ps1 → %s\\powershell\\profile.ps1\n", psProfileDir, dotfilesDir)
+	} else {
+		// Unix: ZSH config
+		fmt.Printf("  ~/.zshrc     → %s/zsh/zshrc\n", dotfilesDir)
+		fmt.Printf("  ~/.p10k.zsh  → %s/zsh/p10k.zsh\n", dotfilesDir)
+	}
 	fmt.Println()
 
 	fmt.Print("Create symlinks? [Y/n]: ")
@@ -565,21 +684,74 @@ func phaseSymlinks(cfg *SetupConfig) error {
 		return nil
 	}
 
-	// Run bootstrap script
-	bootstrapScript := filepath.Join(dotfilesDir, "bootstrap", "bootstrap-dotfiles.sh")
-	if _, err := os.Stat(bootstrapScript); err != nil {
-		return fmt.Errorf("bootstrap-dotfiles.sh not found")
-	}
+	if isWindows() {
+		// Windows: Create PowerShell profile symlink
+		if err := createWindowsSymlinks(dotfilesDir, home); err != nil {
+			fmt.Printf("%s Failed to create symlinks: %v\n", yellow("!"), err)
+			return err
+		}
+	} else {
+		// Unix: Run bootstrap script
+		bootstrapScript := filepath.Join(dotfilesDir, "bootstrap", "bootstrap-dotfiles.sh")
+		if _, err := os.Stat(bootstrapScript); err != nil {
+			return fmt.Errorf("bootstrap-dotfiles.sh not found")
+		}
 
-	cmd := exec.Command("bash", bootstrapScript)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("bootstrap failed: %w", err)
+		cmd := exec.Command("bash", bootstrapScript)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("bootstrap failed: %w", err)
+		}
 	}
 
 	markPhaseComplete(cfg, "symlinks")
 	fmt.Printf("%s Symlinks created\n", green("✓"))
+	return nil
+}
+
+// createWindowsSymlinks creates shell config symlinks on Windows
+func createWindowsSymlinks(dotfilesDir, home string) error {
+	green := color.New(color.FgGreen).SprintFunc()
+
+	// Create PowerShell profile directory if needed
+	psProfileDir := filepath.Join(home, "Documents", "PowerShell")
+	if err := os.MkdirAll(psProfileDir, 0755); err != nil {
+		return fmt.Errorf("failed to create PowerShell directory: %w", err)
+	}
+
+	// Source and target for profile
+	source := filepath.Join(dotfilesDir, "powershell", "profile.ps1")
+	target := filepath.Join(psProfileDir, "profile.ps1")
+
+	// Check if source exists
+	if _, err := os.Stat(source); os.IsNotExist(err) {
+		fmt.Printf("  PowerShell profile source not found: %s\n", source)
+		fmt.Println("  Skipping PowerShell profile (you can create it later)")
+		return nil
+	}
+
+	// Remove existing target if it exists
+	if _, err := os.Lstat(target); err == nil {
+		os.Remove(target)
+	}
+
+	// Create symlink (try mklink first, fall back to copy)
+	cmd := exec.Command("cmd", "/c", "mklink", target, source)
+	if err := cmd.Run(); err != nil {
+		// Symlink failed, try copying instead
+		data, err := os.ReadFile(source)
+		if err != nil {
+			return fmt.Errorf("failed to read source: %w", err)
+		}
+		if err := os.WriteFile(target, data, 0644); err != nil {
+			return fmt.Errorf("failed to copy profile: %w", err)
+		}
+		fmt.Printf("%s Copied profile.ps1 (symlink requires admin)\n", green("✓"))
+	} else {
+		fmt.Printf("%s Created symlink: profile.ps1\n", green("✓"))
+	}
+
 	return nil
 }
 
@@ -596,15 +768,22 @@ func phasePackages(cfg *SetupConfig) error {
 		return nil
 	}
 
-	// Check if Homebrew is available
+	dotfilesDir := DotfilesDir()
+	pkgMgr := packageManagerName()
+
+	// Platform-specific package manager check
+	if isWindows() {
+		return phasePackagesWindows(cfg, dotfilesDir, green, yellow, bold, dim)
+	}
+
+	// Unix: Check if Homebrew is available
 	if _, err := exec.LookPath("brew"); err != nil {
 		fmt.Printf("%s Homebrew not installed - skipping package installation\n", yellow("!"))
 		fmt.Println("Install Homebrew and run 'dotfiles packages' later.")
 		return nil
 	}
 
-	dotfilesDir := DotfilesDir()
-	fmt.Println("This will install packages from Brewfile using Homebrew.")
+	fmt.Printf("This will install packages from Brewfile using %s.\n", pkgMgr)
 
 	// Count packages for each tier
 	countPackages := func(filename string) int {
@@ -718,6 +897,53 @@ func phasePackages(cfg *SetupConfig) error {
 
 	markPhaseComplete(cfg, "packages")
 	fmt.Printf("%s Packages installed successfully (%s tier)\n", green("✓"), selectedTier)
+	return nil
+}
+
+// phasePackagesWindows handles package installation on Windows using winget
+func phasePackagesWindows(cfg *SetupConfig, dotfilesDir string, green, yellow, bold, dim func(a ...interface{}) string) error {
+	// Check if winget is available
+	if _, err := exec.LookPath("winget"); err != nil {
+		fmt.Printf("%s winget not installed - skipping package installation\n", yellow("!"))
+		fmt.Println("winget comes with Windows 11 and App Installer on Windows 10.")
+		fmt.Println("Install it from the Microsoft Store and run 'dotfiles packages' later.")
+		return nil
+	}
+
+	fmt.Println("This will install packages using winget.")
+
+	// Check for winget export file
+	wingetFile := filepath.Join(dotfilesDir, "winget.json")
+	if _, err := os.Stat(wingetFile); os.IsNotExist(err) {
+		fmt.Printf("%s No winget.json found in dotfiles\n", yellow("!"))
+		fmt.Println("Create one with: winget export -o winget.json")
+		fmt.Println()
+		fmt.Println("Alternatively, install packages manually:")
+		fmt.Println("  winget install Git.Git")
+		fmt.Println("  winget install Microsoft.VisualStudioCode")
+		fmt.Println("  winget install Microsoft.WindowsTerminal")
+		markPhaseComplete(cfg, "packages")
+		return nil
+	}
+
+	fmt.Print("Install packages from winget.json? [Y/n]: ")
+	if input := readInput(); strings.EqualFold(input, "n") {
+		fmt.Printf("%s Skipped packages\n", yellow("!"))
+		return nil
+	}
+
+	fmt.Println("Running winget import...")
+
+	cmd := exec.Command("winget", "import", "-i", wingetFile, "--accept-package-agreements", "--accept-source-agreements")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("%s Some packages may have failed - continuing\n", yellow("!"))
+		fmt.Println("Run 'winget import -i winget.json' to retry")
+	}
+
+	markPhaseComplete(cfg, "packages")
+	fmt.Printf("%s Packages installed successfully\n", green("✓"))
 	return nil
 }
 
