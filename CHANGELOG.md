@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Phase 3 Migration Complete** - Go binary is now the sole CLI implementation
+  - Renamed binary from `dotfiles-go` to `dotfiles`
+  - Removed shell fallback (`DOTFILES_USE_GO` escape hatch no longer available)
+  - Deleted 19 deprecated `bin/dotfiles-*` shell scripts (~7,500 lines)
+  - Deleted 12 deprecated `lib/*.sh` libraries (~5,500 lines)
+  - Simplified `40-aliases.zsh` by removing fallback code (~550 lines)
+  - Total reduction: ~13,500 lines of shell code
+
+### Added
+
+- **Cross-Platform CI** - New GitHub Actions workflow for Go testing
+  - Tests on ubuntu-latest, macos-latest, windows-latest
+  - Builds binaries for all platform/arch combinations
+  - PowerShell script validation on Windows
+  - Updated test.yml for Go-first testing
+
+### Removed
+
+- `bin/dotfiles-backup`, `bin/dotfiles-config`, `bin/dotfiles-diff`
+- `bin/dotfiles-doctor`, `bin/dotfiles-drift`, `bin/dotfiles-encrypt`
+- `bin/dotfiles-features`, `bin/dotfiles-hook`, `bin/dotfiles-lint`
+- `bin/dotfiles-metrics`, `bin/dotfiles-migrate`, `bin/dotfiles-packages`
+- `bin/dotfiles-setup`, `bin/dotfiles-sync`, `bin/dotfiles-template`
+- `bin/dotfiles-uninstall`, `bin/dotfiles-vault`
+- `lib/_cli_features.sh`, `lib/_config.sh`, `lib/_config_layers.sh`
+- `lib/_drift.sh`, `lib/_encryption.sh`, `lib/_errors.sh`
+- `lib/_features.sh`, `lib/_paths.sh`, `lib/_progress.sh`
+- `lib/_state.sh`, `lib/_templates.sh`, `lib/_vault.sh`
+
 ## [3.2.0] - 2025-12-09
 
 ### Changed

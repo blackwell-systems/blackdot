@@ -1,13 +1,13 @@
-# Go CLI Migration - Remaining Work
+# Go CLI Migration - Complete
 
-> **Status:** Phase 2 Complete - Merged to Main (v3.2.0)
+> **Status:** Phase 3 Complete - Go Binary is Primary CLI
 > **Last Updated:** 2025-12-09
 
 ---
 
 ## Summary
 
-The Go CLI rewrite is **complete and merged to main**. All 19+ commands have been ported with full parity to the shell implementation. The Go binary is now the primary CLI with shell fallback available via `DOTFILES_USE_GO=0`.
+The Go CLI rewrite is **complete**. All commands are now provided by the Go binary (`bin/dotfiles`). Shell fallback has been removed. The Go binary is the sole CLI implementation.
 
 ### What's Done
 
@@ -25,16 +25,26 @@ The Go CLI rewrite is **complete and merged to main**. All 19+ commands have bee
 | GitHub Actions | ✅ | Multi-platform builds (darwin/linux, amd64/arm64) |
 | Unit Tests | ✅ | 112+ tests, feature: 89%, config: 74% |
 
-### What's Remaining
+### Migration Complete
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│  Phase 1: Installation Integration        ✅ MERGED        │
-│  Phase 2: Shell Switchover                ✅ MERGED (v3.2) │
-│  Phase 3: Deprecation & Cleanup           ⏳ (next)        │
+│  Phase 1: Installation Integration        ✅ COMPLETE      │
+│  Phase 2: Shell Switchover                ✅ COMPLETE      │
+│  Phase 3: Deprecation & Cleanup           ✅ COMPLETE      │
 │  Phase 4: Future Enhancements (optional)  ⏳               │
 └────────────────────────────────────────────────────────────┘
 ```
+
+### Phase 3 Changes (2025-12-09)
+
+- Renamed binary from `dotfiles-go` to `dotfiles`
+- Removed shell fallback (`DOTFILES_USE_GO` escape hatch)
+- Deleted 19 deprecated `bin/dotfiles-*` shell scripts (~7500 lines)
+- Deleted 12 deprecated `lib/*.sh` libraries (~5500 lines)
+- Simplified `40-aliases.zsh` (~550 lines removed)
+- Updated CI workflows for Go-first testing
+- Total reduction: ~13,500 lines of shell code
 
 ---
 
