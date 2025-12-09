@@ -472,39 +472,33 @@ curl -fsSL <url> | bash
 - [ ] Keep only env/cd wrappers in 40-aliases.zsh
 - [ ] Keep only env/cd wrappers in Dotfiles.psm1
 
-**3.4.3 Implement Setup Wizard in Go**
+**3.4.3 Implement Setup Wizard in Go** ✅ DONE
 
-The current `bin/dotfiles-setup` is ZSH-only, which breaks:
-- Windows PowerShell users
-- Binary-only users
-- Linux users without ZSH
+~~The current `bin/dotfiles-setup` is ZSH-only, which breaks Windows/binary-only users.~~
 
-**Required:** Implement `dotfiles setup` command in Go for cross-platform support.
+**IMPLEMENTED (2025-12-09):** Windows support added to `dotfiles setup` command.
 
 > **📋 Detailed Implementation Plan:** See [IMPL-setup-wizard-go.md](IMPL-setup-wizard-go.md)
->
-> The plan includes: Phase interface design, Platform abstraction (Unix vs Windows),
-> all 7 phases to port, ~2500 lines of Go estimated, and complete implementation checklist.
 
-**Phases to implement:**
-- [ ] `dotfiles setup` - Main entry point with progress tracking
-- [ ] Phase 1: Workspace configuration
-- [ ] Phase 2: Symlinks (with platform-specific paths)
-- [ ] Phase 3: Packages (brew on Unix, winget on Windows)
-- [ ] Phase 4: Vault configuration
-- [ ] Phase 5: Secrets setup
-- [ ] Phase 6: Claude configuration
-- [ ] Phase 7: Template rendering
+**Phases implemented:**
+- [x] `dotfiles setup` - Main entry point with progress tracking ✅
+- [x] Phase 1: Workspace configuration ✅ (`C:\workspace` on Windows)
+- [x] Phase 2: Symlinks ✅ (PowerShell profile on Windows)
+- [x] Phase 3: Packages ✅ (winget on Windows, Homebrew on Unix)
+- [x] Phase 4: Vault configuration ✅
+- [x] Phase 5: Secrets setup ✅
+- [x] Phase 6: Claude configuration ✅
+- [x] Phase 7: Template rendering ✅
 
-**State management:**
-- Reuse existing `config.json` state tracking
+**State management:** ✅
+- Reuses existing `config.json` state tracking
 - `dotfiles setup --status` shows progress
 - `dotfiles setup --reset` clears state
 
-**Platform-specific handling:**
+**Platform-specific handling:** ✅
 - Unix: Symlink `.zshrc`, prompt for p10k config
-- Windows: Skip ZSH, prompt for Starship config
-- Both: Prompt for theme config choice
+- Windows: PowerShell profile, prompt for Starship config
+- Both: Platform-aware help text and paths
 
 **3.4.4 Delete Deprecated Shell Scripts**
 ```

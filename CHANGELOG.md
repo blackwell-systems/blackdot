@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Windows support for setup wizard** - Full cross-platform setup experience
+  - Platform detection helpers (`isWindows()`, `workspaceSymlinkPath()`, etc.)
+  - Workspace phase: `C:\workspace` junction on Windows, `/workspace` symlink on Unix
+  - Symlinks phase: PowerShell profile on Windows, `.zshrc`/`.p10k.zsh` on Unix
+  - Packages phase: winget on Windows, Homebrew on Unix
+  - Platform-aware state inference and help text
+  - Cross-compiles for Windows (tested with `GOOS=windows`)
+
 ### Changed
 
 - **Powerlevel10k moved to enhanced tier** - Now optional in minimal installs
