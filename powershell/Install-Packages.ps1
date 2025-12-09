@@ -51,7 +51,8 @@ $MinimalPackages = @(
     "sharkdp.bat",
     "BurntSushi.ripgrep.MSVC",
     "junegunn.fzf",
-    "stedolan.jq"
+    "stedolan.jq",
+    "FiloSottile.age"
 )
 
 $EnhancedPackages = $MinimalPackages + @(
@@ -62,7 +63,6 @@ $EnhancedPackages = $MinimalPackages + @(
     "bootandy.dust",
     "Amazon.AWSCLI",
     "Bitwarden.CLI",
-    "FiloSottile.age",
     "GoLang.Go",
     "Rustlang.Rustup",
     "Python.Python.3.12",
