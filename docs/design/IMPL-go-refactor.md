@@ -512,7 +512,30 @@ lib/_colors.sh     → KEEP (used by remaining shell scripts)
 - [ ] Remove references to `dotfiles-go` binary name
 - [ ] Document that shell integration is optional
 
-### 3.5 Template Syntax Cleanup (Optional)
+### 3.5 Windows Prompt Theming (Undecided)
+
+**Gap:** Unix has Powerlevel10k (`zsh/p10k.zsh`), but PowerShell has no prompt theming.
+
+**Options:**
+
+| Option | Pros | Cons |
+|--------|------|------|
+| **Starship** | Cross-platform, already in Go code, works everywhere | Different config format than p10k |
+| **Oh My Posh** | Most popular for PowerShell, similar to p10k | Windows-focused, another dependency |
+| **None** | Simpler, users choose their own | Inconsistent experience |
+
+**If implemented:**
+```powershell
+# Add to packages.json
+{ "id": "Starship.Starship", "comment": "Cross-platform prompt" }
+
+# Add to Dotfiles.psm1
+Invoke-Expression (&starship init powershell)
+```
+
+**Decision:** TBD - depends on whether cross-platform consistency (Starship) or platform-native experience (Oh My Posh) is preferred.
+
+### 3.6 Template Syntax Cleanup (Optional)
 
 The Go template engine supports both syntaxes:
 - New: `{{#if (eq os "darwin")}}` (Handlebars)
@@ -523,7 +546,7 @@ The Go template engine supports both syntaxes:
 - [ ] Migrate remaining templates to Handlebars syntax
 - [ ] Consider removing old syntax support from Go engine
 
-### 3.6 Success Criteria
+### 3.7 Success Criteria
 
 Phase 3 is complete when:
 - [ ] `dotfiles` command runs Go binary directly (no shell interception)
