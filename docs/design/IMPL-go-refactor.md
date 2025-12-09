@@ -1,13 +1,13 @@
 # Go CLI Migration - Remaining Work
 
-> **Status:** Phase 9 Complete - Ready for Cutover
+> **Status:** Phase 2 Complete - Merged to Main (v3.2.0)
 > **Last Updated:** 2025-12-09
 
 ---
 
 ## Summary
 
-The Go CLI rewrite is **essentially complete**. All 19+ commands have been ported with full parity to the shell implementation. This document tracks the remaining steps to complete the migration.
+The Go CLI rewrite is **complete and merged to main**. All 19+ commands have been ported with full parity to the shell implementation. The Go binary is now the primary CLI with shell fallback available via `DOTFILES_USE_GO=0`.
 
 ### What's Done
 
@@ -29,8 +29,8 @@ The Go CLI rewrite is **essentially complete**. All 19+ commands have been porte
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│  Phase 1: Installation Integration        ✅ (mostly done) │
-│  Phase 2: Shell Switchover                ✅ (complete)    │
+│  Phase 1: Installation Integration        ✅ MERGED        │
+│  Phase 2: Shell Switchover                ✅ MERGED (v3.2) │
 │  Phase 3: Deprecation & Cleanup           ⏳ (next)        │
 │  Phase 4: Future Enhancements (optional)  ⏳               │
 └────────────────────────────────────────────────────────────┘
