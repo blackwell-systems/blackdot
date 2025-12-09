@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.0] - 2025-12-09
+
 ### Added
 
 - **Phase 2 Shell Switchover Complete** - Go binary is now the primary CLI
