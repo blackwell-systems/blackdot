@@ -455,15 +455,9 @@ These are "nice to have" improvements after the migration is complete:
 
 ### 4.2 Additional Backends
 
-- [ ] HashiCorp Vault backend for vaultmux
-- [ ] AWS Secrets Manager backend
-- [ ] Azure Key Vault backend
-
-### 4.3 Advanced Features
-
-- [ ] GUI companion app
-- [ ] Cloud sync (optional)
-- [ ] Dotfile analytics/insights
+- [ ] HashiCorp Vault backend for vaultmux (unlikely - complexity vs. demand)
+- [x] AWS Secrets Manager backend (supported via vaultmux)
+- [x] Azure Key Vault backend (supported via vaultmux)
 
 ---
 
