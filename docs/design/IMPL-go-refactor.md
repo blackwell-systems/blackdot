@@ -481,6 +481,11 @@ The current `bin/dotfiles-setup` is ZSH-only, which breaks:
 
 **Required:** Implement `dotfiles setup` command in Go for cross-platform support.
 
+> **📋 Detailed Implementation Plan:** See [IMPL-setup-wizard-go.md](IMPL-setup-wizard-go.md)
+>
+> The plan includes: Phase interface design, Platform abstraction (Unix vs Windows),
+> all 7 phases to port, ~2500 lines of Go estimated, and complete implementation checklist.
+
 **Phases to implement:**
 - [ ] `dotfiles setup` - Main entry point with progress tracking
 - [ ] Phase 1: Workspace configuration
@@ -578,6 +583,51 @@ Phase 3 is complete when:
 - [ ] Binary-only installation is clean and documented
 - [ ] All tests pass
 - [ ] Documentation updated
+
+### 3.8 Cross-Platform Audit (2025-12-09)
+
+Comprehensive audit of cross-platform support status:
+
+#### Fully Cross-Platform (Go) ✅
+
+| Component | Go Implementation | Notes |
+|-----------|-------------------|-------|
+| **CLI Commands** | `internal/cli/*.go` | 19+ commands, all cross-platform |
+| **Feature Registry** | `internal/feature/` | Works on Unix & Windows |
+| **Config System** | `internal/config/` | Uses `filepath.Join`, `os.UserHomeDir` |
+| **Vault System** | `internal/cli/vault.go` | ~2000 lines, vaultmux integration |
+| **Template Engine** | `internal/cli/template.go` | Handlebars syntax, cross-platform paths |
+| **Claude Tools** | `internal/cli/tools_claude.go` | `claude init` copies files cross-platform |
+| **Developer Tools** | `internal/cli/tools_*.go` | 50+ tools (SSH, AWS, CDK, Go, Rust, etc.) |
+
+#### Platform-Specific Shell (Working) ✅
+
+| Platform | Shell Config | Status |
+|----------|--------------|--------|
+| **Unix (ZSH)** | `zsh/zsh.d/*.zsh` | Full functionality |
+| **Windows (PS)** | `powershell/Dotfiles.psm1` | 1365 lines, full parity |
+| **Prompt (Unix)** | Powerlevel10k | Enhanced tier, config prompt ✅ |
+| **Prompt (Win)** | Starship | Enhanced tier, config prompt ✅ |
+
+#### Needs Go Implementation ⏳
+
+| Component | Current | Needed | Plan |
+|-----------|---------|--------|------|
+| **Setup Wizard** | `bin/dotfiles-setup` (ZSH) | `dotfiles setup` (Go) | [IMPL-setup-wizard-go.md](IMPL-setup-wizard-go.md) |
+
+#### Legacy (Will Be Deprecated) 📦
+
+| Category | Files | Replacement |
+|----------|-------|-------------|
+| `bin/dotfiles-*` | 20 shell scripts | Go CLI commands |
+| `lib/*.sh` | 15 shell libraries | Go packages |
+| `vault/*.sh` | 19 shell scripts | Go vault commands |
+
+#### Known Limitations
+
+1. **Claude hooks** (`claude/hooks/*.sh`) - Shell scripts, need Windows `.ps1` equivalents
+2. **Bootstrap** (`bootstrap-dotfiles.sh`) - Unix only, Windows uses `Install-Dotfiles.ps1`
+3. **Package managers** - Homebrew (Unix) vs winget (Windows) - handled separately
 
 ---
 

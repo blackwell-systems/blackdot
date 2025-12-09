@@ -30,6 +30,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Respects existing configs - asks before overwriting
   - Users can skip and configure their own themes
 
+- **PowerShell versions of Claude hooks** - Full cross-platform support
+  - `block-dangerous-git.ps1` - Prevents dangerous git commands on Windows
+  - `git-sync-check.ps1` - Git sync status check for Windows
+  - Updated hooks README with cross-platform documentation
+
+### Documentation
+
+- **Cross-Platform Audit** - Comprehensive audit of all components
+  - Added section 3.8 to IMPL-go-refactor.md documenting cross-platform status
+  - Identified all Go components as fully cross-platform
+  - Documented platform-specific shell configs (ZSH/PowerShell parity)
+  - Listed legacy scripts marked for deprecation
+
+- **Go Setup Wizard Implementation Plan** - Detailed design document
+  - Created `docs/design/IMPL-setup-wizard-go.md` (~550 lines)
+  - Phase interface design with platform abstraction
+  - All 7 setup phases documented (workspace, symlinks, packages, vault, secrets, claude, templates)
+  - ~2500 lines of Go estimated
+  - Complete implementation checklist
+
 ## [3.2.0] - 2025-12-09
 
 ### Changed
