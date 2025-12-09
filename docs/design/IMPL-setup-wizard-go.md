@@ -23,7 +23,7 @@ The current `bin/dotfiles-setup` is a ~1200 line ZSH script that only works on U
 
 | Phase | Name | What It Does | Platform Concerns |
 |-------|------|--------------|-------------------|
-| 1 | Workspace | Configure ~/workspace, create /workspace symlink | `/workspace` symlink needs sudo on Unix, different on Windows |
+| 1 | Workspace | Configure ~/workspace, create /workspace symlink | Unix: `sudo ln -sfn`, Windows: `C:\workspace` junction |
 | 2 | Symlinks | Link ~/.zshrc, ~/.p10k.zsh | Unix-only files; Windows needs PS profile + Starship |
 | 3 | Packages | Install from Brewfile (tier selection) | Homebrew on Unix, winget on Windows |
 | 4 | Vault | Configure backend, login, validate schema | Cross-platform but different CLI invocations |
@@ -247,7 +247,38 @@ func (p *WindowsPlatform) GetPackageTiers() map[string][]string {
 }
 
 func (p *WindowsPlatform) SupportsWorkspaceSymlink() bool {
-    return false // Different semantics on Windows
+    return true // Windows supports junctions for same goal
+}
+
+func (p *WindowsPlatform) CreateWorkspaceSymlink(target string) error {
+    // Windows uses directory junctions (no admin for same-drive)
+    // or symlinks (needs admin or Developer Mode)
+    workspacePath := "C:\\workspace"
+
+    // Check if already exists
+    if _, err := os.Stat(workspacePath); err == nil {
+        return nil // Already exists
+    }
+
+    // Try junction first (works without admin on same drive)
+    cmd := exec.Command("cmd", "/c", "mklink", "/J", workspacePath, target)
+    if err := cmd.Run(); err == nil {
+        return nil
+    }
+
+    // Fall back to symlink (requires admin or Developer Mode)
+    cmd = exec.Command("cmd", "/c", "mklink", "/D", workspacePath, target)
+    if err := cmd.Run(); err != nil {
+        return fmt.Errorf("failed to create workspace link (try running as Administrator): %w", err)
+    }
+
+    return nil
+}
+
+func (p *WindowsPlatform) IsElevated() bool {
+    // Check if running as Administrator
+    _, err := os.Open("\\\\.\\PHYSICALDRIVE0")
+    return err == nil
 }
 ```
 
@@ -538,9 +569,15 @@ func runSetup(cmd *cobra.Command, args []string) error {
 ## Open Questions
 
 1. **Vault phase**: Call vaultmux directly or shell out to `bw`/`op`/`pass`?
+   - Recommendation: Use vaultmux directly (already integrated in Go CLI)
 2. **Secrets phase**: How much of vault/_common.sh to port vs reuse?
-3. **Windows /workspace**: Skip entirely or offer alternative?
+   - Recommendation: Port scanning logic, reuse vaultmux for operations
+3. ~~**Windows /workspace**: Skip entirely or offer alternative?~~
+   - **RESOLVED**: Create `C:\workspace` junction (same goal as Unix `/workspace`)
+   - Try junction first (no admin needed on same drive), fall back to symlink
 4. **Sudo prompts**: How to handle elevated permissions cross-platform?
+   - Unix: Shell out to `sudo` command
+   - Windows: Try junction first, prompt to run as Admin if needed
 
 ---
 
