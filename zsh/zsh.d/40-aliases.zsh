@@ -341,10 +341,23 @@ _dotfiles_help() {
     echo "${DIM}Runtime: ZSH shell${NC}"
 }
 
-# Unified dotfiles command with subcommands
-# Remove any pre-existing alias (from .zshrc.local, etc.)
+# =========================
+# Main dotfiles() command
+# =========================
+# This is the unified entry point. It delegates most commands to the Go binary
+# when available, falling back to shell scripts for compatibility.
+#
+# Commands that MUST stay in shell (cannot be Go):
+#   - cd: changes current directory
+#   - edit: opens in current shell's EDITOR
+#   - features enable/disable: may update in-memory shell state
+#
+# Use DOTFILES_USE_GO=0 to force shell implementation for all commands.
+
 unalias dotfiles 2>/dev/null || true
-dotfiles() {
+
+# Shell-only implementation (fallback or escape hatch)
+_dotfiles_shell() {
     local cmd="${1:-help}"
     shift 2>/dev/null || true
     local VAULT_DIR="$DOTFILES_DIR/vault"
@@ -897,6 +910,58 @@ dotfiles() {
     esac
 }
 
+# Main dotfiles() function - delegates to Go binary when available
+dotfiles() {
+    local cmd="${1:-help}"
+
+    # Commands that MUST stay in shell (can't be Go)
+    case "$cmd" in
+        cd)
+            # cd must run in current shell to change directory
+            cd "$DOTFILES_DIR"
+            return $?
+            ;;
+        edit)
+            # edit must run in current shell for EDITOR
+            ${EDITOR:-vim} "$DOTFILES_DIR"
+            return $?
+            ;;
+    esac
+
+    # Check for escape hatch - force shell implementation
+    if [[ "${DOTFILES_USE_GO:-1}" == "0" ]]; then
+        _dotfiles_shell "$@"
+        return $?
+    fi
+
+    # Try Go binary first
+    local go_bin=$(_dotfiles_go_bin)
+    if [[ -n "$go_bin" && -x "$go_bin" ]]; then
+        # Special handling for features enable/disable - update shell state too
+        if [[ "$cmd" == "features" && ("${2:-}" == "enable" || "${2:-}" == "disable") ]]; then
+            # Run Go binary first
+            "$go_bin" "$@"
+            local ret=$?
+            # If successful, also update in-memory shell state
+            if [[ $ret -eq 0 && -n "${3:-}" ]]; then
+                if [[ "${2:-}" == "enable" ]]; then
+                    feature_enable "${3:-}" 2>/dev/null || true
+                else
+                    feature_disable "${3:-}" 2>/dev/null || true
+                fi
+            fi
+            return $ret
+        fi
+
+        # All other commands go to Go binary
+        "$go_bin" "$@"
+        return $?
+    fi
+
+    # Fallback to shell implementation
+    _dotfiles_shell "$@"
+}
+
 # Short alias for dotfiles command
 alias d=dotfiles
 
@@ -982,3 +1047,129 @@ dockertools() {
     fi
     "$bin" tools docker "$@"
 }
+
+claudetools() {
+    local bin=$(_dotfiles_go_bin)
+    if [[ -z "$bin" ]]; then
+        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
+        return 1
+    fi
+    "$bin" tools claude "$@"
+}
+
+# =========================
+# Individual Tool Aliases (Go Binary)
+# =========================
+# Hyphenated aliases that call Go binary for cross-platform consistency.
+# These match the PowerShell pattern: ssh-keys, aws-profiles, etc.
+# The unhyphenated versions (sshkeys, awsprofiles) remain as shell functions
+# in the tool-specific modules (60-aws.zsh, 65-ssh.zsh, etc.)
+
+# SSH Tools (via Go binary)
+ssh-keys()   { "$(_dotfiles_go_bin)" tools ssh keys "$@"; }
+ssh-gen()    { "$(_dotfiles_go_bin)" tools ssh gen "$@"; }
+ssh-list()   { "$(_dotfiles_go_bin)" tools ssh list "$@"; }
+ssh-fp()     { "$(_dotfiles_go_bin)" tools ssh fp "$@"; }
+ssh-copy()   { "$(_dotfiles_go_bin)" tools ssh copy "$@"; }
+ssh-tunnel() { "$(_dotfiles_go_bin)" tools ssh tunnel "$@"; }
+ssh-socks()  { "$(_dotfiles_go_bin)" tools ssh socks "$@"; }
+ssh-status() { "$(_dotfiles_go_bin)" tools ssh status "$@"; }
+ssh-agent-status() { "$(_dotfiles_go_bin)" tools ssh agent "$@"; }
+
+# AWS Tools (via Go binary)
+aws-profiles() { "$(_dotfiles_go_bin)" tools aws profiles "$@"; }
+aws-who()      { "$(_dotfiles_go_bin)" tools aws who "$@"; }
+aws-login()    { "$(_dotfiles_go_bin)" tools aws login "$@"; }
+aws-status()   { "$(_dotfiles_go_bin)" tools aws status "$@"; }
+# aws-switch and aws-assume need shell wrappers to set env vars
+aws-switch() {
+    local output
+    output=$("$(_dotfiles_go_bin)" tools aws switch "$@")
+    if [[ $? -eq 0 && -n "$output" ]]; then
+        eval "$output"
+    else
+        echo "$output"
+    fi
+}
+aws-assume() {
+    local output
+    output=$("$(_dotfiles_go_bin)" tools aws assume "$@")
+    if [[ $? -eq 0 && -n "$output" ]]; then
+        eval "$output"
+    else
+        echo "$output"
+    fi
+}
+aws-clear() {
+    unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+    echo "Cleared AWS temporary credentials"
+}
+
+# CDK Tools (via Go binary)
+cdk-init()    { "$(_dotfiles_go_bin)" tools cdk init "$@"; }
+cdk-outputs() { "$(_dotfiles_go_bin)" tools cdk outputs "$@"; }
+cdk-context() { "$(_dotfiles_go_bin)" tools cdk context "$@"; }
+cdk-status()  { "$(_dotfiles_go_bin)" tools cdk status "$@"; }
+# cdk-env needs shell wrapper to set env vars
+cdk-env() {
+    local output
+    output=$("$(_dotfiles_go_bin)" tools cdk env "$@")
+    if [[ $? -eq 0 && -n "$output" ]]; then
+        eval "$output"
+    else
+        echo "$output"
+    fi
+}
+cdk-env-clear() {
+    unset CDK_DEFAULT_ACCOUNT CDK_DEFAULT_REGION
+    echo "Cleared CDK environment variables"
+}
+
+# Go Tools (via Go binary)
+go-new()       { "$(_dotfiles_go_bin)" tools go new "$@"; }
+go-init()      { "$(_dotfiles_go_bin)" tools go init "$@"; }
+go-test()      { "$(_dotfiles_go_bin)" tools go test "$@"; }
+go-cover()     { "$(_dotfiles_go_bin)" tools go cover "$@"; }
+go-lint()      { "$(_dotfiles_go_bin)" tools go lint "$@"; }
+go-outdated()  { "$(_dotfiles_go_bin)" tools go outdated "$@"; }
+go-update()    { "$(_dotfiles_go_bin)" tools go update "$@"; }
+go-build-all() { "$(_dotfiles_go_bin)" tools go build-all "$@"; }
+go-bench()     { "$(_dotfiles_go_bin)" tools go bench "$@"; }
+go-info()      { "$(_dotfiles_go_bin)" tools go info "$@"; }
+
+# Rust Tools (via Go binary)
+rust-new()      { "$(_dotfiles_go_bin)" tools rust new "$@"; }
+rust-update()   { "$(_dotfiles_go_bin)" tools rust update "$@"; }
+rust-switch()   { "$(_dotfiles_go_bin)" tools rust switch "$@"; }
+rust-lint()     { "$(_dotfiles_go_bin)" tools rust lint "$@"; }
+rust-fix()      { "$(_dotfiles_go_bin)" tools rust fix "$@"; }
+rust-outdated() { "$(_dotfiles_go_bin)" tools rust outdated "$@"; }
+rust-expand()   { "$(_dotfiles_go_bin)" tools rust expand "$@"; }
+rust-info()     { "$(_dotfiles_go_bin)" tools rust info "$@"; }
+
+# Python Tools (via Go binary)
+py-new()   { "$(_dotfiles_go_bin)" tools python new "$@"; }
+py-clean() { "$(_dotfiles_go_bin)" tools python clean "$@"; }
+py-venv()  { "$(_dotfiles_go_bin)" tools python venv "$@"; }
+py-test()  { "$(_dotfiles_go_bin)" tools python test "$@"; }
+py-cover() { "$(_dotfiles_go_bin)" tools python cover "$@"; }
+py-info()  { "$(_dotfiles_go_bin)" tools python info "$@"; }
+
+# Docker Tools (via Go binary)
+docker-ps()      { "$(_dotfiles_go_bin)" tools docker ps "$@"; }
+docker-images()  { "$(_dotfiles_go_bin)" tools docker images "$@"; }
+docker-ip()      { "$(_dotfiles_go_bin)" tools docker ip "$@"; }
+docker-env()     { "$(_dotfiles_go_bin)" tools docker env "$@"; }
+docker-ports()   { "$(_dotfiles_go_bin)" tools docker ports "$@"; }
+docker-stats()   { "$(_dotfiles_go_bin)" tools docker stats "$@"; }
+docker-vols()    { "$(_dotfiles_go_bin)" tools docker vols "$@"; }
+docker-nets()    { "$(_dotfiles_go_bin)" tools docker nets "$@"; }
+docker-inspect() { "$(_dotfiles_go_bin)" tools docker inspect "$@"; }
+docker-clean()   { "$(_dotfiles_go_bin)" tools docker clean "$@"; }
+docker-prune()   { "$(_dotfiles_go_bin)" tools docker prune "$@"; }
+docker-status()  { "$(_dotfiles_go_bin)" tools docker status "$@"; }
+
+# Claude Tools (via Go binary)
+claude-status() { "$(_dotfiles_go_bin)" tools claude status "$@"; }
+claude-env()    { "$(_dotfiles_go_bin)" tools claude env "$@"; }
+claude-init()   { "$(_dotfiles_go_bin)" tools claude init "$@"; }
