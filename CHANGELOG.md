@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Windows PowerShell One-Line Installer** - Native Windows onboarding experience
+  - New `Install.ps1` bootstrap script for PowerShell users
+  - Usage: `irm https://raw.githubusercontent.com/.../Install.ps1 | iex`
+  - Features: repo clone, Go binary download, module setup, optional packages
+  - Supports presets: `-Preset developer`, `-Preset minimal`, etc.
+  - Supports options: `-SkipPackages`, `-SkipBinary`, `-WorkspaceTarget`
+  - Matches the `curl | bash` experience for Unix users
+
 - **Rollback Command** - Instant rollback to last backup with safety confirmation
   - Go CLI: New `rollback` command with `--to`, `--list`, `-y/--yes` flags
   - ZSH: Fixed `rollback` to handle `--help`, `--list`, added confirmation prompt
