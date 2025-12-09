@@ -229,6 +229,34 @@ irm https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/Install.ps
 - [x] Add checksum verification for downloaded binaries
 - [x] Make `--binary` the default (now opt-out with `--no-binary`)
 
+### 1.5 Windows `/workspace` Symlink Considerations
+
+The `/workspace` symlink enables portable Claude Code sessions across machines. All sessions reference `/workspace/project` instead of platform-specific paths like `/Users/john/workspace/project`.
+
+| Environment | `/workspace` Support | How to Create |
+|-------------|---------------------|---------------|
+| **macOS** | ✅ Full | `sudo ln -sf ~/workspace /workspace` |
+| **Linux** | ✅ Full | `sudo ln -sf ~/workspace /workspace` |
+| **WSL2** | ✅ Full | `sudo ln -sf ~/workspace /workspace` |
+| **Git Bash + Admin** | ✅ Full | `mklink /D C:\workspace %USERPROFILE%\workspace` |
+| **Git Bash (no Admin)** | ⚠️ Limited | Cannot create symlink; sessions use platform-specific paths |
+| **Native PowerShell** | ⚠️ Limited | Needs `C:\workspace` junction (admin required) |
+
+**Why it matters:**
+- The `claude` wrapper in `zsh/zsh.d/70-claude.zsh` auto-redirects `~/workspace/*` to `/workspace/*`
+- Without `/workspace`, sessions use platform-specific paths and aren't portable across machines
+- dotclaude profile sync relies on consistent `/workspace/.claude` paths
+
+**Recommendation for Windows users:**
+1. **Use WSL2** (recommended) - full `/workspace` support
+2. **Or run as admin once** to create the symlink:
+   ```cmd
+   mklink /D C:\workspace %USERPROFILE%\workspace
+   ```
+3. **Or accept non-portable sessions** - works fine for single-machine use
+
+**Current behavior:** `bootstrap-windows.sh` prints instructions but doesn't auto-create (requires admin).
+
 ---
 
 ## Phase 2: Shell Switchover ✅
