@@ -19,13 +19,15 @@ OS="$(uname -s)"
 # =========================
 # Determine DOTFILES_DIR if not set (this file is in zsh/zsh.d/)
 _dotfiles_dir="${DOTFILES_DIR:-${${(%):-%x}:A:h:h:h}}"
-if [[ -f "$_dotfiles_dir/lib/_logging.sh" ]]; then
-    source "$_dotfiles_dir/lib/_logging.sh" 2>/dev/null || true
+_dotfiles_bin="$_dotfiles_dir/bin/dotfiles"
+
+# Initialize feature functions from Go binary
+# This provides: feature_enabled, require_feature, feature_exists, feature_status
+if [[ -x "$_dotfiles_bin" ]]; then
+    eval "$("$_dotfiles_bin" shell-init zsh 2>/dev/null)" || true
 fi
-if [[ -f "$_dotfiles_dir/lib/_features.sh" ]]; then
-    source "$_dotfiles_dir/lib/_features.sh" 2>/dev/null || true
-fi
-unset _dotfiles_dir
+
+unset _dotfiles_dir _dotfiles_bin
 
 # =========================
 # OS-SPECIFIC SETUP

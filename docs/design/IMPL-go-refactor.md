@@ -44,6 +44,8 @@ The Go CLI rewrite is **complete**. All commands are now provided by the Go bina
 - Deleted 12 deprecated `lib/*.sh` libraries (~5500 lines)
 - Simplified `40-aliases.zsh` (~550 lines removed)
 - Updated CI workflows for Go-first testing
+- Added `dotfiles shell-init` command for shell function initialization
+- Updated `00-init.zsh` to use Go binary for feature checks
 - Total reduction: ~13,500 lines of shell code
 
 ---
@@ -296,9 +298,9 @@ eval "$(dotfiles shell-init zsh)"
 ```
 
 **Tasks:**
-- [ ] Audit all `feature_enabled` calls in zsh.d/*.zsh
-- [ ] Implement `dotfiles shell-init zsh` command
-- [ ] Update shell modules to use Go binary
+- [x] Audit all `feature_enabled` calls in zsh.d/*.zsh
+- [x] Implement `dotfiles shell-init zsh` command
+- [x] Update shell modules to use Go binary (via shell-init)
 
 ### 2.4 Tool Group Aliases ✅
 
