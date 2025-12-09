@@ -68,6 +68,9 @@ DOTFILES_VERSION=v3.1.0 ./install.sh --binary
 - [ ] Add checksum verification for downloaded binaries
 - [ ] Make `--binary` the default (currently opt-in)
 - [ ] Update Makefile `install` target to build Go binary
+- [ ] **Windows/PowerShell gap:** `install.sh` doesn't auto-setup PowerShell
+  - Currently Windows users must manually run `powershell/Install-Dotfiles.ps1`
+  - Consider: PowerShell-native installer or prompt after bash bootstrap
 
 ---
 
