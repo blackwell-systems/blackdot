@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Powerlevel10k moved to enhanced tier** - Now optional in minimal installs
+  - Removed `powerlevel10k` and `font-meslo-for-powerlevel10k` from `Brewfile.minimal`
+  - Still included in `Brewfile.enhanced` and `Brewfile` (full)
+  - Minimal tier now provides functional shell without fancy prompt
+  - Users can install manually: `brew install powerlevel10k`
+
 ## [3.2.0] - 2025-12-09
 
 ### Changed
