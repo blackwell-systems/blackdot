@@ -84,6 +84,7 @@ func init() {
 		newVaultCmd(),
 		newTemplateCmd(),
 		newBackupCmd(),
+		newRollbackCmd(),
 		newHookCmd(),
 		// Additional commands from bin/
 		newDiffCmd(),

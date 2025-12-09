@@ -787,6 +787,43 @@ dotfiles() {
                 fi
                 set -- "${CLI_FILTERED_ARGS[@]}"
             fi
+
+            # Handle help and flags
+            local skip_confirm=false
+            case "${1:-}" in
+                -h|--help|help)
+                    echo ""
+                    echo -e "${BOLD}${CYAN}dotfiles rollback${NC} - ${DIM}Instant rollback to last backup${NC}"
+                    echo ""
+                    echo -e "${BOLD}${CYAN}USAGE${NC}"
+                    echo -e "  ${YELLOW}dotfiles rollback${NC}              ${DIM}Rollback to latest backup${NC}"
+                    echo -e "  ${YELLOW}dotfiles rollback${NC} --to ID      ${DIM}Rollback to specific backup${NC}"
+                    echo -e "  ${YELLOW}dotfiles rollback${NC} --list       ${DIM}List available backups${NC}"
+                    echo -e "  ${YELLOW}dotfiles rollback${NC} -y           ${DIM}Skip confirmation prompt${NC}"
+                    echo ""
+                    echo -e "${BOLD}${CYAN}EXAMPLES${NC}"
+                    echo -e "  ${DIM}# Quick rollback to most recent backup${NC}"
+                    echo -e "  dotfiles rollback"
+                    echo ""
+                    echo -e "  ${DIM}# Rollback to a specific backup${NC}"
+                    echo -e "  dotfiles rollback --to backup-20250101-120000"
+                    echo ""
+                    echo -e "${BOLD}${CYAN}SEE ALSO${NC}"
+                    echo -e "  ${YELLOW}dotfiles backup${NC}         ${DIM}Create a new backup${NC}"
+                    echo -e "  ${YELLOW}dotfiles backup --list${NC}  ${DIM}List all backups with details${NC}"
+                    echo ""
+                    return 0
+                    ;;
+                -l|--list|list)
+                    "$DOTFILES_DIR/bin/dotfiles-backup" --list
+                    return $?
+                    ;;
+                -y|--yes)
+                    skip_confirm=true
+                    shift
+                    ;;
+            esac
+
             # Quick rollback to last backup
             local backup_dir="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/backups"
             if [[ ! -d "$backup_dir" ]]; then
@@ -805,17 +842,35 @@ dotfiles() {
             # Check if --to flag specified
             if [[ "$1" == "--to" && -n "$2" ]]; then
                 latest_backup="$2"
-                if [[ ! -d "$backup_dir/$latest_backup" ]]; then
+                if [[ ! -f "$backup_dir/$latest_backup.tar.gz" && ! -f "$backup_dir/$latest_backup.tar" ]]; then
                     echo "${RED}[ERROR]${NC} Backup not found: $latest_backup"
                     echo ""
                     echo "Available backups:"
-                    ls -t "$backup_dir" 2>/dev/null | head -5
+                    ls -1t "$backup_dir"/*.tar* 2>/dev/null | head -5 | while read f; do
+                        basename "$f" | sed 's/.tar.*//'
+                    done
                     return 1
                 fi
             fi
 
-            echo "${CYAN}[INFO]${NC} Rolling back to: $latest_backup"
-            "$DOTFILES_DIR/bin/dotfiles-backup" restore "$latest_backup"
+            # Confirmation prompt
+            echo ""
+            echo -e "${YELLOW}[WARN]${NC} This will overwrite your current configuration files!"
+            echo "  Backup: ${latest_backup%.tar*}"
+            echo ""
+
+            if [[ "$skip_confirm" != "true" ]]; then
+                echo -n "Proceed with rollback? [y/N] "
+                read -r response
+                response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
+                if [[ "$response" != "y" && "$response" != "yes" ]]; then
+                    echo "${CYAN}[INFO]${NC} Rollback cancelled"
+                    return 0
+                fi
+            fi
+
+            echo "${CYAN}[INFO]${NC} Rolling back to: ${latest_backup%.tar*}"
+            "$DOTFILES_DIR/bin/dotfiles-backup" restore "${latest_backup%.tar*}"
             ;;
 
         cd)
