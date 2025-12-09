@@ -397,7 +397,7 @@ git log --oneline --graph
 
 ## Licensing
 
-By contributing, you agree that your contributions will be licensed under the MIT License (same as this project).
+By contributing, you agree that your contributions will be licensed under the Apache License 2.0 (same as this project).
 
 See [LICENSE](LICENSE) for details.
 

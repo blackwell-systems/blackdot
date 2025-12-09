@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.2.0] - 2025-12-09
 
+### Changed
+
+- **License** - Changed from MIT License to Apache License 2.0
+  - LICENSE file updated to Apache License 2.0
+  - All documentation and badges updated (README.md, docs/*, CONTRIBUTING.md, etc.)
+  - Provides additional patent protection and contributor license terms
+  - Code remains free and open source
+  - Effective starting with v3.2.0 and all future releases
+
 ### Added
 
 - **Phase 2 Shell Switchover Complete** - Go binary is now the primary CLI

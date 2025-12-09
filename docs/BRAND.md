@@ -30,9 +30,9 @@ You **may not** without prior written permission:
 
 ## Code vs. Brand
 
-The **code** in this repository is licensed under the MIT License—you're free to use, modify, and distribute it.
+The **code** in this repository is licensed under the Apache License 2.0—you're free to use, modify, and distribute it.
 
-The **brand** (name, logo, visual identity) is separately protected and not covered by the MIT License.
+The **brand** (name, logo, visual identity) is separately protected and not covered by the Apache License 2.0.
 
 ## Questions
 
