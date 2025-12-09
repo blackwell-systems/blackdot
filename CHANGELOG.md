@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Supports presets: `-Preset developer`, `-Preset minimal`, etc.
   - Supports options: `-SkipPackages`, `-SkipBinary`, `-WorkspaceTarget`
   - Matches the `curl | bash` experience for Unix users
+  - Git Bash: `install.sh` now prompts to also set up PowerShell module
 
 - **Rollback Command** - Instant rollback to last backup with safety confirmation
   - Go CLI: New `rollback` command with `--to`, `--list`, `-y/--yes` flags

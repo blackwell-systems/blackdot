@@ -309,6 +309,31 @@ if $INSTALL_BINARY; then
     install_go_binary "${DOTFILES_BIN_DIR:-$HOME/.local/bin}" || warn "Binary installation failed, shell scripts will be used"
 fi
 
+# Windows: Offer to set up PowerShell module
+if [[ "$PLATFORM" == "Windows (Git Bash)" || "$PLATFORM" == "Windows" ]]; then
+    PS_INSTALL_SCRIPT="$INSTALL_DIR/powershell/Install-Dotfiles.ps1"
+    if [[ -f "$PS_INSTALL_SCRIPT" ]] && command -v powershell.exe >/dev/null 2>&1; then
+        echo ""
+        echo -e "${CYAN}PowerShell module available${NC}"
+        echo "This will set up dotfiles commands in PowerShell (recommended if you use both shells)"
+        echo ""
+        echo -n "Also set up PowerShell? [y/N]: "
+        read -r setup_ps
+
+        if [[ "${setup_ps:-N}" =~ ^[Yy] ]]; then
+            echo ""
+            info "Setting up PowerShell module..."
+            powershell.exe -ExecutionPolicy Bypass -File "$PS_INSTALL_SCRIPT" && \
+                pass "PowerShell module installed" || \
+                warn "PowerShell setup had issues (you can run it manually later)"
+        else
+            echo ""
+            info "Skipping PowerShell setup"
+            echo "  Run later: powershell.exe -File $PS_INSTALL_SCRIPT"
+        fi
+    fi
+fi
+
 # Run post-install hooks
 run_hook "post_install"
 

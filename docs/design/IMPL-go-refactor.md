@@ -73,7 +73,7 @@ DOTFILES_VERSION=v3.1.0 ./install.sh --binary
 | **Linux** | `curl \| bash` → zsh + Go binary | ✅ Works well |
 | **WSL2** | `curl \| bash` → zsh + Go binary | ✅ Works well |
 | **Windows (PowerShell)** | `irm \| iex` → clone + Go binary + module | ✅ Done |
-| **Windows (Git Bash)** | `curl \| bash` → bash only | ⚠️ No PowerShell prompt |
+| **Windows (Git Bash)** | `curl \| bash` → bash + PS prompt | ✅ Done |
 
 ### 1.3 Windows PowerShell Installer ✅
 
@@ -95,7 +95,7 @@ irm https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/Install.ps
 - [x] Preset support: `-Preset minimal|developer|claude|full`
 
 **Remaining:**
-- [ ] Add to install.sh: detect Windows + prompt for PowerShell setup
+- [x] Add to install.sh: detect Windows + prompt for PowerShell setup
 - [ ] Update docs with platform-specific quick start
 
 ### 1.4 Other Remaining Tasks
