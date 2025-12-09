@@ -1010,6 +1010,18 @@ Set-Alias -Name cbed -Value claude-bedrock -Scope Global -Force
 Set-Alias -Name cmax -Value claude-max -Scope Global -Force
 Set-Alias -Name cm -Value claude-max -Scope Global -Force  # Alias for cmax
 
+# Tool Group Aliases
+# These expose the full tool category as a single command
+# Usage: sshtools keys, awstools profiles, cdktools status, etc.
+function sshtools    { dotfiles tools ssh @args }
+function awstools    { dotfiles tools aws @args }
+function cdktools    { dotfiles tools cdk @args }
+function gotools     { dotfiles tools go @args }
+function rusttools   { dotfiles tools rust @args }
+function pytools     { dotfiles tools python @args }
+function dockertools { dotfiles tools docker @args }
+function claudetools { dotfiles tools claude @args }
+
 #endregion
 
 #region Core Dotfiles Commands
@@ -1300,6 +1312,10 @@ Export-ModuleMember -Function @(
     # Core commands
     'dotfiles-status', 'dotfiles-doctor', 'dotfiles-setup',
     'dotfiles-features', 'dotfiles-vault', 'dotfiles-hook',
+
+    # Tool group aliases (expose full tool category)
+    'sshtools', 'awstools', 'cdktools', 'gotools',
+    'rusttools', 'pytools', 'dockertools', 'claudetools',
 
     # Main wrapper (handles feature auto-reload)
     'Invoke-Dotfiles'

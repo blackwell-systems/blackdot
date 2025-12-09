@@ -899,3 +899,86 @@ dotfiles() {
 
 # Short alias for dotfiles command
 alias d=dotfiles
+
+# =========================
+# Tool Group Aliases
+# =========================
+# These delegate to the Go binary for cross-platform consistency.
+# Usage: sshtools keys, awstools profiles, cdktools status, etc.
+
+# Determine Go binary path
+_dotfiles_go_bin() {
+    if [[ -x "$DOTFILES_DIR/bin/dotfiles" ]]; then
+        echo "$DOTFILES_DIR/bin/dotfiles"
+    elif [[ -x "$DOTFILES_DIR/bin/dotfiles-go" ]]; then
+        echo "$DOTFILES_DIR/bin/dotfiles-go"
+    elif command -v dotfiles-go &>/dev/null; then
+        echo "dotfiles-go"
+    else
+        echo ""
+    fi
+}
+
+# Tool group functions - delegate to Go binary
+sshtools() {
+    local bin=$(_dotfiles_go_bin)
+    if [[ -z "$bin" ]]; then
+        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
+        return 1
+    fi
+    "$bin" tools ssh "$@"
+}
+
+awstools() {
+    local bin=$(_dotfiles_go_bin)
+    if [[ -z "$bin" ]]; then
+        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
+        return 1
+    fi
+    "$bin" tools aws "$@"
+}
+
+cdktools() {
+    local bin=$(_dotfiles_go_bin)
+    if [[ -z "$bin" ]]; then
+        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
+        return 1
+    fi
+    "$bin" tools cdk "$@"
+}
+
+gotools() {
+    local bin=$(_dotfiles_go_bin)
+    if [[ -z "$bin" ]]; then
+        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
+        return 1
+    fi
+    "$bin" tools go "$@"
+}
+
+rusttools() {
+    local bin=$(_dotfiles_go_bin)
+    if [[ -z "$bin" ]]; then
+        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
+        return 1
+    fi
+    "$bin" tools rust "$@"
+}
+
+pytools() {
+    local bin=$(_dotfiles_go_bin)
+    if [[ -z "$bin" ]]; then
+        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
+        return 1
+    fi
+    "$bin" tools python "$@"
+}
+
+dockertools() {
+    local bin=$(_dotfiles_go_bin)
+    if [[ -z "$bin" ]]; then
+        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
+        return 1
+    fi
+    "$bin" tools docker "$@"
+}
