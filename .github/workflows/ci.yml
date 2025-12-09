@@ -1,0 +1,188 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, 'claude/**', 'feature/**' ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # Go binary build and test on all platforms
+  go-test:
+    name: Go Tests
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Test
+        run: go test -v ./...
+
+      - name: Vet
+        run: go vet ./...
+
+  # Build binaries for all platforms
+  go-build-matrix:
+    name: Build (${{ matrix.goos }}/${{ matrix.goarch }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+          - goos: windows
+            goarch: amd64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          SUFFIX=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            SUFFIX=".exe"
+          fi
+          go build -ldflags="-s -w" -o dotfiles-${{ matrix.goos }}-${{ matrix.goarch }}${SUFFIX} ./cmd/dotfiles/
+          ls -la dotfiles-*
+
+  # Shell script validation (remaining scripts)
+  shell-validation:
+    name: Shell Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zsh shellcheck
+
+      - name: Validate bash scripts
+        run: |
+          echo "Validating bash scripts..."
+          SCRIPTS=(
+            bootstrap/bootstrap-mac.sh
+            bootstrap/bootstrap-linux.sh
+            bootstrap/bootstrap-windows.sh
+            bootstrap/_common.sh
+            install.sh
+          )
+          for script in "${SCRIPTS[@]}"; do
+            if [[ -f "$script" ]]; then
+              echo "Checking $script..."
+              shellcheck -S warning "$script" || true
+            fi
+          done
+          echo "Done!"
+
+      - name: Validate zsh scripts
+        run: |
+          echo "Validating ZSH script syntax..."
+          # Check remaining ZSH files
+          for script in zsh/zsh.d/*.zsh lib/*.sh vault/*.sh; do
+            if [[ -f "$script" ]]; then
+              echo "Checking $script..."
+              zsh -n "$script" || exit 1
+            fi
+          done
+          echo "All ZSH scripts have valid syntax!"
+
+  # PowerShell validation
+  powershell-validation:
+    name: PowerShell Scripts
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate PowerShell scripts
+        shell: pwsh
+        run: |
+          Write-Host "Validating PowerShell scripts..."
+          $scripts = @(
+            "powershell/Install-Dotfiles.ps1",
+            "powershell/Dotfiles.psm1",
+            "powershell/Install-Packages.ps1"
+          )
+          foreach ($script in $scripts) {
+            if (Test-Path $script) {
+              Write-Host "Checking $script..."
+              $errors = $null
+              [void][System.Management.Automation.Language.Parser]::ParseFile(
+                (Resolve-Path $script),
+                [ref]$null,
+                [ref]$errors
+              )
+              if ($errors) {
+                Write-Host "Syntax errors in $script :" -ForegroundColor Red
+                $errors | ForEach-Object { Write-Host $_.Message }
+                exit 1
+              }
+            }
+          }
+          Write-Host "All PowerShell scripts valid!"
+
+  # Repository structure check
+  structure-check:
+    name: Repository Structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check required files
+        run: |
+          echo "Checking repository structure..."
+          REQUIRED=(
+            "README.md"
+            "CHANGELOG.md"
+            "Brewfile"
+            "zsh/zshrc"
+            "zsh/p10k.zsh"
+            "cmd/dotfiles/main.go"
+            "internal/cli/root.go"
+            "lib/_logging.sh"
+            "lib/_hooks.sh"
+            "lib/_colors.sh"
+          )
+          MISSING=0
+          for file in "${REQUIRED[@]}"; do
+            if [[ ! -f "$file" ]]; then
+              echo "❌ Missing: $file"
+              ((MISSING++))
+            else
+              echo "✅ Found: $file"
+            fi
+          done
+          if [[ $MISSING -gt 0 ]]; then
+            echo "❌ $MISSING required file(s) missing"
+            exit 1
+          fi
+          echo "All required files present!"
