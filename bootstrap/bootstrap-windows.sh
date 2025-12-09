@@ -15,9 +15,10 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # ============================================================
 # Detect Windows environment
 # ============================================================
-IS_GITBASH=false
-IS_MSYS2=false
-IS_CYGWIN=false
+# Export platform flags for use by other scripts
+export IS_GITBASH=false
+export IS_MSYS2=false
+export IS_CYGWIN=false
 export PLATFORM_NAME="Windows"
 
 case "$(uname -s)" in
