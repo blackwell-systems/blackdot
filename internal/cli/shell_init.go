@@ -78,9 +78,9 @@ _DOTFILES_BIN="%s"
 feature_enabled() {
     local feature="$1"
 
-    # Use Go binary for feature check
+    # Use Go binary for feature check (suppress all output, just use exit code)
     if [[ -x "$_DOTFILES_BIN" ]]; then
-        "$_DOTFILES_BIN" features check "$feature" 2>/dev/null
+        "$_DOTFILES_BIN" features check "$feature" >/dev/null 2>&1
         return $?
     fi
 
@@ -158,7 +158,7 @@ function feature_enabled --description "Check if a feature is enabled"
     set -l feature $argv[1]
 
     if test -x "$_DOTFILES_BIN"
-        $_DOTFILES_BIN features check "$feature" 2>/dev/null
+        $_DOTFILES_BIN features check "$feature" >/dev/null 2>&1
         return $status
     end
 
