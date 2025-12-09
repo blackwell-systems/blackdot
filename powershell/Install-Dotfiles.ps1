@@ -286,6 +286,47 @@ if (-not $NoProfile) {
     Write-Host "[OK] Profile updated" -ForegroundColor Green
 }
 
+# Starship prompt config (if Starship is installed)
+$starshipPath = Get-Command starship -ErrorAction SilentlyContinue
+if ($starshipPath) {
+    Write-Host ""
+    Write-Host "Starship detected. Setting up prompt theme..." -ForegroundColor Cyan
+
+    $starshipConfigDir = Join-Path $HOME ".config"
+    $starshipConfigPath = Join-Path $starshipConfigDir "starship.toml"
+    $bundledConfig = Join-Path $SourcePath "starship.toml"
+
+    $useBundled = "y"
+
+    if (Test-Path $starshipConfigPath) {
+        # Existing config found
+        $response = Read-Host "Existing starship.toml found. Replace with bundled config? [y/N]"
+        $useBundled = if ($response -match '^[Yy]') { "y" } else { "n" }
+    } else {
+        # No existing config
+        $response = Read-Host "Use bundled Starship theme config? [Y/n]"
+        $useBundled = if ($response -match '^[Nn]') { "n" } else { "y" }
+    }
+
+    if ($useBundled -eq "y" -and (Test-Path $bundledConfig)) {
+        # Create config directory if needed
+        if (-not (Test-Path $starshipConfigDir)) {
+            New-Item -Path $starshipConfigDir -ItemType Directory -Force | Out-Null
+        }
+        # Backup existing config if present
+        if (Test-Path $starshipConfigPath) {
+            $timestamp = Get-Date -Format "yyyyMMddHHmmss"
+            $backupPath = "${starshipConfigPath}.bak-${timestamp}"
+            Move-Item -Path $starshipConfigPath -Destination $backupPath -Force
+            Write-Host "  Backed up existing config to: $backupPath" -ForegroundColor Gray
+        }
+        Copy-Item -Path $bundledConfig -Destination $starshipConfigPath -Force
+        Write-Host "  [OK] Starship config installed (powerline theme)" -ForegroundColor Green
+    } else {
+        Write-Host "  Skipping Starship config. Create your own at: $starshipConfigPath" -ForegroundColor Yellow
+    }
+}
+
 Write-Host ""
 Write-Host "Installation complete!" -ForegroundColor Green
 Write-Host ""

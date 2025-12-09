@@ -512,23 +512,22 @@ lib/_colors.sh     → KEEP (used by remaining shell scripts)
 - [ ] Remove references to `dotfiles-go` binary name
 - [ ] Document that shell integration is optional
 
-### 3.5 Windows Prompt Theming ✅
+### 3.5 Prompt Theming ✅
 
-**Decision: Starship** - Added to Windows enhanced tier for cross-platform consistency.
+**Decision: User choice during install** - Both platforms now prompt for theme config.
 
-| Platform | Prompt Theme | Tier |
-|----------|--------------|------|
-| Unix (ZSH) | Powerlevel10k | Enhanced |
-| Windows (PowerShell) | Starship | Enhanced |
+| Platform | Prompt Theme | Tier | Config |
+|----------|--------------|------|--------|
+| Unix (ZSH) | Powerlevel10k | Enhanced | `~/.p10k.zsh` (symlinked) |
+| Windows (PowerShell) | Starship | Enhanced | `~/.config/starship.toml` |
 
-**Implementation (done):**
-- Added `Starship.Starship` to `Install-Packages.ps1` enhanced tier
-- Added to `packages.json`
-- Post-install hint shows profile configuration
-
-**Remaining:**
-- [ ] Add Starship init to `Dotfiles.psm1` for auto-loading
-- [ ] Consider bundling a default `starship.toml` config
+**Implementation (complete):**
+- [x] Added `Starship.Starship` to Windows enhanced tier
+- [x] Bundled `starship.toml` config (powerline theme)
+- [x] `Initialize-Starship` function + auto-init in module
+- [x] Install-Dotfiles.ps1 prompts for Starship config
+- [x] bootstrap-dotfiles.sh prompts for p10k config
+- [x] Respects existing user configs (asks before overwriting)
 
 ### 3.6 Template Syntax Cleanup (Optional)
 

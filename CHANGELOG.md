@@ -19,9 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Starship prompt for Windows** - Cross-platform prompt theming
   - Added `Starship.Starship` to Windows enhanced tier packages
+  - Bundled `starship.toml` config (powerline theme matching p10k)
+  - Auto-initialization in PowerShell module
+  - `Initialize-Starship` function for manual setup
   - Provides consistent prompt experience across platforms
-  - Unix: Powerlevel10k (ZSH), Windows: Starship (PowerShell)
-  - Post-install hint shows profile configuration
+
+- **Prompt theme config choice during install**
+  - Unix: Bootstrap prompts "Use bundled Powerlevel10k theme config? [Y/n]"
+  - Windows: Installer prompts "Use bundled Starship theme config? [Y/n]"
+  - Respects existing configs - asks before overwriting
+  - Users can skip and configure their own themes
 
 ## [3.2.0] - 2025-12-09
 
