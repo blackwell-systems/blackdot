@@ -53,6 +53,7 @@ run_hook() {
 install_go_binary() {
     local install_dir="${1:-$HOME/.local/bin}"
     local version="${DOTFILES_VERSION:-latest}"
+    local skip_checksum="${DOTFILES_SKIP_CHECKSUM:-false}"
 
     # Detect OS
     local os=""
@@ -79,11 +80,14 @@ install_go_binary() {
     # GitHub release URL
     local base_url="https://github.com/blackwell-systems/dotfiles/releases"
     local download_url=""
+    local checksum_url=""
 
     if [[ "$version" == "latest" ]]; then
         download_url="${base_url}/latest/download/${binary_name}"
+        checksum_url="${base_url}/latest/download/SHA256SUMS.txt"
     else
         download_url="${base_url}/download/${version}/${binary_name}"
+        checksum_url="${base_url}/download/${version}/SHA256SUMS.txt"
     fi
 
     info "Downloading Go binary: $binary_name"
@@ -108,6 +112,54 @@ install_go_binary() {
     else
         fail "Neither curl nor wget found"
         return 1
+    fi
+
+    # Verify checksum (unless skipped)
+    if [[ "$skip_checksum" != "true" ]]; then
+        info "Verifying checksum..."
+        local checksum_file="/tmp/dotfiles-checksums-$$.txt"
+        local expected_checksum=""
+
+        # Download checksums file
+        if command -v curl >/dev/null 2>&1; then
+            curl -fsSL "$checksum_url" -o "$checksum_file" 2>/dev/null
+        elif command -v wget >/dev/null 2>&1; then
+            wget -q "$checksum_url" -O "$checksum_file" 2>/dev/null
+        fi
+
+        if [[ -f "$checksum_file" ]]; then
+            # Extract expected checksum for this binary
+            expected_checksum=$(grep "${binary_name}$" "$checksum_file" | awk '{print $1}')
+            rm -f "$checksum_file"
+
+            if [[ -n "$expected_checksum" ]]; then
+                # Calculate actual checksum
+                local actual_checksum=""
+                if command -v sha256sum >/dev/null 2>&1; then
+                    actual_checksum=$(sha256sum "$target" | awk '{print $1}')
+                elif command -v shasum >/dev/null 2>&1; then
+                    actual_checksum=$(shasum -a 256 "$target" | awk '{print $1}')
+                else
+                    warn "No sha256sum or shasum found, skipping checksum verification"
+                fi
+
+                if [[ -n "$actual_checksum" ]]; then
+                    if [[ "$actual_checksum" == "$expected_checksum" ]]; then
+                        pass "Checksum verified"
+                    else
+                        fail "Checksum mismatch!"
+                        fail "Expected: $expected_checksum"
+                        fail "Actual:   $actual_checksum"
+                        rm -f "$target"
+                        return 1
+                    fi
+                fi
+            else
+                warn "Could not find checksum for $binary_name, skipping verification"
+            fi
+        else
+            warn "Could not download checksums file, skipping verification"
+        fi
     fi
 
     # Make executable

@@ -32,6 +32,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - PowerShell script validation on Windows
   - Updated test.yml for Go-first testing
 
+- **Checksum Verification** - Binary downloads now verified against SHA256 checksums
+  - Automatically downloads `SHA256SUMS.txt` from release
+  - Supports both `sha256sum` (Linux) and `shasum` (macOS)
+  - Graceful fallback if checksums unavailable
+  - Skip with `DOTFILES_SKIP_CHECKSUM=true` if needed
+
 ### Removed
 
 - `bin/dotfiles-backup`, `bin/dotfiles-config`, `bin/dotfiles-diff`
