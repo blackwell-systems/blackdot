@@ -63,14 +63,44 @@ DOTFILES_VERSION=v3.1.0 ./install.sh --binary
 - [x] Installs to `~/.local/bin/dotfiles-go`
 - [x] Fallback to shell if binary download fails
 
-### 1.2 Remaining Tasks
+### 1.2 Onboarding Experience by Platform
+
+**Goal:** One command to get started, appropriate setup for each platform.
+
+| Platform | Current | Ideal |
+|----------|---------|-------|
+| **macOS** | `curl \| bash` → zsh + Go binary | ✅ Works well |
+| **Linux** | `curl \| bash` → zsh + Go binary | ✅ Works well |
+| **WSL2** | `curl \| bash` → zsh + Go binary | ✅ Works well |
+| **Windows (PowerShell)** | Manual clone + `Install-Dotfiles.ps1` | ❌ Need one-liner |
+| **Windows (Git Bash)** | `curl \| bash` → bash only | ⚠️ No PowerShell prompt |
+
+### 1.3 Windows PowerShell Installer (NEW)
+
+Create a PowerShell one-liner for native Windows users:
+
+```powershell
+# Ideal: One command in PowerShell
+irm https://raw.githubusercontent.com/.../Install.ps1 | iex
+
+# Or with options
+irm https://... | iex -Args '-Binary', '-Preset', 'developer'
+```
+
+**Tasks:**
+- [ ] Create `Install.ps1` PowerShell bootstrap script
+  - Clone repo to `$HOME\workspace\dotfiles`
+  - Download Go binary for Windows
+  - Run `Install-Dotfiles.ps1` (module setup)
+  - Optionally run `Install-Packages.ps1`
+- [ ] Add to install.sh: detect Windows + prompt for PowerShell setup
+- [ ] Update docs with platform-specific quick start
+
+### 1.4 Other Remaining Tasks
 
 - [ ] Add checksum verification for downloaded binaries
 - [ ] Make `--binary` the default (currently opt-in)
 - [ ] Update Makefile `install` target to build Go binary
-- [ ] **Windows/PowerShell gap:** `install.sh` doesn't auto-setup PowerShell
-  - Currently Windows users must manually run `powershell/Install-Dotfiles.ps1`
-  - Consider: PowerShell-native installer or prompt after bash bootstrap
 
 ---
 
