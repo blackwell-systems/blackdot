@@ -166,6 +166,9 @@ jobs:
             binary: ./dotfiles.exe
             shell_type: powershell
     runs-on: ${{ matrix.os }}
+    env:
+      # Point to checkout directory so binary finds templates/configs
+      DOTFILES_DIR: ${{ github.workspace }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

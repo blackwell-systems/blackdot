@@ -384,6 +384,12 @@ func TestProjectConfigPath(t *testing.T) {
 	}
 	defer os.RemoveAll(tmpDir)
 
+	// Resolve symlinks (macOS: /var -> /private/var)
+	tmpDir, err = filepath.EvalSymlinks(tmpDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	// Create project config in temp dir
 	projectConfig := filepath.Join(tmpDir, ".dotfiles.json")
 	os.WriteFile(projectConfig, []byte(`{"version":3}`), 0644)
