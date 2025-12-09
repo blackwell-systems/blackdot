@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -56,10 +57,20 @@ func SetVersionInfo(version, commit, date string) {
 func Execute() error {
 	err := rootCmd.Execute()
 	if err != nil {
-		// Print styled error message matching ZSH
-		Red.Fprintf(os.Stderr, "Unknown command: ")
-		fmt.Fprintln(os.Stderr, os.Args[1])
-		Dim.Fprintln(os.Stderr, "Run 'dotfiles help' for usage")
+		// Check if it's an unknown command error vs execution error
+		errStr := err.Error()
+		if strings.Contains(errStr, "unknown command") ||
+			strings.Contains(errStr, "unknown flag") ||
+			strings.Contains(errStr, "unknown shorthand flag") {
+			// Unknown command/flag - show help hint
+			Red.Fprintf(os.Stderr, "Error: ")
+			fmt.Fprintln(os.Stderr, errStr)
+			Dim.Fprintln(os.Stderr, "Run 'dotfiles help' for usage")
+		} else {
+			// Execution error - show actual error message
+			Red.Fprintf(os.Stderr, "[ERROR] ")
+			fmt.Fprintln(os.Stderr, errStr)
+		}
 	}
 	return err
 }
