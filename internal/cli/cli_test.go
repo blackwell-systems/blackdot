@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -119,14 +120,15 @@ func TestConfigDir(t *testing.T) {
 	// Test with XDG_CONFIG_HOME set
 	os.Setenv("XDG_CONFIG_HOME", "/custom/config")
 	dir := ConfigDir()
-	if dir != "/custom/config/dotfiles" {
-		t.Errorf("expected '/custom/config/dotfiles', got '%s'", dir)
+	expected := filepath.FromSlash("/custom/config/dotfiles")
+	if dir != expected {
+		t.Errorf("expected '%s', got '%s'", expected, dir)
 	}
 
 	// Test with XDG_CONFIG_HOME unset
 	os.Unsetenv("XDG_CONFIG_HOME")
 	dir = ConfigDir()
-	if !strings.Contains(dir, ".config/dotfiles") {
+	if !strings.Contains(dir, filepath.FromSlash(".config/dotfiles")) {
 		t.Errorf("expected path containing '.config/dotfiles', got '%s'", dir)
 	}
 }

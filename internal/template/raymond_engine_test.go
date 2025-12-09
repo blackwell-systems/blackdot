@@ -1,6 +1,7 @@
 package template
 
 import (
+	"path/filepath"
 	"testing"
 )
 
@@ -260,7 +261,8 @@ func TestRaymondEngineFilterDirname(t *testing.T) {
 		t.Fatalf("Render error: %v", err)
 	}
 
-	expected := "/home/user/.ssh"
+	// filepath.Dir returns platform-native separators
+	expected := filepath.FromSlash("/home/user/.ssh")
 	if result != expected {
 		t.Errorf("Expected %q, got %q", expected, result)
 	}
