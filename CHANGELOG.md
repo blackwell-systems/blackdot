@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Phase 2 Shell Switchover Complete** - Go binary is now the primary CLI
+  - ZSH `dotfiles` function delegates to Go binary when available
+  - Shell-only commands (cd, edit) stay in shell
+  - Features enable/disable updates both Go config and in-memory shell state
+  - Escape hatch: `DOTFILES_USE_GO=0` forces shell implementation
+  - Tool group aliases: `sshtools`, `awstools`, `cdktools`, `gotools`, `rusttools`, `pytools`, `dockertools`, `claudetools`
+  - Individual hyphenated aliases: `ssh-keys`, `aws-profiles`, `cdk-status`, etc.
+
+- **PowerShell Module Improvements** (v3.1.0)
+  - Fixed `d` alias export (now properly exported via New-Alias)
+  - Added tool group functions to manifest
+  - Full parity with ZSH tool aliases
+  - Hook system: 24 hook points, file/function/JSON hooks
+
 - **Windows PowerShell One-Line Installer** - Native Windows onboarding experience
   - New `Install.ps1` bootstrap script for PowerShell users
   - Usage: `irm https://raw.githubusercontent.com/.../Install.ps1 | iex`
@@ -404,6 +418,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Wraps existing shell scripts in `macos/` directory
 
 ### Fixed
+
+- **Go CLI error handling** (`internal/cli/root.go`)
+  - Fixed: All errors were showing "Unknown command: tools" instead of actual error message
+  - Now correctly distinguishes between "unknown command/flag" errors and execution errors
+  - Execution errors show the actual error message with `[ERROR]` prefix
+
+- **Config get/show/source for arbitrary keys** (`internal/cli/config.go`)
+  - Fixed: `config get test.key` returned empty even when `config set user test.key hello` succeeded
+  - Root cause: Used `cfg.Get()` which only knew predefined keys (vault.*, features.*)
+  - Fix: Use `getFromJSONFile()` to read arbitrary nested keys from config layers
+
+- **Age encryption in minimal tier**
+  - Added `age` to `Brewfile.minimal` - required for `dotfiles encrypt` feature
+  - Added `FiloSottile.age` to Windows `$MinimalPackages` in `Install-Packages.ps1`
+
+- **PowerShell `d` alias not exported**
+  - Fixed: Alias was created with `-Scope Global` which prevented export
+  - Changed to `New-Alias` in module scope for proper export via `Export-ModuleMember`
 
 - **Vault session caching** (`dotfiles vault unlock/status`)
   - Fixed: `vault status` always showing "Not authenticated" even after successful unlock

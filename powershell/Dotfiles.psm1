@@ -771,7 +771,10 @@ function Set-LocationWithHook {
     }
 }
 
-# Try to override cd alias for directory change hooks
+# Create cd alias in module scope for export
+New-Alias -Name cd -Value Set-LocationWithHook -Force -ErrorAction SilentlyContinue
+
+# Also try to override the global cd alias for directory change hooks
 # On some PowerShell versions, cd is AllScope and can't be overridden
 try {
     Set-Alias -Name cd -Value Set-LocationWithHook -Scope Global -Force -ErrorAction Stop
@@ -1106,7 +1109,8 @@ function Invoke-Dotfiles {
     return $exitCode
 }
 
-Set-Alias -Name d -Value Invoke-Dotfiles -Scope Global
+# Create aliases for export (must be in module scope, not global, for Export-ModuleMember)
+New-Alias -Name d -Value Invoke-Dotfiles -Force
 
 #endregion
 
