@@ -84,8 +84,9 @@ feature_enabled() {
         return $?
     fi
 
-    # Fallback: assume enabled if binary not found
-    return 0
+    # Binary not found - features are disabled (safe default)
+    # Use DOTFILES_FEATURE_MODE env var to check system state
+    return 1
 }
 
 # Require a feature to be enabled before running a command
@@ -162,7 +163,8 @@ function feature_enabled --description "Check if a feature is enabled"
         return $status
     end
 
-    return 0
+    # Binary not found - features are disabled (safe default)
+    return 1
 end
 
 function require_feature --description "Require a feature to be enabled"
@@ -218,7 +220,8 @@ func outputPowerShellInit() error {
         return $LASTEXITCODE -eq 0
     }
 
-    return $true  # Assume enabled if binary not found
+    # Binary not found - features are disabled (safe default)
+    return $false
 }
 
 function Assert-FeatureEnabled {

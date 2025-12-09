@@ -166,8 +166,10 @@ install_go_binary() {
     chmod +x "$target"
 
     # Verify it works
-    if "$target" version >/dev/null 2>&1; then
+    local verify_output
+    if verify_output=$("$target" version 2>&1); then
         pass "Installed dotfiles binary to: $target"
+        info "Version: $verify_output"
 
         # Add to PATH hint if needed
         if ! echo "$PATH" | grep -q "$install_dir"; then
@@ -175,7 +177,43 @@ install_go_binary() {
         fi
         return 0
     else
-        fail "Binary verification failed"
+        fail "Binary verification failed - the downloaded binary cannot execute"
+        echo ""
+        echo "Possible causes:"
+
+        # Check architecture mismatch
+        local file_info
+        if command -v file >/dev/null 2>&1; then
+            file_info=$(file "$target" 2>/dev/null)
+            echo "  Binary type: $file_info"
+            case "$(uname -m)" in
+                x86_64|amd64)
+                    if ! echo "$file_info" | grep -qi "x86-64\|x86_64\|amd64"; then
+                        echo "  → Architecture mismatch: expected x86_64 binary"
+                    fi
+                    ;;
+                arm64|aarch64)
+                    if ! echo "$file_info" | grep -qi "arm64\|aarch64"; then
+                        echo "  → Architecture mismatch: expected arm64 binary"
+                    fi
+                    ;;
+            esac
+        fi
+
+        # Check if it's actually an HTML error page
+        if head -c 100 "$target" 2>/dev/null | grep -qi "<!DOCTYPE\|<html"; then
+            echo "  → Downloaded file appears to be HTML (release may not exist)"
+        fi
+
+        # Show the error output if any
+        if [[ -n "$verify_output" ]]; then
+            echo "  Error output: $verify_output"
+        fi
+
+        echo ""
+        echo "Try downloading manually from:"
+        echo "  https://github.com/blackwell-systems/dotfiles/releases"
+
         rm -f "$target"
         return 1
     fi
@@ -413,14 +451,20 @@ if ! $MINIMAL; then
         echo -e "${CYAN}Starting setup wizard...${NC}"
         echo ""
 
-        # Run setup - prefer Go binary when available for cross-platform support
+        # Run setup - requires Go binary
         cd "$INSTALL_DIR"
         if [[ -x "$INSTALL_DIR/bin/dotfiles" ]]; then
             "$INSTALL_DIR/bin/dotfiles" setup
         elif [[ -x "${DOTFILES_BIN_DIR:-$HOME/.local/bin}/dotfiles" ]]; then
             "${DOTFILES_BIN_DIR:-$HOME/.local/bin}/dotfiles" setup
         else
-            "$INSTALL_DIR/bin/dotfiles-setup"
+            fail "Go binary not found. Setup requires the dotfiles binary."
+            echo ""
+            echo "To install the binary manually:"
+            echo "  curl -fsSL https://github.com/blackwell-systems/dotfiles/releases/latest/download/dotfiles-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/') -o ~/.local/bin/dotfiles"
+            echo "  chmod +x ~/.local/bin/dotfiles"
+            echo ""
+            echo "Then run: dotfiles setup"
         fi
 
         echo ""
