@@ -189,7 +189,39 @@ DOTFILES_VERSION=v3.1.0 ./install.sh --binary
 | **Windows (PowerShell)** | `irm \| iex` → clone + Go binary + module | ✅ Done |
 | **Windows (Git Bash)** | `curl \| bash` → bash + PS prompt | ✅ Done |
 
-### 1.3 Windows PowerShell Installer ✅
+### 1.3 Binary-Only Installation ✅
+
+For users who don't want shell integration (ZSH or PowerShell modules):
+
+**Unix (macOS/Linux/WSL2):**
+```bash
+# Just the CLI binary, no repo, no shell config
+curl -fsSL <url> | bash -s -- --binary-only
+
+# Result: ~/.local/bin/dotfiles-go
+```
+
+**Windows PowerShell:**
+```powershell
+# Just the CLI binary, no module, no profile changes
+.\Install-Dotfiles.ps1 -BinaryOnly
+
+# Result: ~/.local/bin/dotfiles-go.exe
+```
+
+**Binary-only user experience:**
+- User calls `dotfiles-go` directly (not `dotfiles`)
+- Full CLI functionality: features, doctor, vault, tools, etc.
+- No shell wrappers, no hook system, no auto-loading
+- Can add their own alias if desired: `alias dotfiles=dotfiles-go`
+
+**Use cases:**
+- CI/CD pipelines
+- Docker containers
+- Users preferring minimal shell modifications
+- Testing/development
+
+### 1.4 Windows PowerShell Installer ✅
 
 One-liner for native Windows users:
 
@@ -210,9 +242,9 @@ irm https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/Install.ps
 
 **Remaining:**
 - [x] Add to install.sh: detect Windows + prompt for PowerShell setup
-- [ ] Update docs with platform-specific quick start
+- [x] Update docs with platform-specific quick start
 
-### 1.4 Other Remaining Tasks
+### 1.5 Other Remaining Tasks
 
 - [ ] Add checksum verification for downloaded binaries
 - [ ] Make `--binary` the default (currently opt-in)
