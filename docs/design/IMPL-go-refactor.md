@@ -227,7 +227,7 @@ irm https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/Install.ps
 ### 1.4 Other Remaining Tasks
 
 - [x] Add checksum verification for downloaded binaries
-- [ ] Make `--binary` the default (currently opt-in)
+- [x] Make `--binary` the default (now opt-out with `--no-binary`)
 
 ---
 

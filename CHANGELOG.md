@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Simplified `40-aliases.zsh` by removing fallback code (~550 lines)
   - Total reduction: ~13,500 lines of shell code
 
+- **Binary Download Now Default** - `install.sh` downloads Go binary by default
+  - No longer need `--binary` flag for recommended install
+  - Use `--no-binary` to opt-out if needed
+  - Simpler install: `curl -fsSL <url> | bash` now includes binary
+
 ### Added
 
 - **Shell Init Command** - New `dotfiles shell-init` for shell function initialization

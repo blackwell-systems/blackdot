@@ -8,8 +8,8 @@
 # After installation, run 'dotfiles setup' to configure vault and secrets.
 #
 # Options:
-#   --minimal    Skip optional features (vault, Claude setup)
-#   --binary     Download pre-built Go binary (faster, no build required)
+#   --minimal      Skip optional features (vault, Claude setup)
+#   --no-binary    Skip Go binary download (binary is installed by default)
 #
 # ============================================================
 set -euo pipefail
@@ -195,7 +195,7 @@ INSTALL_DIR="$WORKSPACE_TARGET/dotfiles"
 # Parse arguments
 MINIMAL=false
 USE_SSH=false
-INSTALL_BINARY=false
+INSTALL_BINARY=true   # Default: download Go binary (recommended)
 BINARY_ONLY=false
 
 while [[ $# -gt 0 ]]; do
@@ -212,6 +212,10 @@ while [[ $# -gt 0 ]]; do
             INSTALL_BINARY=true
             shift
             ;;
+        --no-binary)
+            INSTALL_BINARY=false
+            shift
+            ;;
         --binary-only)
             BINARY_ONLY=true
             INSTALL_BINARY=true
@@ -221,13 +225,13 @@ while [[ $# -gt 0 ]]; do
             echo "Dotfiles Installer"
             echo ""
             echo "Usage:"
-            echo "  curl -fsSL <url> | bash                         # Full install (recommended)"
-            echo "  curl -fsSL <url> | bash -s -- --binary          # Install with Go binary"
+            echo "  curl -fsSL <url> | bash                         # Full install with Go binary (recommended)"
+            echo "  curl -fsSL <url> | bash -s -- --no-binary       # Install without Go binary"
             echo "  curl -fsSL <url> | bash -s -- --binary-only     # Just download Go binary"
             echo ""
             echo "Options:"
             echo "  --minimal, -m        Shell config only (skip: Homebrew, vault, Claude, /workspace)"
-            echo "  --binary, -b         Download pre-built Go binary (recommended)"
+            echo "  --no-binary          Skip Go binary download (not recommended)"
             echo "  --binary-only        Just download the Go binary, skip repo clone"
             echo "  --ssh                Clone using SSH instead of HTTPS"
             echo "  --help, -h           Show this help"
@@ -236,10 +240,12 @@ while [[ $# -gt 0 ]]; do
             echo "  WORKSPACE_TARGET     Clone location (default: ~/workspace)"
             echo "  DOTFILES_VERSION     Binary version to download (default: latest)"
             echo "  DOTFILES_BIN_DIR     Where to install binary (default: ~/.local/bin)"
+            echo "  DOTFILES_SKIP_CHECKSUM  Skip SHA256 verification (default: false)"
             echo ""
             echo "Examples:"
-            echo "  curl -fsSL <url> | bash -s -- --binary          # Full install with binary"
-            echo "  DOTFILES_VERSION=v3.1.0 ./install.sh --binary   # Specific version"
+            echo "  curl -fsSL <url> | bash                              # Full install (recommended)"
+            echo "  DOTFILES_VERSION=v4.0.0 ./install.sh                 # Specific version"
+            echo "  curl -fsSL <url> | bash -s -- --minimal --no-binary  # Minimal, no binary"
             echo ""
             echo "After installation, run 'dotfiles setup' to configure your environment."
             exit 0
