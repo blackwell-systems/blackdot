@@ -574,17 +574,55 @@ The Go template engine supports both syntaxes:
 - [ ] Migrate remaining templates to Handlebars syntax
 - [ ] Consider removing old syntax support from Go engine
 
-### 3.7 Success Criteria
+### 3.7 Cross-Platform CI Testing
+
+Add GitHub Actions workflow for automated cross-platform testing.
+
+**Tasks:**
+- [ ] Create `.github/workflows/ci.yml` with matrix strategy
+- [ ] Test on: `ubuntu-latest`, `macos-latest`, `windows-latest`
+- [ ] Run `go build`, `go test`, and `go vet` on all platforms
+- [ ] Add PowerShell script linting for Windows module
+- [ ] Add shellcheck for bash/zsh scripts
+
+**Example workflow:**
+```yaml
+name: CI
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - run: go build ./...
+      - run: go test ./...
+      - run: go vet ./...
+```
+
+**Benefits:**
+- Catch Windows-specific issues without needing Windows locally
+- Verify cross-compilation works
+- Test Go code on all target platforms automatically
+
+### 3.8 Success Criteria
 
 Phase 3 is complete when:
 - [ ] `dotfiles` command runs Go binary directly (no shell interception)
 - [ ] All shell scripts in `bin/dotfiles-*` deleted (except setup)
 - [ ] Shell wrappers only exist for env/cd commands
 - [ ] Binary-only installation is clean and documented
-- [ ] All tests pass
+- [ ] All tests pass on all platforms (Linux, macOS, Windows)
+- [ ] GitHub Actions CI passing
 - [ ] Documentation updated
 
-### 3.8 Cross-Platform Audit (2025-12-09)
+### 3.9 Cross-Platform Audit (2025-12-09)
 
 Comprehensive audit of cross-platform support status:
 
