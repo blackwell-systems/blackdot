@@ -82,6 +82,7 @@ func init() {
 		newDoctorCmd(),
 		newStatusCmd(),
 		newVaultCmd(),
+		newSecretsCmd(), // Alias for vault
 		newTemplateCmd(),
 		newBackupCmd(),
 		newRollbackCmd(),

@@ -99,6 +99,16 @@ func newVaultCmd() *cobra.Command {
 	return cmd
 }
 
+// newSecretsCmd creates a hidden alias for vault command
+// This provides compatibility with ZSH where 'secrets' is an alias for 'vault'
+func newSecretsCmd() *cobra.Command {
+	cmd := newVaultCmd()
+	cmd.Use = "secrets"
+	cmd.Short = "Alias for vault (manage secrets)"
+	cmd.Hidden = true // Don't clutter help, but still works
+	return cmd
+}
+
 func newVaultStatusCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "status",
@@ -334,9 +344,10 @@ Checks:
 
 func newVaultInitCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "init",
-		Short: "Initialize vault setup",
-		Long: `Interactive vault setup wizard.
+		Use:     "init",
+		Aliases: []string{"setup"},
+		Short:   "Initialize vault setup",
+		Long:    `Interactive vault setup wizard.
 
 Steps:
   1. Select vault backend (bitwarden, 1password, pass)
