@@ -10,7 +10,7 @@
 [![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
 [![Tests](https://img.shields.io/badge/Tests-334-brightgreen)](../test/)
 [![Version](https://img.shields.io/github/v/release/blackwell-systems/dotfiles)](https://github.com/blackwell-systems/dotfiles/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
 
 > A dotfiles management framework built on **Feature Registry**, **Configuration Layers**, and **CLI Feature Awareness**. Multi-vault secrets, portable Claude Code sessions, machine-specific templates, and self-healing configuration.
@@ -134,7 +134,7 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 ├── install.sh                          # One-line installer (curl | bash)
 ├── Brewfile                            # Unified Homebrew bundle (macOS + Lima)
 ├── CHANGELOG.md                        # Version history
-├── LICENSE                             # MIT License
+├── LICENSE                             # Apache License 2.0
 ├── README.md                           # Main documentation
 ├── .gitignore                          # Excludes .bw-session, secrets, temp files
 │
@@ -2816,6 +2816,6 @@ echo $SOME_EXPECTED_VAR
 
 ## License
 
-This repository is licensed under the **MIT License**.
+This repository is licensed under the **Apache License 2.0**.
 
 By following this guide, you can fully restore your **dotfiles**, **SSH keys**, **AWS configuration**, **packages via Brewfile**, **Claude workspace**, and **environment secrets** across macOS, Windows, and Linux in a reproducible, vault-backed, fully unified way.
