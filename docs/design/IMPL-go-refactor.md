@@ -176,6 +176,59 @@ eval "$(dotfiles shell-init zsh)"
 - [ ] Implement `dotfiles shell-init zsh` command
 - [ ] Update shell modules to use Go binary
 
+### 2.4 Tool Group Aliases
+
+Expose `dotfiles tools X` as convenient `Xtools` commands:
+
+**ZSH (functions in 40-aliases.zsh):**
+```zsh
+# Tool group aliases - delegate to Go binary
+sshtools()    { "$DOTFILES_DIR/bin/dotfiles-go" tools ssh "$@"; }
+awstools()    { "$DOTFILES_DIR/bin/dotfiles-go" tools aws "$@"; }
+cdktools()    { "$DOTFILES_DIR/bin/dotfiles-go" tools cdk "$@"; }
+gotools()     { "$DOTFILES_DIR/bin/dotfiles-go" tools go "$@"; }
+rusttools()   { "$DOTFILES_DIR/bin/dotfiles-go" tools rust "$@"; }
+pytools()     { "$DOTFILES_DIR/bin/dotfiles-go" tools python "$@"; }
+dockertools() { "$DOTFILES_DIR/bin/dotfiles-go" tools docker "$@"; }
+```
+
+**PowerShell (functions in Dotfiles.psm1):**
+```powershell
+function sshtools    { dotfiles tools ssh @args }
+function awstools    { dotfiles tools aws @args }
+function cdktools    { dotfiles tools cdk @args }
+function gotools     { dotfiles tools go @args }
+function rusttools   { dotfiles tools rust @args }
+function pytools     { dotfiles tools python @args }
+function dockertools { dotfiles tools docker @args }
+```
+
+**Usage (identical on both platforms):**
+```bash
+cdktools              # Shows CDK help
+cdktools status       # Shows CDK status banner
+cdktools init         # Initialize CDK project
+
+awstools              # Shows AWS help
+awstools profiles     # List AWS profiles
+awstools login dev    # SSO login
+
+sshtools              # Shows SSH help
+sshtools keys         # List SSH keys
+sshtools gen mykey    # Generate key
+```
+
+**Benefits:**
+- Short, memorable commands (`cdktools` vs `dotfiles tools cdk`)
+- Consistent across ZSH and PowerShell
+- Both call same Go binary = identical behavior
+- Works alongside individual aliases (`ssh-keys`, `aws-profiles`, etc.)
+
+**Tasks:**
+- [ ] Add tool group functions to `zsh/zsh.d/40-aliases.zsh`
+- [ ] Add tool group functions to `powershell/Dotfiles.psm1`
+- [ ] Update individual aliases (`ssh-keys`, etc.) to call Go binary
+
 ---
 
 ## Phase 3: Deprecation & Cleanup
