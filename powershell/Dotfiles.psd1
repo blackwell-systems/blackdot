@@ -5,7 +5,7 @@
     RootModule = 'Dotfiles.psm1'
 
     # Version number of this module
-    ModuleVersion = '1.2.0'
+    ModuleVersion = '3.1.0'
 
     # ID used to uniquely identify this module
     GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
@@ -91,6 +91,10 @@
         'dotfiles-status', 'dotfiles-doctor', 'dotfiles-setup',
         'dotfiles-features', 'dotfiles-vault', 'dotfiles-hook',
 
+        # Tool group functions (expose full tool category)
+        'sshtools', 'awstools', 'cdktools', 'gotools',
+        'rusttools', 'pytools', 'dockertools', 'claudetools',
+
         # Main wrapper (handles feature auto-reload)
         'Invoke-Dotfiles'
     )
@@ -118,6 +122,12 @@
 
             # Release notes for this module
             ReleaseNotes = @'
+## 3.1.0
+- Go CLI integration (Phase 2 complete)
+- Tool group functions: sshtools, awstools, cdktools, gotools, rusttools, pytools, dockertools, claudetools
+- Fixed alias exports (d, cd now properly exported)
+- Cross-platform parity with ZSH implementation
+
 ## 1.2.0
 - Claude tools integration (full parity with ZSH and Go CLI)
 - claude-status: Show Claude Code configuration
