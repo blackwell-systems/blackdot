@@ -149,6 +149,87 @@ jobs:
           }
           Write-Host "All PowerShell scripts valid!"
 
+  # Integration tests - actually run the binary on each platform
+  integration-tests:
+    name: Integration (${{ matrix.os }})
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            binary: ./dotfiles
+            shell_type: zsh
+          - os: macos-latest
+            binary: ./dotfiles
+            shell_type: zsh
+          - os: windows-latest
+            binary: ./dotfiles.exe
+            shell_type: powershell
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Build binary (Unix)
+        if: matrix.os != 'windows-latest'
+        run: go build -o dotfiles ./cmd/dotfiles/
+
+      - name: Build binary (Windows)
+        if: matrix.os == 'windows-latest'
+        run: go build -o dotfiles.exe ./cmd/dotfiles/
+
+      - name: Test version command
+        run: ${{ matrix.binary }} version
+
+      - name: Test features list
+        run: ${{ matrix.binary }} features list
+
+      - name: Test features presets
+        run: ${{ matrix.binary }} features presets
+
+      - name: Test doctor command
+        run: ${{ matrix.binary }} doctor
+
+      - name: Test config show
+        run: ${{ matrix.binary }} config show
+
+      - name: Test template list
+        run: ${{ matrix.binary }} template list
+
+      - name: Test shell-init (zsh)
+        if: matrix.shell_type == 'zsh'
+        run: |
+          output=$(${{ matrix.binary }} shell-init zsh)
+          if echo "$output" | grep -q "feature_enabled"; then
+            echo "✅ shell-init zsh outputs correct functions"
+          else
+            echo "❌ shell-init zsh output missing expected functions"
+            exit 1
+          fi
+
+      - name: Test shell-init (powershell)
+        if: matrix.shell_type == 'powershell'
+        shell: pwsh
+        run: |
+          $output = ${{ matrix.binary }} shell-init powershell
+          if ($output -match "Test-FeatureEnabled") {
+            Write-Host "✅ shell-init powershell outputs correct functions"
+          } else {
+            Write-Host "❌ shell-init powershell output missing expected functions"
+            exit 1
+          }
+
+      - name: Test help commands
+        run: |
+          ${{ matrix.binary }} help
+          ${{ matrix.binary }} features --help
+          ${{ matrix.binary }} vault --help
+
   # Repository structure check
   structure-check:
     name: Repository Structure
