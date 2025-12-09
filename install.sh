@@ -356,8 +356,15 @@ if ! $MINIMAL; then
         echo ""
 
         # Run setup directly without sourcing zshrc (avoids shell config issues)
-        # Setup script handles its own environment
-        cd "$INSTALL_DIR" && "$INSTALL_DIR/bin/dotfiles-setup"
+        # Prefer Go binary when available for cross-platform support
+        cd "$INSTALL_DIR"
+        if [[ -x "$INSTALL_DIR/bin/dotfiles" ]]; then
+            "$INSTALL_DIR/bin/dotfiles" setup
+        elif [[ -x "${DOTFILES_BIN_DIR:-$HOME/.local/bin}/dotfiles-go" ]]; then
+            "${DOTFILES_BIN_DIR:-$HOME/.local/bin}/dotfiles-go" setup
+        else
+            "$INSTALL_DIR/bin/dotfiles-setup"
+        fi
 
         echo ""
         echo "To load your new shell configuration:"
