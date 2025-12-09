@@ -30,8 +30,8 @@ The Go CLI rewrite is **essentially complete**. All 19+ commands have been porte
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  Phase 1: Installation Integration        ✅ (mostly done) │
-│  Phase 2: Shell Switchover                ⏳ (next)        │
-│  Phase 3: Deprecation & Cleanup           ⏳               │
+│  Phase 2: Shell Switchover                ✅ (complete)    │
+│  Phase 3: Deprecation & Cleanup           ⏳ (next)        │
 │  Phase 4: Future Enhancements (optional)  ⏳               │
 └────────────────────────────────────────────────────────────┘
 ```
@@ -220,11 +220,11 @@ irm https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/Install.ps
 
 ---
 
-## Phase 2: Shell Switchover
+## Phase 2: Shell Switchover ✅
 
 **Goal:** Make shell call Go binary instead of shell scripts
 
-### 2.1 Update 40-aliases.zsh
+### 2.1 Update 40-aliases.zsh ✅
 
 **Current state:** The `dotfiles` function is a large dispatcher calling shell scripts
 
@@ -252,12 +252,12 @@ dotfiles() {
 ```
 
 **Tasks:**
-- [ ] Rename current `dotfiles()` function to `_dotfiles_shell()`
-- [ ] Add new `dotfiles()` that calls Go binary
-- [ ] Add `DOTFILES_USE_GO=0` escape hatch for shell fallback
-- [ ] Test all commands through the new wrapper
+- [x] Rename current `dotfiles()` function to `_dotfiles_shell()`
+- [x] Add new `dotfiles()` that calls Go binary
+- [x] Add `DOTFILES_USE_GO=0` escape hatch for shell fallback
+- [x] Test all commands through the new wrapper
 
-### 2.2 Feature Flag for Gradual Rollout
+### 2.2 Feature Flag for Gradual Rollout ✅
 
 ```zsh
 # Allow users to opt-out if issues arise
@@ -341,7 +341,7 @@ sshtools gen mykey    # Generate key
 **Tasks:**
 - [x] Add tool group functions to `zsh/zsh.d/40-aliases.zsh` ✅
 - [x] Add tool group functions to `powershell/Dotfiles.psm1` ✅
-- [ ] Update individual aliases (`ssh-keys`, etc.) to call Go binary
+- [x] Update individual aliases (`ssh-keys`, etc.) to call Go binary ✅
 
 ---
 
