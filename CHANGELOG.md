@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] - 2025-12-09
+
+> **⚠️ Breaking Changes:** This is a major release. The Go binary is now the sole CLI implementation.
+> Shell fallback (`DOTFILES_USE_GO=0`) has been removed. Direct calls to `bin/dotfiles-*` scripts
+> and sourcing `lib/*.sh` libraries will no longer work.
+
 ### Changed
 
 - **Phase 3 Migration Complete** - Go binary is now the sole CLI implementation
