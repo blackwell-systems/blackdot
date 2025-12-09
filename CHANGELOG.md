@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Minimal tier now provides functional shell without fancy prompt
   - Users can install manually: `brew install powerlevel10k`
 
+### Added
+
+- **Starship prompt for Windows** - Cross-platform prompt theming
+  - Added `Starship.Starship` to Windows enhanced tier packages
+  - Provides consistent prompt experience across platforms
+  - Unix: Powerlevel10k (ZSH), Windows: Starship (PowerShell)
+  - Post-install hint shows profile configuration
+
 ## [3.2.0] - 2025-12-09
 
 ### Changed
