@@ -512,28 +512,23 @@ lib/_colors.sh     → KEEP (used by remaining shell scripts)
 - [ ] Remove references to `dotfiles-go` binary name
 - [ ] Document that shell integration is optional
 
-### 3.5 Windows Prompt Theming (Undecided)
+### 3.5 Windows Prompt Theming ✅
 
-**Gap:** Unix has Powerlevel10k (`zsh/p10k.zsh`), but PowerShell has no prompt theming.
+**Decision: Starship** - Added to Windows enhanced tier for cross-platform consistency.
 
-**Options:**
+| Platform | Prompt Theme | Tier |
+|----------|--------------|------|
+| Unix (ZSH) | Powerlevel10k | Enhanced |
+| Windows (PowerShell) | Starship | Enhanced |
 
-| Option | Pros | Cons |
-|--------|------|------|
-| **Starship** | Cross-platform, already in Go code, works everywhere | Different config format than p10k |
-| **Oh My Posh** | Most popular for PowerShell, similar to p10k | Windows-focused, another dependency |
-| **None** | Simpler, users choose their own | Inconsistent experience |
+**Implementation (done):**
+- Added `Starship.Starship` to `Install-Packages.ps1` enhanced tier
+- Added to `packages.json`
+- Post-install hint shows profile configuration
 
-**If implemented:**
-```powershell
-# Add to packages.json
-{ "id": "Starship.Starship", "comment": "Cross-platform prompt" }
-
-# Add to Dotfiles.psm1
-Invoke-Expression (&starship init powershell)
-```
-
-**Decision:** TBD - depends on whether cross-platform consistency (Starship) or platform-native experience (Oh My Posh) is preferred.
+**Remaining:**
+- [ ] Add Starship init to `Dotfiles.psm1` for auto-loading
+- [ ] Consider bundling a default `starship.toml` config
 
 ### 3.6 Template Syntax Cleanup (Optional)
 
