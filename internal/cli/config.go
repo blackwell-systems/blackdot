@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/blackwell-systems/dotfiles/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -276,8 +275,7 @@ func configGet(key, defaultVal string) error {
 	}
 
 	// Check user config
-	cfg := config.DefaultManager()
-	if val, err := cfg.Get(key); err == nil && val != "" {
+	if val := getFromJSONFile(configLayerUser, key); val != "" {
 		fmt.Println(val)
 		return nil
 	}
@@ -361,8 +359,7 @@ func configShow(key string) error {
 	}
 
 	// User
-	cfg := config.DefaultManager()
-	if val, err := cfg.Get(key); err == nil && val != "" {
+	if val := getFromJSONFile(configLayerUser, key); val != "" {
 		if !active {
 			fmt.Printf("  user:     %s  %s\n", val, Green.Sprint("← active"))
 		} else {
@@ -412,8 +409,7 @@ func configSource(key, defaultVal string) error {
 	}
 
 	// Check user config
-	cfg := config.DefaultManager()
-	if val, err := cfg.Get(key); err == nil && val != "" {
+	if val := getFromJSONFile(configLayerUser, key); val != "" {
 		result = sourceResult{Value: val, Layer: "user", Path: configLayerUser}
 		data, _ := json.Marshal(result)
 		fmt.Println(string(data))
