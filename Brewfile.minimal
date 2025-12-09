@@ -26,8 +26,9 @@ brew "xz"
 brew "zstd"
 brew "ca-certificates"
 
-# Vault (if using secrets management)
+# Vault & Security
 brew "bitwarden-cli"    # Optional: comment out if not using vault
+brew "age"              # Modern file encryption (for dotfiles encrypt)
 
 # ============================================================
 # macOS font (GUI only)
