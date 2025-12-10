@@ -2352,7 +2352,7 @@ The shell automatically checks for drift when you open a new terminal. This uses
 
 **Disable automatic checks:**
 ```bash
-export DOTFILES_SKIP_DRIFT_CHECK=1
+export BLACKDOT_SKIP_DRIFT_CHECK=1
 ```
 
 Add this to `~/.zshrc.local` to permanently disable.

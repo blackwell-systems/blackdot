@@ -119,8 +119,8 @@ blackdot config layers              # Displays effective config with sources
 
 | Layer | File | Use Case |
 |-------|------|----------|
-| Environment | `$DOTFILES_*` vars | CI/CD, temporary overrides |
-| Project | `.dotfiles.local` | Repository-specific settings |
+| Environment | `$BLACKDOT_*` vars | CI/CD, temporary overrides |
+| Project | `.blackdot.local` | Repository-specific settings |
 | Machine | `~/.config/blackdot/machine.json` | Per-machine preferences |
 | User | `~/.config/blackdot/config.json` | User preferences |
 | Defaults | `lib/_config_layers.sh` | Built-in fallbacks |
@@ -197,8 +197,8 @@ All optional components can be controlled via environment variables:
 | `BREWFILE_TIER=full` | Everything including Docker/Node (61 packages, ~10 min) | Full-stack development |
 | `SKIP_WORKSPACE_SYMLINK=true` | Skip `/workspace` symlink | Single-machine setups |
 | `SKIP_CLAUDE_SETUP=true` | Skip Claude Code integration | Non-Claude workflows |
-| `DOTFILES_OFFLINE=1` | Skip all vault operations | Air-gapped/offline environments |
-| `DOTFILES_SKIP_DRIFT_CHECK=1` | Skip drift detection | CI/automation pipelines |
+| `BLACKDOT_OFFLINE=1` | Skip all vault operations | Air-gapped/offline environments |
+| `BLACKDOT_SKIP_DRIFT_CHECK=1` | Skip drift detection | CI/automation pipelines |
 
 **Note:** The `blackdot setup` wizard now presents tier selection interactively. Environment variables are available for advanced/automated setups.
 

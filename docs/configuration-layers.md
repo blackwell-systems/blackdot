@@ -31,7 +31,7 @@ Settings resolve from highest to lowest priority:
 ```
 Priority (highest → lowest)
 ─────────────────────────────────────────────────────────
- 1. Session     Environment variables (DOTFILES_*)
+ 1. Session     Environment variables (BLACKDOT_*)
  2. Project     .blackdot.json in project root
  3. Machine     ~/.config/blackdot/machine.json
  4. User        ~/.config/blackdot/config.json
@@ -115,7 +115,7 @@ Configuration Layers
 
 Layer Locations:
 ───────────────────────────────────────────────────────────────
-  env:         DOTFILES_* environment variables
+  env:         BLACKDOT_* environment variables
   project:     .blackdot.json (not found in current directory)
   machine:     ~/.config/blackdot/machine.json ✓
   user:        ~/.config/blackdot/config.json ✓
@@ -290,7 +290,7 @@ export BLACKDOT_VAULT_BACKEND=pass
 blackdot vault pull  # Uses pass instead of configured backend
 
 # Override feature for testing
-export DOTFILES_FEATURES_VAULT=false
+export BLACKDOT_FEATURES_VAULT=false
 blackdot doctor
 ```
 
@@ -301,7 +301,7 @@ Use environment variables to configure behavior in CI:
 ```bash
 # In CI pipeline
 export BLACKDOT_VAULT_BACKEND=none
-export DOTFILES_FEATURES_TEMPLATES=false
+export BLACKDOT_FEATURES_TEMPLATES=false
 ./install.sh
 ```
 
@@ -314,11 +314,11 @@ Any configuration key can be overridden via environment variable:
 | Config Key | Environment Variable |
 |------------|---------------------|
 | `vault.backend` | `BLACKDOT_VAULT_BACKEND` |
-| `features.vault` | `DOTFILES_FEATURES_VAULT` |
-| `shell.theme` | `DOTFILES_SHELL_THEME` |
-| `packages.tier` | `DOTFILES_PACKAGES_TIER` |
+| `features.vault` | `BLACKDOT_FEATURES_VAULT` |
+| `shell.theme` | `BLACKDOT_SHELL_THEME` |
+| `packages.tier` | `BLACKDOT_PACKAGES_TIER` |
 
-Pattern: `config.key.name` → `DOTFILES_CONFIG_KEY_NAME`
+Pattern: `config.key.name` → `BLACKDOT_CONFIG_KEY_NAME`
 
 ---
 
@@ -379,7 +379,7 @@ When a setting isn't what you expect:
 blackdot config show vault.backend
 
 # Check environment
-env | grep DOTFILES_
+env | grep BLACKDOT_
 
 # See merged result
 blackdot config merged | jq '.vault'

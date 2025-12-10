@@ -23,9 +23,9 @@ This directory contains scripts for **bidirectional secret management** with mul
 
 ```bash
 # Set your preferred backend (add to ~/.zshrc or ~/.zshenv)
-export DOTFILES_VAULT_BACKEND=bitwarden  # default
-export DOTFILES_VAULT_BACKEND=1password
-export DOTFILES_VAULT_BACKEND=pass
+export BLACKDOT_VAULT_BACKEND=bitwarden  # default
+export BLACKDOT_VAULT_BACKEND=1password
+export BLACKDOT_VAULT_BACKEND=pass
 
 # For 1Password, optionally set vault name
 export ONEPASSWORD_VAULT=Personal  # default
@@ -135,7 +135,7 @@ brew install --cask 1password-cli
 op signin
 
 # Set backend
-export DOTFILES_VAULT_BACKEND=1password
+export BLACKDOT_VAULT_BACKEND=1password
 
 # Optionally specify vault
 export ONEPASSWORD_VAULT=Personal
@@ -151,7 +151,7 @@ brew install pass gnupg
 pass init "your-gpg-id@email.com"
 
 # Set backend
-export DOTFILES_VAULT_BACKEND=pass
+export BLACKDOT_VAULT_BACKEND=pass
 
 # Items will be stored under dotfiles/ prefix
 # e.g., dotfiles/Git-Config, dotfiles/SSH-Config
@@ -226,12 +226,12 @@ dotfiles vault restore --force  # Skip drift check
 
 **Skip drift check for automation:**
 ```bash
-DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault restore
+BLACKDOT_SKIP_DRIFT_CHECK=1 blackdot vault restore
 ```
 
 **Offline mode:** For air-gapped environments or when vault is unavailable:
 ```bash
-DOTFILES_OFFLINE=1 dotfiles vault restore  # Exits gracefully, keeps local files
+BLACKDOT_OFFLINE=1 blackdot vault restore  # Exits gracefully, keeps local files
 ```
 
 **When to use:** New machine setup, or after secrets change in your vault.
@@ -399,8 +399,8 @@ pass "Success!"
 
 **Key data structures:**
 ```bash
-# All dotfiles items with their paths and requirements
-DOTFILES_ITEMS["Git-Config"]="$HOME/.gitconfig:required:file"
+# All blackdot items with their paths and requirements
+BLACKDOT_ITEMS["Git-Config"]="$HOME/.gitconfig:required:file"
 
 # Items that can be synced (excludes SSH keys)
 SYNCABLE_ITEMS["Git-Config"]="$HOME/.gitconfig"
@@ -437,7 +437,7 @@ SYNCABLE_ITEMS["Git-Config"]="$HOME/.gitconfig"
 │   vault_sync()         vault_get_notes()  vault_update_item()   │
 │   vault_login_check()  vault_item_exists() vault_delete_item()  │
 │                     ↓                                            │
-│   Loads backend based on DOTFILES_VAULT_BACKEND                 │
+│   Loads backend based on BLACKDOT_VAULT_BACKEND                 │
 │                     ↓                                            │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
@@ -455,7 +455,7 @@ SYNCABLE_ITEMS["Git-Config"]="$HOME/.gitconfig"
 
 1. Create `vault/backends/newbackend.sh`
 2. Implement required functions (see `backends/_interface.md`)
-3. Test with `DOTFILES_VAULT_BACKEND=newbackend dotfiles vault list`
+3. Test with `BLACKDOT_VAULT_BACKEND=newbackend blackdot vault list`
 
 ---
 
@@ -524,7 +524,7 @@ dotfiles vault sync --all
 dotfiles vault list  # Note all items
 
 # 2. Set new backend
-export DOTFILES_VAULT_BACKEND=1password
+export BLACKDOT_VAULT_BACKEND=1password
 
 # 3. Create items in new backend
 dotfiles vault create Git-Config

@@ -147,8 +147,8 @@ plugins/
 (( $+commands[docker] )) || return 0
 
 # Plugin configuration (with defaults from manifest)
-local default_shell="${DOTFILES_PLUGIN_DOCKER_DEFAULT_SHELL:-/bin/sh}"
-local cleanup_days="${DOTFILES_PLUGIN_DOCKER_CLEANUP_DAYS:-7}"
+local default_shell="${BLACKDOT_PLUGIN_DOCKER_DEFAULT_SHELL:-/bin/sh}"
+local cleanup_days="${BLACKDOT_PLUGIN_DOCKER_CLEANUP_DAYS:-7}"
 
 # Aliases
 alias dc='docker compose'
@@ -685,8 +685,8 @@ Based on implementing CLI Feature Awareness, Configuration Layers, and Feature R
 Add env var bypass for scripting/CI:
 ```bash
 # In lib/_plugins.sh
-DOTFILES_PLUGIN_FORCE=true   # Bypass dependency checks
-DOTFILES_PLUGIN_VERBOSE=true # Show debug output
+BLACKDOT_PLUGIN_FORCE=true   # Bypass dependency checks
+BLACKDOT_PLUGIN_VERBOSE=true # Show debug output
 ```
 
 ### 2. Meta-Feature Pattern
@@ -729,7 +729,7 @@ plugin_load() {
     local name="$1"
 
     # Environment override
-    if [[ "${DOTFILES_PLUGIN_FORCE:-}" == "true" ]]; then
+    if [[ "${BLACKDOT_PLUGIN_FORCE:-}" == "true" ]]; then
         # Skip dependency check
     fi
 

@@ -222,11 +222,11 @@ Features can also be controlled via environment variables:
 # SKIP_* variables (backward compatible)
 SKIP_WORKSPACE_SYMLINK=true    # Disables workspace_symlink
 SKIP_CLAUDE_SETUP=true         # Disables claude_integration
-DOTFILES_SKIP_DRIFT_CHECK=1    # Disables drift_check
+BLACKDOT_SKIP_DRIFT_CHECK=1    # Disables drift_check
 
 # Direct feature control
-DOTFILES_FEATURE_VAULT=true    # Enable vault
-DOTFILES_FEATURE_VAULT=false   # Disable vault
+BLACKDOT_FEATURE_VAULT=true    # Enable vault
+BLACKDOT_FEATURE_VAULT=false   # Disable vault
 ```
 
 **See also:** [Feature Registry](features.md) for complete documentation.
@@ -362,8 +362,8 @@ blackdot config set vault.auto_backup true
 
 | Priority | Layer | Source |
 |----------|-------|--------|
-| 1 | Environment | `$DOTFILES_*` variables |
-| 2 | Project | `.dotfiles.local` in current directory |
+| 1 | Environment | `$BLACKDOT_*` variables |
+| 2 | Project | `.blackdot.local` in current directory |
 | 3 | Machine | `~/.config/blackdot/machine.json` |
 | 4 | User | `~/.config/blackdot/config.json` |
 | 5 | Defaults | Built-in fallbacks |
@@ -423,7 +423,7 @@ Drift detection runs automatically on shell startup using quick mode. If local f
   Run: blackdot drift (to compare) or blackdot vault pull (to restore)
 ```
 
-Disable with: `export DOTFILES_SKIP_DRIFT_CHECK=1`
+Disable with: `export BLACKDOT_SKIP_DRIFT_CHECK=1`
 
 **How it works:**
 1. After `blackdot vault pull`, checksums are saved to `~/.cache/dotfiles/vault-state.json`
@@ -869,7 +869,7 @@ blackdot vault pull [OPTIONS]
 5. Sets correct file permissions
 
 **Environment variables:**
-- `DOTFILES_SKIP_DRIFT_CHECK=1` - Skip drift check (for automation)
+- `BLACKDOT_SKIP_DRIFT_CHECK=1` - Skip drift check (for automation)
 
 ---
 
@@ -1776,8 +1776,8 @@ BREWFILE_TIER=enhanced SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-mac.sh
 | Variable | Values | Description |
 |----------|--------|-------------|
 | `BLACKDOT_VAULT_BACKEND` | `bitwarden`, `1password`, `pass` | Vault backend to use (default: `bitwarden`) |
-| `DOTFILES_OFFLINE` | `1` | Skip all vault operations |
-| `DOTFILES_SKIP_DRIFT_CHECK` | `1` | Skip drift check before restore |
+| `BLACKDOT_OFFLINE` | `1` | Skip all vault operations |
+| `BLACKDOT_SKIP_DRIFT_CHECK` | `1` | Skip drift check before restore |
 | `BW_SESSION` | session token | Bitwarden session (set by `bw unlock`) |
 | `ONEPASSWORD_VAULT` | vault name | 1Password vault name (default: `Personal`) |
 | `PASS_PREFIX` | prefix | Pass store prefix (default: `blackdot`) |
@@ -1789,10 +1789,10 @@ BREWFILE_TIER=enhanced SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-mac.sh
 export BLACKDOT_VAULT_BACKEND=1password
 
 # Offline mode (air-gapped environments)
-DOTFILES_OFFLINE=1 ./bootstrap/bootstrap-linux.sh
+BLACKDOT_OFFLINE=1 ./bootstrap/bootstrap-linux.sh
 
 # Force pull without drift check
-DOTFILES_SKIP_DRIFT_CHECK=1 blackdot vault pull
+BLACKDOT_SKIP_DRIFT_CHECK=1 blackdot vault pull
 ```
 
 ---
@@ -1801,18 +1801,18 @@ DOTFILES_SKIP_DRIFT_CHECK=1 blackdot vault pull
 
 | Variable | Values | Description |
 |----------|--------|-------------|
-| `DOTFILES_TMPL_*` | any | Override any template variable |
-| `DOTFILES_MACHINE_TYPE` | `work`, `personal` | Force machine type detection |
+| `BLACKDOT_TMPL_*` | any | Override any template variable |
+| `BLACKDOT_MACHINE_TYPE` | `work`, `personal` | Force machine type detection |
 | `DEBUG` | `1` | Enable debug output |
 
 **Examples:**
 
 ```bash
 # Override git email for one render
-DOTFILES_TMPL_GIT_EMAIL="other@example.com" dotfiles template render
+BLACKDOT_TMPL_GIT_EMAIL="other@example.com" blackdot template render
 
 # Force machine type
-DOTFILES_MACHINE_TYPE=work dotfiles template render
+BLACKDOT_MACHINE_TYPE=work blackdot template render
 
 # Debug template rendering
 DEBUG=1 dotfiles template render

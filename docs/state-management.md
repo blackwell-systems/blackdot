@@ -123,7 +123,7 @@ blackdot features preset developer --persist
 
 **Priority order for feature state:**
 1. Runtime state (current shell session)
-2. Environment variables (`DOTFILES_FEATURE_<NAME>` or `SKIP_*`)
+2. Environment variables (`BLACKDOT_FEATURE_<NAME>` or `SKIP_*`)
 3. Config file (`features.*` in config.json)
 4. Registry defaults (lib/_features.sh)
 

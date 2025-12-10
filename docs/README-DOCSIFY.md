@@ -8,7 +8,7 @@ This directory contains the Docsify-powered documentation website for the dotfil
 
 (Configure this in GitHub Settings → Pages → Source: `main` branch, `/docs` folder)
 
-## 🚀 Local Development
+## Local Development
 
 ### Option 1: Using docsify-cli (Recommended)
 

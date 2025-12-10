@@ -202,7 +202,7 @@ blackdot-update() {
 
 # One-command upgrade flow with health check
 blackdot-upgrade() {
-    echo "🚀 Upgrading blackdot..."
+    echo "Upgrading blackdot..."
 
     # Pull latest changes
     local branch

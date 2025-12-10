@@ -417,7 +417,7 @@ Contributors will be:
 - Added to GitHub contributors page
 - Given credit in commit messages
 
-Thank you for making dotfiles better! 🚀
+Thank you for making blackdot better!
 
 ---
 

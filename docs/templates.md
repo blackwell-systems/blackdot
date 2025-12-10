@@ -544,9 +544,9 @@ The template system automatically prefers JSON arrays if `_arrays.local.json` ex
 
 Variables are resolved in this order (highest priority first):
 
-1. **Environment variables** (`DOTFILES_TMPL_*`)
+1. **Environment variables** (`BLACKDOT_TMPL_*`)
    ```bash
-   DOTFILES_TMPL_GIT_EMAIL="other@example.com" dotfiles template render
+   BLACKDOT_TMPL_GIT_EMAIL="other@example.com" blackdot template render
    ```
 
 2. **Local overrides** (`templates/_variables.local.sh`)
@@ -573,7 +573,7 @@ Variables are resolved in this order (highest priority first):
 
 The template system automatically detects your machine type based on:
 
-1. **Environment variable**: `DOTFILES_MACHINE_TYPE`
+1. **Environment variable**: `BLACKDOT_MACHINE_TYPE`
 2. **Hostname patterns**:
    - Contains `work`, `corp`, `office` → `work`
    - Contains `personal`, `home`, `macbook`, `imac` → `personal`

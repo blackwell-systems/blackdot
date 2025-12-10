@@ -498,9 +498,9 @@ blackdot features enable hooks --persist
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `DOTFILES_HOOKS_VERBOSE` | `false` | Enable verbose hook output |
-| `DOTFILES_HOOKS_DISABLED` | `false` | Disable all hooks |
-| `DOTFILES_HOOKS_FAIL_FAST` | `false` | Stop on first failure |
+| `BLACKDOT_HOOKS_VERBOSE` | `false` | Enable verbose hook output |
+| `BLACKDOT_HOOKS_DISABLED` | `false` | Disable all hooks |
+| `BLACKDOT_HOOKS_FAIL_FAST` | `false` | Stop on first failure |
 
 ---
 

@@ -345,7 +345,7 @@ To skip this check (for automation or when you intentionally want to overwrite):
 blackdot vault pull --force
 
 # Or set environment variable
-DOTFILES_SKIP_DRIFT_CHECK=1 blackdot vault pull
+BLACKDOT_SKIP_DRIFT_CHECK=1 blackdot vault pull
 ```
 
 ---
@@ -356,11 +356,11 @@ For air-gapped environments, vault outages, or when you simply don't have vault 
 
 ```bash
 # Skip all vault operations during bootstrap
-DOTFILES_OFFLINE=1 ./bootstrap/bootstrap-mac.sh
+BLACKDOT_OFFLINE=1 ./bootstrap/bootstrap-mac.sh
 
 # Or for individual commands
-DOTFILES_OFFLINE=1 blackdot vault pull  # Exits gracefully
-DOTFILES_OFFLINE=1 blackdot vault push     # Exits gracefully
+BLACKDOT_OFFLINE=1 blackdot vault pull  # Exits gracefully
+BLACKDOT_OFFLINE=1 blackdot vault push     # Exits gracefully
 ```
 
 When offline mode is enabled:

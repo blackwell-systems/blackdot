@@ -300,8 +300,8 @@ blackdot template render          # Generate configs
 **Use in offline/air-gapped environments:**
 
 ```bash
-DOTFILES_OFFLINE=1 ./bootstrap/bootstrap-linux.sh    # Skips all vault operations
-DOTFILES_SKIP_DRIFT_CHECK=1 blackdot vault pull   # No drift check (for CI/automation)
+BLACKDOT_OFFLINE=1 ./bootstrap/bootstrap-linux.sh    # Skips all vault operations
+BLACKDOT_SKIP_DRIFT_CHECK=1 blackdot vault pull   # No drift check (for CI/automation)
 ```
 
 **All setup wizard steps are optional.** The wizard detects your choices and adjusts:
@@ -388,8 +388,8 @@ blackdot config get vault.backend
 
 Settings resolve through 5 layers (highest to lowest priority):
 
-1. **Environment** - `$DOTFILES_*` variables (CI/CD, temporary overrides)
-2. **Project** - `.dotfiles.local` in current directory
+1. **Environment** - `$BLACKDOT_*` variables (CI/CD, temporary overrides)
+2. **Project** - `.blackdot.local` in current directory
 3. **Machine** - `~/.config/blackdot/machine.json` (per-machine settings)
 4. **User** - `~/.config/blackdot/config.json` (user preferences)
 5. **Defaults** - Built-in fallbacks

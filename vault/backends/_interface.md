@@ -9,7 +9,7 @@ The vault abstraction layer allows dotfiles to work with multiple secret managem
 ## Environment Variable
 
 ```bash
-DOTFILES_VAULT_BACKEND="${DOTFILES_VAULT_BACKEND:-bitwarden}"
+BLACKDOT_VAULT_BACKEND="${BLACKDOT_VAULT_BACKEND:-bitwarden}"
 ```
 
 ## Required Functions
@@ -249,7 +249,7 @@ Each backend should be testable with:
 
 ```bash
 # Set backend
-export DOTFILES_VAULT_BACKEND=example
+export BLACKDOT_VAULT_BACKEND=example
 
 # Test basic operations
 source lib/_vault.sh

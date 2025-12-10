@@ -285,8 +285,8 @@ _cli_feature_disabled_message() {
 
 | Feature | Priority | Notes |
 |---------|----------|-------|
-| `DOTFILES_CLI_SHOW_ALL` env var | Low | For scripting |
-| `DOTFILES_FORCE` env var | Low | For scripting |
+| `BLACKDOT_CLI_SHOW_ALL` env var | Low | For scripting |
+| `BLACKDOT_FORCE` env var | Low | For scripting |
 | Subcommand awareness (Phase 4) | Low | Not critical for v1 |
 | `blackdot help <command>` | Low | Nice-to-have |
 | Tab completion filtering | Low | Future enhancement |
@@ -435,10 +435,10 @@ For scripting and advanced users:
 
 ```bash
 # Always show all commands (ignore feature filtering)
-export DOTFILES_CLI_SHOW_ALL=true
+export BLACKDOT_CLI_SHOW_ALL=true
 
 # Force command execution without feature check
-DOTFILES_FORCE=true blackdot vault pull
+BLACKDOT_FORCE=true blackdot vault pull
 ```
 
 ---
@@ -503,7 +503,7 @@ Disabled Features:
 1. **No breaking changes** - Commands still work, just with prompts
 2. **--force flag** - Execute disabled commands if needed
 3. **--all flag** - See all commands in help
-4. **Environment override** - `DOTFILES_CLI_SHOW_ALL=true`
+4. **Environment override** - `BLACKDOT_CLI_SHOW_ALL=true`
 5. **Feature toggle** - Disable filtering entirely with `cli_feature_filter`
 
 ---

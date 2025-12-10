@@ -518,7 +518,7 @@ blackdot drift
 2. **Handle missing items gracefully** - Return empty strings, not errors
 3. **Cache sessions securely** - Use 600 permissions on session files
 4. **Use jq for JSON** - All backends assume jq is available
-5. **Test offline behavior** - `DOTFILES_OFFLINE=1` should skip vault operations gracefully
+5. **Test offline behavior** - `BLACKDOT_OFFLINE=1` should skip vault operations gracefully
 
 ---
 

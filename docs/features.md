@@ -162,7 +162,7 @@ Features can be controlled via environment variables, providing backward compati
 |----------|---------|--------|
 | `SKIP_WORKSPACE_SYMLINK=true` | `workspace_symlink` | Disables feature |
 | `SKIP_CLAUDE_SETUP=true` | `claude_integration` | Disables feature |
-| `DOTFILES_SKIP_DRIFT_CHECK=1` | `drift_check` | Disables feature |
+| `BLACKDOT_SKIP_DRIFT_CHECK=1` | `drift_check` | Disables feature |
 
 ### Direct Feature Control
 
@@ -170,10 +170,10 @@ Enable or disable any feature directly:
 
 ```bash
 # Enable a feature
-export DOTFILES_FEATURE_VAULT=true
+export BLACKDOT_FEATURE_VAULT=true
 
 # Disable a feature
-export DOTFILES_FEATURE_AWS_HELPERS=false
+export BLACKDOT_FEATURE_AWS_HELPERS=false
 ```
 
 ---
@@ -203,7 +203,7 @@ Use `blackdot features enable <name> --persist` to update this file automaticall
 When checking if a feature is enabled, the system checks in this order (highest priority first):
 
 1. **Runtime state** - `feature_enable`/`feature_disable` in current session
-2. **Environment variables** - `DOTFILES_FEATURE_*` or `SKIP_*` vars
+2. **Environment variables** - `BLACKDOT_FEATURE_*` or `SKIP_*` vars
 3. **Config file** - `~/.config/blackdot/config.json`
 4. **Registry defaults** - Built-in defaults in `lib/_features.sh`
 
@@ -312,7 +312,7 @@ blackdot features list optional
 ```bash
 # Disable interactive features
 export SKIP_WORKSPACE_SYMLINK=true
-export DOTFILES_SKIP_DRIFT_CHECK=1
+export BLACKDOT_SKIP_DRIFT_CHECK=1
 
 # Or use minimal preset
 blackdot features preset minimal
@@ -326,7 +326,7 @@ blackdot features preset minimal
 
 1. Check if it's a core feature (cannot be disabled)
 2. Check if dependencies are met: `blackdot features status <feature>`
-3. Check environment variables: `env | grep -E 'SKIP_|DOTFILES_FEATURE_'`
+3. Check environment variables: `env | grep -E 'SKIP_|BLACKDOT_FEATURE_'`
 
 ### Changes Don't Persist
 

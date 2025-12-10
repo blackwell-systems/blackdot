@@ -213,7 +213,7 @@ config_get_layered() {
 
     # Layer 1: Environment variable
     # Convert key to env var: vault.backend -> BLACKDOT_VAULT_BACKEND
-    local env_key="DOTFILES_${key//\./_}"
+    local env_key="BLACKDOT_${key//\./_}"
     env_key="${env_key:u}"  # uppercase
     if [[ -n "${(P)env_key:-}" ]]; then
         value="${(P)env_key}"
@@ -275,7 +275,7 @@ config_get_with_source() {
     local file=""
 
     # Check each layer and record source
-    local env_key="DOTFILES_${key//\./_}"
+    local env_key="BLACKDOT_${key//\./_}"
     env_key="${env_key:u}"
     if [[ -n "${(P)env_key:-}" ]]; then
         value="${(P)env_key}"
@@ -387,7 +387,7 @@ config_show_layers() {
     echo ""
 
     # Environment
-    local env_key="DOTFILES_${key//\./_}"
+    local env_key="BLACKDOT_${key//\./_}"
     env_key="${env_key:u}"
     local env_val="${(P)env_key:-}"
     printf "  %-10s %s\n" "env:" "${env_val:-(not set)}"
@@ -538,7 +538,7 @@ Commands:
   edit [layer]               Open config in editor (default: user)
 
 Layers (in priority order):
-  env        Environment variables (DOTFILES_*)
+  env        Environment variables (BLACKDOT_*)
   project    Project-specific (.blackdot.json)
   machine    Machine-specific (~/.config/blackdot/machine.json)
   user       User preferences (~/.config/blackdot/config.json)
@@ -600,7 +600,7 @@ cmd_list() {
     echo ""
     echo "Layer Locations:"
     echo "───────────────────────────────────────────────────────────────"
-    printf "  %-12s %s\n" "env:" "DOTFILES_* environment variables"
+    printf "  %-12s %s\n" "env:" "BLACKDOT_* environment variables"
     # ... show project, machine, user locations with existence check
     echo ""
     echo "Priority: env > project > machine > user > default"

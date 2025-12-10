@@ -695,12 +695,12 @@ Based on implementing CLI Feature Awareness, Configuration Layers, and Feature R
 Add env var control for scripting/CI:
 ```bash
 # In lib/_hooks.sh
-DOTFILES_HOOKS_DISABLED=true  # Skip all hook execution
-DOTFILES_HOOKS_VERBOSE=true   # Show detailed execution log
-DOTFILES_HOOKS_TIMEOUT=60     # Override timeout
+BLACKDOT_HOOKS_DISABLED=true  # Skip all hook execution
+BLACKDOT_HOOKS_VERBOSE=true   # Show detailed execution log
+BLACKDOT_HOOKS_TIMEOUT=60     # Override timeout
 
 # Check at start of hook_run()
-if [[ "${DOTFILES_HOOKS_DISABLED:-}" == "true" ]]; then
+if [[ "${BLACKDOT_HOOKS_DISABLED:-}" == "true" ]]; then
     return 0
 fi
 ```

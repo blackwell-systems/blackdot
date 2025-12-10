@@ -4,7 +4,7 @@ First, check the current state:
 
 ```bash
 # Check configured backend
-echo "Backend: ${DOTFILES_VAULT_BACKEND:-bitwarden}"
+echo "Backend: ${BLACKDOT_VAULT_BACKEND:-bitwarden}"
 
 # Bitwarden status
 bw status 2>/dev/null | head -5
