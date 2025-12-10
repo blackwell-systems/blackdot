@@ -1,6 +1,6 @@
-// Package cli implements the dotfiles command-line interface using Cobra.
+// Package cli implements the blackdot command-line interface using Cobra.
 //
-// Commands mirror the existing Zsh implementation in bin/dotfiles-*
+// Commands mirror the existing Zsh implementation in bin/blackdot-*
 // to ensure behavioral compatibility during migration.
 package cli
 
@@ -29,15 +29,15 @@ var (
 
 // rootCmd represents the base command
 var rootCmd = &cobra.Command{
-	Use:   "dotfiles",
-	Short: "Manage your dotfiles",
-	Long: `dotfiles - A feature-rich dotfiles management system.
+	Use:   "blackdot",
+	Short: "Manage your configuration",
+	Long: `blackdot - A feature-rich configuration management system.
 
 This CLI provides commands for managing shell configuration, secrets,
 templates, and system health. Features can be enabled/disabled to
 customize the available functionality.
 
-Run 'dotfiles help' for detailed command information.`,
+Run 'blackdot help' for detailed command information.`,
 	SilenceUsage:  true,
 	SilenceErrors: true,
 	// Show help when called without subcommand
@@ -65,7 +65,7 @@ func Execute() error {
 			// Unknown command/flag - show help hint
 			Red.Fprintf(os.Stderr, "Error: ")
 			fmt.Fprintln(os.Stderr, errStr)
-			Dim.Fprintln(os.Stderr, "Run 'dotfiles help' for usage")
+			Dim.Fprintln(os.Stderr, "Run 'blackdot help' for usage")
 		} else {
 			// Execution error - show actual error message
 			Red.Fprintf(os.Stderr, "[ERROR] ")
@@ -120,35 +120,35 @@ func init() {
 	)
 }
 
-// initConfig resolves the dotfiles directory
+// initConfig resolves the blackdot directory
 func initConfig() {
-	// Check DOTFILES_DIR env var first
-	dotfilesDir = os.Getenv("DOTFILES_DIR")
+	// Check BLACKDOT_DIR env var first
+	dotfilesDir = os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir != "" {
 		return
 	}
 
-	// Default to ~/.dotfiles
+	// Default to ~/.blackdot
 	home, err := os.UserHomeDir()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: could not determine home directory: %v\n", err)
 		return
 	}
 
-	dotfilesDir = filepath.Join(home, ".dotfiles")
+	dotfilesDir = filepath.Join(home, ".blackdot")
 }
 
-// DotfilesDir returns the resolved dotfiles directory path
+// DotfilesDir returns the resolved blackdot directory path
 func DotfilesDir() string {
 	return dotfilesDir
 }
 
-// ConfigDir returns the config directory (~/.config/dotfiles)
+// ConfigDir returns the config directory (~/.config/blackdot)
 func ConfigDir() string {
 	configHome := os.Getenv("XDG_CONFIG_HOME")
 	if configHome == "" {
 		home, _ := os.UserHomeDir()
 		configHome = filepath.Join(home, ".config")
 	}
-	return filepath.Join(configHome, "dotfiles")
+	return filepath.Join(configHome, "blackdot")
 }

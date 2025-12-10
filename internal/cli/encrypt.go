@@ -417,7 +417,7 @@ func runEncryptEdit(cmd *cobra.Command, args []string) error {
 
 func runEncryptList(cmd *cobra.Command, args []string) error {
 	home, _ := os.UserHomeDir()
-	dotfilesDir := os.Getenv("DOTFILES_DIR")
+	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
 		dotfilesDir = filepath.Join(home, ".dotfiles")
 	}
@@ -508,7 +508,7 @@ func runEncryptStatus(cmd *cobra.Command, args []string) error {
 
 	// Count encrypted files
 	home, _ := os.UserHomeDir()
-	dotfilesDir := os.Getenv("DOTFILES_DIR")
+	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
 		dotfilesDir = filepath.Join(home, ".dotfiles")
 	}

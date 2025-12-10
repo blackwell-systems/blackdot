@@ -85,7 +85,7 @@ feature_enabled() {
     fi
 
     # Binary not found - features are disabled (safe default)
-    # Use DOTFILES_FEATURE_MODE env var to check system state
+    # Use BLACKDOT_FEATURE_MODE env var to check system state
     return 1
 }
 

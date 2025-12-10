@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/blackwell-systems/dotfiles/internal/template"
+	"github.com/blackwell-systems/blackdot/internal/template"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -26,13 +26,13 @@ type templateConfig struct {
 }
 
 func getTemplateConfig() (*templateConfig, error) {
-	dotfilesDir := os.Getenv("DOTFILES_DIR")
+	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return nil, fmt.Errorf("cannot determine home directory: %w", err)
 		}
-		dotfilesDir = filepath.Join(home, ".dotfiles")
+		dotfilesDir = filepath.Join(home, ".blackdot")
 	}
 
 	return &templateConfig{

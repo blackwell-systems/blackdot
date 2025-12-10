@@ -1,4 +1,4 @@
-// Package config provides configuration management for dotfiles.
+// Package config provides configuration management for blackdot.
 //
 // This package implements the layered configuration system with
 // resolution order: env > project > machine > user > defaults.
@@ -27,12 +27,12 @@ const (
 
 // Config file names
 const (
-	ProjectConfigFile = ".dotfiles.json"
+	ProjectConfigFile = ".blackdot.json"
 	MachineConfigFile = "machine.json"
 	UserConfigFile    = "config.json"
 )
 
-// Config represents the dotfiles configuration
+// Config represents the blackdot configuration
 type Config struct {
 	Version  int                    `json:"version"`
 	Features map[string]bool        `json:"features,omitempty"`
@@ -87,12 +87,12 @@ func DefaultManager() *Manager {
 		// Normalize path separators for cross-platform consistency
 		configDir = filepath.Clean(configDir)
 	}
-	configDir = filepath.Join(configDir, "dotfiles")
+	configDir = filepath.Join(configDir, "blackdot")
 
-	dotfilesDir := os.Getenv("DOTFILES_DIR")
+	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
 		home, _ := os.UserHomeDir()
-		dotfilesDir = filepath.Join(home, ".dotfiles")
+		dotfilesDir = filepath.Join(home, ".blackdot")
 	} else {
 		// Normalize path separators for cross-platform consistency
 		dotfilesDir = filepath.Clean(dotfilesDir)
@@ -186,8 +186,8 @@ func (m *Manager) GetLayered(key string) (*LayerResult, error) {
 	result := &LayerResult{Key: key}
 
 	// Layer 1: Environment variable
-	// vault.backend -> DOTFILES_VAULT_BACKEND
-	envKey := "DOTFILES_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
+	// vault.backend -> BLACKDOT_VAULT_BACKEND
+	envKey := "BLACKDOT_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
 	if val := os.Getenv(envKey); val != "" {
 		result.Value = val
 		result.Source = LayerEnv

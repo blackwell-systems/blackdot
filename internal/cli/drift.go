@@ -150,7 +150,7 @@ func runDriftQuick(home string, green, yellow, dim func(a ...interface{}) string
 
 // runDriftFull performs a full drift check against vault
 func runDriftFull(home string, green, yellow, cyan, dim func(a ...interface{}) string) error {
-	dotfilesDir := os.Getenv("DOTFILES_DIR")
+	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
 		dotfilesDir = filepath.Join(home, ".dotfiles")
 	}

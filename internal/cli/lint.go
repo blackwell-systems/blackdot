@@ -51,7 +51,7 @@ func runLint(cmd *cobra.Command, args []string) error {
 	verbose, _ := cmd.Flags().GetBool("verbose")
 	showFix, _ := cmd.Flags().GetBool("fix")
 
-	dotfilesDir := os.Getenv("DOTFILES_DIR")
+	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {

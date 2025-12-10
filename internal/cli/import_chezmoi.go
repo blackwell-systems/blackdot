@@ -126,7 +126,7 @@ func runImportChezmoi(sourceDir, configFile string, dryRun, verbose bool) error 
 	fmt.Println()
 
 	// Get target directory
-	dotfilesDir := os.Getenv("DOTFILES_DIR")
+	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
 		home, _ := os.UserHomeDir()
 		dotfilesDir = filepath.Join(home, ".dotfiles")

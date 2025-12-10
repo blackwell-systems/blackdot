@@ -92,18 +92,18 @@ func TestGlobalFlags(t *testing.T) {
 // TestDotfilesDir verifies directory resolution
 func TestDotfilesDir(t *testing.T) {
 	// Save original env
-	original := os.Getenv("DOTFILES_DIR")
-	defer os.Setenv("DOTFILES_DIR", original)
+	original := os.Getenv("BLACKDOT_DIR")
+	defer os.Setenv("BLACKDOT_DIR", original)
 
 	// Test with env var set
-	os.Setenv("DOTFILES_DIR", "/custom/path")
+	os.Setenv("BLACKDOT_DIR", "/custom/path")
 	initConfig()
 	if DotfilesDir() != "/custom/path" {
 		t.Errorf("expected '/custom/path', got '%s'", DotfilesDir())
 	}
 
 	// Test with env var unset (uses default)
-	os.Unsetenv("DOTFILES_DIR")
+	os.Unsetenv("BLACKDOT_DIR")
 	initConfig()
 	dir := DotfilesDir()
 	if !strings.HasSuffix(dir, ".dotfiles") {

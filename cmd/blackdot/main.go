@@ -1,15 +1,15 @@
-// Package main provides the entry point for the dotfiles CLI.
+// Package main provides the entry point for the blackdot CLI.
 //
-// This is the Go implementation of the dotfiles management system.
+// This is the Go implementation of the blackdot configuration management system.
 //
-// Build: go build -o bin/dotfiles ./cmd/dotfiles
-// Usage: dotfiles <command> [flags]
+// Build: go build -o bin/blackdot ./cmd/blackdot
+// Usage: blackdot <command> [flags]
 package main
 
 import (
 	"os"
 
-	"github.com/blackwell-systems/dotfiles/internal/cli"
+	"github.com/blackwell-systems/blackdot/internal/cli"
 )
 
 // Version information set by build flags

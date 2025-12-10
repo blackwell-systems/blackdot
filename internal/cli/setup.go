@@ -1036,7 +1036,7 @@ func phaseVault(cfg *SetupConfig) error {
 
 	selected := available[choiceNum-1]
 	cfg.Vault.Backend = selected
-	os.Setenv("DOTFILES_VAULT_BACKEND", selected)
+	os.Setenv("BLACKDOT_VAULT_BACKEND", selected)
 	fmt.Printf("Using vault backend: %s\n", selected)
 
 	// Check/create vault items configuration

@@ -206,7 +206,7 @@ func runDoctor(fixMode, quickMode bool) error {
 }
 
 func getDotfilesDir() string {
-	if dir := os.Getenv("DOTFILES_DIR"); dir != "" {
+	if dir := os.Getenv("BLACKDOT_DIR"); dir != "" {
 		return dir
 	}
 	if _, err := os.Stat("/workspace/dotfiles"); err == nil {
@@ -304,7 +304,7 @@ func checkCoreComponents(state *doctorState, home, dotfilesDir string) {
 	checkSymlink := func(name, link, target string) {
 		info, err := os.Lstat(link)
 		if err != nil {
-			state.fail(fmt.Sprintf("%s symlink missing", name), fmt.Sprintf("ln -sf \"$DOTFILES_DIR/%s\" \"%s\"", target, link))
+			state.fail(fmt.Sprintf("%s symlink missing", name), fmt.Sprintf("ln -sf \"$BLACKDOT_DIR/%s\" \"%s\"", target, link))
 			return
 		}
 
@@ -317,11 +317,11 @@ func checkCoreComponents(state *doctorState, home, dotfilesDir string) {
 				state.pass(fmt.Sprintf("%s symlink OK", name))
 			} else {
 				state.fail(fmt.Sprintf("%s points to wrong target: %s", name, actualTarget),
-					fmt.Sprintf("rm \"%s\" && ln -sf \"$DOTFILES_DIR/%s\" \"%s\"", link, target, link))
+					fmt.Sprintf("rm \"%s\" && ln -sf \"$BLACKDOT_DIR/%s\" \"%s\"", link, target, link))
 			}
 		} else {
 			state.warn(fmt.Sprintf("%s exists but is not a symlink", name),
-				fmt.Sprintf("mv \"%s\" \"%s.backup\" && ln -sf \"$DOTFILES_DIR/%s\" \"%s\"", link, link, target, link))
+				fmt.Sprintf("mv \"%s\" \"%s.backup\" && ln -sf \"$BLACKDOT_DIR/%s\" \"%s\"", link, link, target, link))
 		}
 	}
 
@@ -335,7 +335,7 @@ func checkCoreComponents(state *doctorState, home, dotfilesDir string) {
 	}
 	claudeTarget := filepath.Join(workspaceTarget, ".claude")
 
-	// Check claude symlink separately since it's not relative to DOTFILES_DIR
+	// Check claude symlink separately since it's not relative to BLACKDOT_DIR
 	claudeLink := filepath.Join(home, ".claude")
 	if info, err := os.Lstat(claudeLink); err != nil {
 		state.fail("~/.claude symlink missing", fmt.Sprintf("ln -sf \"%s\" \"%s\"", claudeTarget, claudeLink))

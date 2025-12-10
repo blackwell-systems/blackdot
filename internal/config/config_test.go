@@ -44,14 +44,14 @@ func TestDefaultManager(t *testing.T) {
 func TestDefaultManagerWithEnv(t *testing.T) {
 	// Save original env
 	origConfig := os.Getenv("XDG_CONFIG_HOME")
-	origDotfiles := os.Getenv("DOTFILES_DIR")
+	origDotfiles := os.Getenv("BLACKDOT_DIR")
 	defer func() {
 		os.Setenv("XDG_CONFIG_HOME", origConfig)
-		os.Setenv("DOTFILES_DIR", origDotfiles)
+		os.Setenv("BLACKDOT_DIR", origDotfiles)
 	}()
 
 	os.Setenv("XDG_CONFIG_HOME", "/custom/config")
-	os.Setenv("DOTFILES_DIR", "/custom/dotfiles")
+	os.Setenv("BLACKDOT_DIR", "/custom/dotfiles")
 
 	m := DefaultManager()
 
@@ -240,9 +240,9 @@ func TestGetLayeredEnv(t *testing.T) {
 	m.Set("vault.backend", "bitwarden")
 
 	// Set env var (should take precedence)
-	orig := os.Getenv("DOTFILES_VAULT_BACKEND")
-	os.Setenv("DOTFILES_VAULT_BACKEND", "1password")
-	defer os.Setenv("DOTFILES_VAULT_BACKEND", orig)
+	orig := os.Getenv("BLACKDOT_VAULT_BACKEND")
+	os.Setenv("BLACKDOT_VAULT_BACKEND", "1password")
+	defer os.Setenv("BLACKDOT_VAULT_BACKEND", orig)
 
 	result, err := m.GetLayered("vault.backend")
 	if err != nil {
@@ -272,9 +272,9 @@ func TestGetLayeredUser(t *testing.T) {
 	m.Set("vault.backend", "bitwarden")
 
 	// Clear any env var
-	orig := os.Getenv("DOTFILES_VAULT_BACKEND")
-	os.Unsetenv("DOTFILES_VAULT_BACKEND")
-	defer os.Setenv("DOTFILES_VAULT_BACKEND", orig)
+	orig := os.Getenv("BLACKDOT_VAULT_BACKEND")
+	os.Unsetenv("BLACKDOT_VAULT_BACKEND")
+	defer os.Setenv("BLACKDOT_VAULT_BACKEND", orig)
 
 	result, err := m.GetLayered("vault.backend")
 	if err != nil {
@@ -301,9 +301,9 @@ func TestGetLayeredDefault(t *testing.T) {
 	m := NewManager(tmpDir, tmpDir)
 
 	// Clear env var
-	orig := os.Getenv("DOTFILES_VAULT_BACKEND")
-	os.Unsetenv("DOTFILES_VAULT_BACKEND")
-	defer os.Setenv("DOTFILES_VAULT_BACKEND", orig)
+	orig := os.Getenv("BLACKDOT_VAULT_BACKEND")
+	os.Unsetenv("BLACKDOT_VAULT_BACKEND")
+	defer os.Setenv("BLACKDOT_VAULT_BACKEND", orig)
 
 	result, err := m.GetLayered("vault.backend")
 	if err != nil {

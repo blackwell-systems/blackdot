@@ -119,18 +119,18 @@ func TestVaultRestoreHasPullAlias(t *testing.T) {
 // TestGetVaultBackend verifies backend resolution
 func TestGetVaultBackend(t *testing.T) {
 	// Save original env
-	original := os.Getenv("DOTFILES_VAULT_BACKEND")
-	defer os.Setenv("DOTFILES_VAULT_BACKEND", original)
+	original := os.Getenv("BLACKDOT_VAULT_BACKEND")
+	defer os.Setenv("BLACKDOT_VAULT_BACKEND", original)
 
 	// Test with env var set
-	os.Setenv("DOTFILES_VAULT_BACKEND", "1password")
+	os.Setenv("BLACKDOT_VAULT_BACKEND", "1password")
 	backend := getVaultBackend()
 	if string(backend) != "1password" {
 		t.Errorf("expected '1password', got '%s'", backend)
 	}
 
 	// Test with env var unset (uses default)
-	os.Unsetenv("DOTFILES_VAULT_BACKEND")
+	os.Unsetenv("BLACKDOT_VAULT_BACKEND")
 	backend = getVaultBackend()
 	if string(backend) != "bitwarden" {
 		t.Errorf("expected default 'bitwarden', got '%s'", backend)
@@ -141,10 +141,10 @@ func TestGetVaultBackend(t *testing.T) {
 func TestGetSessionFile(t *testing.T) {
 	// Save original envs
 	originalSession := os.Getenv("VAULT_SESSION_FILE")
-	originalDotfiles := os.Getenv("DOTFILES_DIR")
+	originalDotfiles := os.Getenv("BLACKDOT_DIR")
 	defer func() {
 		os.Setenv("VAULT_SESSION_FILE", originalSession)
-		os.Setenv("DOTFILES_DIR", originalDotfiles)
+		os.Setenv("BLACKDOT_DIR", originalDotfiles)
 	}()
 
 	// Test with env var set
@@ -156,8 +156,8 @@ func TestGetSessionFile(t *testing.T) {
 
 	// Test with env var unset
 	os.Unsetenv("VAULT_SESSION_FILE")
-	os.Setenv("DOTFILES_DIR", "/test/dotfiles")
-	initConfig() // Re-init to pick up DOTFILES_DIR
+	os.Setenv("BLACKDOT_DIR", "/test/dotfiles")
+	initConfig() // Re-init to pick up BLACKDOT_DIR
 	path = getSessionFile()
 	expected := filepath.Join(DotfilesDir(), "vault", ".vault-session")
 	if path != expected {
@@ -298,10 +298,10 @@ func TestVaultCommandAliasesWork(t *testing.T) {
 
 // TestVaultItemsPath verifies vault items path construction
 func TestVaultItemsPath(t *testing.T) {
-	// Save and set DOTFILES_DIR
-	original := os.Getenv("DOTFILES_DIR")
-	os.Setenv("DOTFILES_DIR", "/test/dotfiles")
-	defer os.Setenv("DOTFILES_DIR", original)
+	// Save and set BLACKDOT_DIR
+	original := os.Getenv("BLACKDOT_DIR")
+	os.Setenv("BLACKDOT_DIR", "/test/dotfiles")
+	defer os.Setenv("BLACKDOT_DIR", original)
 
 	initConfig()
 
@@ -319,11 +319,11 @@ func TestNewVaultBackendError(t *testing.T) {
 	// We can't easily test success without actual vault backends installed
 
 	// Save original env
-	original := os.Getenv("DOTFILES_VAULT_BACKEND")
-	defer os.Setenv("DOTFILES_VAULT_BACKEND", original)
+	original := os.Getenv("BLACKDOT_VAULT_BACKEND")
+	defer os.Setenv("BLACKDOT_VAULT_BACKEND", original)
 
 	// Set an invalid backend
-	os.Setenv("DOTFILES_VAULT_BACKEND", "nonexistent")
+	os.Setenv("BLACKDOT_VAULT_BACKEND", "nonexistent")
 
 	_, err := newVaultBackend()
 	if err == nil {

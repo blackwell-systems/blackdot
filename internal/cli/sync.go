@@ -115,7 +115,7 @@ func runSync(args []string, dryRun, forceLocal, forceVault, verbose, all bool) e
 	}
 
 	home, _ := os.UserHomeDir()
-	dotfilesDir := os.Getenv("DOTFILES_DIR")
+	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
 		dotfilesDir = filepath.Join(home, ".dotfiles")
 	}
@@ -146,7 +146,7 @@ func runSync(args []string, dryRun, forceLocal, forceVault, verbose, all bool) e
 	// Determine backend name
 	backendName := "Bitwarden"
 	if _, err := exec.LookPath("pass"); err == nil {
-		if os.Getenv("DOTFILES_VAULT_BACKEND") == "pass" {
+		if os.Getenv("BLACKDOT_VAULT_BACKEND") == "pass" {
 			backendName = "pass"
 		}
 	}

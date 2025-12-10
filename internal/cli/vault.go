@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/blackwell-systems/dotfiles/internal/config"
+	"github.com/blackwell-systems/blackdot/internal/config"
 	"github.com/blackwell-systems/vaultmux"
 	_ "github.com/blackwell-systems/vaultmux/backends/bitwarden"
 	_ "github.com/blackwell-systems/vaultmux/backends/onepassword"
@@ -25,7 +25,7 @@ import (
 // getVaultBackend returns the configured backend type
 func getVaultBackend() vaultmux.BackendType {
 	// Check env var first
-	if backend := os.Getenv("DOTFILES_VAULT_BACKEND"); backend != "" {
+	if backend := os.Getenv("BLACKDOT_VAULT_BACKEND"); backend != "" {
 		return vaultmux.BackendType(backend)
 	}
 

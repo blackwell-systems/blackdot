@@ -37,7 +37,7 @@ type backupConfig struct {
 
 func getBackupConfig() *backupConfig {
 	home, _ := os.UserHomeDir()
-	dotfilesDir := os.Getenv("DOTFILES_DIR")
+	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
 		dotfilesDir = filepath.Join(home, ".dotfiles")
 	}
