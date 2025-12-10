@@ -2,25 +2,41 @@
 
 > **Complete guide for Windows users using PowerShell**
 
-This guide covers setting up dotfiles on native Windows with PowerShell. For WSL2, use the standard Linux installation.
+This guide covers setting up blackdot on native Windows with PowerShell. For WSL2, use the standard Linux installation.
 
 ---
 
-## Quick Start
+## One-Line Install
+
+```powershell
+irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
+```
+
+This will:
+1. Clone the repository to `~/workspace/blackdot`
+2. Install the PowerShell module
+3. Download the Go binary
+4. Configure your PowerShell profile
+
+After installation, restart PowerShell and run `blackdot setup`.
+
+---
+
+## Manual Installation
 
 ```powershell
 # 1. Clone the repository
-git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\dotfiles
+git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\blackdot
 
 # 2. Install the PowerShell module
-cd $HOME\workspace\dotfiles\powershell
-.\Install-Dotfiles.ps1
+cd $HOME\workspace\blackdot\powershell
+.\Install-Blackdot.ps1 -Binary
 
 # 3. Restart PowerShell or import manually
-Import-Module Dotfiles
+Import-Module Blackdot
 
-# 4. Verify installation
-dotfiles-status
+# 4. Run setup wizard
+blackdot setup
 ```
 
 ---
@@ -54,7 +70,7 @@ git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\dotf
 
 # Install module
 cd $HOME\workspace\dotfiles\powershell
-.\Install-Dotfiles.ps1
+.\Install-Blackdot.ps1
 
 # Done! Restart PowerShell
 ```
@@ -74,8 +90,8 @@ git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\dotf
 cd $HOME\workspace\dotfiles
 
 # Build and install the Go CLI
-go build -o dotfiles.exe ./cmd/blackdot
-Move-Item dotfiles.exe $HOME\.local\bin\
+go build -o blackdot.exe ./cmd/blackdot
+Move-Item blackdot.exe $HOME\.local\bin\
 
 # Add to PATH (if not already)
 $env:Path += ";$HOME\.local\bin"
@@ -83,7 +99,7 @@ $env:Path += ";$HOME\.local\bin"
 
 # Install PowerShell module
 cd powershell
-.\Install-Dotfiles.ps1
+.\Install-Blackdot.ps1
 
 # Run setup wizard
 blackdot setup
@@ -242,7 +258,7 @@ Get-Module -ListAvailable Dotfiles
 Get-Content $PROFILE
 
 # Manual import
-Import-Module Dotfiles -Verbose
+Import-Module Blackdot -Verbose
 ```
 
 ### Commands not found
@@ -304,7 +320,7 @@ git pull
 
 # Reinstall module
 cd powershell
-.\Install-Dotfiles.ps1 -Force
+.\Install-Blackdot.ps1 -Force
 
 # Rebuild CLI (if using Go)
 go build -o dotfiles.exe ./cmd/blackdot

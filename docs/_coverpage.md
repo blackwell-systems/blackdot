@@ -5,7 +5,11 @@
 > Modular dotfiles framework for the AI-assisted development era
 
 ```bash
+# macOS / Linux / WSL
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
+
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
 ```
 
 - **Claude Code Integration** - Portable sessions, dotclaude profiles, git safety hooks

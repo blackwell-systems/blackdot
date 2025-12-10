@@ -26,10 +26,18 @@
 
 Choose your install level:
 
+**macOS / Linux / WSL:**
 ```bash
-# Full: Everything (recommended for Claude Code users)
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
+```
 
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
+```
+
+**Options:**
+```bash
 # Minimal: Just shell config (skip Homebrew, vault, Claude, /workspace)
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash -s -- --minimal
 
