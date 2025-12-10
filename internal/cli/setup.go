@@ -549,10 +549,10 @@ func phaseWorkspace(cfg *SetupConfig) error {
 	fmt.Println()
 	fmt.Println("Examples:")
 	if isWindows() {
-		fmt.Println("  %USERPROFILE%\\workspace     (default)")
-		fmt.Println("  C:\\code")
-		fmt.Println("  D:\\dev")
-		fmt.Println("  C:\\projects")
+		fmt.Printf("  %s\\workspace     (default)\n", "%USERPROFILE%")
+		fmt.Println(`  C:\code`)
+		fmt.Println(`  D:\dev`)
+		fmt.Println(`  C:\projects`)
 	} else {
 		fmt.Println("  ~/workspace     (default)")
 		fmt.Println("  ~/code")
