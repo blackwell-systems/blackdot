@@ -351,22 +351,22 @@ func TestEnvOverride(t *testing.T) {
 	r := NewRegistry()
 
 	// Save original env
-	original := os.Getenv("DOTFILES_FEATURE_VAULT")
-	defer os.Setenv("DOTFILES_FEATURE_VAULT", original)
+	original := os.Getenv("BLACKDOT_FEATURE_VAULT")
+	defer os.Setenv("BLACKDOT_FEATURE_VAULT", original)
 
 	// Test direct env var
-	os.Setenv("DOTFILES_FEATURE_VAULT", "true")
+	os.Setenv("BLACKDOT_FEATURE_VAULT", "true")
 
 	// Need new registry to pick up env
 	r = NewRegistry()
 	if !r.Enabled("vault") {
-		t.Error("vault should be enabled via DOTFILES_FEATURE_VAULT=true")
+		t.Error("vault should be enabled via BLACKDOT_FEATURE_VAULT=true")
 	}
 
-	os.Setenv("DOTFILES_FEATURE_VAULT", "false")
+	os.Setenv("BLACKDOT_FEATURE_VAULT", "false")
 	r = NewRegistry()
 	if r.Enabled("vault") {
-		t.Error("vault should be disabled via DOTFILES_FEATURE_VAULT=false")
+		t.Error("vault should be disabled via BLACKDOT_FEATURE_VAULT=false")
 	}
 }
 

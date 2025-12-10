@@ -149,7 +149,7 @@ func (e *RaymondEngine) SetArray(name string, items []map[string]interface{}) {
 // GetVar returns a variable value with environment override support
 func (e *RaymondEngine) GetVar(name string) (interface{}, bool) {
 	// Check environment override first (highest priority)
-	envName := "DOTFILES_TMPL_" + strings.ToUpper(strings.ReplaceAll(name, ".", "_"))
+	envName := "BLACKDOT_TMPL_" + strings.ToUpper(strings.ReplaceAll(name, ".", "_"))
 	if val := os.Getenv(envName); val != "" {
 		return val, true
 	}
@@ -174,7 +174,7 @@ func (e *RaymondEngine) buildContext() map[string]interface{} {
 
 	// Apply environment overrides
 	for k := range e.vars {
-		envName := "DOTFILES_TMPL_" + strings.ToUpper(strings.ReplaceAll(k, ".", "_"))
+		envName := "BLACKDOT_TMPL_" + strings.ToUpper(strings.ReplaceAll(k, ".", "_"))
 		if val := os.Getenv(envName); val != "" {
 			ctx[k] = val
 		}

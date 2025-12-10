@@ -68,7 +68,7 @@ func (e *Engine) SetArray(name string, values []string) {
 // GetVar returns a variable value
 func (e *Engine) GetVar(name string) (string, bool) {
 	// Check environment override first
-	envName := "DOTFILES_TMPL_" + strings.ToUpper(strings.ReplaceAll(name, ".", "_"))
+	envName := "BLACKDOT_TMPL_" + strings.ToUpper(strings.ReplaceAll(name, ".", "_"))
 	if val := os.Getenv(envName); val != "" {
 		return val, true
 	}

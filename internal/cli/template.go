@@ -91,7 +91,7 @@ Examples:
 		Long: `Show all template variables and their current values.
 
 Variables are loaded from:
-  1. Environment (DOTFILES_TMPL_* prefix, highest priority)
+  1. Environment (BLACKDOT_TMPL_* prefix, highest priority)
   2. templates/_variables.local.sh (machine-specific)
   3. templates/_variables.sh (defaults)
   4. Auto-detected values (hostname, os, user, etc.)`,
@@ -330,7 +330,7 @@ func runTemplateVars(cmd *cobra.Command, args []string) error {
 			display = display[:57] + "..."
 		}
 		// Check if from environment
-		envName := "DOTFILES_TMPL_" + strings.ToUpper(strings.ReplaceAll(name, ".", "_"))
+		envName := "BLACKDOT_TMPL_" + strings.ToUpper(strings.ReplaceAll(name, ".", "_"))
 		if os.Getenv(envName) != "" {
 			fmt.Printf("  %s = %s %s\n", cyan(name), display, yellow("(env)"))
 		} else {

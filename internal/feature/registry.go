@@ -100,7 +100,7 @@ func NewRegistry() *Registry {
 	// Maps SKIP_* vars to feature names (inverted logic: SKIP_X=true means feature=false)
 	r.envMap["SKIP_WORKSPACE_SYMLINK"] = "workspace_symlink"
 	r.envMap["SKIP_CLAUDE_SETUP"] = "claude_integration"
-	r.envMap["DOTFILES_SKIP_DRIFT_CHECK"] = "drift_check"
+	r.envMap["BLACKDOT_SKIP_DRIFT_CHECK"] = "drift_check"
 
 	// Initialize enabled state based on defaults
 	r.initDefaults()
@@ -204,8 +204,8 @@ func (r *Registry) Enabled(name string) bool {
 // checkEnvOverride checks for environment variable overrides
 // Returns "true", "false", or "" (not set)
 func (r *Registry) checkEnvOverride(name string) string {
-	// Check direct DOTFILES_FEATURE_<NAME> env var first
-	directVar := "DOTFILES_FEATURE_" + strings.ToUpper(strings.ReplaceAll(name, "_", "_"))
+	// Check direct BLACKDOT_FEATURE_<NAME> env var first
+	directVar := "BLACKDOT_FEATURE_" + strings.ToUpper(strings.ReplaceAll(name, "_", "_"))
 	if val := os.Getenv(directVar); val != "" {
 		if val == "true" || val == "1" {
 			return "true"

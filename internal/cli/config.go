@@ -83,19 +83,19 @@ func printConfigHelp() {
 	fmt.Print("  ")
 	Yellow.Print("1. env")
 	fmt.Print("       ")
-	Dim.Println("Environment variables (DOTFILES_*)")
+	Dim.Println("Environment variables (BLACKDOT_*)")
 	fmt.Print("  ")
 	Yellow.Print("2. project")
 	fmt.Print("   ")
-	Dim.Println(".dotfiles.json in current repo")
+	Dim.Println(".blackdot.json in current repo")
 	fmt.Print("  ")
 	Yellow.Print("3. machine")
 	fmt.Print("   ")
-	Dim.Println("~/.config/dotfiles/machine.json")
+	Dim.Println("~/.config/blackdot/machine.json")
 	fmt.Print("  ")
 	Yellow.Print("4. user")
 	fmt.Print("      ")
-	Dim.Println("~/.config/dotfiles/config.json")
+	Dim.Println("~/.config/blackdot/config.json")
 	fmt.Print("  ")
 	Yellow.Print("5. default")
 	fmt.Print("   ")
@@ -254,7 +254,7 @@ Layers: user (default), machine, project`,
 
 func configGet(key, defaultVal string) error {
 	// Check environment first
-	envKey := "DOTFILES_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
+	envKey := "BLACKDOT_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
 	if val := os.Getenv(envKey); val != "" {
 		fmt.Println(val)
 		return nil
@@ -321,7 +321,7 @@ func configShow(key string) error {
 	PrintHeader("Config: " + key)
 
 	// Environment
-	envKey := "DOTFILES_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
+	envKey := "BLACKDOT_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
 	if val := os.Getenv(envKey); val != "" {
 		fmt.Printf("  env:      %s  %s\n", val, Green.Sprint("← active"))
 		return nil
@@ -382,7 +382,7 @@ func configSource(key, defaultVal string) error {
 	var result sourceResult
 
 	// Check environment first
-	envKey := "DOTFILES_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
+	envKey := "BLACKDOT_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
 	if val := os.Getenv(envKey); val != "" {
 		result = sourceResult{Value: val, Layer: "env"}
 		data, _ := json.Marshal(result)
@@ -434,7 +434,7 @@ func configList() error {
 	fmt.Println("───────────────────────────────────────────────────────────────")
 
 	// Environment
-	fmt.Printf("  env:       %s\n", Dim.Sprint("DOTFILES_* environment variables"))
+	fmt.Printf("  env:       %s\n", Dim.Sprint("BLACKDOT_* environment variables"))
 
 	// Project
 	projectConfig := findProjectConfig()

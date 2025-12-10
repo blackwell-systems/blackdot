@@ -7,7 +7,7 @@
 # Machine-specific overrides go in _variables.local.sh (gitignored).
 #
 # Variable Precedence (highest to lowest):
-#   1. Environment variables (DOTFILES_TMPL_*)
+#   1. Environment variables (BLACKDOT_TMPL_*)
 #   2. _variables.local.sh (machine-specific)
 #   3. Machine-type defaults (TMPL_WORK / TMPL_PERSONAL below)
 #   4. TMPL_DEFAULTS (this file)

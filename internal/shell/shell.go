@@ -166,10 +166,10 @@ func CommonIntegrations() []*Integration {
 func GenerateFeatureCheck(featureName string) string {
 	return fmt.Sprintf(`
 # Feature check for %s
-if dotfiles features check %s >/dev/null 2>&1; then
-    _DOTFILES_FEATURE_%s=1
+if blackdot features check %s >/dev/null 2>&1; then
+    _BLACKDOT_FEATURE_%s=1
 else
-    _DOTFILES_FEATURE_%s=0
+    _BLACKDOT_FEATURE_%s=0
 fi
 `, featureName, featureName, strings.ToUpper(featureName), strings.ToUpper(featureName))
 }

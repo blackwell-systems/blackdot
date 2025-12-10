@@ -121,12 +121,12 @@ func runSync(args []string, dryRun, forceLocal, forceVault, verbose, all bool) e
 	}
 
 	// Check offline mode
-	if os.Getenv("DOTFILES_OFFLINE") == "1" {
-		fmt.Printf("%s DOTFILES_OFFLINE=1 - Cannot sync in offline mode\n", yellow("[WARN]"))
+	if os.Getenv("BLACKDOT_OFFLINE") == "1" {
+		fmt.Printf("%s BLACKDOT_OFFLINE=1 - Cannot sync in offline mode\n", yellow("[WARN]"))
 		fmt.Println()
 		fmt.Println("To sync later:")
-		fmt.Println("  unset DOTFILES_OFFLINE")
-		fmt.Println("  dotfiles sync")
+		fmt.Println("  unset BLACKDOT_OFFLINE")
+		fmt.Println("  blackdot sync")
 		return nil
 	}
 
