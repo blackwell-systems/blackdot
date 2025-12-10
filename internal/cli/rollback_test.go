@@ -95,7 +95,7 @@ func TestRollbackListWithBackups(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	// Create backup directory
-	backupDir := filepath.Join(tmpDir, ".dotfiles-backups")
+	backupDir := filepath.Join(tmpDir, ".blackdot-backups")
 	if err := os.MkdirAll(backupDir, 0755); err != nil {
 		t.Fatalf("failed to create backup dir: %v", err)
 	}
@@ -160,7 +160,7 @@ func TestRollbackRestoreSpecificNotFound(t *testing.T) {
 	}
 	defer os.RemoveAll(tmpDir)
 
-	backupDir := filepath.Join(tmpDir, ".dotfiles-backups")
+	backupDir := filepath.Join(tmpDir, ".blackdot-backups")
 	os.MkdirAll(backupDir, 0755)
 
 	// Save original home and set temp

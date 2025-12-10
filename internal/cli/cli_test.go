@@ -16,8 +16,8 @@ func TestRootCommand(t *testing.T) {
 		t.Fatal("rootCmd should not be nil")
 	}
 
-	if rootCmd.Use != "dotfiles" {
-		t.Errorf("expected Use='dotfiles', got '%s'", rootCmd.Use)
+	if rootCmd.Use != "blackdot" {
+		t.Errorf("expected Use='blackdot', got '%s'", rootCmd.Use)
 	}
 
 	if rootCmd.Short == "" {
@@ -106,8 +106,8 @@ func TestDotfilesDir(t *testing.T) {
 	os.Unsetenv("BLACKDOT_DIR")
 	initConfig()
 	dir := DotfilesDir()
-	if !strings.HasSuffix(dir, ".dotfiles") {
-		t.Errorf("expected path ending in '.dotfiles', got '%s'", dir)
+	if !strings.HasSuffix(dir, ".blackdot") {
+		t.Errorf("expected path ending in '.blackdot', got '%s'", dir)
 	}
 }
 
@@ -120,7 +120,7 @@ func TestConfigDir(t *testing.T) {
 	// Test with XDG_CONFIG_HOME set
 	os.Setenv("XDG_CONFIG_HOME", "/custom/config")
 	dir := ConfigDir()
-	expected := filepath.FromSlash("/custom/config/dotfiles")
+	expected := filepath.FromSlash("/custom/config/blackdot")
 	if dir != expected {
 		t.Errorf("expected '%s', got '%s'", expected, dir)
 	}
@@ -128,8 +128,8 @@ func TestConfigDir(t *testing.T) {
 	// Test with XDG_CONFIG_HOME unset
 	os.Unsetenv("XDG_CONFIG_HOME")
 	dir = ConfigDir()
-	if !strings.Contains(dir, filepath.FromSlash(".config/dotfiles")) {
-		t.Errorf("expected path containing '.config/dotfiles', got '%s'", dir)
+	if !strings.Contains(dir, filepath.FromSlash(".config/blackdot")) {
+		t.Errorf("expected path containing '.config/blackdot', got '%s'", dir)
 	}
 }
 

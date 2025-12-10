@@ -55,7 +55,7 @@ func TestDefaultManagerWithEnv(t *testing.T) {
 
 	m := DefaultManager()
 
-	expectedConfig := filepath.FromSlash("/custom/config/dotfiles")
+	expectedConfig := filepath.FromSlash("/custom/config/blackdot")
 	if m.configDir != expectedConfig {
 		t.Errorf("expected configDir='%s', got '%s'", expectedConfig, m.configDir)
 	}
@@ -368,8 +368,8 @@ func TestLayerConstants(t *testing.T) {
 
 // TestConfigFileConstants verifies file name constants
 func TestConfigFileConstants(t *testing.T) {
-	if ProjectConfigFile != ".dotfiles.json" {
-		t.Error("ProjectConfigFile should be '.dotfiles.json'")
+	if ProjectConfigFile != ".blackdot.json" {
+		t.Error("ProjectConfigFile should be '.blackdot.json'")
 	}
 	if MachineConfigFile != "machine.json" {
 		t.Error("MachineConfigFile should be 'machine.json'")
@@ -395,7 +395,7 @@ func TestProjectConfigPath(t *testing.T) {
 	}
 
 	// Create project config in temp dir
-	projectConfig := filepath.Join(tmpDir, ".dotfiles.json")
+	projectConfig := filepath.Join(tmpDir, ".blackdot.json")
 	os.WriteFile(projectConfig, []byte(`{"version":3}`), 0644)
 
 	// Create subdirectory
