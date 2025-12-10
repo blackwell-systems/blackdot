@@ -2,7 +2,7 @@
 
 > **Deep Modularity:** Every optional feature can be enabled or disabled independently, without breaking other parts of the system.
 
-The Feature Registry (`lib/_features.sh`) is the control plane for the dotfiles framework. All optional functionality flows through it—enabling, disabling, dependency resolution, and persistence.
+The Feature Registry (`internal/feature/registry.go`) is the control plane for blackdot. All optional functionality flows through it—enabling, disabling, dependency resolution, and persistence. Implemented in Go for cross-platform consistency.
 
 The registry provides:
 
@@ -30,7 +30,7 @@ blackdot features enable vault --persist
 blackdot features preset developer
 
 # Check if a feature is enabled (for scripts)
-if dotfiles features check vault; then
+if blackdot features check vault; then
     echo "Vault is enabled"
 fi
 ```
@@ -200,45 +200,42 @@ Use `blackdot features enable <name> --persist` to update this file automaticall
 
 ## Priority Order
 
-When checking if a feature is enabled, the system checks in this order (highest priority first):
+When checking if a feature is enabled, the Go CLI checks in this order (highest priority first):
 
 1. **Runtime state** - `feature_enable`/`feature_disable` in current session
 2. **Environment variables** - `BLACKDOT_FEATURE_*` or `SKIP_*` vars
 3. **Config file** - `~/.config/blackdot/config.json`
-4. **Registry defaults** - Built-in defaults in `lib/_features.sh`
+4. **Registry defaults** - Built-in defaults in `internal/feature/registry.go`
 
 ---
 
 ## Using Features in Scripts
 
-### Feature Guards
+### Feature Guards (Shell)
 
-Use feature guards to conditionally run code:
+Use feature guards to conditionally run code in shell scripts:
 
 ```bash
 #!/usr/bin/env zsh
-source "$BLACKDOT_DIR/lib/_features.sh"
+# feature_enabled is provided by: eval "$(blackdot shell-init)"
 
 # Skip if feature not enabled
-feature_guard "vault" || return 0
+feature_enabled "vault" || return 0
 
 # Now safe to use vault functionality
-vault_pull
+blackdot vault pull
 ```
 
-### Checking Dependencies
+**Note:** `feature_enabled` is a shell function that calls the Go binary. It's automatically available when you load the shell config.
+
+### Checking Dependencies (Go CLI)
 
 ```bash
 # Check if all dependencies are met
-if feature_deps_met "claude_integration"; then
-    echo "All dependencies satisfied"
-fi
+blackdot features status claude_integration
 
-# Get list of missing dependencies
-missing=$(feature_missing_deps "claude_integration")
-if [[ -n "$missing" ]]; then
-    echo "Missing: $missing"
-fi
+# Get specific feature status
+blackdot features check vault && echo "Vault enabled"
 ```
 
 ### JSON Status for Scripting
@@ -255,22 +252,31 @@ blackdot features status vault
 
 ## Adding New Features
 
-To add a new feature to the registry, edit `lib/_features.sh`:
+To add a new feature to the registry, edit `internal/feature/registry.go` in the `NewRegistry()` function:
 
-```bash
-typeset -gA FEATURE_REGISTRY=(
-    # ... existing features ...
+```go
+func NewRegistry() *Registry {
+    r := &Registry{
+        features:  make(map[string]*Feature),
+        enabled:   make(map[string]bool),
+        conflicts: make(map[string][]string),
+        envMap:    make(map[string]string),
+    }
 
-    # Add your new feature
-    ["my_feature"]="false|Description of my feature|optional|dependency1 dependency2"
-)
+    // Add your new feature
+    r.register("my_feature", CategoryOptional, "Description of my feature",
+        []string{"dependency1", "dependency2"}, DefaultFalse)
+
+    return r
+}
 ```
 
-Format: `"default|description|category|dependencies"`
-
-- **default**: `true`, `false`, or `env` (check env var)
-- **category**: `core`, `optional`, or `integration`
-- **dependencies**: Space-separated list of required features
+**Parameters:**
+- **Name**: Feature identifier (lowercase with underscores)
+- **Category**: `CategoryCore`, `CategoryOptional`, or `CategoryIntegration`
+- **Description**: Brief description shown in `blackdot features list`
+- **Dependencies**: Slice of required feature names (or `nil`)
+- **Default**: `DefaultTrue`, `DefaultFalse`, or `DefaultEnv` (check env var)
 
 ---
 
@@ -342,9 +348,9 @@ Some features require a shell restart:
 exec zsh
 ```
 
-Or source the feature registry:
+Or reload shell initialization:
 ```bash
-source "$BLACKDOT_DIR/lib/_features.sh"
+eval "$(blackdot shell-init)"
 ```
 
 ---
@@ -355,10 +361,11 @@ The Feature Registry works with two companion systems:
 
 ### Configuration Layers
 
-The Configuration Layers system (`lib/_config_layers.sh`) provides a 5-layer priority hierarchy for settings. Features use layered config for their preferences:
+The Configuration Layers system (`internal/config/config.go`) provides a 5-layer priority hierarchy for settings. Features use layered config for their preferences:
 
 ```bash
-config_get_layered "vault.backend"  # Checks all layers in priority order
+blackdot config get vault.backend    # Get config value
+blackdot config show vault.backend   # Show all layers
 ```
 
 See [Architecture](architecture.md#configuration-layers) for details.
