@@ -14,7 +14,7 @@ The vault system provides **bidirectional secret management** with multiple vaul
 | Backend | CLI Tool | Status | Description |
 |---------|----------|--------|-------------|
 | **Bitwarden** | `bw` | Default | Full-featured, cloud-synced |
-| **1Password** | `op` | Supported | v2 CLI with biometric auth |
+| **1Password** | `op` | Supported | CLI with biometric auth |
 | **pass** | `pass` | Supported | GPG-based, git-synced |
 
 ### Switching Backends
@@ -156,149 +156,43 @@ export BLACKDOT_VAULT_BACKEND=pass
 
 ## Location Management
 
-The vault setup wizard v2 introduces location-based organization. Instead of scanning your entire vault, you tell the system where your dotfiles secrets are stored.
+The setup wizard uses location-based organization - you specify where your secrets are stored rather than scanning your entire vault.
 
-### Why Location Management?
+| Backend | Location Type | Example |
+|---------|---------------|---------|
+| Bitwarden | folder | `"dotfiles"` |
+| 1Password | vault/tag | `"Personal"` |
+| pass | directory | `"dotfiles"` |
 
-1. **Respects your existing structure** - Use your own folder/vault/directory naming
-2. **No random scanning** - The system asks you where to look
-3. **Works on new machines** - Vault-first discovery without local files
-4. **Supports all backends** - Unified API across Bitwarden, 1Password, and pass
+The wizard (`blackdot vault setup`) offers three modes:
+- **Existing Items** - Import from existing vault location
+- **Fresh Start** - Create new items from local files
+- **Manual** - Edit `vault-items.json` directly
 
-### Location Types by Backend
-
-| Backend | Location Type | Config Value | Example |
-|---------|---------------|--------------|---------|
-| **Bitwarden** | `folder` | Folder name | `"dotfiles"` |
-| **1Password** | `vault` | Vault name | `"Personal"` (planned) |
-| **1Password** | `tag` | Tag name | `"dotfiles"` (planned) |
-| **pass** | `directory` | Directory name | `"dotfiles"` |
-| **Any** | `prefix` | Name prefix | `"SSH-"` |
-| **Any** | `none` | No filter | Legacy behavior |
-
-### Setup Wizard v2 Flow
-
-The wizard (`blackdot vault init`) now has three modes:
-
-1. **Existing Items** - You have secrets in your vault already
-   - Select or create a location (folder/directory)
-   - Import items from that location
-   - Map each item to a local path
-
-2. **Fresh Start** - Create new items from local files
-   - Scans local machine for secrets
-   - Creates vault items with your naming preference
-   - Stores in your chosen location
-
-3. **Manual Setup** - Configure yourself
-   - Creates minimal config
-   - You edit `vault-items.json` directly
-
-### Configuration Example
-
+Location is stored in `vault-items.json`:
 ```json
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "vault_location": {
-    "type": "folder",
-    "value": "dotfiles"
-  },
-  "vault_items": {
-    "SSH-GitHub": {
-      "path": "~/.ssh/id_ed25519_github",
-      "required": true,
-      "type": "sshkey"
-    }
-  }
+  "vault_location": { "type": "folder", "value": "dotfiles" }
 }
 ```
-
-### Design Document
-
-For the full design rationale, see: [`docs/design/vault-setup-wizard-v2.md`](design/vault-setup-wizard-v2.md)
 
 ---
 
 ## Configuration File
 
-Vault items are defined in a user-editable JSON configuration file. This allows you to customize which secrets to manage without editing source code.
-
-### Location
-
-```
-~/.config/blackdot/vault-items.json
-```
-
-### Getting Started
+Vault items are defined in `~/.config/blackdot/vault-items.json`. Run `blackdot setup` to create it automatically, or copy the example:
 
 ```bash
-# Copy the example configuration
-mkdir -p ~/.config/blackdot
 cp vault/vault-items.example.json ~/.config/blackdot/vault-items.json
-
-# Edit to match your vault items
-$EDITOR ~/.config/blackdot/vault-items.json
 ```
-
-Or use the setup wizard which creates this automatically:
-```bash
-blackdot setup
-```
-
-### Configuration Structure
-
-```json
-{
-  "ssh_keys": {
-    "SSH-GitHub": "~/.ssh/id_ed25519_github",
-    "SSH-Work": "~/.ssh/id_ed25519_work"
-  },
-  "vault_items": {
-    "SSH-GitHub": {
-      "path": "~/.ssh/id_ed25519_github",
-      "required": true,
-      "type": "sshkey"
-    },
-    "SSH-Config": {
-      "path": "~/.ssh/config",
-      "required": true,
-      "type": "file"
-    },
-    "AWS-Config": {
-      "path": "~/.aws/config",
-      "required": true,
-      "type": "file"
-    }
-  },
-  "syncable_items": {
-    "SSH-Config": "~/.ssh/config",
-    "AWS-Config": "~/.aws/config",
-    "AWS-Credentials": "~/.aws/credentials"
-  },
-  "aws_expected_profiles": [
-    "default"
-  ]
-}
-```
-
-### Sections
 
 | Section | Purpose |
 |---------|---------|
-| `ssh_keys` | Maps vault item names to local SSH key paths |
 | `vault_items` | All managed items with metadata (path, required, type) |
+| `ssh_keys` | Maps vault item names to local SSH key paths |
 | `syncable_items` | Items that can sync bidirectionally |
-| `aws_expected_profiles` | AWS profiles validated by `blackdot doctor` |
 
-### Item Types
-
-- `sshkey` - SSH key pair (private + public key in vault notes)
-- `file` - Plain text config file
-
-### Required vs Optional
-
-- `required: true` - `blackdot vault check` will fail if missing
-- `required: false` - Restored if present, skipped if not
+**Item types:** `sshkey` (private + public key) or `file` (plain text config)
 
 ---
 
@@ -334,21 +228,11 @@ BLACKDOT_SKIP_DRIFT_CHECK=1 blackdot vault pull
 
 ### Offline Mode
 
-For air-gapped environments, vault outages, or when you simply don't have vault access:
+For air-gapped environments or vault outages:
 
 ```bash
-# Skip all vault operations during bootstrap
-BLACKDOT_OFFLINE=1 ./bootstrap/bootstrap-mac.sh
-
-# Or for individual commands
-BLACKDOT_OFFLINE=1 blackdot vault pull  # Exits gracefully
-BLACKDOT_OFFLINE=1 blackdot vault push     # Exits gracefully
+BLACKDOT_OFFLINE=1 blackdot vault pull  # Exits gracefully, keeps local files
 ```
-
-When offline mode is enabled:
-- `blackdot vault pull` - Skips restore, keeps existing local files
-- `blackdot vault push` - Skips sync with helpful message
-- All other dotfiles commands work normally
 
 ---
 
@@ -427,63 +311,15 @@ blackdot vault pull
 ### Daily Operations
 
 ```bash
-# Update SSH config locally
-vim ~/.ssh/config
-
-# Smart sync - auto-detects push/pull direction
-blackdot sync
-
-# Or explicitly push changes to vault
-blackdot vault push SSH-Config
-
-# Check vault health
-blackdot vault check
-
-# Validate vault schema
-blackdot vault validate
-```
-
-### Switching Backends
-
-```bash
-# 1. Export from current backend
-blackdot vault list  # Note all items
-
-# 2. Set new backend
-export BLACKDOT_VAULT_BACKEND=1password
-
-# 3. Create items in new backend
-blackdot vault create Git-Config
-blackdot vault create SSH-Config
-# ... etc
-
-# 4. Verify
-blackdot vault check
+vim ~/.ssh/config              # Edit locally
+blackdot vault push SSH-Config # Push to vault
 ```
 
 ---
 
 ## Vault Items Structure
 
-### SSH Keys
-
-Each SSH key item should contain:
-
-```
------BEGIN OPENSSH PRIVATE KEY-----
-<private key content>
------END OPENSSH PRIVATE KEY-----
-
-ssh-ed25519 AAAAC3... username@hostname
-```
-
-**Item Names:**
-- `SSH-GitHub-Enterprise` → `~/.ssh/id_ed25519_enterprise_ghub{,.pub}`
-- `SSH-GitHub-Blackwell` → `~/.ssh/id_ed25519_blackwell{,.pub}`
-
-### Configuration Files
-
-File-based config items contain the full file content in the notes field:
+**SSH keys** contain private key + public key (in notes field). **Config files** contain full file content.
 
 | Item Name | Local File |
 |-----------|------------|
@@ -492,124 +328,35 @@ File-based config items contain the full file content in the notes field:
 | `AWS-Credentials` | `~/.aws/credentials` |
 | `Git-Config` | `~/.gitconfig` |
 | `Environment-Secrets` | `~/.local/env.secrets` |
-| `Template-Variables` | `~/.config/blackdot/template-variables.sh` |
 
 ---
 
-## Template Variables Integration
+## Template Variables
 
-The vault system can store and restore machine-specific template variables, enabling portable configurations across machines.
-
-### What are Template Variables?
-
-Template variables customize dotfiles per-machine. They're stored in `~/.config/blackdot/template-variables.sh`:
+Template variables (`~/.config/blackdot/template-variables.sh`) customize dotfiles per-machine and can be stored in vault:
 
 ```bash
-# Machine-specific template variables
-TMPL_DEFAULTS[git_name]="Your Name"
-TMPL_DEFAULTS[git_email]="your@email.com"
-TMPL_DEFAULTS[company]="ACME Corp"
+blackdot vault push Template-Variables   # Store in vault
+blackdot vault pull                      # Restore on new machine
+blackdot template render --all           # Apply templates
 ```
 
-### Vault Workflow
-
-**Push to vault (current machine):**
-```bash
-# Store template variables in your vault
-pass insert -mf dotfiles/Template-Variables < ~/.config/blackdot/template-variables.sh
-
-# Or with Bitwarden (via vault scripts)
-blackdot vault push Template-Variables
-```
-
-**Pull from vault (new machine):**
-```bash
-# Restore template variables from vault
-pass show dotfiles/Template-Variables > ~/.config/blackdot/template-variables.sh
-
-# Then render templates
-blackdot template render --all
-```
-
-### Location Priority
-
-The template system loads variables from these locations (in order):
-1. `~/.config/blackdot/template-variables.sh` (XDG, vault-portable)
-2. `templates/_variables.local.sh` (repo-specific fallback)
-3. `templates/_variables.sh` (defaults)
-
-### Complete New Machine Workflow
-
-```bash
-# 1. Clone dotfiles
-git clone git@github.com:USER/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-
-# 2. Run bootstrap
-./bootstrap/bootstrap-mac.sh
-
-# 3. Login to vault and pull secrets
-bw login  # or: op signin / pass init
-blackdot vault pull
-
-# 4. Render templates (uses restored variables)
-blackdot template render --all
-```
+Priority: XDG config → `templates/_variables.local.sh` → `templates/_variables.sh`
 
 ---
 
 ## Schema Validation
 
-The `blackdot vault validate` command validates your `vault-items.json` configuration file against the JSON schema:
-
 ```bash
-# Validate configuration
 blackdot vault validate
 ```
 
-**What it validates:**
-- ✅ Valid JSON syntax
-- ✅ Required fields present (path, required, type)
-- ✅ Valid type values ("file" or "sshkey")
-- ✅ Item naming conventions (must start with capital letter)
-- ✅ Path format (must start with ~, /, or $)
+Validates JSON syntax, required fields, type values, and path formats. Runs automatically before push/pull operations.
 
-**Validation runs automatically:**
-- Before `blackdot vault push` operations
-- Before `blackdot vault pull` operations
-- During setup wizard vault configuration phase
-
-**Interactive error recovery:**
-If validation fails during setup, the wizard offers to open your editor:
-```
-Vault configuration is invalid
-
-Open editor to fix now? [Y/n]: y
-```
-
-After you fix errors and save, validation re-runs automatically.
-
-**Example output:**
-```
-════════════════════════════════════════════════════════════
-  Vault Configuration Schema Validation
-════════════════════════════════════════════════════════════
-
-Validating: /home/user/.config/blackdot/vault-items.json
-
-Configuration summary:
-  • 5 vault items configured
-  • 2 SSH keys configured
-  • 3 syncable items configured
-
-✓ vault-items.json schema is valid
-```
-
-**Common errors and fixes:**
-- `Missing required field: vault_items` → Add empty object: `"vault_items": {}`
-- `Item X: missing required field (path, required, or type)` → Add missing fields
-- `Item X: invalid type "folder"` → Change to "file" or "sshkey"
-- `Invalid JSON syntax` → Run `jq . ~/.config/blackdot/vault-items.json` to find syntax errors
+**Common errors:**
+- `Missing required field: vault_items` → Add `"vault_items": {}`
+- `Invalid type "folder"` → Use "file" or "sshkey"
+- `Invalid JSON syntax` → Run `jq . ~/.config/blackdot/vault-items.json`
 
 ---
 
