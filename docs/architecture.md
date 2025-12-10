@@ -1,37 +1,40 @@
 # Architecture
 
-This page describes the architecture of the dotfiles framework—the systems that control how features are loaded, configured, and composed.
+This page describes the architecture of blackdot—the systems that control how features are loaded, configured, and composed.
 
 ## Framework Architecture
 
-The dotfiles system is built on three core architectural systems:
+Blackdot is a **Go-first** framework with shell integration:
 
-1. **Feature Registry** (`lib/_features.sh`) - Modular control plane for all functionality
-2. **Configuration Layers** (`lib/_config_layers.sh`) - 5-layer priority system for settings
-3. **Claude Code Integration** (`claude/`, `/workspace`) - Portable sessions, dotclaude profiles, git safety hooks
+1. **Feature Registry** (`internal/feature/registry.go`) - Modular control plane implemented in Go
+2. **Go CLI** (`internal/cli/*.go`) - 20+ Cobra commands for all operations
+3. **Vaultmux Library** - External Go library for multi-vault support (Bitwarden/1Password/pass)
+4. **Shell Layer** (`zsh/`, `powershell/`) - Aliases and integrations that call the Go binary
 
-Additional systems:
+**Key principle:** Core functionality lives in Go. Shell provides convenience wrappers and tool integrations.
 
-4. **Hook System** (`lib/_hooks.sh`) - Lifecycle hooks for custom behavior at key points
-5. **Encryption System** (`lib/_encryption.sh`) - Age-based file encryption for non-vault secrets
-
-These systems work together to provide a modular, extensible foundation for AI-assisted development across machines.
+These systems work together to provide a modular, extensible, cross-platform foundation for AI-assisted development.
 
 ## System Overview
 
 ```mermaid
 graph TB
     subgraph "User Machine"
-        CLI[dotfiles CLI]
-        ZSH[ZSH Shell]
-        SYMLINKS[Symlinked Configs]
+        CLI["Go Binary<br/>(blackdot)"]
+        ZSH["ZSH Shell<br/>(macOS/Linux)"]
+        PS["PowerShell<br/>(Windows)"]
     end
 
-    subgraph "Dotfiles Repository"
-        BOOTSTRAP[Bootstrap Scripts]
-        VAULT_SCRIPTS[Vault Scripts]
-        DOCTOR[Health Checks]
-        ZSHD[ZSH Modules]
+    subgraph "Go Implementation"
+        FEATURES["Feature Registry<br/>(internal/feature)"]
+        VAULT["Vault CLI<br/>(internal/cli/vault.go)"]
+        DOCTOR["Health Checks<br/>(internal/cli/doctor.go)"]
+        CONFIG["Config Management<br/>(internal/config)"]
+    end
+
+    subgraph "External Libraries"
+        VAULTMUX["vaultmux<br/>(Go library)"]
+        COBRA["Cobra<br/>(CLI framework)"]
     end
 
     subgraph "External Services"
@@ -39,20 +42,24 @@ graph TB
         GH[GitHub]
     end
 
+    CLI --> FEATURES
+    CLI --> VAULT
     CLI --> DOCTOR
-    CLI --> VAULT_SCRIPTS
-    CLI --> BOOTSTRAP
-    ZSH --> ZSHD
-    SYMLINKS --> ZSHD
+    CLI --> CONFIG
 
-    VAULT_SCRIPTS <--> VAULT_BACKEND
-    BOOTSTRAP --> SYMLINKS
-    GH --> BOOTSTRAP
+    ZSH --> CLI
+    PS --> CLI
+
+    VAULT --> VAULTMUX
+    VAULTMUX <--> VAULT_BACKEND
+    CLI --> COBRA
+
+    GH -->|clone/pull| CLI
 ```
 
 ## Modular Architecture
 
-**Everything is optional except shell config.** The system is designed to be fully modular, allowing users to pick only the components they need. The **feature registry** (`lib/_features.sh`) provides centralized control over all optional functionality.
+**Everything is optional except shell config.** The system is designed to be fully modular, allowing users to pick only the components they need. The **feature registry** (`internal/feature/registry.go`) provides centralized control over all optional functionality.
 
 ### Feature Registry
 
@@ -123,11 +130,11 @@ blackdot config layers              # Displays effective config with sources
 | Project | `.blackdot.local` | Repository-specific settings |
 | Machine | `~/.config/blackdot/machine.json` | Per-machine preferences |
 | User | `~/.config/blackdot/config.json` | User preferences |
-| Defaults | `lib/_config_layers.sh` | Built-in fallbacks |
+| Defaults | `internal/config/config.go` | Built-in fallbacks |
 
 ### CLI Feature Awareness
 
-The CLI adapts based on enabled features:
+The Go CLI adapts based on enabled features:
 
 ```bash
 blackdot help  # Shows only commands for enabled features
@@ -147,17 +154,15 @@ Run: blackdot features enable vault
 
 **Implementation:**
 
-```bash
-# In lib/_cli_features.sh
-_cli_feature_map=(
-    ["vault:pull"]="vault"
-    ["vault:push"]="vault"
-    ["template:render"]="templates"
-    # ...
-)
-
-# Commands check feature status before executing
-cli_command_available "vault:pull"  # Returns 0 if vault enabled
+Feature checks are implemented in Go (`internal/cli/*.go`):
+```go
+// Each command checks its feature before running
+func newVaultCmd() *cobra.Command {
+    // Feature check happens in RunE
+    if !registry.IsEnabled("vault") {
+        return fmt.Errorf("Feature 'vault' is not enabled...")
+    }
+}
 ```
 
 ### Core vs. Optional Components
@@ -236,11 +241,11 @@ graph TD
 
 ### CLI Entry Point
 
-The unified `blackdot` command provides a single entry point for all operations:
+The unified `blackdot` Go binary provides a single entry point for all operations:
 
 ```mermaid
 graph LR
-    A[dotfiles] --> B{Command}
+    A[blackdot] --> B{Command}
     B --> C[status]
     B --> D[doctor]
     B --> M[features]
@@ -284,110 +289,128 @@ graph LR
 ```mermaid
 flowchart TD
     subgraph "Installation"
-        A[install.sh] --> B[bootstrap-*.sh]
-        B --> C[Create Symlinks]
-        B --> D[Install Dependencies]
+        A[install.sh/ps1] --> B[Clone Repository]
+        B --> C[Build Go Binary]
+        C --> D[Create Symlinks]
+        D --> E[blackdot setup wizard]
     end
 
-    subgraph "Secret Management"
-        E[Bitwarden Vault] <-->|restore| F[Local Files]
-        F <-->|sync| E
+    subgraph "Secret Management (vaultmux)"
+        F[Go CLI] <-->|vaultmux| G[Vault Backend]
+        G <-->|bw/op/pass CLI| H[Bitwarden/1Password/pass]
+        F --> I[Local Files]
     end
 
     subgraph "Runtime"
-        G[Shell Start] --> H[Load .zshrc]
-        H --> I[Load zsh.d/*.zsh]
-        I --> J[Ready]
+        J[Shell Start] --> K[Load .zshrc]
+        K --> L[eval blackdot shell-init]
+        L --> M[Load zsh.d/*.zsh]
+        M --> N[Ready]
     end
 
-    C --> H
+    E --> K
 ```
 
 ## Directory Structure
 
 ```
-dotfiles/
-├── install.sh              # One-line installer
-├── bootstrap/              # Platform bootstrap scripts
-│   ├── bootstrap-mac.sh    # macOS setup
-│   ├── bootstrap-linux.sh  # Linux/WSL setup
-│   ├── bootstrap-dotfiles.sh # Symlink setup
-│   └── _common.sh          # Shared bootstrap functions
-├── bin/                    # CLI tools
-│   ├── dotfiles-doctor     # Health checks
-│   ├── dotfiles-drift      # Vault comparison
-│   ├── dotfiles-features   # Feature registry management
-│   ├── dotfiles-hook       # Hook system management
-│   ├── dotfiles-sync       # Bidirectional vault sync
-│   ├── dotfiles-diff       # Preview changes
-│   ├── dotfiles-backup     # Backup/restore
-│   ├── dotfiles-setup      # Setup wizard
-│   ├── dotfiles-migrate    # Config migration orchestrator
-│   ├── dotfiles-migrate-config    # INI→JSON config migration
-│   ├── dotfiles-migrate-vault-schema # Legacy vault schema migration
-│   ├── dotfiles-uninstall  # Clean removal
-│   └── blackdot-metrics    # Show metrics
+blackdot/
+├── install.sh                    # Unix installer
+├── install-windows.ps1           # Windows PowerShell installer
+├── Install.ps1                   # Legacy Windows installer
+├── doc.go                        # Go package documentation
 │
-├── zsh/                    # Zsh config (macOS/Linux)
-│   ├── .zshrc              # Main entry (symlinked)
-│   ├── .p10k.zsh           # Powerlevel10k theme
-│   ├── completions/        # Tab completions
-│   │   └── _dotfiles       # CLI completions
-│   └── zsh.d/              # Modular config
-│       ├── 00-init.zsh
-│       ├── 10-environment.zsh
-│       ├── 20-history.zsh
-│       ├── 30-prompt.zsh
-│       ├── 40-aliases.zsh  # blackdot command
-│       ├── 50-functions.zsh
-│       ├── 60-completions.zsh
-│       ├── 70-plugins.zsh
-│       ├── 80-tools.zsh
-│       └── 90-local.zsh
+├── cmd/blackdot/                 # Go CLI entry point
+│   └── main.go                   # Binary entry point
 │
-├── powershell/             # PowerShell module (Windows)
-│   ├── Blackdot.psm1       # Main module (hooks, aliases, tools)
-│   ├── Blackdot.psd1       # Module manifest
-│   ├── Install-Blackdot.ps1 # Module installer
-│   ├── Install-Packages.ps1 # Winget package installer
-│   └── packages.json       # Package definitions
+├── internal/                     # Go implementation
+│   ├── cli/                      # Cobra commands (20+ files)
+│   │   ├── root.go               # Root command
+│   │   ├── features.go           # Feature management
+│   │   ├── vault.go              # Vault operations (vaultmux)
+│   │   ├── doctor.go             # Health checks
+│   │   ├── status.go             # System status
+│   │   ├── backup.go             # Backup/restore
+│   │   ├── setup.go              # Setup wizard
+│   │   ├── hook.go               # Hook management
+│   │   ├── config.go             # Config management
+│   │   ├── shell_init.go         # Shell initialization code
+│   │   ├── tools_*.go            # Developer tool integrations
+│   │   └── ...                   # Other commands
+│   ├── feature/                  # Feature registry
+│   │   ├── registry.go           # Registry implementation
+│   │   ├── registry_test.go      # Registry tests
+│   │   └── presets.go            # Preset configurations
+│   ├── config/                   # Configuration management
+│   │   ├── config.go             # JSON config read/write
+│   │   └── config_test.go        # Config tests
+│   ├── shell/                    # Shell utilities
+│   │   └── shell.go              # Shell detection
+│   └── template/                 # Template engine
+│       └── raymond_engine.go     # Handlebars templates
 │
-├── lib/                    # Shared libraries
-│   ├── _logging.sh         # Logging functions
-│   ├── _config.sh          # JSON config abstraction
-│   ├── _config_layers.sh   # Configuration Layers (5-layer priority)
-│   ├── _cli_features.sh    # CLI Feature Awareness
-│   ├── _features.sh        # Feature Registry (control plane)
-│   ├── _hooks.sh           # Hook System (lifecycle hooks)
-│   ├── _drift.sh           # Fast drift detection (shell startup)
-│   ├── _state.sh           # Setup state management
-│   ├── _vault.sh           # Vault abstraction layer
-│   ├── _templates.sh       # Template engine
-│   ├── _errors.sh          # Error handling
-│   └── _paths.sh           # Path utilities
+├── bin/                          # Compiled Go binary
+│   └── blackdot                  # The CLI (or blackdot.exe on Windows)
 │
-├── vault/
-│   ├── _common.sh          # Config loader & validation
-│   ├── vault-items.example.json # Example config template
-│   ├── restore.sh          # Restore secrets
-│   ├── sync-to-vault.sh
-│   └── restore-*.sh        # Category restores
+├── lib/                          # Minimal shell helpers
+│   ├── _colors.sh                # Color output functions
+│   ├── _hooks.sh                 # Hook system helpers
+│   └── _logging.sh               # Shell logging (info, pass, warn, fail)
 │
-├── hooks/
-│   └── examples/           # Example hook scripts
-│       ├── post_vault_pull/
-│       ├── doctor_check/
-│       ├── shell_init/
-│       └── directory_change/
+├── zsh/                          # Zsh config (macOS/Linux)
+│   ├── .zshrc                    # Main entry (symlinked to ~/)
+│   ├── .p10k.zsh                 # Powerlevel10k theme
+│   ├── completions/              # Tab completions
+│   │   └── _blackdot             # CLI completions
+│   └── zsh.d/                    # Modular config (18 files)
+│       ├── 00-init.zsh           # Shell initialization, feature_enabled()
+│       ├── 10-plugins.zsh        # ZSH plugins
+│       ├── 20-env.zsh            # Environment variables
+│       ├── 30-tools.zsh          # Tool PATH setup
+│       ├── 40-aliases.zsh        # Aliases, blackdot command
+│       ├── 50-functions.zsh      # Shell functions
+│       ├── 60-aws.zsh            # AWS/CDK integrations
+│       ├── 62-rust.zsh           # Rust tools
+│       ├── 63-go.zsh             # Go tools
+│       ├── 64-python.zsh         # Python/uv tools
+│       ├── 65-ssh.zsh            # SSH tools
+│       ├── 66-docker.zsh         # Docker tools
+│       ├── 70-claude.zsh         # Claude Code integration
+│       ├── 80-git.zsh            # Git aliases
+│       ├── 90-integrations.zsh   # NVM, SDKMAN
+│       └── 99-local.zsh.example  # Local overrides template
 │
-├── macos/
-│   └── settings.sh         # macOS defaults
+├── powershell/                   # PowerShell module (Windows)
+│   ├── Blackdot.psm1             # Main module
+│   ├── Blackdot.psd1             # Module manifest
+│   ├── Install-Blackdot.ps1      # Module installer
+│   └── Install-Packages.ps1      # Winget package installer
 │
-├── claude/
-│   └── commands/           # Slash commands
+├── vault/                        # Vault configuration
+│   ├── README.md                 # Vault documentation
+│   └── vault-items.example.json  # Example vault schema
 │
-└── docs/                   # Documentation site
+├── claude/                       # Claude Code integration
+│   ├── hooks/                    # Git safety hooks
+│   │   ├── git-sync-check.ps1    # PowerShell version
+│   │   ├── block-dangerous-git.ps1
+│   │   └── *.sh                  # Bash/Zsh versions
+│   └── commands/                 # Slash commands
+│
+└── docs/                         # Docsify documentation site
+    ├── index.html                # Docsify config
+    ├── _sidebar.md               # Navigation
+    ├── _coverpage.md             # Landing page
+    ├── README.md                 # Homepage
+    └── *.md                      # Documentation pages (29 files)
 ```
+
+**Key changes from shell-based architecture:**
+- `cmd/` and `internal/` contain all Go implementation
+- `bin/` contains only the compiled Go binary
+- `lib/` reduced to 3 files (colors, hooks, logging)
+- No shell scripts in `bin/`, `vault/`, or elsewhere - all functionality in Go
+- Shell layer (`zsh.d/`) calls Go binary for all operations
 
 ## ZSH Module Load Order
 
@@ -445,7 +468,7 @@ Both Zsh and PowerShell modules share the same aliases where possible, so comman
 
 ## Vault System
 
-The vault system provides bidirectional sync with multiple backends (Bitwarden, 1Password, pass).
+The vault system (`internal/cli/vault.go` + `vaultmux` library) provides bidirectional sync with multiple backends (Bitwarden, 1Password, pass). All vault operations are implemented in Go.
 
 ### Configuration
 
@@ -488,7 +511,8 @@ If validation fails during setup, offers to open editor for immediate fixes with
 ```mermaid
 sequenceDiagram
     participant User
-    participant CLI as dotfiles CLI
+    participant CLI as Go CLI (blackdot)
+    participant VMux as vaultmux Library
     participant Config as ~/.config/blackdot
     participant Local as Local Files
     participant BW as Bitwarden
@@ -498,13 +522,16 @@ sequenceDiagram
     CLI->>Config: Set backend (bitwarden/1password/pass)
 
     User->>CLI: blackdot vault pull
-    CLI->>BW: Fetch secrets
-    BW-->>CLI: Return encrypted data
+    CLI->>VMux: vaultmux.GetItem()
+    VMux->>BW: bw get item
+    BW-->>VMux: Return encrypted data
+    VMux-->>CLI: Parsed secret
     CLI->>Local: Write files (600 perms)
 
     User->>CLI: blackdot vault push
     CLI->>Local: Read files
-    CLI->>BW: Update vault items
+    CLI->>VMux: vaultmux.UpdateItem()
+    VMux->>BW: bw edit item
 ```
 
 ### Protected Items
@@ -534,7 +561,7 @@ Each vault item follows a consistent schema:
 
 ## Hook System
 
-The hook system (`lib/_hooks.sh`) allows custom behavior at lifecycle events without modifying core scripts.
+The hook system (`internal/cli/hook.go` + `lib/_hooks.sh`) allows custom behavior at lifecycle events without modifying core scripts. Go handles registration and execution, while shell helpers provide convenience functions.
 
 ### Hook Points
 
