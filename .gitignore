@@ -33,6 +33,7 @@ generated/
 *.backup
 
 # Go binaries (built from cmd/)
+bin/blackdot
 bin/dotfiles
 /dotfiles-go
 
