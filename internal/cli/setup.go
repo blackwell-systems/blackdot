@@ -75,8 +75,8 @@ func newSetupCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "setup",
-		Short: "Interactive setup wizard for dotfiles",
-		Long: `Dotfiles Setup - Unified configuration wizard
+		Short: "Interactive setup wizard for blackdot",
+		Long: `Blackdot Setup - Unified configuration wizard
 
 The setup wizard will:
   1. Check current configuration status
@@ -84,7 +84,7 @@ The setup wizard will:
   3. Save your preferences for future sessions
 
 Your progress is saved automatically. If interrupted, just
-run 'dotfiles setup' again to continue where you left off.`,
+run 'blackdot setup' again to continue where you left off.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runSetup(reset, status)
 		},
@@ -164,11 +164,11 @@ func runSetup(reset, statusOnly bool) error {
 
 	// Show banner
 	fmt.Println()
-	fmt.Println(cyan(`    ____        __  _____ __`))
-	fmt.Println(cyan(`   / __ \____  / /_/ __(_) /__  _____`))
-	fmt.Println(cyan(`  / / / / __ \/ __/ /_/ / / _ \/ ___/`))
-	fmt.Println(cyan(` / /_/ / /_/ / /_/ __/ / /  __(__  )`))
-	fmt.Println(cyan(`/_____/\____/\__/_/ /_/_/\___/____/`))
+	fmt.Println(cyan(`    ____  __           __       __      __`))
+	fmt.Println(cyan(`   / __ )/ /___ ______/ /______/ /___  / /_`))
+	fmt.Println(cyan(`  / __  / / __ ` + "`" + `/ ___/ //_/ __  / __ \/ __/`))
+	fmt.Println(cyan(` / /_/ / / /_/ / /__/ ,< / /_/ / /_/ / /_`))
+	fmt.Println(cyan(`/_____/_/\__,_/\___/_/|_|\__,_/\____/\__/`))
 	fmt.Println()
 	fmt.Println(bold("              Setup Wizard"))
 	fmt.Println()
@@ -180,8 +180,8 @@ func runSetup(reset, statusOnly bool) error {
 	if !needsSetup(cfg) {
 		fmt.Printf("%s%s\n", green(bold("All setup complete!")), "")
 		fmt.Println()
-		fmt.Println("Run 'dotfiles doctor' to verify health.")
-		fmt.Println("Run 'dotfiles setup --reset' to reconfigure.")
+		fmt.Println("Run 'blackdot doctor' to verify health.")
+		fmt.Println("Run 'blackdot setup --reset' to reconfigure.")
 		return nil
 	}
 
@@ -229,7 +229,7 @@ func runSetup(reset, statusOnly bool) error {
 	fmt.Printf("     %s\n", dim("Optional: work vs personal configs"))
 	fmt.Println()
 	fmt.Printf("%s %s - Progress is saved automatically\n", green("✓"), bold("Safe to exit anytime"))
-	fmt.Printf("%s %s - Just run 'dotfiles setup' again\n", green("✓"), bold("Resume anytime"))
+	fmt.Printf("%s %s - Just run 'blackdot setup' again\n", green("✓"), bold("Resume anytime"))
 	fmt.Println()
 	fmt.Println(cyan("═══════════════════════════════════════════════════════════════"))
 	fmt.Println()
@@ -280,7 +280,7 @@ func runSetup(reset, statusOnly bool) error {
 		showNextSteps(cfg)
 	} else {
 		fmt.Printf("%s Some steps were skipped or failed.\n", yellow("!"))
-		fmt.Println("Run 'dotfiles setup' again to continue.")
+		fmt.Println("Run 'blackdot setup' again to continue.")
 	}
 
 	return nil
@@ -463,7 +463,7 @@ func showSetupStatus(cfg *SetupConfig) {
 				}
 			case "vault":
 				if cfg.Vault.Backend == "none" {
-					fmt.Printf("  %s %s %s\n", yellow("[⊘]"), titleCase(phase), dim("(Skipped - run 'dotfiles vault init')"))
+					fmt.Printf("  %s %s %s\n", yellow("[⊘]"), titleCase(phase), dim("(Skipped - run 'blackdot vault init')"))
 					continue
 				} else if cfg.Vault.Backend != "" {
 					extra = fmt.Sprintf(" %s", dim(fmt.Sprintf("(%s)", cfg.Vault.Backend)))
@@ -779,7 +779,7 @@ func phasePackages(cfg *SetupConfig) error {
 	// Unix: Check if Homebrew is available
 	if _, err := exec.LookPath("brew"); err != nil {
 		fmt.Printf("%s Homebrew not installed - skipping package installation\n", yellow("!"))
-		fmt.Println("Install Homebrew and run 'dotfiles packages' later.")
+		fmt.Println("Install Homebrew and run 'blackdot packages' later.")
 		return nil
 	}
 
@@ -906,7 +906,7 @@ func phasePackagesWindows(cfg *SetupConfig, dotfilesDir string, green, yellow, b
 	if _, err := exec.LookPath("winget"); err != nil {
 		fmt.Printf("%s winget not installed - skipping package installation\n", yellow("!"))
 		fmt.Println("winget comes with Windows 11 and App Installer on Windows 10.")
-		fmt.Println("Install it from the Microsoft Store and run 'dotfiles packages' later.")
+		fmt.Println("Install it from the Microsoft Store and run 'blackdot packages' later.")
 		return nil
 	}
 
@@ -967,7 +967,7 @@ func phaseVault(cfg *SetupConfig) error {
 		fmt.Print("Reconfigure vault? [y/N]: ")
 		if !strings.EqualFold(readInput(), "y") {
 			if cfg.Vault.Backend == "none" {
-				fmt.Println("Run 'dotfiles vault init' anytime to configure vault")
+				fmt.Println("Run 'blackdot vault init' anytime to configure vault")
 			}
 			return nil
 		}
@@ -999,10 +999,10 @@ func phaseVault(cfg *SetupConfig) error {
 			cfg.Vault.Backend = "none"
 			markPhaseComplete(cfg, "vault")
 			fmt.Println()
-			fmt.Println("Run 'dotfiles vault init' anytime to configure vault")
+			fmt.Println("Run 'blackdot vault init' anytime to configure vault")
 			return nil
 		}
-		fmt.Println("Please install a vault CLI and run 'dotfiles setup' again.")
+		fmt.Println("Please install a vault CLI and run 'blackdot setup' again.")
 		return fmt.Errorf("no vault CLI available")
 	}
 
@@ -1026,7 +1026,7 @@ func phaseVault(cfg *SetupConfig) error {
 		cfg.Vault.Backend = "none"
 		markPhaseComplete(cfg, "vault")
 		fmt.Println()
-		fmt.Println("Run 'dotfiles vault init' anytime to configure vault")
+		fmt.Println("Run 'blackdot vault init' anytime to configure vault")
 		return nil
 	}
 
@@ -1171,7 +1171,7 @@ func phaseSecrets(cfg *SetupConfig) error {
 		}
 	default:
 		fmt.Printf("%s Skipped secrets management\n", yellow("!"))
-		fmt.Println("Run 'dotfiles sync' anytime to manage secrets")
+		fmt.Println("Run 'blackdot sync' anytime to manage secrets")
 	}
 
 	markPhaseComplete(cfg, "secrets")
@@ -1264,13 +1264,13 @@ func phaseTemplate(cfg *SetupConfig) error {
 				fmt.Printf("%s Templates configured\n", green("✓"))
 				cfg.Features["templates"] = true
 				fmt.Println()
-				fmt.Println("Run 'dotfiles template render' to generate configs from your templates")
+				fmt.Println("Run 'blackdot template render' to generate configs from your templates")
 			}
 		}
 	} else {
 		fmt.Println("Skipped template setup")
 		fmt.Println()
-		fmt.Println("You can enable templates later with: dotfiles template init")
+		fmt.Println("You can enable templates later with: blackdot template init")
 	}
 
 	markPhaseComplete(cfg, "template")
@@ -1316,7 +1316,7 @@ func showPresetSelection(cfg *SetupConfig) {
 		selectedPreset = "full"
 	default:
 		fmt.Println("Skipped preset selection")
-		fmt.Println("Configure later with: dotfiles features preset <name> --persist")
+		fmt.Println("Configure later with: blackdot features preset <name> --persist")
 		return
 	}
 
@@ -1345,8 +1345,8 @@ func showNextSteps(cfg *SetupConfig) {
 	// Vault-specific next steps
 	if cfg.Vault.Backend != "" && cfg.Vault.Backend != "none" {
 		fmt.Printf("  %s Vault configured (%s)\n", cyan("✓"), cfg.Vault.Backend)
-		fmt.Printf("    %s %s    %s\n", dim("→"), bold("dotfiles vault validate"), dim("# Validate vault schema (recommended)"))
-		fmt.Printf("    %s %s     %s\n", dim("→"), bold("dotfiles vault restore"), dim("# Restore your secrets"))
+		fmt.Printf("    %s %s    %s\n", dim("→"), bold("blackdot vault validate"), dim("# Validate vault schema (recommended)"))
+		fmt.Printf("    %s %s     %s\n", dim("→"), bold("blackdot vault restore"), dim("# Restore your secrets"))
 		fmt.Println()
 	}
 
@@ -1354,19 +1354,19 @@ func showNextSteps(cfg *SetupConfig) {
 	templateFile := filepath.Join(DotfilesDir(), "templates", "_variables.local.sh")
 	if _, err := os.Stat(templateFile); err == nil {
 		fmt.Printf("  %s Templates configured\n", cyan("✓"))
-		fmt.Printf("    %s %s   %s\n", dim("→"), bold("dotfiles template render"), dim("# Generate configs"))
+		fmt.Printf("    %s %s   %s\n", dim("→"), bold("blackdot template render"), dim("# Generate configs"))
 		fmt.Println()
 	}
 
 	// Always show health check
 	fmt.Printf("  %s Health check:\n", blue("ℹ"))
-	fmt.Printf("    %s %s             %s\n", dim("→"), bold("dotfiles doctor"), dim("# Verify everything works"))
+	fmt.Printf("    %s %s             %s\n", dim("→"), bold("blackdot doctor"), dim("# Verify everything works"))
 	fmt.Println()
 
 	// Show helpful commands
 	fmt.Printf("  %s Explore commands:\n", blue("ℹ"))
-	fmt.Printf("    %s %s             %s\n", dim("→"), bold("dotfiles status"), dim("# Visual dashboard"))
-	fmt.Printf("    %s %s               %s\n", dim("→"), bold("dotfiles help"), dim("# See all commands"))
+	fmt.Printf("    %s %s             %s\n", dim("→"), bold("blackdot status"), dim("# Visual dashboard"))
+	fmt.Printf("    %s %s               %s\n", dim("→"), bold("blackdot help"), dim("# See all commands"))
 	fmt.Println()
 
 	// Check for installed tools and show relevant aliases

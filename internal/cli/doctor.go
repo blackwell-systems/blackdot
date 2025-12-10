@@ -62,14 +62,14 @@ func newDoctorCmd() *cobra.Command {
 // printDoctorHelp prints styled help matching ZSH doctor help
 func printDoctorHelp() {
 	// Title
-	BoldCyan.Print("dotfiles doctor")
+	BoldCyan.Print("blackdot doctor")
 	fmt.Print(" - ")
 	Dim.Println("Comprehensive dotfiles health check")
 	fmt.Println()
 
 	// Usage
 	Bold.Print("Usage:")
-	fmt.Println(" dotfiles doctor [OPTIONS]")
+	fmt.Println(" blackdot doctor [OPTIONS]")
 	fmt.Println()
 
 	// Options
@@ -110,15 +110,15 @@ func printDoctorHelp() {
 	// Examples
 	BoldCyan.Println("Examples:")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles doctor")
+	Yellow.Print("blackdot doctor")
 	fmt.Print("          ")
 	Dim.Println("# Run all checks")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles doctor --fix")
+	Yellow.Print("blackdot doctor --fix")
 	fmt.Print("    ")
 	Dim.Println("# Auto-fix permissions")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles doctor --quick")
+	Yellow.Print("blackdot doctor --quick")
 	fmt.Print("  ")
 	Dim.Println("# Fast checks only")
 	fmt.Println()
@@ -142,11 +142,11 @@ func runDoctor(fixMode, quickMode bool) error {
 	// Banner
 	fmt.Println()
 	boldCyan := color.New(color.Bold, color.FgCyan).SprintFunc()
-	fmt.Println(boldCyan(`    ____        __  _____ __                ____             __
-   / __ \____  / /_/ __(_) /__  _____      / __ \____  _____/ /_____  _____
-  / / / / __ \/ __/ /_/ / / _ \/ ___/_____/ / / / __ \/ ___/ __/ __ \/ ___/
- / /_/ / /_/ / /_/ __/ / /  __(__  )_____/ /_/ / /_/ / /__/ /_/ /_/ / /
-/_____/\____/\__/_/ /_/_/\___/____/     /_____/\____/\___/\__/\____/_/`))
+	fmt.Println(boldCyan(`    ____  __           __       __      __        ____             __
+   / __ )/ /___ ______/ /______/ /___  / /_      / __ \____  _____/ /_____  _____
+  / __  / / __ ` + "`" + `/ ___/ //_/ __  / __ \/ __/_____/ / / / __ \/ ___/ __/ __ \/ ___/
+ / /_/ / / /_/ / /__/ ,< / /_/ / /_/ / /_/_____/ /_/ / /_/ / /__/ /_/ /_/ / /
+/_____/_/\__,_/\___/_/|_|\__,_/\____/\__/     /_____/\____/\___/\__/\____/_/`))
 	fmt.Println()
 	fmt.Println(state.dim("Comprehensive dotfiles health check"))
 	fmt.Println()
@@ -260,7 +260,7 @@ func checkVersionAndUpdates(state *doctorState, dotfilesDir string) {
 				if start >= 0 && end > start {
 					version := line[start+1 : end]
 					if version != "Unreleased" {
-						state.pass(fmt.Sprintf("Dotfiles version: %s", version))
+						state.pass(fmt.Sprintf("Blackdot version: %s", version))
 						break
 					}
 				}
@@ -289,7 +289,7 @@ func checkVersionAndUpdates(state *doctorState, dotfilesDir string) {
 				behindCmd := exec.Command("git", "-C", dotfilesDir, "rev-list", "--count", "HEAD..origin/main")
 				behindOut, _ := behindCmd.Output()
 				behind := strings.TrimSpace(string(behindOut))
-				state.warn(fmt.Sprintf("Behind origin/main by %s commit(s)", behind), "dotfiles-upgrade")
+				state.warn(fmt.Sprintf("Behind origin/main by %s commit(s)", behind), "blackdot upgrade")
 			}
 		} else {
 			state.info("Could not check for updates (offline?)")
@@ -494,10 +494,10 @@ func checkVaultStatus(state *doctorState) {
 			if err := unlockCmd.Run(); err == nil {
 				state.pass("Vault is unlocked")
 			} else {
-				state.warn("Vault is locked", "dotfiles vault unlock")
+				state.warn("Vault is locked", "blackdot vault unlock")
 			}
 		} else {
-			state.warn("Not logged in to Bitwarden", "bw login && dotfiles vault unlock")
+			state.warn("Not logged in to Bitwarden", "bw login && blackdot vault unlock")
 		}
 		return
 	}
@@ -510,7 +510,7 @@ func checkVaultStatus(state *doctorState) {
 		if err := accountCmd.Run(); err == nil {
 			state.pass("Signed in to 1Password")
 		} else {
-			state.warn("Not signed in to 1Password", "dotfiles vault unlock")
+			state.warn("Not signed in to 1Password", "blackdot vault unlock")
 		}
 		return
 	}
@@ -631,19 +631,19 @@ func checkTemplateSystem(state *doctorState, dotfilesDir string) {
 				}
 
 				if staleCount > 0 {
-					state.warn(fmt.Sprintf("%d template(s) need re-rendering", staleCount), "dotfiles template render")
+					state.warn(fmt.Sprintf("%d template(s) need re-rendering", staleCount), "blackdot template render")
 				} else {
 					state.pass("All generated configs up to date")
 				}
 			} else {
-				state.warn("No generated configs", "dotfiles template render")
+				state.warn("No generated configs", "blackdot template render")
 			}
 		} else {
-			state.warn("Generated directory missing", fmt.Sprintf("mkdir -p \"%s\" && dotfiles template render", generatedDir))
+			state.warn("Generated directory missing", fmt.Sprintf("mkdir -p \"%s\" && blackdot template render", generatedDir))
 		}
 	} else {
 		state.info("Template system not configured (optional)")
-		state.info("Run 'dotfiles template init' to set up machine-specific configs")
+		state.info("Run 'blackdot template init' to set up machine-specific configs")
 	}
 }
 
@@ -774,7 +774,7 @@ func printSummary(state *doctorState, fixMode bool) {
 			}
 			if fixable > 0 {
 				fmt.Printf("  %s\n", state.bold(fmt.Sprintf("Auto-fix available for %d issue(s):", fixable)))
-				fmt.Printf("    %s dotfiles doctor --fix\n", state.green("→"))
+				fmt.Printf("    %s blackdot doctor --fix\n", state.green("→"))
 				fmt.Println()
 			}
 		}
@@ -804,7 +804,7 @@ func printSummary(state *doctorState, fixMode bool) {
 }
 
 func saveMetrics(state *doctorState, dotfilesDir, home string) {
-	metricsFile := filepath.Join(home, ".dotfiles-metrics.jsonl")
+	metricsFile := filepath.Join(home, ".blackdot-metrics.jsonl")
 
 	// Get metadata
 	timestamp := time.Now().UTC().Format("2006-01-02T15:04:05+00:00")
