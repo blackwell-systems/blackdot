@@ -12,7 +12,7 @@ BLACKDOT_DIR="$(dirname "$VAULT_DIR")"
 source "$BLACKDOT_DIR/lib/_logging.sh"
 
 # Output file
-VAULT_CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/vault-items.json"
+VAULT_CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/blackdot/vault-items.json"
 
 # Custom paths to scan (in addition to standard locations)
 typeset -a CUSTOM_SSH_PATHS=()
@@ -171,7 +171,7 @@ discover_other_secrets() {
     fi
 
     # Template variables (XDG location - preferred for vault portability)
-    local xdg_vars="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/template-variables.sh"
+    local xdg_vars="${XDG_CONFIG_HOME:-$HOME/.config}/blackdot/template-variables.sh"
     if [[ -f "$xdg_vars" ]]; then
         items+=("Template-Variables:$xdg_vars")
         info "Found: $xdg_vars"
@@ -180,7 +180,7 @@ discover_other_secrets() {
         # Try common dotfiles locations (including configured workspace target)
         local ws_target="${WORKSPACE_TARGET:-$HOME/workspace}"
         ws_target="${ws_target/#\~/$HOME}"
-        local dotfiles_dirs=("$HOME/dotfiles" "$HOME/.blackdot" "$ws_target/dotfiles")
+        local dotfiles_dirs=("$HOME/blackdot" "$HOME/.blackdot" "$ws_target/blackdot")
         for dir in "${dotfiles_dirs[@]}"; do
             if [[ -f "$dir/templates/_variables.local.sh" ]]; then
                 items+=("Template-Variables:$dir/templates/_variables.local.sh")
@@ -306,15 +306,15 @@ generate_vault_json() {
     fi
 
     # Discover template variables (XDG location preferred, then dotfiles repo)
-    local xdg_vars="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/template-variables.sh"
+    local xdg_vars="${XDG_CONFIG_HOME:-$HOME/.config}/blackdot/template-variables.sh"
     if [[ -f "$xdg_vars" ]]; then
         pass "  Found: $xdg_vars"
-        syncable_items+=("Template-Variables:~/.config/dotfiles/template-variables.sh")
+        syncable_items+=("Template-Variables:~/.config/blackdot/template-variables.sh")
     else
         # Check common dotfiles locations (including configured workspace target)
         local ws_target="${WORKSPACE_TARGET:-$HOME/workspace}"
         ws_target="${ws_target/#\~/$HOME}"
-        for dir in "$HOME/dotfiles" "$HOME/.blackdot" "$ws_target/dotfiles"; do
+        for dir in "$HOME/blackdot" "$HOME/.blackdot" "$ws_target/blackdot"; do
             if [[ -f "$dir/templates/_variables.local.sh" ]]; then
                 pass "  Found: $dir/templates/_variables.local.sh"
                 syncable_items+=("Template-Variables:$dir/templates/_variables.local.sh")
@@ -334,7 +334,7 @@ generate_vault_json() {
         echo "  • ~/.aws/ (AWS configs)" >&2
         echo "  • ~/.gitconfig (Git config)" >&2
         echo "  • ~/.npmrc, ~/.pypirc, ~/.docker/config.json" >&2
-        echo "  • ~/.config/dotfiles/template-variables.sh (template vars)" >&2
+        echo "  • ~/.config/blackdot/template-variables.sh (template vars)" >&2
         echo "" >&2
         return 1
     fi
@@ -588,7 +588,7 @@ Options:
   --dry-run, -n           Show what would be discovered without creating file
   --force, -f             Overwrite existing config (skip merge, no backup)
   --merge                 Merge with existing config (no prompt)
-  --location TYPE:VALUE   Set vault location (e.g., folder:dotfiles)
+  --location TYPE:VALUE   Set vault location (e.g., folder:blackdot)
   --ssh-path PATH         Additional directory to scan for SSH keys
   --config-path PATH      Additional directory to scan for config files
   --help, -h              Show this help
@@ -598,8 +598,8 @@ Standard locations scanned:
   • ~/.aws/           (AWS configs)
   • ~/.gitconfig      (Git config)
   • ~/.npmrc, ~/.pypirc, ~/.docker/config.json (other secrets)
-  • ~/.config/dotfiles/template-variables.sh (template variables)
-  • ~/dotfiles/templates/_variables.local.sh (alternate location)
+  • ~/.config/blackdot/template-variables.sh (template variables)
+  • ~/blackdot/templates/_variables.local.sh (alternate location)
 
 Merge behavior (when config exists):
   Interactive prompt offers three choices:
@@ -621,7 +621,7 @@ Examples:
   ./discover-secrets.sh --ssh-path /mnt/keys --ssh-path ~/backup/.ssh
 
 Output:
-  Generates ~/.config/dotfiles/vault-items.json with discovered items.
+  Generates ~/.config/blackdot/vault-items.json with discovered items.
   If config exists, merges intelligently unless --force is used.
 EOF
                 exit 0
@@ -849,7 +849,7 @@ EOF
         echo "     ${CYAN}\$EDITOR $VAULT_CONFIG_FILE${NC}"
         echo ""
         echo "  3. Sync to vault:"
-        echo "     ${CYAN}dotfiles vault push --all${NC}"
+        echo "     ${CYAN}blackdot vault push --all${NC}"
         echo ""
     fi
 }

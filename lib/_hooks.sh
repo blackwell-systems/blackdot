@@ -37,8 +37,8 @@ _HOOKS_SOURCED=1
 typeset -gA HOOKS=()
 
 # Configuration with environment variable overrides
-HOOKS_DIR="${BLACKDOT_HOOKS_DIR:-${HOME}/.config/dotfiles/hooks}"
-HOOKS_CONFIG="${BLACKDOT_HOOKS_CONFIG:-${HOME}/.config/dotfiles/hooks.json}"
+HOOKS_DIR="${BLACKDOT_HOOKS_DIR:-${HOME}/.config/blackdot/hooks}"
+HOOKS_CONFIG="${BLACKDOT_HOOKS_CONFIG:-${HOME}/.config/blackdot/hooks.json}"
 HOOKS_FAIL_FAST="${BLACKDOT_HOOKS_FAIL_FAST:-false}"
 HOOKS_VERBOSE="${BLACKDOT_HOOKS_VERBOSE:-false}"
 HOOKS_TIMEOUT="${BLACKDOT_HOOKS_TIMEOUT:-30}"

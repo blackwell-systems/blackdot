@@ -15,7 +15,7 @@ BLACKDOT_DIR="$(dirname "$SCRIPT_DIR")"
 source "$BLACKDOT_DIR/lib/_vault.sh"
 
 # Get vault-items.json path (default or from argument)
-VAULT_ITEMS_FILE="${1:-$HOME/.config/dotfiles/vault-items.json}"
+VAULT_ITEMS_FILE="${1:-$HOME/.config/blackdot/vault-items.json}"
 
 echo ""
 echo "════════════════════════════════════════════════════════════"
@@ -61,7 +61,7 @@ else
     echo "  1. Review the validation errors above"
     echo "  2. Check example: $BLACKDOT_DIR/vault/vault-items.example.json"
     echo "  3. Fix the JSON structure in: $VAULT_ITEMS_FILE"
-    echo "  4. Re-run validation: dotfiles vault validate"
+    echo "  4. Re-run validation: blackdot vault validate"
     echo ""
     echo "Common issues:"
     echo "  • Missing required fields (path, required, type)"

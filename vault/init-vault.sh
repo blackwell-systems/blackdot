@@ -28,7 +28,7 @@ source "$BLACKDOT_DIR/lib/_vault.sh"
 source "$BLACKDOT_DIR/lib/_config.sh"
 
 # Configuration
-CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/blackdot"
 VAULT_CONFIG="$CONFIG_DIR/vault-items.json"
 
 # Parse arguments
@@ -278,7 +278,7 @@ select_backend() {
 
         if prompt_yesno "Skip vault setup for now?" "y"; then
             config_set "vault.backend" "none"
-            info "Vault setup skipped. Run 'dotfiles vault setup' anytime."
+            info "Vault setup skipped. Run 'blackdot vault setup' anytime."
             exit 0
         else
             fail "Please install a vault CLI and try again"
@@ -303,7 +303,7 @@ select_backend() {
     if [[ "$choice" =~ ^[0-9]+$ ]]; then
         if [[ $choice -eq $i ]]; then
             config_set "vault.backend" "none"
-            info "Vault setup skipped. Run 'dotfiles vault setup' anytime."
+            info "Vault setup skipped. Run 'blackdot vault setup' anytime."
             exit 0
         elif [[ $choice -ge 1 && $choice -lt $i ]]; then
             SELECTED_BACKEND="${available[$choice]}"
@@ -345,7 +345,7 @@ check_authentication() {
                 echo "  ${GREEN}bw login${NC}"
                 echo ""
                 echo "Then run setup again:"
-                echo "  ${GREEN}dotfiles vault setup${NC}"
+                echo "  ${GREEN}blackdot vault setup${NC}"
                 ;;
             1password)
                 echo "Please sign in first:"

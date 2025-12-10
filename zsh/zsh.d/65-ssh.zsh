@@ -386,7 +386,7 @@ sshtunnels() {
 sshtools() {
     require_feature "ssh_tools" || return 1
     # Source theme colors
-    source "${BLACKDOT_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
+    source "${BLACKDOT_DIR:-$HOME/workspace/blackdot}/lib/_colors.sh"
 
     # Check SSH agent status
     local logo_color agent_running keys_loaded

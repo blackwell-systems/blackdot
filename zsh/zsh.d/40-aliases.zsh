@@ -121,7 +121,7 @@ _blackdot_help_command() {
         feature_status="core"
     fi
 
-    echo "${BOLD}${CYAN}dotfiles $cmd${NC} - $title"
+    echo "${BOLD}${CYAN}blackdot $cmd${NC} - $title"
     echo ""
     echo "${BOLD}Feature:${NC} $feature ($status_text)"
     echo "${BOLD}Description:${NC} $description"
@@ -134,8 +134,8 @@ _blackdot_help_command() {
     if [[ "$feature_status" == "disabled" ]]; then
         echo "─────────────────────────────────────────────────────"
         echo "${YELLOW}⚠${NC} This feature is not enabled."
-        echo "  Enable with: ${GREEN}dotfiles features enable $feature${NC}"
-        echo "  Or use: ${DIM}dotfiles $cmd --force${NC}"
+        echo "  Enable with: ${GREEN}blackdot features enable $feature${NC}"
+        echo "  Or use: ${DIM}blackdot $cmd --force${NC}"
         echo ""
     fi
 }
@@ -161,9 +161,9 @@ _blackdot_help() {
         return $?
     fi
 
-    echo "${BOLD}${CYAN}dotfiles${NC} - Manage your dotfiles"
+    echo "${BOLD}${CYAN}blackdot${NC} - Manage your dotfiles"
     echo ""
-    echo "${BOLD}Usage:${NC} dotfiles <command> [options]"
+    echo "${BOLD}Usage:${NC} blackdot <command> [options]"
     echo ""
 
     # Setup & Health (always visible)
@@ -332,11 +332,11 @@ _blackdot_help() {
     else
         echo "─────────────────────────────────────────────────────"
         echo "${DIM}Legend: ${GREEN}●${NC}${DIM} enabled  ${NC}○${DIM} disabled${NC}"
-        echo "${DIM}Enable features: dotfiles features enable <name>${NC}"
+        echo "${DIM}Enable features: blackdot features enable <name>${NC}"
         echo ""
     fi
 
-    echo "${DIM}Run 'dotfiles <command> --help' for detailed options.${NC}"
+    echo "${DIM}Run 'blackdot <command> --help' for detailed options.${NC}"
     echo ""
     echo "${DIM}Runtime: ZSH shell${NC}"
 }
@@ -375,7 +375,7 @@ blackdot() {
     # Get Go binary path
     local go_bin=$(_blackdot_go_bin)
     if [[ -z "$go_bin" ]]; then
-        echo "${RED}[ERROR]${NC} dotfiles binary not found. Run: go build -o bin/blackdot ./cmd/dotfiles" >&2
+        echo "${RED}[ERROR]${NC} blackdot binary not found. Run: go build -o bin/blackdot ./cmd/blackdot" >&2
         return 1
     fi
 
@@ -398,8 +398,8 @@ blackdot() {
     "$go_bin" "$@"
 }
 
-# Short alias for dotfiles command
-alias d=dotfiles
+# Short alias for blackdot command
+alias d=blackdot
 
 # =========================
 # Tool Group Aliases
@@ -411,8 +411,8 @@ alias d=dotfiles
 _blackdot_go_bin() {
     if [[ -x "$BLACKDOT_DIR/bin/blackdot" ]]; then
         echo "$BLACKDOT_DIR/bin/blackdot"
-    elif command -v dotfiles &>/dev/null; then
-        echo "dotfiles"
+    elif command -v blackdot &>/dev/null; then
+        echo "blackdot"
     else
         echo ""
     fi

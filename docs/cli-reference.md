@@ -1,6 +1,6 @@
 # CLI Reference
 
-Complete reference for all dotfiles commands, options, and environment variables.
+Complete reference for all blackdot commands, options, and environment variables.
 
 ---
 

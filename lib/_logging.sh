@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ============================================================
 # FILE: lib/_logging.sh
-# Shared logging functions and color definitions for dotfiles scripts
+# Shared logging functions and color definitions for blackdot scripts
 #
 # Usage:
 #   source "$(dirname "${BASH_SOURCE[0]}")/../lib/_logging.sh"

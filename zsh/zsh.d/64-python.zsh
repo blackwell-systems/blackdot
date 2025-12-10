@@ -320,7 +320,7 @@ uv-python-setup() {
 pythontools() {
     require_feature "python_tools" || return 1
     # Source theme colors
-    source "${BLACKDOT_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
+    source "${BLACKDOT_DIR:-$HOME/workspace/blackdot}/lib/_colors.sh"
 
     # Check if uv and Python are installed
     local logo_color has_uv has_python in_project in_venv

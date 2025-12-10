@@ -17,7 +17,7 @@ status() {
   # Gather detailed status
   local s_zshrc="${r}◇${n}" s_zshrc_info="not linked"
   if [[ -L ~/.zshrc ]]; then
-    s_zshrc="${g}◆${n}"; s_zshrc_info="${d}→ dotfiles/zsh/zshrc${n}"
+    s_zshrc="${g}◆${n}"; s_zshrc_info="${d}→ blackdot/zsh/zshrc${n}"
   else
     fixes+=("zshrc: bootstrap-dotfiles.sh")
   fi
@@ -41,7 +41,7 @@ status() {
   if [[ "$ssh_count" -gt 0 ]]; then
     s_ssh="${g}◆${n}"; s_ssh_info="${g}$ssh_count keys loaded${n}"
   else
-    fixes+=("ssh: dotfiles vault restore")
+    fixes+=("ssh: blackdot vault restore")
   fi
 
   local s_aws="${r}◇${n}" s_aws_info="${d}not authenticated${n}"
@@ -194,15 +194,15 @@ notes() {
   esac
 }
 
-# Deprecated: use dotfiles-upgrade instead
-dotfiles-update() {
-    warn "dotfiles-update is deprecated, use dotfiles-upgrade instead"
-    dotfiles-upgrade
+# Deprecated: use blackdot-upgrade instead
+blackdot-update() {
+    warn "blackdot-update is deprecated, use blackdot-upgrade instead"
+    blackdot-upgrade
 }
 
 # One-command upgrade flow with health check
-dotfiles-upgrade() {
-    echo "🚀 Upgrading dotfiles..."
+blackdot-upgrade() {
+    echo "🚀 Upgrading blackdot..."
 
     # Pull latest changes
     local branch
@@ -228,10 +228,10 @@ dotfiles-upgrade() {
     echo "   Or run: source ~/.zshrc"
 }
 
-# Check for dotfiles updates (once per day)
-_check_dotfiles_updates() {
+# Check for blackdot updates (once per day)
+_check_blackdot_updates() {
     local dotfiles_dir="$BLACKDOT_DIR"
-    local cache_file="$HOME/.dotfiles-update-check"
+    local cache_file="$HOME/.blackdot-update-check"
 
     # Skip if checked recently (within last day)
     if [[ -f "$cache_file" ]]; then
@@ -254,8 +254,8 @@ _check_dotfiles_updates() {
 
     if [[ -n "$behind" && "$behind" -gt 0 ]]; then
         echo ""
-        echo "📦 Dotfiles update available ($behind commit(s) behind origin/$current_branch)"
-        echo "   Run: dotfiles-upgrade"
+        echo "📦 Blackdot update available ($behind commit(s) behind origin/$current_branch)"
+        echo "   Run: blackdot-upgrade"
         echo ""
     fi
 
@@ -264,7 +264,7 @@ _check_dotfiles_updates() {
 }
 
 # Auto-check on shell startup
-_check_dotfiles_updates
+_check_blackdot_updates
 
 # =========================
 # SSH Agent (lazy start + auto-add keys)
