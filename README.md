@@ -145,19 +145,19 @@ Push local secrets to vault? [Y/n]: y
 Next steps based on your configuration:
 
   ✓ Vault configured (bitwarden)
-    → dotfiles vault validate    # Validate vault schema
-    → dotfiles vault pull        # Restore your secrets
+    → blackdot vault validate    # Validate vault schema
+    → blackdot vault pull        # Restore your secrets
 
   ✓ Templates configured
-    → dotfiles template render   # Generate configs
+    → blackdot template render   # Generate configs
 
   ℹ Health check:
-    → dotfiles doctor            # Verify everything works
+    → blackdot doctor            # Verify everything works
 
   ℹ Explore commands:
-    → dotfiles status            # Visual dashboard
-    → dotfiles sync              # Smart bidirectional vault sync
-    → dotfiles help              # See all commands
+    → blackdot status            # Visual dashboard
+    → blackdot sync              # Smart bidirectional vault sync
+    → blackdot help              # See all commands
 
   ℹ Your new shell features:
     → ll, la, lt                 # Enhanced ls (eza with icons)
@@ -301,7 +301,7 @@ blackdot template render          # Generate configs
 
 ```bash
 DOTFILES_OFFLINE=1 ./bootstrap/bootstrap-linux.sh    # Skips all vault operations
-DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull   # No drift check (for CI/automation)
+DOTFILES_SKIP_DRIFT_CHECK=1 blackdot vault pull   # No drift check (for CI/automation)
 ```
 
 **All setup wizard steps are optional.** The wizard detects your choices and adjusts:

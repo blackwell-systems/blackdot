@@ -197,7 +197,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Backend-specific login/unlock flows
   - Fixes Alpine/Linux issue where pass was auto-selected
 - **Integrated `install.sh` with `blackdot init`** - `install.sh --interactive` now calls the wizard automatically
-- **Simplified Quick Start** - Reduced from 4 manual steps to 2 (clone → dotfiles init)
+- **Simplified Quick Start** - Reduced from 4 manual steps to 2 (clone → blackdot init)
 - **Reordered README Sections** - End sections now: Acknowledgments → Trademarks → License
 - **Updated Project Structure** - Added lib/_vault.sh and test/fixtures/ subdirectory
 - **Removed Bitwarden Bias** - All documentation now vault-agnostic

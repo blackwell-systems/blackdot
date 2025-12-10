@@ -64,7 +64,7 @@ source "$(dirname "$0")/../lib/_features.sh"
 
 feature_enabled "my_feature" || {
     echo "Feature 'my_feature' is not enabled"
-    echo "Run: dotfiles features enable my_feature"
+    echo "Run: blackdot features enable my_feature"
     exit 1
 }
 

@@ -485,7 +485,7 @@ blackdot vault push --all    # Push current secrets to vault
 5. **Document custom workflows**: Add notes to profile READMEs
    ```bash
    # In ~/workspace/dotclaude-profiles/profiles/client-acme/README.md
-   # Requires: dotfiles vault pull client-acme-*
+   # Requires: blackdot vault pull client-acme-*
    ```
 
 ## Further Reading

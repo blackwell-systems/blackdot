@@ -146,7 +146,7 @@ For use in scripts:
 # Returns exit code 0 if enabled, 1 if disabled
 if dotfiles features check vault; then
     # Vault is enabled, do something
-    dotfiles vault pull
+    blackdot vault pull
 fi
 ```
 

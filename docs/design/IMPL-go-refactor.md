@@ -463,7 +463,7 @@ cdk-env()    { eval "$(dotfiles tools cdk env "$@")"; }
 mkcd()       { mkdir -p "$1" && cd "$1"; }
 
 # Everything else: call binary directly, no wrapper needed
-# dotfiles doctor, dotfiles features, dotfiles vault, etc.
+# blackdot doctor, dotfiles features, dotfiles vault, etc.
 ```
 
 ```powershell
@@ -545,7 +545,7 @@ bin/blackdot-backup      → DELETE (Go: dotfiles backup)
 bin/blackdot-config      → DELETE (Go: dotfiles config)
 bin/blackdot-diff        → DELETE (Go: dotfiles diff)
 bin/blackdot-doctor      → DELETE (Go: dotfiles doctor)
-bin/blackdot-drift       → DELETE (Go: dotfiles drift)
+bin/blackdot-drift       → DELETE (Go: blackdot drift)
 bin/blackdot-encrypt     → DELETE (Go: dotfiles encrypt)
 bin/blackdot-features    → DELETE (Go: dotfiles features)
 bin/blackdot-hook        → DELETE (Go: dotfiles hook)
