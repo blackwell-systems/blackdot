@@ -175,7 +175,7 @@ cli_command_available "vault:pull"  # Returns 0 if vault enabled
 
 ```bash
 # Full install - Everything (recommended for Claude Code users)
-curl -fsSL [...]/install.sh | bash && blackdot setup
+curl -fsSL [...]/install.sh | bash
 
 # Minimal install - Shell config only
 curl -fsSL [...]/install.sh | bash -s -- --minimal
