@@ -72,9 +72,15 @@ func newVaultCmd() *cobra.Command {
 		},
 	}
 
-	// Override help to use our styled version
-	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
-		printVaultHelp()
+	// Override help only for the parent vault command
+	// Subcommands will use their default cobra help with flags
+	defaultHelp := cmd.HelpFunc()
+	cmd.SetHelpFunc(func(c *cobra.Command, args []string) {
+		if c.Name() == "vault" && len(args) == 0 {
+			printVaultHelp()
+		} else {
+			defaultHelp(c, args)
+		}
 	})
 
 	cmd.AddCommand(
