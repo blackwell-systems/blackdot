@@ -108,7 +108,9 @@ All shell script functionality now implemented in Go, enabling multi-backend sup
 
 - **Vault Shell Scripts** - Deleted 16 scripts (4,283 lines) now that Go has full parity:
   - `vault/*.sh` (restore-*.sh, sync-*.sh, create-*.sh, delete-*.sh, etc.)
-  - All functionality now in `internal/cli/vault.go`
+  - `vault/backends/*.sh` (bitwarden.sh, 1password.sh, pass.sh)
+  - `vault/backends/_interface.md` (shell backend interface spec)
+  - All functionality now in `internal/cli/vault.go` + `vaultmux` Go library
 - Shell script vault fallback (Go implementation now has full parity)
 - Legacy `DOTFILES_*` environment variables (use `BLACKDOT_*`)
 - Old backup file `README_12_03_2025.md`
