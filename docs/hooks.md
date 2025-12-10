@@ -4,13 +4,13 @@ The hook system allows you to inject custom behavior at key lifecycle points wit
 
 ---
 
-## Architecture: Dual-Layer System
+## Architecture: Triple-Layer System
 
-Blackdot's hook system operates in two layers that work together:
+Blackdot's hook system operates in three layers that work together:
 
 ### Layer 1: Go CLI Management (`internal/cli/hook.go`)
 
-The Go binary provides hook management commands:
+The Go binary provides hook management commands (cross-platform):
 
 ```bash
 blackdot hook list [point]       # List hooks for all or specific point
@@ -22,10 +22,11 @@ blackdot hook points             # List all hook points
 ```
 
 **Purpose:** CLI interface for discovering, managing, and manually triggering hooks.
+**Platform:** Works identically on Unix/Linux/macOS/Windows
 
-### Layer 2: Shell Runtime Execution (`lib/_hooks.sh`)
+### Layer 2: Zsh Runtime Execution (`lib/_hooks.sh`)
 
-The shell library provides runtime hook execution:
+The Zsh library provides runtime hook execution for Unix/Linux/macOS:
 
 ```bash
 # In shell scripts / runtime
@@ -35,6 +36,37 @@ hook_register "my_point" "func"  # Register function as hook
 ```
 
 **Purpose:** Execute hooks during actual operations (vault pull, setup, shell init, etc.)
+**Platform:** Zsh on Unix/Linux/macOS
+
+### Layer 3: PowerShell Runtime Execution (`powershell/Blackdot.psm1`)
+
+The PowerShell module provides runtime hook execution for Windows:
+
+```powershell
+# In PowerShell scripts / profile
+Import-Module Blackdot
+
+# Execute hooks at runtime
+Invoke-BlackdotHook -Point "post_vault_pull"
+
+# Register PowerShell function as hook
+Register-BlackdotHook -Point "shell_init" -ScriptBlock {
+    Write-Host "Shell initialized"
+}
+
+# List hooks (PowerShell-specific)
+Get-BlackdotHook -Point "post_vault_pull"
+```
+
+**Purpose:** Execute hooks during actual operations on Windows
+**Platform:** PowerShell 5.1+ on Windows
+
+**Key PowerShell functions:**
+- `Register-BlackdotHook` - Register PowerShell scriptblocks
+- `Invoke-BlackdotHook` - Run hooks at runtime
+- `Get-BlackdotHook` - List hooks (like `blackdot hook list`)
+- `Test-BlackdotHook` - Test hooks (like `blackdot hook test`)
+- `Enable-BlackdotHooks` / `Disable-BlackdotHooks` - Toggle system
 
 ### How They Work Together
 
@@ -42,8 +74,14 @@ hook_register "my_point" "func"  # Register function as hook
 graph TB
     User[User Action] --> CLI[blackdot vault pull]
     CLI --> VMux[vaultmux pulls secrets]
-    VMux --> Runtime[Shell hook_run function]
-    Runtime --> Discover[Discover hooks from:]
+    VMux --> Platform{Platform?}
+
+    Platform -->|Unix/Linux/macOS| ZshRuntime[Zsh hook_run]
+    Platform -->|Windows| PSRuntime[PowerShell Invoke-BlackdotHook]
+
+    ZshRuntime --> Discover[Discover hooks from:]
+    PSRuntime --> Discover
+
     Discover --> F[1. Files in ~/.config/blackdot/hooks/]
     Discover --> R[2. Registered functions]
     Discover --> J[3. JSON config]
@@ -56,10 +94,12 @@ graph TB
 ```
 
 **Key points:**
-- **Go CLI** = Management interface (list, add, test)
-- **Shell library** = Runtime execution (actually runs hooks during operations)
-- **Both** read from same `~/.config/blackdot/hooks/` directory
+- **Go CLI** = Management interface (list, add, test) - works on all platforms
+- **Zsh library** = Runtime execution on Unix/Linux/macOS
+- **PowerShell module** = Runtime execution on Windows (complete parity)
+- **All three** read from same `~/.config/blackdot/hooks/` directory
 - **Feature-gated**: Hooks respect feature registry (vault hooks skip if vault disabled)
+- **Cross-platform hooks**: Place `.sh` scripts in hooks directory, they work on both Zsh and PowerShell (PowerShell calls Go CLI which executes them)
 
 ---
 
@@ -122,11 +162,11 @@ blackdot vault pull  # ← post_vault_pull hooks execute here
 
 ### Shell Hooks
 
-| Hook | When | Use Case |
-|------|------|----------|
-| `shell_init` | End of .zshrc | Load project-specific config |
-| `shell_exit` | Shell exit | Cleanup, logging |
-| `directory_change` | On `cd` | Auto-activate envs |
+| Hook | When (Zsh) | When (PowerShell) | Use Case |
+|------|------------|-------------------|----------|
+| `shell_init` | End of .zshrc | Module import | Load project-specific config |
+| `shell_exit` | Shell exit (zshexit) | Module unload | Cleanup, logging |
+| `directory_change` | On `cd` (chpwd) | On `cd` override | Auto-activate envs |
 
 ### Setup Wizard Hooks
 
@@ -147,11 +187,11 @@ blackdot vault pull  # ← post_vault_pull hooks execute here
 
 ---
 
-## Understanding ZSH Hooks
+## Understanding Native Shell Hooks
 
-ZSH provides native hook functions that execute at specific points in the shell lifecycle. Blackdot's hook system builds on these to provide a more structured, manageable approach.
+Both Zsh and PowerShell provide native hook mechanisms that execute at specific points in the shell lifecycle. Blackdot's hook system builds on these to provide a more structured, manageable approach.
 
-### Native ZSH Hook Functions
+### Zsh Native Hooks
 
 ZSH has several built-in hook arrays that you can add functions to:
 
@@ -236,28 +276,64 @@ _filter_history() {
 add-zsh-hook zshaddhistory _filter_history
 ```
 
-### How Dotfiles Hooks Map to ZSH Hooks
+### PowerShell Native Hooks
 
-Blackdot's hook system provides a higher-level abstraction over native ZSH hooks:
+PowerShell provides native event mechanisms:
 
-| Blackdot Hook | Underlying ZSH Mechanism |
-|---------------|-------------------------|
-| `shell_init` | Sourced at end of `.zshrc` |
-| `shell_exit` | `zshexit_functions` array |
-| `directory_change` | `chpwd_functions` array |
+| Mechanism | When It Runs | Example Use |
+|-----------|--------------|-------------|
+| `$PROFILE` | On shell start | Load modules, set environment |
+| `Register-EngineEvent` | On PowerShell events | Monitor state changes |
+| `Set-PSBreakpoint` | On variable/command access | Debug, intercept |
+| `$MyInvocation.MyCommand.ScriptBlock` | On exit (finally) | Cleanup handlers |
+
+**How Zsh hooks work:**
+```zsh
+# Direct assignment to hook array
+precmd_functions+=(_my_function)
+
+# Or use add-zsh-hook helper (recommended)
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _my_function
+```
+
+**How PowerShell hooks work:**
+```powershell
+# Override Set-Location for directory change hooks
+function prompt {
+    # Runs before each prompt (like precmd)
+    Write-Host "$(Get-Location)>" -NoNewline
+}
+
+# Module import/unload hooks
+$MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
+    # Cleanup on module unload (like shell_exit)
+}
+```
+
+### How Blackdot Hooks Map to Native Hooks
+
+Blackdot's hook system provides a higher-level abstraction over native shell hooks:
+
+| Blackdot Hook | Zsh Mechanism | PowerShell Mechanism |
+|---------------|---------------|---------------------|
+| `shell_init` | Sourced at end of `.zshrc` | Module import (`Initialize-BlackdotModule`) |
+| `shell_exit` | `zshexit_functions` array | Module OnRemove handler |
+| `directory_change` | `chpwd_functions` array | `Set-LocationWithHook` override |
 
 **Why use blackdot hooks instead of native?**
 
-1. **File-based organization** - Hooks live in `~/.config/blackdot/hooks/`, not scattered in `.zshrc`
-2. **Easy enable/disable** - Toggle with `blackdot features` or JSON config
-3. **Ordering control** - Numeric prefixes (10-, 20-, 90-) guarantee execution order
-4. **Visibility** - `blackdot hook list` shows all registered hooks
-5. **Testing** - `blackdot hook test` validates hooks without running them
-6. **Feature gating** - Hooks respect the Feature Registry
+1. **File-based organization** - Hooks live in `~/.config/blackdot/hooks/`, not scattered in shell config
+2. **Cross-platform** - Same hooks work on Zsh and PowerShell
+3. **Easy enable/disable** - Toggle with `blackdot features` or JSON config
+4. **Ordering control** - Numeric prefixes (10-, 20-, 90-) guarantee execution order
+5. **Visibility** - `blackdot hook list` shows all registered hooks
+6. **Testing** - `blackdot hook test` validates hooks without running them
+7. **Feature gating** - Hooks respect the Feature Registry
 
 ### Using Both Systems Together
 
-You can use native ZSH hooks alongside blackdot hooks:
+**Zsh:** You can use native ZSH hooks alongside blackdot hooks:
 
 ```zsh
 # In ~/.zshrc.local - use native hooks for fast, inline operations
@@ -273,11 +349,27 @@ add-zsh-hook precmd _update_title
 # ~/.config/blackdot/hooks/directory_change/10-project-env.zsh
 ```
 
+**PowerShell:** You can use native PowerShell mechanisms alongside blackdot hooks:
+
+```powershell
+# In your $PROFILE - use native prompt for fast operations
+function prompt {
+    Write-Host "$(Get-Location)>" -NoNewline -ForegroundColor Green
+    return " "
+}
+
+# Complex hook (blackdot system) - registered via module
+Register-BlackdotHook -Point "directory_change" -ScriptBlock {
+    # Auto-load project environment
+    if (Test-Path ".\.env.ps1") { . ".\.env.ps1" }
+}
+```
+
 **Best practice:** Use native hooks for simple, fast operations that need to run on every prompt. Use blackdot hooks for more complex, configurable behavior.
 
 ### Performance Considerations
 
-Native ZSH hooks run synchronously and can affect shell responsiveness:
+**Zsh:** Native hooks run synchronously and can affect shell responsiveness:
 
 ```zsh
 # BAD: Slow hook blocks every prompt
@@ -296,6 +388,28 @@ _periodic_fetch() {
     git fetch origin 2>/dev/null
 }
 add-zsh-hook periodic _periodic_fetch
+```
+
+**PowerShell:** Similar considerations apply:
+
+```powershell
+# BAD: Slow prompt blocks shell
+function prompt {
+    git fetch origin 2>$null  # Network call on every prompt!
+    "PS> "
+}
+
+# GOOD: Background slow operations
+function prompt {
+    Start-Job -ScriptBlock { git fetch origin } | Out-Null
+    "PS> "
+}
+
+# BETTER: Use blackdot hooks instead of prompt
+Register-BlackdotHook -Point "shell_init" -ScriptBlock {
+    # Runs once on shell start, not every prompt
+    git fetch origin 2>$null
+}
 ```
 
 ---
@@ -329,12 +443,19 @@ Place executable scripts in hook point directories:
 **Pros:** Easy to manage, visible in filesystem, easy to share
 **Cons:** Requires executable permissions
 
+**Cross-platform note:** Both `.sh` (Bash/Zsh) and `.ps1` (PowerShell) scripts work:
+```bash
+~/.config/blackdot/hooks/
+├── post_vault_pull/
+│   ├── 10-fix-permissions.sh    # Runs on Unix/Linux/macOS
+│   └── 10-fix-permissions.ps1   # Runs on Windows
+```
+
 ### 2. Function-Based Hooks
 
-**Registered via:** `hook_register()` in shell scripts
+**Registered via:** `hook_register()` (Zsh) or `Register-BlackdotHook` (PowerShell)
 
-Register shell functions programmatically:
-
+**Zsh example:**
 ```bash
 # In your shell initialization or script
 source "${BLACKDOT_DIR}/lib/_hooks.sh"
@@ -348,8 +469,20 @@ my_post_pull_hook() {
 hook_register "post_vault_pull" "my_post_pull_hook"
 ```
 
+**PowerShell example:**
+```powershell
+# In your PowerShell profile ($PROFILE)
+Import-Module Blackdot
+
+# Register a scriptblock as a hook
+Register-BlackdotHook -Point "post_vault_pull" -ScriptBlock {
+    Write-Host "Vault pulled, running custom logic"
+    ssh-add "$HOME\.ssh\id_ed25519" 2>$null
+} -Name "my_post_pull_hook"
+```
+
 **Pros:** Dynamic registration, conditional logic, embedded in scripts
-**Cons:** Not visible via `blackdot hook list`, requires shell script knowledge
+**Cons:** Not visible via `blackdot hook list`, platform-specific (Zsh vs PowerShell)
 
 ### 3. JSON-Configured Hooks
 
@@ -392,31 +525,20 @@ Define hooks declaratively:
 
 **JSON hook properties:**
 - `name` - Identifier for the hook
-- `command` - Shell command to execute
+- `command` - Shell command to execute (works on both Zsh and PowerShell)
+- `script` - Path to script file (`.sh` for Zsh, `.ps1` for PowerShell)
+- `function` - Function name to call (must be loaded in current shell)
 - `enabled` - Whether hook is active (default: true)
 - `fail_ok` - Continue if hook fails (default: false)
 
-### 3. Inline Registration (Shell Config)
-
-Register hooks programmatically in your `.zshrc.local`:
-
-```zsh
-# Source hooks library
-source "$BLACKDOT_DIR/lib/_hooks.sh"
-
-# Register inline hooks
-hook_register "shell_init" "load-work-env" '
-    [[ -f ~/.work-env ]] && source ~/.work-env
-'
-
-hook_register "directory_change" "auto-nvm" '
-    [[ -f .nvmrc ]] && nvm use 2>/dev/null
-'
-```
+**Pros:** Declarative config, easy to version control, cross-platform
+**Cons:** Requires JSON editing, less flexible than code
 
 ---
 
 ## CLI Commands
+
+**Same commands work on all platforms:**
 
 ```bash
 # List all hook points and their hooks
@@ -433,6 +555,20 @@ blackdot hook run --verbose post_vault_pull
 
 # Test hooks (shows what would run)
 blackdot hook test post_vault_pull
+```
+
+**PowerShell-specific commands:**
+
+```powershell
+# List hooks using PowerShell cmdlet
+Get-BlackdotHook -Point "post_vault_pull"
+
+# Test hooks
+Test-BlackdotHook -Point "post_vault_pull"
+
+# Enable/disable hook system
+Enable-BlackdotHooks
+Disable-BlackdotHooks
 ```
 
 ---
