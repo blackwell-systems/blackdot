@@ -99,6 +99,85 @@ All shell script functionality now implemented in Go, enabling multi-backend sup
   - Migrates aliases and functions
   - Backs up before making changes
 
+### Added - Windows Native Support
+
+- **PowerShell One-Line Installer** (`install-windows.ps1`)
+  - Native Windows installation via PowerShell
+  - Automatic git installation via winget if missing
+  - PowerShell module auto-import configuration
+  - Minimal mode support for shell-only config
+  - Usage: `irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex`
+
+- **PowerShell Module Enhancements**
+  - Complete feature parity with Zsh implementation (1,346 lines)
+  - Triple-layer hook system (Go CLI + Zsh runtime + PowerShell runtime)
+  - Native Windows path handling
+  - Cross-platform Go binary execution
+
+### Changed - Documentation Overhaul
+
+Comprehensive documentation updates to reflect v4.0.0-rc3 Go-first architecture:
+
+- **Architecture Documentation**
+  - Complete rewrite of directory structure in README-FULL.md
+  - Removed references to 11 deleted `lib/*.sh` files
+  - Added Go implementation structure (cmd/, internal/, powershell/)
+  - Updated Framework Architecture diagrams with Mermaid
+  - Added Templates to architecture diagram
+  - Platform table now includes Windows native support
+  - Architecture layers diagram updated: Go CLI + Shell integration (Zsh/PowerShell)
+
+- **Command Reference Updates**
+  - Fixed 14 files with dotfiles → blackdot command references
+  - Updated cli-reference.md with correct command examples
+  - Fixed Mermaid diagrams in architecture.md (sync, doctor, backup)
+  - Updated all code blocks to use `blackdot` CLI
+  - Removed duplicate sections and outdated content
+
+- **Cross-Platform Documentation**
+  - README-FULL.md: Added Windows/PowerShell examples throughout
+  - Platform-Independent Components section rewritten for Go architecture
+  - SSH key auto-add examples for both Zsh and PowerShell
+  - Environment variable examples for Zsh and PowerShell
+  - DOTCLAUDE-INTEGRATION.md: Added PowerShell configuration examples
+  - Configuration structure updated to show powershell/ directory
+
+- **Hook System Documentation**
+  - Complete rewrite of hooks.md (191 additions, 55 deletions)
+  - Documented triple-layer architecture (Go CLI + Zsh + PowerShell)
+  - Added PowerShell hook examples for all 24 hook points
+  - Mermaid diagram showing platform branching
+  - PowerShell cmdlets documented: Register/Invoke/Get/Test-BlackdotHook
+  - Native PowerShell hooks comparison table
+  - Cross-platform hook file support (.sh and .ps1)
+
+- **Go-First Architecture Documentation**
+  - CLAUDE.md: Complete rewrite of "Adding a New Feature" workflow
+  - Updated feature registry references (lib/_features.sh → internal/feature/registry.go)
+  - Updated configuration layer references (lib/_config.sh → internal/config/config.go)
+  - Updated backup customization (bin/blackdot-backup → internal/cli/backup.go)
+  - Updated vault system references to vaultmux Go library
+  - Developer guide now shows Go code examples
+
+- **File Path Corrections**
+  - developer-tools.md: Fixed zsh.d file paths (50-aws.zsh → 60-aws.zsh, etc.)
+  - templates.md: Fixed DEBUG command examples
+  - backup.md: Fixed restore and config command references
+  - features.md: Fixed features check examples
+  - windows-setup.md: Fixed doctor/setup command references
+
+- **Removed Obsolete Documentation**
+  - Deleted DESIGN-workspace-target.md (574 lines of outdated planning doc)
+  - Deleted extending-backends.md (550 lines describing shell-based vault extension)
+  - Vault extension now done via vaultmux Go library contribution
+  - Removed sidebar links to deleted documentation
+
+- **Documentation Condensing**
+  - vault-README.md: Condensed by 38% while improving clarity
+  - Updated vault and state docs for vaultmux architecture
+  - Minimized README and fixed outdated references
+  - Simplified one-line install documentation
+
 ### Fixed
 
 - Vault subcommand help now shows proper flags (--force, --dry-run, etc.)
