@@ -131,12 +131,46 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 ```
 ~/workspace/dotfiles/
 │
-├── install.sh                          # One-line installer (curl | bash)
-├── Brewfile                            # Unified Homebrew bundle (macOS + Lima)
+├── install.sh                          # One-line Unix/Linux installer (curl | bash)
+├── install-windows.ps1                 # One-line Windows installer (PowerShell)
+├── Brewfile.minimal                    # Minimal Homebrew bundle
+├── Brewfile.enhanced                   # Full Homebrew bundle
 ├── CHANGELOG.md                        # Version history
-├── LICENSE                             # Apache License 2.0
+├── CLAUDE.md                           # Developer guide for Claude Code
 ├── README.md                           # Main documentation
-├── .gitignore                          # Excludes .bw-session, secrets, temp files
+├── go.mod / go.sum                     # Go module dependencies
+├── doc.go                              # Go package documentation
+│
+├── cmd/blackdot/                       # Go CLI entry point
+│   └── main.go                         # Main function
+│
+├── internal/                           # Go implementation (private packages)
+│   ├── cli/                            # Cobra CLI commands (20+ files)
+│   │   ├── root.go                     # Root command
+│   │   ├── features.go                 # Feature management commands
+│   │   ├── vault.go                    # Vault operations (vaultmux)
+│   │   ├── doctor.go                   # Health check & diagnostics
+│   │   ├── status.go                   # Visual dashboard
+│   │   ├── setup.go                    # Interactive setup wizard
+│   │   ├── hook.go                     # Hook management
+│   │   ├── config.go                   # Configuration management
+│   │   └── ...                         # 20+ total command files
+│   ├── feature/                        # Feature Registry system
+│   │   └── registry.go                 # Central control plane
+│   ├── config/                         # JSON configuration management
+│   │   └── config.go                   # Config read/write/layers
+│   ├── template/                       # Template rendering engine
+│   │   └── template.go                 # Handlebars template system
+│   └── shell/                          # Shell integration helpers
+│       └── shell.go                    # Shell-init generation
+│
+├── bin/                                # Compiled binaries
+│   └── dotfiles-go                     # Go CLI binary (symlinked to ~/bin/blackdot)
+│
+├── lib/                                # Minimal shell helpers (3 files only)
+│   ├── _colors.sh                      # Color output functions
+│   ├── _logging.sh                     # Shell logging (info, pass, warn, fail)
+│   └── _hooks.sh                       # Hook system runtime (Zsh)
 │
 ├── bootstrap/                          # Platform bootstrap scripts
 │   ├── bootstrap-mac.sh                # macOS-specific bootstrap
@@ -144,136 +178,116 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 │   ├── bootstrap-dotfiles.sh           # Shared symlink bootstrap
 │   └── _common.sh                      # Shared bootstrap functions
 │
-├── bin/                                # CLI management tools
-│   ├── dotfiles                        # Main CLI entry point (symlinked to PATH)
-│   ├── dotfiles-backup                 # Backup/restore dotfiles
-│   ├── dotfiles-diff                   # Preview changes before applying
-│   ├── dotfiles-doctor                 # Health check validation
-│   ├── dotfiles-drift                  # Detect config drift from repo
-│   ├── dotfiles-setup                  # Interactive setup wizard
-│   ├── dotfiles-migrate                # Config migration orchestrator (INI→JSON)
-│   ├── dotfiles-migrate-config         # Config migration (INI→JSON)
-│   ├── dotfiles-migrate-vault-schema   # Legacy vault schema migration
-│   ├── dotfiles-lint                   # Lint shell scripts for errors
-│   ├── blackdot-metrics                # Collect system metrics
-│   ├── dotfiles-packages               # List/validate installed packages
-│   ├── dotfiles-template               # Generate machine-specific templates
-│   └── dotfiles-uninstall              # Clean removal of dotfiles
+├── powershell/                         # PowerShell module for Windows
+│   └── Blackdot.psm1                   # Complete PowerShell module (1,346 lines)
+│                                       # - Hook system (Register/Invoke/Get/Test-BlackdotHook)
+│                                       # - Feature management
+│                                       # - Shell integration functions
+│
+├── zsh/                                # Zsh shell configuration (Unix/Linux/macOS)
+│   ├── zshrc                           # Main Zsh config (sources zsh.d modules)
+│   ├── p10k.zsh                        # Powerlevel10k theme configuration
+│   ├── completions/                    # Zsh completion scripts
+│   └── zsh.d/                          # Modular shell configuration (18 modules)
+│       ├── 00-init.zsh                 # Core initialization
+│       ├── 10-plugins.zsh              # Plugin loading
+│       ├── 20-env.zsh                  # Environment variables
+│       ├── 30-tools.zsh                # Tool configuration
+│       ├── 40-aliases.zsh              # General aliases
+│       ├── 50-functions.zsh            # Helper functions
+│       ├── 60-aws.zsh                  # AWS aliases and helpers
+│       ├── 61-cdk.zsh                  # CDK aliases and helpers
+│       ├── 62-rust.zsh                 # Rust/Cargo aliases
+│       ├── 63-go.zsh                   # Go aliases and helpers
+│       ├── 64-python.zsh               # Python/UV aliases and helpers
+│       ├── 70-claude.zsh               # Claude Code integration
+│       ├── 80-git.zsh                  # Git aliases
+│       └── 90-integrations.zsh         # External tool integrations
+│
+├── hooks/                              # Hook system configuration
+│   └── examples/                       # Example hook implementations
 │
 ├── claude/                             # Claude Code configuration
 │   ├── settings.json                   # Claude settings (permissions, hooks)
-│   └── commands/                       # Custom slash commands
-│       └── health.md                   # /health - run dotfiles health check
+│   ├── commands/                       # Custom slash commands
+│   └── hooks/                          # Claude-specific hooks
+│
+├── templates/                          # Machine-specific configuration templates
+│   ├── configs/                        # Template files (Handlebars)
+│   │   ├── ssh-config.tmpl             # SSH config template
+│   │   ├── aws-config.tmpl             # AWS config template
+│   │   └── ...                         # More config templates
+│   └── _variables.sh                   # Default template variables
+│
+├── vault/                              # Vault item templates (vaultmux-managed)
+│   ├── README.md                       # Vault system documentation
+│   └── *.tmpl                          # Vault item templates
 │
 ├── docs/                               # Documentation
-│   ├── README.md                       # Docs index
+│   ├── README.md                       # Docs index (Docsify homepage)
 │   ├── README-FULL.md                  # Comprehensive guide (this file)
-│   ├── VAULT.md                        # Vault system documentation
-│   └── TROUBLESHOOTING.md              # Common issues and solutions
+│   ├── architecture.md                 # System architecture
+│   ├── features.md                     # Feature Registry documentation
+│   ├── hooks.md                        # Hook system guide
+│   ├── configuration-layers.md         # Configuration system
+│   ├── TESTDRIVE.md                    # Docker test environment guide
+│   ├── DOTCLAUDE-INTEGRATION.md        # dotclaude integration
+│   └── ...                             # More documentation
 │
 ├── ghostty/                            # Ghostty terminal configuration
 │   └── config                          # Ghostty settings
 │
-├── lib/                                # Shared libraries
-│   ├── _logging.sh                     # Logging functions (info, pass, warn, fail)
-│   ├── _config.sh                      # JSON config abstraction
-│   ├── _config_layers.sh               # Layered config (env → project → machine → user)
-│   ├── _features.sh                    # Feature Registry (control plane)
-│   ├── _cli_features.sh                # CLI feature awareness helpers
-│   ├── _state.sh                       # Setup wizard state management
-│   ├── _vault.sh                       # Multi-backend vault abstraction
-│   ├── _drift.sh                       # Drift detection helpers
-│   ├── _hooks.sh                       # Hook system for lifecycle events
-│   ├── _paths.sh                       # Path resolution utilities
-│   ├── _errors.sh                      # Error handling utilities
-│   ├── _encryption.sh                  # Encryption helpers
-│   └── _templates.sh                   # Template engine
+├── zellij/                             # Zellij multiplexer configuration
+│   └── config.kdl                      # Zellij keybindings and layout
 │
 ├── lima/                               # Lima VM configuration
-│   └── lima.yaml                       # Lima VM definition (host-side)
+│   └── lima.yaml                       # Lima VM definition
 │
 ├── macos/                              # macOS-specific settings
 │   ├── apply-settings.sh               # Apply macOS system preferences
 │   ├── discover-settings.sh            # Capture/diff macOS settings
-│   ├── settings.sh                     # Actual settings to apply
-│   └── snapshots/                      # Setting snapshots for comparison
+│   └── settings.sh                     # Actual settings to apply
 │
-├── tests/                              # Test suite
-│   ├── test-bootstrap.sh               # Bootstrap script tests
-│   ├── test-vault.sh                   # Vault system tests
-│   └── test-symlinks.sh                # Symlink validation tests
+├── scripts/                            # Utility scripts
 │
-├── vault/                              # Multi-vault secret management
-│   ├── _common.sh                      # Shared library (colors, logging, SSH_KEYS)
-│   ├── backends/                       # Vault backend implementations
-│   │   ├── bitwarden.sh                # Bitwarden CLI integration
-│   │   ├── 1password.sh                # 1Password CLI integration
-│   │   └── pass.sh                     # pass (GPG) integration
-│   ├── restore.sh                      # Orchestrates all vault pulls
-│   ├── check-vault-items.sh            # Validates required vault items exist
-│   ├── create-vault-item.sh            # Creates new vault secure notes
-│   ├── delete-vault-item.sh            # Deletes items from vault (with safety)
-│   ├── list-vault-items.sh             # Lists all vault items (debug/inventory)
-│   ├── sync-to-vault.sh                # Syncs local changes back to vault
-│   ├── validate-schema.sh              # Validates vault item schemas
-│   ├── restore-ssh.sh                  # Restores SSH keys and config
-│   ├── restore-aws.sh                  # Restores ~/.aws/config & credentials
-│   ├── restore-env.sh                  # Restores environment secrets
-│   ├── restore-git.sh                  # Restores ~/.gitconfig
-│   ├── template-aws-config             # Reference template for AWS config
-│   ├── template-aws-credentials        # Reference template for AWS credentials
-│   └── README.md                       # Vault documentation
-│
-├── zellij/                             # Zellij multiplexer configuration
-│   └── config.kdl                      # Zellij keybindings and layout
-│
-└── zsh/                                # Zsh shell configuration
-    ├── zshrc                           # Main Zsh config (sources zsh.d modules)
-    ├── p10k.zsh                        # Powerlevel10k theme configuration
-    └── zsh.d/                          # Modular shell configuration
-        ├── 00-init.zsh                 # Core initialization
-        ├── 10-plugins.zsh              # Plugin loading
-        ├── 20-env.zsh                  # Environment variables
-        ├── 30-tools.zsh                # Tool configuration
-        ├── 40-aliases.zsh              # General aliases
-        ├── 50-functions.zsh            # Helper functions
-        ├── 60-aws.zsh                  # AWS aliases and helpers
-        ├── 61-cdk.zsh                  # CDK aliases and helpers
-        ├── 62-rust.zsh                 # Rust/Cargo aliases
-        ├── 63-go.zsh                   # Go aliases and helpers
-        ├── 64-python.zsh               # Python/UV aliases and helpers
-        ├── 70-claude.zsh               # Claude Code integration
-        ├── 80-git.zsh                  # Git aliases
-        └── 90-integrations.zsh         # External tool integrations
+└── test/                               # Test suite
+    ├── fixtures/                       # Test fixtures
+    └── mocks/                          # Mock data for tests
 
 Deployed files (after bootstrap):
+
+Unix/Linux/macOS:
 ~/.zshrc                 → ~/workspace/dotfiles/zsh/zshrc (symlink)
 ~/.p10k.zsh              → ~/workspace/dotfiles/zsh/p10k.zsh (symlink)
 ~/.config/ghostty/config → ~/workspace/dotfiles/ghostty/config (symlink)
 ~/.config/zellij/        → ~/workspace/dotfiles/zellij/ (symlink)
 ~/.claude/               → ~/workspace/.claude/ (symlink)
-~/bin/blackdot           → ~/workspace/dotfiles/bin/blackdot (symlink in PATH)
+~/bin/blackdot           → ~/workspace/dotfiles/bin/dotfiles-go (symlink in PATH)
+
+Windows (PowerShell):
+$PROFILE                 → Module auto-import (Import-Module Blackdot)
+~/.claude/               → ~/workspace/.claude/ (junction/symlink)
+~/bin/blackdot.exe       → ~/workspace/dotfiles/bin/dotfiles-go.exe (in PATH)
 ```
 
 </details>
 
 Key pieces:
 
+- **cmd/blackdot/main.go**: Go CLI entry point
 - **internal/feature/registry.go**: Feature Registry - the control plane for enabling/disabling functionality
-- **internal/cli/**: Go CLI commands (vault, doctor, status, setup, etc.)
+- **internal/cli/**: Go CLI commands (vault, doctor, status, setup, etc.) - 20+ files
+- **internal/config/config.go**: JSON configuration management with 5-layer priority
+- **powershell/Blackdot.psm1**: Complete PowerShell module with hook system, feature management, shell integration (Windows)
+- **lib/**: Only 3 minimal shell helpers remain (_colors.sh, _logging.sh, _hooks.sh) - all business logic moved to Go
+- **zsh/zshrc**: Main Zsh config that sources zsh.d modules (Unix/Linux/macOS)
 - **zsh/zsh.d/**: Modular shell configuration (18 modules loaded in numeric order)
-- **zsh/zshrc**: Main Zsh config that sources zsh.d modules
 - **zsh/p10k.zsh**: Powerlevel10k theme configuration
-- **ghostty/config**: Ghostty terminal configuration
-- **zellij/config.kdl**: Zellij multiplexer configuration
-- **vault/**: Multi-vault secure bootstrap for SSH, AWS, and environment secrets (Bitwarden, 1Password, pass)
-- **claude/**: Claude Code configuration (settings, slash commands)
-- **Brewfile**: Shared Homebrew definition used by both macOS and Lima bootstrap scripts
-- **Claude Workspace Symlink** inside `bootstrap-dotfiles.sh` ensures that both macOS and Lima point to the shared workspace directory:
-
-  ```
-  ~/.claude → ~/workspace/.claude
-  ```
+- **templates/configs/**: Handlebars templates for machine-specific configuration
+- **vault/**: Vault item templates managed by vaultmux (external Go library)
+- **claude/**: Claude Code configuration (settings, slash commands, hooks)
+- **Brewfile**: Shared Homebrew definition used by both macOS and Linux bootstrap scripts
+- **Claude Workspace Symlink**: `~/.claude → ~/workspace/.claude` created by bootstrap for portable sessions
 
 ---
 
@@ -286,8 +300,9 @@ This dotfiles system is designed for extensibility across multiple platforms wit
 | Platform | Bootstrap Script | Status | Notes |
 |----------|-----------------|---------|-------|
 | **macOS** | `bootstrap-mac.sh` | ✅ Fully tested | Apple Silicon & Intel |
+| **Windows** | `install-windows.ps1` | ✅ Fully tested | Native PowerShell module |
 | **Lima VM** | `bootstrap-linux.sh` | ✅ Fully tested | Ubuntu 24.04 |
-| **WSL2** | `bootstrap-linux.sh` | ✅ Auto-detected | Windows 10/11 |
+| **WSL2** | `bootstrap-linux.sh` | ✅ Auto-detected | Windows 10/11 with Linux |
 | **Ubuntu/Debian** | `bootstrap-linux.sh` | ✅ Compatible | Bare metal or VM |
 
 ### Extensible to (15-30 minutes each):
@@ -295,15 +310,15 @@ This dotfiles system is designed for extensibility across multiple platforms wit
 - Arch Linux
 - Fedora/RHEL
 - FreeBSD/OpenBSD
-- Any POSIX-compliant system with ZSH
+- Any POSIX-compliant system with ZSH or Windows with PowerShell
 
 ### Architecture Layers
 
 ```mermaid
 flowchart TB
-    platform["<b>Platform-Specific Bootstrap</b><br/>(10% of code)<br/>━━━━━━━━━━━━━━━━━━━━━<br/>• Package manager setup (apt/brew/pacman)<br/>• System-specific configuration<br/>• GUI tool installation"]
+    platform["<b>Platform-Specific Bootstrap</b><br/>(10% of code)<br/>━━━━━━━━━━━━━━━━━━━━━<br/>• Package manager setup (apt/brew/winget)<br/>• System-specific configuration<br/>• GUI tool installation"]
 
-    shared["<b>Shared Dotfiles Layer</b><br/>(90% of code)<br/>━━━━━━━━━━━━━━━━━━━━━<br/>• Symlink management (bootstrap-dotfiles)<br/>• Shell configuration (zshrc)<br/>• Vault system (all scripts)<br/>• Health checks & metrics<br/>• Tab completions"]
+    shared["<b>Shared Dotfiles Layer</b><br/>(90% of code)<br/>━━━━━━━━━━━━━━━━━━━━━<br/>• Go CLI (blackdot commands)<br/>• Shell integration (Zsh/PowerShell)<br/>• Vault system (vaultmux)<br/>• Health checks & metrics<br/>• Feature Registry"]
 
     platform --> shared
 
@@ -315,26 +330,39 @@ flowchart TB
 
 These work on **any platform** without modification:
 
-**Vault System** (100% portable)
-- All `vault/*.sh` scripts with multi-backend support
-- Backends: Bitwarden (`bw`), 1Password (`op`), pass (`pass/gpg`)
-- Just needs: `zsh`, vault CLI, `jq`
-- Works on Linux, macOS, BSD, WSL, Docker
-
-**Health & Metrics** (Go CLI - 100% portable)
-- `blackdot doctor` - System health validation
-- `blackdot vault status` - Drift detection
-- `blackdot status` - Visual dashboard with metrics
+**Go CLI** (100% portable)
+- Single binary (`blackdot`) works on macOS, Linux, Windows
+- All commands: `doctor`, `vault`, `status`, `features`, `config`, etc.
 - Cross-platform file permissions handling
+- Identical behavior across all platforms
 
-**Shell Configuration** (OS-aware)
-- `zshrc` with OS detection
-- Conditional loading for macOS/Linux
-- Portable modern CLI tools (eza, fzf, etc.)
+**Vault System** (vaultmux - 100% portable)
+- Multi-backend support via vaultmux Go library
+- Backends: Bitwarden (`bw`), 1Password (`op`), pass (`pass/gpg`)
+- Works on Linux, macOS, BSD, WSL, Windows, Docker
+- Same vault operations across all platforms
+
+**Feature Registry** (Go - 100% portable)
+- `internal/feature/registry.go` - central control plane
+- Enable/disable features: `blackdot features enable/disable <name>`
+- Dependency resolution and conflict detection
+- Works identically everywhere
+
+**Shell Integration** (Platform-specific wrappers)
+- **Unix/Linux/macOS**: Zsh configuration (`zsh/zshrc`, `zsh.d/*.zsh`)
+- **Windows**: PowerShell module (`powershell/Blackdot.psm1`)
+- Both call the same Go CLI binary
+- Platform-specific aliases and helpers that invoke Go commands
+
+**Template System** (Go - 100% portable)
+- Handlebars templates in `templates/configs/*.tmpl`
+- Machine-specific variable substitution
+- Renders portable configs (SSH, AWS, Git, etc.)
 
 **Package Management** (cross-platform)
 - `Brewfile` works on macOS + Linux (Linuxbrew)
-- Conditional sections (`on_macos`, `on_linux`)
+- Windows uses winget or Scoop
+- Conditional sections for platform-specific packages
 
 ### Adding a New Platform
 
@@ -1693,13 +1721,24 @@ After editing `~/.ssh/config`, sync it back:
 blackdot vault push SSH-Config
 ```
 
-### 6. Update zshrc for auto-add (optional)
+### 6. Update shell config for auto-add (optional)
 
-If you want the new key auto-loaded into the SSH agent, add to `zsh/zshrc`:
+If you want the new key auto-loaded into the SSH agent:
+
+**Zsh (Unix/Linux/macOS)** - add to `zsh/zshrc`:
 
 ```bash
-# SSH keys to auto-add (canonical list in vault/_common.sh SSH_KEYS array)
+# SSH keys to auto-add
 _ssh_add_if_missing ~/.ssh/id_ed25519_newservice
+```
+
+**PowerShell (Windows)** - add to your `$PROFILE`:
+
+```powershell
+# SSH keys to auto-add
+if (Get-Command ssh-add -ErrorAction SilentlyContinue) {
+    ssh-add "$HOME\.ssh\id_ed25519_newservice" 2>$null
+}
 ```
 
 ---

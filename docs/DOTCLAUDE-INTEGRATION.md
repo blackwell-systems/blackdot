@@ -251,8 +251,10 @@ Located in `~/workspace/dotfiles/`:
 │   ├── restore-aws.sh       # AWS credential restoration
 │   └── restore-git.sh       # Git config restoration
 ├── zsh/
-│   └── zshrc                # Shell config (respects dotclaude)
-└── Brewfile                 # Packages for both systems
+│   └── zshrc                # Shell config for Unix/Linux/macOS
+├── powershell/
+│   └── Blackdot.psm1        # PowerShell module for Windows
+└── Brewfile                 # Packages (macOS/Linux)
 ```
 
 ### dotclaude Configuration
@@ -365,13 +367,23 @@ This auto-restores secrets when activating a profile.
 
 Both systems can use environment variables:
 
+**Zsh (Unix/Linux/macOS)** - in `~/.zshrc`:
+
 ```bash
-# In ~/.zshrc (managed by dotfiles)
+# Shell environment (managed by dotfiles)
 export DOTCLAUDE_PROFILE_DIR="$HOME/workspace/dotclaude-profiles"
 export BLACKDOT_VAULT_BACKEND="bitwarden"
-
-# Now both systems know where to find things
 ```
+
+**PowerShell (Windows)** - in `$PROFILE`:
+
+```powershell
+# Shell environment (managed by dotfiles)
+$env:DOTCLAUDE_PROFILE_DIR = "$HOME\workspace\dotclaude-profiles"
+$env:BLACKDOT_VAULT_BACKEND = "bitwarden"
+```
+
+Now both systems know where to find things across all platforms.
 
 ### Shared Workspace Structure
 
