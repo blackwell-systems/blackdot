@@ -28,17 +28,13 @@ Choose your install level:
 
 ```bash
 # Full: Everything (recommended for Claude Code users)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash && blackdot setup
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 
 # Minimal: Just shell config (skip Homebrew, vault, Claude, /workspace)
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash -s -- --minimal
 
 # Custom workspace: Install to ~/code instead of ~/workspace
 WORKSPACE_TARGET=~/code curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
-
-# Custom: Pick components in the interactive wizard
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash && blackdot setup
-# (wizard lets you skip vault, Claude, packages, etc.)
 ```
 
 ### What "Full Install" Does
@@ -46,7 +42,7 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/ins
 **For users with existing credentials (SSH keys, AWS config, Git config):**
 
 ```console
-$ curl -fsSL ... | bash && blackdot setup
+$ curl -fsSL ... | bash
 
     ____  __    ___   ________ ____  ____  ______
    / __ )/ /   /   | / ____/ //_/ / / / / / / __ \______
@@ -221,7 +217,7 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/in
 
 ```bash
 # Full install (recommended for Claude Code users)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash && blackdot setup
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 
 # Minimal: Shell config only (no vault, no Claude integration, no packages)
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash -s -- --minimal
@@ -1070,10 +1066,10 @@ To clone via SSH (recommended), you'll also want an SSH key configured with GitH
 ### One-Line Install (Recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash && blackdot setup
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 ```
 
-The install script clones the repository and runs bootstrap. Then `blackdot setup` guides you through:
+The install script clones the repository, runs bootstrap, and launches the setup wizard. The wizard guides you through:
 - Platform detection and configuration
 - Vault selection (Bitwarden, 1Password, pass, or skip)
 - Secret restoration (SSH keys, AWS, Git config)
