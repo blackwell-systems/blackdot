@@ -1,9 +1,9 @@
-Run the dotfiles health check and summarize any issues:
+Run the blackdot health check and summarize any issues:
 
 ```bash
-~/workspace/dotfiles/bin/dotfiles-doctor
+blackdot doctor
 ```
 
 If there are permission warnings, offer to run with `--fix`.
-If there are missing items, explain how to restore them with `dotfiles vault restore`.
-For drift detection, suggest running `dotfiles drift`.
+If there are missing items, explain how to restore them with `blackdot vault restore`.
+For drift detection, suggest running `blackdot drift`.

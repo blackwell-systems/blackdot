@@ -585,8 +585,8 @@ The hook system (`internal/cli/hook.go` + `lib/_hooks.sh`) allows custom behavio
 flowchart TD
     A[install.sh] -->|pre/post_install| H[Hook System]
     B[bootstrap-*.sh] -->|pre/post_bootstrap| H
-    C[dotfiles sync] -->|pre/post_vault_*| H
-    D[dotfiles doctor] -->|pre/post/check_doctor| H
+    C[blackdot sync] -->|pre/post_vault_*| H
+    D[blackdot doctor] -->|pre/post/check_doctor| H
     E[.zshrc] -->|shell_init/exit| H
     F[cd command] -->|directory_change| H
 
@@ -641,7 +641,7 @@ The `blackdot doctor` command validates system state:
 
 ```mermaid
 flowchart TD
-    A[dotfiles doctor] --> B{Check Type}
+    A[blackdot doctor] --> B{Check Type}
     B --> C[File Permissions]
     B --> D[Symlink Status]
     B --> E[Directory Structure]
@@ -662,12 +662,12 @@ The backup system creates timestamped archives:
 
 ```mermaid
 flowchart LR
-    A[dotfiles backup] --> B[Collect Files]
+    A[blackdot backup] --> B[Collect Files]
     B --> C[Create tar.gz]
     C --> D[~/.blackdot-backups/]
     D --> E[Auto-cleanup > 10]
 
-    F[dotfiles backup restore] --> G[List Backups]
+    F[blackdot backup restore] --> G[List Backups]
     G --> H[Select Backup]
     H --> I[Extract & Restore]
 ```

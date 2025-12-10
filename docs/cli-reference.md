@@ -201,7 +201,7 @@ blackdot features preset developer --persist
 blackdot features preset --list
 
 # Check if feature enabled (for scripts)
-if dotfiles features check vault; then
+if blackdot features check vault; then
     blackdot vault pull
 fi
 ```
@@ -666,7 +666,7 @@ blackdot vault create <item-name> [content] [OPTIONS]
 **Content Sources (in order of precedence):**
 1. Command line argument: `blackdot vault create Name "content"`
 2. File: `blackdot vault create Name --file ~/path/to/file`
-3. Stdin: `echo "content" | dotfiles vault create Name`
+3. Stdin: `echo "content" | blackdot vault create Name`
 
 **Examples:**
 
@@ -678,7 +678,7 @@ blackdot vault create API-Key "sk-1234567890"
 blackdot vault create SSH-Config --file ~/.ssh/config
 
 # Create from stdin
-cat ~/.gitconfig | dotfiles vault create Git-Config
+cat ~/.gitconfig | blackdot vault create Git-Config
 
 # Preview what would be created
 blackdot vault create --dry-run Test-Item "preview content"
@@ -922,7 +922,7 @@ Bidirectional sync - intelligently determines whether to push or pull each item.
 blackdot vault sync [OPTIONS] [ITEMS...]
 ```
 
-Same as `blackdot sync`. See [dotfiles sync](#dotfiles-sync) for full documentation.
+Same as `blackdot sync`. See [blackdot sync](#blackdot-sync) for full documentation.
 
 **Quick Examples:**
 
@@ -1815,7 +1815,7 @@ BLACKDOT_TMPL_GIT_EMAIL="other@example.com" blackdot template render
 BLACKDOT_MACHINE_TYPE=work blackdot template render
 
 # Debug template rendering
-DEBUG=1 dotfiles template render
+DEBUG=1 blackdot template render
 ```
 
 ---
@@ -1865,12 +1865,13 @@ notes search <term>        # Search notes
 
 Notes stored in `~/workspace/.notes.md`.
 
-### `dotfiles-upgrade`
+### `blackdot upgrade`
 
-Same as `blackdot upgrade`. Pull and update.
+Pull latest changes and run bootstrap.
 
 ```bash
-dotfiles-upgrade
+blackdot upgrade
+blackdot update    # Alias
 ```
 
 ---
@@ -2267,16 +2268,6 @@ notes search <term>        # Search notes
 ```
 
 Notes stored in `~/workspace/.notes.md`.
-
----
-
-### `dotfiles-upgrade`
-
-Same as `blackdot upgrade`. Pull latest and update.
-
-```bash
-dotfiles-upgrade
-```
 
 ---
 

@@ -826,7 +826,7 @@ blackdot template vars
 
 **Check precedence:**
 ```bash
-DEBUG=1 dotfiles template render --dry-run
+DEBUG=1 blackdot template render --dry-run
 ```
 
 ### Stale Generated Files

@@ -200,7 +200,7 @@ docker run -it --rm -v dotfiles-home:/root dotfiles-lite
 ### Run specific command and exit
 
 ```bash
-docker run --rm dotfiles-lite dotfiles doctor
+docker run --rm dotfiles-lite blackdot doctor
 ```
 
 ---

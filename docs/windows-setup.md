@@ -130,7 +130,7 @@ If Go isn't installed, download a pre-built binary:
 # https://github.com/blackwell-systems/blackdot/releases
 
 # Download and extract to PATH
-# Then run: dotfiles setup
+# Then run: blackdot setup
 ```
 
 ---

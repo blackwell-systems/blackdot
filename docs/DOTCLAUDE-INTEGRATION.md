@@ -91,7 +91,7 @@ No manual configuration needed. Both systems coordinate automatically.
 ### Manual Verification
 
 ```bash
-# Check dotfiles setup
+# Check blackdot setup
 blackdot doctor
 
 # Check dotclaude setup
@@ -407,7 +407,7 @@ Both systems respect this structure.
 
 ### Secrets Storage
 
-- **dotfiles vault**: Encrypted in Bitwarden/1Password/pass
+- **blackdot vault**: Encrypted in Bitwarden/1Password/pass
 - **dotclaude profiles**: Version controlled, no secrets
 - **Never**: Store secrets in dotclaude profiles
 
@@ -427,11 +427,11 @@ Dotfiles vault items stay private in your vault.
 
 Some secrets are per-machine (not synced):
 ```bash
-# dotfiles handles per-machine secrets
+# blackdot handles per-machine secrets
 ~/.ssh/config             # Can include machine-specific entries
 ~/.aws/config             # Can have machine-specific profiles
 
-# Use dotfiles templates for customization
+# Use blackdot templates for customization
 blackdot template init    # Set machine variables
 ```
 

@@ -20,7 +20,7 @@ dotfiles hook list post_vault_pull
 ## Available Examples
 
 ### `post_vault_pull/`
-Hooks that run after `dotfiles sync` pulls secrets from vault.
+Hooks that run after `blackdot sync` pulls secrets from vault.
 
 | File | Purpose |
 |------|---------|
@@ -28,7 +28,7 @@ Hooks that run after `dotfiles sync` pulls secrets from vault.
 | `20-ssh-add.sh` | Add SSH keys to the agent |
 
 ### `doctor_check/`
-Hooks that add custom checks to `dotfiles doctor`.
+Hooks that add custom checks to `blackdot doctor`.
 
 | File | Purpose |
 |------|---------|

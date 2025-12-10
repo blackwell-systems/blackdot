@@ -144,7 +144,7 @@ For use in scripts:
 
 ```bash
 # Returns exit code 0 if enabled, 1 if disabled
-if dotfiles features check vault; then
+if blackdot features check vault; then
     # Vault is enabled, do something
     blackdot vault pull
 fi

@@ -99,10 +99,10 @@ The health check validates file permissions:
 
 ```bash
 # Check permissions
-dotfiles doctor
+blackdot doctor
 
 # Auto-fix permission issues
-dotfiles doctor --fix
+blackdot doctor --fix
 ```
 
 Expected permissions:

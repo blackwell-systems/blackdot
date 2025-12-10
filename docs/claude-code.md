@@ -245,11 +245,11 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
 ├─────────────────────────────────┤     ├─────────────────────────────────┤
 │                                 │     │                                 │
 │  dotfiles status    ───────────────────► shows Claude profile status   │
-│  dotfiles doctor    ───────────────────► checks Claude health          │
+│  blackdot doctor    ───────────────────► checks Claude health          │
 │  blackdot drift     ───────────────────► detects profile changes       │
 │  blackdot vault pull ───────────────► restores profiles.json        │
 │  dotfiles packages  ───────────────────► suggests dotclaude install    │
-│  dotfiles setup     ───────────────────► offers dotclaude setup        │
+│  blackdot setup     ───────────────────► offers dotclaude setup        │
 │                                 │     │                                 │
 └─────────────────────────────────┘     └─────────────────────────────────┘
                                               ▲
@@ -277,7 +277,7 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
 
 1. **dotclaude** manages profiles in `~/code/dotclaude/profiles/`
 2. **dotclaude** auto-generates `~/.claude/profiles.json` on activate/create
-3. **dotfiles vault** syncs `profiles.json` to your password manager
+3. **blackdot vault** syncs `profiles.json` to your password manager
 4. **blackdot vault pull** restores it on new machines
 
 The `profiles.json` format:

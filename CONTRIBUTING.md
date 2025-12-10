@@ -120,7 +120,7 @@ shellcheck your-script.sh
 zsh -n vault/your-script.sh
 
 # 3. Run health check
-dotfiles doctor
+blackdot doctor
 
 # 4. Test on clean environment (if possible)
 # macOS:
@@ -157,7 +157,7 @@ cd vault
 ./restore-ssh.sh --help
 
 # Test with dry-run mode (where available)
-dotfiles vault sync --dry-run SSH-Config
+blackdot vault sync --dry-run SSH-Config
 ```
 
 ### Integration Testing
@@ -166,7 +166,7 @@ dotfiles vault sync --dry-run SSH-Config
 ```bash
 # Test full bootstrap on macOS
 ./bootstrap/bootstrap-mac.sh
-dotfiles doctor --fix
+blackdot doctor --fix
 ```
 
 **Linux (Docker):**
@@ -175,7 +175,7 @@ dotfiles doctor --fix
 docker run -it --rm -v $PWD:/dotfiles ubuntu:24.04 bash
 cd /dotfiles
 ./bootstrap/bootstrap-linux.sh
-dotfiles doctor
+blackdot doctor
 ```
 
 ### CI/CD
@@ -375,7 +375,7 @@ export BW_SESSION="$(bw unlock --raw)"
 
 # Test vault operations (use test account!)
 ./vault/check-vault-items.sh -v
-dotfiles vault sync --dry-run SSH-Config
+blackdot vault sync --dry-run SSH-Config
 ```
 
 ### Debugging

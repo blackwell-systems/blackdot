@@ -97,7 +97,7 @@ Available backups (max: 10, retention: 30d):
   backup-20241204-091500  (24K) [compressed]
   backup-20241203-180000  (22K) [compressed]
 
-Restore with: dotfiles backup restore [backup-name]
+Restore with: blackdot backup restore [backup-name]
 Location: /Users/john/.blackdot-backups
 ```
 
@@ -307,7 +307,7 @@ blackdot backup restore
 
 ```
 [WARN] Backup system is disabled in config
-Enable with: dotfiles config set backup.enabled true
+Enable with: blackdot config set backup.enabled true
 ```
 
 Enable with:
@@ -319,7 +319,7 @@ blackdot config set backup.enabled true
 
 ```
 [WARN] No backups found in /Users/john/.blackdot-backups
-Create one with: dotfiles backup
+Create one with: blackdot backup
 ```
 
 The backup directory doesn't exist or is empty. Create your first backup:
