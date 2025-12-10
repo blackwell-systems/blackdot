@@ -1,11 +1,10 @@
-# Vault Bootstrap System
+# Vault System
 
-This directory contains scripts for **bidirectional secret management** with multiple vault backends:
+The vault system provides **bidirectional secret management** with multiple vault backends through the `vaultmux` library:
 
-- **Restore scripts** pull secrets from your vault → local files
-- **Sync/Create scripts** push local changes → your vault
-- **Utility scripts** for validation, debugging, deletion, and inventory
-- **Shared library** (`_common.sh`) with reusable functions
+- **Pull** secrets from your vault → local files
+- **Push** local changes → your vault
+- **Validate** vault item schema
 - **Backend abstraction** supporting Bitwarden, 1Password, and pass
 
 ---
@@ -45,23 +44,6 @@ All `blackdot vault` commands work identically regardless of which backend you'v
 ---
 
 ## Quick Reference
-
-| Script | Purpose | Command |
-|--------|---------|---------|
-| `init-vault.sh` | Configure vault backend with location support | `blackdot vault setup` |
-| `restore.sh` | Orchestrates all restores | `blackdot vault pull` |
-| `restore-ssh.sh` | Restores SSH keys + config | Called by bootstrap |
-| `restore-aws.sh` | Restores AWS config/creds | Called by bootstrap |
-| `restore-env.sh` | Restores env secrets | Called by bootstrap |
-| `restore-git.sh` | Restores gitconfig | Called by bootstrap |
-| `create-vault-item.sh` | Creates new vault items | `blackdot vault create ITEM` |
-| `sync-to-vault.sh` | Syncs local → vault | `blackdot vault push --all` |
-| `dotfiles-sync` | Smart bidirectional sync | `blackdot sync` or `blackdot vault sync` |
-| `validate-schema.sh` | Validates vault item schema | `blackdot vault validate` |
-| `delete-vault-item.sh` | Deletes items from vault | `blackdot vault delete ITEM` |
-| `check-vault-items.sh` | Pre-flight validation | `blackdot vault check` |
-| `list-vault-items.sh` | Debug/inventory tool | `blackdot vault list` |
-| `_common.sh` | Shared functions library | Sourced by other scripts |
 
 ### Commands
 
@@ -372,54 +354,37 @@ When offline mode is enabled:
 
 ## Architecture
 
-### Backend Abstraction Layer
+### vaultmux Abstraction Layer
+
+The vault system uses `vaultmux`, a polymorphic secrets manager library that provides a unified API across all backends:
+
+```mermaid
+graph LR
+    CLI[blackdot CLI] --> VM[vaultmux]
+    VM --> BW[Bitwarden]
+    VM --> OP[1Password]
+    VM --> P[pass]
+```
+
+**How it works:**
+1. User runs `blackdot vault <command>`
+2. Go CLI loads backend based on `BLACKDOT_VAULT_BACKEND` or config.json
+3. `vaultmux` provides unified API: `GetItem()`, `CreateItem()`, `UpdateItem()`, `DeleteItem()`
+4. Backend-specific code handles CLI differences (bw, op, pass)
+
+### Configuration
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    VAULT SYSTEM ARCHITECTURE                     │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   USER COMMANDS                                                  │
-│   ═══════════════════════════════════════════════════════════    │
-│   blackdot vault pull | sync | create | delete | list        │
-│                     ↓                                            │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   OPERATION LAYER                                                │
-│   ═════════════════════════════════════════════════════════════  │
-│   restore-*.sh, sync-to-vault.sh, create/delete scripts         │
-│                     ↓                                            │
-│   _common.sh (validation, drift detection, config loader)       │
-│                     ↓                                            │
-│   ~/.config/blackdot/vault-items.json (user configuration)      │
-│                     ↓                                            │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   VAULT ABSTRACTION (lib/_vault.sh)                             │
-│   ═════════════════════════════════════════════════════════════  │
-│   vault_get_session()  vault_get_item()   vault_create_item()   │
-│   vault_sync()         vault_get_notes()  vault_update_item()   │
-│   vault_login_check()  vault_item_exists() vault_delete_item()  │
-│                     ↓                                            │
-│   Loads backend based on BLACKDOT_VAULT_BACKEND                 │
-│                     ↓                                            │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   BACKENDS (vault/backends/*.sh)                                │
-│   ═════════════════════════════════════════════════════════════  │
-│   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
-│   │  bitwarden  │  │  1password  │  │    pass     │             │
-│   │    (bw)     │  │    (op)     │  │ (pass/gpg)  │             │
-│   └─────────────┘  └─────────────┘  └─────────────┘             │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+~/.config/blackdot/
+├── config.json           # Vault backend preference
+└── vault-items.json      # Item definitions and mappings
 ```
 
 ### Adding a New Backend
 
-1. Create `vault/backends/newbackend.sh`
-2. Implement required functions (see `backends/_interface.md`)
-3. Test with `BLACKDOT_VAULT_BACKEND=newbackend dotfiles vault list`
+New backends are implemented in the `vaultmux` Go library:
+- Repository: `github.com/blackwell-systems/vaultmux`
+- See vaultmux documentation for backend implementation guide
 
 ---
 
@@ -595,7 +560,7 @@ blackdot template render --all
 
 ## Schema Validation
 
-The `validate-config.sh` script validates your `vault-items.json` configuration file against the JSON schema:
+The `blackdot vault validate` command validates your `vault-items.json` configuration file against the JSON schema:
 
 ```bash
 # Validate configuration

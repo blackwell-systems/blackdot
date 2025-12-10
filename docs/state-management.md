@@ -2,8 +2,6 @@
 
 The `blackdot setup` wizard uses a persistent state system to track progress, save preferences, and enable resume capability. State management is a foundation component that works with the [Configuration Layers](architecture.md#configuration-layers) system.
 
-> **v3.0 Update:** State management now uses JSON configuration format. Run `blackdot migrate` to upgrade from v2.x INI files.
-
 ---
 
 ## Overview
@@ -125,26 +123,7 @@ blackdot features preset developer --persist
 1. Runtime state (current shell session)
 2. Environment variables (`BLACKDOT_FEATURE_<NAME>` or `SKIP_*`)
 3. Config file (`features.*` in config.json)
-4. Registry defaults (lib/_features.sh)
-
-### Migrating from v2.x
-
-If you're upgrading from v2.x (INI files):
-
-```bash
-blackdot migrate              # Interactive migration
-blackdot migrate --yes        # Skip confirmation
-
-# Old files (v2.x):
-~/.config/blackdot/state.ini
-~/.config/blackdot/config.ini
-
-# New file (v3.0):
-~/.config/blackdot/config.json
-
-# Backup location:
-~/.config/blackdot/backups/pre-v3-migration-YYYYMMDD_HHMMSS/
-```
+4. Feature presets in Go CLI
 
 ---
 
@@ -211,78 +190,40 @@ This means you can run `blackdot setup` on an existing installation and it will 
 
 ---
 
-## Library Functions
+## Configuration Access
 
-The state system is implemented in `lib/_state.sh` (uses `lib/_config.sh` as backend):
+State and configuration are managed by the Go CLI (`blackdot`). The CLI reads and writes `~/.config/blackdot/config.json` directly.
 
-### Phase State Functions
+### CLI Commands
 
 ```bash
-# Initialize state (creates config.json if needed)
-state_init
+# View current configuration
+blackdot config show
 
-# Check if a phase is completed
-if state_completed "symlinks"; then
-    echo "Symlinks already configured"
-fi
+# Get a specific value
+blackdot config get vault.backend
+blackdot config get backup.retention_days
 
-# Mark a phase as complete (adds to setup.completed[] array)
-state_complete "packages"
-
-# Mark a phase as incomplete (removes from array)
-state_reset "vault"
-
-# Check if setup is needed (any incomplete phases)
-if state_needs_setup; then
-    echo "Run: blackdot setup"
-fi
-
-# Get next incomplete phase
-next_phase=$(state_next_phase)
-
-# Infer state from filesystem
-state_infer
+# Set values
+blackdot config set vault.backend 1password
+blackdot config set backup.retention_days 60
 ```
 
-### Config Functions
+### Direct JSON Access
 
-Direct JSON config access via `lib/_config.sh`:
+You can also edit `config.json` directly with `jq`:
 
 ```bash
-# Get a config value (supports nested keys)
-backend=$(config_get "vault.backend")
-tier=$(config_get "packages.tier" "enhanced")
+# Get a value
+jq '.vault.backend' ~/.config/blackdot/config.json
 
-# Set a config value
-config_set "vault.backend" "1password"
-config_set "backup.retention_days" "60"
+# Set a value
+jq '.vault.backend = "1password"' ~/.config/blackdot/config.json > /tmp/config.json && \
+    mv /tmp/config.json ~/.config/blackdot/config.json
 
-# Boolean values (use config_get_bool for conditionals)
-config_set_bool "vault.auto_sync" true
-if config_get_bool "backup.enabled"; then
-    echo "Backups are enabled"
-fi
-
-# Note: config_get returns "true" or "false" as strings for booleans
-compress=$(config_get "backup.compress" "true")
-[[ "$compress" == "true" ]] && echo "Compression enabled"
-
-# Array operations
-config_array_add "setup.completed" "symlinks"
-config_array_remove "setup.completed" "vault"
-config_get_array "setup.completed"  # Returns: symlinks\npackages\nsecrets
-
-# Validation and display
-config_validate                     # Validate JSON syntax and version
-config_show                         # Pretty-print entire config
-config_backup                       # Create timestamped backup
-```
-
-**Legacy API Compatibility:**
-```bash
-# v2.x API still works (delegates to v3.0 backend)
-backend=$(config_get "vault" "backend")      # Converts to vault.backend
-config_set "vault" "backend" "bitwarden"    # Converts to vault.backend
+# Add to array
+jq '.setup.completed += ["symlinks"]' ~/.config/blackdot/config.json > /tmp/config.json && \
+    mv /tmp/config.json ~/.config/blackdot/config.json
 ```
 
 ---
