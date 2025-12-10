@@ -165,7 +165,7 @@ func runUninstall(cmd *cobra.Command, args []string) error {
 		color.New(color.FgGreen).Println("Uninstall complete.")
 		fmt.Println()
 		fmt.Println("To reinstall:")
-		fmt.Println("  curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash")
+		fmt.Println("  curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash")
 	}
 	fmt.Println()
 
