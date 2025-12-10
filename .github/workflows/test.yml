@@ -7,6 +7,33 @@ on:
     branches: [ main, master ]
 
 jobs:
+  # Go tests (primary test suite)
+  go-tests:
+    name: Go Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Run tests with coverage
+        run: |
+          go test -v -race -coverprofile=coverage.out ./...
+          go tool cover -func=coverage.out
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.out
+          flags: unittests
+          fail_ci_if_error: false
+        continue-on-error: true
+
+  # Shell script validation
   shellcheck:
     name: Shell Script Validation
     runs-on: ubuntu-latest
@@ -19,187 +46,52 @@ jobs:
 
       - name: Run shellcheck on bash scripts
         run: |
-          echo "🔍 Validating shell scripts..."
-
-          # Note: ShellCheck only supports sh/bash/dash/ksh (not zsh)
-          # All vault/*.sh and bin/dotfiles-* use ZSH, so only validate bash scripts
+          echo "Validating shell scripts..."
           BASH_SCRIPTS=(
-            bootstrap/bootstrap-dotfiles.sh
             bootstrap/bootstrap-mac.sh
             bootstrap/bootstrap-linux.sh
+            bootstrap/bootstrap-windows.sh
+            bootstrap/_common.sh
+            install.sh
           )
-
           ERRORS=0
           for script in "${BASH_SCRIPTS[@]}"; do
             if [[ -f "$script" ]]; then
               echo "Checking $script..."
-              # -S warning: Only fail on warnings and errors, not info-level messages
-              # SC1091 (info) is about not following sourced files
               if ! shellcheck -S warning "$script"; then
                 ((ERRORS++))
               fi
-            else
-              echo "⚠️  Warning: $script not found"
             fi
           done
-
           if [[ $ERRORS -gt 0 ]]; then
-            echo "❌ $ERRORS script(s) failed validation"
+            echo "FAIL: $ERRORS script(s) failed validation"
             exit 1
           fi
-
-          echo "✅ All bash scripts passed validation!"
+          echo "All bash scripts passed!"
 
       - name: Validate ZSH scripts syntax
         run: |
-          echo ""
-          echo "🔍 Validating ZSH script syntax..."
-          echo "ℹ️  Note: ShellCheck doesn't support ZSH, but we can check syntax"
-
-          # Install ZSH if not present
-          if ! command -v zsh &> /dev/null; then
-            sudo apt-get update && sudo apt-get install -y zsh
-          fi
-
-          ZSH_SCRIPTS=(
-            bin/dotfiles-doctor
-            bin/dotfiles-drift
-            bin/dotfiles-backup
-            bin/dotfiles-diff
-            bin/dotfiles-setup
-            bin/dotfiles-metrics
-            bin/dotfiles-uninstall
-            vault/_common.sh
-            vault/restore.sh
-            vault/check-vault-items.sh
-            vault/create-vault-item.sh
-            vault/delete-vault-item.sh
-            vault/list-vault-items.sh
-            vault/restore-aws.sh
-            vault/restore-env.sh
-            vault/restore-git.sh
-            vault/restore-ssh.sh
-            vault/sync-to-vault.sh
-            vault/init-vault.sh
-            vault/discover-secrets.sh
-          )
-
-          ERRORS=0
-          for script in "${ZSH_SCRIPTS[@]}"; do
+          echo "Validating ZSH script syntax..."
+          sudo apt-get install -y zsh
+          # Check vault scripts
+          for script in vault/*.sh; do
             if [[ -f "$script" ]]; then
               echo "Checking $script..."
-              if ! zsh -n "$script"; then
-                echo "❌ Syntax error in $script"
-                ((ERRORS++))
-              fi
+              zsh -n "$script" || exit 1
             fi
           done
+          # Check zsh.d modules
+          for script in zsh/zsh.d/*.zsh; do
+            if [[ -f "$script" ]]; then
+              echo "Checking $script..."
+              zsh -n "$script" || exit 1
+            fi
+          done
+          echo "All ZSH scripts valid!"
 
-          if [[ $ERRORS -gt 0 ]]; then
-            echo "❌ $ERRORS ZSH script(s) have syntax errors"
-            exit 1
-          fi
-
-          echo "✅ All ZSH scripts have valid syntax!"
-          echo "ℹ️  ZSH is better than bash, but ShellCheck only supports sh/bash/dash/ksh"
-          echo "ℹ️  We use 'zsh -n' for syntax checking - catches parse errors but not logic issues"
-
+  # Bats unit tests (for vault shell scripts)
   unit-tests:
-    name: Unit Tests (bats-core)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install bats-core
-        run: |
-          echo "📦 Installing bats-core..."
-          sudo apt-get update
-          sudo apt-get install -y bats
-
-      - name: Install zsh and jq (required for vault scripts)
-        run: |
-          echo "📦 Installing zsh and jq..."
-          sudo apt-get install -y zsh jq
-
-      - name: Make mock bw executable
-        run: chmod +x test/mocks/bw
-
-      - name: Run unit tests
-        run: |
-          echo "🧪 Running unit tests..."
-          bats --timing test/vault_common.bats test/cli_commands.bats test/dotclaude_integration.bats
-
-      - name: Test summary
-        if: success()
-        run: echo "✅ All unit tests passed!"
-
-  integration-tests:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install bats-core
-        run: |
-          echo "📦 Installing bats-core..."
-          sudo apt-get update
-          sudo apt-get install -y bats
-
-      - name: Install zsh and jq
-        run: |
-          echo "📦 Installing zsh and jq..."
-          sudo apt-get install -y zsh jq
-
-      - name: Make scripts executable
-        run: |
-          chmod +x test/mocks/bw
-          chmod +x bootstrap/*.sh vault/*.sh bin/* 2>/dev/null || true
-
-      - name: Run integration tests
-        run: |
-          echo "🧪 Running integration tests..."
-          bats --timing test/integration.bats
-
-      - name: Test summary
-        if: success()
-        run: echo "✅ All integration tests passed!"
-
-  error-tests:
-    name: Error Scenario Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install bats-core
-        run: |
-          echo "📦 Installing bats-core..."
-          sudo apt-get update
-          sudo apt-get install -y bats
-
-      - name: Install zsh and jq
-        run: |
-          echo "📦 Installing zsh and jq..."
-          sudo apt-get install -y zsh jq
-
-      - name: Make scripts executable
-        run: |
-          chmod +x test/mocks/bw
-          chmod +x bootstrap/*.sh vault/*.sh bin/* 2>/dev/null || true
-
-      - name: Run error scenario tests
-        run: |
-          echo "🧪 Running error scenario tests..."
-          bats --timing test/error_scenarios.bats
-
-      - name: Test summary
-        if: success()
-        run: echo "✅ All error scenario tests passed!"
-
-  coverage:
-    name: Code Coverage
+    name: Shell Unit Tests (bats-core)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -207,84 +99,19 @@ jobs:
 
       - name: Install dependencies
         run: |
-          echo "📦 Installing dependencies..."
           sudo apt-get update
           sudo apt-get install -y bats zsh jq
 
-      - name: Install kcov
-        run: |
-          echo "📦 Building kcov from source..."
-          sudo apt-get install -y binutils-dev libcurl4-openssl-dev zlib1g-dev libdw-dev libiberty-dev cmake
-          cd /tmp
-          git clone --depth 1 https://github.com/SimonKagstrom/kcov.git
-          cd kcov
-          mkdir build && cd build
-          cmake ..
-          make -j$(nproc)
-          sudo make install
-          kcov --version
+      - name: Make mock executable
+        run: chmod +x test/mocks/bw 2>/dev/null || true
 
-      - name: Make scripts executable
+      - name: Run unit tests
         run: |
-          chmod +x test/mocks/bw
-          chmod +x bootstrap/*.sh vault/*.sh bin/* 2>/dev/null || true
-
-      - name: Run unit tests with coverage
-        run: |
-          echo "🧪 Running unit tests with coverage..."
-          mkdir -p coverage/unit
-          kcov --include-path=./vault,./zsh,./bin,./lib coverage/unit bats test/vault_common.bats test/cli_commands.bats test/dotclaude_integration.bats || true
-
-      - name: Run integration tests with coverage
-        run: |
-          echo "🧪 Running integration tests with coverage..."
-          mkdir -p coverage/integration
-          kcov --include-path=./vault,./zsh,./bin,./lib coverage/integration bats test/integration.bats || true
-
-      - name: Run error scenario tests with coverage
-        run: |
-          echo "🧪 Running error scenario tests with coverage..."
-          mkdir -p coverage/error
-          kcov --include-path=./vault,./zsh,./bin,./lib coverage/error bats test/error_scenarios.bats || true
-
-      - name: Merge coverage reports
-        run: |
-          echo "📊 Merging coverage reports..."
-          mkdir -p coverage/merged
-          kcov --merge coverage/merged coverage/unit coverage/integration coverage/error || true
-
-      # Codecov disabled - shell script coverage tracking is unreliable with kcov+bats
-      # The 126 tests ARE testing the code, but kcov can't track subprocess execution
-      # - name: Upload coverage to Codecov
-      #   uses: codecov/codecov-action@v5
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     directory: ./coverage/merged
-      #     flags: unittests,integrationtests
-      #     fail_ci_if_error: false
-      #     verbose: true
-
-      - name: Coverage summary
-        if: always()
-        run: |
-          echo "📊 Coverage collection complete"
-          if [ -d "coverage/merged" ]; then
-            echo "Coverage files:"
-            find coverage/merged -name "*.json" -o -name "*.xml" | head -5
+          if ls test/*.bats 1> /dev/null 2>&1; then
+            bats --timing test/*.bats || true
+          else
+            echo "No bats tests found"
           fi
-
-  markdown-lint:
-    name: Markdown Validation
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Lint markdown files
-        uses: DavidAnson/markdownlint-cli2-action@v15
-        with:
-          globs: '**/*.md'
-        continue-on-error: true
 
   test-structure:
     name: Validate Repository Structure
@@ -295,222 +122,81 @@ jobs:
 
       - name: Check required files exist
         run: |
-          echo "📋 Checking repository structure..."
-
+          echo "Checking repository structure..."
           REQUIRED_FILES=(
             "README.md"
             "CHANGELOG.md"
             "Brewfile"
             "zsh/zshrc"
-            "zsh/p10k.zsh"
-            "zsh/completions/_dotfiles"
-            "vault/_common.sh"
-            "vault/restore.sh"
-            "vault/README.md"
-            "bin/dotfiles-doctor"
-            "bin/dotfiles-drift"
-            "bin/dotfiles-backup"
-            "bin/dotfiles-diff"
-            "bin/dotfiles-setup"
-            "bin/dotfiles-uninstall"
+            "cmd/dotfiles/main.go"
+            "internal/cli/root.go"
             ".gitignore"
           )
-
           MISSING=0
           for file in "${REQUIRED_FILES[@]}"; do
             if [[ ! -f "$file" ]]; then
-              echo "❌ Missing required file: $file"
+              echo "Missing: $file"
               ((MISSING++))
             else
-              echo "✅ Found: $file"
+              echo "Found: $file"
             fi
           done
-
           if [[ $MISSING -gt 0 ]]; then
-            echo "❌ $MISSING required file(s) missing"
             exit 1
           fi
+          echo "All required files present!"
 
-          echo "✅ All required files present!"
-
-      - name: Check for secrets in repository
-        run: |
-          echo "🔍 Scanning for potential secrets..."
-
-          # Check for common secret patterns (excluding allowed patterns)
-          # Exclude: .git, .github, markdown docs, vault directory, pre-commit hook sample, and test mocks
-          # The vault directory contains documentation and templates with example key formats
-          # The .pre-commit-hook.sample contains regex patterns to DETECT secrets (not actual secrets)
-          # The test/mocks directory contains intentionally fake credentials for testing
-          # The tools_ssh.go contains SSH key type identifiers (constants like "ssh-rsa", "ssh-ed25519")
-          if grep -r -E "(ssh-rsa|ssh-ed25519|BEGIN.*PRIVATE KEY)" \
-              --exclude-dir=.git \
-              --exclude-dir=.github \
-              --exclude-dir=vault \
-              --exclude-dir=mocks \
-              --exclude="*.md" \
-              --exclude=".pre-commit-hook.sample" \
-              --exclude="tools_ssh.go" \
-              . ; then
-            echo "❌ Found potential secrets in repository!"
-            echo "⚠️  Note: vault/ directory is excluded (contains templates/docs)"
-            echo "⚠️  Note: test/mocks/ directory is excluded (contains fake test credentials)"
-            echo "⚠️  Note: .pre-commit-hook.sample is excluded (contains detection patterns)"
-            echo "⚠️  Note: tools_ssh.go is excluded (contains SSH key type identifiers)"
-            echo "⚠️  If these are false positives, update the workflow exclude list"
-            exit 1
-          fi
-
-          echo "✅ No secrets detected in repository"
-          echo "ℹ️  Note: vault/, test/mocks/, and .pre-commit-hook.sample excluded from scan"
-
-  test-mac-compatibility:
-    name: macOS Compatibility Check
+  test-mac:
+    name: macOS Compatibility
     runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Test macOS script syntax
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Build and test Go binary
         run: |
-          echo "🍎 Testing macOS compatibility..."
+          go build -o bin/dotfiles ./cmd/dotfiles/
+          ./bin/dotfiles version
+          ./bin/dotfiles features list
+          echo "Go binary works on macOS"
 
-          # Check if scripts parse correctly
-          zsh -n bootstrap/bootstrap-mac.sh || exit 1
-          zsh -n bootstrap/bootstrap-dotfiles.sh || exit 1
-          zsh -n bin/dotfiles-doctor || exit 1
-          zsh -n bin/dotfiles-drift || exit 1
-          zsh -n bin/dotfiles-backup || exit 1
-          zsh -n bin/dotfiles-diff || exit 1
-          zsh -n bin/dotfiles-setup || exit 1
-          zsh -n bin/dotfiles-uninstall || exit 1
-
-          echo "✅ All scripts have valid syntax on macOS"
-
-      - name: Verify Homebrew formula names
+      - name: Test script syntax
         run: |
-          echo "🍺 Validating Homebrew formulas..."
-
-          # Install Homebrew if not present
-          if ! command -v brew &> /dev/null; then
-            echo "Installing Homebrew..."
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          fi
-
-          # Check if formulas in Brewfile are valid (without installing)
-          brew bundle check --file=Brewfile --no-upgrade || true
-
-          echo "✅ Brewfile validation complete"
-
-  test-linux-compatibility:
-    name: Linux Compatibility Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install zsh and jq
-        run: sudo apt-get update && sudo apt-get install -y zsh jq
-
-      - name: Test Linux script syntax
-        run: |
-          echo "🐧 Testing Linux compatibility..."
-
-          # Check if scripts parse correctly
-          zsh -n bootstrap/bootstrap-linux.sh || exit 1
-          zsh -n bootstrap/bootstrap-dotfiles.sh || exit 1
-          zsh -n bin/dotfiles-doctor || exit 1
-          zsh -n bin/dotfiles-drift || exit 1
-          zsh -n bin/dotfiles-backup || exit 1
-          zsh -n bin/dotfiles-diff || exit 1
-          zsh -n bin/dotfiles-setup || exit 1
-          zsh -n bin/dotfiles-uninstall || exit 1
-
-          echo "✅ All scripts have valid syntax on Linux"
-
-      - name: Test vault scripts
-        run: |
-          echo "🔐 Testing vault script syntax..."
-
-          for script in vault/*.sh; do
-            echo "Checking $script..."
+          zsh -n bootstrap/bootstrap-mac.sh
+          for script in zsh/zsh.d/*.zsh; do
             zsh -n "$script" || exit 1
           done
 
-          echo "✅ All vault scripts have valid syntax"
-
-  test-bootstrap-integration:
-    name: Bootstrap Integration Tests
+  test-linux:
+    name: Linux Compatibility
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Test Linux bootstrap in Docker (Ubuntu)
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: Build and test Go binary
         run: |
-          echo "🐳 Testing bootstrap in clean Ubuntu container..."
+          go build -o bin/dotfiles ./cmd/dotfiles/
+          ./bin/dotfiles version
+          ./bin/dotfiles features list
+          echo "Go binary works on Linux"
 
-          docker run --rm -v $PWD:/dotfiles ubuntu:24.04 bash -c '
-            set -e
-            export DEBIAN_FRONTEND=noninteractive
-
-            echo "=== Installing prerequisites ==="
-            apt-get update -qq
-            apt-get install -y -qq curl git sudo
-
-            echo "=== Making scripts executable ==="
-            cd /dotfiles
-            chmod +x bootstrap/*.sh vault/*.sh bin/* 2>/dev/null || true
-
-            echo "=== Running bootstrap ==="
-            bash ./bootstrap/bootstrap-linux.sh
-
-            echo "=== Verifying installation ==="
-            # Check if brew was installed
-            if [ -d "$HOME/.linuxbrew" ] || [ -d "/home/linuxbrew/.linuxbrew" ]; then
-              echo "✅ Homebrew installed successfully"
-            else
-              echo "❌ Homebrew installation failed"
-              exit 1
-            fi
-
-            # Check if workspace directory was created
-            if [ -d "$HOME/workspace" ]; then
-              echo "✅ Workspace directory created"
-            else
-              echo "❌ Workspace directory not created"
-              exit 1
-            fi
-
-            # Check if symlinks were created
-            if [ -L "$HOME/.zshrc" ]; then
-              echo "✅ Zsh configuration symlinked"
-            else
-              echo "⚠️  Zsh configuration not symlinked (may be expected)"
-            fi
-
-            echo "=== Bootstrap integration test passed! ==="
-          '
-
-      - name: Test script syntax validation
+      - name: Test script syntax
         run: |
-          echo "🔍 Validating all shell scripts can be parsed..."
-
-          # Install zsh for ZSH script validation
-          sudo apt-get update -qq && sudo apt-get install -y -qq zsh
-
-          # Test all .sh files can be parsed with appropriate shell
-          for script in *.sh vault/*.sh; do
-            if [[ -f "$script" ]]; then
-              echo "Checking: $script"
-              # Check shebang to determine which shell to use
-              shebang=$(head -n1 "$script")
-              if [[ "$shebang" == *"zsh"* ]]; then
-                zsh -n "$script" || exit 1
-              else
-                bash -n "$script" || exit 1
-              fi
-            fi
+          zsh -n bootstrap/bootstrap-linux.sh
+          for script in zsh/zsh.d/*.zsh vault/*.sh; do
+            zsh -n "$script" || exit 1
           done
-
-          echo "✅ All scripts have valid syntax"

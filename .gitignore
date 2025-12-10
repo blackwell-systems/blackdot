@@ -34,5 +34,7 @@ generated/
 
 # Go binaries (built from cmd/)
 bin/dotfiles
-bin/dotfiles-go
 /dotfiles-go
+
+# Legacy binary name
+bin/dotfiles-go

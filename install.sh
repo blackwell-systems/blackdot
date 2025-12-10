@@ -8,8 +8,8 @@
 # After installation, run 'dotfiles setup' to configure vault and secrets.
 #
 # Options:
-#   --minimal    Skip optional features (vault, Claude setup)
-#   --binary     Download pre-built Go binary (faster, no build required)
+#   --minimal      Skip optional features (vault, Claude setup)
+#   --no-binary    Skip Go binary download (binary is installed by default)
 #
 # ============================================================
 set -euo pipefail
@@ -53,6 +53,7 @@ run_hook() {
 install_go_binary() {
     local install_dir="${1:-$HOME/.local/bin}"
     local version="${DOTFILES_VERSION:-latest}"
+    local skip_checksum="${DOTFILES_SKIP_CHECKSUM:-false}"
 
     # Detect OS
     local os=""
@@ -79,11 +80,14 @@ install_go_binary() {
     # GitHub release URL
     local base_url="https://github.com/blackwell-systems/dotfiles/releases"
     local download_url=""
+    local checksum_url=""
 
     if [[ "$version" == "latest" ]]; then
         download_url="${base_url}/latest/download/${binary_name}"
+        checksum_url="${base_url}/latest/download/SHA256SUMS.txt"
     else
         download_url="${base_url}/download/${version}/${binary_name}"
+        checksum_url="${base_url}/download/${version}/SHA256SUMS.txt"
     fi
 
     info "Downloading Go binary: $binary_name"
@@ -92,8 +96,8 @@ install_go_binary() {
     # Create install directory
     mkdir -p "$install_dir"
 
-    # Download binary (named dotfiles-go to avoid shadowing ZSH alias)
-    local target="${install_dir}/dotfiles-go${suffix}"
+    # Download binary
+    local target="${install_dir}/dotfiles${suffix}"
     if command -v curl >/dev/null 2>&1; then
         curl -fsSL "$download_url" -o "$target" || {
             fail "Failed to download binary. Release may not exist yet."
@@ -110,12 +114,62 @@ install_go_binary() {
         return 1
     fi
 
+    # Verify checksum (unless skipped)
+    if [[ "$skip_checksum" != "true" ]]; then
+        info "Verifying checksum..."
+        local checksum_file="/tmp/dotfiles-checksums-$$.txt"
+        local expected_checksum=""
+
+        # Download checksums file
+        if command -v curl >/dev/null 2>&1; then
+            curl -fsSL "$checksum_url" -o "$checksum_file" 2>/dev/null
+        elif command -v wget >/dev/null 2>&1; then
+            wget -q "$checksum_url" -O "$checksum_file" 2>/dev/null
+        fi
+
+        if [[ -f "$checksum_file" ]]; then
+            # Extract expected checksum for this binary
+            expected_checksum=$(grep "${binary_name}$" "$checksum_file" | awk '{print $1}')
+            rm -f "$checksum_file"
+
+            if [[ -n "$expected_checksum" ]]; then
+                # Calculate actual checksum
+                local actual_checksum=""
+                if command -v sha256sum >/dev/null 2>&1; then
+                    actual_checksum=$(sha256sum "$target" | awk '{print $1}')
+                elif command -v shasum >/dev/null 2>&1; then
+                    actual_checksum=$(shasum -a 256 "$target" | awk '{print $1}')
+                else
+                    warn "No sha256sum or shasum found, skipping checksum verification"
+                fi
+
+                if [[ -n "$actual_checksum" ]]; then
+                    if [[ "$actual_checksum" == "$expected_checksum" ]]; then
+                        pass "Checksum verified"
+                    else
+                        fail "Checksum mismatch!"
+                        fail "Expected: $expected_checksum"
+                        fail "Actual:   $actual_checksum"
+                        rm -f "$target"
+                        return 1
+                    fi
+                fi
+            else
+                warn "Could not find checksum for $binary_name, skipping verification"
+            fi
+        else
+            warn "Could not download checksums file, skipping verification"
+        fi
+    fi
+
     # Make executable
     chmod +x "$target"
 
     # Verify it works
-    if "$target" version >/dev/null 2>&1; then
+    local verify_output
+    if verify_output=$("$target" version 2>&1); then
         pass "Installed dotfiles binary to: $target"
+        info "Version: $verify_output"
 
         # Add to PATH hint if needed
         if ! echo "$PATH" | grep -q "$install_dir"; then
@@ -123,7 +177,43 @@ install_go_binary() {
         fi
         return 0
     else
-        fail "Binary verification failed"
+        fail "Binary verification failed - the downloaded binary cannot execute"
+        echo ""
+        echo "Possible causes:"
+
+        # Check architecture mismatch
+        local file_info
+        if command -v file >/dev/null 2>&1; then
+            file_info=$(file "$target" 2>/dev/null)
+            echo "  Binary type: $file_info"
+            case "$(uname -m)" in
+                x86_64|amd64)
+                    if ! echo "$file_info" | grep -qi "x86-64\|x86_64\|amd64"; then
+                        echo "  → Architecture mismatch: expected x86_64 binary"
+                    fi
+                    ;;
+                arm64|aarch64)
+                    if ! echo "$file_info" | grep -qi "arm64\|aarch64"; then
+                        echo "  → Architecture mismatch: expected arm64 binary"
+                    fi
+                    ;;
+            esac
+        fi
+
+        # Check if it's actually an HTML error page
+        if head -c 100 "$target" 2>/dev/null | grep -qi "<!DOCTYPE\|<html"; then
+            echo "  → Downloaded file appears to be HTML (release may not exist)"
+        fi
+
+        # Show the error output if any
+        if [[ -n "$verify_output" ]]; then
+            echo "  Error output: $verify_output"
+        fi
+
+        echo ""
+        echo "Try downloading manually from:"
+        echo "  https://github.com/blackwell-systems/dotfiles/releases"
+
         rm -f "$target"
         return 1
     fi
@@ -143,7 +233,7 @@ INSTALL_DIR="$WORKSPACE_TARGET/dotfiles"
 # Parse arguments
 MINIMAL=false
 USE_SSH=false
-INSTALL_BINARY=false
+INSTALL_BINARY=true   # Default: download Go binary (recommended)
 BINARY_ONLY=false
 
 while [[ $# -gt 0 ]]; do
@@ -160,6 +250,10 @@ while [[ $# -gt 0 ]]; do
             INSTALL_BINARY=true
             shift
             ;;
+        --no-binary)
+            INSTALL_BINARY=false
+            shift
+            ;;
         --binary-only)
             BINARY_ONLY=true
             INSTALL_BINARY=true
@@ -169,13 +263,13 @@ while [[ $# -gt 0 ]]; do
             echo "Dotfiles Installer"
             echo ""
             echo "Usage:"
-            echo "  curl -fsSL <url> | bash                         # Full install (recommended)"
-            echo "  curl -fsSL <url> | bash -s -- --binary          # Install with Go binary"
+            echo "  curl -fsSL <url> | bash                         # Full install with Go binary (recommended)"
+            echo "  curl -fsSL <url> | bash -s -- --no-binary       # Install without Go binary"
             echo "  curl -fsSL <url> | bash -s -- --binary-only     # Just download Go binary"
             echo ""
             echo "Options:"
             echo "  --minimal, -m        Shell config only (skip: Homebrew, vault, Claude, /workspace)"
-            echo "  --binary, -b         Download pre-built Go binary (recommended)"
+            echo "  --no-binary          Skip Go binary download (not recommended)"
             echo "  --binary-only        Just download the Go binary, skip repo clone"
             echo "  --ssh                Clone using SSH instead of HTTPS"
             echo "  --help, -h           Show this help"
@@ -184,10 +278,12 @@ while [[ $# -gt 0 ]]; do
             echo "  WORKSPACE_TARGET     Clone location (default: ~/workspace)"
             echo "  DOTFILES_VERSION     Binary version to download (default: latest)"
             echo "  DOTFILES_BIN_DIR     Where to install binary (default: ~/.local/bin)"
+            echo "  DOTFILES_SKIP_CHECKSUM  Skip SHA256 verification (default: false)"
             echo ""
             echo "Examples:"
-            echo "  curl -fsSL <url> | bash -s -- --binary          # Full install with binary"
-            echo "  DOTFILES_VERSION=v3.1.0 ./install.sh --binary   # Specific version"
+            echo "  curl -fsSL <url> | bash                              # Full install (recommended)"
+            echo "  DOTFILES_VERSION=v4.0.0 ./install.sh                 # Specific version"
+            echo "  curl -fsSL <url> | bash -s -- --minimal --no-binary  # Minimal, no binary"
             echo ""
             echo "After installation, run 'dotfiles setup' to configure your environment."
             exit 0
@@ -220,7 +316,7 @@ if $BINARY_ONLY; then
     echo ""
     echo -e "${GREEN}${BOLD}Binary installation complete!${NC}"
     echo ""
-    echo "Run 'dotfiles-go version' to verify the installation."
+    echo "Run 'dotfiles version' to verify the installation."
     exit 0
 fi
 
@@ -355,15 +451,20 @@ if ! $MINIMAL; then
         echo -e "${CYAN}Starting setup wizard...${NC}"
         echo ""
 
-        # Run setup directly without sourcing zshrc (avoids shell config issues)
-        # Prefer Go binary when available for cross-platform support
+        # Run setup - requires Go binary
         cd "$INSTALL_DIR"
         if [[ -x "$INSTALL_DIR/bin/dotfiles" ]]; then
             "$INSTALL_DIR/bin/dotfiles" setup
-        elif [[ -x "${DOTFILES_BIN_DIR:-$HOME/.local/bin}/dotfiles-go" ]]; then
-            "${DOTFILES_BIN_DIR:-$HOME/.local/bin}/dotfiles-go" setup
+        elif [[ -x "${DOTFILES_BIN_DIR:-$HOME/.local/bin}/dotfiles" ]]; then
+            "${DOTFILES_BIN_DIR:-$HOME/.local/bin}/dotfiles" setup
         else
-            "$INSTALL_DIR/bin/dotfiles-setup"
+            fail "Go binary not found. Setup requires the dotfiles binary."
+            echo ""
+            echo "To install the binary manually:"
+            echo "  curl -fsSL https://github.com/blackwell-systems/dotfiles/releases/latest/download/dotfiles-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/') -o ~/.local/bin/dotfiles"
+            echo "  chmod +x ~/.local/bin/dotfiles"
+            echo ""
+            echo "Then run: dotfiles setup"
         fi
 
         echo ""

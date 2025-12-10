@@ -722,7 +722,7 @@ func buildHere(noCache bool) error {
 
 	args := []string{"build", "-t", tag, "."}
 	if noCache {
-		args = append([]string{"build", "--no-cache", "-t", tag, "."})
+		args = []string{"build", "--no-cache", "-t", tag, "."}
 	}
 
 	cmd := exec.Command("docker", args...)

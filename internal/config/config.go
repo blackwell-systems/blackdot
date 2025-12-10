@@ -83,6 +83,9 @@ func DefaultManager() *Manager {
 	if configDir == "" {
 		home, _ := os.UserHomeDir()
 		configDir = filepath.Join(home, ".config")
+	} else {
+		// Normalize path separators for cross-platform consistency
+		configDir = filepath.Clean(configDir)
 	}
 	configDir = filepath.Join(configDir, "dotfiles")
 
@@ -90,6 +93,9 @@ func DefaultManager() *Manager {
 	if dotfilesDir == "" {
 		home, _ := os.UserHomeDir()
 		dotfilesDir = filepath.Join(home, ".dotfiles")
+	} else {
+		// Normalize path separators for cross-platform consistency
+		dotfilesDir = filepath.Clean(dotfilesDir)
 	}
 
 	return NewManager(configDir, dotfilesDir)
@@ -112,12 +118,17 @@ func (m *Manager) ProjectConfigPath() string {
 		return ""
 	}
 
-	for dir != "/" {
+	for {
 		path := filepath.Join(dir, ProjectConfigFile)
 		if _, err := os.Stat(path); err == nil {
 			return path
 		}
-		dir = filepath.Dir(dir)
+		parent := filepath.Dir(dir)
+		// Stop when we've reached the root (parent equals current)
+		if parent == dir {
+			break
+		}
+		dir = parent
 	}
 	return ""
 }

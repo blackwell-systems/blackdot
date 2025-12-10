@@ -19,13 +19,66 @@ OS="$(uname -s)"
 # =========================
 # Determine DOTFILES_DIR if not set (this file is in zsh/zsh.d/)
 _dotfiles_dir="${DOTFILES_DIR:-${${(%):-%x}:A:h:h:h}}"
-if [[ -f "$_dotfiles_dir/lib/_logging.sh" ]]; then
-    source "$_dotfiles_dir/lib/_logging.sh" 2>/dev/null || true
-fi
-if [[ -f "$_dotfiles_dir/lib/_features.sh" ]]; then
-    source "$_dotfiles_dir/lib/_features.sh" 2>/dev/null || true
-fi
-unset _dotfiles_dir
+_dotfiles_bin="$_dotfiles_dir/bin/dotfiles"
+_dotfiles_cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles"
+
+# Initialize feature functions from Go binary (with caching for faster startup)
+# This provides: feature_enabled, require_feature, feature_exists, feature_status
+_dotfiles_init_features() {
+    local cache_file="$_dotfiles_cache_dir/shell-init.zsh"
+    local binary_mtime cache_mtime
+
+    # Create cache directory if needed
+    [[ -d "$_dotfiles_cache_dir" ]] || mkdir -p "$_dotfiles_cache_dir"
+
+    # Check if binary exists
+    if [[ ! -x "$_dotfiles_bin" ]]; then
+        export DOTFILES_FEATURE_MODE="degraded"
+        # Provide minimal fallback functions
+        feature_enabled() { return 1; }  # Features disabled when binary missing
+        require_feature() {
+            echo "Feature system unavailable (Go binary not found at $_dotfiles_bin)" >&2
+            return 1
+        }
+        return 1
+    fi
+
+    # Use cache if it exists and is newer than binary
+    if [[ -f "$cache_file" ]]; then
+        binary_mtime=$(stat -c %Y "$_dotfiles_bin" 2>/dev/null || stat -f %m "$_dotfiles_bin" 2>/dev/null)
+        cache_mtime=$(stat -c %Y "$cache_file" 2>/dev/null || stat -f %m "$cache_file" 2>/dev/null)
+
+        if [[ -n "$cache_mtime" && -n "$binary_mtime" && "$cache_mtime" -ge "$binary_mtime" ]]; then
+            source "$cache_file" 2>/dev/null && {
+                export DOTFILES_FEATURE_MODE="cached"
+                return 0
+            }
+        fi
+    fi
+
+    # Generate fresh init and cache it
+    local init_code
+    if init_code=$("$_dotfiles_bin" shell-init zsh 2>&1); then
+        echo "$init_code" > "$cache_file"
+        eval "$init_code"
+        export DOTFILES_FEATURE_MODE="live"
+        return 0
+    else
+        export DOTFILES_FEATURE_MODE="error"
+        echo "dotfiles: shell-init failed: $init_code" >&2
+        # Provide safe fallback
+        feature_enabled() { return 1; }
+        require_feature() {
+            echo "Feature system initialization failed" >&2
+            return 1
+        }
+        return 1
+    fi
+}
+
+_dotfiles_init_features
+unset _dotfiles_dir _dotfiles_bin _dotfiles_cache_dir
+unset -f _dotfiles_init_features
 
 # =========================
 # OS-SPECIFIC SETUP

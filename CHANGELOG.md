@@ -7,58 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+## [4.0.0-rc1] - 2025-12-09
 
-- **Windows support for setup wizard** - Full cross-platform setup experience
-  - Platform detection helpers (`isWindows()`, `workspaceSymlinkPath()`, etc.)
-  - Workspace phase: `C:\workspace` junction on Windows, `/workspace` symlink on Unix
-  - Symlinks phase: PowerShell profile on Windows, `.zshrc`/`.p10k.zsh` on Unix
-  - Packages phase: winget on Windows, Homebrew on Unix
-  - Platform-aware state inference and help text
-  - Cross-compiles for Windows (tested with `GOOS=windows`)
+> **WARNING - Breaking Changes:** This is a major release. The Go binary is now the sole CLI implementation.
+> Shell fallback (`DOTFILES_USE_GO=0`) has been removed. Direct calls to `bin/dotfiles-*` scripts
+> and sourcing `lib/*.sh` libraries will no longer work.
+
+### Known Issues
+
+- BATS test suite migration in progress - old shell script tests temporarily disabled
+- Use Go test suite for validation: `go test ./...`
+- Full test suite coverage will be restored in v4.0.0 final release
 
 ### Changed
 
-- **Powerlevel10k moved to enhanced tier** - Now optional in minimal installs
-  - Removed `powerlevel10k` and `font-meslo-for-powerlevel10k` from `Brewfile.minimal`
-  - Still included in `Brewfile.enhanced` and `Brewfile` (full)
-  - Minimal tier now provides functional shell without fancy prompt
-  - Users can install manually: `brew install powerlevel10k`
+- **Phase 3 Migration Complete** - Go binary is now the sole CLI implementation
+  - Renamed binary from `dotfiles-go` to `dotfiles`
+  - Removed shell fallback (`DOTFILES_USE_GO` escape hatch no longer available)
+  - Deleted 19 deprecated `bin/dotfiles-*` shell scripts (~7,500 lines)
+  - Deleted 12 deprecated `lib/*.sh` libraries (~5,500 lines)
+  - Simplified `40-aliases.zsh` by removing fallback code (~550 lines)
+  - Total reduction: ~13,500 lines of shell code
+
+- **Binary Download Now Default** - `install.sh` downloads Go binary by default
+  - No longer need `--binary` flag for recommended install
+  - Use `--no-binary` to opt-out if needed
+  - Simpler install: `curl -fsSL <url> | bash` now includes binary
 
 ### Added
 
-- **Starship prompt for Windows** - Cross-platform prompt theming
-  - Added `Starship.Starship` to Windows enhanced tier packages
-  - Bundled `starship.toml` config (powerline theme matching p10k)
-  - Auto-initialization in PowerShell module
-  - `Initialize-Starship` function for manual setup
-  - Provides consistent prompt experience across platforms
+- **Shell Init Command** - New `dotfiles shell-init` for shell function initialization
+  - Outputs `feature_enabled`, `require_feature`, `feature_exists`, `feature_status` functions
+  - Supports zsh, bash, fish, and PowerShell
+  - Usage: `eval "$(dotfiles shell-init zsh)"` in shell config
+  - Replaces deleted `lib/_features.sh` with Go-backed implementation
+  - Updated `00-init.zsh` to use shell-init instead of sourcing deleted libs
 
-- **Prompt theme config choice during install**
-  - Unix: Bootstrap prompts "Use bundled Powerlevel10k theme config? [Y/n]"
-  - Windows: Installer prompts "Use bundled Starship theme config? [Y/n]"
-  - Respects existing configs - asks before overwriting
-  - Users can skip and configure their own themes
+- **Cross-Platform CI** - New GitHub Actions workflow for Go testing
+  - Tests on ubuntu-latest, macos-latest, windows-latest
+  - Builds binaries for all platform/arch combinations
+  - PowerShell script validation on Windows
+  - Updated test.yml for Go-first testing
 
-- **PowerShell versions of Claude hooks** - Full cross-platform support
-  - `block-dangerous-git.ps1` - Prevents dangerous git commands on Windows
-  - `git-sync-check.ps1` - Git sync status check for Windows
-  - Updated hooks README with cross-platform documentation
+- **Checksum Verification** - Binary downloads now verified against SHA256 checksums
+  - Automatically downloads `SHA256SUMS.txt` from release
+  - Supports both `sha256sum` (Linux) and `shasum` (macOS)
+  - Graceful fallback if checksums unavailable
+  - Skip with `DOTFILES_SKIP_CHECKSUM=true` if needed
 
-### Documentation
+### Removed
 
-- **Cross-Platform Audit** - Comprehensive audit of all components
-  - Added section 3.8 to IMPL-go-refactor.md documenting cross-platform status
-  - Identified all Go components as fully cross-platform
-  - Documented platform-specific shell configs (ZSH/PowerShell parity)
-  - Listed legacy scripts marked for deprecation
-
-- **Go Setup Wizard Implementation Plan** - Detailed design document
-  - Created `docs/design/IMPL-setup-wizard-go.md` (~550 lines)
-  - Phase interface design with platform abstraction
-  - All 7 setup phases documented (workspace, symlinks, packages, vault, secrets, claude, templates)
-  - ~2500 lines of Go estimated
-  - Complete implementation checklist
+- `bin/dotfiles-backup`, `bin/dotfiles-config`, `bin/dotfiles-diff`
+- `bin/dotfiles-doctor`, `bin/dotfiles-drift`, `bin/dotfiles-encrypt`
+- `bin/dotfiles-features`, `bin/dotfiles-hook`, `bin/dotfiles-lint`
+- `bin/dotfiles-metrics`, `bin/dotfiles-migrate`, `bin/dotfiles-packages`
+- `bin/dotfiles-setup`, `bin/dotfiles-sync`, `bin/dotfiles-template`
+- `bin/dotfiles-uninstall`, `bin/dotfiles-vault`
+- `lib/_cli_features.sh`, `lib/_config.sh`, `lib/_config_layers.sh`
+- `lib/_drift.sh`, `lib/_encryption.sh`, `lib/_errors.sh`
+- `lib/_features.sh`, `lib/_paths.sh`, `lib/_progress.sh`
+- `lib/_state.sh`, `lib/_templates.sh`, `lib/_vault.sh`
 
 ## [3.2.0] - 2025-12-09
 

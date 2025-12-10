@@ -35,9 +35,9 @@ Checks:
   - Shellcheck warnings (if installed)
 
 Examples:
-  dotfiles-go lint              # Check all files
-  dotfiles-go lint --verbose    # Show all files checked
-  dotfiles-go lint --fix        # Show fix suggestions`,
+  dotfiles lint              # Check all files
+  dotfiles lint --verbose    # Show all files checked
+  dotfiles lint --fix        # Show fix suggestions`,
 		RunE: runLint,
 	}
 

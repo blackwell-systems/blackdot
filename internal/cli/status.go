@@ -34,8 +34,8 @@ Shows:
   - Claude profile (if dotclaude available)
 
 Examples:
-  dotfiles-go status    # Quick visual dashboard
-  dotfiles-go s         # Short alias`,
+  dotfiles status    # Quick visual dashboard
+  dotfiles s         # Short alias`,
 		RunE: runStatus,
 	}
 

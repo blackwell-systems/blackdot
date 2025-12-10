@@ -52,8 +52,8 @@ The quick mode compares local files against the last vault pull.
 Full mode connects to vault and compares current vault contents.
 
 Examples:
-  dotfiles-go drift          # Full check (connects to vault)
-  dotfiles-go drift --quick  # Fast check against cached state`,
+  dotfiles drift          # Full check (connects to vault)
+  dotfiles drift --quick  # Fast check against cached state`,
 		RunE: runDrift,
 	}
 
@@ -175,7 +175,7 @@ func runDriftFull(home string, green, yellow, cyan, dim func(a ...interface{}) s
 	if bwSession == "" {
 		fmt.Printf("%s Vault not unlocked - cannot check drift\n", yellow("[WARN]"))
 		fmt.Println()
-		fmt.Printf("%s For quick local check: dotfiles-go drift --quick\n", cyan("[INFO]"))
+		fmt.Printf("%s For quick local check: dotfiles drift --quick\n", cyan("[INFO]"))
 		fmt.Printf("%s To unlock vault: export BW_SESSION=\"$(bw unlock --raw)\"\n", cyan("[INFO]"))
 		return nil
 	}

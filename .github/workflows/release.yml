@@ -22,20 +22,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y zsh bats
+          sudo apt-get install -y zsh
 
-      - name: Run tests
+      - name: Run Go tests
         run: |
-          echo "Running validation tests..."
-          bats --timing test/*.bats
+          echo "Running Go test suite..."
+          go test -v ./...
 
-      - name: Validate scripts
+      - name: Validate remaining shell scripts
         run: |
-          echo "Validating all scripts..."
-          for script in *.sh vault/*.sh; do
+          echo "Validating vault and bootstrap scripts..."
+          for script in vault/*.sh bootstrap/*.sh; do
             if [[ -f "$script" ]]; then
               zsh -n "$script" || exit 1
             fi

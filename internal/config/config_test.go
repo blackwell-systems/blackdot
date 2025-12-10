@@ -55,12 +55,14 @@ func TestDefaultManagerWithEnv(t *testing.T) {
 
 	m := DefaultManager()
 
-	if m.configDir != "/custom/config/dotfiles" {
-		t.Errorf("expected configDir='/custom/config/dotfiles', got '%s'", m.configDir)
+	expectedConfig := filepath.FromSlash("/custom/config/dotfiles")
+	if m.configDir != expectedConfig {
+		t.Errorf("expected configDir='%s', got '%s'", expectedConfig, m.configDir)
 	}
 
-	if m.dotfilesDir != "/custom/dotfiles" {
-		t.Errorf("expected dotfilesDir='/custom/dotfiles', got '%s'", m.dotfilesDir)
+	expectedDotfiles := filepath.FromSlash("/custom/dotfiles")
+	if m.dotfilesDir != expectedDotfiles {
+		t.Errorf("expected dotfilesDir='%s', got '%s'", expectedDotfiles, m.dotfilesDir)
 	}
 }
 
@@ -68,12 +70,14 @@ func TestDefaultManagerWithEnv(t *testing.T) {
 func TestConfigPaths(t *testing.T) {
 	m := NewManager("/config", "/dotfiles")
 
-	if m.UserConfigPath() != "/config/config.json" {
-		t.Errorf("unexpected UserConfigPath: %s", m.UserConfigPath())
+	expectedUser := filepath.FromSlash("/config/config.json")
+	if m.UserConfigPath() != expectedUser {
+		t.Errorf("unexpected UserConfigPath: got %s, want %s", m.UserConfigPath(), expectedUser)
 	}
 
-	if m.MachineConfigPath() != "/config/machine.json" {
-		t.Errorf("unexpected MachineConfigPath: %s", m.MachineConfigPath())
+	expectedMachine := filepath.FromSlash("/config/machine.json")
+	if m.MachineConfigPath() != expectedMachine {
+		t.Errorf("unexpected MachineConfigPath: got %s, want %s", m.MachineConfigPath(), expectedMachine)
 	}
 }
 
@@ -383,6 +387,12 @@ func TestProjectConfigPath(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(tmpDir)
+
+	// Resolve symlinks (macOS: /var -> /private/var)
+	tmpDir, err = filepath.EvalSymlinks(tmpDir)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Create project config in temp dir
 	projectConfig := filepath.Join(tmpDir, ".dotfiles.json")

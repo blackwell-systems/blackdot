@@ -38,9 +38,9 @@ Modes:
   --all, -a     Show all metric entries
 
 Examples:
-  dotfiles-go metrics           # Summary view
-  dotfiles-go metrics --graph   # Health score trend
-  dotfiles-go metrics --all     # All entries`,
+  dotfiles metrics           # Summary view
+  dotfiles metrics --graph   # Health score trend
+  dotfiles metrics --all     # All entries`,
 		RunE: runMetrics,
 	}
 

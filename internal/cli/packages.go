@@ -36,10 +36,10 @@ Tiers:
   full        ~61 packages  - Everything (Docker, etc.)
 
 Examples:
-  dotfiles-go packages                        # Status overview
-  dotfiles-go packages --check                # See what needs installing
-  dotfiles-go packages --install              # Install from saved tier
-  dotfiles-go packages --install --tier minimal  # Install minimal tier`,
+  dotfiles packages                        # Status overview
+  dotfiles packages --check                # See what needs installing
+  dotfiles packages --install              # Install from saved tier
+  dotfiles packages --install --tier minimal  # Install minimal tier`,
 		RunE: runPackages,
 	}
 

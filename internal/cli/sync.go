@@ -66,11 +66,11 @@ Items:
   SSH-Config, AWS-Config, AWS-Credentials, Git-Config, Environment-Secrets
 
 Examples:
-  dotfiles-go sync --dry-run         # Preview all changes
-  dotfiles-go sync --all             # Sync everything
-  dotfiles-go sync Git-Config        # Sync just Git config
-  dotfiles-go sync --force-local     # Push all local to vault
-  dotfiles-go sync --force-vault     # Pull all vault to local`,
+  dotfiles sync --dry-run         # Preview all changes
+  dotfiles sync --all             # Sync everything
+  dotfiles sync Git-Config        # Sync just Git config
+  dotfiles sync --force-local     # Push all local to vault
+  dotfiles sync --force-vault     # Pull all vault to local`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runSync(args, dryRun, forceLocal, forceVault, verbose, all)
 		},
@@ -262,9 +262,9 @@ func runSync(args []string, dryRun, forceLocal, forceVault, verbose, all bool) e
 	if conflicts > 0 {
 		fmt.Println()
 		fmt.Println("To resolve conflicts:")
-		fmt.Println("  dotfiles-go sync --force-local   # Push your local changes")
-		fmt.Println("  dotfiles-go sync --force-vault   # Pull vault changes")
-		fmt.Println("  dotfiles-go drift                # See detailed differences")
+		fmt.Println("  dotfiles sync --force-local   # Push your local changes")
+		fmt.Println("  dotfiles sync --force-vault   # Pull vault changes")
+		fmt.Println("  dotfiles drift                # See detailed differences")
 	}
 
 	// Exit codes

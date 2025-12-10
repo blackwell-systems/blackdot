@@ -76,9 +76,9 @@ If no files are specified, renders all .tmpl files in templates/configs/.
 Output goes to the generated/ directory.
 
 Examples:
-  dotfiles-go template render                    # Render all templates
-  dotfiles-go template render gitconfig.tmpl     # Render specific template
-  dotfiles-go template render --stdout file.tmpl # Output to stdout`,
+  dotfiles template render                    # Render all templates
+  dotfiles template render gitconfig.tmpl     # Render specific template
+  dotfiles template render --stdout file.tmpl # Output to stdout`,
 		RunE: runTemplateRender,
 	}
 	renderCmd.Flags().Bool("stdout", false, "Output to stdout instead of file")
