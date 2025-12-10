@@ -221,23 +221,6 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/in
 
 **Everything is optional except shell config.** Use only the parts you need.
 
-### Quick Install Options
-
-```bash
-# Full install (recommended for Claude Code users)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
-
-# Minimal: Shell config only (no vault, no Claude integration, no packages)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash -s -- --minimal
-
-# Custom: Skip specific components with environment variables
-SKIP_WORKSPACE_SYMLINK=true ./bootstrap/bootstrap-mac.sh  # Shell + packages, no /workspace
-SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-linux.sh     # Everything except Claude
-
-# Custom workspace location (default: ~/workspace)
-WORKSPACE_TARGET=~/code ./bootstrap/bootstrap-mac.sh      # Use ~/code as workspace
-```
-
 ### Component Matrix
 
 | Component | What It Does | How to Skip | Still Works Without It? |
@@ -687,122 +670,15 @@ blackdot template link    # Symlink generated configs to destinations
 
 **The Solution:** One template file → Multiple machine-specific configs
 
-### Real-World Examples
-
-**Example 1: Git Config Per Machine**
-
-Template file: `templates/configs/gitconfig.tmpl`
-```ini
-[user]
-    name = {{ GIT_USER_NAME }}
-    email = {{ GIT_EMAIL }}
-{{#if GIT_SIGNING_KEY}}
-    signingkey = {{ GIT_SIGNING_KEY }}
-{{/if}}
-
-[core]
-    editor = {{ EDITOR | default="vim" }}
-
-{{#if IS_WORK_MACHINE}}
-[includeIf "gitdir:~/work/"]
-    path = ~/.gitconfig-work
-{{/if}}
-```
-
-Variables file: `templates/_variables_work-laptop.sh`
-```bash
-export GIT_USER_NAME="John Doe"
-export GIT_EMAIL="john.doe@company.com"
-export GIT_SIGNING_KEY="ABC123DEF456"
-export IS_WORK_MACHINE="true"
-export EDITOR="code"
-```
-
-Result: `generated/gitconfig` (different per machine)
-
-**Example 2: SSH Config With Per-Machine Keys**
-
-Template: `templates/configs/ssh-config.tmpl`
-```
-{{#each SSH_HOSTS}}
-Host {{ this.name }}
-    HostName {{ this.hostname }}
-    User {{ this.user }}
-    IdentityFile {{ this.key }}
-{{/each}}
-```
-
-Variables: `templates/_variables_personal.sh`
-```bash
-export SSH_HOSTS='[
-    {"name": "github", "hostname": "github.com", "user": "git", "key": "~/.ssh/id_ed25519_personal"},
-    {"name": "homelab", "hostname": "192.168.1.100", "user": "admin", "key": "~/.ssh/id_rsa_homelab"}
-]'
-```
-
-**Example 3: Machine-Specific Environment Variables**
-
-Template: `templates/configs/env.secrets.tmpl`
-```bash
-# API Keys (different per environment)
-export OPENAI_API_KEY="{{ OPENAI_API_KEY }}"
-export ANTHROPIC_API_KEY="{{ ANTHROPIC_API_KEY }}"
-
-{{#if IS_WORK_MACHINE}}
-# Work-specific secrets
-export COMPANY_VPN_TOKEN="{{ COMPANY_VPN_TOKEN }}"
-export AWS_PROFILE="work"
-{{else}}
-# Personal secrets
-export AWS_PROFILE="personal"
-{{/if}}
-```
-
-### Quick Start
+**Use cases:** Work vs personal emails/SSH keys, multi-cloud AWS profiles, team onboarding.
 
 ```bash
-# 1. Initialize template system (creates _variables.local.sh)
-blackdot template init
-
-# 2. Edit your variables
-vim ~/.config/blackdot/templates/_variables.local.sh
-
-# 3. Generate configs from templates
-blackdot template render
-
-# 4. Link generated configs to their destinations
-blackdot template link
-
-# 5. Check for stale templates (template newer than generated file)
-blackdot doctor  # Shows: "3 templates need re-rendering"
+blackdot template init    # Setup machine variables
+blackdot template render  # Generate configs from templates
+blackdot template link    # Symlink to destinations
 ```
 
-### Auto-Detected Variables
-
-Available in all templates without manual definition:
-- `{{ HOSTNAME }}` - Machine hostname
-- `{{ OS }}` - `macos`, `linux`, or `windows`
-- `{{ USER }}` - Current username
-- `{{ HOME }}` - Home directory path
-- `{{ WORKSPACE }}` - Workspace directory
-
-### Use Cases
-
-**Work vs Personal:**
-- Different git emails, SSH keys, AWS profiles
-- Work machine has VPN config, personal doesn't
-- Different editor settings
-
-**Multi-Cloud:**
-- Dev machine: staging AWS keys
-- Prod machine: production AWS keys (via separate template variables)
-
-**Team Onboarding:**
-- New developer clones dotfiles
-- Runs `blackdot template init` with their name/email
-- All configs generate with their info
-
-[Complete Template Guide →](docs/templates.md)
+[Complete Template Guide with Examples →](docs/templates.md)
 
 </details>
 
@@ -1079,31 +955,7 @@ To clone via SSH (recommended), you'll also want an SSH key configured with GitH
 
 ## Quick Start
 
-### One-Line Install (Recommended)
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
-```
-
-The install script clones the repository, runs bootstrap, and launches the setup wizard. The wizard guides you through:
-- Platform detection and configuration
-- Vault selection (Bitwarden, 1Password, pass, or skip)
-- Secret restoration (SSH keys, AWS, Git config)
-- Claude Code integration
-
-Progress is saved—resume anytime if interrupted.
-
-### Minimal Mode (No Vault)
-
-Shell config only, no secrets integration:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash -s -- --minimal
-```
-
-**You still get:** Zsh + Powerlevel10k, all CLI tools (eza, fzf, ripgrep, etc.), aliases, functions, and the `blackdot` command.
-
-**To enable vault later:** Run `blackdot setup`
+See [One-Line Install](#one-line-install) above for the recommended installation. Use `--minimal` for shell config only.
 
 ### Manual Clone
 

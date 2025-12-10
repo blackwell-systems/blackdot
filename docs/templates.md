@@ -27,6 +27,79 @@ blackdot template link
 
 ---
 
+## Real-World Examples
+
+### Example 1: Git Config Per Machine
+
+Template file: `templates/configs/gitconfig.tmpl`
+```ini
+[user]
+    name = {{ GIT_USER_NAME }}
+    email = {{ GIT_EMAIL }}
+{{#if GIT_SIGNING_KEY}}
+    signingkey = {{ GIT_SIGNING_KEY }}
+{{/if}}
+
+[core]
+    editor = {{ EDITOR | default="vim" }}
+
+{{#if IS_WORK_MACHINE}}
+[includeIf "gitdir:~/work/"]
+    path = ~/.gitconfig-work
+{{/if}}
+```
+
+Variables file: `templates/_variables_work-laptop.sh`
+```bash
+export GIT_USER_NAME="John Doe"
+export GIT_EMAIL="john.doe@company.com"
+export GIT_SIGNING_KEY="ABC123DEF456"
+export IS_WORK_MACHINE="true"
+export EDITOR="code"
+```
+
+Result: `generated/gitconfig` (different per machine)
+
+### Example 2: SSH Config With Per-Machine Keys
+
+Template: `templates/configs/ssh-config.tmpl`
+```
+{{#each SSH_HOSTS}}
+Host {{ this.name }}
+    HostName {{ this.hostname }}
+    User {{ this.user }}
+    IdentityFile {{ this.key }}
+{{/each}}
+```
+
+Variables: `templates/_variables_personal.sh`
+```bash
+export SSH_HOSTS='[
+    {"name": "github", "hostname": "github.com", "user": "git", "key": "~/.ssh/id_ed25519_personal"},
+    {"name": "homelab", "hostname": "192.168.1.100", "user": "admin", "key": "~/.ssh/id_rsa_homelab"}
+]'
+```
+
+### Example 3: Machine-Specific Environment Variables
+
+Template: `templates/configs/env.secrets.tmpl`
+```bash
+# API Keys (different per environment)
+export OPENAI_API_KEY="{{ OPENAI_API_KEY }}"
+export ANTHROPIC_API_KEY="{{ ANTHROPIC_API_KEY }}"
+
+{{#if IS_WORK_MACHINE}}
+# Work-specific secrets
+export COMPANY_VPN_TOKEN="{{ COMPANY_VPN_TOKEN }}"
+export AWS_PROFILE="work"
+{{else}}
+# Personal secrets
+export AWS_PROFILE="personal"
+{{/if}}
+```
+
+---
+
 ## Overview
 
 ### How It Works

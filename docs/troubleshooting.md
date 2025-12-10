@@ -115,7 +115,7 @@ rm -f ~/.zcompdump*
 exec zsh
 
 # Verify completion file exists
-ls ~/workspace/dotfiles/zsh/completions/_dotfiles
+ls ~/workspace/dotfiles/zsh/completions/_blackdot
 ```
 
 ### ZSH modules not loading
@@ -369,8 +369,8 @@ head -5 ~/workspace/dotfiles/README.md
 
 1. **Run full diagnostics:**
    ```bash
-   dotfiles doctor
-   dotfiles status
+   blackdot doctor
+   blackdot status
    ```
 
 2. **Check logs:**
@@ -382,11 +382,11 @@ head -5 ~/workspace/dotfiles/README.md
 3. **Reset to clean state:**
    ```bash
    # Backup first!
-   dotfiles backup
+   blackdot backup
 
    # Uninstall
-   dotfiles uninstall --dry-run  # Preview
-   dotfiles uninstall            # Execute
+   blackdot uninstall --dry-run  # Preview
+   blackdot uninstall            # Execute
 
    # Reinstall
    curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
