@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > Shell fallback (`DOTFILES_USE_GO=0`) has been removed. Direct calls to `bin/dotfiles-*` scripts
 > and sourcing `lib/*.sh` libraries will no longer work.
 
+### Known Issues
+
+- BATS test suite migration in progress - old shell script tests temporarily disabled
+- Use Go test suite for validation: `go test ./...`
+- Full test suite coverage will be restored in v4.0.0 final release
+
 ### Changed
 
 - **Phase 3 Migration Complete** - Go binary is now the sole CLI implementation
