@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0-rc2] - 2025-12-10
+
+### Added
+
+- **Windows Support Enhancements**
+  - PowerShell hook for blocking dangerous git operations (force push, hard reset)
+  - PowerShell git sync check hook
+  - Starship prompt configuration for Windows (119 lines)
+  - Added Starship to Windows packages (enhanced tier)
+
+- **Enhanced Go Setup Wizard** (internal/cli/setup.go)
+  - Windows workspace junction support
+  - Cross-platform prompt theme configuration
+  - Improved state detection and inference
+  - Better error handling and user feedback
+  - Expanded from basic implementation to production-ready (356 lines of improvements)
+
+- **Documentation**
+  - Comprehensive rebranding strategy document (dotfiles → blackdot)
+  - Complete Go setup wizard implementation plan (IMPL-setup-wizard-go.md, 618 lines)
+  - Expanded Go refactor documentation with Windows support details
+  - Updated hooks README with PowerShell examples
+
+### Changed
+
+- **install.sh** - Now prefers Go binary by default
+- **bootstrap-dotfiles.sh** - Enhanced with better p10k handling
+- **Brewfile.minimal** - Added age package for encryption support
+- **PowerShell module** - Added Windows-specific utilities and helpers
+
+### Fixed
+
+- Release workflow validation now uses Go tests instead of deprecated BATS suite
+- Added zsh dependency installation in CI validation step
+
 ## [4.0.0-rc1] - 2025-12-09
 
 > **WARNING - Breaking Changes:** This is a major release. The Go binary is now the sole CLI implementation.
