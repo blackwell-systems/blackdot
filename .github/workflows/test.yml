@@ -73,13 +73,6 @@ jobs:
         run: |
           echo "Validating ZSH script syntax..."
           sudo apt-get install -y zsh
-          # Check vault scripts
-          for script in vault/*.sh; do
-            if [[ -f "$script" ]]; then
-              echo "Checking $script..."
-              zsh -n "$script" || exit 1
-            fi
-          done
           # Check zsh.d modules
           for script in zsh/zsh.d/*.zsh; do
             if [[ -f "$script" ]]; then
@@ -89,7 +82,7 @@ jobs:
           done
           echo "All ZSH scripts valid!"
 
-  # Bats unit tests (for vault shell scripts)
+  # Bats unit tests (for shell utilities)
   unit-tests:
     name: Shell Unit Tests (bats-core)
     runs-on: ubuntu-latest
@@ -197,6 +190,6 @@ jobs:
       - name: Test script syntax
         run: |
           zsh -n bootstrap/bootstrap-linux.sh
-          for script in zsh/zsh.d/*.zsh vault/*.sh; do
+          for script in zsh/zsh.d/*.zsh; do
             zsh -n "$script" || exit 1
           done
