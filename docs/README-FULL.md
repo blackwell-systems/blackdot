@@ -1,4 +1,4 @@
-# Dotfiles & Vault Setup - Full Documentation
+# Blackdot - Full Documentation
 
 [![Blackwell Systems™](https://raw.githubusercontent.com/blackwell-systems/blackwell-docs-theme/main/badge-trademark.svg)](https://github.com/blackwell-systems)
 [![Claude Code](https://img.shields.io/badge/Built_for-Claude_Code-8A2BE2?logo=anthropic)](https://claude.ai/claude-code)
@@ -47,7 +47,7 @@ This is the comprehensive reference for the dotfiles framework. It covers the co
 - [Backup System](#backup-system)
 - [Using the Dotfiles Day-to-Day](#using-the-dotfiles-day-to-day)
 - [Health Check](#health-check)
-  - [The dotfiles Command](#the-dotfiles-command)
+  - [The blackdot Command](#the-blackdot-command)
   - [Custom Doctor Checks (Hooks)](#custom-doctor-checks)
 - [Metrics & Observability](#metrics--observability)
 - [Docker Test Environments](#docker-test-environments)
@@ -724,12 +724,13 @@ There are two big pillars:
 
 2. **Vault / Secure secrets bootstrap (Multi-vault)**
 
-   Handled by:
+   Handled by the Go CLI:
 
-   - `vault/restore.sh`
-   - `vault/restore-ssh.sh`
-   - `vault/restore-aws.sh`
-   - `vault/restore-env.sh`
+   ```bash
+   blackdot vault pull        # Restore all secrets from vault
+   blackdot vault pull ssh    # Restore SSH keys only
+   blackdot vault pull aws    # Restore AWS credentials only
+   ```
 
    Goal: restore **SSH keys**, **AWS config/credentials**, and **env secrets** from your vault (Bitwarden, 1Password, or pass).
 
@@ -827,7 +828,7 @@ flowchart TB
 
     subgraph setup["Setup Phase"]
         bootstrap["Bootstrap<br/><small>bootstrap-mac/linux.sh</small><br/>Install packages, tools, shell"]
-        restore["Restore Secrets<br/><small>restore.sh</small><br/>SSH, AWS, Git, env"]
+        restore["Restore Secrets<br/><small>blackdot vault pull</small><br/>SSH, AWS, Git, env"]
         verify["Health Check<br/><small>blackdot doctor</small><br/>Verify installation"]
     end
 
@@ -837,11 +838,11 @@ flowchart TB
 
     subgraph vault["Multi-Vault Backend"]
         vault_storage["Vault Storage<br/><small>Bitwarden / 1Password / pass</small><br/>• SSH keys<br/>• AWS credentials<br/>• Git config<br/>• Environment secrets"]
-        vault_check["check-vault-items.sh<br/><small>Pre-flight validation</small>"]
+        vault_check["blackdot vault check<br/><small>Pre-flight validation</small>"]
     end
 
     subgraph sync["Maintenance"]
-        sync_back["sync-to-vault.sh<br/><small>Push local changes back</small>"]
+        sync_back["blackdot vault push<br/><small>Push local changes back</small>"]
     end
 
     machine --> bootstrap
@@ -1266,79 +1267,71 @@ op signin
 export BLACKDOT_VAULT_BACKEND=1password  # or 'pass'
 ```
 
-3. **Run the vault bootstrap**
+3. **Run the vault restore**
 
 ```bash
-cd ~/workspace/dotfiles/vault
-./restore.sh
+blackdot vault pull
 ```
 
-`restore.sh` will:
+This command will:
 
-- Initialize the configured vault backend
+- Initialize the configured vault backend (vaultmux)
 - Check/prompt for vault unlock
-- Cache session to `.vault-session` (secure permissions)
-- Call:
-
-  - `restore-ssh.sh "$SESSION"`
-  - `restore-aws.sh "$SESSION"`
-  - `restore-env.sh "$SESSION"`
+- Cache session for subsequent operations
+- Restore all configured vault items to their destinations
 
 After this finishes:
 
-- Your **SSH keys** are back under `~/.ssh`.
-- Your **AWS config/credentials** are restored.
-- Your **env secrets** file and loader script are in `~/.local`.
+- Your **SSH keys** are back under `~/.ssh`
+- Your **AWS config/credentials** are restored
+- Your **env secrets** file and loader script are in `~/.local`
+- Your **Git config** is restored to `~/.gitconfig`
 
 ---
 
-## Scripts: What Each Restore Script Expects
+## Vault Item Types
 
-### `restore-ssh.sh`
+The Go CLI (`blackdot vault pull`) restores different item types based on your `vault-items.json` configuration.
 
-Reads vault **Secure Note** items:
+### SSH Keys
+
+Vault items with `type: "ssh"`:
 
 - `"SSH-GitHub-Enterprise"` → SSH key for work/enterprise account
 - `"SSH-GitHub-Personal"` → SSH key for personal account
 - `"SSH-Config"` → SSH config file with host mappings
 
-Each SSH key item's **notes** field should contain:
-- The full **OpenSSH private key** block
-- Optionally the corresponding `ssh-ed25519 ...` public key line
-
-The `SSH-Config` item's **notes** field should contain the complete `~/.ssh/config` file.
-
-The script reconstructs files and sets appropriate permissions (`600` for private keys and config, `644` for public keys).
-
-> **Important:** The exact item names (`SSH-GitHub-Enterprise`, `SSH-GitHub-Personal`, `SSH-Config`) must match.
+Each SSH key item should contain the full **OpenSSH private key** block. The CLI extracts and writes:
+- Private key to `~/.ssh/<name>` (permissions: 600)
+- Public key to `~/.ssh/<name>.pub` (permissions: 644)
 
 ---
 
-### `restore-aws.sh`
+### AWS Credentials
 
-Expects two **Secure Note** items in your vault:
+Vault items with `type: "aws"`:
 
-- `"AWS-Config"` → contains complete `~/.aws/config`
-- `"AWS-Credentials"` → contains complete `~/.aws/credentials`
+- `"AWS-Config"` → complete `~/.aws/config`
+- `"AWS-Credentials"` → complete `~/.aws/credentials`
 
-The **notes** field of each item contains the raw file content.
-
-The script writes files directly from notes and sets safe permissions (`600`).
+Written directly with permissions `600`.
 
 ---
 
-### `restore-env.sh`
+### Environment Secrets
 
-Expects a **Secure Note** item named `"Environment-Secrets"` with content like:
+Vault items with `type: "env"`:
+
+- `"Environment-Secrets"` → key-value pairs
 
 ```text
 SOME_API_KEY=...
 ANOTHER_SECRET=...
 ```
 
-The script:
+The CLI:
 - Writes content to `~/.local/env.secrets`
-- Creates `~/.local/load-env.sh` which exports variables when sourced:
+- Creates `~/.local/load-env.sh` for sourcing:
 
 ```bash
 source ~/.local/load-env.sh
@@ -1346,48 +1339,48 @@ source ~/.local/load-env.sh
 
 ---
 
-### `restore-git.sh`
+### Git Config
 
-Expects a **Secure Note** item named `"Git-Config"` containing the complete `~/.gitconfig` file.
+Vault items with `type: "git"`:
 
-The script writes to `~/.gitconfig` (backing up any existing file) and sets permissions to `644`.
+- `"Git-Config"` → complete `~/.gitconfig` file
+
+Written to `~/.gitconfig` (backing up any existing file) with permissions `644`.
 
 ---
 
 ## Validating Vault Items Before Restore
 
-Before running `restore.sh` on a new machine, you can verify all required vault items exist:
+Before running `blackdot vault pull` on a new machine, verify all required vault items exist:
 
 ```bash
-./vault/check-vault-items.sh
+blackdot vault check
 ```
 
 Example output:
 
 ```
 === Required Items ===
-[OK] SSH-GitHub-Enterprise
-[OK] SSH-GitHub-Personal
-[OK] SSH-Config
-[OK] AWS-Config
-[OK] AWS-Credentials
-[OK] Git-Config
+✓ SSH-GitHub-Enterprise
+✓ SSH-GitHub-Personal
+✓ SSH-Config
+✓ AWS-Config
+✓ AWS-Credentials
+✓ Git-Config
 
 === Optional Items ===
-[OK] Environment-Secrets
+✓ Environment-Secrets
 
-========================================
 All required vault items present!
-You can safely run: ./restore.sh
 ```
 
-If items are missing, the script will tell you which ones and exit with an error.
+If items are missing, the command will report which ones are missing.
 
 ---
 
 ## One-Time: Push Current Files into Vault
 
-Run these commands **once** on a configured machine to populate your vault, enabling future machines to restore via `restore.sh`.
+Run these commands **once** on a configured machine to populate your vault, enabling future machines to restore via `blackdot vault pull`.
 
 For Bitwarden, this can also be done manually in the GUI. CLI commands are provided for automation and reproducibility.
 
@@ -1568,7 +1561,7 @@ ENV_ENC=$(printf '%s' "$ENV_JSON" | bw encode)
 bw create item "$ENV_ENC" --session "$BW_SESSION"
 ```
 
-Now `restore-env.sh` will restore this on any new machine and create `~/.local/load-env.sh` to load it.
+Now `blackdot vault pull` will restore this on any new machine and create `~/.local/load-env.sh` to load it.
 
 ---
 
@@ -2667,11 +2660,8 @@ git commit --no-verify  # Use sparingly!
 # Install shellcheck
 brew install shellcheck
 
-# Run on all scripts
-shellcheck bootstrap-*.sh vault/*.sh dotfiles-*.sh
-
-# Check specific script
-shellcheck vault/restore.sh
+# Run on all shell scripts
+shellcheck bootstrap/*.sh lib/*.sh zsh/zsh.d/*.zsh
 ```
 
 ### Status Badges
@@ -2721,7 +2711,7 @@ op signin
 **"Cannot find item" errors:**
 
 ```bash
-# Use dotfiles command to list items
+# Use blackdot command to list items
 blackdot vault list
 
 # Or with Bitwarden CLI directly
@@ -2850,7 +2840,7 @@ source ~/.local/load-env.sh
 echo $SOME_EXPECTED_VAR
 
 # If missing, re-run vault pull
-./vault/restore.sh
+blackdot vault pull
 ```
 
 ---
