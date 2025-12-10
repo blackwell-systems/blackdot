@@ -2,11 +2,14 @@
 
 This directory contains hook scripts for Claude Code that enforce safe git practices and prevent accidental data loss.
 
+**Cross-Platform Support:** Both Bash (`.sh`) and PowerShell (`.ps1`) versions are provided.
+
 ## Available Hooks
 
-### `block-dangerous-git.sh`
+### `block-dangerous-git.sh` / `block-dangerous-git.ps1`
 
-**Type:** PreToolUse (Bash)
+**Type:** PreToolUse
+**Platforms:** Unix (Bash), Windows (PowerShell)
 
 Blocks potentially destructive git commands:
 
@@ -21,9 +24,10 @@ Blocks potentially destructive git commands:
 | `git branch -D` | WARNING | Force deletes unmerged branches |
 | `git commit --amend` | WARNING | Check authorship first |
 
-### `git-sync-check.sh`
+### `git-sync-check.sh` / `git-sync-check.ps1`
 
 **Type:** SessionStart
+**Platforms:** Unix (Bash), Windows (PowerShell)
 
 Checks git sync status at session start:
 
@@ -45,6 +49,8 @@ Checks git sync status at session start:
 These hooks are configured in `claude/settings.json` and run automatically.
 
 To test manually:
+
+**Unix (Bash):**
 ```bash
 # Test block-dangerous-git with a command
 echo '{"command": "git push --force"}' | ./block-dangerous-git.sh
@@ -53,15 +59,33 @@ echo '{"command": "git push --force"}' | ./block-dangerous-git.sh
 ./git-sync-check.sh
 ```
 
+**Windows (PowerShell):**
+```powershell
+# Test block-dangerous-git with a command
+'{"command": "git push --force"}' | .\block-dangerous-git.ps1
+
+# Test sync check
+.\git-sync-check.ps1
+```
+
 ## Customization
 
-To add custom blocked commands, edit `block-dangerous-git.sh` and add patterns:
+To add custom blocked commands, edit the appropriate script:
 
+**Bash (`block-dangerous-git.sh`):**
 ```bash
 if echo "$NORMALIZED" | grep -qE 'pattern-here'; then
     echo "BLOCKED: Reason"
     exit 2
 fi
+```
+
+**PowerShell (`block-dangerous-git.ps1`):**
+```powershell
+if ($Normalized -match 'pattern-here') {
+    Write-Host "BLOCKED: Reason"
+    exit 2
+}
 ```
 
 ## Related

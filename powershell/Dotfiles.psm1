@@ -1252,6 +1252,31 @@ function Initialize-Zoxide {
     Write-Host "zoxide initialized (use 'z' to jump to directories)" -ForegroundColor Green
 }
 
+function Initialize-Starship {
+    <#
+    .SYNOPSIS
+        Initialize Starship prompt for the current session
+    .DESCRIPTION
+        Sets up Starship cross-platform prompt. Config file: ~/.config/starship.toml
+    .PARAMETER Quiet
+        Suppress output messages (used for auto-initialization)
+    #>
+    param(
+        [switch]$Quiet
+    )
+
+    if (-not (Get-Command starship -ErrorAction SilentlyContinue)) {
+        if (-not $Quiet) {
+            Write-Host "Starship not found. Install with: winget install Starship.Starship" -ForegroundColor Yellow
+        }
+        return
+    }
+    Invoke-Expression (&starship init powershell)
+    if (-not $Quiet) {
+        Write-Host "Starship prompt initialized" -ForegroundColor Green
+    }
+}
+
 #endregion
 
 #region Exports
@@ -1313,6 +1338,9 @@ Export-ModuleMember -Function @(
     # Zoxide integration
     'Initialize-Zoxide',
 
+    # Starship prompt
+    'Initialize-Starship',
+
     # Core commands
     'dotfiles-status', 'dotfiles-doctor', 'dotfiles-setup',
     'dotfiles-features', 'dotfiles-vault', 'dotfiles-hook',
@@ -1331,3 +1359,6 @@ Export-ModuleMember -Alias @('cd', 'd')
 
 # Auto-initialize when module is imported
 Initialize-Dotfiles
+
+# Auto-initialize Starship prompt if available (silent)
+Initialize-Starship -Quiet

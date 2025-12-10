@@ -27,7 +27,46 @@ safe_symlink() {
 
 # Zsh config (shared)
 safe_symlink "$DOTFILES_DIR/zsh/zshrc" "$HOME/.zshrc"
-safe_symlink "$DOTFILES_DIR/zsh/p10k.zsh" "$HOME/.p10k.zsh"
+
+# Powerlevel10k theme config (only if p10k is installed or will be)
+setup_p10k_config() {
+  local use_bundled="y"
+
+  # Check if existing config exists (and is not our symlink)
+  if [ -f "$HOME/.p10k.zsh" ] && [ ! -L "$HOME/.p10k.zsh" ]; then
+    echo ""
+    echo "Existing .p10k.zsh found."
+    read -p "Replace with bundled config? [y/N] " use_bundled
+    use_bundled="${use_bundled:-n}"
+  elif [ -L "$HOME/.p10k.zsh" ]; then
+    # Already symlinked, skip prompt
+    echo "Powerlevel10k config already linked"
+    return 0
+  else
+    # No existing config - ask if they want bundled
+    echo ""
+    read -p "Use bundled Powerlevel10k theme config? [Y/n] " use_bundled
+    use_bundled="${use_bundled:-y}"
+  fi
+
+  if [[ "$use_bundled" =~ ^[Yy] ]]; then
+    safe_symlink "$DOTFILES_DIR/zsh/p10k.zsh" "$HOME/.p10k.zsh"
+    echo "Powerlevel10k config linked (classic powerline theme)"
+  else
+    echo "Skipping p10k config. Run 'p10k configure' to set up your own theme."
+  fi
+}
+
+# Only prompt for p10k if enhanced tier or p10k is installed
+if command -v brew >/dev/null 2>&1 && [ -d "$(brew --prefix)/share/powerlevel10k" ] 2>/dev/null; then
+  setup_p10k_config
+elif [ -f "$HOME/.p10k.zsh" ]; then
+  # Existing config but p10k not installed yet - still offer to set up
+  setup_p10k_config
+else
+  echo "Powerlevel10k not installed. Skipping theme config."
+  echo "Install with: brew install powerlevel10k"
+fi
 
 # Ghostty config (macOS only)
 if [ "$OS" = "Darwin" ]; then
@@ -98,7 +137,8 @@ fi
 # ============================================================
 echo ""
 echo "Symlinks created:"
-ls -l "$HOME/.zshrc" "$HOME/.p10k.zsh" 2>/dev/null || true
+ls -l "$HOME/.zshrc" 2>/dev/null || true
+[ -L "$HOME/.p10k.zsh" ] && ls -l "$HOME/.p10k.zsh" 2>/dev/null || true
 if [ "$OS" = "Darwin" ]; then
   ls -l "$HOME/Library/Application Support/com.mitchellh.ghostty/config" 2>/dev/null || true
 fi

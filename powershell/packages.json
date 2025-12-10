@@ -18,6 +18,7 @@
         { "id": "stedolan.jq", "comment": "JSON processor" },
         { "id": "charmbracelet.glow", "comment": "Markdown renderer" },
         { "id": "bootandy.dust", "comment": "Disk usage analyzer" },
+        { "id": "Starship.Starship", "comment": "Cross-platform prompt (enhanced tier)" },
 
         { "id": "Amazon.AWSCLI", "comment": "AWS CLI v2" },
         { "id": "Bitwarden.CLI", "comment": "Bitwarden vault CLI" },

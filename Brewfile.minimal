@@ -10,8 +10,7 @@ brew "git"              # Version control (required)
 brew "zsh"              # Shell (required)
 brew "jq"               # JSON processing (used by dotfiles scripts)
 
-# Shell experience
-brew "powerlevel10k"                # Beautiful prompt
+# Shell experience (optional - install powerlevel10k separately or use enhanced tier)
 brew "zsh-autosuggestions"          # Command suggestions
 brew "zsh-syntax-highlighting"      # Syntax highlighting
 
@@ -31,9 +30,7 @@ brew "bitwarden-cli"    # Optional: comment out if not using vault
 brew "age"              # Modern file encryption (for dotfiles encrypt)
 
 # ============================================================
-# macOS font (GUI only)
-# Note: Skipped on Linux automatically
+# Note: Powerlevel10k prompt theme moved to enhanced tier
+# For fancy prompt, use: brew bundle --file=Brewfile.enhanced
+# Or install manually: brew install powerlevel10k
 # ============================================================
-if OS.mac?
-  cask "font-meslo-for-powerlevel10k"
-end

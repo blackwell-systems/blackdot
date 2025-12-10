@@ -60,6 +60,7 @@ $EnhancedPackages = $MinimalPackages + @(
     "eza-community.eza",
     "charmbracelet.glow",
     "bootandy.dust",
+    "Starship.Starship",
     "Amazon.AWSCLI",
     "Bitwarden.CLI",
     "FiloSottile.age",
@@ -218,6 +219,13 @@ if ($toInstall -contains "Rustlang.Rustup") {
 if ($toInstall -contains "ajeetdsouza.zoxide") {
     Write-Host "  zoxide (smart cd):" -ForegroundColor Yellow
     Write-Host "    Add to profile: Invoke-Expression (& { zoxide init powershell | Out-String })" -ForegroundColor Gray
+    Write-Host ""
+}
+
+if ($toInstall -contains "Starship.Starship") {
+    Write-Host "  Starship (cross-platform prompt):" -ForegroundColor Yellow
+    Write-Host "    Add to profile: Invoke-Expression (&starship init powershell)" -ForegroundColor Gray
+    Write-Host "    Config: ~/.config/starship.toml" -ForegroundColor Gray
     Write-Host ""
 }
 
