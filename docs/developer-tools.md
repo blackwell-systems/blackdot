@@ -22,6 +22,15 @@ The dotfiles framework provides deep integrations with modern developer tools. E
 
 **Total:** 120+ aliases across all toolchains, with shell completions and helpers.
 
+### Cross-Platform Support
+
+| Shell | Location | Notes |
+|-------|----------|-------|
+| **Zsh** (macOS/Linux) | `zsh/zsh.d/*.zsh` | Feature-gated, lazy-loaded |
+| **PowerShell** (Windows) | `powershell/Blackdot.psm1` | Equivalent aliases and functions |
+
+Most aliases work identically in both shells (`gst`, `awswho`, `docker-ps`, etc.). PowerShell users get the same tool integrations via the Blackdot module.
+
 ---
 
 ## Feature Control

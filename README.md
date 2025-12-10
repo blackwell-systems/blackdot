@@ -80,7 +80,7 @@ This wizard will guide you through 7 steps:
      Default: ~/workspace (target for /workspace symlink)
 
   2. Symlinks     - Link shell config files
-     ~/.zshrc, ~/.p10k.zsh, ~/.claude
+     Zsh: ~/.zshrc, ~/.p10k.zsh | PowerShell: profile auto-import
 
   3. Packages     - Install Homebrew packages
      Choose: minimal (18) | enhanced (43) | full (61)
@@ -948,22 +948,30 @@ blackdot features preset developer  # Enables all dev tools
 <details>
 <summary><b>Modular Shell Config</b> - Organized, not monolithic</summary>
 
+**Zsh (macOS/Linux):**
 ```
 zsh.d/
 ├── 00-init.zsh          # Powerlevel10k, OS detection
 ├── 10-plugins.zsh       # Plugin loading
 ├── 20-env.zsh           # Environment variables
-├── 30-tools.zsh         # CLI tool configs
-├── 40-aliases.zsh       # Aliases
+├── 40-aliases.zsh       # Aliases + blackdot command
 ├── 50-functions.zsh     # Shell functions
 ├── 60-aws.zsh           # AWS helpers
 ├── 70-claude.zsh        # Claude wrapper
 ├── 80-git.zsh           # Git shortcuts
-├── 90-integrations.zsh  # Tool integrations
 └── 99-local.zsh         # Machine-specific (gitignored)
 ```
 
-Each module < 150 lines, focused, testable. Easy to enable/disable or customize per-machine.
+**PowerShell (Windows):**
+```
+powershell/
+├── Blackdot.psm1        # Main module (hooks, aliases, tools)
+├── Blackdot.psd1        # Module manifest
+├── Install-Blackdot.ps1 # Module installer
+└── Install-Packages.ps1 # Winget package installer
+```
+
+Both shells get equivalent aliases (`gst`, `gd`, `ll`), tool wrappers (AWS, Claude, Docker), and hooks.
 
 </details>
 

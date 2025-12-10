@@ -37,6 +37,7 @@
 | [Docker Containers](docker.md) | Test environments & mock vault |
 | [Troubleshooting](troubleshooting.md) | Common issues & solutions |
 | [macOS Settings](macos-settings.md) | 137+ system preferences |
+| [Windows Setup](windows-setup.md) | PowerShell module & winget packages |
 
 For detailed feature comparisons vs chezmoi, thoughtbot, holman, and other popular dotfiles, see the [main README on GitHub](https://github.com/blackwell-systems/blackdot#how-this-compares).
 
@@ -44,8 +45,14 @@ For detailed feature comparisons vs chezmoi, thoughtbot, holman, and other popul
 
 ## One-Line Install
 
+**macOS / Linux / WSL:**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
+```
+
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
 ```
 
 After installation, run the setup wizard:
