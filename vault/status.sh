@@ -8,10 +8,10 @@ set -uo pipefail
 
 # Source shared libraries
 SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
-DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
-source "$DOTFILES_DIR/lib/_logging.sh"
-source "$DOTFILES_DIR/lib/_vault.sh"
-source "$DOTFILES_DIR/lib/_config.sh"
+BLACKDOT_DIR="$(dirname "$SCRIPT_DIR")"
+source "$BLACKDOT_DIR/lib/_logging.sh"
+source "$BLACKDOT_DIR/lib/_vault.sh"
+source "$BLACKDOT_DIR/lib/_config.sh"
 
 # ============================================================
 # Banner
@@ -50,7 +50,7 @@ if vault_login_check; then
     else
         warn "Vault locked (session expired)"
         echo ""
-        case "$DOTFILES_VAULT_BACKEND" in
+        case "$BLACKDOT_VAULT_BACKEND" in
             bitwarden)
                 echo -e "${DIM}Unlock:${NC} ${GREEN}dotfiles vault unlock${NC}"
                 ;;
@@ -67,7 +67,7 @@ if vault_login_check; then
 else
     fail "Not logged in to $BACKEND_NAME"
     echo ""
-    case "$DOTFILES_VAULT_BACKEND" in
+    case "$BLACKDOT_VAULT_BACKEND" in
         bitwarden)
             echo -e "${DIM}Login:${NC} ${GREEN}bw login && dotfiles vault unlock${NC}"
             ;;
@@ -300,7 +300,7 @@ if [[ $DRIFT_COUNT -gt 0 || $MISSING_VAULT -gt 0 ]]; then
     echo ""
 fi
 
-echo -e "${DIM}Full documentation: https://github.com/blackwell-systems/dotfiles/blob/main/docs/vault-README.md${NC}"
+echo -e "${DIM}Full documentation: https://github.com/blackwell-systems/blackdot/blob/main/docs/vault-README.md${NC}"
 echo ""
 
 # Exit with status code

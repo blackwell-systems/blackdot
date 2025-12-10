@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to this dotfiles repository will be documented in this file.
+All notable changes to this blackdot repository will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -14,8 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Stepped progress: `steps_init`, `step`, `step_done`, `step_fail` for multi-phase operations
   - Helper: `run_with_spinner "message" command args...` for wrapping commands
   - TTY detection: Auto-disables in non-interactive environments
-  - ASCII fallback: `DOTFILES_UNICODE=false` for terminals without Unicode support
-  - Configurable: `DOTFILES_PROGRESS=false` to disable globally
+  - ASCII fallback: `BLACKDOT_UNICODE=false` for terminals without Unicode support
+  - Configurable: `BLACKDOT_PROGRESS=false` to disable globally
   - 30 new tests in `test/progress.bats`
 - **Centralized Color Theming System** (`lib/_colors.sh`) - Consistent colors across all modules
   - Semantic colors: `CLR_PRIMARY`, `CLR_SECONDARY`, `CLR_SUCCESS`, `CLR_ERROR`, `CLR_WARNING`, `CLR_INFO`, `CLR_MUTED`, `CLR_BOLD`, `CLR_NC`
@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `_detect_circular_dep()` function detects cycles before enabling features
   - `_check_conflicts()` prevents enabling mutually exclusive features
   - `feature_validate()` validates entire registry for cycles and conflicts
-  - New CLI command: `dotfiles features validate`
+  - New CLI command: `blackdot features validate`
   - `FEATURE_CONFLICTS` array for defining mutually exclusive features
 - **SSH Tools Integration** (`zsh/zsh.d/65-ssh.zsh`) - Comprehensive SSH workflow helpers
   - Config management: `sshlist`, `sshgo`, `sshedit`, `sshadd-host`
@@ -51,25 +51,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Chainable syntax: `{{ hostname | upper | truncate 8 }}`
   - Default values for optional settings: `{{ editor | default "vim" }}`
   - Path manipulation: `{{ home | basename }}`, `{{ path | dirname }}`
-  - New command: `dotfiles template filters` to list all available filters
+  - New command: `blackdot template filters` to list all available filters
   - 20 new tests for pipeline functionality
 - **Hook System** - 19 lifecycle hooks for custom behavior at key points
   - Categories: Lifecycle, Vault, Doctor, Shell, Setup
   - Three registration methods: file-based, JSON config, inline
-  - CLI: `dotfiles hook list`, `dotfiles hook run`, `dotfiles hook test`
+  - CLI: `blackdot hook list`, `blackdot hook run`, `blackdot hook test`
   - Example hooks in `hooks/examples/`
   - Full documentation in `docs/hooks.md`
-- **Smart Bidirectional Sync** (`dotfiles sync`) - Intelligent vault sync command
+- **Smart Bidirectional Sync** (`blackdot sync`) - Intelligent vault sync command
   - Auto-detects sync direction for each file (push vs pull)
   - Uses cached checksums from last sync as baseline
   - Handles conflicts with `--force-local` / `--force-vault`
   - Works with all vault backends (Bitwarden, 1Password, pass)
-  - Available as `dotfiles sync` or `dotfiles vault sync`
+  - Available as `blackdot sync` or `blackdot vault sync`
 - **Automatic Drift Detection on Shell Startup** - Fast local-only check (<50ms)
   - Compares local files against cached checksums from last vault pull
   - Shows warning if files have changed since last sync
-  - Disable with `DOTFILES_SKIP_DRIFT_CHECK=1`
-- **Drift Detection Quick Mode** (`dotfiles drift --quick`) - Fast check without vault access
+  - Disable with `BLACKDOT_SKIP_DRIFT_CHECK=1`
+- **Drift Detection Quick Mode** (`blackdot drift --quick`) - Fast check without vault access
   - Uses cached state instead of connecting to vault
   - Useful for quick checks when vault is unavailable
 
@@ -83,51 +83,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.1] - 2025-12-02
 
 ### Added
-- **Help hint for subcommand options** - Main `dotfiles help` now shows: "Run 'dotfiles <command> --help' for detailed options"
+- **Help hint for subcommand options** - Main `blackdot help` now shows: "Run 'blackdot <command> --help' for detailed options"
 - **State Management in Quick Navigation** - Added link to `state-management.md` in docsify homepage
 
 ## [2.0.0] - 2025-12-02
 
 ### Breaking Changes
-- **Removed `dotfiles init` command** - Now use `dotfiles setup` instead
-- **Removed `install.sh --interactive` flag** - Bootstrap now prompts to run `dotfiles setup`
+- **Removed `blackdot init` command** - Now use `blackdot setup` instead
+- **Removed `install.sh --interactive` flag** - Bootstrap now prompts to run `blackdot setup`
 - **Renamed `vault/bootstrap-vault.sh`** to `vault/restore.sh` for clarity
 
 ### Added
-- **Unified Setup Wizard** (`dotfiles setup`) - New interactive setup with persistent state
+- **Unified Setup Wizard** (`blackdot setup`) - New interactive setup with persistent state
   - Five-phase setup: symlinks → packages → vault → secrets → claude
   - Progress persistence in `~/.config/dotfiles/state.ini` and `~/.config/dotfiles/config.ini`
   - Resume support: continue where you left off if interrupted
   - State inference: auto-detects existing installations from filesystem
-  - Visual status dashboard with checkmarks (`dotfiles setup --status`)
-  - Reset capability (`dotfiles setup --reset`)
+  - Visual status dashboard with checkmarks (`blackdot setup --status`)
+  - Reset capability (`blackdot setup --reset`)
 - **State Management Library** (`lib/_state.sh`) - Pure zsh INI file parsing
   - Functions: `state_init`, `state_completed`, `state_complete`, `state_needs_setup`
   - Config API: `config_get`, `config_set` for persistent preferences
   - State inference: `state_infer` detects symlinks, packages, vault, secrets, Claude
   - Files: `~/.config/dotfiles/state.ini` (phase completion), `~/.config/dotfiles/config.ini` (user prefs)
-- **macOS Settings Command** (`dotfiles macos`) - Expose macOS settings management
-  - `dotfiles macos apply` - Apply settings from settings.sh
-  - `dotfiles macos preview` - Dry-run mode
-  - `dotfiles macos discover` - Capture current settings
-- **Vault Restore Preview** - `dotfiles vault pull --preview` shows what would be restored without making changes
+- **macOS Settings Command** (`blackdot macos`) - Expose macOS settings management
+  - `blackdot macos apply` - Apply settings from settings.sh
+  - `blackdot macos preview` - Dry-run mode
+  - `blackdot macos discover` - Capture current settings
+- **Vault Restore Preview** - `blackdot vault pull --preview` shows what would be restored without making changes
 - **Documentation Updates**
   - New `docs/state-management.md` - Dedicated state system documentation
   - State Management section in `docs/cli-reference.md` with INI file format examples
-  - `dotfiles macos` command reference with all subcommands and options
-  - Updated all references from `dotfiles init` to `dotfiles setup`
+  - `blackdot macos` command reference with all subcommands and options
+  - Updated all references from `blackdot init` to `blackdot setup`
   - Added `macos` command to architecture diagram
 
 ### Changed
 - **Renamed `bootstrap-vault.sh` to `restore.sh`** - Clearer naming for vault orchestrator
-- **Removed `dotfiles init`** - Replaced by `dotfiles setup` with better state management
+- **Removed `blackdot init`** - Replaced by `blackdot setup` with better state management
 - **Vault Backend Persistence** - Backend choice now saved to config file
   - Priority: config file → environment variable → default (bitwarden)
   - Persists across sessions without needing to export env var
 - **Simplified `install.sh`** - Removed `--interactive` flag
-  - Bootstrap scripts now tell user to run `dotfiles setup`
+  - Bootstrap scripts now tell user to run `blackdot setup`
   - Cleaner separation: install.sh handles clone/bootstrap, setup handles configuration
-- **dotfiles-drift Multi-Backend Support** - Now works with all vault backends (Bitwarden, 1Password, pass)
+- **blackdot-drift Multi-Backend Support** - Now works with all vault backends (Bitwarden, 1Password, pass)
   - Uses `lib/_vault.sh` abstraction instead of hardcoded Bitwarden commands
   - Dynamic backend name in messages
   - Backend-specific login hints
@@ -140,7 +140,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `process_loop_conditionals()` function to evaluate loop variables
 - **Template Engine: Nested `{{#else}}`** - Fixed stray `{{/if}}` tags in output
   - Properly matches `{{#else}}` at correct nesting depth
-- **`pass` Function Name Collision** - Fixed conflict in `dotfiles-setup` between pass CLI and logging function
+- **`pass` Function Name Collision** - Fixed conflict in `blackdot-setup` between pass CLI and logging function
   - Uses `command pass` to explicitly call the CLI
 - **Test: Doctor Claude Detection** - Fixed test failing when real claude installed
   - Test now isolates PATH to exclude system claude
@@ -178,7 +178,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Documentation
 - Added dotclaude integration links throughout documentation ecosystem
 - Added comprehensive badge set to README-FULL
-- Cross-linked dotfiles and dotclaude documentation sites
+- Cross-linked blackdot and dotclaude documentation sites
 - Improved feature presentation with code blocks and collapsible sections
 - Updated coverpage formatting and Development & Testing section
 
@@ -186,25 +186,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **GitHub Sponsors Support** - Added `github: blackwell-systems` to FUNDING.yml
-- **Collapsible README Sections** - Made Acknowledgments, Troubleshooting, The dotfiles Command, and Project Structure collapsible for better readability
-- **DOTFILES_SKIP_DRIFT_CHECK** documentation - Added missing environment variable to Optional Components
+- **Collapsible README Sections** - Made Acknowledgments, Troubleshooting, The blackdot Command, and Project Structure collapsible for better readability
+- **BLACKDOT_SKIP_DRIFT_CHECK** documentation - Added missing environment variable to Optional Components
 
 ### Changed
-- **Vault-Agnostic `dotfiles init`** - Major refactor of interactive setup wizard
+- **Vault-Agnostic `blackdot init`** - Major refactor of interactive setup wizard
   - Auto-detects all vault backends (Bitwarden, 1Password, pass)
   - Prompts user to choose vault (never auto-selects)
   - Option to skip vault setup entirely
   - Backend-specific login/unlock flows
   - Fixes Alpine/Linux issue where pass was auto-selected
-- **Integrated `install.sh` with `dotfiles init`** - `install.sh --interactive` now calls the wizard automatically
-- **Simplified Quick Start** - Reduced from 4 manual steps to 2 (clone → dotfiles init)
+- **Integrated `install.sh` with `blackdot init`** - `install.sh --interactive` now calls the wizard automatically
+- **Simplified Quick Start** - Reduced from 4 manual steps to 2 (clone → blackdot init)
 - **Reordered README Sections** - End sections now: Acknowledgments → Trademarks → License
 - **Updated Project Structure** - Added lib/_vault.sh and test/fixtures/ subdirectory
 - **Removed Bitwarden Bias** - All documentation now vault-agnostic
 
 ### Documentation
 - Updated README.md, docs/README.md, docs/README-FULL.md with simplified install flow
-- Updated docs/cli-reference.md with comprehensive `dotfiles init` documentation
+- Updated docs/cli-reference.md with comprehensive `blackdot init` documentation
 - All install documentation now consistently promotes 2-step flow
 
 ## [1.8.2] - 2025-12-01
@@ -229,12 +229,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **dotclaude Integration** - Claude Code profile management across machines
-  - `dotfiles status` shows active Claude profile (if dotclaude installed)
-  - `dotfiles doctor` validates Claude/dotclaude setup with install hints
-  - `dotfiles vault` syncs `~/.claude/profiles.json` to vault
-  - `dotfiles drift` detects Claude profile changes vs vault
-  - `dotfiles packages` suggests dotclaude for Claude users
-  - `dotfiles init` offers dotclaude installation during setup wizard
+  - `blackdot status` shows active Claude profile (if dotclaude installed)
+  - `blackdot doctor` validates Claude/dotclaude setup with install hints
+  - `blackdot vault` syncs `~/.claude/profiles.json` to vault
+  - `blackdot drift` detects Claude profile changes vs vault
+  - `blackdot packages` suggests dotclaude for Claude users
+  - `blackdot init` offers dotclaude installation during setup wizard
   - See [docs/claude-code.md](docs/claude-code.md#dotclaude-integration) for details
 - **Dockerfile.lite** - Lightweight Alpine container for CLI exploration
 - **`{{#each}}` Template Loops** - Iterate over arrays with named fields
@@ -269,7 +269,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `1password.sh` - 1Password CLI v2 backend
   - `pass.sh` - pass (GPG) backend
   - `_interface.md` - Interface specification for backend implementations
-- **`DOTFILES_VAULT_BACKEND`** - Environment variable to select backend (defaults to `bitwarden`)
+- **`BLACKDOT_VAULT_BACKEND`** - Environment variable to select backend (defaults to `bitwarden`)
 
 #### Backward Compatibility
 - Legacy `bw_*` functions still work (aliased to new `vault_*` API)
@@ -282,7 +282,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Moved bootstrap scripts to `bootstrap/`** for cleaner repository root
   - `bootstrap/bootstrap-mac.sh` - macOS setup
   - `bootstrap/bootstrap-linux.sh` - Linux/WSL2/Lima setup
-  - `bootstrap/bootstrap-dotfiles.sh` - Symlink creation
+  - `bootstrap/bootstrap-blackdot.sh` - Symlink creation
   - `bootstrap/_common.sh` - Shared bootstrap functions (already here)
 
 #### Relocated Configuration Files
@@ -295,7 +295,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`bootstrap-lima.sh` symlink** - Deprecated alias for bootstrap-linux.sh
 
 ### Changed
-- Bootstrap scripts updated to find DOTFILES_DIR from parent directory
+- Bootstrap scripts updated to find BLACKDOT_DIR from parent directory
 - `install.sh` updated with new bootstrap script paths
 - `Dockerfile` updated with new bootstrap script path
 - All CI workflow paths updated for new locations
@@ -312,16 +312,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### bin/ Directory Structure
 - **Moved CLI scripts to `bin/`** for cleaner repository root
-  - `dotfiles-doctor` - Health validation
-  - `dotfiles-drift` - Drift detection
-  - `dotfiles-backup` - Backup/restore
-  - `dotfiles-diff` - Preview changes
-  - `dotfiles-init` - Setup wizard
-  - `dotfiles-metrics` - Metrics visualization (renamed from show-metrics.sh)
-  - `dotfiles-uninstall` - Clean removal (renamed from uninstall.sh)
+  - `blackdot-doctor` - Health validation
+  - `blackdot-drift` - Drift detection
+  - `blackdot-backup` - Backup/restore
+  - `blackdot-diff` - Preview changes
+  - `blackdot-init` - Setup wizard
+  - `blackdot-metrics` - Metrics visualization (renamed from show-metrics.sh)
+  - `blackdot-uninstall` - Clean removal (renamed from uninstall.sh)
 
 ### Changed
-- Scripts now source `lib/_logging.sh` from `$DOTFILES_DIR/lib/` (parent of bin/)
+- Scripts now source `lib/_logging.sh` from `$BLACKDOT_DIR/lib/` (parent of bin/)
 - `zsh/zsh.d/40-aliases.zsh` updated to reference `bin/` paths
 - All test files updated with new paths
 - CI/CD workflow updated with new paths
@@ -337,7 +337,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added - Offline Mode Support
 
 #### Offline Mode
-- **`DOTFILES_OFFLINE=1`** - Skip all Bitwarden vault operations gracefully
+- **`BLACKDOT_OFFLINE=1`** - Skip all Bitwarden vault operations gracefully
   - `is_offline()` - Check if offline mode is enabled
   - `require_online()` - Helper to skip vault operations in offline mode
   - `require_bw()` and `require_logged_in()` - Skip checks in offline mode
@@ -375,19 +375,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `add_brew_to_zprofile()` - Homebrew PATH setup
 
 #### Pre-Restore Drift Check
-- **Safety feature** - Prevents accidental data loss during `dotfiles vault pull`
+- **Safety feature** - Prevents accidental data loss during `blackdot vault pull`
   - Detects when local files have changed since last vault sync
   - Warns user and suggests options: sync first, force restore, or review diff
   - `check_item_drift()` - Check single item for drift
   - `check_pre_restore_drift()` - Check all syncable items
-  - `skip_drift_check()` - Check DOTFILES_SKIP_DRIFT_CHECK env var
+  - `skip_drift_check()` - Check BLACKDOT_SKIP_DRIFT_CHECK env var
   - `--force` flag to skip drift check when needed
 
 ### Changed
 - `bootstrap-mac.sh` - Now sources `bootstrap/_common.sh` for shared functions
 - `bootstrap-linux.sh` - Now sources `bootstrap/_common.sh` for shared functions
 - `vault/bootstrap-vault.sh` - Added drift check before restore
-- Help text updated for `dotfiles vault pull --force`
+- Help text updated for `blackdot vault pull --force`
 - Reduced code duplication by ~60% in bootstrap scripts
 
 ### Documentation
@@ -419,10 +419,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Scripts now use shared `lib/_logging.sh` instead of inline definitions:
-  - `dotfiles-backup.sh`
-  - `dotfiles-diff.sh`
-  - `dotfiles-drift.sh`
-  - `dotfiles-init.sh`
+  - `blackdot-backup.sh`
+  - `blackdot-diff.sh`
+  - `blackdot-drift.sh`
+  - `blackdot-init.sh`
   - `show-metrics.sh`
   - `uninstall.sh`
   - `bootstrap-mac.sh`
@@ -500,38 +500,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added - CLI Commands
 
 #### Unified `dotfiles` Command Expansion
-- **`dotfiles diff`** - Preview changes before sync or restore
-  - `dotfiles diff --sync` - Show what would be synced to vault
-  - `dotfiles diff --restore` - Show what restore would change
+- **`blackdot diff`** - Preview changes before sync or restore
+  - `blackdot diff --sync` - Show what would be synced to vault
+  - `blackdot diff --restore` - Show what restore would change
   - Unified diff output with color coding
 
-- **`dotfiles backup`** - Backup and restore configuration
-  - Creates timestamped tar.gz archives in `~/.dotfiles-backups/`
-  - `dotfiles backup` - Create new backup
-  - `dotfiles backup --list` - List available backups
-  - `dotfiles backup restore` - Interactive restore from backup
+- **`blackdot backup`** - Backup and restore configuration
+  - Creates timestamped tar.gz archives in `~/.blackdot-backups/`
+  - `blackdot backup` - Create new backup
+  - `blackdot backup --list` - List available backups
+  - `blackdot backup restore` - Interactive restore from backup
   - Auto-cleanup keeps only 10 most recent backups
 
-- **`dotfiles init`** - First-time setup wizard
+- **`blackdot init`** - First-time setup wizard
   - Interactive walkthrough for new installations
   - Guides through bootstrap, Bitwarden setup, secret restoration
   - ASCII art banner and step-by-step progress
 
-- **`dotfiles uninstall`** - Clean removal script
-  - `dotfiles uninstall --dry-run` - Preview what would be removed
-  - `dotfiles uninstall --keep-secrets` - Remove dotfiles but keep SSH/AWS/Git
+- **`blackdot uninstall`** - Clean removal script
+  - `blackdot uninstall --dry-run` - Preview what would be removed
+  - `blackdot uninstall --keep-secrets` - Remove blackdot but keep SSH/AWS/Git
   - Safe removal with confirmation prompts
 
 #### Tab Completion
-- **`_dotfiles` completion** - Full tab completion for dotfiles command
+- **`_dotfiles` completion** - Full tab completion for blackdot command
   - All subcommands with descriptions
   - Vault subcommands with item names
   - Flag completions for all options
 
 ### Added - New Scripts
-- `dotfiles-backup.sh` - Backup and restore functionality
-- `dotfiles-diff.sh` - Preview changes before sync/restore
-- `dotfiles-init.sh` - First-time setup wizard
+- `blackdot-backup.sh` - Backup and restore functionality
+- `blackdot-diff.sh` - Preview changes before sync/restore
+- `blackdot-init.sh` - First-time setup wizard
 - `uninstall.sh` - Clean removal script
 
 ### Added - Documentation
@@ -568,7 +568,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `40-aliases.zsh` with new commands (diff, backup, init, uninstall)
 - Updated test workflow to validate new scripts
 - Updated documentation with new commands and features
-- Expanded `dotfiles help` output with all new commands
+- Expanded `blackdot help` output with all new commands
 
 ### Infrastructure
 - New scripts made executable with proper permissions
@@ -598,7 +598,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Health Metrics System
 - **Automatic Metrics Collection** in `check-health.sh`
-  - Records health check results to `~/.dotfiles-metrics.jsonl`
+  - Records health check results to `~/.blackdot-metrics.jsonl`
   - Tracks: errors, warnings, fixes, health score (0-100)
   - Includes git branch, commit hash, hostname, OS
   - Timestamped entries for trend analysis
@@ -613,7 +613,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added - Developer Experience
 
 #### Improved Upgrade Flow
-- **`dotfiles-upgrade` Command** (replaces `dotfiles-update`)
+- **`blackdot-upgrade` Command** (replaces `blackdot-update`)
   - One-command upgrade with comprehensive steps:
     1. Pull latest changes from current branch
     2. Re-run bootstrap to update symlinks
@@ -624,7 +624,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Update Notifications
 - **Daily Update Checker** in `zshrc`
-  - Checks for dotfiles updates once per day
+  - Checks for blackdot updates once per day
   - Caches check result to avoid slowdown
   - Shows notification with commit count if behind
   - Cross-platform (macOS and Linux)
@@ -642,7 +642,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `_awsset` - AWS profile setting
   - `_awslogin` - AWS SSO login
   - `_bw-sync` - Bitwarden sync with item suggestions
-  - `_dotfiles-doctor` - Health check flags
+  - `_blackdot-doctor` - Health check flags
   - `_show-metrics` - Metrics display modes
 - Completions automatically loaded on shell startup
 
@@ -694,12 +694,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Refactored Components
 - Vault scripts now use shared `_common.sh` library (~50 lines saved per script)
-- `dotfiles-update` deprecated in favor of `dotfiles-upgrade`
+- `blackdot-update` deprecated in favor of `blackdot-upgrade`
 - Completion system initialization moved earlier in `zshrc`
 
 #### Improved Functionality
 - `check-health.sh` now tracks metrics automatically
-- `dotfiles-update` shows deprecation warning
+- `blackdot-update` shows deprecation warning
 - Update checker uses cross-platform date calculation
 
 ### Fixed
@@ -712,8 +712,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### .gitignore Updates
 - Added `*.local` to exclude machine-specific overrides
-- Added `.dotfiles-update-check` cache file
-- Added `.dotfiles-metrics.jsonl` metrics file
+- Added `.blackdot-update-check` cache file
+- Added `.blackdot-metrics.jsonl` metrics file
 
 #### New Scripts
 - `show-metrics.sh` - Health metrics visualization (183 lines)
@@ -752,7 +752,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Refactored all vault scripts to use shared `_common.sh` library
-- `dotfiles-update` now detects current branch instead of assuming `main`
+- `blackdot-update` now detects current branch instead of assuming `main`
 - `check-health.sh` now sources `_common.sh` for SSH keys and AWS profiles
 - Updated `vault/README.md` with comprehensive script documentation
 

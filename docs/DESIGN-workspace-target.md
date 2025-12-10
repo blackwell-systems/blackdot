@@ -112,7 +112,7 @@ Add to `get_default_config()`:
   "paths": {
     "dotfiles_dir": "",
     "config_dir": "~/.config/dotfiles",
-    "backup_dir": "~/.dotfiles-backups",
+    "backup_dir": "~/.blackdot-backups",
     "workspace_target": "~/workspace"  // NEW
   }
 }
@@ -172,10 +172,10 @@ All CLI tools that use fallback path detection need updating.
 #!/usr/bin/env bash
 # Shared path resolution for CLI tools
 
-# Get dotfiles directory with fallback logic
+# Get blackdot directory with fallback logic
 get_dotfiles_dir() {
-    if [[ -n "${DOTFILES_DIR:-}" ]]; then
-        echo "$DOTFILES_DIR"
+    if [[ -n "${BLACKDOT_DIR:-}" ]]; then
+        echo "$BLACKDOT_DIR"
         return 0
     fi
 
@@ -231,23 +231,23 @@ get_workspace_target() {
 
 | File | Current Code | Change Needed |
 |------|--------------|---------------|
-| `bin/dotfiles-doctor` | Lines 17-20: hardcoded `~/workspace/dotfiles`, `/workspace/dotfiles` | Use `get_dotfiles_dir()` |
-| `bin/dotfiles-lint` | Lines 20-23: same pattern | Use `get_dotfiles_dir()` |
-| `bin/dotfiles-packages` | Lines 18-21: same pattern | Use `get_dotfiles_dir()` |
-| `bin/dotfiles-backup` | Lines 23-26: same pattern | Use `get_dotfiles_dir()` |
-| `bin/dotfiles-diff` | Line 35, 149: hardcoded `$HOME/workspace/dotfiles/vault` | Use `get_dotfiles_dir()` |
-| `bin/dotfiles-uninstall` | Line 53: `/workspace`, Line 124: `$HOME/workspace/dotfiles` | Use `get_workspace_target()` |
+| `bin/blackdot-doctor` | Lines 17-20: hardcoded `~/workspace/dotfiles`, `/workspace/dotfiles` | Use `get_dotfiles_dir()` |
+| `bin/blackdot-lint` | Lines 20-23: same pattern | Use `get_dotfiles_dir()` |
+| `bin/blackdot-packages` | Lines 18-21: same pattern | Use `get_dotfiles_dir()` |
+| `bin/blackdot-backup` | Lines 23-26: same pattern | Use `get_dotfiles_dir()` |
+| `bin/blackdot-diff` | Line 35, 149: hardcoded `$HOME/workspace/dotfiles/vault` | Use `get_dotfiles_dir()` |
+| `bin/blackdot-uninstall` | Line 53: `/workspace`, Line 124: `$HOME/workspace/dotfiles` | Use `get_workspace_target()` |
 
-**Example update for `bin/dotfiles-doctor`:**
+**Example update for `bin/blackdot-doctor`:**
 
 ```bash
 # Before (lines 14-41):
-if [[ -n "${DOTFILES_DIR:-}" ]]; then
-    DOTFILES_DIR="$DOTFILES_DIR"
+if [[ -n "${BLACKDOT_DIR:-}" ]]; then
+    BLACKDOT_DIR="$BLACKDOT_DIR"
 elif [[ -d "$HOME/workspace/dotfiles" ]]; then
-    DOTFILES_DIR="$HOME/workspace/dotfiles"
+    BLACKDOT_DIR="$HOME/workspace/dotfiles"
 elif [[ -d "/workspace/dotfiles" ]]; then
-    DOTFILES_DIR="/workspace/dotfiles"
+    BLACKDOT_DIR="/workspace/dotfiles"
 else
     # ... error handling ...
 fi
@@ -256,8 +256,8 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$(dirname "$SCRIPT_DIR")/lib/_paths.sh" 2>/dev/null || true
 
-DOTFILES_DIR="${DOTFILES_DIR:-$(get_dotfiles_dir)}"
-if [[ -z "$DOTFILES_DIR" || ! -d "$DOTFILES_DIR" ]]; then
+BLACKDOT_DIR="${BLACKDOT_DIR:-$(get_dotfiles_dir)}"
+if [[ -z "$BLACKDOT_DIR" || ! -d "$BLACKDOT_DIR" ]]; then
     # ... error handling ...
 fi
 ```
@@ -308,7 +308,7 @@ get_computed_defaults() {
 
 #### 4.1 Bootstrap Dotfiles
 
-**File: `bootstrap/bootstrap-dotfiles.sh`**
+**File: `bootstrap/bootstrap-blackdot.sh`**
 
 ```bash
 # Line 55: Update Claude shared path
@@ -323,14 +323,14 @@ CLAUDE_SHARED="$WORKSPACE_TARGET/.claude"
 ```bash
 # Line 181, 313: Update search paths
 local workspace_target="$(get_workspace_target)"
-local dotfiles_dirs=("$HOME/dotfiles" "$HOME/.dotfiles" "$workspace_target/dotfiles")
+local dotfiles_dirs=("$HOME/dotfiles" "$HOME/.blackdot" "$workspace_target/dotfiles")
 ```
 
 ---
 
 ### Phase 5: Doctor Health Check
 
-**File: `bin/dotfiles-doctor`**
+**File: `bin/blackdot-doctor`**
 
 Update the `/workspace` symlink check to be target-aware:
 
@@ -425,12 +425,12 @@ Select [1]:
 
 | File | Type | Complexity |
 |------|------|------------|
-| `bin/dotfiles-doctor` | Modify | Low |
-| `bin/dotfiles-lint` | Modify | Low |
-| `bin/dotfiles-packages` | Modify | Low |
-| `bin/dotfiles-backup` | Modify | Low |
-| `bin/dotfiles-diff` | Modify | Low |
-| `bin/dotfiles-uninstall` | Modify | Low |
+| `bin/blackdot-doctor` | Modify | Low |
+| `bin/blackdot-lint` | Modify | Low |
+| `bin/blackdot-packages` | Modify | Low |
+| `bin/blackdot-backup` | Modify | Low |
+| `bin/blackdot-diff` | Modify | Low |
+| `bin/blackdot-uninstall` | Modify | Low |
 
 ### Must Change (Templates)
 
@@ -443,7 +443,7 @@ Select [1]:
 
 | File | Type | Complexity |
 |------|------|------------|
-| `bootstrap/bootstrap-dotfiles.sh` | Modify | Low |
+| `bootstrap/bootstrap-blackdot.sh` | Modify | Low |
 | `vault/discover-secrets.sh` | Modify | Low |
 
 ### Optional (Dockerfiles)
@@ -537,30 +537,30 @@ No migration needed - default behavior unchanged (`~/workspace`).
 ### lib/_config.sh
 - Line 46-49: Add `workspace_target` to default config
 
-### bin/dotfiles-doctor
+### bin/blackdot-doctor
 - Lines 17-20: Path detection
 - Lines 23-24, 34, 38: Error messages
 - Line 212: Claude symlink check
 - Lines 215-218: /workspace symlink check
 
-### bin/dotfiles-lint
+### bin/blackdot-lint
 - Lines 20-23: Path detection
 
-### bin/dotfiles-packages
+### bin/blackdot-packages
 - Lines 18-21: Path detection
 
-### bin/dotfiles-backup
+### bin/blackdot-backup
 - Lines 23-26: Path detection
 
-### bin/dotfiles-diff
+### bin/blackdot-diff
 - Line 35: Hardcoded vault path
 - Line 149: Same
 
-### bin/dotfiles-uninstall
+### bin/blackdot-uninstall
 - Line 53: `/workspace` in SYMLINKS array
 - Line 124-131: `$HOME/workspace/dotfiles` removal logic
 
-### bootstrap/bootstrap-dotfiles.sh
+### bootstrap/bootstrap-blackdot.sh
 - Line 55: `CLAUDE_SHARED` path
 
 ### vault/discover-secrets.sh

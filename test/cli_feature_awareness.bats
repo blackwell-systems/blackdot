@@ -3,9 +3,9 @@
 # NOTE: These tests require zsh since the scripts use zsh syntax
 
 setup() {
-  export DOTFILES_DIR="${BATS_TEST_DIRNAME}/.."
-  export CLI_FEATURES_SH="${DOTFILES_DIR}/lib/_cli_features.sh"
-  export FEATURES_SH="${DOTFILES_DIR}/lib/_features.sh"
+  export BLACKDOT_DIR="${BATS_TEST_DIRNAME}/.."
+  export CLI_FEATURES_SH="${BLACKDOT_DIR}/lib/_cli_features.sh"
+  export FEATURES_SH="${BLACKDOT_DIR}/lib/_features.sh"
 
   # Create temporary config directory
   export TEST_CONFIG_DIR="${BATS_TEST_TMPDIR}/dotfiles"
@@ -356,12 +356,12 @@ teardown() {
 # Environment Variable Override Tests
 # ============================================================
 
-@test "DOTFILES_CLI_SHOW_ALL makes hidden commands visible" {
+@test "BLACKDOT_CLI_SHOW_ALL makes hidden commands visible" {
   echo '{"features": {"vault": false}}' > "$CONFIG_FILE"
 
   run zsh -c "
     export CONFIG_FILE='$CONFIG_FILE'
-    export DOTFILES_CLI_SHOW_ALL=true
+    export BLACKDOT_CLI_SHOW_ALL=true
     source '$FEATURES_SH'
     source '$CLI_FEATURES_SH'
     cli_command_visible 'vault' && echo 'visible' || echo 'hidden'
@@ -370,12 +370,12 @@ teardown() {
   [ "$output" = "visible" ]
 }
 
-@test "DOTFILES_CLI_SHOW_ALL=1 also works" {
+@test "BLACKDOT_CLI_SHOW_ALL=1 also works" {
   echo '{"features": {"vault": false}}' > "$CONFIG_FILE"
 
   run zsh -c "
     export CONFIG_FILE='$CONFIG_FILE'
-    export DOTFILES_CLI_SHOW_ALL=1
+    export BLACKDOT_CLI_SHOW_ALL=1
     source '$FEATURES_SH'
     source '$CLI_FEATURES_SH'
     cli_command_visible 'vault' && echo 'visible' || echo 'hidden'
@@ -384,12 +384,12 @@ teardown() {
   [ "$output" = "visible" ]
 }
 
-@test "DOTFILES_FORCE bypasses feature guard" {
+@test "BLACKDOT_FORCE bypasses feature guard" {
   echo '{"features": {"vault": false}}' > "$CONFIG_FILE"
 
   run zsh -c "
     export CONFIG_FILE='$CONFIG_FILE'
-    export DOTFILES_FORCE=true
+    export BLACKDOT_FORCE=true
     source '$FEATURES_SH'
     source '$CLI_FEATURES_SH'
     cli_require_feature 'vault' 'vault pull' && echo 'allowed' || echo 'blocked'
@@ -398,12 +398,12 @@ teardown() {
   [ "$output" = "allowed" ]
 }
 
-@test "DOTFILES_FORCE=1 also works" {
+@test "BLACKDOT_FORCE=1 also works" {
   echo '{"features": {"vault": false}}' > "$CONFIG_FILE"
 
   run zsh -c "
     export CONFIG_FILE='$CONFIG_FILE'
-    export DOTFILES_FORCE=1
+    export BLACKDOT_FORCE=1
     source '$FEATURES_SH'
     source '$CLI_FEATURES_SH'
     cli_require_feature 'vault' 'vault pull' && echo 'allowed' || echo 'blocked'

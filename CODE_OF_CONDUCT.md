@@ -61,7 +61,7 @@ representative at an online or offline event.
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement via:
 
-* GitHub Issues: https://github.com/blackwell-systems/dotfiles/issues
+* GitHub Issues: https://github.com/blackwell-systems/blackdot/issues
 * Email: [Contact maintainer through GitHub profile]
 
 All complaints will be reviewed and investigated promptly and fairly.

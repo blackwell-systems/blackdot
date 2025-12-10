@@ -10,7 +10,7 @@ setup() {
     export TEST_HOME="$TEST_DIR/home"
     export MOCK_DATA_DIR="$TEST_DIR/mock-bw"
     export BW_MOCK_DATA_DIR="$MOCK_DATA_DIR"
-    export DOTFILES_DIR="${BATS_TEST_DIRNAME}/.."
+    export BLACKDOT_DIR="${BATS_TEST_DIRNAME}/.."
 
     # Create test directories
     mkdir -p "$TEST_HOME"
@@ -37,10 +37,10 @@ setup() {
     "max_snapshots": 10,
     "retention_days": 30,
     "compress": true,
-    "location": "~/.dotfiles-backups"
+    "location": "~/.blackdot-backups"
   },
   "paths": {
-    "backup_dir": "~/.dotfiles-backups"
+    "backup_dir": "~/.blackdot-backups"
   }
 }
 EOFCONFIG
@@ -82,7 +82,7 @@ teardown() {
 
     # Backup should handle this gracefully (warn but not crash)
     export HOME="$TEST_HOME"
-    run "$DOTFILES_DIR/bin/dotfiles-backup" 2>&1
+    run "$BLACKDOT_DIR/bin/blackdot-backup" 2>&1
 
     # Should complete (might warn, but shouldn't crash hard)
     # Exit code 0 or 1 both acceptable (depends on implementation)
@@ -119,17 +119,17 @@ teardown() {
     export HOME="$TEST_HOME"
 
     # Backup should handle missing files gracefully
-    run "$DOTFILES_DIR/bin/dotfiles-backup" 2>&1
+    run "$BLACKDOT_DIR/bin/blackdot-backup" 2>&1
 
     # Should succeed but backup will have fewer files
     [[ "$status" -eq 0 ]] || [[ "$status" -eq 1 ]]
 }
 
 @test "error: doctor handles missing dotfiles directory" {
-    # Run doctor with non-existent DOTFILES_DIR
-    export DOTFILES_DIR="/nonexistent/path"
+    # Run doctor with non-existent BLACKDOT_DIR
+    export BLACKDOT_DIR="/nonexistent/path"
 
-    run "$BATS_TEST_DIRNAME/../bin/dotfiles-doctor" 2>&1
+    run "$BATS_TEST_DIRNAME/../bin/blackdot-doctor" 2>&1
 
     # Should fail gracefully
     [ "$status" -ne 0 ] || [[ "$output" =~ "not found" ]] || [[ "$output" =~ "error" ]]
@@ -137,10 +137,10 @@ teardown() {
 
 @test "error: metrics handles missing metrics file" {
     # Ensure no metrics file exists
-    rm -f "$TEST_HOME/.dotfiles-metrics.jsonl"
+    rm -f "$TEST_HOME/.blackdot-metrics.jsonl"
 
     export HOME="$TEST_HOME"
-    run "$DOTFILES_DIR/bin/dotfiles-metrics" 2>&1
+    run "$BLACKDOT_DIR/bin/blackdot-metrics" 2>&1
 
     # Should exit with error and helpful message
     [ "$status" -ne 0 ]
@@ -164,13 +164,13 @@ teardown() {
 
 @test "error: backup handles corrupted backup file" {
     # Create a corrupted backup file
-    mkdir -p "$TEST_HOME/.dotfiles-backups"
-    echo "not a valid tar.gz" > "$TEST_HOME/.dotfiles-backups/backup-corrupted.tar.gz"
+    mkdir -p "$TEST_HOME/.blackdot-backups"
+    echo "not a valid tar.gz" > "$TEST_HOME/.blackdot-backups/backup-corrupted.tar.gz"
 
     export HOME="$TEST_HOME"
 
     # List should still work
-    run "$DOTFILES_DIR/bin/dotfiles-backup" --list 2>&1
+    run "$BLACKDOT_DIR/bin/blackdot-backup" --list 2>&1
 
     # Should show backups (even if corrupted)
     [[ "$output" =~ "backup-corrupted" ]] || [ "$status" -eq 1 ]
@@ -178,11 +178,11 @@ teardown() {
 
 @test "error: restore from corrupted backup fails gracefully" {
     # Create a corrupted backup
-    mkdir -p "$TEST_HOME/.dotfiles-backups"
-    echo "corrupted data" > "$TEST_HOME/.dotfiles-backups/backup-20250101-120000.tar.gz"
+    mkdir -p "$TEST_HOME/.blackdot-backups"
+    echo "corrupted data" > "$TEST_HOME/.blackdot-backups/backup-20250101-120000.tar.gz"
 
     export HOME="$TEST_HOME"
-    run "$DOTFILES_DIR/bin/dotfiles-backup" restore backup-20250101-120000 2>&1
+    run "$BLACKDOT_DIR/bin/blackdot-backup" restore backup-20250101-120000 2>&1
 
     # Should fail but not crash
     [ "$status" -ne 0 ]
@@ -235,11 +235,11 @@ teardown() {
 # ============================================================
 
 @test "edge: handles empty backup directory" {
-    mkdir -p "$TEST_HOME/.dotfiles-backups"
+    mkdir -p "$TEST_HOME/.blackdot-backups"
     # Directory exists but is empty
 
     export HOME="$TEST_HOME"
-    run "$DOTFILES_DIR/bin/dotfiles-backup" --list 2>&1
+    run "$BLACKDOT_DIR/bin/blackdot-backup" --list 2>&1
 
     # Should indicate no backups
     [ "$status" -eq 1 ]
@@ -283,9 +283,9 @@ teardown() {
     export HOME="$TEST_HOME"
 
     # Start two backups simultaneously
-    "$DOTFILES_DIR/bin/dotfiles-backup" &
+    "$BLACKDOT_DIR/bin/blackdot-backup" &
     local pid1=$!
-    "$DOTFILES_DIR/bin/dotfiles-backup" &
+    "$BLACKDOT_DIR/bin/blackdot-backup" &
     local pid2=$!
 
     # Wait for both to complete
@@ -293,7 +293,7 @@ teardown() {
     wait $pid2 || true
 
     # Both should complete (may have different results, but shouldn't crash)
-    [ -d "$TEST_HOME/.dotfiles-backups" ] || true
+    [ -d "$TEST_HOME/.blackdot-backups" ] || true
 }
 
 # ============================================================
@@ -301,15 +301,15 @@ teardown() {
 # ============================================================
 
 @test "edge: handles many backup files" {
-    mkdir -p "$TEST_HOME/.dotfiles-backups"
+    mkdir -p "$TEST_HOME/.blackdot-backups"
 
     # Create 15 backup files (more than MAX_BACKUPS=10)
     for i in {01..15}; do
-        touch "$TEST_HOME/.dotfiles-backups/backup-202501$i-120000.tar.gz"
+        touch "$TEST_HOME/.blackdot-backups/backup-202501$i-120000.tar.gz"
     done
 
     export HOME="$TEST_HOME"
-    run "$DOTFILES_DIR/bin/dotfiles-backup" --list 2>&1
+    run "$BLACKDOT_DIR/bin/blackdot-backup" --list 2>&1
 
     # Should list backups without error
     [ "$status" -eq 0 ]
@@ -321,21 +321,21 @@ teardown() {
 # ============================================================
 
 @test "error: backup rejects invalid arguments" {
-    run "$DOTFILES_DIR/bin/dotfiles-backup" --invalid-flag 2>&1
+    run "$BLACKDOT_DIR/bin/blackdot-backup" --invalid-flag 2>&1
 
     # Should show help or error
     [[ "$output" =~ "Usage" ]] || [[ "$output" =~ "help" ]] || [ "$status" -ne 0 ]
 }
 
 @test "error: uninstall --help exits cleanly" {
-    run "$DOTFILES_DIR/bin/dotfiles-uninstall" --help 2>&1
+    run "$BLACKDOT_DIR/bin/blackdot-uninstall" --help 2>&1
 
     [ "$status" -eq 0 ]
     [[ "$output" =~ "Usage" ]] || [[ "$output" =~ "Uninstall" ]]
 }
 
 @test "error: doctor --help exits cleanly" {
-    run "$DOTFILES_DIR/bin/dotfiles-doctor" --help 2>&1
+    run "$BLACKDOT_DIR/bin/blackdot-doctor" --help 2>&1
 
     [ "$status" -eq 0 ]
 }

@@ -1,6 +1,6 @@
 # Docsify Documentation Site
 
-This directory contains the Docsify-powered documentation website for the dotfiles repository.
+This directory contains the Docsify-powered documentation website for the blackdot repository.
 
 ## 🌐 Live Site
 
@@ -202,4 +202,4 @@ https://blackwell-systems.github.io/dotfiles/
 
 ---
 
-**Need help?** [Open an issue](https://github.com/blackwell-systems/dotfiles/issues)
+**Need help?** [Open an issue](https://github.com/blackwell-systems/blackdot/issues)

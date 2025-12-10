@@ -78,7 +78,7 @@ RUN echo '' >> /root/.zshrc && \
     echo '    echo ""' >> /root/.zshrc && \
     echo '    echo "\\033[1mTest Vault with Mock Credentials (pass backend):\\033[0m"' >> /root/.zshrc && \
     echo '    echo "  ./test/mocks/setup-mock-vault.sh --no-pass  # Creates fake GPG key + pass store"' >> /root/.zshrc && \
-    echo '    echo "  export DOTFILES_VAULT_BACKEND=pass          # Switch to pass backend"' >> /root/.zshrc && \
+    echo '    echo "  export BLACKDOT_VAULT_BACKEND=pass          # Switch to pass backend"' >> /root/.zshrc && \
     echo '    echo "  dotfiles vault check                        # Test vault commands"' >> /root/.zshrc && \
     echo '    echo ""' >> /root/.zshrc && \
     echo '    echo "\\033[2mThis container has Homebrew. Install packages with: brew install <pkg>\\033[0m"' >> /root/.zshrc && \
@@ -109,7 +109,7 @@ CMD ["zsh"]
 #
 # Test with Mock Vault:
 #   ./test/mocks/setup-mock-vault.sh --no-pass
-#   export DOTFILES_VAULT_BACKEND=pass
+#   export BLACKDOT_VAULT_BACKEND=pass
 #   dotfiles vault check
 #
 # To get full setup:

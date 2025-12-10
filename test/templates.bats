@@ -5,7 +5,7 @@
 setup() {
   # Path to the script under test
   export TEMPLATES_SH="${BATS_TEST_DIRNAME}/../lib/_templates.sh"
-  export DOTFILES_DIR="${BATS_TEST_DIRNAME}/.."
+  export BLACKDOT_DIR="${BATS_TEST_DIRNAME}/.."
 
   # Create temporary directory for test templates
   export TEST_TMPDIR="${BATS_TMPDIR}/templates_test_$$"
@@ -20,9 +20,9 @@ teardown() {
 # Helper function to invoke zsh functions
 zsh_eval() {
   zsh -c "
-    export DOTFILES_DIR='$DOTFILES_DIR'
-    export TEMPLATES_DIR='$DOTFILES_DIR/templates'
-    source '$DOTFILES_DIR/lib/_logging.sh'
+    export BLACKDOT_DIR='$BLACKDOT_DIR'
+    export TEMPLATES_DIR='$BLACKDOT_DIR/templates'
+    source '$BLACKDOT_DIR/lib/_logging.sh'
     source '$TEMPLATES_SH'
     $*
   "
@@ -37,9 +37,9 @@ render_string() {
   echo "$template" > "$TEST_TMPDIR/test.tmpl"
 
   zsh -c "
-    export DOTFILES_DIR='$DOTFILES_DIR'
-    export TEMPLATES_DIR='$DOTFILES_DIR/templates'
-    source '$DOTFILES_DIR/lib/_logging.sh'
+    export BLACKDOT_DIR='$BLACKDOT_DIR'
+    export TEMPLATES_DIR='$BLACKDOT_DIR/templates'
+    source '$BLACKDOT_DIR/lib/_logging.sh'
     source '$TEMPLATES_SH'
     $setup_code
     build_template_vars

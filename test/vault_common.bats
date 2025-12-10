@@ -286,8 +286,8 @@ zsh_var() {
   [ "$output" -gt 0 ]
 }
 
-@test "DOTFILES_ITEMS array is properly defined" {
-  run zsh -c "export VAULT_CONFIG_FILE='$VAULT_CONFIG_FILE'; source '$COMMON_SH'; echo \${#DOTFILES_ITEMS[@]}"
+@test "BLACKDOT_ITEMS array is properly defined" {
+  run zsh -c "export VAULT_CONFIG_FILE='$VAULT_CONFIG_FILE'; source '$COMMON_SH'; echo \${#BLACKDOT_ITEMS[@]}"
 
   [ "$status" -eq 0 ]
   [ "$output" -gt 0 ]

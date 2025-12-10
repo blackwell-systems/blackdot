@@ -28,8 +28,8 @@ WORKDIR /home/developer
 
 # Clone dotfiles (replace with your fork)
 # For CI, you might mount the repo instead
-ARG DOTFILES_REPO=https://github.com/blackwell-systems/dotfiles.git
-RUN git clone "$DOTFILES_REPO" /home/developer/workspace/dotfiles
+ARG BLACKDOT_REPO=https://github.com/blackwell-systems/blackdot.git
+RUN git clone "$BLACKDOT_REPO" /home/developer/workspace/dotfiles
 
 # Run bootstrap
 WORKDIR /home/developer/workspace/dotfiles
@@ -54,7 +54,7 @@ RUN echo '' >> /home/developer/.zshrc && \
     echo '    echo ""' >> /home/developer/.zshrc && \
     echo '    echo "\\033[1mTest Vault with Mock Credentials (pass backend):\\033[0m"' >> /home/developer/.zshrc && \
     echo '    echo "  ./test/mocks/setup-mock-vault.sh --no-pass  # Creates fake GPG key + pass store"' >> /home/developer/.zshrc && \
-    echo '    echo "  export DOTFILES_VAULT_BACKEND=pass          # Switch to pass backend"' >> /home/developer/.zshrc && \
+    echo '    echo "  export BLACKDOT_VAULT_BACKEND=pass          # Switch to pass backend"' >> /home/developer/.zshrc && \
     echo '    echo "  dotfiles vault check                        # Test vault commands"' >> /home/developer/.zshrc && \
     echo '    echo ""' >> /home/developer/.zshrc && \
     echo '    export _WELCOME_SHOWN=1' >> /home/developer/.zshrc && \

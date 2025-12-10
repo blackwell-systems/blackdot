@@ -7,7 +7,7 @@
 # dotfiles modules. Source this file to use themed colors.
 #
 # Usage:
-#   source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
+#   source "${BLACKDOT_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
 #
 # Semantic colors:
 #   $CLR_PRIMARY, $CLR_SECONDARY, $CLR_SUCCESS, $CLR_ERROR,

@@ -1,6 +1,6 @@
 # Claude Code Integration
 
-> **The first dotfiles designed for AI-assisted development.**
+> **The first blackdot designed for AI-assisted development.**
 
 This repository includes native Claude Code integration for portable sessions across machines.
 
@@ -127,7 +127,7 @@ The `claude/commands/` directory can contain custom slash commands for Claude Co
 Claude Code integration is **automatic** when you run the bootstrap:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 ```
 
 To skip the `/workspace` symlink (not recommended for Claude users):
@@ -240,16 +240,16 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
 
 ```
 ┌─────────────────────────────────┐     ┌─────────────────────────────────┐
-│           dotfiles              │     │           dotclaude             │
+│           blackdot              │     │           dotclaude             │
 │  (shell config, secrets, etc)   │     │   (Claude profile management)   │
 ├─────────────────────────────────┤     ├─────────────────────────────────┤
 │                                 │     │                                 │
-│  dotfiles status    ───────────────────► shows Claude profile status   │
-│  dotfiles doctor    ───────────────────► checks Claude health          │
-│  dotfiles drift     ───────────────────► detects profile changes       │
-│  dotfiles vault pull ───────────────► restores profiles.json        │
-│  dotfiles packages  ───────────────────► suggests dotclaude install    │
-│  dotfiles setup     ───────────────────► offers dotclaude setup        │
+│  blackdot status    ───────────────────► shows Claude profile status   │
+│  blackdot doctor    ───────────────────► checks Claude health          │
+│  blackdot drift     ───────────────────► detects profile changes       │
+│  blackdot vault pull ───────────────► restores profiles.json        │
+│  blackdot packages  ───────────────────► suggests dotclaude install    │
+│  blackdot setup     ───────────────────► offers dotclaude setup        │
 │                                 │     │                                 │
 └─────────────────────────────────┘     └─────────────────────────────────┘
                                               ▲
@@ -260,25 +260,25 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
                                         dotclaude create personal
 ```
 
-**Key principle:** dotclaude is NOT wrapped or hidden. Users run it directly for all profile management. dotfiles just "knows about" dotclaude to enhance existing commands.
+**Key principle:** dotclaude is NOT wrapped or hidden. Users run it directly for all profile management. blackdot just "knows about" dotclaude to enhance existing commands.
 
 ### What's Integrated
 
 | Command | Claude Integration |
 |---------|-------------------|
-| `dotfiles status` | Shows active Claude profile |
-| `dotfiles doctor` | Validates Claude/dotclaude setup |
-| `dotfiles vault pull` | Restores Claude profiles.json |
-| `dotfiles drift` | Detects profile changes vs vault |
-| `dotfiles packages` | Suggests dotclaude for Claude users |
-| `dotfiles setup` | Offers dotclaude installation |
+| `blackdot status` | Shows active Claude profile |
+| `blackdot doctor` | Validates Claude/dotclaude setup |
+| `blackdot vault pull` | Restores Claude profiles.json |
+| `blackdot drift` | Detects profile changes vs vault |
+| `blackdot packages` | Suggests dotclaude for Claude users |
+| `blackdot setup` | Offers dotclaude installation |
 
 ### How It Works
 
 1. **dotclaude** manages profiles in `~/code/dotclaude/profiles/`
 2. **dotclaude** auto-generates `~/.claude/profiles.json` on activate/create
-3. **dotfiles vault** syncs `profiles.json` to your password manager
-4. **dotfiles vault pull** restores it on new machines
+3. **blackdot vault** syncs `profiles.json` to your password manager
+4. **blackdot vault pull** restores it on new machines
 
 The `profiles.json` format:
 ```json
@@ -302,10 +302,10 @@ dotclaude create my-project
 dotclaude activate my-project
 
 # Sync to vault
-dotfiles vault push Claude-Profiles
+blackdot vault push Claude-Profiles
 
 # On new machine, restore everything including Claude profiles
-dotfiles vault pull
+blackdot vault pull
 ```
 
 ### New Developer Onboarding
@@ -317,10 +317,10 @@ curl -fsSL .../install.sh | bash
 # Unlock vault and restore secrets (including Claude profiles)
 bw login
 export BW_SESSION="$(bw unlock --raw)"
-dotfiles vault pull
+blackdot vault pull
 
 # Verify setup
-dotfiles doctor
+blackdot doctor
 # All systems green, including Claude
 
 # Ready to work
@@ -331,10 +331,10 @@ dotclaude list
 ### Without dotclaude
 
 If you use Claude Code without dotclaude:
-- `dotfiles status` shows a gentle hint: `try: dotclaude`
-- `dotfiles doctor` suggests installation with instructions
-- `dotfiles packages` mentions dotclaude availability
-- No impact on other dotfiles functionality - completely optional
+- `blackdot status` shows a gentle hint: `try: dotclaude`
+- `blackdot doctor` suggests installation with instructions
+- `blackdot packages` mentions dotclaude availability
+- No impact on other blackdot functionality - completely optional
 
 ---
 
@@ -352,6 +352,6 @@ Potential capabilities:
 
 ## Related Documentation
 
-- [CLAUDE.md](https://github.com/blackwell-systems/dotfiles/blob/main/CLAUDE.md) - Session guidelines
-- [claude/hooks/README.md](https://github.com/blackwell-systems/dotfiles/blob/main/claude/hooks/README.md) - Hook customization
+- [CLAUDE.md](https://github.com/blackwell-systems/blackdot/blob/main/CLAUDE.md) - Session guidelines
+- [claude/hooks/README.md](https://github.com/blackwell-systems/blackdot/blob/main/claude/hooks/README.md) - Hook customization
 - [Roadmap](ROADMAP.md) - Future plans including MCP

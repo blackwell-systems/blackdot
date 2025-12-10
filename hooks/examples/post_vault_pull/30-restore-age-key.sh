@@ -29,9 +29,9 @@ if [[ -f "$AGE_KEY_FILE" ]]; then
 fi
 
 # Check if encryption library is available
-DOTFILES_DIR="${DOTFILES_DIR:-$HOME/workspace/dotfiles}"
-if [[ -f "$DOTFILES_DIR/lib/_encryption.sh" ]]; then
-    source "$DOTFILES_DIR/lib/_encryption.sh"
+BLACKDOT_DIR="${BLACKDOT_DIR:-$HOME/workspace/dotfiles}"
+if [[ -f "$BLACKDOT_DIR/lib/_encryption.sh" ]]; then
+    source "$BLACKDOT_DIR/lib/_encryption.sh"
 
     # Try to restore from vault
     if encryption_hook_post_vault_pull 2>/dev/null; then

@@ -66,7 +66,7 @@ vault_backend_login_check() {
 }
 
 vault_backend_get_session() {
-    local session_file="${VAULT_SESSION_FILE:-$DOTFILES_DIR/vault/.vault-session}"
+    local session_file="${VAULT_SESSION_FILE:-$BLACKDOT_DIR/vault/.vault-session}"
 
     # 1Password v2 uses biometric/system auth, not session tokens
     # But we still support service accounts via OP_SERVICE_ACCOUNT_TOKEN

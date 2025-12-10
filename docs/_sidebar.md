@@ -44,5 +44,5 @@
   - [Changelog](CHANGELOG.md)
 
 - **Links**
-  - [![GitHub](https://icongr.am/simple/github.svg?size=16&colored=false) GitHub Repo](https://github.com/blackwell-systems/dotfiles)
-  - [![Issues](https://icongr.am/octicons/issue-opened.svg?size=16) Issues](https://github.com/blackwell-systems/dotfiles/issues)
+  - [![GitHub](https://icongr.am/simple/github.svg?size=16&colored=false) GitHub Repo](https://github.com/blackwell-systems/blackdot)
+  - [![Issues](https://icongr.am/octicons/issue-opened.svg?size=16) Issues](https://github.com/blackwell-systems/blackdot/issues)

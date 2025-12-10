@@ -1,6 +1,6 @@
 # Roadmap & Future Improvements
 
-This document outlines planned improvements and future work for the dotfiles system.
+This document outlines planned improvements and future work for the blackdot system.
 
 ---
 
@@ -10,9 +10,9 @@ This document outlines planned improvements and future work for the dotfiles sys
 
 **Status:** Concept - Not Started
 
-Create an MCP (Model Context Protocol) server that allows Claude Code to directly interact with dotfiles operations.
+Create an MCP (Model Context Protocol) server that allows Claude Code to directly interact with blackdot operations.
 
-**Why:** Currently, Claude interacts with dotfiles via shell commands. An MCP server would provide:
+**Why:** Currently, Claude interacts with blackdot via shell commands. An MCP server would provide:
 - **Native tool integration** - Claude sees `dotfiles_health_check`, `dotfiles_vault_sync` as first-class tools
 - **Structured responses** - JSON responses instead of parsing shell output
 - **Proactive actions** - Claude could auto-fix issues during coding sessions
@@ -71,10 +71,10 @@ plugins/
 
 **Commands:**
 ```bash
-dotfiles plugin list              # List available plugins
-dotfiles plugin enable <name>     # Enable a plugin
-dotfiles plugin disable <name>    # Disable a plugin
-dotfiles plugin create <name>     # Scaffold new plugin
+blackdot plugin list              # List available plugins
+blackdot plugin enable <name>     # Enable a plugin
+blackdot plugin disable <name>    # Disable a plugin
+blackdot plugin create <name>     # Scaffold new plugin
 ```
 
 ---
@@ -98,7 +98,7 @@ modules/
 **Features:**
 - Module manifests (`module.json`) for metadata
 - Feature-to-module mapping
-- `dotfiles module` subcommand
+- `blackdot module` subcommand
 
 ---
 
@@ -150,8 +150,8 @@ Group all developer tool integrations as a single `dev_tools` meta-feature for e
 
 **Commands:**
 ```bash
-dotfiles features enable dev_tools      # Enable all developer tool integrations
-dotfiles features disable dev_tools     # Disable all developer tool integrations
+blackdot features enable dev_tools      # Enable all developer tool integrations
+blackdot features disable dev_tools     # Disable all developer tool integrations
 ```
 
 **Included Features:**
@@ -176,9 +176,9 @@ Automatically detect variables from existing config files and generate templates
 
 **Discovery Command:**
 ```bash
-dotfiles template discover [file]     # Analyze file(s) for variables
-dotfiles template discover            # Analyze all known config locations
-dotfiles template discover --apply    # Generate template + update variables
+blackdot template discover [file]     # Analyze file(s) for variables
+blackdot template discover            # Analyze all known config locations
+blackdot template discover --apply    # Generate template + update variables
 ```
 
 **Safety Features:**
@@ -244,18 +244,18 @@ Validate config.json structure with helpful error messages.
 
 **Validation Command:**
 ```bash
-dotfiles config validate
+blackdot config validate
 # ✓ Config is valid
 
-dotfiles config validate
+blackdot config validate
 # ✗ Invalid config:
 #   - .vault.backend: "bitwarden_cli" is not valid (expected: bitwarden, 1password, pass)
 #   - .features.valt: unknown feature (did you mean: vault?)
 ```
 
 **Auto-validation:**
-- Run on `dotfiles config set` (before saving)
-- Run on `dotfiles doctor` (health check)
+- Run on `blackdot config set` (before saving)
+- Run on `blackdot doctor` (health check)
 
 ---
 
@@ -267,9 +267,9 @@ Dedicated command to list and search aliases, grouped by category.
 
 **Command:**
 ```bash
-dotfiles aliases                  # List all aliases by category
-dotfiles aliases aws              # Show AWS-related aliases
-dotfiles aliases search <term>    # Search aliases by name or expansion
+blackdot aliases                  # List all aliases by category
+blackdot aliases aws              # Show AWS-related aliases
+blackdot aliases search <term>    # Search aliases by name or expansion
 ```
 
 ---
@@ -289,7 +289,7 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 **If you need a different location:**
 1. Clone to your preferred location
 2. Create symlink: `ln -s /your/path /workspace`
-3. Update `DOTFILES_DIR` in scripts (not recommended)
+3. Update `BLACKDOT_DIR` in scripts (not recommended)
 
 ---
 
@@ -311,8 +311,8 @@ Rebrand from "dotfiles" to **blackdot** - a searchable, memorable name that repr
 ### Runtime Indicators
 Both shells now report their runtime:
 ```bash
-dotfiles version     # → "dotfiles dev (Go CLI)" or "dotfiles dev (ZSH shell)"
-dotfiles help        # → Shows "Runtime: Go CLI (dev)" or "Runtime: ZSH shell"
+blackdot version     # → "blackdot dev (Go CLI)" or "blackdot dev (ZSH shell)"
+blackdot help        # → Shows "Runtime: Go CLI (dev)" or "Runtime: ZSH shell"
 ```
 
 ### Migration Path
@@ -329,14 +329,14 @@ dotfiles help        # → Shows "Runtime: Go CLI (dev)" or "Runtime: ZSH shell"
 ### Go CLI - Full Cross-Platform Parity
 
 - **100% command parity** with bash implementation (16/16 commands, 34/34 subcommands)
-- **Cross-platform tools** (`dotfiles tools`) with 8 categories, 50+ commands
+- **Cross-platform tools** (`blackdot tools`) with 8 categories, 50+ commands
 - **Runtime feature guards** in ZSH - enable/disable features without shell reload
 - **Binary distribution** - GitHub Actions builds for Linux/macOS/Windows x amd64/arm64
 - **PowerShell module v1.2.0** - Claude tools with `-Eval` support
 
 ### Claude Integration
 
-- **Go CLI:** `dotfiles tools claude` (status, bedrock, max, switch, init, env)
+- **Go CLI:** `blackdot tools claude` (status, bedrock, max, switch, init, env)
 - **ZSH:** claude-bedrock, claude-max, claude-run, claude-status with runtime guards
 - **PowerShell:** claude-status, claude-bedrock -Eval, claude-max -Eval, claude-switch
 

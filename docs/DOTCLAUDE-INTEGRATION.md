@@ -1,4 +1,4 @@
-# dotclaude + dotfiles Integration Guide
+# dotclaude + blackdot Integration Guide
 
 ## Overview
 
@@ -18,7 +18,7 @@ flowchart TB
         base["Base Config<br/>• Global standards<br/>• Shared agents"]
     end
 
-    subgraph dotfiles["dotfiles System"]
+    subgraph dotfiles["blackdot System"]
         vault["Vault Secrets<br/>• SSH keys<br/>• AWS credentials<br/>• Git config<br/>• Env secrets"]
         shell["Shell & Tools<br/>• Zsh config<br/>• CLI tools<br/>• Brewfile"]
     end
@@ -35,7 +35,7 @@ flowchart TB
     claude_dir --> workspace
 
     style dotclaude fill:#8A2BE2,stroke:#9333EA,color:#e2e8f0
-    style dotfiles fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style blackdot fill:#2c5282,stroke:#4299e1,color:#e2e8f0
     style shared fill:#22543d,stroke:#2f855a,color:#e2e8f0
     style workspace fill:#2f855a,stroke:#48bb78,color:#e2e8f0
 ```
@@ -49,7 +49,7 @@ flowchart TB
 - **settings.json**: Claude Code settings per profile
 - **Profile switching**: `dotclaude activate <profile>`
 
-### dotfiles Manages:
+### blackdot Manages:
 - **Secrets**: SSH keys, AWS credentials, Git config, environment variables
 - **Vault sync**: Multi-backend (Bitwarden, 1Password, pass)
 - **Shell configuration**: Zsh, Powerlevel10k, CLI tools
@@ -58,7 +58,7 @@ flowchart TB
 
 ### Shared Components:
 - **~/workspace/**: Both systems use this for portable paths
-- **~/.claude/**: dotclaude manages, dotfiles respects
+- **~/.claude/**: dotclaude manages, blackdot respects
 - **Portable sessions**: Both contribute to session portability
 
 ## Setup
@@ -67,8 +67,8 @@ flowchart TB
 
 Both systems installed:
 ```bash
-# Install dotfiles first
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+# Install blackdot first
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 
 # Then install dotclaude
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh | bash
@@ -79,7 +79,7 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/in
 The bootstrap scripts detect each other:
 
 ```bash
-# dotfiles bootstrap detects dotclaude
+# blackdot bootstrap detects dotclaude
 ./bootstrap/bootstrap-mac.sh
 # Detected: dotclaude is installed
 # Ensuring compatibility with dotclaude profile management...
@@ -91,8 +91,8 @@ No manual configuration needed. Both systems coordinate automatically.
 ### Manual Verification
 
 ```bash
-# Check dotfiles setup
-dotfiles doctor
+# Check blackdot setup
+blackdot doctor
 
 # Check dotclaude setup
 dotclaude show
@@ -114,7 +114,7 @@ dotclaude create client-acme    # Acme Corp project
 dotclaude create client-beta    # Beta Inc project
 
 # Store client-specific secrets in vault
-dotfiles vault create          # Interactive prompts
+blackdot vault create          # Interactive prompts
 # Item: acme-ssh-key
 # Item: acme-aws-creds
 # Item: beta-ssh-key
@@ -122,11 +122,11 @@ dotfiles vault create          # Interactive prompts
 
 # Switch contexts
 dotclaude activate client-acme
-dotfiles vault pull acme-*   # Restore Acme secrets
+blackdot vault pull acme-*   # Restore Acme secrets
 
 # Later: switch to Beta
 dotclaude activate client-beta
-dotfiles vault pull beta-*   # Restore Beta secrets
+blackdot vault pull beta-*   # Restore Beta secrets
 ```
 
 **Result**: Profile standards change, secrets change, both synced across machines.
@@ -143,7 +143,7 @@ dotclaude activate oss-projects
 # - Community-friendly tone
 
 # OSS secrets (dotfiles)
-dotfiles vault pull oss-*
+blackdot vault pull oss-*
 # - Personal SSH key
 # - Personal AWS (for demos)
 # - GitHub personal account Git config
@@ -155,7 +155,7 @@ dotclaude activate work-employer
 # - Corporate tone
 
 # Work secrets (dotfiles)
-dotfiles vault pull work-*
+blackdot vault pull work-*
 # - Corporate SSH key
 # - Corporate AWS
 # - GitLab work account Git config
@@ -170,13 +170,13 @@ dotfiles vault pull work-*
 ```bash
 # On macOS
 dotclaude activate my-project
-dotfiles vault pull
+blackdot vault pull
 cd /workspace/my-project && claude
 # ... work, exit ...
 
 # In Lima VM
 dotclaude activate my-project  # Same profile name
-dotfiles vault pull         # Same secrets
+blackdot vault pull         # Same secrets
 cd /workspace/my-project && claude
 # SAME conversation continues!
 ```
@@ -188,8 +188,8 @@ cd /workspace/my-project && claude
 ### New Machine Setup
 
 ```bash
-# 1. Bootstrap dotfiles (handles /workspace, vault, shell)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+# 1. Bootstrap blackdot (handles /workspace, vault, shell)
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 
 # 2. Install dotclaude
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh | bash
@@ -199,7 +199,7 @@ cd ~/workspace/dotclaude-profiles
 git pull
 
 # 4. Restore secrets
-dotfiles vault pull
+blackdot vault pull
 
 # 5. Activate profile
 dotclaude activate my-preferred-profile
@@ -231,16 +231,16 @@ cd /workspace/oss/contrib && claude
 ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey
 
 # Update vault
-dotfiles vault push ssh
+blackdot vault push ssh
 
 # Propagate to other machines
 # (on other machine)
-dotfiles vault pull ssh
+blackdot vault pull ssh
 ```
 
 ## Configuration
 
-### dotfiles Configuration
+### blackdot Configuration
 
 Located in `~/workspace/dotfiles/`:
 
@@ -277,7 +277,7 @@ Located in your dotclaude repository (typically `~/workspace/dotclaude-profiles/
 
 The systems coordinate via:
 
-1. **~/.claude/**: dotclaude manages, dotfiles respects
+1. **~/.claude/**: dotclaude manages, blackdot respects
 2. **~/workspace/**: Both use for portable paths
 3. **/workspace symlink**: Created by dotfiles, used by dotclaude
 
@@ -290,19 +290,19 @@ The systems coordinate via:
 **Solution**: dotclaude only manages Claude config. Secrets are separate:
 ```bash
 dotclaude activate new-profile    # Changes Claude context
-dotfiles vault pull new-*      # Manually restore new secrets
+blackdot vault pull new-*      # Manually restore new secrets
 ```
 
-**Future enhancement**: Hook in dotclaude to auto-run `dotfiles vault pull`
+**Future enhancement**: Hook in dotclaude to auto-run `blackdot vault pull`
 
 ### Issue: /workspace Paths Don't Work
 
 **Symptom**: dotclaude profiles reference `/workspace/...` but symlink missing
 
-**Solution**: Run dotfiles bootstrap:
+**Solution**: Run blackdot bootstrap:
 ```bash
 cd ~/workspace/dotfiles
-./bootstrap/bootstrap-dotfiles.sh
+./bootstrap/bootstrap-blackdot.sh
 # Creates /workspace -> ~/workspace symlink
 ```
 
@@ -310,22 +310,22 @@ cd ~/workspace/dotfiles
 
 **Symptom**: Both systems trying to manage `~/.claude/`
 
-**Solution**: dotclaude takes precedence. dotfiles will detect and skip:
+**Solution**: dotclaude takes precedence. blackdot will detect and skip:
 ```bash
-dotfiles doctor
+blackdot doctor
 # ~/.claude managed by dotclaude: OK
 ```
 
-If you uninstall dotclaude, dotfiles can take over:
+If you uninstall dotclaude, blackdot can take over:
 ```bash
 dotclaude uninstall
-dotfiles doctor --fix
+blackdot doctor --fix
 # ~/.claude now managed by dotfiles
 ```
 
 ### Issue: Vault Items Not Found After Profile Switch
 
-**Symptom**: `dotfiles vault pull` fails after switching profile
+**Symptom**: `blackdot vault pull` fails after switching profile
 
 **Cause**: Vault item names don't match profile names
 
@@ -337,7 +337,7 @@ profile-name-aws-creds
 profile-name-git-config
 
 # Restore by pattern:
-dotfiles vault pull "profile-name-*"
+blackdot vault pull "profile-name-*"
 ```
 
 ## Advanced Integration
@@ -352,7 +352,7 @@ Add to your dotclaude profile's `settings.json`:
     "PostActivate": [
       {
         "type": "command",
-        "command": "bash -c 'cd ~/workspace/dotfiles && ./vault/restore-ssh.sh $DOTCLAUDE_PROFILE'"
+        "command": "bash -c 'cd ~/workspace/blackdot && ./vault/restore-ssh.sh $DOTCLAUDE_PROFILE'"
       }
     ]
   }
@@ -368,7 +368,7 @@ Both systems can use environment variables:
 ```bash
 # In ~/.zshrc (managed by dotfiles)
 export DOTCLAUDE_PROFILE_DIR="$HOME/workspace/dotclaude-profiles"
-export DOTFILES_VAULT_BACKEND="bitwarden"
+export BLACKDOT_VAULT_BACKEND="bitwarden"
 
 # Now both systems know where to find things
 ```
@@ -379,7 +379,7 @@ Recommended workspace organization:
 
 ```bash
 ~/workspace/
-├── dotfiles/              # dotfiles repo
+├── dotfiles/              # blackdot repo
 ├── dotclaude-profiles/    # dotclaude repo
 ├── .claude/              # Claude state (symlinked)
 ├── code/
@@ -395,7 +395,7 @@ Both systems respect this structure.
 
 ### Secrets Storage
 
-- **dotfiles vault**: Encrypted in Bitwarden/1Password/pass
+- **blackdot vault**: Encrypted in Bitwarden/1Password/pass
 - **dotclaude profiles**: Version controlled, no secrets
 - **Never**: Store secrets in dotclaude profiles
 
@@ -415,12 +415,12 @@ Dotfiles vault items stay private in your vault.
 
 Some secrets are per-machine (not synced):
 ```bash
-# dotfiles handles per-machine secrets
+# blackdot handles per-machine secrets
 ~/.ssh/config             # Can include machine-specific entries
 ~/.aws/config             # Can have machine-specific profiles
 
-# Use dotfiles templates for customization
-dotfiles template init    # Set machine variables
+# Use blackdot templates for customization
+blackdot template init    # Set machine variables
 ```
 
 ## Migration Guides
@@ -447,13 +447,13 @@ Already using dotclaude? Add dotfiles:
 
 ```bash
 # Install dotfiles
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 
 # It detects dotclaude and coordinates automatically
 # Your existing ~/.claude profiles stay intact
 
 # Add secret management
-dotfiles vault push --all    # Push current secrets to vault
+blackdot vault push --all    # Push current secrets to vault
 ```
 
 ## Best Practices
@@ -485,18 +485,18 @@ dotfiles vault push --all    # Push current secrets to vault
 5. **Document custom workflows**: Add notes to profile READMEs
    ```bash
    # In ~/workspace/dotclaude-profiles/profiles/client-acme/README.md
-   # Requires: dotfiles vault pull client-acme-*
+   # Requires: blackdot vault pull client-acme-*
    ```
 
 ## Further Reading
 
 - **[dotclaude Documentation](https://github.com/blackwell-systems/dotclaude)** - Profile management
-- **[dotfiles Vault Guide](VAULT.md)** - Secret management
+- **[blackdot Vault Guide](VAULT.md)** - Secret management
 - **[Workspace Architecture](README-FULL.md#canonical-workspace)** - How /workspace works
 
 ## Support
 
 Issues with integration:
-- **dotfiles**: https://github.com/blackwell-systems/dotfiles/issues
+- **dotfiles**: https://github.com/blackwell-systems/blackdot/issues
 - **dotclaude**: https://github.com/blackwell-systems/dotclaude/issues
 - **Integration**: Open issue in either repo, tag with `integration`

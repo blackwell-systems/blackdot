@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/blackwell-systems/dotfiles/vault-items.schema.json",
+  "$id": "https://github.com/blackwell-systems/blackdot/vault-items.schema.json",
   "title": "Dotfiles Vault Items Configuration",
   "description": "Schema for validating vault-items.json configuration file",
   "type": "object",

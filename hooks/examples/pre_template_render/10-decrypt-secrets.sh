@@ -19,8 +19,8 @@
 
 set -euo pipefail
 
-DOTFILES_DIR="${DOTFILES_DIR:-$HOME/workspace/dotfiles}"
-TEMPLATES_DIR="$DOTFILES_DIR/templates"
+BLACKDOT_DIR="${BLACKDOT_DIR:-$HOME/workspace/dotfiles}"
+TEMPLATES_DIR="$BLACKDOT_DIR/templates"
 ENCRYPTION_DIR="${HOME}/.config/dotfiles"
 AGE_KEY_FILE="${ENCRYPTION_DIR}/age-key.txt"
 
@@ -35,8 +35,8 @@ if ! command -v age >/dev/null 2>&1; then
 fi
 
 # Source encryption library if available
-if [[ -f "$DOTFILES_DIR/lib/_encryption.sh" ]]; then
-    source "$DOTFILES_DIR/lib/_encryption.sh"
+if [[ -f "$BLACKDOT_DIR/lib/_encryption.sh" ]]; then
+    source "$BLACKDOT_DIR/lib/_encryption.sh"
     encryption_hook_pre_template
     exit 0
 fi

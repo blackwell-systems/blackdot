@@ -3,8 +3,8 @@
 # NOTE: These tests require zsh since _features.sh uses zsh syntax
 
 setup() {
-  export DOTFILES_DIR="${BATS_TEST_DIRNAME}/.."
-  export FEATURES_SH="${DOTFILES_DIR}/lib/_features.sh"
+  export BLACKDOT_DIR="${BATS_TEST_DIRNAME}/.."
+  export FEATURES_SH="${BLACKDOT_DIR}/lib/_features.sh"
 
   # Create temporary config directory
   export TEST_CONFIG_DIR="${BATS_TEST_TMPDIR}/dotfiles"
@@ -195,9 +195,9 @@ teardown() {
   [ "$output" = "disabled" ]
 }
 
-@test "DOTFILES_SKIP_DRIFT_CHECK=1 disables drift_check" {
+@test "BLACKDOT_SKIP_DRIFT_CHECK=1 disables drift_check" {
   run zsh -c "
-    export DOTFILES_SKIP_DRIFT_CHECK=1
+    export BLACKDOT_SKIP_DRIFT_CHECK=1
     source '$FEATURES_SH'
     feature_enabled 'drift_check' || echo 'disabled'
   "
@@ -205,12 +205,12 @@ teardown() {
   [ "$output" = "disabled" ]
 }
 
-@test "DOTFILES_FEATURE_VAULT=true enables vault" {
+@test "BLACKDOT_FEATURE_VAULT=true enables vault" {
   echo '{"features": {"vault": false}}' > "$CONFIG_FILE"
 
   run zsh -c "
     export CONFIG_FILE='$CONFIG_FILE'
-    export DOTFILES_FEATURE_VAULT=true
+    export BLACKDOT_FEATURE_VAULT=true
     source '$FEATURES_SH'
     feature_enabled 'vault' && echo 'enabled'
   "
@@ -218,12 +218,12 @@ teardown() {
   [ "$output" = "enabled" ]
 }
 
-@test "DOTFILES_FEATURE_VAULT=false disables vault" {
+@test "BLACKDOT_FEATURE_VAULT=false disables vault" {
   echo '{"features": {"vault": true}}' > "$CONFIG_FILE"
 
   run zsh -c "
     export CONFIG_FILE='$CONFIG_FILE'
-    export DOTFILES_FEATURE_VAULT=false
+    export BLACKDOT_FEATURE_VAULT=false
     source '$FEATURES_SH'
     feature_enabled 'vault' || echo 'disabled'
   "

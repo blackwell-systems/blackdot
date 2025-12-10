@@ -66,7 +66,7 @@ assignees: ''
 ## Checklist
 
 - [ ] I have read the [README](../../README.md)
-- [ ] I have searched [existing issues](https://github.com/blackwell-systems/dotfiles/issues)
+- [ ] I have searched [existing issues](https://github.com/blackwell-systems/blackdot/issues)
 - [ ] I have included health check output
 - [ ] I have included error messages
 - [ ] I have specified my environment details

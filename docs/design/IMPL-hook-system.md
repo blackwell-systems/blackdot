@@ -37,7 +37,7 @@ The Hook System integrates with the **Feature Registry** (`lib/_features.sh`) wh
 - The hook system registers as the `hooks` feature (optional category)
 - Vault hooks only run if `vault` feature is enabled
 - Hooks can call `feature_enabled()` to conditionally execute
-- `dotfiles features disable hooks` disables all hook execution
+- `blackdot features disable hooks` disables all hook execution
 
 ---
 
@@ -60,7 +60,7 @@ The Hook System integrates with the **Feature Registry** (`lib/_features.sh`) wh
 | `post_install` | After `install.sh` completes | Run custom setup |
 | `pre_bootstrap` | Before bootstrap script | Check prerequisites |
 | `post_bootstrap` | After bootstrap completes | Install extra packages |
-| `pre_upgrade` | Before `dotfiles upgrade` | Backup config |
+| `pre_upgrade` | Before `blackdot upgrade` | Backup config |
 | `post_upgrade` | After upgrade completes | Run migrations |
 
 ### Vault Hooks
@@ -436,11 +436,11 @@ hook_init() {
 
 ---
 
-## CLI Command (`bin/dotfiles-hook`)
+## CLI Command (`bin/blackdot-hook`)
 
 ```bash
 #!/usr/bin/env bash
-# bin/dotfiles-hook - Hook management CLI
+# bin/blackdot-hook - Hook management CLI
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -449,7 +449,7 @@ source "${SCRIPT_DIR}/../lib/_hooks.sh"
 
 usage() {
     cat <<EOF
-Usage: dotfiles hook <command> [args]
+Usage: blackdot hook <command> [args]
 
 Commands:
   list [point]            List hooks (all or for specific point)
@@ -471,10 +471,10 @@ Hook Points:
   pre_setup_phase, post_setup_phase, setup_complete
 
 Examples:
-  dotfiles hook list
-  dotfiles hook list post_vault_pull
-  dotfiles hook run post_vault_pull
-  dotfiles hook add post_vault_pull ~/scripts/my-hook.sh
+  blackdot hook list
+  blackdot hook list post_vault_pull
+  blackdot hook run post_vault_pull
+  blackdot hook add post_vault_pull ~/scripts/my-hook.sh
 EOF
 }
 
@@ -564,7 +564,7 @@ esac
 
 ```bash
 # bootstrap-mac.sh
-source "$DOTFILES_DIR/lib/_hooks.sh"
+source "$BLACKDOT_DIR/lib/_hooks.sh"
 
 hook_run "pre_bootstrap"
 
@@ -577,7 +577,7 @@ hook_run "post_bootstrap"
 
 ```bash
 # vault/restore-secrets.sh
-source "$DOTFILES_DIR/lib/_hooks.sh"
+source "$BLACKDOT_DIR/lib/_hooks.sh"
 
 hook_run "pre_vault_pull"
 
@@ -590,7 +590,7 @@ hook_run "post_vault_pull"
 
 ```zsh
 # zsh/zsh.d/99-hooks.zsh
-source "${DOTFILES_DIR}/lib/_hooks.sh"
+source "${BLACKDOT_DIR}/lib/_hooks.sh"
 hook_init
 
 # Run shell_init hooks
@@ -695,12 +695,12 @@ Based on implementing CLI Feature Awareness, Configuration Layers, and Feature R
 Add env var control for scripting/CI:
 ```bash
 # In lib/_hooks.sh
-DOTFILES_HOOKS_DISABLED=true  # Skip all hook execution
-DOTFILES_HOOKS_VERBOSE=true   # Show detailed execution log
-DOTFILES_HOOKS_TIMEOUT=60     # Override timeout
+BLACKDOT_HOOKS_DISABLED=true  # Skip all hook execution
+BLACKDOT_HOOKS_VERBOSE=true   # Show detailed execution log
+BLACKDOT_HOOKS_TIMEOUT=60     # Override timeout
 
 # Check at start of hook_run()
-if [[ "${DOTFILES_HOOKS_DISABLED:-}" == "true" ]]; then
+if [[ "${BLACKDOT_HOOKS_DISABLED:-}" == "true" ]]; then
     return 0
 fi
 ```
@@ -735,7 +735,7 @@ if [[ "${1:-}" != "--no-hooks" ]]; then
     hook_run "pre_vault_pull"
 fi
 
-# Usage: dotfiles vault pull --no-hooks
+# Usage: blackdot vault pull --no-hooks
 ```
 
 ### 4. Helpful Error Messages with Enable Hints
@@ -745,7 +745,7 @@ hook_run() {
     # ...
     if (( result != 0 )); then
         echo "Hook failed: $name" >&2
-        echo "  Disable with: dotfiles features disable hooks" >&2
+        echo "  Disable with: blackdot features disable hooks" >&2
         echo "  Or skip with: --no-hooks flag" >&2
     fi
 }
@@ -766,12 +766,12 @@ enabled=$(jq -r '.enabled' hooks.json)
 Allow hooks config from multiple sources (like config_layers):
 ```bash
 # Priority: env > project > user
-# Project hooks in .dotfiles.json
+# Project hooks in .blackdot.json
 # User hooks in ~/.config/dotfiles/hooks.json
 
 _hooks_get_config() {
     local project_hooks=""
-    [[ -f .dotfiles.json ]] && project_hooks=$(jq -r '.hooks // empty' .dotfiles.json)
+    [[ -f .blackdot.json ]] && project_hooks=$(jq -r '.hooks // empty' .blackdot.json)
 
     # Merge project + user hooks
 }
@@ -815,7 +815,7 @@ All hook tests need zsh:
 Hook settings should respect config layer precedence:
 ```bash
 # Allow project-level hook overrides
-# .dotfiles.json in repo can add project-specific hooks
+# .blackdot.json in repo can add project-specific hooks
 {
   "hooks": {
     "post_install": [
@@ -861,18 +861,18 @@ The following existing functionality in the codebase would be brought under hook
 
 | Current Location | Function | Hook Point |
 |-----------------|----------|------------|
-| `bin/dotfiles-setup:328` | Create symlinks | `setup_symlinks` |
-| `bin/dotfiles-setup:662` | `chmod 600` vault session | `post_setup_vault` |
-| `bin/dotfiles-setup:947` | Template init | `post_setup` |
+| `bin/blackdot-setup:328` | Create symlinks | `setup_symlinks` |
+| `bin/blackdot-setup:662` | `chmod 600` vault session | `post_setup_vault` |
+| `bin/blackdot-setup:947` | Template init | `post_setup` |
 
-**Migration benefit:** Project-specific setup hooks via `.dotfiles.json`.
+**Migration benefit:** Project-specific setup hooks via `.blackdot.json`.
 
 ### Template Hooks
 
 | Current Location | Function | Hook Point |
 |-----------------|----------|------------|
 | `lib/_templates.sh` | Render templates | `template_render` |
-| `bin/dotfiles-template:link` | Create symlinks | `post_template_render` |
+| `bin/blackdot-template:link` | Create symlinks | `post_template_render` |
 
 **Migration benefit:** Custom post-render hooks for file permissions, notifications.
 
@@ -880,7 +880,7 @@ The following existing functionality in the codebase would be brought under hook
 
 | Current Location | Function | Hook Point |
 |-----------------|----------|------------|
-| `bin/dotfiles-doctor:302,334` | Auto-fix permissions | `doctor_fix` |
+| `bin/blackdot-doctor:302,334` | Auto-fix permissions | `doctor_fix` |
 
 **Migration benefit:** Extensible auto-fix system with user-defined repairs.
 

@@ -65,11 +65,11 @@ sync_vault "$SESSION"
 info "Fetching item list..."
 ALL_ITEMS=$(BW_SESSION="$SESSION" bw list items 2>/dev/null | jq -r '.[].name')
 
-# Build required/optional lists from DOTFILES_ITEMS
+# Build required/optional lists from BLACKDOT_ITEMS
 REQUIRED_ITEMS=()
 OPTIONAL_ITEMS=()
-for item in "${(@k)DOTFILES_ITEMS}"; do
-    spec="${DOTFILES_ITEMS[$item]}"
+for item in "${(@k)BLACKDOT_ITEMS}"; do
+    spec="${BLACKDOT_ITEMS[$item]}"
     if [[ "$spec" == *":required:"* ]]; then
         REQUIRED_ITEMS+=("$item")
     else

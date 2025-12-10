@@ -4,16 +4,16 @@
 [![Shell](https://img.shields.io/badge/Shell-Zsh-89e051?logo=zsh&logoColor=white)](https://www.zsh.org/)
 [![Claude Code](https://img.shields.io/badge/Built_for-Claude_Code-8A2BE2?logo=anthropic)](https://claude.ai/claude-code)
 [![dotclaude](https://img.shields.io/badge/Integrates-dotclaude-8A2BE2?logo=anthropic)](https://github.com/blackwell-systems/dotclaude)
-[![Secrets](https://img.shields.io/badge/Secrets-Multi--Vault-ff4081)](https://github.com/blackwell-systems/dotfiles#vault--secrets)
-[![Version](https://img.shields.io/github/v/release/blackwell-systems/dotfiles)](https://github.com/blackwell-systems/dotfiles/releases)
-[![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)](https://github.com/blackwell-systems/dotfiles)
-[![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
+[![Secrets](https://img.shields.io/badge/Secrets-Multi--Vault-ff4081)](https://github.com/blackwell-systems/blackdot#vault--secrets)
+[![Version](https://img.shields.io/github/v/release/blackwell-systems/blackdot)](https://github.com/blackwell-systems/blackdot/releases)
+[![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)](https://github.com/blackwell-systems/blackdot)
+[![Test Status](https://github.com/blackwell-systems/blackdot/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/blackdot/actions)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
 
-> A dotfiles management framework built on **Feature Registry**, **Configuration Layers**, and **Claude Code Integration**. Multi-vault secrets, portable sessions, machine-specific templates, and self-healing configuration.
+> A blackdot management framework built on **Feature Registry**, **Configuration Layers**, and **Claude Code Integration**. Multi-vault secrets, portable sessions, machine-specific templates, and self-healing configuration.
 
-[Changelog](https://github.com/blackwell-systems/dotfiles/blob/main/CHANGELOG.md) | [GitHub](https://github.com/blackwell-systems/dotfiles)
+[Changelog](https://github.com/blackwell-systems/blackdot/blob/main/CHANGELOG.md) | [GitHub](https://github.com/blackwell-systems/blackdot)
 
 ---
 
@@ -35,20 +35,20 @@
 | [Troubleshooting](troubleshooting.md) | Common issues & solutions |
 | [macOS Settings](macos-settings.md) | 137+ system preferences |
 
-For detailed feature comparisons vs chezmoi, thoughtbot, holman, and other popular dotfiles, see the [main README on GitHub](https://github.com/blackwell-systems/dotfiles#how-this-compares).
+For detailed feature comparisons vs chezmoi, thoughtbot, holman, and other popular dotfiles, see the [main README on GitHub](https://github.com/blackwell-systems/blackdot#how-this-compares).
 
 ---
 
 ## One-Line Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 ```
 
 After installation, run the setup wizard:
 
 ```bash
-dotfiles setup
+blackdot setup
 ```
 
 The wizard guides you through:
@@ -60,15 +60,15 @@ The wizard guides you through:
 **Minimal mode** (shell config only, no secrets integration):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash -s -- --minimal
 ```
 
-Skips: `/workspace` symlink, vault setup, Claude integration. You still get Zsh, CLI tools, and aliases. Run `dotfiles setup` later to enable full features.
+Skips: `/workspace` symlink, vault setup, Claude integration. You still get Zsh, CLI tools, and aliases. Run `blackdot setup` later to enable full features.
 
 **Custom workspace** (use `~/code` instead of `~/workspace`):
 
 ```bash
-WORKSPACE_TARGET=~/code curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+WORKSPACE_TARGET=~/code curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 ```
 
 The setup wizard also prompts for workspace directory (Step 1 of 7).
@@ -78,7 +78,7 @@ The setup wizard also prompts for workspace directory (Step 1 of 7).
 ## Core Features
 
 **Framework Systems:**
-- **Feature Registry** – Modular control plane for all functionality (`dotfiles features`)
+- **Feature Registry** – Modular control plane for all functionality (`blackdot features`)
 - **Configuration Layers** – 5-layer priority: env → project → machine → user → defaults
 - **Claude Code Integration** – Portable sessions, dotclaude profiles, git safety hooks
 
@@ -102,7 +102,7 @@ Integration with Claude Code and [dotclaude](https://github.com/blackwell-system
 |---------|--------------|
 | **Portable sessions** | `/workspace` symlink (target is configurable) lets Claude conversations continue across machines |
 | **[dotclaude](https://github.com/blackwell-systems/dotclaude) profiles** | Manage multiple Claude contexts (work, personal, client projects) |
-| **Vault-synced profiles** | `dotfiles vault pull` brings your Claude profiles to new machines |
+| **Vault-synced profiles** | `blackdot vault pull` brings your Claude profiles to new machines |
 | **Git safety hooks** | PreToolUse hook blocks dangerous commands like `git push --force` |
 | **Session validation** | SessionStart hook auto-checks branch sync status |
 | **Multi-backend support** | Works with Anthropic Max, AWS Bedrock, Google Vertex AI |
@@ -112,10 +112,10 @@ Integration with Claude Code and [dotclaude](https://github.com/blackwell-system
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh | bash
 dotclaude create my-project
 dotclaude activate my-project
-dotfiles vault push Claude-Profiles  # Sync to vault for other machines
+blackdot vault push Claude-Profiles  # Sync to vault for other machines
 ```
 
-**Without dotclaude?** No problem—portable sessions and git safety hooks work standalone. `dotfiles doctor` will gently suggest dotclaude if you're a Claude Code user.
+**Without dotclaude?** No problem—portable sessions and git safety hooks work standalone. `blackdot doctor` will gently suggest dotclaude if you're a Claude Code user.
 
 See [Claude Code + dotclaude Integration](claude-code.md) for the full guide including architecture diagrams.
 
@@ -135,7 +135,7 @@ Deep integrations with modern developer toolchains—not just aliases, but helpe
 | **NVM** | Lazy-loaded Node.js version manager | Auto-loads on first `node`/`npm` call |
 | **SDKMAN** | Lazy-loaded Java/Gradle/Kotlin manager | Auto-loads on first `java`/`gradle` call |
 
-**Shell Completions:** Tab completion for all tool commands—`awsswitch <TAB>`, `dotfiles features <TAB>`.
+**Shell Completions:** Tab completion for all tool commands—`awsswitch <TAB>`, `blackdot features <TAB>`.
 
 **90+ Aliases:** Opinionated shortcuts that follow consistent naming patterns across toolchains.
 
@@ -160,8 +160,8 @@ uvs && uvr pytest      # Sync deps & run in project env
 
 **Feature-gated:** Each tool suite can be enabled/disabled independently:
 ```bash
-dotfiles features disable rust_tools --persist
-dotfiles features enable cdk_tools --persist
+blackdot features disable rust_tools --persist
+blackdot features enable cdk_tools --persist
 ```
 
 ---
@@ -170,7 +170,7 @@ dotfiles features enable cdk_tools --persist
 
 ```bash
 # 1. Clone
-git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
+git clone git@github.com:blackwell-systems/blackdot.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
 # 2. Run platform bootstrap
@@ -178,14 +178,14 @@ cd ~/workspace/dotfiles
 ./bootstrap/bootstrap-linux.sh # Linux/WSL
 
 # 3. Run setup wizard
-dotfiles setup
+blackdot setup
 ```
 
 **That's it!** The wizard handles:
 - Vault selection (Bitwarden, 1Password, pass, or skip)
 - Secret restoration (SSH keys, AWS, Git config)
 - Claude Code integration
-- Progress is saved—resume anytime with `dotfiles setup`
+- Progress is saved—resume anytime with `blackdot setup`
 
 > **💡 Why `/workspace` symlink?**
 >
@@ -214,25 +214,25 @@ dotfiles setup
 
 ```bash
 # Status & Health
-dotfiles status          # Visual dashboard
-dotfiles doctor          # Health check
-dotfiles doctor --fix    # Auto-repair
-dotfiles drift           # Compare local vs vault
+blackdot status          # Visual dashboard
+blackdot doctor          # Health check
+blackdot doctor --fix    # Auto-repair
+blackdot drift           # Compare local vs vault
 
 # Vault Operations
-dotfiles sync            # Smart bidirectional sync
-dotfiles vault pull      # Restore secrets from vault
-dotfiles vault push      # Push local changes to vault
-dotfiles vault validate  # Validate vault schema
-dotfiles vault setup     # Interactive onboarding
+blackdot sync            # Smart bidirectional sync
+blackdot vault pull      # Restore secrets from vault
+blackdot vault push      # Push local changes to vault
+blackdot vault validate  # Validate vault schema
+blackdot vault setup     # Interactive onboarding
 
 # Templates
-dotfiles template init   # Setup wizard
-dotfiles template render # Generate configs
+blackdot template init   # Setup wizard
+blackdot template render # Generate configs
 
 # Maintenance
-dotfiles upgrade         # Pull latest & bootstrap
-dotfiles lint            # Validate syntax
+blackdot upgrade         # Pull latest & bootstrap
+blackdot lint            # Validate syntax
 ```
 
 ---
@@ -287,4 +287,4 @@ See [Full Documentation](README-FULL.md) for complete project structure and deta
 
 ---
 
-**Questions?** [Open an issue](https://github.com/blackwell-systems/dotfiles/issues) or check the [full documentation](README-FULL.md).
+**Questions?** [Open an issue](https://github.com/blackwell-systems/blackdot/issues) or check the [full documentation](README-FULL.md).

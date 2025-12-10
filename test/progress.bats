@@ -5,9 +5,9 @@
 # ============================================================
 
 setup() {
-    export DOTFILES_DIR="${BATS_TEST_DIRNAME}/.."
-    export DOTFILES_PROGRESS_FORCE=true
-    source "$DOTFILES_DIR/lib/_progress.sh"
+    export BLACKDOT_DIR="${BATS_TEST_DIRNAME}/.."
+    export BLACKDOT_PROGRESS_FORCE=true
+    source "$BLACKDOT_DIR/lib/_progress.sh"
 }
 
 # ============================================================
@@ -55,14 +55,14 @@ setup() {
 # ============================================================
 
 @test "progress_bar: ASCII mode uses = instead of blocks" {
-    DOTFILES_UNICODE=false
+    BLACKDOT_UNICODE=false
     result=$(progress_bar 5 10 "ascii" 2>&1)
     [[ "$result" == *"="* ]]
-    DOTFILES_UNICODE=true
+    BLACKDOT_UNICODE=true
 }
 
 @test "progress_bar: Unicode mode uses block characters" {
-    DOTFILES_UNICODE=true
+    BLACKDOT_UNICODE=true
     result=$(progress_bar 5 10 "unicode" 2>&1)
     # Check for unicode block or the dim character
     [[ "$result" == *"█"* ]] || [[ "$result" == *"░"* ]]
@@ -162,30 +162,30 @@ setup() {
 # ============================================================
 
 @test "_progress_enabled: returns true with force flag" {
-    DOTFILES_PROGRESS_FORCE=true
+    BLACKDOT_PROGRESS_FORCE=true
     _progress_enabled
     [[ $? -eq 0 ]]
 }
 
 @test "_progress_enabled: returns false when disabled" {
-    unset DOTFILES_PROGRESS_FORCE
-    DOTFILES_PROGRESS=false
+    unset BLACKDOT_PROGRESS_FORCE
+    BLACKDOT_PROGRESS=false
     run _progress_enabled
     [[ $status -eq 1 ]]
-    DOTFILES_PROGRESS=true
+    BLACKDOT_PROGRESS=true
 }
 
 @test "_progress_unicode: returns true by default" {
-    DOTFILES_UNICODE=true
+    BLACKDOT_UNICODE=true
     _progress_unicode
     [[ $? -eq 0 ]]
 }
 
 @test "_progress_unicode: returns false when disabled" {
-    DOTFILES_UNICODE=false
+    BLACKDOT_UNICODE=false
     run _progress_unicode
     [[ $status -eq 1 ]]
-    DOTFILES_UNICODE=true
+    BLACKDOT_UNICODE=true
 }
 
 # ============================================================

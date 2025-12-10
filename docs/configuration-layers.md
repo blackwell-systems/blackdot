@@ -8,16 +8,16 @@ The configuration layers system provides hierarchical config resolution, allowin
 
 ```bash
 # Initialize machine-specific config
-dotfiles config init machine my-laptop
+blackdot config init machine my-laptop
 
 # Set a machine-specific value
-dotfiles config set machine vault.backend 1password
+blackdot config set machine vault.backend 1password
 
 # View where a setting comes from
-dotfiles config show vault.backend
+blackdot config show vault.backend
 
 # See merged config from all layers
-dotfiles config merged
+blackdot config merged
 ```
 
 ---
@@ -31,8 +31,8 @@ Settings resolve from highest to lowest priority:
 ```
 Priority (highest → lowest)
 ─────────────────────────────────────────────────────────
- 1. Session     Environment variables (DOTFILES_*)
- 2. Project     .dotfiles.json in project root
+ 1. Session     Environment variables (BLACKDOT_*)
+ 2. Project     .blackdot.json in project root
  3. Machine     ~/.config/dotfiles/machine.json
  4. User        ~/.config/dotfiles/config.json
  5. Defaults    Built-in defaults
@@ -44,7 +44,7 @@ Priority (highest → lowest)
 | Layer | Location | Git Tracked | Purpose |
 |-------|----------|-------------|---------|
 | Session | Environment | N/A | Temporary overrides |
-| Project | `.dotfiles.json` (project root) | Yes | Project-specific settings |
+| Project | `.blackdot.json` (project root) | Yes | Project-specific settings |
 | Machine | `~/.config/dotfiles/machine.json` | No | Machine-specific settings |
 | User | `~/.config/dotfiles/config.json` | No | User preferences |
 | Defaults | `lib/_config.sh` | Yes | Built-in defaults |
@@ -53,39 +53,39 @@ Priority (highest → lowest)
 
 ## Commands
 
-### `dotfiles config get <key> [default]`
+### `blackdot config get <key> [default]`
 
 Get a configuration value with layered resolution.
 
 ```bash
-dotfiles config get vault.backend
+blackdot config get vault.backend
 # Output: bitwarden
 
-dotfiles config get shell.theme "default"
+blackdot config get shell.theme "default"
 # Output: default (if not set)
 ```
 
-### `dotfiles config set <layer> <key> <value>`
+### `blackdot config set <layer> <key> <value>`
 
 Set a configuration value in a specific layer.
 
 ```bash
 # Set in user config
-dotfiles config set user vault.backend bitwarden
+blackdot config set user vault.backend bitwarden
 
 # Set in machine config
-dotfiles config set machine vault.backend 1password
+blackdot config set machine vault.backend 1password
 
 # Set in project config (current directory)
-dotfiles config set project features.vault false
+blackdot config set project features.vault false
 ```
 
-### `dotfiles config show <key>`
+### `blackdot config show <key>`
 
 Show the value from all layers to understand where settings come from.
 
 ```bash
-dotfiles config show vault.backend
+blackdot config show vault.backend
 ```
 
 Output:
@@ -100,12 +100,12 @@ Configuration layers for: vault.backend
   resolved:   1password
 ```
 
-### `dotfiles config list`
+### `blackdot config list`
 
 Show all layer locations and their status.
 
 ```bash
-dotfiles config list
+blackdot config list
 ```
 
 Output:
@@ -115,47 +115,47 @@ Configuration Layers
 
 Layer Locations:
 ───────────────────────────────────────────────────────────────
-  env:         DOTFILES_* environment variables
-  project:     .dotfiles.json (not found in current directory)
+  env:         BLACKDOT_* environment variables
+  project:     .blackdot.json (not found in current directory)
   machine:     ~/.config/dotfiles/machine.json ✓
   user:        ~/.config/dotfiles/config.json ✓
 
 Priority: env > project > machine > user > default
 ```
 
-### `dotfiles config merged`
+### `blackdot config merged`
 
 Show the merged configuration from all layers.
 
 ```bash
-dotfiles config merged
+blackdot config merged
 ```
 
-### `dotfiles config init <layer> [id]`
+### `blackdot config init <layer> [id]`
 
 Initialize a configuration layer.
 
 ```bash
 # Initialize machine config
-dotfiles config init machine work-macbook
+blackdot config init machine work-macbook
 
 # Initialize project config in current directory
-dotfiles config init project
+blackdot config init project
 ```
 
-### `dotfiles config edit [layer]`
+### `blackdot config edit [layer]`
 
 Open a config file in your editor.
 
 ```bash
 # Edit user config (default)
-dotfiles config edit
+blackdot config edit
 
 # Edit machine config
-dotfiles config edit machine
+blackdot config edit machine
 
 # Edit project config
-dotfiles config edit project
+blackdot config edit project
 ```
 
 ---
@@ -196,7 +196,7 @@ Machine-specific settings that don't travel between computers:
 }
 ```
 
-### Project Config (`.dotfiles.json`)
+### Project Config (`.blackdot.json`)
 
 Project-specific settings that travel with the repository:
 
@@ -258,14 +258,14 @@ Configure different vault backends for different machines:
 
 ```bash
 # On work laptop
-dotfiles config init machine work-macbook
-dotfiles config set machine vault.backend 1password
-dotfiles config set machine features.claude_integration false
+blackdot config init machine work-macbook
+blackdot config set machine vault.backend 1password
+blackdot config set machine features.claude_integration false
 
 # On personal desktop
-dotfiles config init machine home-desktop
-dotfiles config set machine vault.backend bitwarden
-dotfiles config set machine packages.tier full
+blackdot config init machine home-desktop
+blackdot config set machine vault.backend bitwarden
+blackdot config set machine packages.tier full
 ```
 
 ### Project-Specific Settings
@@ -274,9 +274,9 @@ Set up auto-activation and aliases for a specific project:
 
 ```bash
 cd ~/projects/webapp
-dotfiles config init project
+blackdot config init project
 
-# The .dotfiles.json file is created
+# The .blackdot.json file is created
 # Edit to add project-specific aliases and settings
 ```
 
@@ -286,12 +286,12 @@ Override settings for the current session only:
 
 ```bash
 # Override vault backend for this session
-export DOTFILES_VAULT_BACKEND=pass
-dotfiles vault pull  # Uses pass instead of configured backend
+export BLACKDOT_VAULT_BACKEND=pass
+blackdot vault pull  # Uses pass instead of configured backend
 
 # Override feature for testing
-export DOTFILES_FEATURES_VAULT=false
-dotfiles doctor
+export BLACKDOT_FEATURES_VAULT=false
+blackdot doctor
 ```
 
 ### CI/CD Environments
@@ -300,8 +300,8 @@ Use environment variables to configure behavior in CI:
 
 ```bash
 # In CI pipeline
-export DOTFILES_VAULT_BACKEND=none
-export DOTFILES_FEATURES_TEMPLATES=false
+export BLACKDOT_VAULT_BACKEND=none
+export BLACKDOT_FEATURES_TEMPLATES=false
 ./install.sh
 ```
 
@@ -313,18 +313,18 @@ Any configuration key can be overridden via environment variable:
 
 | Config Key | Environment Variable |
 |------------|---------------------|
-| `vault.backend` | `DOTFILES_VAULT_BACKEND` |
-| `features.vault` | `DOTFILES_FEATURES_VAULT` |
-| `shell.theme` | `DOTFILES_SHELL_THEME` |
-| `packages.tier` | `DOTFILES_PACKAGES_TIER` |
+| `vault.backend` | `BLACKDOT_VAULT_BACKEND` |
+| `features.vault` | `BLACKDOT_FEATURES_VAULT` |
+| `shell.theme` | `BLACKDOT_SHELL_THEME` |
+| `packages.tier` | `BLACKDOT_PACKAGES_TIER` |
 
-Pattern: `config.key.name` → `DOTFILES_CONFIG_KEY_NAME`
+Pattern: `config.key.name` → `BLACKDOT_CONFIG_KEY_NAME`
 
 ---
 
 ## State vs Configuration
 
-The dotfiles system distinguishes between **state** (what happened) and **configuration** (what should happen):
+The blackdot system distinguishes between **state** (what happened) and **configuration** (what should happen):
 
 | Data Type | Example | Layer-Aware | Why |
 |-----------|---------|-------------|-----|
@@ -346,7 +346,7 @@ The [Feature Registry](features.md) uses configuration layers to resolve feature
 # Machine config: features.claude_integration = false (work laptop)
 # Result: claude_integration is DISABLED on this machine
 
-dotfiles features status claude_integration
+blackdot features status claude_integration
 # Shows: disabled (via machine config)
 ```
 
@@ -365,7 +365,7 @@ dotfiles features status claude_integration
 
 ### Security
 
-- **Project configs are git-tracked** – Don't put secrets in `.dotfiles.json`
+- **Project configs are git-tracked** – Don't put secrets in `.blackdot.json`
 - **Machine configs are local** – Safe for machine-specific settings
 - **Environment vars are transient** – Good for CI/CD overrides
 - **Secrets** – Use the [Vault System](vault-README.md) for secrets
@@ -376,13 +376,13 @@ When a setting isn't what you expect:
 
 ```bash
 # See all layers for a setting
-dotfiles config show vault.backend
+blackdot config show vault.backend
 
 # Check environment
-env | grep DOTFILES_
+env | grep BLACKDOT_
 
 # See merged result
-dotfiles config merged | jq '.vault'
+blackdot config merged | jq '.vault'
 ```
 
 ---
@@ -393,7 +393,7 @@ dotfiles config merged | jq '.vault'
 
 ```bash
 # Check layer resolution
-dotfiles config show <key>
+blackdot config show <key>
 
 # A higher-priority layer may be overriding
 ```
@@ -401,17 +401,17 @@ dotfiles config show <key>
 ### Project Config Not Found
 
 ```bash
-# Project config must be named .dotfiles.json
+# Project config must be named .blackdot.json
 # Must be in current directory or parent
 
-ls -la .dotfiles.json
+ls -la .blackdot.json
 ```
 
 ### Machine Config Not Initialized
 
 ```bash
 # Initialize machine config first
-dotfiles config init machine $(hostname -s)
+blackdot config init machine $(hostname -s)
 ```
 
 ---
@@ -420,6 +420,6 @@ dotfiles config init machine $(hostname -s)
 
 - [Feature Registry](features.md) - Feature enable/disable system
 - [State Management](state-management.md) - Setup wizard state tracking
-- [CLI Reference](cli-reference.md) - All dotfiles commands
+- [CLI Reference](cli-reference.md) - All blackdot commands
 - [Design Document](design/IMPL-configuration-layers.md) - Technical implementation details
 

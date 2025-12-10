@@ -2,7 +2,7 @@
 
 > **Complete guide for Windows users using PowerShell**
 
-This guide covers setting up dotfiles on native Windows with PowerShell. For WSL2, use the standard Linux installation.
+This guide covers setting up blackdot on native Windows with PowerShell. For WSL2, use the standard Linux installation.
 
 ---
 
@@ -10,7 +10,7 @@ This guide covers setting up dotfiles on native Windows with PowerShell. For WSL
 
 ```powershell
 # 1. Clone the repository
-git clone https://github.com/blackwell-systems/dotfiles.git $HOME\workspace\dotfiles
+git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\dotfiles
 
 # 2. Install the PowerShell module
 cd $HOME\workspace\dotfiles\powershell
@@ -20,7 +20,7 @@ cd $HOME\workspace\dotfiles\powershell
 Import-Module Dotfiles
 
 # 4. Verify installation
-dotfiles-status
+blackdot-status
 ```
 
 ---
@@ -50,7 +50,7 @@ If you just want the developer tool aliases:
 
 ```powershell
 # Clone
-git clone https://github.com/blackwell-systems/dotfiles.git $HOME\workspace\dotfiles
+git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\dotfiles
 
 # Install module
 cd $HOME\workspace\dotfiles\powershell
@@ -70,12 +70,12 @@ For complete functionality including vault sync:
 
 ```powershell
 # Clone
-git clone https://github.com/blackwell-systems/dotfiles.git $HOME\workspace\dotfiles
+git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\dotfiles
 cd $HOME\workspace\dotfiles
 
 # Build and install the Go CLI
-go build -o dotfiles.exe ./cmd/dotfiles
-Move-Item dotfiles.exe $HOME\.local\bin\
+go build -o blackdot.exe ./cmd/blackdot
+Move-Item blackdot.exe $HOME\.local\bin\
 
 # Add to PATH (if not already)
 $env:Path += ";$HOME\.local\bin"
@@ -86,7 +86,7 @@ cd powershell
 .\Install-Dotfiles.ps1
 
 # Run setup wizard
-dotfiles setup
+blackdot setup
 ```
 
 ### Option 3: Download Pre-built Binary
@@ -95,10 +95,10 @@ If Go isn't installed, download a pre-built binary:
 
 ```powershell
 # Check releases page for latest
-# https://github.com/blackwell-systems/dotfiles/releases
+# https://github.com/blackwell-systems/blackdot/releases
 
 # Download and extract to PATH
-# Then run: dotfiles setup
+# Then run: blackdot setup
 ```
 
 ---
@@ -188,12 +188,12 @@ fnm auto-switches Node versions when entering directories with `.nvmrc` or `.nod
 
 | Command | Description |
 |---------|-------------|
-| `dotfiles setup` | Interactive setup wizard |
-| `dotfiles status` | Show configuration status |
-| `dotfiles doctor` | Health check with auto-fix |
-| `dotfiles vault pull` | Pull secrets from vault |
-| `dotfiles vault push` | Push secrets to vault |
-| `dotfiles features` | Manage feature flags |
+| `blackdot setup` | Interactive setup wizard |
+| `blackdot status` | Show configuration status |
+| `blackdot doctor` | Health check with auto-fix |
+| `blackdot vault pull` | Pull secrets from vault |
+| `blackdot vault push` | Push secrets to vault |
+| `blackdot features` | Manage feature flags |
 
 ---
 
@@ -210,7 +210,7 @@ bw login
 $env:BW_SESSION = $(bw unlock --raw)
 
 # Configure dotfiles
-dotfiles setup
+blackdot setup
 # Select Bitwarden as vault backend
 ```
 
@@ -224,7 +224,7 @@ winget install AgileBits.1Password.CLI
 op signin
 
 # Configure dotfiles
-dotfiles setup
+blackdot setup
 # Select 1Password as vault backend
 ```
 
@@ -248,7 +248,7 @@ Import-Module Dotfiles -Verbose
 ### Commands not found
 
 ```powershell
-# Ensure dotfiles CLI is in PATH
+# Ensure blackdot CLI is in PATH
 where.exe dotfiles
 
 # If not found, add to PATH
@@ -269,7 +269,7 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 docker info
 
 # Enable docker_tools feature
-dotfiles features enable docker_tools
+blackdot features enable docker_tools
 ```
 
 ---
@@ -307,8 +307,8 @@ cd powershell
 .\Install-Dotfiles.ps1 -Force
 
 # Rebuild CLI (if using Go)
-go build -o dotfiles.exe ./cmd/dotfiles
-Move-Item -Force dotfiles.exe $HOME\.local\bin\
+go build -o blackdot.exe ./cmd/blackdot
+Move-Item -Force blackdot.exe $HOME\.local\bin\
 ```
 
 ---
@@ -329,8 +329,8 @@ Move-Item -Force dotfiles.exe $HOME\.local\bin\
 
 ## Getting Help
 
-- **Documentation**: https://github.com/blackwell-systems/dotfiles
-- **Issues**: https://github.com/blackwell-systems/dotfiles/issues
+- **Documentation**: https://github.com/blackwell-systems/blackdot
+- **Issues**: https://github.com/blackwell-systems/blackdot/issues
 - **PowerShell Commands**: `Get-Command -Module Dotfiles`
 
 ---

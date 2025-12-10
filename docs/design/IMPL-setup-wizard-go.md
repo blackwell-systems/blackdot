@@ -8,7 +8,7 @@
 
 ## Overview
 
-~~The current `bin/dotfiles-setup` is a ~1200 line ZSH script that only works on Unix with ZSH installed.~~
+~~The current `bin/blackdot-setup` is a ~1200 line ZSH script that only works on Unix with ZSH installed.~~
 
 **UPDATE (2025-12-09):** Windows support has been implemented directly in the existing Go `setup` command (`internal/cli/setup.go`). The implementation:
 
@@ -160,7 +160,7 @@ type UnixPlatform struct {
 func (p *UnixPlatform) GetShellConfigLinks() []SymlinkSpec {
     return []SymlinkSpec{
         {
-            Source: filepath.Join(p.dotfilesDir, "zsh/zshrc"),
+            Source: filepath.Join(p.blackdotDir, "zsh/zshrc"),
             Target: filepath.Join(os.Getenv("HOME"), ".zshrc"),
         },
     }
@@ -175,14 +175,14 @@ func (p *UnixPlatform) GetThemeConfig() *ThemeConfig {
         Name:        "Powerlevel10k",
         Installed:   p10kInstalled,
         ConfigPath:  filepath.Join(os.Getenv("HOME"), ".p10k.zsh"),
-        BundledPath: filepath.Join(p.dotfilesDir, "zsh/p10k.zsh"),
+        BundledPath: filepath.Join(p.blackdotDir, "zsh/p10k.zsh"),
         InstallHint: "brew install powerlevel10k",
     }
 }
 
 func (p *UnixPlatform) GetPackageManager() PackageManager {
     if commandExists("brew") {
-        return &BrewPackageManager{dotfilesDir: p.dotfilesDir}
+        return &BrewPackageManager{dotfilesDir: p.blackdotDir}
     }
     return nil
 }
@@ -227,14 +227,14 @@ func (p *WindowsPlatform) GetThemeConfig() *ThemeConfig {
         Name:        "Starship",
         Installed:   starshipInstalled,
         ConfigPath:  filepath.Join(os.Getenv("USERPROFILE"), ".config/starship.toml"),
-        BundledPath: filepath.Join(p.dotfilesDir, "powershell/starship.toml"),
+        BundledPath: filepath.Join(p.blackdotDir, "powershell/starship.toml"),
         InstallHint: "winget install Starship.Starship",
     }
 }
 
 func (p *WindowsPlatform) GetPackageManager() PackageManager {
     if commandExists("winget") {
-        return &WingetPackageManager{dotfilesDir: p.dotfilesDir}
+        return &WingetPackageManager{dotfilesDir: p.blackdotDir}
     }
     return nil
 }
@@ -394,7 +394,7 @@ func (p *SymlinksPhase) handleThemeConfig(ui *UI, theme *ThemeConfig) error {
 var setupCmd = &cobra.Command{
     Use:   "setup",
     Short: "Interactive setup wizard",
-    Long: `Guide through initial dotfiles configuration.
+    Long: `Guide through initial blackdot configuration.
 
 The setup wizard will:
   1. Configure workspace directory
@@ -406,7 +406,7 @@ The setup wizard will:
   7. Initialize machine-specific templates
 
 Your progress is saved automatically. If interrupted,
-run 'dotfiles setup' again to continue.`,
+run 'blackdot setup' again to continue.`,
     RunE: runSetup,
 }
 
@@ -468,8 +468,8 @@ func runSetup(cmd *cobra.Command, args []string) error {
 
     if !needsSetup {
         ui.Pass("All setup complete!")
-        ui.Info("Run 'dotfiles doctor' to verify health.")
-        ui.Info("Run 'dotfiles setup --reset' to reconfigure.")
+        ui.Info("Run 'blackdot doctor' to verify health.")
+        ui.Info("Run 'blackdot setup --reset' to reconfigure.")
         return nil
     }
 
@@ -554,10 +554,10 @@ func runSetup(cmd *cobra.Command, args []string) error {
 ## Migration Path
 
 1. ~~**Implement Go version** alongside ZSH version~~ ✅ Done
-2. ~~**Feature flag**: `DOTFILES_SETUP_GO=1` to opt-in~~ (Not needed - Go is already default)
+2. ~~**Feature flag**: `BLACKDOT_SETUP_GO=1` to opt-in~~ (Not needed - Go is already default)
 3. **Test extensively** on all platforms - Linux ✅, Windows pending
 4. ~~**Make Go default** when stable~~ ✅ Already default via Phase 2 shell switchover
-5. **Remove ZSH version** in Phase 3 cleanup - `bin/dotfiles-setup` can be deprecated
+5. **Remove ZSH version** in Phase 3 cleanup - `bin/blackdot-setup` can be deprecated
 
 ---
 

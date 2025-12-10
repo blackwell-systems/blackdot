@@ -1,10 +1,10 @@
 # Architecture
 
-This page describes the architecture of the dotfiles framework—the systems that control how features are loaded, configured, and composed.
+This page describes the architecture of the blackdot framework—the systems that control how features are loaded, configured, and composed.
 
 ## Framework Architecture
 
-The dotfiles system is built on three core architectural systems:
+The blackdot system is built on three core architectural systems:
 
 1. **Feature Registry** (`lib/_features.sh`) - Modular control plane for all functionality
 2. **Configuration Layers** (`lib/_config_layers.sh`) - 5-layer priority system for settings
@@ -22,7 +22,7 @@ These systems work together to provide a modular, extensible foundation for AI-a
 ```mermaid
 graph TB
     subgraph "User Machine"
-        CLI[dotfiles CLI]
+        CLI[blackdot CLI]
         ZSH[ZSH Shell]
         SYMLINKS[Symlinked Configs]
     end
@@ -60,13 +60,13 @@ The feature registry is the central system for enabling and disabling optional f
 
 ```bash
 # List all features
-dotfiles features
+blackdot features
 
 # Enable a feature
-dotfiles features enable vault --persist
+blackdot features enable vault --persist
 
 # Use a preset
-dotfiles features preset developer --persist
+blackdot features preset developer --persist
 ```
 
 **Available Features:**
@@ -97,7 +97,7 @@ Priority (highest to lowest):
 ┌─────────────────────────────────────────────────┐
 │ 1. Environment Variables   (session-specific)   │
 ├─────────────────────────────────────────────────┤
-│ 2. Project Config          (.dotfiles.local)    │
+│ 2. Project Config          (.blackdot.local)    │
 ├─────────────────────────────────────────────────┤
 │ 3. Machine Config          (machine.json)       │
 ├─────────────────────────────────────────────────┤
@@ -112,15 +112,15 @@ Priority (highest to lowest):
 config_get_layered "vault.backend"  # Checks all layers in priority order
 
 # Show where a setting comes from
-dotfiles config layers              # Displays effective config with sources
+blackdot config layers              # Displays effective config with sources
 ```
 
 **Layer Files:**
 
 | Layer | File | Use Case |
 |-------|------|----------|
-| Environment | `$DOTFILES_*` vars | CI/CD, temporary overrides |
-| Project | `.dotfiles.local` | Repository-specific settings |
+| Environment | `$BLACKDOT_*` vars | CI/CD, temporary overrides |
+| Project | `.blackdot.local` | Repository-specific settings |
 | Machine | `~/.config/dotfiles/machine.json` | Per-machine preferences |
 | User | `~/.config/dotfiles/config.json` | User preferences |
 | Defaults | `lib/_config_layers.sh` | Built-in fallbacks |
@@ -130,7 +130,7 @@ dotfiles config layers              # Displays effective config with sources
 The CLI adapts based on enabled features:
 
 ```bash
-dotfiles help  # Shows only commands for enabled features
+blackdot help  # Shows only commands for enabled features
 ```
 
 **Behavior:**
@@ -140,9 +140,9 @@ dotfiles help  # Shows only commands for enabled features
 
 ```bash
 # Example: vault feature disabled
-$ dotfiles vault pull
+$ blackdot vault pull
 Feature 'vault' is not enabled.
-Run: dotfiles features enable vault
+Run: blackdot features enable vault
 ```
 
 **Implementation:**
@@ -169,13 +169,13 @@ cli_command_available "vault:pull"  # Returns 0 if vault enabled
 | **Vault System** | Optional | `vault` | Select "Skip" in wizard or `--minimal` | Multi-backend secrets (Bitwarden/1Password/pass) |
 | **/workspace Symlink** | Optional | `workspace_symlink` | `SKIP_WORKSPACE_SYMLINK=true` | For portable Claude sessions |
 | **Claude Integration** | Optional | `claude_integration` | `SKIP_CLAUDE_SETUP=true` or `--minimal` | dotclaude + hooks + settings |
-| **Template Engine** | Optional | `templates` | Don't run `dotfiles template` | Machine-specific configs |
+| **Template Engine** | Optional | `templates` | Don't run `blackdot template` | Machine-specific configs |
 
 ### Install Modes
 
 ```bash
 # Full install - Everything (recommended for Claude Code users)
-curl -fsSL [...]/install.sh | bash && dotfiles setup
+curl -fsSL [...]/install.sh | bash && blackdot setup
 
 # Minimal install - Shell config only
 curl -fsSL [...]/install.sh | bash -s -- --minimal
@@ -197,10 +197,10 @@ All optional components can be controlled via environment variables:
 | `BREWFILE_TIER=full` | Everything including Docker/Node (61 packages, ~10 min) | Full-stack development |
 | `SKIP_WORKSPACE_SYMLINK=true` | Skip `/workspace` symlink | Single-machine setups |
 | `SKIP_CLAUDE_SETUP=true` | Skip Claude Code integration | Non-Claude workflows |
-| `DOTFILES_OFFLINE=1` | Skip all vault operations | Air-gapped/offline environments |
-| `DOTFILES_SKIP_DRIFT_CHECK=1` | Skip drift detection | CI/automation pipelines |
+| `BLACKDOT_OFFLINE=1` | Skip all vault operations | Air-gapped/offline environments |
+| `BLACKDOT_SKIP_DRIFT_CHECK=1` | Skip drift detection | CI/automation pipelines |
 
-**Note:** The `dotfiles setup` wizard now presents tier selection interactively. Environment variables are available for advanced/automated setups.
+**Note:** The `blackdot setup` wizard now presents tier selection interactively. Environment variables are available for advanced/automated setups.
 
 ### Component Dependencies
 
@@ -228,7 +228,7 @@ graph TD
 
 **Key Design Principles:**
 - **No hard dependencies** - Optional components gracefully degrade if missing
-- **Enable later** - Started minimal? Run `dotfiles setup` to add features
+- **Enable later** - Started minimal? Run `blackdot setup` to add features
 - **Progressive disclosure** - Setup wizard guides you through choices
 - **Safe defaults** - Full install gives best experience, minimal still works
 
@@ -311,34 +311,34 @@ dotfiles/
 ├── bootstrap/              # Platform bootstrap scripts
 │   ├── bootstrap-mac.sh    # macOS setup
 │   ├── bootstrap-linux.sh  # Linux/WSL setup
-│   ├── bootstrap-dotfiles.sh # Symlink setup
+│   ├── bootstrap-blackdot.sh # Symlink setup
 │   └── _common.sh          # Shared bootstrap functions
 ├── bin/                    # CLI tools
-│   ├── dotfiles-doctor     # Health checks
-│   ├── dotfiles-drift      # Vault comparison
-│   ├── dotfiles-features   # Feature registry management
-│   ├── dotfiles-hook       # Hook system management
-│   ├── dotfiles-sync       # Bidirectional vault sync
-│   ├── dotfiles-diff       # Preview changes
-│   ├── dotfiles-backup     # Backup/restore
-│   ├── dotfiles-setup      # Setup wizard
-│   ├── dotfiles-migrate    # Config migration orchestrator
-│   ├── dotfiles-migrate-config    # INI→JSON config migration
-│   ├── dotfiles-migrate-vault-schema # Legacy vault schema migration
-│   ├── dotfiles-uninstall  # Clean removal
-│   └── dotfiles-metrics    # Show metrics
+│   ├── blackdot-doctor     # Health checks
+│   ├── blackdot-drift      # Vault comparison
+│   ├── blackdot-features   # Feature registry management
+│   ├── blackdot-hook       # Hook system management
+│   ├── blackdot-sync       # Bidirectional vault sync
+│   ├── blackdot-diff       # Preview changes
+│   ├── blackdot-backup     # Backup/restore
+│   ├── blackdot-setup      # Setup wizard
+│   ├── blackdot-migrate    # Config migration orchestrator
+│   ├── blackdot-migrate-config    # INI→JSON config migration
+│   ├── blackdot-migrate-vault-schema # Legacy vault schema migration
+│   ├── blackdot-uninstall  # Clean removal
+│   └── blackdot-metrics    # Show metrics
 │
 ├── zsh/
 │   ├── .zshrc              # Main entry (symlinked)
 │   ├── .p10k.zsh           # Powerlevel10k theme
 │   ├── completions/        # Tab completions
-│   │   └── _dotfiles       # CLI completions
+│   │   └── _blackdot       # CLI completions
 │   └── zsh.d/              # Modular config
 │       ├── 00-init.zsh
 │       ├── 10-environment.zsh
 │       ├── 20-history.zsh
 │       ├── 30-prompt.zsh
-│       ├── 40-aliases.zsh  # dotfiles command
+│       ├── 40-aliases.zsh  # blackdot command
 │       ├── 50-functions.zsh
 │       ├── 60-completions.zsh
 │       ├── 70-plugins.zsh
@@ -434,12 +434,12 @@ See `vault/vault-items.example.json` for the template.
 The vault system validates `vault-items.json` before all sync operations:
 
 ```bash
-dotfiles vault validate  # Manual validation
+blackdot vault validate  # Manual validation
 ```
 
 **Automatic validation:**
-- Before `dotfiles vault push` operations
-- Before `dotfiles vault pull` operations
+- Before `blackdot vault push` operations
+- Before `blackdot vault pull` operations
 - During setup wizard vault configuration phase
 
 **Validates:**
@@ -457,21 +457,21 @@ If validation fails during setup, offers to open editor for immediate fixes with
 ```mermaid
 sequenceDiagram
     participant User
-    participant CLI as dotfiles CLI
+    participant CLI as blackdot CLI
     participant Config as ~/.config/dotfiles
     participant Local as Local Files
     participant BW as Bitwarden
 
-    User->>CLI: dotfiles vault setup
+    User->>CLI: blackdot vault setup
     CLI->>Config: Create vault-items.json
     CLI->>Config: Set backend (bitwarden/1password/pass)
 
-    User->>CLI: dotfiles vault pull
+    User->>CLI: blackdot vault pull
     CLI->>BW: Fetch secrets
     BW-->>CLI: Return encrypted data
     CLI->>Local: Write files (600 perms)
 
-    User->>CLI: dotfiles vault push
+    User->>CLI: blackdot vault push
     CLI->>Local: Read files
     CLI->>BW: Update vault items
 ```
@@ -491,7 +491,7 @@ Each vault item follows a consistent schema:
 
 ```json
 {
-  "name": "dotfiles-item-name",
+  "name": "blackdot-item-name",
   "type": 2,
   "notes": "item content here",
   "fields": [
@@ -527,8 +527,8 @@ The hook system (`lib/_hooks.sh`) allows custom behavior at lifecycle events wit
 flowchart TD
     A[install.sh] -->|pre/post_install| H[Hook System]
     B[bootstrap-*.sh] -->|pre/post_bootstrap| H
-    C[dotfiles sync] -->|pre/post_vault_*| H
-    D[dotfiles doctor] -->|pre/post/check_doctor| H
+    C[blackdot sync] -->|pre/post_vault_*| H
+    D[blackdot doctor] -->|pre/post/check_doctor| H
     E[.zshrc] -->|shell_init/exit| H
     F[cd command] -->|directory_change| H
 
@@ -539,7 +539,7 @@ See [Hook System](hooks.md) for complete documentation.
 
 ## Setup Wizard
 
-The interactive setup wizard (`dotfiles setup`) guides users through installation with visual feedback:
+The interactive setup wizard (`blackdot setup`) guides users through installation with visual feedback:
 
 ### Progress Visualization
 
@@ -579,11 +579,11 @@ See [State Management](state-management.md) for details.
 
 ## Health Check System
 
-The `dotfiles doctor` command validates system state:
+The `blackdot doctor` command validates system state:
 
 ```mermaid
 flowchart TD
-    A[dotfiles doctor] --> B{Check Type}
+    A[blackdot doctor] --> B{Check Type}
     B --> C[File Permissions]
     B --> D[Symlink Status]
     B --> E[Directory Structure]
@@ -604,12 +604,12 @@ The backup system creates timestamped archives:
 
 ```mermaid
 flowchart LR
-    A[dotfiles backup] --> B[Collect Files]
+    A[blackdot backup] --> B[Collect Files]
     B --> C[Create tar.gz]
-    C --> D[~/.dotfiles-backups/]
+    C --> D[~/.blackdot-backups/]
     D --> E[Auto-cleanup > 10]
 
-    F[dotfiles backup restore] --> G[List Backups]
+    F[blackdot backup restore] --> G[List Backups]
     G --> H[Select Backup]
     H --> I[Extract & Restore]
 ```
@@ -638,10 +638,10 @@ graph TB
 | Flow | Source | Destination | Command |
 |------|--------|-------------|---------|
 | Install | GitHub | Local | `curl ... \| bash` |
-| Bootstrap | Scripts | System | `dotfiles setup` |
-| Pull | Bitwarden | Local | `dotfiles vault pull` |
-| Push | Local | Bitwarden | `dotfiles vault push` |
-| Backup | Config | Archive | `dotfiles backup` |
-| Restore | Archive | Config | `dotfiles backup restore` |
-| Upgrade | GitHub | Local | `dotfiles upgrade` |
-| Remove | Local | (deleted) | `dotfiles uninstall` |
+| Bootstrap | Scripts | System | `blackdot setup` |
+| Pull | Bitwarden | Local | `blackdot vault pull` |
+| Push | Local | Bitwarden | `blackdot vault push` |
+| Backup | Config | Archive | `blackdot backup` |
+| Restore | Archive | Config | `blackdot backup restore` |
+| Upgrade | GitHub | Local | `blackdot upgrade` |
+| Remove | Local | (deleted) | `blackdot uninstall` |

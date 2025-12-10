@@ -46,7 +46,7 @@ Categories: `core` (always on), `optional` (user choice), `integration` (externa
 ### 2. Create the feature code
 
 ```bash
-# lib/_my_feature.sh or bin/dotfiles-myfeature
+# lib/_my_feature.sh or bin/blackdot-myfeature
 
 # Guard: only run if feature is enabled
 feature_enabled "my_feature" || return 0
@@ -57,14 +57,14 @@ feature_enabled "my_feature" || return 0
 ### 3. Add CLI command (if needed)
 
 ```bash
-# bin/dotfiles-myfeature
+# bin/blackdot-myfeature
 #!/usr/bin/env bash
 set -euo pipefail
 source "$(dirname "$0")/../lib/_features.sh"
 
 feature_enabled "my_feature" || {
     echo "Feature 'my_feature' is not enabled"
-    echo "Run: dotfiles features enable my_feature"
+    echo "Run: blackdot features enable my_feature"
     exit 1
 }
 
@@ -78,7 +78,7 @@ Add to appropriate `zsh/zsh.d/*.zsh` file:
 ```zsh
 # Only load if feature enabled
 if feature_enabled "my_feature"; then
-    source "${DOTFILES_DIR}/lib/_my_feature.sh"
+    source "${BLACKDOT_DIR}/lib/_my_feature.sh"
 fi
 ```
 
@@ -101,7 +101,7 @@ dotfiles/
 │   ├── _state.sh             # Setup wizard state
 │   ├── _logging.sh           # info(), pass(), warn(), fail()
 │   └── _vault.sh             # Vault abstraction
-├── bin/                      # CLI commands (dotfiles-*)
+├── bin/                      # CLI commands (blackdot-*)
 ├── zsh/zsh.d/                # Shell modules (00-99 load order)
 ├── vault/                    # Multi-vault integration
 ├── templates/                # Machine-specific configs
@@ -115,7 +115,7 @@ dotfiles/
 | `lib/_features.sh` | Feature Registry - the control plane |
 | `lib/_config.sh` | JSON config read/write |
 | `lib/_state.sh` | Setup wizard state management |
-| `bin/dotfiles-features` | Features CLI command |
+| `bin/blackdot-features` | Features CLI command |
 | `zsh/zsh.d/40-aliases.zsh` | The `dotfiles` command |
 
 ---
@@ -123,13 +123,13 @@ dotfiles/
 ## Quick Commands
 
 ```bash
-dotfiles features              # List all features
-dotfiles features enable X     # Enable feature
-dotfiles features disable X    # Disable feature
-dotfiles features preset Y     # Apply preset (minimal/developer/claude/full)
-dotfiles doctor                # Health check
-dotfiles doctor --fix          # Auto-fix issues
-dotfiles status                # Visual dashboard
+blackdot features              # List all features
+blackdot features enable X     # Enable feature
+blackdot features disable X    # Disable feature
+blackdot features preset Y     # Apply preset (minimal/developer/claude/full)
+blackdot doctor                # Health check
+blackdot doctor --fix          # Auto-fix issues
+blackdot status                # Visual dashboard
 ```
 
 ---
@@ -158,8 +158,8 @@ State management always uses direct access. It tracks machine reality, not prefe
 set -euo pipefail
 
 # Source what you need
-source "${DOTFILES_DIR}/lib/_logging.sh"
-source "${DOTFILES_DIR}/lib/_features.sh"
+source "${BLACKDOT_DIR}/lib/_logging.sh"
+source "${BLACKDOT_DIR}/lib/_features.sh"
 
 # Check feature before doing anything
 feature_enabled "my_feature" || exit 0
@@ -204,7 +204,7 @@ bats test/cli_feature_awareness.bats # 30 tests
 bats test/config_layers.bats         # 28 tests
 
 # Quick syntax check (no zsh needed)
-shellcheck --shell=bash bin/dotfiles-*
+shellcheck --shell=bash bin/blackdot-*
 ```
 
 **Test counts (as of 2025-12-05):**

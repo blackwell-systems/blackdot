@@ -6,10 +6,10 @@
 
 # Get directory paths
 SCRIPT_DIR="${0:A:h}"
-DOTFILES_DIR="${SCRIPT_DIR:h}"
+BLACKDOT_DIR="${SCRIPT_DIR:h}"
 
 # Source the progress library
-source "$DOTFILES_DIR/lib/_progress.sh"
+source "$BLACKDOT_DIR/lib/_progress.sh"
 
 # Set up cleanup trap
 trap 'progress_cleanup' EXIT INT TERM
@@ -121,7 +121,7 @@ echo ""
 # ============================================================
 echo ""
 echo "Test 8: ASCII mode (unicode disabled)"
-DOTFILES_UNICODE=false
+BLACKDOT_UNICODE=false
 
 progress_init
 for i in {1..5}; do
@@ -131,7 +131,7 @@ done
 progress_done "ASCII mode complete"
 
 # Reset
-DOTFILES_UNICODE=true
+BLACKDOT_UNICODE=true
 echo ""
 
 # ============================================================

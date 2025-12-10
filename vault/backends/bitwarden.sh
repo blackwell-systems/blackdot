@@ -45,7 +45,7 @@ vault_backend_login_check() {
 
 vault_backend_get_session() {
     local session=""
-    local session_file="${VAULT_SESSION_FILE:-$DOTFILES_DIR/vault/.vault-session}"
+    local session_file="${VAULT_SESSION_FILE:-$BLACKDOT_DIR/vault/.vault-session}"
 
     # Try environment variable first
     session="${BW_SESSION:-}"
@@ -304,7 +304,7 @@ vault_backend_health_check() {
     fi
 
     # Check session
-    local session_file="${VAULT_SESSION_FILE:-$DOTFILES_DIR/vault/.vault-session}"
+    local session_file="${VAULT_SESSION_FILE:-$BLACKDOT_DIR/vault/.vault-session}"
     if [[ -f "$session_file" ]]; then
         local session
         session=$(cat "$session_file")

@@ -36,7 +36,7 @@ The **brand** (name, logo, visual identity) is separately protected and not cove
 
 ## Questions
 
-For brand usage questions or permission requests, open an [issue](https://github.com/blackwell-systems/dotfiles/issues) or contact the maintainer.
+For brand usage questions or permission requests, open an [issue](https://github.com/blackwell-systems/blackdot/issues) or contact the maintainer.
 
 ---
 

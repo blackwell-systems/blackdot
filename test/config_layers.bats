@@ -83,7 +83,7 @@ teardown() {
   run zsh -c "
     set +e; source '$CONFIG_LAYERS_SH'; set -e
     export CONFIG_LAYER_USER='$CONFIG_LAYER_USER'
-    export DOTFILES_VAULT_BACKEND='env_value'
+    export BLACKDOT_VAULT_BACKEND='env_value'
     config_get_layered 'vault.backend' 'default'
   "
   [ "$status" -eq 0 ]
@@ -94,7 +94,7 @@ teardown() {
   run zsh -c "
     set +e; source '$CONFIG_LAYERS_SH'; set -e
     export CONFIG_LAYER_USER='$CONFIG_LAYER_USER'
-    export DOTFILES_FEATURES_DEBUG='true'
+    export BLACKDOT_FEATURES_DEBUG='true'
     config_get_layered 'features.debug' 'false'
   "
   [ "$status" -eq 0 ]
@@ -124,7 +124,7 @@ teardown() {
   run zsh -c "
     set +e; source '$CONFIG_LAYERS_SH'; set -e
     export CONFIG_LAYER_USER='$CONFIG_LAYER_USER'
-    export DOTFILES_VAULT_BACKEND='1password'
+    export BLACKDOT_VAULT_BACKEND='1password'
     config_get_layered 'vault.backend' 'default'
   "
   [ "$status" -eq 0 ]
@@ -155,7 +155,7 @@ teardown() {
 
 @test "project config overrides machine config" {
   echo '{"vault": {"backend": "machine_value"}}' > "$CONFIG_LAYER_MACHINE"
-  echo '{"vault": {"backend": "project_value"}}' > "$TEST_PROJECT_DIR/.dotfiles.json"
+  echo '{"vault": {"backend": "project_value"}}' > "$TEST_PROJECT_DIR/.blackdot.json"
 
   run zsh -c "
     set +e; source '$CONFIG_LAYERS_SH'; set -e
@@ -176,7 +176,7 @@ teardown() {
   run zsh -c "
     set +e; source '$CONFIG_LAYERS_SH'; set -e
     export CONFIG_LAYER_USER='$CONFIG_LAYER_USER'
-    export DOTFILES_FEATURE_ENABLED='true'
+    export BLACKDOT_FEATURE_ENABLED='true'
     if config_get_layered_bool 'feature.enabled' 'false'; then
       echo 'passed'
     else
@@ -191,7 +191,7 @@ teardown() {
   run zsh -c "
     set +e; source '$CONFIG_LAYERS_SH'; set -e
     export CONFIG_LAYER_USER='$CONFIG_LAYER_USER'
-    export DOTFILES_FEATURE_DISABLED='false'
+    export BLACKDOT_FEATURE_DISABLED='false'
     if config_get_layered_bool 'feature.disabled' 'true'; then
       echo 'failed'
     else
@@ -283,7 +283,7 @@ teardown() {
   run zsh -c "
     set +e; source '$CONFIG_LAYERS_SH'; set -e
     export CONFIG_LAYER_USER='$CONFIG_LAYER_USER'
-    export DOTFILES_TEST_KEY='env_value'
+    export BLACKDOT_TEST_KEY='env_value'
     config_get_with_source 'test.key' 'default'
   "
   [ "$status" -eq 0 ]
@@ -373,7 +373,7 @@ teardown() {
     set +e; source '$CONFIG_LAYERS_SH'; set -e
     cd '$TEST_PROJECT_DIR'
     config_init_project
-    cat '.dotfiles.json'
+    cat '.blackdot.json'
   "
   [ "$status" -eq 0 ]
   [[ "$output" == *'"version": 1'* ]]

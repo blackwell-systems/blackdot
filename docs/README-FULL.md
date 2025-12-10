@@ -3,21 +3,21 @@
 [![Blackwell Systems™](https://raw.githubusercontent.com/blackwell-systems/blackwell-docs-theme/main/badge-trademark.svg)](https://github.com/blackwell-systems)
 [![Claude Code](https://img.shields.io/badge/Built_for-Claude_Code-8A2BE2?logo=anthropic)](https://claude.ai/claude-code)
 [![dotclaude](https://img.shields.io/badge/Integrates-dotclaude-8A2BE2?logo=anthropic)](https://github.com/blackwell-systems/dotclaude)
-[![Secrets](https://img.shields.io/badge/Secrets-Multi--Vault-ff4081)](https://github.com/blackwell-systems/dotfiles#vault--secrets)
-[![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)](https://github.com/blackwell-systems/dotfiles)
+[![Secrets](https://img.shields.io/badge/Secrets-Multi--Vault-ff4081)](https://github.com/blackwell-systems/blackdot#vault--secrets)
+[![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)](https://github.com/blackwell-systems/blackdot)
 
 [![Shell](https://img.shields.io/badge/Shell-Zsh-89e051?logo=zsh&logoColor=white)](https://www.zsh.org/)
-[![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
+[![Test Status](https://github.com/blackwell-systems/blackdot/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/blackdot/actions)
 [![Tests](https://img.shields.io/badge/Tests-334-brightgreen)](../test/)
-[![Version](https://img.shields.io/github/v/release/blackwell-systems/dotfiles)](https://github.com/blackwell-systems/dotfiles/releases)
+[![Version](https://img.shields.io/github/v/release/blackwell-systems/blackdot)](https://github.com/blackwell-systems/blackdot/releases)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
 
-> A dotfiles management framework built on **Feature Registry**, **Configuration Layers**, and **CLI Feature Awareness**. Multi-vault secrets, portable Claude Code sessions, machine-specific templates, and self-healing configuration.
+> A blackdot management framework built on **Feature Registry**, **Configuration Layers**, and **CLI Feature Awareness**. Multi-vault secrets, portable Claude Code sessions, machine-specific templates, and self-healing configuration.
 
 [Changelog](../CHANGELOG.md) | [Quick Start Guide](../README.md)
 
-This is the comprehensive reference for the dotfiles framework. It covers the core systems (Feature Registry, Configuration Layers, CLI Feature Awareness), along with configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code**, and **multi-vault secret management** (Bitwarden, 1Password, pass) across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
+This is the comprehensive reference for the blackdot framework. It covers the core systems (Feature Registry, Configuration Layers, CLI Feature Awareness), along with configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code**, and **multi-vault secret management** (Bitwarden, 1Password, pass) across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
 
 ---
 
@@ -33,7 +33,7 @@ This is the comprehensive reference for the dotfiles framework. It covers the co
   - [Interactive Mode](#interactive-mode)
 - [Bootstrapping macOS from Scratch](#bootstrapping-macos-from-scratch)
 - [Bootstrapping Lima / Linux Guest](#bootstrapping-lima--linux-guest)
-- [Dotfiles Bootstrap Details](#dotfiles-bootstrap-details)
+- [Dotfiles Bootstrap Details](#blackdot-bootstrap-details)
 - [Homebrew & Brewfile](#homebrew--brewfile)
 - [Vault System Bootstrap](#vault-system-bootstrap)
 - [Restoring from Vault on Any Machine](#restoring-from-vault-on-any-machine)
@@ -45,9 +45,9 @@ This is the comprehensive reference for the dotfiles framework. It covers the co
 - [Syncing Local Changes to Vault](#syncing-local-changes-to-vault)
 - [Maintenance Checklists](#maintenance-checklists)
 - [Backup System](#backup-system)
-- [Using the Dotfiles Day-to-Day](#using-the-dotfiles-day-to-day)
+- [Using the Dotfiles Day-to-Day](#using-the-blackdot-day-to-day)
 - [Health Check](#health-check)
-  - [The dotfiles Command](#the-dotfiles-command)
+  - [The blackdot Command](#the-blackdot-command)
   - [Custom Doctor Checks (Hooks)](#custom-doctor-checks)
 - [Metrics & Observability](#metrics--observability)
 - [Docker Test Environments](#docker-test-environments)
@@ -62,20 +62,20 @@ This is the comprehensive reference for the dotfiles framework. It covers the co
 ### One-Line Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 ```
 
 Options:
-- `--minimal` - Shell config only (skips `/workspace` symlink, vault setup, Claude integration). Run `dotfiles setup` later to enable.
+- `--minimal` - Shell config only (skips `/workspace` symlink, vault setup, Claude integration). Run `blackdot setup` later to enable.
 - `--ssh` - Clone using SSH instead of HTTPS
 
-After installation, run `dotfiles setup` for interactive configuration.
+After installation, run `blackdot setup` for interactive configuration.
 
 ### Manual Install
 
 ```bash
 # 1. Clone repository
-git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
+git clone git@github.com:blackwell-systems/blackdot.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
 # 2. Run platform bootstrap
@@ -83,7 +83,7 @@ cd ~/workspace/dotfiles
 ./bootstrap/bootstrap-linux.sh # Linux/WSL
 
 # 3. Run interactive setup wizard
-dotfiles setup
+blackdot setup
 ```
 
 **That's it!** The wizard handles platform detection, vault selection, and secret restoration. Progress is saved—resume anytime if interrupted.
@@ -95,10 +95,10 @@ dotfiles setup
 ./bootstrap/bootstrap-linux.sh    # Linux / WSL2
 
 # Then manually configure secrets or run:
-dotfiles vault pull  # (requires vault CLI login first)
+blackdot vault pull  # (requires vault CLI login first)
 
 # Verify installation
-dotfiles doctor
+blackdot doctor
 ```
 
 **What gets installed:**
@@ -113,10 +113,10 @@ dotfiles doctor
 After bootstrap, **always** use `/workspace` paths:
 
 ```bash
-cd /workspace/dotfiles  # ✅ Portable sessions
+cd /workspace/blackdot  # ✅ Portable sessions
 claude                  # Same session on ALL machines
 
-cd ~/workspace/dotfiles # ❌ Non-portable (different paths per OS)
+cd ~/workspace/blackdot # ❌ Non-portable (different paths per OS)
 ```
 
 The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identical paths across macOS, Lima, and WSL, preserving your conversation history when switching machines.
@@ -141,29 +141,29 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 ├── bootstrap/                          # Platform bootstrap scripts
 │   ├── bootstrap-mac.sh                # macOS-specific bootstrap
 │   ├── bootstrap-linux.sh              # Linux-specific bootstrap
-│   ├── bootstrap-dotfiles.sh           # Shared symlink bootstrap
+│   ├── bootstrap-blackdot.sh           # Shared symlink bootstrap
 │   └── _common.sh                      # Shared bootstrap functions
 │
 ├── bin/                                # CLI management tools
-│   ├── dotfiles                        # Main CLI entry point (symlinked to PATH)
-│   ├── dotfiles-backup                 # Backup/restore dotfiles
-│   ├── dotfiles-diff                   # Preview changes before applying
-│   ├── dotfiles-doctor                 # Health check validation
-│   ├── dotfiles-drift                  # Detect config drift from repo
-│   ├── dotfiles-setup                  # Interactive setup wizard
-│   ├── dotfiles-migrate                # Config migration orchestrator (INI→JSON)
-│   ├── dotfiles-migrate-config         # Config migration (INI→JSON)
-│   ├── dotfiles-migrate-vault-schema   # Legacy vault schema migration
-│   ├── dotfiles-lint                   # Lint shell scripts for errors
-│   ├── dotfiles-metrics                # Collect system metrics
-│   ├── dotfiles-packages               # List/validate installed packages
-│   ├── dotfiles-template               # Generate machine-specific templates
-│   └── dotfiles-uninstall              # Clean removal of dotfiles
+│   ├── blackdot                        # Main CLI entry point (symlinked to PATH)
+│   ├── blackdot-backup                 # Backup/restore dotfiles
+│   ├── blackdot-diff                   # Preview changes before applying
+│   ├── blackdot-doctor                 # Health check validation
+│   ├── blackdot-drift                  # Detect config drift from repo
+│   ├── blackdot-setup                  # Interactive setup wizard
+│   ├── blackdot-migrate                # Config migration orchestrator (INI→JSON)
+│   ├── blackdot-migrate-config         # Config migration (INI→JSON)
+│   ├── blackdot-migrate-vault-schema   # Legacy vault schema migration
+│   ├── blackdot-lint                   # Lint shell scripts for errors
+│   ├── blackdot-metrics                # Collect system metrics
+│   ├── blackdot-packages               # List/validate installed packages
+│   ├── blackdot-template               # Generate machine-specific templates
+│   └── blackdot-uninstall              # Clean removal of dotfiles
 │
 ├── claude/                             # Claude Code configuration
 │   ├── settings.json                   # Claude settings (permissions, hooks)
 │   └── commands/                       # Custom slash commands
-│       └── health.md                   # /health - run dotfiles health check
+│       └── health.md                   # /health - run blackdot health check
 │
 ├── docs/                               # Documentation
 │   ├── README.md                       # Docs index
@@ -252,7 +252,7 @@ Deployed files (after bootstrap):
 ~/.config/ghostty/config → ~/workspace/dotfiles/ghostty/config (symlink)
 ~/.config/zellij/        → ~/workspace/dotfiles/zellij/ (symlink)
 ~/.claude/               → ~/workspace/.claude/ (symlink)
-~/bin/dotfiles           → ~/workspace/dotfiles/bin/dotfiles (symlink in PATH)
+~/bin/blackdot           → ~/workspace/dotfiles/bin/blackdot (symlink in PATH)
 ```
 
 </details>
@@ -268,7 +268,7 @@ Key pieces:
 - **vault/**: Multi-vault secure bootstrap for SSH, AWS, and environment secrets (Bitwarden, 1Password, pass)
 - **claude/**: Claude Code configuration (settings, slash commands)
 - **Brewfile**: Shared Homebrew definition used by both macOS and Lima bootstrap scripts
-- **Claude Workspace Symlink** inside `bootstrap-dotfiles.sh` ensures that both macOS and Lima point to the shared workspace directory:
+- **Claude Workspace Symlink** inside `bootstrap-blackdot.sh` ensures that both macOS and Lima point to the shared workspace directory:
 
   ```
   ~/.claude → ~/workspace/.claude
@@ -278,7 +278,7 @@ Key pieces:
 
 ## Multi-Platform Architecture
 
-This dotfiles system is designed for extensibility across multiple platforms with **90% shared code**.
+This blackdot system is designed for extensibility across multiple platforms with **90% shared code**.
 
 ### Currently Supported Platforms
 
@@ -321,8 +321,8 @@ These work on **any platform** without modification:
 - Works on Linux, macOS, BSD, WSL, Docker
 
 **Health & Metrics** (100% portable)
-- `bin/dotfiles-doctor` / `bin/dotfiles-drift`
-- `bin/dotfiles-metrics`
+- `bin/blackdot-doctor` / `bin/blackdot-drift`
+- `bin/blackdot-metrics`
 - Cross-platform file permissions handling
 
 **Shell Configuration** (OS-aware)
@@ -342,7 +342,7 @@ Example: Adding Arch Linux support (~30 lines)
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BLACKDOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # 1. System packages (platform-specific)
 sudo pacman -Syu --noconfirm git zsh curl base-devel
@@ -351,10 +351,10 @@ sudo pacman -Syu --noconfirm git zsh curl base-devel
 # ... setup ...
 
 # 3. SHARED: Use same Brewfile
-brew bundle --file="$DOTFILES_DIR/Brewfile"
+brew bundle --file="$BLACKDOT_DIR/Brewfile"
 
-# 4. SHARED: Use same dotfiles bootstrap
-"$DOTFILES_DIR/bootstrap-dotfiles.sh"
+# 4. SHARED: Use same blackdot bootstrap
+"$BLACKDOT_DIR/bootstrap-blackdot.sh"
 
 # 5. Set shell to zsh
 chsh -s $(command -v zsh)
@@ -390,7 +390,7 @@ esac
 
 ### Why This Architecture Matters
 
-**Portability**: Use the same dotfiles across:
+**Portability**: Use the same blackdot across:
 - Work and personal machines (macOS/Linux)
 - Development VMs (Lima/WSL)
 - CI/CD containers (Docker)
@@ -430,7 +430,7 @@ Lima mounts the macOS home directory into the VM. With `~/workspace` as the cano
 
 This enables:
 - Edit code on macOS, run tests in Lima
-- Same dotfiles repo accessible from both platforms
+- Same blackdot repo accessible from both platforms
 - Claude Code shares state via `~/.claude → ~/workspace/.claude`
 
 ### 3. Organizational Structure
@@ -459,7 +459,7 @@ graph LR
     style state fill:#2c5282,stroke:#4299e1,color:#e2e8f0
     style work fill:#1a365d,stroke:#2c5282,color:#e2e8f0
     style claude fill:#2f855a,stroke:#48bb78,color:#e2e8f0
-    style dotfiles fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style blackdot fill:#2c5282,stroke:#4299e1,color:#e2e8f0
 ```
 
 **Structure breakdown:**
@@ -490,13 +490,13 @@ alias cws='cd "$WORKSPACE"'
 
 ### 5. Claude Code Session Portability (`/workspace`) 🌟
 
-**This is a key innovation that sets this dotfiles system apart.**
+**This is a key innovation that sets this blackdot system apart.**
 
 #### The Challenge
 Claude Code stores sessions based on your working directory path:
-- macOS: `/Users/username/workspace/dotfiles` → session `-Users-username-workspace-dotfiles-`
-- Lima: `/home/username.linux/workspace/dotfiles` → session `-home-username.linux-workspace-dotfiles-`
-- WSL: `/home/username/workspace/dotfiles` → session `-home-username-workspace-dotfiles-`
+- macOS: `/Users/username/workspace/dotfiles` → session `-Users-username-workspace-blackdot-`
+- Lima: `/home/username.linux/workspace/dotfiles` → session `-home-username.linux-workspace-blackdot-`
+- WSL: `/home/username/workspace/dotfiles` → session `-home-username-workspace-blackdot-`
 
 Even with the same files (via Lima mount or git sync), **different absolute paths = different session folders = lost conversation history** when switching machines.
 
@@ -523,12 +523,12 @@ Claude Code sees **the same path** (`/workspace/dotfiles`) on all platforms:
 # On macOS
 cd /workspace/dotfiles
 claude
-# Session stored in: ~/.claude/projects/-workspace-dotfiles-/
+# Session stored in: ~/.claude/projects/-workspace-blackdot-/
 
 # On Lima (same session!)
 cd /workspace/dotfiles
 claude
-# Session stored in: ~/.claude/projects/-workspace-dotfiles-/
+# Session stored in: ~/.claude/projects/-workspace-blackdot-/
 # ✅ Conversation history continues from macOS!
 ```
 
@@ -540,15 +540,15 @@ claude
 
 # ✅ Start on macOS, continue on Lima
 # macOS:
-cd /workspace/dotfiles && claude
+cd /workspace/blackdot && claude
 # ... work, exit ...
 
 # Lima (same conversation):
-cd /workspace/dotfiles && claude
+cd /workspace/blackdot && claude
 # Your conversation history is preserved!
 
 # ❌ DON'T use ~/workspace (non-portable)
-cd ~/workspace/dotfiles  # Different on each OS
+cd ~/workspace/blackdot  # Different on each OS
 claude                    # New session every time
 ```
 
@@ -568,7 +568,7 @@ Both systems coordinate seamlessly:
 dotclaude activate client-work
 
 # Secrets managed by dotfiles
-dotfiles vault pull client-*
+blackdot vault pull client-*
 
 # Both respect /workspace for portable sessions
 cd /workspace/my-project && claude
@@ -576,7 +576,7 @@ cd /workspace/my-project && claude
 
 **Division of responsibilities:**
 - dotclaude handles Claude configuration per context (OSS, work, client)
-- dotfiles handles secrets and cross-platform consistency
+- blackdot handles secrets and cross-platform consistency
 - Both use `/workspace` paths for session portability
 
 See [DOTCLAUDE-INTEGRATION.md](DOTCLAUDE-INTEGRATION.md) for complete integration guide.
@@ -654,7 +654,7 @@ When setting up a new machine or VM, no username updates are needed. Everything 
   - **Bitwarden CLI** (`bw`) - Default, full-featured, cloud-synced
   - **1Password CLI** (`op`) - v2 CLI with biometric auth
   - **pass** (`pass`) - GPG-based, git-synced
-  - Skip with `--minimal` flag or just don't run `dotfiles vault` commands
+  - Skip with `--minimal` flag or just don't run `blackdot vault` commands
   - Without vault: manually configure `~/.ssh`, `~/.aws`, `~/.gitconfig`
 
 ### Optional (for specific workflows)
@@ -665,7 +665,7 @@ When setting up a new machine or VM, no username updates are needed. Everything 
 
 ### Optional (Brewfile package tiers)
 
-The `dotfiles setup` wizard presents three package tiers **interactively**:
+The `blackdot setup` wizard presents three package tiers **interactively**:
   - `minimal` - Essential tools only (18 packages, ~2 min)
   - `enhanced` - Modern CLI tools without containers (43 packages, ~5 min) **← RECOMMENDED**
   - `full` - Everything including Docker/Kubernetes (61 packages, ~10 min) [default]
@@ -686,7 +686,7 @@ There are two big pillars:
 
    Handled by:
 
-   - `bootstrap-dotfiles.sh`
+   - `bootstrap-blackdot.sh`
    - `bootstrap-mac.sh`
    - `bootstrap-linux.sh`
 
@@ -708,7 +708,7 @@ There are two big pillars:
 After bootstrap, run the interactive setup wizard for full configuration:
 
 ```bash
-dotfiles setup
+blackdot setup
 ```
 
 The wizard handles:
@@ -737,14 +737,14 @@ The wizard shows:
 - **Visual progress bar** using Unicode characters (█ for completed, ░ for remaining)
 - **Percentage complete** to track overall progress
 
-**Progress is saved** to `~/.config/dotfiles/`. If interrupted, run `dotfiles setup` again to resume. See [State Management](state-management.md) for details on state files and persistence.
+**Progress is saved** to `~/.config/dotfiles/`. If interrupted, run `blackdot setup` again to resume. See [State Management](state-management.md) for details on state files and persistence.
 
 ### Smart Secrets Onboarding
 
 For first-time vault setup or adding new secrets, use the interactive onboarding wizard:
 
 ```bash
-dotfiles vault setup
+blackdot vault setup
 ```
 
 This wizard:
@@ -762,15 +762,15 @@ The **feature registry** provides centralized control over all optional function
 
 ```bash
 # List all features and their status
-dotfiles features
+blackdot features
 
 # Enable/disable features
-dotfiles features enable vault --persist
-dotfiles features disable drift_check --persist
+blackdot features enable vault --persist
+blackdot features disable drift_check --persist
 
 # Apply presets
-dotfiles features preset developer --persist  # vault, aws_helpers, git_hooks, modern_cli
-dotfiles features preset claude --persist     # Claude Code optimized
+blackdot features preset developer --persist  # vault, aws_helpers, git_hooks, modern_cli
+blackdot features preset claude --persist     # Claude Code optimized
 ```
 
 You can also skip optional features using environment variables:
@@ -785,7 +785,7 @@ See [Feature Registry](features.md) for complete documentation.
 Use `--help` to see available options:
 
 ```bash
-dotfiles setup --help
+blackdot setup --help
 ./bootstrap/bootstrap-mac.sh --help
 ```
 
@@ -798,7 +798,7 @@ flowchart TB
     subgraph setup["Setup Phase"]
         bootstrap["Bootstrap<br/><small>bootstrap-mac/linux.sh</small><br/>Install packages, tools, shell"]
         restore["Restore Secrets<br/><small>restore.sh</small><br/>SSH, AWS, Git, env"]
-        verify["Health Check<br/><small>dotfiles doctor</small><br/>Verify installation"]
+        verify["Health Check<br/><small>blackdot doctor</small><br/>Verify installation"]
     end
 
     subgraph tools["Package Sources"]
@@ -849,7 +849,7 @@ flowchart LR
         profiles["Claude Profiles<br/>• CLAUDE.md<br/>• agents/<br/>• settings.json"]
     end
 
-    subgraph dotfiles["dotfiles System"]
+    subgraph dotfiles["blackdot System"]
         secrets["Secrets<br/>• SSH keys<br/>• AWS creds<br/>• Git config"]
         shell["Shell & Tools<br/>• Zsh<br/>• Brewfile"]
     end
@@ -865,7 +865,7 @@ flowchart LR
     claude_dir --> workspace
 
     style dotclaude fill:#8A2BE2,stroke:#9333EA,color:#e2e8f0
-    style dotfiles fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style blackdot fill:#2c5282,stroke:#4299e1,color:#e2e8f0
     style shared fill:#22543d,stroke:#2f855a,color:#e2e8f0
     style workspace fill:#2f855a,stroke:#48bb78,color:#e2e8f0
 ```
@@ -888,10 +888,10 @@ mkdir -p ~/workspace
 cd ~/workspace
 ```
 
-2. **Clone dotfiles repo**
+2. **Clone blackdot repo**
 
 ```bash
-git clone git@github.com:blackwell-systems/dotfiles.git
+git clone git@github.com:blackwell-systems/blackdot.git
 cd ~/workspace/dotfiles
 ```
 
@@ -909,10 +909,10 @@ Typical responsibilities of `bootstrap-mac.sh`:
 - Run the **shared Brewfile**:
 
   ```bash
-  brew bundle --file="$DOTFILES_DIR/Brewfile"
+  brew bundle --file="$BLACKDOT_DIR/Brewfile"
   ```
 
-- Run `bootstrap-dotfiles.sh` to create symlinks:
+- Run `bootstrap-blackdot.sh` to create symlinks:
 
   - `~/.zshrc    → ~/workspace/dotfiles/zsh/zshrc`  
   - `~/.p10k.zsh → ~/workspace/dotfiles/zsh/p10k.zsh`  
@@ -953,7 +953,7 @@ Typical responsibilities of `bootstrap-linux.sh`:
 - Install **Linuxbrew** if missing.  
 - Ensure `brew` is on `PATH`.  
 - Run the **same Brewfile** used by macOS.  
-- Call `bootstrap-dotfiles.sh` to symlink everything, including:
+- Call `bootstrap-blackdot.sh` to symlink everything, including:
 
   - `~/.claude → ~/workspace/.claude`
   - shared Zsh files
@@ -965,12 +965,12 @@ Typical responsibilities of `bootstrap-linux.sh`:
 
 ## Dotfiles Bootstrap Details
 
-### `bootstrap-dotfiles.sh`
+### `bootstrap-blackdot.sh`
 
 This file creates all unified symlinks:
 
-- `~/.zshrc    -> $DOTFILES_DIR/zsh/zshrc`  
-- `~/.p10k.zsh -> $DOTFILES_DIR/zsh/p10k.zsh`  
+- `~/.zshrc    -> $BLACKDOT_DIR/zsh/zshrc`  
+- `~/.p10k.zsh -> $BLACKDOT_DIR/zsh/p10k.zsh`  
 - Ghostty config (macOS only)  
 - **Claude setup**: Creates `~/workspace/.claude`, symlinks `~/.claude` to it, and links config files from `dotfiles/claude/`
 
@@ -1144,7 +1144,7 @@ Restores:
 - **AWS config & credentials**
 - **Environment secrets**
 
-via your preferred vault backend (Bitwarden, 1Password, or pass). Set `DOTFILES_VAULT_BACKEND` environment variable to choose your backend.
+via your preferred vault backend (Bitwarden, 1Password, or pass). Set `BLACKDOT_VAULT_BACKEND` environment variable to choose your backend.
 
 Same flow on macOS and Lima.
 
@@ -1161,8 +1161,8 @@ This allows you to customize which secrets to manage without editing source code
 **Auto-Discovery (Recommended):**
 
 ```bash
-dotfiles vault setup      # Configure backend, offers auto-discovery
-dotfiles vault scan  # Or run discovery directly
+blackdot vault setup      # Configure backend, offers auto-discovery
+blackdot vault scan  # Or run discovery directly
 ```
 
 Auto-discovery scans standard locations (`~/.ssh/`, `~/.aws/`, `~/.gitconfig`, etc.) and generates `vault-items.json` automatically with smart naming.
@@ -1172,7 +1172,7 @@ Auto-discovery scans standard locations (`~/.ssh/`, `~/.aws/`, `~/.gitconfig`, e
 Before syncing to your vault, validate your configuration to catch errors early:
 
 ```bash
-dotfiles vault validate
+blackdot vault validate
 ```
 
 The validator checks:
@@ -1181,7 +1181,7 @@ The validator checks:
 - ✅ Valid type values ("file" or "sshkey")
 - ✅ Item naming conventions (must start with capital letter)
 
-**Validation is automatic** before `dotfiles vault push` and `dotfiles vault pull` operations. If validation fails, the wizard offers to open your editor to fix errors interactively.
+**Validation is automatic** before `blackdot vault push` and `blackdot vault pull` operations. If validation fails, the wizard offers to open your editor to fix errors interactively.
 
 Example output:
 
@@ -1206,7 +1206,7 @@ Configuration summary:
 mkdir -p ~/.config/dotfiles
 cp vault/vault-items.example.json ~/.config/dotfiles/vault-items.json
 # Edit to match your setup
-dotfiles vault validate  # Verify your changes
+blackdot vault validate  # Verify your changes
 ```
 
 See [Vault README](vault-README.md#configuration-file) for the full schema and customization options.
@@ -1215,7 +1215,7 @@ See [Vault README](vault-README.md#configuration-file) for the full schema and c
 
 ## Restoring from Vault on Any Machine
 
-Once the dotfiles are in place and your vault CLI is installed:
+Once the blackdot are in place and your vault CLI is installed:
 
 1. **Login to your vault**
 
@@ -1233,7 +1233,7 @@ op signin
 
 ```bash
 # Add to ~/.zshrc or ~/.zshenv for persistence
-export DOTFILES_VAULT_BACKEND=1password  # or 'pass'
+export BLACKDOT_VAULT_BACKEND=1password  # or 'pass'
 ```
 
 3. **Run the vault bootstrap**
@@ -1380,7 +1380,7 @@ op signin
 
 **Using the unified vault command (recommended):**
 ```bash
-dotfiles vault push AWS-Config
+blackdot vault push AWS-Config
 ```
 
 **Or manually with Bitwarden CLI:**
@@ -1672,7 +1672,7 @@ declare -A SSH_KEYS=(
 
 This automatically propagates to:
 - `restore-ssh.sh` (restores the key from vault)
-- `bin/dotfiles-doctor` (validates key exists with correct permissions)
+- `bin/blackdot-doctor` (validates key exists with correct permissions)
 
 ### 4. Add to SSH config
 
@@ -1688,7 +1688,7 @@ Host newservice.example.com
 After editing `~/.ssh/config`, sync it back:
 
 ```bash
-dotfiles vault push SSH-Config
+blackdot vault push SSH-Config
 ```
 
 ### 6. Update zshrc for auto-add (optional)
@@ -1709,20 +1709,20 @@ When you modify local config files (`~/.ssh/config`, `~/.aws/config`, `~/.gitcon
 ### Preview changes (dry run)
 
 ```bash
-dotfiles vault push --dry-run --all
+blackdot vault push --dry-run --all
 ```
 
 ### Sync specific items
 
 ```bash
-dotfiles vault push SSH-Config           # Just SSH config
-dotfiles vault push AWS-Config Git-Config  # Multiple items
+blackdot vault push SSH-Config           # Just SSH config
+blackdot vault push AWS-Config Git-Config  # Multiple items
 ```
 
 ### Sync all items
 
 ```bash
-dotfiles vault push --all
+blackdot vault push --all
 ```
 
 ### Supported items
@@ -1742,13 +1742,13 @@ dotfiles vault push --all
 
 ### Security Maintenance
 
-Regular security maintenance schedule to keep your dotfiles and credentials secure:
+Regular security maintenance schedule to keep your blackdot and credentials secure:
 
 **Annual Tasks:**
 - [ ] **Rotate SSH keys** - Generate new SSH key pairs and update vault
   - Generate: `ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey`
   - Update GitHub/GitLab/etc. with new public key
-  - Sync to vault: `dotfiles vault push`
+  - Sync to vault: `blackdot vault push`
   - Test connections: `ssh -T git@github.com`
 - [ ] **Update vault master password** - Use a strong, unique password
   - Update in your vault app or web interface
@@ -1758,27 +1758,27 @@ Regular security maintenance schedule to keep your dotfiles and credentials secu
 - [ ] **Review AWS credentials** - Check for unused or expired credentials
   - Audit IAM access keys in AWS Console
   - Rotate if compromised or shared accidentally
-  - Update local files and sync: `dotfiles vault push AWS-Credentials`
+  - Update local files and sync: `blackdot vault push AWS-Credentials`
 - [ ] **Audit vault items** - Review all items stored in your vault
-  - Run: `dotfiles vault list` for inventory
-  - Run: `dotfiles vault check` to validate required items
+  - Run: `blackdot vault list` for inventory
+  - Run: `blackdot vault check` to validate required items
   - Remove obsolete credentials
   - Verify all required items exist
 
 **Monthly Tasks:**
-- [ ] **Check for dotfiles updates** - Keep dotfiles current with latest improvements
-  - Run: `dotfiles-upgrade` or `git pull && ./bootstrap/bootstrap-*.sh`
+- [ ] **Check for blackdot updates** - Keep blackdot current with latest improvements
+  - Run: `blackdot-upgrade` or `git pull && ./bootstrap/bootstrap-*.sh`
   - Review CHANGELOG.md for breaking changes
 - [ ] **Run health check with drift detection** - Ensure local files match vault
-  - Run: `dotfiles drift`
-  - Sync any differences: `dotfiles vault push --all`
+  - Run: `blackdot drift`
+  - Sync any differences: `blackdot vault push --all`
 
 **Best Practices:**
 - Never commit secrets to git (verify with `git diff` before committing)
 - Use different SSH keys for different services (work vs personal)
 - Enable 2FA on your vault account
 - Regularly backup your vault (export encrypted JSON)
-- Review file permissions regularly: `dotfiles doctor --fix`
+- Review file permissions regularly: `blackdot doctor --fix`
 
 ---
 
@@ -1790,34 +1790,34 @@ Complete checklist when adding a new SSH identity:
 - [ ] Push to vault (see "Adding New SSH Keys" section above)
 - [ ] **Add to `SSH_KEYS` array in `vault/_common.sh`** (propagates to restore + health check)
 - [ ] Update `~/.ssh/config` with Host entry
-- [ ] Sync SSH config: `dotfiles vault push SSH-Config`
+- [ ] Sync SSH config: `blackdot vault push SSH-Config`
 - [ ] Update `zsh/zshrc` - add `_ssh_add_if_missing` line (optional, for ssh-agent)
-- [ ] Commit dotfiles changes
+- [ ] Commit blackdot changes
 
 ### Updating AWS Credentials
 
 When AWS credentials or config change:
 
 - [ ] Edit `~/.aws/config` and/or `~/.aws/credentials`
-- [ ] Sync to vault: `dotfiles vault push AWS-Config AWS-Credentials`
-- [ ] Verify on other machines: `dotfiles vault pull`
+- [ ] Sync to vault: `blackdot vault push AWS-Config AWS-Credentials`
+- [ ] Verify on other machines: `blackdot vault pull`
 
 ### Adding a New Environment Variable
 
 - [ ] Edit `~/.local/env.secrets`
-- [ ] Sync to vault: `dotfiles vault push Environment-Secrets`
+- [ ] Sync to vault: `blackdot vault push Environment-Secrets`
 - [ ] Source on current shell: `source ~/.local/load-env.sh`
 
 ### Modifying SSH Config (add hosts, change options)
 
 - [ ] Edit `~/.ssh/config`
-- [ ] Sync to vault: `dotfiles vault push SSH-Config`
-- [ ] Restore on other machines: `dotfiles vault pull`
+- [ ] Sync to vault: `blackdot vault push SSH-Config`
+- [ ] Restore on other machines: `blackdot vault pull`
 
 ### Updating Git Config
 
 - [ ] Edit `~/.gitconfig`
-- [ ] Sync to vault: `dotfiles vault push Git-Config`
+- [ ] Sync to vault: `blackdot vault push Git-Config`
 
 ### New Machine Setup
 
@@ -1826,28 +1826,28 @@ Complete checklist for a fresh machine:
 1. [ ] Clone dotfiles: `git clone ... ~/workspace/dotfiles`
 2. [ ] Run bootstrap: `./bootstrap/bootstrap-mac.sh` or `./bootstrap/bootstrap-linux.sh`
 3. [ ] Login to vault: `bw login` / `op signin` / (pass uses GPG)
-4. [ ] Validate vault items: `dotfiles vault check`
-5. [ ] Restore secrets: `dotfiles vault pull`
-6. [ ] Run health check: `dotfiles doctor`
+4. [ ] Validate vault items: `blackdot vault check`
+5. [ ] Restore secrets: `blackdot vault pull`
+6. [ ] Run health check: `blackdot doctor`
 7. [ ] Restart shell or `source ~/.zshrc`
 
 ---
 
 ## Backup System
 
-The dotfiles system includes automatic backup and restore functionality to protect your configuration files.
+The blackdot system includes automatic backup and restore functionality to protect your configuration files.
 
 ### Creating Backups
 
 ```bash
 # Create a backup
-dotfiles backup
+blackdot backup
 
 # List all available backups
-dotfiles backup --list
+blackdot backup --list
 ```
 
-Each backup creates a timestamped archive in `~/.dotfiles-backups/` containing:
+Each backup creates a timestamped archive in `~/.blackdot-backups/` containing:
 - `~/.ssh/config` and `~/.ssh/known_hosts`
 - `~/.gitconfig`
 - `~/.aws/config` and `~/.aws/credentials`
@@ -1858,10 +1858,10 @@ Each backup creates a timestamped archive in `~/.dotfiles-backups/` containing:
 
 ```bash
 # Interactive restore (shows list of backups)
-dotfiles backup restore
+blackdot backup restore
 
 # Restore specific backup
-dotfiles backup restore backup-20240115-143022
+blackdot backup restore backup-20240115-143022
 ```
 
 ### Automatic Backup Behavior
@@ -1891,8 +1891,8 @@ Configure in `~/.config/dotfiles/config.json`:
 
 ### Best Practices
 
-- **Before major changes**: Run `dotfiles backup` before modifying configs
-- **Before uninstall**: Always backup before running `dotfiles uninstall`
+- **Before major changes**: Run `blackdot backup` before modifying configs
+- **Before uninstall**: Always backup before running `blackdot uninstall`
 - **Regular backups**: Run periodic backups even with vault sync
 - **Test restores**: Occasionally verify backups work with `--list`
 
@@ -1964,7 +1964,7 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 **Smart directory jumping (zoxide):**
 
 - `z <partial>` → Jump to directory matching pattern (learns your habits)
-- `z dot` → Jumps to ~/workspace/dotfiles (after visiting once)
+- `z dot` → Jumps to ~/workspace/blackdot (after visiting once)
 - `z code` → Jumps to ~/workspace/code
 - `zi` → Interactive selection with fzf
 
@@ -1983,35 +1983,35 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 
 **Vault:**
 
-- `dotfiles vault pull` → Restore all secrets from vault
-- `dotfiles vault push` → Sync local files to vault
-- `dotfiles vault sync` → **Smart bidirectional sync** (auto-detects push/pull direction)
-- `dotfiles vault setup` → Interactive onboarding wizard for new vault items
-- `dotfiles vault list` → List vault items
-- `dotfiles vault check` → Validate vault items exist
-- `dotfiles vault validate` → Validate vault item schema
+- `blackdot vault pull` → Restore all secrets from vault
+- `blackdot vault push` → Sync local files to vault
+- `blackdot vault sync` → **Smart bidirectional sync** (auto-detects push/pull direction)
+- `blackdot vault setup` → Interactive onboarding wizard for new vault items
+- `blackdot vault list` → List vault items
+- `blackdot vault check` → Validate vault items exist
+- `blackdot vault validate` → Validate vault item schema
 - Supports Bitwarden (default), 1Password, and pass backends
 
 **Dotfiles Management:**
 
-- `dotfiles status` → Visual dashboard
-- `dotfiles sync` → Smart bidirectional vault sync (shortcut for `dotfiles vault sync`)
-- `dotfiles drift` → Compare local files vs vault
-- `dotfiles doctor` → Run health check + vault item validation
-- `dotfiles backup` → Create timestamped backup of config files
-- `dotfiles backup --list` → List available backups
-- `dotfiles backup restore` → Restore from backup (interactive)
-- `dotfiles upgrade` → Pull latest dotfiles and run bootstrap
-- `dotfiles lint` → Validate shell config syntax
-- `dotfiles lint --fix` → Auto-fix script permissions
-- `dotfiles packages` → Check Brewfile package status
-- `dotfiles packages --install` → Install missing packages
-- `dotfiles template init` → Setup machine-specific config templates
-- `dotfiles template vars` → List template variables and values
-- `dotfiles template render` → Generate configs from templates
-- `dotfiles template link` → Symlink generated files to destinations
-- `dotfiles cd` → Navigate to dotfiles directory
-- `dotfiles edit` → Open in editor
+- `blackdot status` → Visual dashboard
+- `blackdot sync` → Smart bidirectional vault sync (shortcut for `blackdot vault sync`)
+- `blackdot drift` → Compare local files vs vault
+- `blackdot doctor` → Run health check + vault item validation
+- `blackdot backup` → Create timestamped backup of config files
+- `blackdot backup --list` → List available backups
+- `blackdot backup restore` → Restore from backup (interactive)
+- `blackdot upgrade` → Pull latest blackdot and run bootstrap
+- `blackdot lint` → Validate shell config syntax
+- `blackdot lint --fix` → Auto-fix script permissions
+- `blackdot packages` → Check Brewfile package status
+- `blackdot packages --install` → Install missing packages
+- `blackdot template init` → Setup machine-specific config templates
+- `blackdot template vars` → List template variables and values
+- `blackdot template render` → Generate configs from templates
+- `blackdot template link` → Symlink generated files to destinations
+- `blackdot cd` → Navigate to blackdot directory
+- `blackdot edit` → Open in editor
 - `status` → Quick dashboard showing symlinks, SSH, AWS, Lima status
 
 **AWS Profile Management:**
@@ -2198,67 +2198,67 @@ source ~/.local/load-env.sh
 The recommended way to manage and check your dotfiles:
 
 ```bash
-dotfiles status          # Quick visual dashboard (color-coded)
-dotfiles doctor          # Comprehensive health check
-dotfiles doctor --fix    # Auto-repair permission issues
-dotfiles drift           # Compare local files vs vault
-dotfiles features        # List all features and their status
-dotfiles features enable X   # Enable feature X
-dotfiles features disable X  # Disable feature X
-dotfiles features preset Y   # Apply preset (minimal/developer/claude/full)
-dotfiles lint            # Validate shell config syntax
-dotfiles lint --fix      # Auto-fix script permissions
-dotfiles packages        # Check Brewfile package status
-dotfiles packages --install  # Install missing packages
-dotfiles hook list       # List registered hooks
-dotfiles hook run <point> # Run hooks for a hook point
-dotfiles hook test <point> # Test hooks (dry-run + execute)
-dotfiles template init   # Setup machine-specific config templates
-dotfiles template vars   # List template variables and values
-dotfiles template render # Generate configs from templates
-dotfiles template link   # Symlink generated files to destinations
-dotfiles encrypt init    # Initialize age encryption (generate keys)
-dotfiles encrypt <file>  # Encrypt a file (creates .age, removes original)
-dotfiles encrypt decrypt <file>  # Decrypt a .age file
-dotfiles encrypt edit <file>     # Decrypt, edit in $EDITOR, re-encrypt
-dotfiles encrypt list    # List encrypted/unencrypted sensitive files
-dotfiles encrypt status  # Show encryption status and key info
-dotfiles encrypt push-key # Backup private key to vault
-dotfiles upgrade         # Pull latest, run bootstrap, verify
-dotfiles cd              # Navigate to dotfiles directory
-dotfiles edit            # Open dotfiles in $EDITOR
-dotfiles help            # Show all commands
+blackdot status          # Quick visual dashboard (color-coded)
+blackdot doctor          # Comprehensive health check
+blackdot doctor --fix    # Auto-repair permission issues
+blackdot drift           # Compare local files vs vault
+blackdot features        # List all features and their status
+blackdot features enable X   # Enable feature X
+blackdot features disable X  # Disable feature X
+blackdot features preset Y   # Apply preset (minimal/developer/claude/full)
+blackdot lint            # Validate shell config syntax
+blackdot lint --fix      # Auto-fix script permissions
+blackdot packages        # Check Brewfile package status
+blackdot packages --install  # Install missing packages
+blackdot hook list       # List registered hooks
+blackdot hook run <point> # Run hooks for a hook point
+blackdot hook test <point> # Test hooks (dry-run + execute)
+blackdot template init   # Setup machine-specific config templates
+blackdot template vars   # List template variables and values
+blackdot template render # Generate configs from templates
+blackdot template link   # Symlink generated files to destinations
+blackdot encrypt init    # Initialize age encryption (generate keys)
+blackdot encrypt <file>  # Encrypt a file (creates .age, removes original)
+blackdot encrypt decrypt <file>  # Decrypt a .age file
+blackdot encrypt edit <file>     # Decrypt, edit in $EDITOR, re-encrypt
+blackdot encrypt list    # List encrypted/unencrypted sensitive files
+blackdot encrypt status  # Show encryption status and key info
+blackdot encrypt push-key # Backup private key to vault
+blackdot upgrade         # Pull latest, run bootstrap, verify
+blackdot cd              # Navigate to blackdot directory
+blackdot edit            # Open blackdot in $EDITOR
+blackdot help            # Show all commands
 ```
 
 ### File Encryption (Age)
 
-The dotfiles system includes file encryption using [age](https://github.com/FiloSottile/age) for securing sensitive configuration files that shouldn't be stored in plain text.
+The blackdot system includes file encryption using [age](https://github.com/FiloSottile/age) for securing sensitive configuration files that shouldn't be stored in plain text.
 
 **Setup:**
 
 ```bash
 # Initialize encryption (one-time, generates key pair)
-dotfiles encrypt init
+blackdot encrypt init
 
 # Back up your private key to vault (important!)
-dotfiles encrypt push-key
+blackdot encrypt push-key
 ```
 
 **Usage:**
 
 ```bash
 # Encrypt sensitive files
-dotfiles encrypt templates/_variables.local.sh
+blackdot encrypt templates/_variables.local.sh
 # Creates: templates/_variables.local.sh.age (original removed)
 
 # Decrypt when needed
-dotfiles encrypt decrypt templates/_variables.local.sh.age
+blackdot encrypt decrypt templates/_variables.local.sh.age
 
 # Edit encrypted file directly (decrypts → edits → re-encrypts)
-dotfiles encrypt edit templates/_variables.local.sh.age
+blackdot encrypt edit templates/_variables.local.sh.age
 
 # List all encrypted files
-dotfiles encrypt list
+blackdot encrypt list
 ```
 
 **Files automatically targeted for encryption:**
@@ -2279,15 +2279,15 @@ dotfiles encrypt list
 | Private key | `~/.config/dotfiles/age-key.txt` | 600 |
 | Public key | `~/.config/dotfiles/age-recipients.txt` | 644 |
 
-> **Important:** Without your private key, encrypted files cannot be recovered. Always back up to vault with `dotfiles encrypt push-key`.
+> **Important:** Without your private key, encrypted files cannot be recovered. Always back up to vault with `blackdot encrypt push-key`.
 
 ### Health Check Details
 
-Run the health check to verify your dotfiles installation:
+Run the health check to verify your blackdot installation:
 
 ```bash
-dotfiles doctor          # Recommended
-dotfiles drift           # Compare local vs vault
+blackdot doctor          # Recommended
+blackdot drift           # Compare local vs vault
 ```
 
 The script verifies:
@@ -2324,14 +2324,14 @@ See [Hook System](hooks.md) for more on custom hooks.
 **Auto-fix mode**: Run with `--fix` to automatically correct permission issues:
 
 ```bash
-dotfiles doctor --fix
+blackdot doctor --fix
 ```
 
 **Drift detection**: Compare local files vs vault:
 
 ```bash
-dotfiles drift           # Full check (connects to vault)
-dotfiles drift --quick   # Fast check (local checksums only, <50ms)
+blackdot drift           # Full check (connects to vault)
+blackdot drift --quick   # Fast check (local checksums only, <50ms)
 ```
 
 This checks if your local `~/.ssh/config`, `~/.aws/config`, `~/.gitconfig`, etc. differ from what's stored in your vault. Useful for detecting unsync'd changes before switching machines.
@@ -2341,18 +2341,18 @@ This checks if your local `~/.ssh/config`, `~/.aws/config`, `~/.gitconfig`, etc.
 The shell automatically checks for drift when you open a new terminal. This uses a fast, local-only comparison (<50ms) that doesn't require vault authentication.
 
 **How it works:**
-1. After `dotfiles vault pull`, file checksums are saved to `~/.cache/dotfiles/vault-state.json`
+1. After `blackdot vault pull`, file checksums are saved to `~/.cache/dotfiles/vault-state.json`
 2. On every shell startup, local files are compared against cached checksums
 3. If differences are detected, you'll see a warning:
 
 ```
 ⚠ Drift detected: Git-Config Template-Variables
-  Run: dotfiles drift (to compare) or dotfiles vault pull (to restore)
+  Run: blackdot drift (to compare) or blackdot vault pull (to restore)
 ```
 
 **Disable automatic checks:**
 ```bash
-export DOTFILES_SKIP_DRIFT_CHECK=1
+export BLACKDOT_SKIP_DRIFT_CHECK=1
 ```
 
 Add this to `~/.zshrc.local` to permanently disable.
@@ -2366,7 +2366,7 @@ Add this to `~/.zshrc.local` to permanently disable.
 [WARN] Git-Config: LOCAL DIFFERS from vault
 
 To sync local changes to vault:
-  dotfiles vault push --all
+  blackdot vault push --all
 ```
 
 ### Bidirectional Sync
@@ -2374,9 +2374,9 @@ To sync local changes to vault:
 Instead of manually choosing `vault push` or `vault pull`, use the smart **sync** command that automatically determines the correct direction for each file:
 
 ```bash
-dotfiles sync                     # Smart sync all items
-dotfiles sync --dry-run           # Preview what would happen
-dotfiles sync Git-Config          # Sync specific item
+blackdot sync                     # Smart sync all items
+blackdot sync --dry-run           # Preview what would happen
+blackdot sync Git-Config          # Sync specific item
 ```
 
 **How it determines direction:**
@@ -2393,8 +2393,8 @@ dotfiles sync Git-Config          # Sync specific item
 When both sides have changed, use force flags:
 
 ```bash
-dotfiles sync --force-local   # Push local changes, overwrite vault
-dotfiles sync --force-vault   # Pull vault changes, overwrite local
+blackdot sync --force-local   # Push local changes, overwrite vault
+blackdot sync --force-vault   # Pull vault changes, overwrite local
 ```
 
 **Example sync output:**
@@ -2453,11 +2453,11 @@ Use this after initial setup or when debugging issues.
 
 ## Metrics & Observability
 
-The dotfiles now include comprehensive metrics collection to track health over time.
+The blackdot now include comprehensive metrics collection to track health over time.
 
 ### Automatic Metrics Collection
 
-Every time you run `dotfiles doctor`, metrics are automatically recorded to `~/.dotfiles-metrics.jsonl`:
+Every time you run `blackdot doctor`, metrics are automatically recorded to `~/.blackdot-metrics.jsonl`:
 
 ```json
 {
@@ -2475,7 +2475,7 @@ Every time you run `dotfiles doctor`, metrics are automatically recorded to `~/.
 
 ### Viewing Metrics
 
-Use the `show-metrics.sh` script to visualize your dotfiles health:
+Use the `show-metrics.sh` script to visualize your blackdot health:
 
 ```bash
 # Summary view (default)
@@ -2524,17 +2524,17 @@ Add to your workflow:
 
 ```bash
 # Check health and view trends
-dotfiles doctor && show-metrics.sh --graph
+blackdot doctor && show-metrics.sh --graph
 
 # Auto-fix and track
-dotfiles doctor --fix && show-metrics.sh
+blackdot doctor --fix && show-metrics.sh
 ```
 
 ---
 
 ## Docker Test Environments
 
-Test dotfiles in isolated containers before installing on your system. Four container sizes are available depending on your testing needs:
+Test blackdot in isolated containers before installing on your system. Four container sizes are available depending on your testing needs:
 
 | Container | Base | Size | Use Case |
 |-----------|------|------|----------|
@@ -2547,12 +2547,12 @@ Test dotfiles in isolated containers before installing on your system. Four cont
 
 ```bash
 # Build and run lite container
-docker build -f Dockerfile.lite -t dotfiles-lite .
-docker run -it --rm dotfiles-lite
+docker build -f Dockerfile.lite -t blackdot-lite .
+docker run -it --rm blackdot-lite
 
 # Inside container
-dotfiles status
-dotfiles doctor
+blackdot status
+blackdot doctor
 ```
 
 ### Mock Vault for Testing
@@ -2562,9 +2562,9 @@ Test vault functionality without real credentials using the mock vault setup:
 ```bash
 # Inside lite container
 ./test/mocks/setup-mock-vault.sh --no-pass
-export DOTFILES_VAULT_BACKEND=pass
-dotfiles vault check
-dotfiles vault pull --preview
+export BLACKDOT_VAULT_BACKEND=pass
+blackdot vault check
+blackdot vault pull --preview
 ```
 
 See [Docker Guide](docker.md) for complete container details and testing workflows.
@@ -2573,7 +2573,7 @@ See [Docker Guide](docker.md) for complete container details and testing workflo
 
 ## CI/CD & Testing
 
-The dotfiles repository includes comprehensive automated testing via GitHub Actions.
+The blackdot repository includes comprehensive automated testing via GitHub Actions.
 
 ### Continuous Integration
 
@@ -2602,7 +2602,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run shellcheck
-        run: shellcheck bootstrap-*.sh vault/*.sh dotfiles-*.sh
+        run: shellcheck bootstrap-*.sh vault/*.sh blackdot-*.sh
   # ... more jobs
 ```
 
@@ -2627,7 +2627,7 @@ git commit --no-verify  # Use sparingly!
 brew install shellcheck
 
 # Run on all scripts
-shellcheck bootstrap-*.sh vault/*.sh dotfiles-*.sh
+shellcheck bootstrap-*.sh vault/*.sh blackdot-*.sh
 
 # Check specific script
 shellcheck vault/restore.sh
@@ -2638,7 +2638,7 @@ shellcheck vault/restore.sh
 Add to your forked README:
 
 ```markdown
-![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)
+![Test Status](https://github.com/blackwell-systems/blackdot/workflows/Test%20Dotfiles/badge.svg)
 ```
 
 ---
@@ -2657,7 +2657,7 @@ ls -ld ~/.claude
 If not, rerun:
 
 ```bash
-~/workspace/dotfiles/bootstrap-dotfiles.sh
+~/workspace/dotfiles/bootstrap-blackdot.sh
 ```
 
 ### Vault CLI issues
@@ -2680,8 +2680,8 @@ op signin
 **"Cannot find item" errors:**
 
 ```bash
-# Use dotfiles command to list items
-dotfiles vault list
+# Use blackdot command to list items
+blackdot vault list
 
 # Or with Bitwarden CLI directly
 bw list items --session "$BW_SESSION" | jq '.[].name'
@@ -2795,7 +2795,7 @@ ls -la ~/.zshrc ~/.p10k.zsh
 
 # Remove and recreate
 rm ~/.zshrc ~/.p10k.zsh
-~/workspace/dotfiles/bootstrap-dotfiles.sh
+~/workspace/dotfiles/bootstrap-blackdot.sh
 ```
 
 ### Environment secrets not loading

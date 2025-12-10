@@ -11,9 +11,9 @@ source "$(dirname "$0")/_common.sh"
 
 # Source config functions for timestamp tracking
 SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
-DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
-source "$DOTFILES_DIR/lib/_config.sh"
-source "$DOTFILES_DIR/lib/_vault.sh"
+BLACKDOT_DIR="$(dirname "$SCRIPT_DIR")"
+source "$BLACKDOT_DIR/lib/_config.sh"
+source "$BLACKDOT_DIR/lib/_vault.sh"
 
 DRY_RUN=false
 ITEMS_TO_SYNC=()
@@ -84,10 +84,10 @@ fi
 
 # Check offline mode
 if is_offline; then
-    warn "DOTFILES_OFFLINE=1 - Cannot sync to Bitwarden in offline mode"
+    warn "BLACKDOT_OFFLINE=1 - Cannot sync to Bitwarden in offline mode"
     echo ""
     echo "To sync later:"
-    echo "  unset DOTFILES_OFFLINE"
+    echo "  unset BLACKDOT_OFFLINE"
     echo "  dotfiles vault push --all"
     exit 0
 fi

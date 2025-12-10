@@ -8,7 +8,7 @@
 
 ## Overview
 
-The plugin system allows users to extend dotfiles functionality without forking the repository. Plugins are self-contained packages that can add shell functions, aliases, completions, and integrations.
+The plugin system allows users to extend blackdot functionality without forking the repository. Plugins are self-contained packages that can add shell functions, aliases, completions, and integrations.
 
 ---
 
@@ -37,7 +37,7 @@ The Plugin System builds on the **Feature Registry** (`lib/_features.sh`) which 
 - Plugins register themselves as features in the `integration` category
 - `plugin_load()` checks `feature_enabled()` before loading
 - Plugin dependencies can require other features (not just commands)
-- `dotfiles features enable <plugin>` enables a plugin's feature
+- `blackdot features enable <plugin>` enables a plugin's feature
 
 ---
 
@@ -127,7 +127,7 @@ plugins/
 | `license` | No | SPDX license identifier |
 | `homepage` | No | URL for plugin documentation |
 | `dependencies.commands` | No | Required CLI tools (checked before loading) |
-| `dependencies.features` | No | Required dotfiles features |
+| `dependencies.features` | No | Required blackdot features |
 | `dependencies.plugins` | No | Other plugins this depends on |
 | `provides.commands` | No | Commands this plugin adds (for docs) |
 | `provides.aliases` | No | Aliases this plugin adds |
@@ -147,8 +147,8 @@ plugins/
 (( $+commands[docker] )) || return 0
 
 # Plugin configuration (with defaults from manifest)
-local default_shell="${DOTFILES_PLUGIN_DOCKER_DEFAULT_SHELL:-/bin/sh}"
-local cleanup_days="${DOTFILES_PLUGIN_DOCKER_CLEANUP_DAYS:-7}"
+local default_shell="${BLACKDOT_PLUGIN_DOCKER_DEFAULT_SHELL:-/bin/sh}"
+local cleanup_days="${BLACKDOT_PLUGIN_DOCKER_CLEANUP_DAYS:-7}"
 
 # Aliases
 alias dc='docker compose'
@@ -189,7 +189,7 @@ dclean() {
 # lib/_plugins.sh - Plugin system library
 
 # Plugin directories
-PLUGINS_DIR="${DOTFILES_DIR}/plugins"
+PLUGINS_DIR="${BLACKDOT_DIR}/plugins"
 PLUGINS_AVAILABLE="${PLUGINS_DIR}/available"
 PLUGINS_ENABLED="${PLUGINS_DIR}/enabled"
 PLUGINS_LOCAL="${PLUGINS_DIR}/local"
@@ -452,7 +452,7 @@ Description of what this plugin does.
 ## Installation
 
 \`\`\`bash
-dotfiles plugin enable ${name}
+blackdot plugin enable ${name}
 \`\`\`
 
 ## Usage
@@ -467,11 +467,11 @@ EOF
 
 ---
 
-## CLI Command (`bin/dotfiles-plugin`)
+## CLI Command (`bin/blackdot-plugin`)
 
 ```bash
 #!/usr/bin/env bash
-# bin/dotfiles-plugin - Plugin management CLI
+# bin/blackdot-plugin - Plugin management CLI
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -480,7 +480,7 @@ source "${SCRIPT_DIR}/../lib/_plugins.sh"
 
 usage() {
     cat <<EOF
-Usage: dotfiles plugin <command> [args]
+Usage: blackdot plugin <command> [args]
 
 Commands:
   list                    List all plugins (available and enabled)
@@ -495,10 +495,10 @@ Options:
   -h, --help              Show this help
 
 Examples:
-  dotfiles plugin list
-  dotfiles plugin enable docker-helpers
-  dotfiles plugin create my-tools
-  dotfiles plugin info kubernetes
+  blackdot plugin list
+  blackdot plugin enable docker-helpers
+  blackdot plugin create my-tools
+  blackdot plugin info kubernetes
 EOF
 }
 
@@ -535,8 +535,8 @@ cmd_list() {
         printf "  %s %-20s %s\n" "$status" "$name" "$desc"
     done
     echo ""
-    echo "Enable:  dotfiles plugin enable <name>"
-    echo "Disable: dotfiles plugin disable <name>"
+    echo "Enable:  blackdot plugin enable <name>"
+    echo "Disable: blackdot plugin disable <name>"
 }
 
 cmd_enable() {
@@ -605,8 +605,8 @@ Add to `zsh/zsh.d/95-plugins.zsh`:
 
 ```zsh
 # Load plugin system
-if [[ -f "${DOTFILES_DIR}/lib/_plugins.sh" ]]; then
-    source "${DOTFILES_DIR}/lib/_plugins.sh"
+if [[ -f "${BLACKDOT_DIR}/lib/_plugins.sh" ]]; then
+    source "${BLACKDOT_DIR}/lib/_plugins.sh"
     plugin_load_all
 fi
 ```
@@ -685,8 +685,8 @@ Based on implementing CLI Feature Awareness, Configuration Layers, and Feature R
 Add env var bypass for scripting/CI:
 ```bash
 # In lib/_plugins.sh
-DOTFILES_PLUGIN_FORCE=true   # Bypass dependency checks
-DOTFILES_PLUGIN_VERBOSE=true # Show debug output
+BLACKDOT_PLUGIN_FORCE=true   # Bypass dependency checks
+BLACKDOT_PLUGIN_VERBOSE=true # Show debug output
 ```
 
 ### 2. Meta-Feature Pattern
@@ -703,13 +703,13 @@ feature_enabled "plugins" || return 0
 Always provide bypass for guards:
 ```bash
 # Enable plugin even if deps missing
-dotfiles plugin enable docker-helpers --force
+blackdot plugin enable docker-helpers --force
 ```
 
 ### 4. Per-Plugin Help with Feature Status
 Show plugin details with enable hints:
 ```bash
-dotfiles plugin info docker-helpers
+blackdot plugin info docker-helpers
 # Shows: enabled/disabled, deps status, enable command
 ```
 
@@ -729,7 +729,7 @@ plugin_load() {
     local name="$1"
 
     # Environment override
-    if [[ "${DOTFILES_PLUGIN_FORCE:-}" == "true" ]]; then
+    if [[ "${BLACKDOT_PLUGIN_FORCE:-}" == "true" ]]; then
         # Skip dependency check
     fi
 
@@ -763,7 +763,7 @@ Add to CLI_COMMAND_FEATURES and CLI_COMMAND_HELP:
 ["plugin"]="plugins"
 
 # In zsh/zsh.d/40-aliases.zsh CLI_COMMAND_HELP
-["plugin"]="plugins|Plugin Management|Manage dotfiles plugins|
+["plugin"]="plugins|Plugin Management|Manage blackdot plugins|
   plugin list       List available plugins
   plugin enable     Enable a plugin
   ..."
@@ -774,7 +774,7 @@ Add to CLI_COMMAND_FEATURES and CLI_COMMAND_HELP:
 ## Open Questions
 
 1. Should plugins support update/upgrade from git remotes?
-2. Plugin versioning and compatibility with dotfiles versions?
+2. Plugin versioning and compatibility with blackdot versions?
 3. Should we support plugin "packs" (collections of plugins)?
 
 ---

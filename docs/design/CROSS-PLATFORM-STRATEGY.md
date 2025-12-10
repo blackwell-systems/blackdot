@@ -7,9 +7,9 @@
 
 ## Problem Statement
 
-The dotfiles system has two layers:
+The blackdot system has two layers:
 
-1. **Control Plane** (Go CLI) - `dotfiles setup`, `dotfiles vault`, etc.
+1. **Control Plane** (Go CLI) - `blackdot setup`, `blackdot vault`, etc.
    - ✅ 100% Go, works anywhere Go compiles
 
 2. **Developer Tools** (Shell Functions) - `awsswitch`, `go-new`, `sshtunnel`, etc.
@@ -19,25 +19,25 @@ Windows users can install the Go binary but get none of the developer productivi
 
 ---
 
-## Proposed Solution: `dotfiles tools` Subcommand
+## Proposed Solution: `blackdot tools` Subcommand
 
 Extend the Go CLI with a `tools` subcommand that provides cross-platform versions of high-value shell functions.
 
 ```
-dotfiles tools aws [command]      # AWS profile management
-dotfiles tools ssh [command]      # SSH key/tunnel management
-dotfiles tools docker [command]   # Docker helpers
-dotfiles tools scaffold [lang]    # Project scaffolding
+blackdot tools aws [command]      # AWS profile management
+blackdot tools ssh [command]      # SSH key/tunnel management
+blackdot tools docker [command]   # Docker helpers
+blackdot tools scaffold [lang]    # Project scaffolding
 ```
 
 ### Phase 1: SSH Tools (Highest Cross-Platform Value)
 
 ```
-dotfiles tools ssh list           # List SSH hosts from config
-dotfiles tools ssh keys           # List keys with fingerprints
-dotfiles tools ssh gen [name]     # Generate new key pair
-dotfiles tools ssh tunnel [spec]  # Create port forward tunnel
-dotfiles tools ssh agent          # Agent status and management
+blackdot tools ssh list           # List SSH hosts from config
+blackdot tools ssh keys           # List keys with fingerprints
+blackdot tools ssh gen [name]     # Generate new key pair
+blackdot tools ssh tunnel [spec]  # Create port forward tunnel
+blackdot tools ssh agent          # Agent status and management
 ```
 
 **Why SSH first:**
@@ -48,10 +48,10 @@ dotfiles tools ssh agent          # Agent status and management
 ### Phase 2: AWS Tools
 
 ```
-dotfiles tools aws profiles       # List configured profiles
-dotfiles tools aws switch [name]  # Switch active profile
-dotfiles tools aws who            # Show current identity
-dotfiles tools aws login [prof]   # SSO login flow
+blackdot tools aws profiles       # List configured profiles
+blackdot tools aws switch [name]  # Switch active profile
+blackdot tools aws who            # Show current identity
+blackdot tools aws login [prof]   # SSO login flow
 ```
 
 **Why AWS second:**
@@ -62,9 +62,9 @@ dotfiles tools aws login [prof]   # SSO login flow
 ### Phase 3: Scaffolding
 
 ```
-dotfiles tools scaffold go [name]     # Go project with standard layout
-dotfiles tools scaffold rust [name]   # Rust project
-dotfiles tools scaffold python [name] # Python/uv project
+blackdot tools scaffold go [name]     # Go project with standard layout
+blackdot tools scaffold rust [name]   # Rust project
+blackdot tools scaffold python [name] # Python/uv project
 ```
 
 **Why scaffolding:**
@@ -75,10 +75,10 @@ dotfiles tools scaffold python [name] # Python/uv project
 ### Phase 4: Docker Tools (Optional)
 
 ```
-dotfiles tools docker ps          # Enhanced container list
-dotfiles tools docker ip [name]   # Get container IP
-dotfiles tools docker clean       # Prune unused resources
-dotfiles tools docker stats       # Live resource usage
+blackdot tools docker ps          # Enhanced container list
+blackdot tools docker ip [name]   # Get container IP
+blackdot tools docker clean       # Prune unused resources
+blackdot tools docker stats       # Live resource usage
 ```
 
 ---
@@ -87,10 +87,10 @@ dotfiles tools docker stats       # Live resource usage
 
 ### Option A: Monolithic Binary (Recommended)
 
-Add all tools to the existing `dotfiles-go` binary:
+Add all tools to the existing `blackdot-go` binary:
 
 ```
-cmd/dotfiles/
+cmd/blackdot/
 ├── main.go
 ├── root.go
 └── tools/
@@ -111,12 +111,12 @@ cmd/dotfiles/
 
 ### Option B: Separate Binaries
 
-Create `dotfiles-tools` as separate binary:
+Create `blackdot-tools` as separate binary:
 
 ```
 cmd/
 ├── dotfiles/             # Core CLI
-└── dotfiles-tools/       # Developer tools
+└── blackdot-tools/       # Developer tools
 ```
 
 **Pros:**
@@ -136,8 +136,8 @@ For zsh/bash users, the shell functions can remain as thin wrappers:
 ```bash
 # zsh/zsh.d/60-aws.zsh
 awsswitch() {
-  if command -v dotfiles-go &>/dev/null; then
-    dotfiles-go tools aws switch "$@"
+  if command -v blackdot-go &>/dev/null; then
+    blackdot-go tools aws switch "$@"
   else
     # Fallback to shell implementation
     _awsswitch_shell "$@"
@@ -212,8 +212,8 @@ These should remain in shell config files.
 - [x] Implement `prompt` hook (like ZSH `precmd`)
 - [x] Implement directory change hook (like ZSH `chpwd`)
 - [x] Implement shell exit hook (like ZSH `zshexit`)
-- [x] Wire hooks to call `dotfiles hook run <point>`
-- [x] Generate aliases for all `dotfiles tools` commands
+- [x] Wire hooks to call `blackdot hook run <point>`
+- [x] Generate aliases for all `blackdot tools` commands
 - [x] Installation script for PowerShell profile
 - [x] Documentation for Windows users
 - [x] Full parity: all 24 hook points, file/function/JSON hooks
@@ -257,7 +257,7 @@ These should remain in shell config files.
 
 3. **Configuration sharing?** Should `tools aws` read from same config as shell functions?
 
-4. ~~**Feature flags?** Should tools be feature-gated like other dotfiles features?~~ ✅ Yes - Milestone 7 implements this
+4. ~~**Feature flags?** Should tools be feature-gated like other blackdot features?~~ ✅ Yes - Milestone 7 implements this
 
 ---
 

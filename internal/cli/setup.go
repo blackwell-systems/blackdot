@@ -1403,5 +1403,5 @@ func showNextSteps(cfg *SetupConfig) {
 	}
 
 	// Documentation link
-	fmt.Printf("  %s\n", dim("📚 Docs: https://github.com/blackwell-systems/dotfiles/docs"))
+	fmt.Printf("  %s\n", dim("📚 Docs: https://github.com/blackwell-systems/blackdot/docs"))
 }

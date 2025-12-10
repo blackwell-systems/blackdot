@@ -22,7 +22,7 @@ assignees: ''
 <!-- What have you already attempted? -->
 
 - [ ] Read the [README](../../README.md)
-- [ ] Searched [existing issues](https://github.com/blackwell-systems/dotfiles/issues)
+- [ ] Searched [existing issues](https://github.com/blackwell-systems/blackdot/issues)
 - [ ] Checked the troubleshooting section
 - [ ] Ran `dotfiles doctor`
 
@@ -40,4 +40,4 @@ assignees: ''
 
 ---
 
-**Note:** For general discussions or broader questions, consider using [GitHub Discussions](https://github.com/blackwell-systems/dotfiles/discussions) instead.
+**Note:** For general discussions or broader questions, consider using [GitHub Discussions](https://github.com/blackwell-systems/blackdot/discussions) instead.

@@ -20,12 +20,12 @@ set -euo pipefail
 
 # Determine script location
 SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
-DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+BLACKDOT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Source libraries
-source "$DOTFILES_DIR/lib/_logging.sh"
-source "$DOTFILES_DIR/lib/_vault.sh"
-source "$DOTFILES_DIR/lib/_config.sh"
+source "$BLACKDOT_DIR/lib/_logging.sh"
+source "$BLACKDOT_DIR/lib/_vault.sh"
+source "$BLACKDOT_DIR/lib/_config.sh"
 
 # Configuration
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
@@ -308,7 +308,7 @@ select_backend() {
         elif [[ $choice -ge 1 && $choice -lt $i ]]; then
             SELECTED_BACKEND="${available[$choice]}"
             config_set "vault.backend" "$SELECTED_BACKEND"
-            export DOTFILES_VAULT_BACKEND="$SELECTED_BACKEND"
+            export BLACKDOT_VAULT_BACKEND="$SELECTED_BACKEND"
             pass "Backend set to: ${backend_names[$SELECTED_BACKEND]}"
         else
             fail "Invalid selection"
@@ -763,7 +763,7 @@ setup_manual() {
     fi
 
     # Copy example
-    local example_file="$DOTFILES_DIR/vault/vault-items.example.json"
+    local example_file="$BLACKDOT_DIR/vault/vault-items.example.json"
     if [[ -f "$example_file" ]]; then
         cp "$example_file" "$VAULT_CONFIG"
         pass "Created config from template"

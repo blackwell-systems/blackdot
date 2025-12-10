@@ -3,7 +3,7 @@
 # Tests the various dotfiles-*.sh scripts
 
 setup() {
-  export DOTFILES_DIR="${BATS_TEST_DIRNAME}/.."
+  export BLACKDOT_DIR="${BATS_TEST_DIRNAME}/.."
   export TEST_TMP="${BATS_TEST_TMPDIR}/dotfiles-test"
   mkdir -p "$TEST_TMP"
 }
@@ -13,15 +13,15 @@ teardown() {
 }
 
 # ============================================================
-# bin/dotfiles-backup Tests
+# bin/blackdot-backup Tests
 # ============================================================
 
 @test "backup script exists and is executable" {
-  [ -x "$DOTFILES_DIR/bin/dotfiles-backup" ]
+  [ -x "$BLACKDOT_DIR/bin/blackdot-backup" ]
 }
 
 @test "backup --help shows usage" {
-  run "$DOTFILES_DIR/bin/dotfiles-backup" --help
+  run "$BLACKDOT_DIR/bin/blackdot-backup" --help
 
   [ "$status" -eq 0 ]
   [[ "${output}" =~ "USAGE" ]]
@@ -30,7 +30,7 @@ teardown() {
 
 @test "backup --list handles no existing backups" {
   export HOME="$TEST_TMP"
-  run "$DOTFILES_DIR/bin/dotfiles-backup" --list
+  run "$BLACKDOT_DIR/bin/blackdot-backup" --list
 
   # Returns 1 when no backups exist (warning state)
   [ "$status" -eq 1 ]
@@ -38,15 +38,15 @@ teardown() {
 }
 
 # ============================================================
-# bin/dotfiles-diff Tests
+# bin/blackdot-diff Tests
 # ============================================================
 
 @test "diff script exists and is executable" {
-  [ -x "$DOTFILES_DIR/bin/dotfiles-diff" ]
+  [ -x "$BLACKDOT_DIR/bin/blackdot-diff" ]
 }
 
 @test "diff --help shows usage" {
-  run "$DOTFILES_DIR/bin/dotfiles-diff" --help
+  run "$BLACKDOT_DIR/bin/blackdot-diff" --help
 
   [ "$status" -eq 0 ]
   [[ "${output}" =~ "Usage" ]]
@@ -54,46 +54,46 @@ teardown() {
 }
 
 # ============================================================
-# bin/dotfiles-doctor Tests
+# bin/blackdot-doctor Tests
 # ============================================================
 
 @test "doctor script exists and is executable" {
-  [ -x "$DOTFILES_DIR/bin/dotfiles-doctor" ]
+  [ -x "$BLACKDOT_DIR/bin/blackdot-doctor" ]
 }
 
 @test "doctor --help shows usage" {
-  run "$DOTFILES_DIR/bin/dotfiles-doctor" --help
+  run "$BLACKDOT_DIR/bin/blackdot-doctor" --help
 
   [ "$status" -eq 0 ]
   [[ "${output}" =~ "Usage" ]] || [[ "${output}" =~ "doctor" ]]
 }
 
 # ============================================================
-# bin/dotfiles-drift Tests
+# bin/blackdot-drift Tests
 # ============================================================
 
 @test "drift script exists and is executable" {
-  [ -x "$DOTFILES_DIR/bin/dotfiles-drift" ]
+  [ -x "$BLACKDOT_DIR/bin/blackdot-drift" ]
 }
 
 # ============================================================
-# bin/dotfiles-setup Tests
+# bin/blackdot-setup Tests
 # ============================================================
 
 @test "setup script exists and is executable" {
-  [ -x "$DOTFILES_DIR/bin/dotfiles-setup" ]
+  [ -x "$BLACKDOT_DIR/bin/blackdot-setup" ]
 }
 
 # ============================================================
-# bin/dotfiles-uninstall Tests
+# bin/blackdot-uninstall Tests
 # ============================================================
 
 @test "uninstall script exists and is executable" {
-  [ -x "$DOTFILES_DIR/bin/dotfiles-uninstall" ]
+  [ -x "$BLACKDOT_DIR/bin/blackdot-uninstall" ]
 }
 
 @test "uninstall --help shows usage" {
-  run "$DOTFILES_DIR/bin/dotfiles-uninstall" --help
+  run "$BLACKDOT_DIR/bin/blackdot-uninstall" --help
 
   [ "$status" -eq 0 ]
   [[ "${output}" =~ "Usage" ]]
@@ -107,7 +107,7 @@ teardown() {
   mkdir -p "$TEST_TMP/.config/ghostty"
   ln -sf /nonexistent "$TEST_TMP/.zshrc"
 
-  run "$DOTFILES_DIR/bin/dotfiles-uninstall" --dry-run
+  run "$BLACKDOT_DIR/bin/blackdot-uninstall" --dry-run
 
   [ "$status" -eq 0 ]
   [[ "${output}" =~ "DRY RUN" ]]
@@ -118,11 +118,11 @@ teardown() {
 # ============================================================
 
 @test "install script exists and is executable" {
-  [ -x "$DOTFILES_DIR/install.sh" ]
+  [ -x "$BLACKDOT_DIR/install.sh" ]
 }
 
 @test "install --help shows usage" {
-  run "$DOTFILES_DIR/install.sh" --help
+  run "$BLACKDOT_DIR/install.sh" --help
 
   [ "$status" -eq 0 ]
   [[ "${output}" =~ "Usage" ]] || [[ "${output}" =~ "install" ]] || [[ "${output}" =~ "Dotfiles" ]]
@@ -134,7 +134,7 @@ teardown() {
 
 @test "all shell scripts have valid bash syntax" {
   # Check all .sh files for basic syntax
-  for script in "$DOTFILES_DIR"/*.sh; do
+  for script in "$BLACKDOT_DIR"/*.sh; do
     if [[ -f "$script" ]]; then
       run bash -n "$script"
       [ "$status" -eq 0 ] || echo "Syntax error in: $script"
@@ -144,7 +144,7 @@ teardown() {
 }
 
 @test "vault scripts have valid zsh syntax" {
-  for script in "$DOTFILES_DIR/vault"/*.sh; do
+  for script in "$BLACKDOT_DIR/vault"/*.sh; do
     if [[ -f "$script" ]]; then
       run zsh -n "$script"
       [ "$status" -eq 0 ] || echo "Syntax error in: $script"

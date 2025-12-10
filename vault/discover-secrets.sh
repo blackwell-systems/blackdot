@@ -8,8 +8,8 @@ set -euo pipefail
 
 # Source common functions
 VAULT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
-DOTFILES_DIR="$(dirname "$VAULT_DIR")"
-source "$DOTFILES_DIR/lib/_logging.sh"
+BLACKDOT_DIR="$(dirname "$VAULT_DIR")"
+source "$BLACKDOT_DIR/lib/_logging.sh"
 
 # Output file
 VAULT_CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/vault-items.json"
@@ -180,7 +180,7 @@ discover_other_secrets() {
         # Try common dotfiles locations (including configured workspace target)
         local ws_target="${WORKSPACE_TARGET:-$HOME/workspace}"
         ws_target="${ws_target/#\~/$HOME}"
-        local dotfiles_dirs=("$HOME/dotfiles" "$HOME/.dotfiles" "$ws_target/dotfiles")
+        local dotfiles_dirs=("$HOME/dotfiles" "$HOME/.blackdot" "$ws_target/dotfiles")
         for dir in "${dotfiles_dirs[@]}"; do
             if [[ -f "$dir/templates/_variables.local.sh" ]]; then
                 items+=("Template-Variables:$dir/templates/_variables.local.sh")
@@ -314,7 +314,7 @@ generate_vault_json() {
         # Check common dotfiles locations (including configured workspace target)
         local ws_target="${WORKSPACE_TARGET:-$HOME/workspace}"
         ws_target="${ws_target/#\~/$HOME}"
-        for dir in "$HOME/dotfiles" "$HOME/.dotfiles" "$ws_target/dotfiles"; do
+        for dir in "$HOME/dotfiles" "$HOME/.blackdot" "$ws_target/dotfiles"; do
             if [[ -f "$dir/templates/_variables.local.sh" ]]; then
                 pass "  Found: $dir/templates/_variables.local.sh"
                 syncable_items+=("Template-Variables:$dir/templates/_variables.local.sh")

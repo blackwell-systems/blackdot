@@ -5,7 +5,7 @@
 # Allows users to inject custom behavior at lifecycle events
 #
 # Usage:
-#   source "${DOTFILES_DIR}/lib/_hooks.sh"
+#   source "${BLACKDOT_DIR}/lib/_hooks.sh"
 #   hook_register "post_vault_pull" "my_function"
 #   hook_run "post_vault_pull"
 #
@@ -37,14 +37,14 @@ _HOOKS_SOURCED=1
 typeset -gA HOOKS=()
 
 # Configuration with environment variable overrides
-HOOKS_DIR="${DOTFILES_HOOKS_DIR:-${HOME}/.config/dotfiles/hooks}"
-HOOKS_CONFIG="${DOTFILES_HOOKS_CONFIG:-${HOME}/.config/dotfiles/hooks.json}"
-HOOKS_FAIL_FAST="${DOTFILES_HOOKS_FAIL_FAST:-false}"
-HOOKS_VERBOSE="${DOTFILES_HOOKS_VERBOSE:-false}"
-HOOKS_TIMEOUT="${DOTFILES_HOOKS_TIMEOUT:-30}"
+HOOKS_DIR="${BLACKDOT_HOOKS_DIR:-${HOME}/.config/dotfiles/hooks}"
+HOOKS_CONFIG="${BLACKDOT_HOOKS_CONFIG:-${HOME}/.config/dotfiles/hooks.json}"
+HOOKS_FAIL_FAST="${BLACKDOT_HOOKS_FAIL_FAST:-false}"
+HOOKS_VERBOSE="${BLACKDOT_HOOKS_VERBOSE:-false}"
+HOOKS_TIMEOUT="${BLACKDOT_HOOKS_TIMEOUT:-30}"
 
 # Master disable switch
-HOOKS_DISABLED="${DOTFILES_HOOKS_DISABLED:-false}"
+HOOKS_DISABLED="${BLACKDOT_HOOKS_DISABLED:-false}"
 
 # ============================================================
 # Valid Hook Points

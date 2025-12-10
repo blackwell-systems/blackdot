@@ -11,8 +11,8 @@ source "$(dirname "$0")/_common.sh"
 
 # Source vault library
 SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
-DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
-source "$DOTFILES_DIR/lib/_vault.sh"
+BLACKDOT_DIR="$(dirname "$SCRIPT_DIR")"
+source "$BLACKDOT_DIR/lib/_vault.sh"
 
 # Get vault-items.json path (default or from argument)
 VAULT_ITEMS_FILE="${1:-$HOME/.config/dotfiles/vault-items.json}"
@@ -59,7 +59,7 @@ else
     echo ""
     echo "How to fix:"
     echo "  1. Review the validation errors above"
-    echo "  2. Check example: $DOTFILES_DIR/vault/vault-items.example.json"
+    echo "  2. Check example: $BLACKDOT_DIR/vault/vault-items.example.json"
     echo "  3. Fix the JSON structure in: $VAULT_ITEMS_FILE"
     echo "  4. Re-run validation: dotfiles vault validate"
     echo ""

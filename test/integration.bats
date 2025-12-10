@@ -21,7 +21,7 @@ setup() {
     mkdir -p "$TEST_HOME/.ssh"
     mkdir -p "$TEST_HOME/.aws"
     mkdir -p "$TEST_HOME/.local"
-    mkdir -p "$TEST_HOME/.dotfiles-backups"
+    mkdir -p "$TEST_HOME/.blackdot-backups"
     mkdir -p "$TEST_HOME/.config/dotfiles"
     mkdir -p "$MOCK_DATA_DIR/items"
 
@@ -34,13 +34,13 @@ setup() {
     "max_snapshots": 10,
     "retention_days": 30,
     "compress": true,
-    "location": "~/.dotfiles-backups"
+    "location": "~/.blackdot-backups"
   }
 }
 EOFCONFIG
 
     # Path to dotfiles repo
-    export DOTFILES_DIR="${BATS_TEST_DIRNAME}/.."
+    export BLACKDOT_DIR="${BATS_TEST_DIRNAME}/.."
 
     # Add mock bw to PATH (before real bw)
     export PATH="${BATS_TEST_DIRNAME}/mocks:$PATH"
@@ -123,22 +123,22 @@ teardown() {
     echo "test ssh config" > "$TEST_HOME/.ssh/config"
     echo "test git config" > "$TEST_HOME/.gitconfig"
 
-    run "$DOTFILES_DIR/bin/dotfiles-backup"
+    run "$BLACKDOT_DIR/bin/blackdot-backup"
 
     [ "$status" -eq 0 ]
 
     # Check backup was created
     local backup_count
-    backup_count=$(ls "$TEST_HOME/.dotfiles-backups/"*.tar.gz 2>/dev/null | wc -l)
+    backup_count=$(ls "$TEST_HOME/.blackdot-backups/"*.tar.gz 2>/dev/null | wc -l)
     [ "$backup_count" -ge 1 ]
 }
 
 @test "backup: --list shows available backups" {
     # Create a backup first
     echo "test" > "$TEST_HOME/.gitconfig"
-    "$DOTFILES_DIR/bin/dotfiles-backup" >/dev/null 2>&1
+    "$BLACKDOT_DIR/bin/blackdot-backup" >/dev/null 2>&1
 
-    run "$DOTFILES_DIR/bin/dotfiles-backup" --list
+    run "$BLACKDOT_DIR/bin/blackdot-backup" --list
 
     [ "$status" -eq 0 ]
     [[ "$output" =~ "backup-" ]] || [[ "$output" =~ ".tar.gz" ]] || [[ "$output" =~ "Available" ]]
@@ -151,11 +151,11 @@ teardown() {
     echo "git-config-content" > "$TEST_HOME/.gitconfig"
 
     # Create backup
-    "$DOTFILES_DIR/bin/dotfiles-backup" >/dev/null 2>&1
+    "$BLACKDOT_DIR/bin/blackdot-backup" >/dev/null 2>&1
 
     # Find the backup
     local backup_file
-    backup_file=$(ls -t "$TEST_HOME/.dotfiles-backups/"*.tar.gz 2>/dev/null | head -1)
+    backup_file=$(ls -t "$TEST_HOME/.blackdot-backups/"*.tar.gz 2>/dev/null | head -1)
 
     [ -n "$backup_file" ]
 
@@ -172,7 +172,7 @@ teardown() {
     echo "original-git-config" > "$TEST_HOME/.gitconfig"
 
     # Create backup
-    "$DOTFILES_DIR/bin/dotfiles-backup" >/dev/null 2>&1
+    "$BLACKDOT_DIR/bin/blackdot-backup" >/dev/null 2>&1
 
     # Modify files
     echo "modified-ssh-config" > "$TEST_HOME/.ssh/config"
@@ -183,7 +183,7 @@ teardown() {
 
     # Find backup and restore (using the latest)
     local backup_file
-    backup_file=$(ls -t "$TEST_HOME/.dotfiles-backups/"*.tar.gz 2>/dev/null | head -1)
+    backup_file=$(ls -t "$TEST_HOME/.blackdot-backups/"*.tar.gz 2>/dev/null | head -1)
 
     # Extract to verify (manual restore simulation)
     cd "$TEST_HOME"
@@ -198,7 +198,7 @@ teardown() {
 # ============================================================
 
 @test "diff: --help shows usage" {
-    run "$DOTFILES_DIR/bin/dotfiles-diff" --help
+    run "$BLACKDOT_DIR/bin/blackdot-diff" --help
 
     [ "$status" -eq 0 ]
     [[ "$output" =~ "Usage" ]] || [[ "$output" =~ "diff" ]]
@@ -210,7 +210,7 @@ teardown() {
     echo "local-ssh-config" > "$TEST_HOME/.ssh/config"
 
     # Just verify the script runs (may show "no diff" or actual diff)
-    run "$DOTFILES_DIR/bin/dotfiles-diff"
+    run "$BLACKDOT_DIR/bin/blackdot-diff"
 
     # Should not crash
     [ "$status" -eq 0 ] || [ "$status" -eq 1 ]
@@ -224,14 +224,14 @@ teardown() {
     # Create symlinks that would be removed
     ln -sf /nonexistent "$TEST_HOME/.zshrc"
 
-    run "$DOTFILES_DIR/bin/dotfiles-uninstall" --dry-run
+    run "$BLACKDOT_DIR/bin/blackdot-uninstall" --dry-run
 
     [ "$status" -eq 0 ]
     [[ "$output" =~ "DRY RUN" ]]
 }
 
 @test "uninstall: --help shows usage" {
-    run "$DOTFILES_DIR/bin/dotfiles-uninstall" --help
+    run "$BLACKDOT_DIR/bin/blackdot-uninstall" --help
 
     [ "$status" -eq 0 ]
     [[ "$output" =~ "Usage" ]]
@@ -247,7 +247,7 @@ teardown() {
     rm -rf "$TEST_HOME/.aws"
 
     # Should not crash
-    run "$DOTFILES_DIR/bin/dotfiles-backup"
+    run "$BLACKDOT_DIR/bin/blackdot-backup"
 
     # May succeed with warning or fail gracefully
     [ "$status" -eq 0 ] || [ "$status" -eq 1 ]
@@ -256,7 +256,7 @@ teardown() {
 @test "error: diff handles locked vault" {
     touch "$MOCK_DATA_DIR/.locked"
 
-    run "$DOTFILES_DIR/bin/dotfiles-diff" --restore
+    run "$BLACKDOT_DIR/bin/blackdot-diff" --restore
 
     # Should fail gracefully, not crash
     [ "$status" -eq 0 ] || [ "$status" -eq 1 ]
@@ -267,14 +267,14 @@ teardown() {
 # ============================================================
 
 @test "doctor: runs health check" {
-    run "$DOTFILES_DIR/bin/dotfiles-doctor"
+    run "$BLACKDOT_DIR/bin/blackdot-doctor"
 
     # Doctor may report issues (non-zero) but shouldn't crash
     [[ "$output" =~ "Symlinks" ]] || [[ "$output" =~ "dotfiles" ]] || [[ "$output" =~ "Health" ]] || true
 }
 
 @test "doctor: --help shows usage" {
-    run "$DOTFILES_DIR/bin/dotfiles-doctor" --help
+    run "$BLACKDOT_DIR/bin/blackdot-doctor" --help
 
     [ "$status" -eq 0 ]
 }
@@ -284,7 +284,7 @@ teardown() {
 # ============================================================
 
 @test "setup: script exists and has valid syntax" {
-    run zsh -n "$DOTFILES_DIR/bin/dotfiles-setup"
+    run zsh -n "$BLACKDOT_DIR/bin/blackdot-setup"
 
     [ "$status" -eq 0 ]
 }
@@ -299,12 +299,12 @@ teardown() {
     echo "version: 1" > "$TEST_HOME/.ssh/config"
 
     # Step 1: Create backup
-    run "$DOTFILES_DIR/bin/dotfiles-backup"
+    run "$BLACKDOT_DIR/bin/blackdot-backup"
     [ "$status" -eq 0 ]
 
     # Step 2: Verify backup exists
     local backup_count
-    backup_count=$(ls "$TEST_HOME/.dotfiles-backups/"*.tar.gz 2>/dev/null | wc -l)
+    backup_count=$(ls "$TEST_HOME/.blackdot-backups/"*.tar.gz 2>/dev/null | wc -l)
     [ "$backup_count" -ge 1 ]
 
     # Step 3: Modify config
@@ -315,7 +315,7 @@ teardown() {
 
     # Step 4: Backup file is unchanged (immutable)
     local backup_file
-    backup_file=$(ls -t "$TEST_HOME/.dotfiles-backups/"*.tar.gz 2>/dev/null | head -1)
+    backup_file=$(ls -t "$TEST_HOME/.blackdot-backups/"*.tar.gz 2>/dev/null | head -1)
     [ -f "$backup_file" ]
 }
 
@@ -325,13 +325,13 @@ teardown() {
     # Create multiple backups
     for i in {1..3}; do
         echo "config v$i" > "$TEST_HOME/.ssh/config"
-        "$DOTFILES_DIR/bin/dotfiles-backup" >/dev/null 2>&1
+        "$BLACKDOT_DIR/bin/blackdot-backup" >/dev/null 2>&1
         sleep 1  # Ensure different timestamps
     done
 
     # Count backups
     local backup_count
-    backup_count=$(ls "$TEST_HOME/.dotfiles-backups/"*.tar.gz 2>/dev/null | wc -l)
+    backup_count=$(ls "$TEST_HOME/.blackdot-backups/"*.tar.gz 2>/dev/null | wc -l)
 
     # Should have multiple backups
     [ "$backup_count" -ge 3 ]

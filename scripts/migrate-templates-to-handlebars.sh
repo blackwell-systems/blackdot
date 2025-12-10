@@ -15,8 +15,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOTFILES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-TEMPLATES_DIR="$DOTFILES_DIR/templates/configs"
+BLACKDOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+TEMPLATES_DIR="$BLACKDOT_DIR/templates/configs"
 
 # Colors
 RED='\033[0;31m'

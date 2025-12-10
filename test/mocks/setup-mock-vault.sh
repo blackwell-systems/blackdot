@@ -429,7 +429,7 @@ print_usage() {
     echo ""
     echo "To use with dotfiles vault commands:"
     echo ""
-    echo -e "  ${BOLD}export DOTFILES_VAULT_BACKEND=pass${NC}"
+    echo -e "  ${BOLD}export BLACKDOT_VAULT_BACKEND=pass${NC}"
     echo ""
     echo "Then test with:"
     echo ""

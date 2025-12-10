@@ -3,7 +3,7 @@
 # Verifies Claude Code integration works correctly across CLI commands
 
 setup() {
-  export DOTFILES_DIR="${BATS_TEST_DIRNAME}/.."
+  export BLACKDOT_DIR="${BATS_TEST_DIRNAME}/.."
   export TEST_TMP="${BATS_TEST_TMPDIR}/dotclaude-test"
   export HOME="$TEST_TMP"
   export WORKSPACE="$TEST_TMP/workspace"
@@ -80,7 +80,7 @@ EOF
 
 @test "doctor: no Claude section when claude not installed" {
   # Override PATH to exclude real claude - only include essential paths
-  PATH="/usr/bin:/bin" run "$DOTFILES_DIR/bin/dotfiles-doctor" --quick
+  PATH="/usr/bin:/bin" run "$BLACKDOT_DIR/bin/blackdot-doctor" --quick
 
   # Should not contain Claude section
   [[ ! "${output}" =~ "Claude Code" ]]
@@ -89,7 +89,7 @@ EOF
 @test "doctor: shows Claude section when claude installed" {
   create_mock_claude
 
-  run "$DOTFILES_DIR/bin/dotfiles-doctor" --quick
+  run "$BLACKDOT_DIR/bin/blackdot-doctor" --quick
 
   [[ "${output}" =~ "Claude Code" ]]
   [[ "${output}" =~ "Claude CLI installed" ]]
@@ -99,7 +99,7 @@ EOF
   create_mock_claude
   # No dotclaude mock
 
-  run "$DOTFILES_DIR/bin/dotfiles-doctor" --quick
+  run "$BLACKDOT_DIR/bin/blackdot-doctor" --quick
 
   [[ "${output}" =~ "dotclaude not installed" ]]
   [[ "${output}" =~ "github.com/blackwell-systems/dotclaude" ]]
@@ -109,7 +109,7 @@ EOF
   create_mock_claude
   create_mock_dotclaude "work-bedrock"
 
-  run "$DOTFILES_DIR/bin/dotfiles-doctor" --quick
+  run "$BLACKDOT_DIR/bin/blackdot-doctor" --quick
 
   [[ "${output}" =~ "dotclaude installed" ]]
   [[ "${output}" =~ "Active profile: work-bedrock" ]]
@@ -119,7 +119,7 @@ EOF
   create_mock_claude
   create_mock_dotclaude_no_profile
 
-  run "$DOTFILES_DIR/bin/dotfiles-doctor" --quick
+  run "$BLACKDOT_DIR/bin/blackdot-doctor" --quick
 
   [[ "${output}" =~ "No active profile" ]]
 }
@@ -129,7 +129,7 @@ EOF
   create_mock_dotclaude "test-profile"
   create_profiles_json "test-profile"
 
-  run "$DOTFILES_DIR/bin/dotfiles-doctor" --quick
+  run "$BLACKDOT_DIR/bin/blackdot-doctor" --quick
 
   [[ "${output}" =~ "profiles.json exists" ]]
 }
@@ -140,19 +140,19 @@ EOF
 
 @test "vault: source _common.sh successfully" {
   # Source the vault common file to generate coverage
-  cd "$DOTFILES_DIR"
+  cd "$BLACKDOT_DIR"
   run zsh -c "source vault/_common.sh && echo 'sourced ok'"
   [[ "${output}" =~ "sourced ok" ]] || true
 }
 
 @test "vault: Claude-Profiles in SYNCABLE_ITEMS" {
   # After refactor, vault items are in vault-items.example.json
-  run grep -q "Claude-Profiles" "$DOTFILES_DIR/vault/vault-items.example.json"
+  run grep -q "Claude-Profiles" "$BLACKDOT_DIR/vault/vault-items.example.json"
   [ "$status" -eq 0 ]
 }
 
 @test "vault: Claude-Profiles points to profiles.json" {
-  run grep "Claude-Profiles.*profiles.json" "$DOTFILES_DIR/vault/vault-items.example.json"
+  run grep "Claude-Profiles.*profiles.json" "$BLACKDOT_DIR/vault/vault-items.example.json"
   [ "$status" -eq 0 ]
 }
 
@@ -161,11 +161,11 @@ EOF
 # ============================================================
 
 @test "packages: script exists and is executable" {
-  [ -x "$DOTFILES_DIR/bin/dotfiles-packages" ]
+  [ -x "$BLACKDOT_DIR/bin/blackdot-packages" ]
 }
 
 @test "packages: shows help" {
-  run "$DOTFILES_DIR/bin/dotfiles-packages" --help
+  run "$BLACKDOT_DIR/bin/blackdot-packages" --help
   [ "$status" -eq 0 ]
   [[ "${output}" =~ "Usage" ]] || [[ "${output}" =~ "packages" ]]
 }
@@ -173,13 +173,13 @@ EOF
 @test "packages: handles missing brew gracefully" {
   # Remove brew from path temporarily
   export PATH="/usr/bin:/bin"
-  run "$DOTFILES_DIR/bin/dotfiles-packages"
+  run "$BLACKDOT_DIR/bin/blackdot-packages"
   # Should fail with message about Homebrew
   [[ "${output}" =~ "Homebrew" ]] || [[ "${output}" =~ "brew" ]]
 }
 
 @test "packages: contains dotclaude suggestion code" {
-  run grep -q "Claude Code detected without dotclaude" "$DOTFILES_DIR/bin/dotfiles-packages"
+  run grep -q "Claude Code detected without dotclaude" "$BLACKDOT_DIR/bin/blackdot-packages"
   [ "$status" -eq 0 ]
 }
 
@@ -188,11 +188,11 @@ EOF
 # ============================================================
 
 @test "drift: script exists and is executable" {
-  [ -x "$DOTFILES_DIR/bin/dotfiles-drift" ]
+  [ -x "$BLACKDOT_DIR/bin/blackdot-drift" ]
 }
 
 @test "drift: includes Claude-Profiles in DRIFT_ITEMS" {
-  run grep -q "Claude-Profiles" "$DOTFILES_DIR/bin/dotfiles-drift"
+  run grep -q "Claude-Profiles" "$BLACKDOT_DIR/bin/blackdot-drift"
   [ "$status" -eq 0 ]
 }
 
@@ -201,21 +201,21 @@ EOF
 # ============================================================
 
 @test "setup: script exists and is executable" {
-  [ -x "$DOTFILES_DIR/bin/dotfiles-setup" ]
+  [ -x "$BLACKDOT_DIR/bin/blackdot-setup" ]
 }
 
 @test "setup: contains Claude Code setup step" {
-  run grep -q "Claude Code" "$DOTFILES_DIR/bin/dotfiles-setup"
+  run grep -q "Claude Code" "$BLACKDOT_DIR/bin/blackdot-setup"
   [ "$status" -eq 0 ]
 }
 
 @test "setup: offers dotclaude installation" {
-  run grep -q "dotclaude" "$DOTFILES_DIR/bin/dotfiles-setup"
+  run grep -q "dotclaude" "$BLACKDOT_DIR/bin/blackdot-setup"
   [ "$status" -eq 0 ]
 }
 
 @test "setup: uses GitHub install URL for dotclaude" {
-  run grep -q "raw.githubusercontent.com/blackwell-systems/dotclaude" "$DOTFILES_DIR/bin/dotfiles-setup"
+  run grep -q "raw.githubusercontent.com/blackwell-systems/dotclaude" "$BLACKDOT_DIR/bin/blackdot-setup"
   [ "$status" -eq 0 ]
 }
 
@@ -224,11 +224,11 @@ EOF
 # ============================================================
 
 @test "backup: script exists and is executable" {
-  [ -x "$DOTFILES_DIR/bin/dotfiles-backup" ]
+  [ -x "$BLACKDOT_DIR/bin/blackdot-backup" ]
 }
 
 @test "backup: shows help" {
-  run "$DOTFILES_DIR/bin/dotfiles-backup" --help
+  run "$BLACKDOT_DIR/bin/blackdot-backup" --help
   [ "$status" -eq 0 ]
   [[ "${output}" =~ "Usage" ]] || [[ "${output}" =~ "backup" ]]
 }
@@ -238,11 +238,11 @@ EOF
 # ============================================================
 
 @test "diff: script exists and is executable" {
-  [ -x "$DOTFILES_DIR/bin/dotfiles-diff" ]
+  [ -x "$BLACKDOT_DIR/bin/blackdot-diff" ]
 }
 
 @test "diff: shows help" {
-  run "$DOTFILES_DIR/bin/dotfiles-diff" --help
+  run "$BLACKDOT_DIR/bin/blackdot-diff" --help
   [ "$status" -eq 0 ]
 }
 
@@ -251,27 +251,27 @@ EOF
 # ============================================================
 
 @test "logging: source _logging.sh successfully" {
-  run bash -c "source $DOTFILES_DIR/lib/_logging.sh && info 'test message'"
+  run bash -c "source $BLACKDOT_DIR/lib/_logging.sh && info 'test message'"
   [[ "${output}" =~ "test" ]]
 }
 
 @test "logging: pass function works" {
-  run bash -c "source $DOTFILES_DIR/lib/_logging.sh && pass 'success'"
+  run bash -c "source $BLACKDOT_DIR/lib/_logging.sh && pass 'success'"
   [[ "${output}" =~ "success" ]]
 }
 
 @test "logging: fail function works" {
-  run bash -c "source $DOTFILES_DIR/lib/_logging.sh && fail 'error'"
+  run bash -c "source $BLACKDOT_DIR/lib/_logging.sh && fail 'error'"
   [[ "${output}" =~ "error" ]]
 }
 
 @test "logging: warn function works" {
-  run bash -c "source $DOTFILES_DIR/lib/_logging.sh && warn 'warning'"
+  run bash -c "source $BLACKDOT_DIR/lib/_logging.sh && warn 'warning'"
   [[ "${output}" =~ "warning" ]]
 }
 
 @test "logging: section function works" {
-  run bash -c "source $DOTFILES_DIR/lib/_logging.sh && section 'header'"
+  run bash -c "source $BLACKDOT_DIR/lib/_logging.sh && section 'header'"
   [[ "${output}" =~ "header" ]]
 }
 
@@ -280,21 +280,21 @@ EOF
 # ============================================================
 
 @test "zsh: 50-functions.zsh has valid syntax" {
-  run zsh -n "$DOTFILES_DIR/zsh/zsh.d/50-functions.zsh"
+  run zsh -n "$BLACKDOT_DIR/zsh/zsh.d/50-functions.zsh"
   [ "$status" -eq 0 ]
 }
 
 @test "zsh: 40-aliases.zsh has valid syntax" {
-  run zsh -n "$DOTFILES_DIR/zsh/zsh.d/40-aliases.zsh"
+  run zsh -n "$BLACKDOT_DIR/zsh/zsh.d/40-aliases.zsh"
   [ "$status" -eq 0 ]
 }
 
 @test "status function: contains profile variable" {
-  run grep -q "s_profile" "$DOTFILES_DIR/zsh/zsh.d/50-functions.zsh"
+  run grep -q "s_profile" "$BLACKDOT_DIR/zsh/zsh.d/50-functions.zsh"
   [ "$status" -eq 0 ]
 }
 
 @test "status function: checks for dotclaude command" {
-  run grep -q "command -v dotclaude" "$DOTFILES_DIR/zsh/zsh.d/50-functions.zsh"
+  run grep -q "command -v dotclaude" "$BLACKDOT_DIR/zsh/zsh.d/50-functions.zsh"
   [ "$status" -eq 0 ]
 }

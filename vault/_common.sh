@@ -14,7 +14,7 @@ _VAULT_COMMON_LOADED=1
 # ============================================================
 # In zsh, ${0:a:h} gets the absolute path's directory for sourced scripts
 VAULT_DIR="${0:a:h}"
-DOTFILES_DIR="${VAULT_DIR:h}"  # Parent of vault/
+BLACKDOT_DIR="${VAULT_DIR:h}"  # Parent of vault/
 SESSION_FILE="$VAULT_DIR/.vault-session"
 
 # ============================================================
@@ -50,8 +50,8 @@ debug() { [[ "${DEBUG:-}" == "1" ]] && print "${DIM}[DEBUG] $1${NC}"; }
 #   - bitwarden (default)
 #   - 1password
 #   - pass
-# Set DOTFILES_VAULT_BACKEND to switch backends
-source "$DOTFILES_DIR/lib/_vault.sh"
+# Set BLACKDOT_VAULT_BACKEND to switch backends
+source "$BLACKDOT_DIR/lib/_vault.sh"
 
 # ============================================================
 # Vault Items Configuration
@@ -68,7 +68,7 @@ VAULT_CONFIG_EXAMPLE="$VAULT_DIR/vault-items.example.json"
 
 # Initialize empty arrays (populated by load_vault_config)
 typeset -gA SSH_KEYS=()
-typeset -gA DOTFILES_ITEMS=()
+typeset -gA BLACKDOT_ITEMS=()
 typeset -gA SYNCABLE_ITEMS=()
 typeset -ga AWS_EXPECTED_PROFILES=()
 
@@ -106,11 +106,11 @@ load_vault_config() {
         [[ -n "$key" ]] && SSH_KEYS[$key]="${value//\~/$HOME}"
     done < <("$JQ_CMD" -r '.ssh_keys // {} | to_entries[] | "\(.key)=\(.value)"' "$VAULT_CONFIG_FILE" 2>/dev/null)
 
-    # Load DOTFILES_ITEMS
+    # Load BLACKDOT_ITEMS
     # NOTE: Variable must be named 'item_path' not 'path' to avoid zsh PATH conflict
-    typeset -gA DOTFILES_ITEMS=()
+    typeset -gA BLACKDOT_ITEMS=()
     while IFS='|' read -r name item_path required item_type; do
-        [[ -n "$name" ]] && DOTFILES_ITEMS[$name]="${item_path//\~/$HOME}:$required:$item_type"
+        [[ -n "$name" ]] && BLACKDOT_ITEMS[$name]="${item_path//\~/$HOME}:$required:$item_type"
     done < <("$JQ_CMD" -r '.vault_items // {} | to_entries[] | "\(.key)|\(.value.path)|\(.value.required // false | if . then "required" else "optional" end)|\(.value.type)"' "$VAULT_CONFIG_FILE" 2>/dev/null)
 
     # Load SYNCABLE_ITEMS (use process substitution like SSH_KEYS)
@@ -127,7 +127,7 @@ load_vault_config() {
 
     debug "Loaded vault config from $VAULT_CONFIG_FILE"
     debug "  SSH_KEYS: ${#SSH_KEYS[@]} items"
-    debug "  DOTFILES_ITEMS: ${#DOTFILES_ITEMS[@]} items"
+    debug "  BLACKDOT_ITEMS: ${#BLACKDOT_ITEMS[@]} items"
     debug "  SYNCABLE_ITEMS: ${#SYNCABLE_ITEMS[@]} items"
     debug "  AWS_EXPECTED_PROFILES: ${#AWS_EXPECTED_PROFILES[@]} profiles"
 
@@ -182,8 +182,8 @@ get_ssh_key_items() {
 # Get required items list
 get_required_items() {
     local items=()
-    for item in "${(@k)DOTFILES_ITEMS}"; do
-        local spec="${DOTFILES_ITEMS[$item]}"
+    for item in "${(@k)BLACKDOT_ITEMS}"; do
+        local spec="${BLACKDOT_ITEMS[$item]}"
         [[ "$spec" == *":required:"* ]] && items+=("$item")
     done
     printf '%s\n' "${items[@]}" | /usr/bin/sort
@@ -192,8 +192,8 @@ get_required_items() {
 # Get optional items list
 get_optional_items() {
     local items=()
-    for item in "${(@k)DOTFILES_ITEMS}"; do
-        local spec="${DOTFILES_ITEMS[$item]}"
+    for item in "${(@k)BLACKDOT_ITEMS}"; do
+        local spec="${BLACKDOT_ITEMS[$item]}"
         [[ "$spec" == *":optional:"* ]] && items+=("$item")
     done
     printf '%s\n' "${items[@]}" | /usr/bin/sort
@@ -203,8 +203,8 @@ get_optional_items() {
 get_item_path() {
     local item="$1"
 
-    # Check DOTFILES_ITEMS first (has full metadata)
-    local spec="${DOTFILES_ITEMS[$item]:-}"
+    # Check BLACKDOT_ITEMS first (has full metadata)
+    local spec="${BLACKDOT_ITEMS[$item]:-}"
     if [[ -n "$spec" ]]; then
         echo "${spec%%:*}"
         return 0
@@ -228,7 +228,7 @@ get_item_path() {
 # Check if item is a protected dotfiles item
 is_protected_item() {
     local item="$1"
-    (( ${+DOTFILES_ITEMS[$item]} ))
+    (( ${+BLACKDOT_ITEMS[$item]} ))
 }
 
 # ============================================================
@@ -237,7 +237,7 @@ is_protected_item() {
 # Check if running in offline mode
 # Usage: if is_offline; then skip_vault_ops; fi
 is_offline() {
-    [[ "${DOTFILES_OFFLINE:-0}" == "1" ]]
+    [[ "${BLACKDOT_OFFLINE:-0}" == "1" ]]
 }
 
 # Wrapper to skip vault operations in offline mode
@@ -245,7 +245,7 @@ is_offline() {
 # Usage: require_online || return 0
 require_online() {
     if is_offline; then
-        warn "Offline mode enabled (DOTFILES_OFFLINE=1) - skipping vault operation"
+        warn "Offline mode enabled (BLACKDOT_OFFLINE=1) - skipping vault operation"
         return 1
     fi
     return 0
@@ -465,7 +465,7 @@ validate_all_items() {
 
     # Validate config files
     for item in SSH-Config AWS-Config AWS-Credentials Git-Config; do
-        if [[ -n "${DOTFILES_ITEMS[$item]:-}" ]]; then
+        if [[ -n "${BLACKDOT_ITEMS[$item]:-}" ]]; then
             if ! validate_config_item "$item" "$session" 2>&1; then
                 ((errors++))
             fi
@@ -473,8 +473,8 @@ validate_all_items() {
     done
 
     # Optional items (don't fail if missing, but validate if present)
-    for item in "${(@k)DOTFILES_ITEMS}"; do
-        local spec="${DOTFILES_ITEMS[$item]}"
+    for item in "${(@k)BLACKDOT_ITEMS}"; do
+        local spec="${BLACKDOT_ITEMS[$item]}"
         if [[ "$spec" == *":optional:"* ]] && vault_item_exists "$item" "$session"; then
             if ! validate_config_item "$item" "$session" 1 2>&1; then
                 warn "Optional item '$item' failed validation"
@@ -587,7 +587,7 @@ check_pre_restore_drift() {
 }
 
 # Environment variable to skip drift check (for automation)
-# Usage: DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull
+# Usage: BLACKDOT_SKIP_DRIFT_CHECK=1 dotfiles vault pull
 skip_drift_check() {
-    [[ "${DOTFILES_SKIP_DRIFT_CHECK:-0}" == "1" ]]
+    [[ "${BLACKDOT_SKIP_DRIFT_CHECK:-0}" == "1" ]]
 }

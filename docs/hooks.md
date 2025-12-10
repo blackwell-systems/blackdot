@@ -1,6 +1,6 @@
 # Hook System
 
-The hook system allows you to inject custom behavior at key lifecycle points without modifying core dotfiles scripts. Hooks are shell scripts or commands that execute before/after major operations.
+The hook system allows you to inject custom behavior at key lifecycle points without modifying core blackdot scripts. Hooks are shell scripts or commands that execute before/after major operations.
 
 ---
 
@@ -20,10 +20,10 @@ EOF
 chmod +x ~/.config/dotfiles/hooks/post_vault_pull/10-fix-permissions.sh
 
 # Verify it's registered
-dotfiles hook list post_vault_pull
+blackdot hook list post_vault_pull
 
 # Test the hook
-dotfiles hook test post_vault_pull
+blackdot hook test post_vault_pull
 ```
 
 ---
@@ -38,7 +38,7 @@ dotfiles hook test post_vault_pull
 | `post_install` | After `install.sh` completes | Run custom setup |
 | `pre_bootstrap` | Before bootstrap script | Check prerequisites |
 | `post_bootstrap` | After bootstrap completes | Install extra packages |
-| `pre_upgrade` | Before `dotfiles upgrade` | Backup config |
+| `pre_upgrade` | Before `blackdot upgrade` | Backup config |
 | `post_upgrade` | After upgrade completes | Run migrations |
 
 ### Vault Hooks
@@ -87,7 +87,7 @@ dotfiles hook test post_vault_pull
 
 ## Understanding ZSH Hooks
 
-ZSH provides native hook functions that execute at specific points in the shell lifecycle. The dotfiles hook system builds on these to provide a more structured, manageable approach.
+ZSH provides native hook functions that execute at specific points in the shell lifecycle. The blackdot hook system builds on these to provide a more structured, manageable approach.
 
 ### Native ZSH Hook Functions
 
@@ -176,7 +176,7 @@ add-zsh-hook zshaddhistory _filter_history
 
 ### How Dotfiles Hooks Map to ZSH Hooks
 
-The dotfiles hook system provides a higher-level abstraction over native ZSH hooks:
+The blackdot hook system provides a higher-level abstraction over native ZSH hooks:
 
 | Dotfiles Hook | Underlying ZSH Mechanism |
 |---------------|-------------------------|
@@ -184,18 +184,18 @@ The dotfiles hook system provides a higher-level abstraction over native ZSH hoo
 | `shell_exit` | `zshexit_functions` array |
 | `directory_change` | `chpwd_functions` array |
 
-**Why use dotfiles hooks instead of native?**
+**Why use blackdot hooks instead of native?**
 
 1. **File-based organization** - Hooks live in `~/.config/dotfiles/hooks/`, not scattered in `.zshrc`
-2. **Easy enable/disable** - Toggle with `dotfiles features` or JSON config
+2. **Easy enable/disable** - Toggle with `blackdot features` or JSON config
 3. **Ordering control** - Numeric prefixes (10-, 20-, 90-) guarantee execution order
-4. **Visibility** - `dotfiles hook list` shows all registered hooks
-5. **Testing** - `dotfiles hook test` validates hooks without running them
+4. **Visibility** - `blackdot hook list` shows all registered hooks
+5. **Testing** - `blackdot hook test` validates hooks without running them
 6. **Feature gating** - Hooks respect the Feature Registry
 
 ### Using Both Systems Together
 
-You can use native ZSH hooks alongside dotfiles hooks:
+You can use native ZSH hooks alongside blackdot hooks:
 
 ```zsh
 # In ~/.zshrc.local - use native hooks for fast, inline operations
@@ -207,11 +207,11 @@ _update_title() {
 }
 add-zsh-hook precmd _update_title
 
-# Complex hook (dotfiles system) - lives in separate file
+# Complex hook (blackdot system) - lives in separate file
 # ~/.config/dotfiles/hooks/directory_change/10-project-env.zsh
 ```
 
-**Best practice:** Use native hooks for simple, fast operations that need to run on every prompt. Use dotfiles hooks for more complex, configurable behavior.
+**Best practice:** Use native hooks for simple, fast operations that need to run on every prompt. Use blackdot hooks for more complex, configurable behavior.
 
 ### Performance Considerations
 
@@ -309,7 +309,7 @@ Register hooks programmatically in your `.zshrc.local`:
 
 ```zsh
 # Source hooks library
-source "$DOTFILES_DIR/lib/_hooks.sh"
+source "$BLACKDOT_DIR/lib/_hooks.sh"
 
 # Register inline hooks
 hook_register "shell_init" "load-work-env" '
@@ -327,19 +327,19 @@ hook_register "directory_change" "auto-nvm" '
 
 ```bash
 # List all hook points and their hooks
-dotfiles hook list
+blackdot hook list
 
 # List hooks for a specific point
-dotfiles hook list post_vault_pull
+blackdot hook list post_vault_pull
 
 # Run hooks for a point
-dotfiles hook run post_vault_pull
+blackdot hook run post_vault_pull
 
 # Run with verbose output
-dotfiles hook run --verbose post_vault_pull
+blackdot hook run --verbose post_vault_pull
 
 # Test hooks (shows what would run)
-dotfiles hook test post_vault_pull
+blackdot hook test post_vault_pull
 ```
 
 ---
@@ -392,7 +392,7 @@ done
 ```bash
 #!/bin/bash
 # hooks/examples/doctor_check/10-custom-checks.sh
-# Add custom checks to dotfiles doctor
+# Add custom checks to blackdot doctor
 
 # Check VPN connection
 if command -v openconnect &>/dev/null; then
@@ -466,16 +466,16 @@ chmod +x ~/.config/dotfiles/hooks/post_vault_pull/10-fix-permissions.sh
 
 The hook system integrates with the [Feature Registry](features.md):
 
-- **Hooks are a feature** - Enable/disable with `dotfiles features enable/disable hooks`
+- **Hooks are a feature** - Enable/disable with `blackdot features enable/disable hooks`
 - **Parent feature gating** - Vault hooks only run if `vault` feature is enabled
 - **Feature checks in hooks** - Use `feature_enabled "name"` in your hook scripts
 
 ```bash
 # Disable all hooks
-dotfiles features disable hooks
+blackdot features disable hooks
 
 # Re-enable hooks
-dotfiles features enable hooks --persist
+blackdot features enable hooks --persist
 ```
 
 ---
@@ -498,9 +498,9 @@ dotfiles features enable hooks --persist
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `DOTFILES_HOOKS_VERBOSE` | `false` | Enable verbose hook output |
-| `DOTFILES_HOOKS_DISABLED` | `false` | Disable all hooks |
-| `DOTFILES_HOOKS_FAIL_FAST` | `false` | Stop on first failure |
+| `BLACKDOT_HOOKS_VERBOSE` | `false` | Enable verbose hook output |
+| `BLACKDOT_HOOKS_DISABLED` | `false` | Disable all hooks |
+| `BLACKDOT_HOOKS_FAIL_FAST` | `false` | Stop on first failure |
 
 ---
 
@@ -509,22 +509,22 @@ dotfiles features enable hooks --persist
 ### Hook not running?
 
 1. **Check it's executable:** `chmod +x ~/.config/dotfiles/hooks/<point>/<script>`
-2. **Check feature enabled:** `dotfiles features | grep hooks`
+2. **Check feature enabled:** `blackdot features | grep hooks`
 3. **Check parent feature:** Vault hooks require `vault` feature enabled
-4. **Test manually:** `dotfiles hook test <point>`
+4. **Test manually:** `blackdot hook test <point>`
 
 ### Hook failing silently?
 
 Run with verbose mode:
 ```bash
-dotfiles hook run --verbose <point>
+blackdot hook run --verbose <point>
 ```
 
 ### View registered hooks
 
 ```bash
-dotfiles hook list        # All hooks
-dotfiles hook list <point> # Specific point
+blackdot hook list        # All hooks
+blackdot hook list <point> # Specific point
 ```
 
 ---
@@ -535,12 +535,12 @@ dotfiles hook list <point> # Specific point
 2. **Set `fail_ok: true`** for non-critical hooks
 3. **Keep hooks fast** - Shell init hooks affect startup time
 4. **Use verbose logging** during development
-5. **Test hooks** before relying on them: `dotfiles hook test <point>`
+5. **Test hooks** before relying on them: `blackdot hook test <point>`
 
 ---
 
 ## See Also
 
 - [Feature Registry](features.md) - Control plane for hook feature
-- [CLI Reference](cli-reference.md) - Full `dotfiles hook` command reference
+- [CLI Reference](cli-reference.md) - Full `blackdot hook` command reference
 - [Design Document](design/IMPL-hook-system.md) - Implementation details

@@ -2,7 +2,7 @@
 
 > **Deep Integration:** Not just aliases—helpers, completions, and workflow automation for your entire toolchain.
 
-The dotfiles framework provides deep integrations with modern developer tools. Each tool suite is feature-gated and can be enabled/disabled independently.
+The blackdot framework provides deep integrations with modern developer tools. Each tool suite is feature-gated and can be enabled/disabled independently.
 
 ---
 
@@ -30,15 +30,15 @@ Each tool suite is independently toggleable:
 
 ```bash
 # Enable/disable at runtime
-dotfiles features enable rust_tools
-dotfiles features disable cdk_tools
+blackdot features enable rust_tools
+blackdot features disable cdk_tools
 
 # Persist across sessions
-dotfiles features enable aws_helpers --persist
-dotfiles features disable go_tools --persist
+blackdot features enable aws_helpers --persist
+blackdot features disable go_tools --persist
 
 # Check what's enabled
-dotfiles features list integration
+blackdot features list integration
 ```
 
 ---
@@ -660,9 +660,9 @@ All tool commands have tab completion:
 awsswitch <TAB>              # Shows profile names
 
 # dotfiles
-dotfiles <TAB>               # Shows subcommands
-dotfiles features <TAB>      # Shows: enable disable list preset status
-dotfiles features enable <TAB>  # Shows: vault aws_helpers rust_tools ...
+blackdot <TAB>               # Shows subcommands
+blackdot features <TAB>      # Shows: enable disable list preset status
+blackdot features enable <TAB>  # Shows: vault aws_helpers rust_tools ...
 
 # Rust
 cargo <TAB>                  # Standard cargo completions
@@ -696,9 +696,9 @@ Over time, this trains muscle memory for the shortcuts.
 A dedicated command to list and search aliases:
 
 ```bash
-dotfiles aliases             # List all by category
-dotfiles aliases rust        # Show Rust aliases
-dotfiles aliases search test # Find aliases containing "test"
+blackdot aliases             # List all by category
+blackdot aliases rust        # Show Rust aliases
+blackdot aliases search test # Find aliases containing "test"
 ```
 
 ---
@@ -720,5 +720,5 @@ This file is sourced after the standard aliases, so you can override defaults.
 ## Related Documentation
 
 - [Feature Registry](features.md) - Enable/disable tool integrations
-- [CLI Reference](cli-reference.md) - All dotfiles commands
+- [CLI Reference](cli-reference.md) - All blackdot commands
 - [Full Documentation](README-FULL.md) - Complete guide

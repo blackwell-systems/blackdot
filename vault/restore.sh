@@ -5,7 +5,7 @@
 # Usage:
 #   ./restore.sh              # Restore with drift check
 #   ./restore.sh --force      # Restore without drift check
-#   DOTFILES_OFFLINE=1 ./restore.sh  # Skip vault operations
+#   BLACKDOT_OFFLINE=1 ./restore.sh  # Skip vault operations
 # ============================================================
 set -euo pipefail
 
@@ -14,10 +14,10 @@ source "$(dirname "$0")/_common.sh"
 
 # Source config functions for timestamp tracking
 SCRIPT_DIR="$(cd "$(dirname "${0:a}")" && pwd)"
-DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
-source "$DOTFILES_DIR/lib/_config.sh"
-source "$DOTFILES_DIR/lib/_vault.sh"
-source "$DOTFILES_DIR/lib/_drift.sh"
+BLACKDOT_DIR="$(dirname "$SCRIPT_DIR")"
+source "$BLACKDOT_DIR/lib/_config.sh"
+source "$BLACKDOT_DIR/lib/_vault.sh"
+source "$BLACKDOT_DIR/lib/_drift.sh"
 
 # Parse arguments
 FORCE=false
@@ -43,8 +43,8 @@ while [[ $# -gt 0 ]]; do
             echo "  --help, -h        Show this help"
             echo ""
             echo "Environment variables:"
-            echo "  DOTFILES_OFFLINE=1            Run in offline mode (skip vault operations)"
-            echo "  DOTFILES_SKIP_DRIFT_CHECK=1   Skip drift check (for automation)"
+            echo "  BLACKDOT_OFFLINE=1            Run in offline mode (skip vault operations)"
+            echo "  BLACKDOT_SKIP_DRIFT_CHECK=1   Skip drift check (for automation)"
             exit 0
             ;;
         *)
@@ -59,12 +59,12 @@ done
 # ============================================================
 if is_offline; then
     echo "=== Offline mode enabled ==="
-    warn "DOTFILES_OFFLINE=1 - Skipping vault operations"
+    warn "BLACKDOT_OFFLINE=1 - Skipping vault operations"
     echo ""
     echo "Vault restore skipped. Your existing local files are unchanged."
     echo ""
     echo "To restore from vault later:"
-    echo "  unset DOTFILES_OFFLINE"
+    echo "  unset BLACKDOT_OFFLINE"
     echo "  dotfiles vault pull"
     exit 0
 fi
@@ -134,8 +134,8 @@ if [[ "$PREVIEW" == "true" ]]; then
 
     # Dotfiles items
     echo "Dotfiles:"
-    for item in "${(@k)DOTFILES_ITEMS}"; do
-        local path="${DOTFILES_ITEMS[$item]}"
+    for item in "${(@k)BLACKDOT_ITEMS}"; do
+        local path="${BLACKDOT_ITEMS[$item]}"
         if [[ -e "$path" ]]; then
             echo "  $item → $path (exists, would overwrite)"
         else
@@ -155,12 +155,12 @@ echo ""
 info "Creating backup before restore..."
 
 # Define dotfiles root
-DOTFILES_ROOT="$(dirname "$VAULT_DIR")"
+BLACKDOT_ROOT="$(dirname "$VAULT_DIR")"
 
 # Check if any tracked files exist
 has_files_to_backup=false
-for item in "${(@k)DOTFILES_ITEMS}"; do
-    local path="${DOTFILES_ITEMS[$item]}"
+for item in "${(@k)BLACKDOT_ITEMS}"; do
+    local path="${BLACKDOT_ITEMS[$item]}"
     if [[ -e "$path" ]]; then
         has_files_to_backup=true
         break
@@ -177,7 +177,7 @@ done
 
 if [[ "$has_files_to_backup" == "true" ]]; then
     # Use Go binary if available, otherwise skip backup
-    local backup_cmd="$DOTFILES_ROOT/bin/dotfiles"
+    local backup_cmd="$BLACKDOT_ROOT/bin/dotfiles"
     if [[ -x "$backup_cmd" ]] && "$backup_cmd" backup create >/dev/null 2>&1; then
         backup_dir="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/backups"
         latest_backup=$(ls -t "$backup_dir" 2>/dev/null | head -1)

@@ -2,7 +2,7 @@
 
 > **Add support for any secret management tool**
 
-The dotfiles vault system uses a pluggable backend architecture. This guide explains how to add support for a new vault provider.
+The blackdot vault system uses a pluggable backend architecture. This guide explains how to add support for a new vault provider.
 
 ---
 
@@ -10,7 +10,7 @@ The dotfiles vault system uses a pluggable backend architecture. This guide expl
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        dotfiles vault                           │
+│                        blackdot vault                           │
 ├─────────────────────────────────────────────────────────────────┤
 │                       lib/_vault.sh                             │
 │                    (Abstraction Layer)                          │
@@ -26,7 +26,7 @@ The dotfiles vault system uses a pluggable backend architecture. This guide expl
 
 1. **Abstraction layer** (`lib/_vault.sh`) - Provides unified API for all vault operations
 2. **Backend implementations** (`vault/backends/*.sh`) - Provider-specific logic
-3. **Environment variable** - `DOTFILES_VAULT_BACKEND` selects which backend to use
+3. **Environment variable** - `BLACKDOT_VAULT_BACKEND` selects which backend to use
 
 ---
 
@@ -63,11 +63,11 @@ Every backend must implement these 12 functions:
 
 ```bash
 # Set your backend
-export DOTFILES_VAULT_BACKEND=mybackend
+export BLACKDOT_VAULT_BACKEND=mybackend
 
 # Test it
-dotfiles vault list
-dotfiles doctor
+blackdot vault list
+blackdot doctor
 ```
 
 ---
@@ -358,7 +358,7 @@ Get or create an authentication token. May prompt the user for credentials.
 ```bash
 vault_backend_get_session() {
     # Try cached token first
-    local session_file="${VAULT_SESSION_FILE:-$DOTFILES_DIR/vault/.vault-session}"
+    local session_file="${VAULT_SESSION_FILE:-$BLACKDOT_DIR/vault/.vault-session}"
 
     if [[ -f "$session_file" ]]; then
         local cached=$(cat "$session_file")
@@ -401,7 +401,7 @@ vault_backend_get_notes(item_name, session) {
 
 #### `vault_backend_health_check`
 
-Provide detailed diagnostics for `dotfiles doctor`.
+Provide detailed diagnostics for `blackdot doctor`.
 
 ```bash
 vault_backend_health_check() {
@@ -451,7 +451,7 @@ Where `type: 2` indicates a "secure note" (borrowed from Bitwarden's type system
 
 ## Item Naming Convention
 
-dotfiles expects these item names in the vault:
+blackdot expects these item names in the vault:
 
 | Item Name | Local Path | Description |
 |-----------|------------|-------------|
@@ -479,7 +479,7 @@ ssh-ed25519 AAAA... comment
 
 ```bash
 # Set your backend
-export DOTFILES_VAULT_BACKEND=mybackend
+export BLACKDOT_VAULT_BACKEND=mybackend
 
 # Source the abstraction layer
 source lib/_vault.sh
@@ -500,14 +500,14 @@ vault_item_exists "SSH-Config" "$SESSION" && echo "exists"
 
 ```bash
 # Full integration test
-export DOTFILES_VAULT_BACKEND=mybackend
+export BLACKDOT_VAULT_BACKEND=mybackend
 
 # Should work with all vault commands
-dotfiles vault list
-dotfiles vault pull --dry-run
-dotfiles sync --dry-run
-dotfiles doctor
-dotfiles drift
+blackdot vault list
+blackdot vault pull --dry-run
+blackdot sync --dry-run
+blackdot doctor
+blackdot drift
 ```
 
 ---
@@ -518,7 +518,7 @@ dotfiles drift
 2. **Handle missing items gracefully** - Return empty strings, not errors
 3. **Cache sessions securely** - Use 600 permissions on session files
 4. **Use jq for JSON** - All backends assume jq is available
-5. **Test offline behavior** - `DOTFILES_OFFLINE=1` should skip vault operations gracefully
+5. **Test offline behavior** - `BLACKDOT_OFFLINE=1` should skip vault operations gracefully
 
 ---
 
@@ -534,7 +534,7 @@ dotfiles drift
 
 ## Interface Specification
 
-For the complete technical specification, see [`vault/backends/_interface.md`](https://github.com/blackwell-systems/dotfiles/blob/main/vault/backends/_interface.md).
+For the complete technical specification, see [`vault/backends/_interface.md`](https://github.com/blackwell-systems/blackdot/blob/main/vault/backends/_interface.md).
 
 ---
 

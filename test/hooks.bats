@@ -3,9 +3,9 @@
 # NOTE: These tests require zsh since _hooks.sh uses zsh syntax
 
 setup() {
-    export DOTFILES_DIR="${BATS_TEST_DIRNAME}/.."
-    export HOOKS_SH="${DOTFILES_DIR}/lib/_hooks.sh"
-    export FEATURES_SH="${DOTFILES_DIR}/lib/_features.sh"
+    export BLACKDOT_DIR="${BATS_TEST_DIRNAME}/.."
+    export HOOKS_SH="${BLACKDOT_DIR}/lib/_hooks.sh"
+    export FEATURES_SH="${BLACKDOT_DIR}/lib/_features.sh"
 
     # Create temporary config/hooks directory
     export TEST_CONFIG_DIR="${BATS_TEST_TMPDIR}/dotfiles"
@@ -14,10 +14,10 @@ setup() {
     mkdir -p "$TEST_HOOKS_DIR"
 
     # Set hook system config for tests
-    export DOTFILES_HOOKS_DIR="$TEST_HOOKS_DIR"
-    export DOTFILES_HOOKS_CONFIG="$TEST_CONFIG_DIR/hooks.json"
-    export DOTFILES_HOOKS_VERBOSE="false"
-    export DOTFILES_HOOKS_DISABLED="false"
+    export BLACKDOT_HOOKS_DIR="$TEST_HOOKS_DIR"
+    export BLACKDOT_HOOKS_CONFIG="$TEST_CONFIG_DIR/hooks.json"
+    export BLACKDOT_HOOKS_VERBOSE="false"
+    export BLACKDOT_HOOKS_DISABLED="false"
 }
 
 teardown() {
@@ -339,7 +339,7 @@ EOF
     chmod +x "${TEST_HOOKS_DIR}/post_vault_pull/10-test.sh"
 
     run zsh -c "
-        export DOTFILES_HOOKS_DIR='$TEST_HOOKS_DIR'
+        export BLACKDOT_HOOKS_DIR='$TEST_HOOKS_DIR'
         source '$HOOKS_SH'
         hook_run 'post_vault_pull'
     "
@@ -356,7 +356,7 @@ EOF
     # Intentionally NOT making it executable
 
     run zsh -c "
-        export DOTFILES_HOOKS_DIR='$TEST_HOOKS_DIR'
+        export BLACKDOT_HOOKS_DIR='$TEST_HOOKS_DIR'
         source '$HOOKS_SH'
         hook_run 'post_vault_pull'
         echo 'done'
@@ -381,7 +381,7 @@ EOF
     chmod +x "${TEST_HOOKS_DIR}/post_vault_pull/10-first.sh"
 
     run zsh -c "
-        export DOTFILES_HOOKS_DIR='$TEST_HOOKS_DIR'
+        export BLACKDOT_HOOKS_DIR='$TEST_HOOKS_DIR'
         source '$HOOKS_SH'
         hook_run 'post_vault_pull'
     "
@@ -412,7 +412,7 @@ EOF
 EOF
 
     run zsh -c "
-        export DOTFILES_HOOKS_CONFIG='${TEST_CONFIG_DIR}/hooks.json'
+        export BLACKDOT_HOOKS_CONFIG='${TEST_CONFIG_DIR}/hooks.json'
         source '$HOOKS_SH'
         hook_run 'post_vault_pull'
     "
@@ -436,7 +436,7 @@ EOF
 EOF
 
     run zsh -c "
-        export DOTFILES_HOOKS_CONFIG='${TEST_CONFIG_DIR}/hooks.json'
+        export BLACKDOT_HOOKS_CONFIG='${TEST_CONFIG_DIR}/hooks.json'
         source '$HOOKS_SH'
         hook_run 'post_vault_pull'
         echo done
@@ -467,7 +467,7 @@ EOF
 EOF
 
     run zsh -c "
-        export DOTFILES_HOOKS_CONFIG='${TEST_CONFIG_DIR}/hooks.json'
+        export BLACKDOT_HOOKS_CONFIG='${TEST_CONFIG_DIR}/hooks.json'
         source '$HOOKS_SH'
         hook_run 'post_vault_pull'
     "
@@ -547,7 +547,7 @@ EOF
 EOF
 
     run zsh -c "
-        export DOTFILES_HOOKS_CONFIG='${TEST_CONFIG_DIR}/hooks.json'
+        export BLACKDOT_HOOKS_CONFIG='${TEST_CONFIG_DIR}/hooks.json'
         source '$HOOKS_SH'
         hook_init
         echo \"fail_fast=\$HOOKS_FAIL_FAST\"
@@ -657,22 +657,22 @@ EOF
 }
 
 # ============================================================
-# CLI Command Tests (bin/dotfiles-hook)
+# CLI Command Tests (bin/blackdot-hook)
 # ============================================================
 
 @test "dotfiles-hook command exists and is executable" {
-    [ -x "${DOTFILES_DIR}/bin/dotfiles-hook" ]
+    [ -x "${BLACKDOT_DIR}/bin/blackdot-hook" ]
 }
 
 @test "dotfiles-hook --help shows usage" {
-    run "${DOTFILES_DIR}/bin/dotfiles-hook" --help
+    run "${BLACKDOT_DIR}/bin/blackdot-hook" --help
     [ "$status" -eq 0 ]
     [[ "$output" == *"Usage:"* ]]
     [[ "$output" == *"Commands:"* ]]
 }
 
 @test "dotfiles-hook list shows all hook points" {
-    run "${DOTFILES_DIR}/bin/dotfiles-hook" list
+    run "${BLACKDOT_DIR}/bin/blackdot-hook" list
     [ "$status" -eq 0 ]
     [[ "$output" == *"Hook System"* ]]
     [[ "$output" == *"Lifecycle"* ]]
@@ -680,7 +680,7 @@ EOF
 }
 
 @test "dotfiles-hook list <point> shows specific point" {
-    run "${DOTFILES_DIR}/bin/dotfiles-hook" list post_vault_pull
+    run "${BLACKDOT_DIR}/bin/blackdot-hook" list post_vault_pull
     [ "$status" -eq 0 ]
     # Output has ANSI color codes, so check parts separately
     [[ "$output" == *"Hooks for:"* ]]
@@ -688,13 +688,13 @@ EOF
 }
 
 @test "dotfiles-hook list fails for invalid point" {
-    run "${DOTFILES_DIR}/bin/dotfiles-hook" list invalid_hook
+    run "${BLACKDOT_DIR}/bin/blackdot-hook" list invalid_hook
     [ "$status" -eq 1 ]
     [[ "$output" == *"Invalid hook point"* ]]
 }
 
 @test "dotfiles-hook points lists all hook points with descriptions" {
-    run "${DOTFILES_DIR}/bin/dotfiles-hook" points
+    run "${BLACKDOT_DIR}/bin/blackdot-hook" points
     [ "$status" -eq 0 ]
     [[ "$output" == *"Available Hook Points"* ]]
     [[ "$output" == *"pre_vault_pull"* ]]
@@ -702,55 +702,55 @@ EOF
 }
 
 @test "dotfiles-hook run requires point argument" {
-    run "${DOTFILES_DIR}/bin/dotfiles-hook" run
+    run "${BLACKDOT_DIR}/bin/blackdot-hook" run
     [ "$status" -eq 1 ]
     [[ "$output" == *"Hook point required"* ]]
 }
 
 @test "dotfiles-hook run fails for invalid point" {
-    run "${DOTFILES_DIR}/bin/dotfiles-hook" run invalid_hook
+    run "${BLACKDOT_DIR}/bin/blackdot-hook" run invalid_hook
     [ "$status" -eq 1 ]
     [[ "$output" == *"Invalid hook point"* ]]
 }
 
 @test "dotfiles-hook run succeeds with no hooks" {
-    run "${DOTFILES_DIR}/bin/dotfiles-hook" run post_vault_pull
+    run "${BLACKDOT_DIR}/bin/blackdot-hook" run post_vault_pull
     [ "$status" -eq 0 ]
     [[ "$output" == *"Hooks completed successfully"* ]]
 }
 
 @test "dotfiles-hook run --verbose shows detailed output" {
-    run "${DOTFILES_DIR}/bin/dotfiles-hook" run --verbose post_vault_pull
+    run "${BLACKDOT_DIR}/bin/blackdot-hook" run --verbose post_vault_pull
     [ "$status" -eq 0 ]
     [[ "$output" == *"running hooks"* ]] || [[ "$output" == *"Hooks completed"* ]]
 }
 
 @test "dotfiles-hook add requires both arguments" {
-    run "${DOTFILES_DIR}/bin/dotfiles-hook" add post_vault_pull
+    run "${BLACKDOT_DIR}/bin/blackdot-hook" add post_vault_pull
     [ "$status" -eq 1 ]
     [[ "$output" == *"required"* ]]
 }
 
 @test "dotfiles-hook add fails for non-existent script" {
-    run "${DOTFILES_DIR}/bin/dotfiles-hook" add post_vault_pull /nonexistent/script.sh
+    run "${BLACKDOT_DIR}/bin/blackdot-hook" add post_vault_pull /nonexistent/script.sh
     [ "$status" -eq 1 ]
     [[ "$output" == *"not found"* ]]
 }
 
 @test "dotfiles-hook remove requires both arguments" {
-    run "${DOTFILES_DIR}/bin/dotfiles-hook" remove post_vault_pull
+    run "${BLACKDOT_DIR}/bin/blackdot-hook" remove post_vault_pull
     [ "$status" -eq 1 ]
     [[ "$output" == *"required"* ]]
 }
 
 @test "dotfiles-hook test requires point argument" {
-    run "${DOTFILES_DIR}/bin/dotfiles-hook" test
+    run "${BLACKDOT_DIR}/bin/blackdot-hook" test
     [ "$status" -eq 1 ]
     [[ "$output" == *"Hook point required"* ]]
 }
 
 @test "dotfiles-hook test shows hooks and runs them" {
-    run "${DOTFILES_DIR}/bin/dotfiles-hook" test post_vault_pull
+    run "${BLACKDOT_DIR}/bin/blackdot-hook" test post_vault_pull
     [ "$status" -eq 0 ]
     # Output has ANSI color codes, so check parts separately
     [[ "$output" == *"Testing hooks for:"* ]]
@@ -763,7 +763,7 @@ EOF
 
 @test "hook command is registered in CLI_COMMAND_FEATURES" {
     run zsh -c "
-        source '${DOTFILES_DIR}/lib/_cli_features.sh'
+        source '${BLACKDOT_DIR}/lib/_cli_features.sh'
         echo \"\${CLI_COMMAND_FEATURES[hook]}\"
     "
     [ "$status" -eq 0 ]
@@ -772,7 +772,7 @@ EOF
 
 @test "hook subcommands are registered in CLI_SUBCOMMAND_FEATURES" {
     run zsh -c "
-        source '${DOTFILES_DIR}/lib/_cli_features.sh'
+        source '${BLACKDOT_DIR}/lib/_cli_features.sh'
         echo \"\${CLI_SUBCOMMAND_FEATURES[hook:list]}\"
         echo \"\${CLI_SUBCOMMAND_FEATURES[hook:run]}\"
     "
@@ -784,51 +784,51 @@ EOF
 # Integration Tests - Hooks in Other Files
 # ============================================================
 
-@test "bin/dotfiles-sync sources hooks library" {
-    grep -q "source.*_hooks.sh" "${DOTFILES_DIR}/bin/dotfiles-sync"
+@test "bin/blackdot-sync sources hooks library" {
+    grep -q "source.*_hooks.sh" "${BLACKDOT_DIR}/bin/blackdot-sync"
 }
 
-@test "bin/dotfiles-sync has vault hook calls" {
-    grep -q "hook_run.*pre_vault" "${DOTFILES_DIR}/bin/dotfiles-sync"
-    grep -q "hook_run.*post_vault" "${DOTFILES_DIR}/bin/dotfiles-sync"
+@test "bin/blackdot-sync has vault hook calls" {
+    grep -q "hook_run.*pre_vault" "${BLACKDOT_DIR}/bin/blackdot-sync"
+    grep -q "hook_run.*post_vault" "${BLACKDOT_DIR}/bin/blackdot-sync"
 }
 
 @test "bootstrap/_common.sh has run_hook function" {
-    grep -q "run_hook()" "${DOTFILES_DIR}/bootstrap/_common.sh"
+    grep -q "run_hook()" "${BLACKDOT_DIR}/bootstrap/_common.sh"
 }
 
 @test "bootstrap/bootstrap-mac.sh has bootstrap hooks" {
-    grep -q "run_hook.*pre_bootstrap" "${DOTFILES_DIR}/bootstrap/bootstrap-mac.sh"
-    grep -q "run_hook.*post_bootstrap" "${DOTFILES_DIR}/bootstrap/bootstrap-mac.sh"
+    grep -q "run_hook.*pre_bootstrap" "${BLACKDOT_DIR}/bootstrap/bootstrap-mac.sh"
+    grep -q "run_hook.*post_bootstrap" "${BLACKDOT_DIR}/bootstrap/bootstrap-mac.sh"
 }
 
 @test "bootstrap/bootstrap-linux.sh has bootstrap hooks" {
-    grep -q "run_hook.*pre_bootstrap" "${DOTFILES_DIR}/bootstrap/bootstrap-linux.sh"
-    grep -q "run_hook.*post_bootstrap" "${DOTFILES_DIR}/bootstrap/bootstrap-linux.sh"
+    grep -q "run_hook.*pre_bootstrap" "${BLACKDOT_DIR}/bootstrap/bootstrap-linux.sh"
+    grep -q "run_hook.*post_bootstrap" "${BLACKDOT_DIR}/bootstrap/bootstrap-linux.sh"
 }
 
 @test "install.sh has install hooks" {
-    grep -q "run_hook.*pre_install" "${DOTFILES_DIR}/install.sh"
-    grep -q "run_hook.*post_install" "${DOTFILES_DIR}/install.sh"
+    grep -q "run_hook.*pre_install" "${BLACKDOT_DIR}/install.sh"
+    grep -q "run_hook.*post_install" "${BLACKDOT_DIR}/install.sh"
 }
 
 @test "zsh/zsh.d/90-integrations.zsh has shell hooks" {
-    grep -q "hook_run.*shell_init" "${DOTFILES_DIR}/zsh/zsh.d/90-integrations.zsh"
-    grep -q "hook_run.*directory_change" "${DOTFILES_DIR}/zsh/zsh.d/90-integrations.zsh"
-    grep -q "hook_run.*shell_exit" "${DOTFILES_DIR}/zsh/zsh.d/90-integrations.zsh"
+    grep -q "hook_run.*shell_init" "${BLACKDOT_DIR}/zsh/zsh.d/90-integrations.zsh"
+    grep -q "hook_run.*directory_change" "${BLACKDOT_DIR}/zsh/zsh.d/90-integrations.zsh"
+    grep -q "hook_run.*shell_exit" "${BLACKDOT_DIR}/zsh/zsh.d/90-integrations.zsh"
 }
 
-@test "bin/dotfiles-doctor has doctor hooks" {
-    grep -q "run_hook.*pre_doctor" "${DOTFILES_DIR}/bin/dotfiles-doctor"
-    grep -q "run_hook.*post_doctor" "${DOTFILES_DIR}/bin/dotfiles-doctor"
-    grep -q "run_hook.*doctor_check" "${DOTFILES_DIR}/bin/dotfiles-doctor"
+@test "bin/blackdot-doctor has doctor hooks" {
+    grep -q "run_hook.*pre_doctor" "${BLACKDOT_DIR}/bin/blackdot-doctor"
+    grep -q "run_hook.*post_doctor" "${BLACKDOT_DIR}/bin/blackdot-doctor"
+    grep -q "run_hook.*doctor_check" "${BLACKDOT_DIR}/bin/blackdot-doctor"
 }
 
 @test "run_hook in _common.sh handles missing zsh gracefully" {
     # Test that run_hook returns 0 even when hooks can't run
     run bash -c "
-        DOTFILES_DIR='${DOTFILES_DIR}'
-        source '${DOTFILES_DIR}/bootstrap/_common.sh'
+        BLACKDOT_DIR='${BLACKDOT_DIR}'
+        source '${BLACKDOT_DIR}/bootstrap/_common.sh'
         run_hook 'pre_bootstrap'
         echo 'success'
     "
@@ -841,34 +841,34 @@ EOF
 # ============================================================
 
 @test "hooks/examples directory exists" {
-    [ -d "${DOTFILES_DIR}/hooks/examples" ]
+    [ -d "${BLACKDOT_DIR}/hooks/examples" ]
 }
 
 @test "hooks/examples/README.md exists" {
-    [ -f "${DOTFILES_DIR}/hooks/examples/README.md" ]
+    [ -f "${BLACKDOT_DIR}/hooks/examples/README.md" ]
 }
 
 @test "post_vault_pull permission hook example exists and is executable" {
-    [ -f "${DOTFILES_DIR}/hooks/examples/post_vault_pull/10-fix-permissions.sh" ]
-    [ -x "${DOTFILES_DIR}/hooks/examples/post_vault_pull/10-fix-permissions.sh" ]
+    [ -f "${BLACKDOT_DIR}/hooks/examples/post_vault_pull/10-fix-permissions.sh" ]
+    [ -x "${BLACKDOT_DIR}/hooks/examples/post_vault_pull/10-fix-permissions.sh" ]
 }
 
 @test "post_vault_pull ssh-add hook example exists and is executable" {
-    [ -f "${DOTFILES_DIR}/hooks/examples/post_vault_pull/20-ssh-add.sh" ]
-    [ -x "${DOTFILES_DIR}/hooks/examples/post_vault_pull/20-ssh-add.sh" ]
+    [ -f "${BLACKDOT_DIR}/hooks/examples/post_vault_pull/20-ssh-add.sh" ]
+    [ -x "${BLACKDOT_DIR}/hooks/examples/post_vault_pull/20-ssh-add.sh" ]
 }
 
 @test "doctor_check custom checks hook example exists and is executable" {
-    [ -f "${DOTFILES_DIR}/hooks/examples/doctor_check/10-custom-checks.sh" ]
-    [ -x "${DOTFILES_DIR}/hooks/examples/doctor_check/10-custom-checks.sh" ]
+    [ -f "${BLACKDOT_DIR}/hooks/examples/doctor_check/10-custom-checks.sh" ]
+    [ -x "${BLACKDOT_DIR}/hooks/examples/doctor_check/10-custom-checks.sh" ]
 }
 
 @test "shell_init project-env hook example exists and is executable" {
-    [ -f "${DOTFILES_DIR}/hooks/examples/shell_init/10-project-env.zsh" ]
-    [ -x "${DOTFILES_DIR}/hooks/examples/shell_init/10-project-env.zsh" ]
+    [ -f "${BLACKDOT_DIR}/hooks/examples/shell_init/10-project-env.zsh" ]
+    [ -x "${BLACKDOT_DIR}/hooks/examples/shell_init/10-project-env.zsh" ]
 }
 
 @test "directory_change auto-env hook example exists and is executable" {
-    [ -f "${DOTFILES_DIR}/hooks/examples/directory_change/10-auto-env.zsh" ]
-    [ -x "${DOTFILES_DIR}/hooks/examples/directory_change/10-auto-env.zsh" ]
+    [ -f "${BLACKDOT_DIR}/hooks/examples/directory_change/10-auto-env.zsh" ]
+    [ -x "${BLACKDOT_DIR}/hooks/examples/directory_change/10-auto-env.zsh" ]
 }
