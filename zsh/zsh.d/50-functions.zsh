@@ -206,23 +206,23 @@ dotfiles-upgrade() {
 
     # Pull latest changes
     local branch
-    branch="$(cd "$DOTFILES_DIR" && git rev-parse --abbrev-ref HEAD)"
+    branch="$(cd "$BLACKDOT_DIR" && git rev-parse --abbrev-ref HEAD)"
     echo "   Pulling from $branch..."
-    (cd "$DOTFILES_DIR" && git pull --rebase origin "$branch")
+    (cd "$BLACKDOT_DIR" && git pull --rebase origin "$branch")
 
     # Re-run bootstrap to update symlinks
     echo "   Re-bootstrapping..."
-    "$DOTFILES_DIR/bootstrap-dotfiles.sh"
+    "$BLACKDOT_DIR/bootstrap-dotfiles.sh"
 
     # Update Homebrew packages
     if command -v brew >/dev/null 2>&1; then
         echo "   Updating Homebrew packages..."
-        brew bundle --file="$DOTFILES_DIR/Brewfile" --quiet
+        brew bundle --file="$BLACKDOT_DIR/Brewfile" --quiet
     fi
 
     # Run health check with auto-fix
     echo "   Running health check..."
-    "$DOTFILES_DIR/bin/dotfiles" doctor --fix
+    "$BLACKDOT_DIR/bin/blackdot" doctor --fix
 
     echo "✅ Upgrade complete! Restart shell to apply all changes."
     echo "   Or run: source ~/.zshrc"
@@ -230,7 +230,7 @@ dotfiles-upgrade() {
 
 # Check for dotfiles updates (once per day)
 _check_dotfiles_updates() {
-    local dotfiles_dir="$DOTFILES_DIR"
+    local dotfiles_dir="$BLACKDOT_DIR"
     local cache_file="$HOME/.dotfiles-update-check"
 
     # Skip if checked recently (within last day)

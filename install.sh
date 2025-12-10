@@ -3,7 +3,7 @@
 # One-line installer for dotfiles
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 #
 # After installation, run 'dotfiles setup' to configure vault and secrets.
 #
@@ -52,8 +52,8 @@ run_hook() {
 # Download Go binary from GitHub releases
 install_go_binary() {
     local install_dir="${1:-$HOME/.local/bin}"
-    local version="${DOTFILES_VERSION:-latest}"
-    local skip_checksum="${DOTFILES_SKIP_CHECKSUM:-false}"
+    local version="${BLACKDOT_VERSION:-latest}"
+    local skip_checksum="${BLACKDOT_SKIP_CHECKSUM:-false}"
 
     # Detect OS
     local os=""
@@ -78,7 +78,7 @@ install_go_binary() {
     local binary_name="dotfiles-${os}-${arch}${suffix}"
 
     # GitHub release URL
-    local base_url="https://github.com/blackwell-systems/dotfiles/releases"
+    local base_url="https://github.com/blackwell-systems/blackdot/releases"
     local download_url=""
     local checksum_url=""
 
@@ -212,7 +212,7 @@ install_go_binary() {
 
         echo ""
         echo "Try downloading manually from:"
-        echo "  https://github.com/blackwell-systems/dotfiles/releases"
+        echo "  https://github.com/blackwell-systems/blackdot/releases"
 
         rm -f "$target"
         return 1
@@ -220,8 +220,8 @@ install_go_binary() {
 }
 
 # Configuration
-REPO_URL="https://github.com/blackwell-systems/dotfiles.git"
-REPO_SSH="git@github.com:blackwell-systems/dotfiles.git"
+REPO_URL="https://github.com/blackwell-systems/blackdot.git"
+REPO_SSH="git@github.com:blackwell-systems/blackdot.git"
 
 # Workspace target (configurable via env var, defaults to ~/workspace)
 WORKSPACE_TARGET="${WORKSPACE_TARGET:-$HOME/workspace}"
@@ -276,13 +276,13 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "Environment Variables:"
             echo "  WORKSPACE_TARGET     Clone location (default: ~/workspace)"
-            echo "  DOTFILES_VERSION     Binary version to download (default: latest)"
-            echo "  DOTFILES_BIN_DIR     Where to install binary (default: ~/.local/bin)"
-            echo "  DOTFILES_SKIP_CHECKSUM  Skip SHA256 verification (default: false)"
+            echo "  BLACKDOT_VERSION     Binary version to download (default: latest)"
+            echo "  BLACKDOT_BIN_DIR     Where to install binary (default: ~/.local/bin)"
+            echo "  BLACKDOT_SKIP_CHECKSUM  Skip SHA256 verification (default: false)"
             echo ""
             echo "Examples:"
             echo "  curl -fsSL <url> | bash                              # Full install (recommended)"
-            echo "  DOTFILES_VERSION=v4.0.0 ./install.sh                 # Specific version"
+            echo "  BLACKDOT_VERSION=v4.0.0 ./install.sh                 # Specific version"
             echo "  curl -fsSL <url> | bash -s -- --minimal --no-binary  # Minimal, no binary"
             echo ""
             echo "After installation, run 'dotfiles setup' to configure your environment."
@@ -312,7 +312,7 @@ echo ""
 
 # Binary-only mode: just download the binary and exit
 if $BINARY_ONLY; then
-    install_go_binary "${DOTFILES_BIN_DIR:-$HOME/.local/bin}"
+    install_go_binary "${BLACKDOT_BIN_DIR:-$HOME/.local/bin}"
     echo ""
     echo -e "${GREEN}${BOLD}Binary installation complete!${NC}"
     echo ""
@@ -402,7 +402,7 @@ echo ""
 if $INSTALL_BINARY; then
     echo ""
     info "Installing Go binary..."
-    install_go_binary "${DOTFILES_BIN_DIR:-$HOME/.local/bin}" || warn "Binary installation failed, shell scripts will be used"
+    install_go_binary "${BLACKDOT_BIN_DIR:-$HOME/.local/bin}" || warn "Binary installation failed, shell scripts will be used"
 fi
 
 # Windows: Offer to set up PowerShell module
@@ -453,16 +453,16 @@ if ! $MINIMAL; then
 
         # Run setup - requires Go binary
         cd "$INSTALL_DIR"
-        if [[ -x "$INSTALL_DIR/bin/dotfiles" ]]; then
-            "$INSTALL_DIR/bin/dotfiles" setup
-        elif [[ -x "${DOTFILES_BIN_DIR:-$HOME/.local/bin}/dotfiles" ]]; then
-            "${DOTFILES_BIN_DIR:-$HOME/.local/bin}/dotfiles" setup
+        if [[ -x "$INSTALL_DIR/bin/blackdot" ]]; then
+            "$INSTALL_DIR/bin/blackdot" setup
+        elif [[ -x "${BLACKDOT_BIN_DIR:-$HOME/.local/bin}/dotfiles" ]]; then
+            "${BLACKDOT_BIN_DIR:-$HOME/.local/bin}/dotfiles" setup
         else
             fail "Go binary not found. Setup requires the dotfiles binary."
             echo ""
             echo "To install the binary manually:"
-            echo "  curl -fsSL https://github.com/blackwell-systems/dotfiles/releases/latest/download/dotfiles-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/') -o ~/.local/bin/dotfiles"
-            echo "  chmod +x ~/.local/bin/dotfiles"
+            echo "  curl -fsSL https://github.com/blackwell-systems/blackdot/releases/latest/download/dotfiles-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/') -o ~/.local/bin/blackdot"
+            echo "  chmod +x ~/.local/bin/blackdot"
             echo ""
             echo "Then run: dotfiles setup"
         fi
@@ -494,5 +494,5 @@ else
     echo -e "     ${CYAN}dotfiles doctor${NC}"
 fi
 echo ""
-echo -e "Documentation: ${BLUE}https://github.com/blackwell-systems/dotfiles${NC}"
+echo -e "Documentation: ${BLUE}https://github.com/blackwell-systems/blackdot${NC}"
 echo ""

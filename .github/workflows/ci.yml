@@ -68,7 +68,7 @@ jobs:
           if [ "${{ matrix.goos }}" = "windows" ]; then
             SUFFIX=".exe"
           fi
-          go build -ldflags="-s -w" -o dotfiles-${{ matrix.goos }}-${{ matrix.goarch }}${SUFFIX} ./cmd/dotfiles/
+          go build -ldflags="-s -w" -o dotfiles-${{ matrix.goos }}-${{ matrix.goarch }}${SUFFIX} ./cmd/blackdot/
           ls -la dotfiles-*
 
   # Shell script validation (remaining scripts)
@@ -168,7 +168,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       # Point to checkout directory so binary finds templates/configs
-      DOTFILES_DIR: ${{ github.workspace }}
+      BLACKDOT_DIR: ${{ github.workspace }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -180,11 +180,11 @@ jobs:
 
       - name: Build binary (Unix)
         if: matrix.os != 'windows-latest'
-        run: go build -o dotfiles ./cmd/dotfiles/
+        run: go build -o dotfiles ./cmd/blackdot/
 
       - name: Build binary (Windows)
         if: matrix.os == 'windows-latest'
-        run: go build -o dotfiles.exe ./cmd/dotfiles/
+        run: go build -o dotfiles.exe ./cmd/blackdot/
 
       - name: Test version command
         run: ${{ matrix.binary }} version
@@ -253,7 +253,7 @@ jobs:
             "Brewfile"
             "zsh/zshrc"
             "zsh/p10k.zsh"
-            "cmd/dotfiles/main.go"
+            "cmd/blackdot/main.go"
             "internal/cli/root.go"
             "lib/_logging.sh"
             "lib/_hooks.sh"

@@ -198,7 +198,7 @@ check_vault_drift() {
   local state_file="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/vault-state.json"
 
   # Skip if disabled
-  [[ "${DOTFILES_SKIP_DRIFT_CHECK:-}" == "1" ]] && return 0
+  [[ "${BLACKDOT_SKIP_DRIFT_CHECK:-}" == "1" ]] && return 0
 
   # Skip if no state file (user hasn't done vault pull yet)
   [[ ! -f "$state_file" ]] && return 0
@@ -230,7 +230,7 @@ fi
 # Source hooks library and run shell_init hooks
 # Enables custom behavior at shell lifecycle points
 _dotfiles_init_hooks() {
-  local dotfiles_dir="${DOTFILES_DIR:-${HOME}/workspace/dotfiles}"
+  local dotfiles_dir="${BLACKDOT_DIR:-${HOME}/workspace/dotfiles}"
   local hooks_lib="$dotfiles_dir/lib/_hooks.sh"
 
   # Skip if hooks library doesn't exist

@@ -7,10 +7,10 @@
     Downloads and installs the dotfiles system for Windows PowerShell users.
 
     Usage:
-        irm https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/Install.ps1 | iex
+        irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/Install.ps1 | iex
 
     Or with options:
-        $script = irm https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/Install.ps1
+        $script = irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/Install.ps1
         & ([scriptblock]::Create($script)) -Preset developer -SkipPackages
 
 .PARAMETER Preset
@@ -29,7 +29,7 @@
     Specific version to download (default: latest)
 
 .EXAMPLE
-    irm https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/Install.ps1 | iex
+    irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/Install.ps1 | iex
 
 .EXAMPLE
     .\Install.ps1 -Preset developer
@@ -126,10 +126,10 @@ function Install-GoBinary {
 
     # Detect architecture
     $arch = if ([Environment]::Is64BitOperatingSystem) { "amd64" } else { "386" }
-    $binaryName = "dotfiles-windows-$arch.exe"
+    $binaryName = "blackdot-windows-$arch.exe"
 
     # GitHub release URL
-    $baseUrl = "https://github.com/blackwell-systems/dotfiles/releases"
+    $baseUrl = "https://github.com/blackwell-systems/blackdot/releases"
     $downloadUrl = if ($Version -eq "latest") {
         "$baseUrl/latest/download/$binaryName"
     } else {
@@ -188,7 +188,7 @@ function Install-Repository {
         [string]$TargetDir
     )
 
-    $repoUrl = "https://github.com/blackwell-systems/dotfiles.git"
+    $repoUrl = "https://github.com/blackwell-systems/blackdot.git"
 
     if (Test-Path (Join-Path $TargetDir ".git")) {
         Write-Info "Dotfiles already installed at $TargetDir"
@@ -403,7 +403,7 @@ function Main {
         Write-Host ""
     }
 
-    Write-Host "Documentation: $($Colors.Blue)https://github.com/blackwell-systems/dotfiles$($Colors.Reset)"
+    Write-Host "Documentation: $($Colors.Blue)https://github.com/blackwell-systems/blackdot$($Colors.Reset)"
     Write-Host ""
 }
 

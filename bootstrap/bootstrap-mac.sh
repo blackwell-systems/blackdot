@@ -9,15 +9,15 @@
 # ============================================================
 set -euo pipefail
 
-# DOTFILES_DIR is parent of bootstrap/
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# BLACKDOT_DIR is parent of bootstrap/
+BLACKDOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Set platform name before sourcing common (used in help text)
 export PLATFORM_NAME="macOS"
 
 # Source shared bootstrap functions
 # shellcheck source=bootstrap/_common.sh
-source "$DOTFILES_DIR/bootstrap/_common.sh"
+source "$BLACKDOT_DIR/bootstrap/_common.sh"
 
 # Parse arguments (sets INTERACTIVE flag)
 parse_bootstrap_args "$@"

@@ -128,7 +128,7 @@ jobs:
             "CHANGELOG.md"
             "Brewfile"
             "zsh/zshrc"
-            "cmd/dotfiles/main.go"
+            "cmd/blackdot/main.go"
             "internal/cli/root.go"
             ".gitignore"
           )
@@ -160,9 +160,9 @@ jobs:
 
       - name: Build and test Go binary
         run: |
-          go build -o bin/dotfiles ./cmd/dotfiles/
-          ./bin/dotfiles version
-          ./bin/dotfiles features list
+          go build -o bin/blackdot ./cmd/blackdot/
+          ./bin/blackdot version
+          ./bin/blackdot features list
           echo "Go binary works on macOS"
 
       - name: Test script syntax
@@ -189,9 +189,9 @@ jobs:
 
       - name: Build and test Go binary
         run: |
-          go build -o bin/dotfiles ./cmd/dotfiles/
-          ./bin/dotfiles version
-          ./bin/dotfiles features list
+          go build -o bin/blackdot ./cmd/blackdot/
+          ./bin/blackdot version
+          ./bin/blackdot features list
           echo "Go binary works on Linux"
 
       - name: Test script syntax

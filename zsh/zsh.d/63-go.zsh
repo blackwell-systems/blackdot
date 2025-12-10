@@ -226,7 +226,7 @@ go-build-all() {
 gotools() {
     require_feature "go_tools" || return 1
     # Source theme colors
-    source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
+    source "${BLACKDOT_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
 
     # Check if Go is installed and if we're in a Go project
     local logo_color has_go in_project

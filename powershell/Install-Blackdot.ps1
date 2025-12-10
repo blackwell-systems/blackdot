@@ -1,10 +1,10 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    Install the Dotfiles PowerShell module
+    Install the Blackdot PowerShell module
 
 .DESCRIPTION
-    This script installs the Dotfiles PowerShell module to your module path
+    This script installs the Blackdot PowerShell module to your module path
     and optionally adds it to your PowerShell profile for auto-loading.
 
 .PARAMETER ModulePath
@@ -30,15 +30,15 @@
     Version of the binary to download. Defaults to 'latest'.
 
 .EXAMPLE
-    .\Install-Dotfiles.ps1
+    .\Install-Blackdot.ps1
     Install the module and add to profile.
 
 .EXAMPLE
-    .\Install-Dotfiles.ps1 -NoProfile
+    .\Install-Blackdot.ps1 -NoProfile
     Install the module without modifying profile.
 
 .EXAMPLE
-    .\Install-Dotfiles.ps1 -Force
+    .\Install-Blackdot.ps1 -Force
     Force reinstall, overwriting existing installation.
 #>
 [CmdletBinding()]
@@ -61,7 +61,7 @@ param(
 $ErrorActionPreference = 'Stop'
 
 # Binary download function
-function Install-DotfilesBinary {
+function Install-BlackdotBinary {
     param(
         [string]$InstallPath,
         [string]$Version = "latest"
@@ -87,10 +87,10 @@ function Install-DotfilesBinary {
 
     # Build binary name
     $suffix = if ($os -eq "windows") { ".exe" } else { "" }
-    $binaryName = "dotfiles-$os-$arch$suffix"
+    $binaryName = "blackdot-$os-$arch$suffix"
 
     # GitHub release URL
-    $baseUrl = "https://github.com/blackwell-systems/dotfiles/releases"
+    $baseUrl = "https://github.com/blackwell-systems/blackdot/releases"
     $downloadUrl = if ($Version -eq "latest") {
         "$baseUrl/latest/download/$binaryName"
     } else {
@@ -106,7 +106,7 @@ function Install-DotfilesBinary {
     }
 
     # Download binary
-    $target = Join-Path $InstallPath "dotfiles$suffix"
+    $target = Join-Path $InstallPath "blackdot$suffix"
     try {
         Invoke-WebRequest -Uri $downloadUrl -OutFile $target -UseBasicParsing
     } catch {
@@ -121,7 +121,7 @@ function Install-DotfilesBinary {
     # Verify it works
     try {
         $null = & $target version 2>&1
-        Write-Host "[OK] Installed dotfiles binary to: $target" -ForegroundColor Green
+        Write-Host "[OK] Installed blackdot binary to: $target" -ForegroundColor Green
     } catch {
         Remove-Item $target -Force -ErrorAction SilentlyContinue
         throw "Binary verification failed"
@@ -146,10 +146,10 @@ if (-not $ModulePath) {
 
     # On Windows, typically: ~\Documents\PowerShell\Modules
     # On Linux/Mac: ~/.local/share/powershell/Modules
-    $ModulePath = Join-Path $userModulePath "Dotfiles"
+    $ModulePath = Join-Path $userModulePath "Blackdot"
 }
 
-Write-Host "Dotfiles PowerShell Module Installer" -ForegroundColor Cyan
+Write-Host "Blackdot PowerShell Module Installer" -ForegroundColor Cyan
 Write-Host "=====================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -171,10 +171,10 @@ if (-not $BinaryPath) {
 # Binary-only mode: just download the binary and exit
 if ($BinaryOnly) {
     try {
-        Install-DotfilesBinary -InstallPath $BinaryPath -Version $Version
+        Install-BlackdotBinary -InstallPath $BinaryPath -Version $Version
         Write-Host ""
         Write-Host "Binary installation complete!" -ForegroundColor Green
-        Write-Host "Run 'dotfiles version' to verify the installation." -ForegroundColor Cyan
+        Write-Host "Run 'blackdot version' to verify the installation." -ForegroundColor Cyan
     } catch {
         Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
         exit 1
@@ -182,15 +182,15 @@ if ($BinaryOnly) {
     exit 0
 }
 
-# Check if dotfiles CLI is available
-$dotfilesCli = Get-Command "dotfiles" -ErrorAction SilentlyContinue
-if ($dotfilesCli) {
-    Write-Host "[OK] dotfiles CLI found: $($dotfilesCli.Source)" -ForegroundColor Green
+# Check if blackdot CLI is available
+$blackdotCli = Get-Command "blackdot" -ErrorAction SilentlyContinue
+if ($blackdotCli) {
+    Write-Host "[OK] blackdot CLI found: $($blackdotCli.Source)" -ForegroundColor Green
 }
 else {
-    Write-Host "[WARN] dotfiles CLI not found in PATH" -ForegroundColor Yellow
+    Write-Host "[WARN] blackdot CLI not found in PATH" -ForegroundColor Yellow
     Write-Host "       Some features will be unavailable until you install it." -ForegroundColor Yellow
-    Write-Host "       See: https://github.com/blackwell-systems/dotfiles" -ForegroundColor Yellow
+    Write-Host "       See: https://github.com/blackwell-systems/blackdot" -ForegroundColor Yellow
     Write-Host ""
 }
 
@@ -216,8 +216,8 @@ New-Item -Path $ModulePath -ItemType Directory -Force | Out-Null
 
 # Copy module files
 $filesToCopy = @(
-    'Dotfiles.psm1',
-    'Dotfiles.psd1'
+    'Blackdot.psm1',
+    'Blackdot.psd1'
 )
 
 foreach ($file in $filesToCopy) {
@@ -240,7 +240,7 @@ Write-Host ""
 if ($Binary) {
     Write-Host "Installing Go binary..." -ForegroundColor Cyan
     try {
-        Install-DotfilesBinary -InstallPath $BinaryPath -Version $Version
+        Install-BlackdotBinary -InstallPath $BinaryPath -Version $Version
     } catch {
         Write-Host "[WARN] Binary installation failed: $($_.Exception.Message)" -ForegroundColor Yellow
         Write-Host "       Module will use shell scripts instead." -ForegroundColor Yellow
@@ -266,16 +266,16 @@ if (-not $NoProfile) {
 
     # Check if already imported
     $profileContent = Get-Content $profilePath -Raw -ErrorAction SilentlyContinue
-    $importLine = "Import-Module Dotfiles"
+    $importLine = "Import-Module Blackdot"
 
     if ($profileContent -and $profileContent.Contains($importLine)) {
-        Write-Host "  Profile already imports Dotfiles module" -ForegroundColor Gray
+        Write-Host "  Profile already imports Blackdot module" -ForegroundColor Gray
     }
     else {
         # Add import line
         $linesToAdd = @(
             "",
-            "# Dotfiles PowerShell module - cross-platform hooks and aliases",
+            "# Blackdot PowerShell module - cross-platform hooks and aliases",
             $importLine
         )
 
@@ -331,7 +331,7 @@ Write-Host ""
 Write-Host "Installation complete!" -ForegroundColor Green
 Write-Host ""
 Write-Host "To use now, run:" -ForegroundColor Cyan
-Write-Host "  Import-Module Dotfiles" -ForegroundColor White
+Write-Host "  Import-Module Blackdot" -ForegroundColor White
 Write-Host ""
 Write-Host "Or restart PowerShell for auto-loading." -ForegroundColor Cyan
 Write-Host ""
@@ -339,9 +339,9 @@ Write-Host ""
 # Show available commands
 Write-Host "Available commands:" -ForegroundColor Cyan
 Write-Host "  Hook Management:" -ForegroundColor Yellow
-Write-Host "    Invoke-DotfilesHook  - Run a hook point" -ForegroundColor Gray
-Write-Host "    Enable-DotfilesHooks - Enable hooks" -ForegroundColor Gray
-Write-Host "    Disable-DotfilesHooks - Disable hooks" -ForegroundColor Gray
+Write-Host "    Invoke-BlackdotHook  - Run a hook point" -ForegroundColor Gray
+Write-Host "    Enable-BlackdotHooks - Enable hooks" -ForegroundColor Gray
+Write-Host "    Disable-BlackdotHooks - Disable hooks" -ForegroundColor Gray
 Write-Host ""
 Write-Host "  Tool Aliases:" -ForegroundColor Yellow
 Write-Host "    ssh-keys, ssh-gen, ssh-tunnel, ssh-status" -ForegroundColor Gray
@@ -360,7 +360,7 @@ Write-Host "  Navigation:" -ForegroundColor Yellow
 Write-Host "    z (zoxide) - smart directory jumping, Initialize-Zoxide" -ForegroundColor Gray
 Write-Host ""
 Write-Host "  Shortcut:" -ForegroundColor Yellow
-Write-Host "    d  - Alias for 'dotfiles'" -ForegroundColor Gray
+Write-Host "    d  - Alias for 'blackdot'" -ForegroundColor Gray
 Write-Host ""
 Write-Host "Install packages: .\Install-Packages.ps1" -ForegroundColor Cyan
 Write-Host ""

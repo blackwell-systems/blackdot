@@ -25,8 +25,8 @@ alias cwhite='cd "$WORKSPACE/whitepapers"'
 alias cpat='cd "$WORKSPACE/patent-pool"'
 
 # Source CLI feature awareness if available
-if [[ -f "$DOTFILES_DIR/lib/_cli_features.sh" ]]; then
-    source "$DOTFILES_DIR/lib/_cli_features.sh" 2>/dev/null || true
+if [[ -f "$BLACKDOT_DIR/lib/_cli_features.sh" ]]; then
+    source "$BLACKDOT_DIR/lib/_cli_features.sh" 2>/dev/null || true
 fi
 
 # Command-specific help information
@@ -86,14 +86,14 @@ typeset -gA CLI_COMMAND_HELP=(
 )
 
 # Helper: Show help for a specific command
-_dotfiles_help_command() {
+_blackdot_help_command() {
     local cmd="$1"
     local info="${CLI_COMMAND_HELP[$cmd]:-}"
 
     if [[ -z "$info" ]]; then
         echo "No detailed help available for: $cmd"
         echo ""
-        echo "Try: dotfiles help"
+        echo "Try: blackdot help"
         return 1
     fi
 
@@ -141,7 +141,7 @@ _dotfiles_help_command() {
 }
 
 # Helper function for feature-aware help display
-_dotfiles_help() {
+_blackdot_help() {
     local show_all=false
     local show_cmd=""
 
@@ -157,7 +157,7 @@ _dotfiles_help() {
 
     # If command specified, show command-specific help
     if [[ -n "$show_cmd" ]]; then
-        _dotfiles_help_command "$show_cmd"
+        _blackdot_help_command "$show_cmd"
         return $?
     fi
 
@@ -325,7 +325,7 @@ _dotfiles_help() {
         fi
         if [[ -n "$hidden" ]]; then
             echo "─────────────────────────────────────────────────────"
-            echo "${DIM}Some commands hidden. Run 'dotfiles help --all' to see all.${NC}"
+            echo "${DIM}Some commands hidden. Run 'blackdot help --all' to see all.${NC}"
             echo "${DIM}Disabled features: ${hidden}${NC}"
             echo ""
         fi
@@ -342,7 +342,7 @@ _dotfiles_help() {
 }
 
 # =========================
-# Main dotfiles() command
+# Main blackdot() command
 # =========================
 # The unified entry point. Delegates all commands to the Go binary.
 #
@@ -354,28 +354,28 @@ _dotfiles_help() {
 unalias dotfiles 2>/dev/null || true
 
 
-# Main dotfiles() function - delegates to Go binary
-dotfiles() {
+# Main blackdot() function - delegates to Go binary
+blackdot() {
     local cmd="${1:-help}"
 
     # Commands that MUST stay in shell (can't be Go)
     case "$cmd" in
         cd)
             # cd must run in current shell to change directory
-            cd "$DOTFILES_DIR"
+            cd "$BLACKDOT_DIR"
             return $?
             ;;
         edit)
             # edit must run in current shell for EDITOR
-            ${EDITOR:-vim} "$DOTFILES_DIR"
+            ${EDITOR:-vim} "$BLACKDOT_DIR"
             return $?
             ;;
     esac
 
     # Get Go binary path
-    local go_bin=$(_dotfiles_go_bin)
+    local go_bin=$(_blackdot_go_bin)
     if [[ -z "$go_bin" ]]; then
-        echo "${RED}[ERROR]${NC} dotfiles binary not found. Run: go build -o bin/dotfiles ./cmd/dotfiles" >&2
+        echo "${RED}[ERROR]${NC} dotfiles binary not found. Run: go build -o bin/blackdot ./cmd/dotfiles" >&2
         return 1
     fi
 
@@ -408,9 +408,9 @@ alias d=dotfiles
 # Usage: sshtools keys, awstools profiles, cdktools status, etc.
 
 # Determine Go binary path
-_dotfiles_go_bin() {
-    if [[ -x "$DOTFILES_DIR/bin/dotfiles" ]]; then
-        echo "$DOTFILES_DIR/bin/dotfiles"
+_blackdot_go_bin() {
+    if [[ -x "$BLACKDOT_DIR/bin/blackdot" ]]; then
+        echo "$BLACKDOT_DIR/bin/blackdot"
     elif command -v dotfiles &>/dev/null; then
         echo "dotfiles"
     else
@@ -420,7 +420,7 @@ _dotfiles_go_bin() {
 
 # Tool group functions - delegate to Go binary
 sshtools() {
-    local bin=$(_dotfiles_go_bin)
+    local bin=$(_blackdot_go_bin)
     if [[ -z "$bin" ]]; then
         echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
         return 1
@@ -429,7 +429,7 @@ sshtools() {
 }
 
 awstools() {
-    local bin=$(_dotfiles_go_bin)
+    local bin=$(_blackdot_go_bin)
     if [[ -z "$bin" ]]; then
         echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
         return 1
@@ -438,7 +438,7 @@ awstools() {
 }
 
 cdktools() {
-    local bin=$(_dotfiles_go_bin)
+    local bin=$(_blackdot_go_bin)
     if [[ -z "$bin" ]]; then
         echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
         return 1
@@ -447,7 +447,7 @@ cdktools() {
 }
 
 gotools() {
-    local bin=$(_dotfiles_go_bin)
+    local bin=$(_blackdot_go_bin)
     if [[ -z "$bin" ]]; then
         echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
         return 1
@@ -456,7 +456,7 @@ gotools() {
 }
 
 rusttools() {
-    local bin=$(_dotfiles_go_bin)
+    local bin=$(_blackdot_go_bin)
     if [[ -z "$bin" ]]; then
         echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
         return 1
@@ -465,7 +465,7 @@ rusttools() {
 }
 
 pytools() {
-    local bin=$(_dotfiles_go_bin)
+    local bin=$(_blackdot_go_bin)
     if [[ -z "$bin" ]]; then
         echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
         return 1
@@ -474,7 +474,7 @@ pytools() {
 }
 
 dockertools() {
-    local bin=$(_dotfiles_go_bin)
+    local bin=$(_blackdot_go_bin)
     if [[ -z "$bin" ]]; then
         echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
         return 1
@@ -483,7 +483,7 @@ dockertools() {
 }
 
 claudetools() {
-    local bin=$(_dotfiles_go_bin)
+    local bin=$(_blackdot_go_bin)
     if [[ -z "$bin" ]]; then
         echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
         return 1
@@ -500,25 +500,25 @@ claudetools() {
 # in the tool-specific modules (60-aws.zsh, 65-ssh.zsh, etc.)
 
 # SSH Tools (via Go binary)
-ssh-keys()   { "$(_dotfiles_go_bin)" tools ssh keys "$@"; }
-ssh-gen()    { "$(_dotfiles_go_bin)" tools ssh gen "$@"; }
-ssh-list()   { "$(_dotfiles_go_bin)" tools ssh list "$@"; }
-ssh-fp()     { "$(_dotfiles_go_bin)" tools ssh fp "$@"; }
-ssh-copy()   { "$(_dotfiles_go_bin)" tools ssh copy "$@"; }
-ssh-tunnel() { "$(_dotfiles_go_bin)" tools ssh tunnel "$@"; }
-ssh-socks()  { "$(_dotfiles_go_bin)" tools ssh socks "$@"; }
-ssh-status() { "$(_dotfiles_go_bin)" tools ssh status "$@"; }
-ssh-agent-status() { "$(_dotfiles_go_bin)" tools ssh agent "$@"; }
+ssh-keys()   { "$(_blackdot_go_bin)" tools ssh keys "$@"; }
+ssh-gen()    { "$(_blackdot_go_bin)" tools ssh gen "$@"; }
+ssh-list()   { "$(_blackdot_go_bin)" tools ssh list "$@"; }
+ssh-fp()     { "$(_blackdot_go_bin)" tools ssh fp "$@"; }
+ssh-copy()   { "$(_blackdot_go_bin)" tools ssh copy "$@"; }
+ssh-tunnel() { "$(_blackdot_go_bin)" tools ssh tunnel "$@"; }
+ssh-socks()  { "$(_blackdot_go_bin)" tools ssh socks "$@"; }
+ssh-status() { "$(_blackdot_go_bin)" tools ssh status "$@"; }
+ssh-agent-status() { "$(_blackdot_go_bin)" tools ssh agent "$@"; }
 
 # AWS Tools (via Go binary)
-aws-profiles() { "$(_dotfiles_go_bin)" tools aws profiles "$@"; }
-aws-who()      { "$(_dotfiles_go_bin)" tools aws who "$@"; }
-aws-login()    { "$(_dotfiles_go_bin)" tools aws login "$@"; }
-aws-status()   { "$(_dotfiles_go_bin)" tools aws status "$@"; }
+aws-profiles() { "$(_blackdot_go_bin)" tools aws profiles "$@"; }
+aws-who()      { "$(_blackdot_go_bin)" tools aws who "$@"; }
+aws-login()    { "$(_blackdot_go_bin)" tools aws login "$@"; }
+aws-status()   { "$(_blackdot_go_bin)" tools aws status "$@"; }
 # aws-switch and aws-assume need shell wrappers to set env vars
 aws-switch() {
     local output
-    output=$("$(_dotfiles_go_bin)" tools aws switch "$@")
+    output=$("$(_blackdot_go_bin)" tools aws switch "$@")
     if [[ $? -eq 0 && -n "$output" ]]; then
         eval "$output"
     else
@@ -527,7 +527,7 @@ aws-switch() {
 }
 aws-assume() {
     local output
-    output=$("$(_dotfiles_go_bin)" tools aws assume "$@")
+    output=$("$(_blackdot_go_bin)" tools aws assume "$@")
     if [[ $? -eq 0 && -n "$output" ]]; then
         eval "$output"
     else
@@ -540,14 +540,14 @@ aws-clear() {
 }
 
 # CDK Tools (via Go binary)
-cdk-init()    { "$(_dotfiles_go_bin)" tools cdk init "$@"; }
-cdk-outputs() { "$(_dotfiles_go_bin)" tools cdk outputs "$@"; }
-cdk-context() { "$(_dotfiles_go_bin)" tools cdk context "$@"; }
-cdk-status()  { "$(_dotfiles_go_bin)" tools cdk status "$@"; }
+cdk-init()    { "$(_blackdot_go_bin)" tools cdk init "$@"; }
+cdk-outputs() { "$(_blackdot_go_bin)" tools cdk outputs "$@"; }
+cdk-context() { "$(_blackdot_go_bin)" tools cdk context "$@"; }
+cdk-status()  { "$(_blackdot_go_bin)" tools cdk status "$@"; }
 # cdk-env needs shell wrapper to set env vars
 cdk-env() {
     local output
-    output=$("$(_dotfiles_go_bin)" tools cdk env "$@")
+    output=$("$(_blackdot_go_bin)" tools cdk env "$@")
     if [[ $? -eq 0 && -n "$output" ]]; then
         eval "$output"
     else
@@ -560,50 +560,50 @@ cdk-env-clear() {
 }
 
 # Go Tools (via Go binary)
-go-new()       { "$(_dotfiles_go_bin)" tools go new "$@"; }
-go-init()      { "$(_dotfiles_go_bin)" tools go init "$@"; }
-go-test()      { "$(_dotfiles_go_bin)" tools go test "$@"; }
-go-cover()     { "$(_dotfiles_go_bin)" tools go cover "$@"; }
-go-lint()      { "$(_dotfiles_go_bin)" tools go lint "$@"; }
-go-outdated()  { "$(_dotfiles_go_bin)" tools go outdated "$@"; }
-go-update()    { "$(_dotfiles_go_bin)" tools go update "$@"; }
-go-build-all() { "$(_dotfiles_go_bin)" tools go build-all "$@"; }
-go-bench()     { "$(_dotfiles_go_bin)" tools go bench "$@"; }
-go-info()      { "$(_dotfiles_go_bin)" tools go info "$@"; }
+go-new()       { "$(_blackdot_go_bin)" tools go new "$@"; }
+go-init()      { "$(_blackdot_go_bin)" tools go init "$@"; }
+go-test()      { "$(_blackdot_go_bin)" tools go test "$@"; }
+go-cover()     { "$(_blackdot_go_bin)" tools go cover "$@"; }
+go-lint()      { "$(_blackdot_go_bin)" tools go lint "$@"; }
+go-outdated()  { "$(_blackdot_go_bin)" tools go outdated "$@"; }
+go-update()    { "$(_blackdot_go_bin)" tools go update "$@"; }
+go-build-all() { "$(_blackdot_go_bin)" tools go build-all "$@"; }
+go-bench()     { "$(_blackdot_go_bin)" tools go bench "$@"; }
+go-info()      { "$(_blackdot_go_bin)" tools go info "$@"; }
 
 # Rust Tools (via Go binary)
-rust-new()      { "$(_dotfiles_go_bin)" tools rust new "$@"; }
-rust-update()   { "$(_dotfiles_go_bin)" tools rust update "$@"; }
-rust-switch()   { "$(_dotfiles_go_bin)" tools rust switch "$@"; }
-rust-lint()     { "$(_dotfiles_go_bin)" tools rust lint "$@"; }
-rust-fix()      { "$(_dotfiles_go_bin)" tools rust fix "$@"; }
-rust-outdated() { "$(_dotfiles_go_bin)" tools rust outdated "$@"; }
-rust-expand()   { "$(_dotfiles_go_bin)" tools rust expand "$@"; }
-rust-info()     { "$(_dotfiles_go_bin)" tools rust info "$@"; }
+rust-new()      { "$(_blackdot_go_bin)" tools rust new "$@"; }
+rust-update()   { "$(_blackdot_go_bin)" tools rust update "$@"; }
+rust-switch()   { "$(_blackdot_go_bin)" tools rust switch "$@"; }
+rust-lint()     { "$(_blackdot_go_bin)" tools rust lint "$@"; }
+rust-fix()      { "$(_blackdot_go_bin)" tools rust fix "$@"; }
+rust-outdated() { "$(_blackdot_go_bin)" tools rust outdated "$@"; }
+rust-expand()   { "$(_blackdot_go_bin)" tools rust expand "$@"; }
+rust-info()     { "$(_blackdot_go_bin)" tools rust info "$@"; }
 
 # Python Tools (via Go binary)
-py-new()   { "$(_dotfiles_go_bin)" tools python new "$@"; }
-py-clean() { "$(_dotfiles_go_bin)" tools python clean "$@"; }
-py-venv()  { "$(_dotfiles_go_bin)" tools python venv "$@"; }
-py-test()  { "$(_dotfiles_go_bin)" tools python test "$@"; }
-py-cover() { "$(_dotfiles_go_bin)" tools python cover "$@"; }
-py-info()  { "$(_dotfiles_go_bin)" tools python info "$@"; }
+py-new()   { "$(_blackdot_go_bin)" tools python new "$@"; }
+py-clean() { "$(_blackdot_go_bin)" tools python clean "$@"; }
+py-venv()  { "$(_blackdot_go_bin)" tools python venv "$@"; }
+py-test()  { "$(_blackdot_go_bin)" tools python test "$@"; }
+py-cover() { "$(_blackdot_go_bin)" tools python cover "$@"; }
+py-info()  { "$(_blackdot_go_bin)" tools python info "$@"; }
 
 # Docker Tools (via Go binary)
-docker-ps()      { "$(_dotfiles_go_bin)" tools docker ps "$@"; }
-docker-images()  { "$(_dotfiles_go_bin)" tools docker images "$@"; }
-docker-ip()      { "$(_dotfiles_go_bin)" tools docker ip "$@"; }
-docker-env()     { "$(_dotfiles_go_bin)" tools docker env "$@"; }
-docker-ports()   { "$(_dotfiles_go_bin)" tools docker ports "$@"; }
-docker-stats()   { "$(_dotfiles_go_bin)" tools docker stats "$@"; }
-docker-vols()    { "$(_dotfiles_go_bin)" tools docker vols "$@"; }
-docker-nets()    { "$(_dotfiles_go_bin)" tools docker nets "$@"; }
-docker-inspect() { "$(_dotfiles_go_bin)" tools docker inspect "$@"; }
-docker-clean()   { "$(_dotfiles_go_bin)" tools docker clean "$@"; }
-docker-prune()   { "$(_dotfiles_go_bin)" tools docker prune "$@"; }
-docker-status()  { "$(_dotfiles_go_bin)" tools docker status "$@"; }
+docker-ps()      { "$(_blackdot_go_bin)" tools docker ps "$@"; }
+docker-images()  { "$(_blackdot_go_bin)" tools docker images "$@"; }
+docker-ip()      { "$(_blackdot_go_bin)" tools docker ip "$@"; }
+docker-env()     { "$(_blackdot_go_bin)" tools docker env "$@"; }
+docker-ports()   { "$(_blackdot_go_bin)" tools docker ports "$@"; }
+docker-stats()   { "$(_blackdot_go_bin)" tools docker stats "$@"; }
+docker-vols()    { "$(_blackdot_go_bin)" tools docker vols "$@"; }
+docker-nets()    { "$(_blackdot_go_bin)" tools docker nets "$@"; }
+docker-inspect() { "$(_blackdot_go_bin)" tools docker inspect "$@"; }
+docker-clean()   { "$(_blackdot_go_bin)" tools docker clean "$@"; }
+docker-prune()   { "$(_blackdot_go_bin)" tools docker prune "$@"; }
+docker-status()  { "$(_blackdot_go_bin)" tools docker status "$@"; }
 
 # Claude Tools (via Go binary)
-claude-status() { "$(_dotfiles_go_bin)" tools claude status "$@"; }
-claude-env()    { "$(_dotfiles_go_bin)" tools claude env "$@"; }
-claude-init()   { "$(_dotfiles_go_bin)" tools claude init "$@"; }
+claude-status() { "$(_blackdot_go_bin)" tools claude status "$@"; }
+claude-env()    { "$(_blackdot_go_bin)" tools claude env "$@"; }
+claude-init()   { "$(_blackdot_go_bin)" tools claude init "$@"; }

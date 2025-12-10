@@ -185,7 +185,7 @@ cdkctx-clear() {
 cdktools() {
     require_feature "cdk_tools" || return 1
     # Source theme colors
-    source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
+    source "${BLACKDOT_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
 
     # Check if CDK is installed and if we're in a CDK project
     local logo_color has_cdk in_project

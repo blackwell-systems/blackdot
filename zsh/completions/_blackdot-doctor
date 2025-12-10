@@ -1,7 +1,7 @@
-#compdef dotfiles-doctor
-# ZSH completion for dotfiles-doctor command
+#compdef blackdot-doctor
+# ZSH completion for blackdot-doctor command
 
-_dotfiles_doctor() {
+_blackdot_doctor() {
   local -a args
   args=(
     '--fix:Automatically fix permission issues'
@@ -12,4 +12,4 @@ _dotfiles_doctor() {
   _describe 'option' args
 }
 
-_dotfiles_doctor "$@"
+_blackdot_doctor "$@"

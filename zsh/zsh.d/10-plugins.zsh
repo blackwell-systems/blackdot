@@ -8,9 +8,9 @@
 # COMPLETIONS
 # =========================
 # Load custom completions from dotfiles
-DOTFILES_COMPLETIONS="$DOTFILES_DIR/zsh/completions"
-if [[ -d "$DOTFILES_COMPLETIONS" ]]; then
-  fpath=($DOTFILES_COMPLETIONS $fpath)
+BLACKDOT_COMPLETIONS="$BLACKDOT_DIR/zsh/completions"
+if [[ -d "$BLACKDOT_COMPLETIONS" ]]; then
+  fpath=($BLACKDOT_COMPLETIONS $fpath)
 fi
 
 # Initialize completion system

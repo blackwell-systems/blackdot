@@ -1,8 +1,8 @@
 @{
-    # Module manifest for Dotfiles PowerShell module
+    # Module manifest for Blackdot PowerShell module
 
     # Script module file associated with this manifest
-    RootModule = 'Dotfiles.psm1'
+    RootModule = 'Blackdot.psm1'
 
     # Version number of this module
     ModuleVersion = '3.1.0'
@@ -11,7 +11,7 @@
     GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
 
     # Author of this module
-    Author = 'Dotfiles'
+    Author = 'Blackdot'
 
     # Company or vendor of this module
     CompanyName = 'Blackwell Systems'
@@ -20,7 +20,7 @@
     Copyright = '(c) 2025 Blackwell Systems. MIT License.'
 
     # Description of the functionality provided by this module
-    Description = 'Cross-platform dotfiles integration for PowerShell. Provides full hooks system (24 hook points), aliases, and developer tools for Windows users. Complete parity with ZSH implementation.'
+    Description = 'Cross-platform blackdot integration for PowerShell. Provides full hooks system (24 hook points), aliases, and developer tools for Windows users. Complete parity with ZSH implementation.'
 
     # Minimum version of the PowerShell engine required by this module
     PowerShellVersion = '5.1'
@@ -28,23 +28,23 @@
     # Functions to export from this module
     FunctionsToExport = @(
         # Hook system (complete parity with ZSH)
-        'Register-DotfilesHook',      # hook_register equivalent
-        'Unregister-DotfilesHook',    # hook_unregister equivalent
-        'Invoke-DotfilesHook',        # hook_run equivalent
-        'Get-DotfilesHook',           # hook_list equivalent
-        'Get-DotfilesHookPoints',     # hook_points equivalent
-        'Add-DotfilesHook',           # dotfiles hook add equivalent
-        'Remove-DotfilesHook',        # dotfiles hook remove equivalent
-        'Test-DotfilesHook',          # dotfiles hook test equivalent
-        'Enable-DotfilesHooks',
-        'Disable-DotfilesHooks',
+        'Register-BlackdotHook',      # hook_register equivalent
+        'Unregister-BlackdotHook',    # hook_unregister equivalent
+        'Invoke-BlackdotHook',        # hook_run equivalent
+        'Get-BlackdotHook',           # hook_list equivalent
+        'Get-BlackdotHookPoints',     # hook_points equivalent
+        'Add-BlackdotHook',           # blackdot hook add equivalent
+        'Remove-BlackdotHook',        # blackdot hook remove equivalent
+        'Test-BlackdotHook',          # blackdot hook test equivalent
+        'Enable-BlackdotHooks',
+        'Disable-BlackdotHooks',
 
         # Utilities
-        'Get-DotfilesPath',
-        'Test-DotfilesCli',
+        'Get-BlackdotPath',
+        'Test-BlackdotCli',
         'Test-HookPoint',             # hook_valid_point equivalent
-        'Initialize-Dotfiles',
-        'Initialize-DotfilesHooks',   # hook_init equivalent
+        'Initialize-Blackdot',
+        'Initialize-BlackdotHooks',   # hook_init equivalent
 
         # CD wrapper
         'Set-LocationWithHook',
@@ -88,15 +88,15 @@
         'Initialize-Zoxide',
 
         # Core commands
-        'dotfiles-status', 'dotfiles-doctor', 'dotfiles-setup',
-        'dotfiles-features', 'dotfiles-vault', 'dotfiles-hook',
+        'blackdot-status', 'blackdot-doctor', 'blackdot-setup',
+        'blackdot-features', 'blackdot-vault', 'blackdot-hook',
 
         # Tool group functions (expose full tool category)
         'sshtools', 'awstools', 'cdktools', 'gotools',
         'rusttools', 'pytools', 'dockertools', 'claudetools',
 
         # Main wrapper (handles feature auto-reload)
-        'Invoke-Dotfiles'
+        'Invoke-Blackdot'
     )
 
     # Cmdlets to export from this module
@@ -112,13 +112,13 @@
     PrivateData = @{
         PSData = @{
             # Tags applied to this module for module discovery
-            Tags = @('dotfiles', 'hooks', 'aws', 'ssh', 'development', 'cross-platform', 'windows')
+            Tags = @('blackdot', 'hooks', 'aws', 'ssh', 'development', 'cross-platform', 'windows')
 
             # A URL to the license for this module
-            LicenseUri = 'https://github.com/blackwell-systems/dotfiles/blob/main/LICENSE'
+            LicenseUri = 'https://github.com/blackwell-systems/blackdot/blob/main/LICENSE'
 
             # A URL to the main website for this project
-            ProjectUri = 'https://github.com/blackwell-systems/dotfiles'
+            ProjectUri = 'https://github.com/blackwell-systems/blackdot'
 
             # Release notes for this module
             ReleaseNotes = @'
