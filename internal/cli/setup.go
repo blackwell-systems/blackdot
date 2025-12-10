@@ -1140,8 +1140,6 @@ func phaseSecrets(cfg *SetupConfig) error {
 		choice = "4"
 	}
 
-	dotfilesDir := DotfilesDir()
-
 	switch choice {
 	case "1":
 		// Run drift check using Go CLI
@@ -1152,26 +1150,20 @@ func phaseSecrets(cfg *SetupConfig) error {
 		dim := color.New(color.Faint).SprintFunc()
 		runDriftFull(home, green, yellow, cyan, dim)
 	case "2":
-		// Push to vault
-		syncScript := filepath.Join(dotfilesDir, "vault", "sync-to-vault.sh")
-		if _, err := os.Stat(syncScript); err == nil {
-			cmd := exec.Command("bash", syncScript, "--all")
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			cmd.Run()
+		// Push to vault using Go implementation
+		fmt.Println("Pushing secrets to vault...")
+		if err := vaultPush(nil, false, false, true); err != nil {
+			fmt.Printf("%s Push failed: %v\n", yellow("!"), err)
 		}
 	case "3":
-		// Pull from vault
-		restoreScript := filepath.Join(dotfilesDir, "vault", "restore.sh")
-		if _, err := os.Stat(restoreScript); err == nil {
-			cmd := exec.Command("bash", restoreScript, "--force")
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			cmd.Run()
+		// Pull from vault using Go implementation
+		fmt.Println("Restoring secrets from vault...")
+		if err := vaultRestore(true, false); err != nil {
+			fmt.Printf("%s Restore failed: %v\n", yellow("!"), err)
 		}
 	default:
 		fmt.Printf("%s Skipped secrets management\n", yellow("!"))
-		fmt.Println("Run 'blackdot sync' anytime to manage secrets")
+		fmt.Println("Run 'blackdot vault' anytime to manage secrets")
 	}
 
 	markPhaseComplete(cfg, "secrets")
