@@ -313,6 +313,7 @@ graph TB
         FR[Feature Registry]
         CL[Config Layers]
         VM[Vaultmux]
+        TM[Templates]
     end
 
     FR -->|controls| Shell[Shell Modules]
@@ -321,6 +322,7 @@ graph TB
     VM -->|unified API| BW[Bitwarden]
     VM -->|unified API| OP[1Password]
     VM -->|unified API| Pass[pass]
+    TM -->|renders| Configs[Machine-Specific Configs]
 
     Shell --> ZSH[zsh.d/]
     Shell --> PS[PowerShell]
@@ -336,9 +338,10 @@ graph TB
 | **Feature Registry** | Control plane for all functionality. Presets: minimal, developer, claude, full |
 | **Config Layers** | 5-layer priority: Environment → Project → Machine → User → Defaults |
 | **Vaultmux** | Unified secrets API across Bitwarden, 1Password, and pass |
+| **Templates** | Handlebars templates with machine-specific variables for portable configs |
 | **Portable Sessions** | `/workspace` symlink + dotclaude profiles for cross-machine continuity |
 
-**Also included:** 19 lifecycle hooks, self-healing doctor, machine templates, adaptive CLI completions
+**Also included:** 19 lifecycle hooks, self-healing doctor, adaptive CLI completions
 
 ---
 
