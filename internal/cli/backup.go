@@ -25,7 +25,7 @@ var defaultBackupFiles = []string{
 	".local/env.secrets",
 	".zshrc",
 	".p10k.zsh",
-	".config/dotfiles/config.json",
+	".config/blackdot/config.json",
 }
 
 type backupConfig struct {
