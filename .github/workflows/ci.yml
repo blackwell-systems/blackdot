@@ -68,7 +68,7 @@ jobs:
           if [ "${{ matrix.goos }}" = "windows" ]; then
             SUFFIX=".exe"
           fi
-          go build -ldflags="-s -w" -o dotfiles-${{ matrix.goos }}-${{ matrix.goarch }}${SUFFIX} ./cmd/blackdot/
+          go build -ldflags="-s -w" -o dotfiles-${{ matrix.goos }}-${{ matrix.goarch }}${SUFFIX} ./cmd/dotfiles/
           ls -la dotfiles-*
 
   # Shell script validation (remaining scripts)
@@ -127,8 +127,8 @@ jobs:
         run: |
           Write-Host "Validating PowerShell scripts..."
           $scripts = @(
-            "powershell/Install-Blackdot.ps1",
-            "powershell/Blackdot.psm1",
+            "powershell/Install-Dotfiles.ps1",
+            "powershell/Dotfiles.psm1",
             "powershell/Install-Packages.ps1"
           )
           foreach ($script in $scripts) {
@@ -149,93 +149,6 @@ jobs:
           }
           Write-Host "All PowerShell scripts valid!"
 
-  # Integration tests - actually run the binary on each platform
-  integration-tests:
-    name: Integration (${{ matrix.os }})
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        include:
-          - os: ubuntu-latest
-            binary: ./dotfiles
-            shell_type: zsh
-          - os: macos-latest
-            binary: ./dotfiles
-            shell_type: zsh
-          - os: windows-latest
-            binary: ./dotfiles.exe
-            shell_type: powershell
-    runs-on: ${{ matrix.os }}
-    env:
-      # Point to checkout directory so binary finds templates/configs
-      BLACKDOT_DIR: ${{ github.workspace }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.23'
-
-      - name: Build binary (Unix)
-        if: matrix.os != 'windows-latest'
-        run: go build -o dotfiles ./cmd/blackdot/
-
-      - name: Build binary (Windows)
-        if: matrix.os == 'windows-latest'
-        run: go build -o dotfiles.exe ./cmd/blackdot/
-
-      - name: Test version command
-        run: ${{ matrix.binary }} version
-
-      - name: Test features list
-        run: ${{ matrix.binary }} features list
-
-      - name: Test features presets
-        run: ${{ matrix.binary }} features presets
-
-      - name: Test doctor command
-        # Doctor returns non-zero when health checks fail (expected in CI)
-        # We just verify the command runs and produces output
-        shell: bash
-        run: ${{ matrix.binary }} doctor || echo "Doctor reported issues (expected in CI)"
-
-      - name: Test config list
-        run: ${{ matrix.binary }} config list
-
-      - name: Test template list
-        run: ${{ matrix.binary }} template list
-
-      - name: Test shell-init (zsh)
-        if: matrix.shell_type == 'zsh'
-        run: |
-          output=$(${{ matrix.binary }} shell-init zsh)
-          if echo "$output" | grep -q "feature_enabled"; then
-            echo "✅ shell-init zsh outputs correct functions"
-          else
-            echo "❌ shell-init zsh output missing expected functions"
-            exit 1
-          fi
-
-      - name: Test shell-init (powershell)
-        if: matrix.shell_type == 'powershell'
-        shell: pwsh
-        run: |
-          $output = ${{ matrix.binary }} shell-init powershell
-          if ($output -match "Test-FeatureEnabled") {
-            Write-Host "✅ shell-init powershell outputs correct functions"
-          } else {
-            Write-Host "❌ shell-init powershell output missing expected functions"
-            exit 1
-          }
-
-      - name: Test help commands
-        run: |
-          ${{ matrix.binary }} help
-          ${{ matrix.binary }} features --help
-          ${{ matrix.binary }} vault --help
-
   # Repository structure check
   structure-check:
     name: Repository Structure
@@ -253,7 +166,7 @@ jobs:
             "Brewfile"
             "zsh/zshrc"
             "zsh/p10k.zsh"
-            "cmd/blackdot/main.go"
+            "cmd/dotfiles/main.go"
             "internal/cli/root.go"
             "lib/_logging.sh"
             "lib/_hooks.sh"

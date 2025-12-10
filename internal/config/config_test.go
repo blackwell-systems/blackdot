@@ -44,25 +44,23 @@ func TestDefaultManager(t *testing.T) {
 func TestDefaultManagerWithEnv(t *testing.T) {
 	// Save original env
 	origConfig := os.Getenv("XDG_CONFIG_HOME")
-	origDotfiles := os.Getenv("BLACKDOT_DIR")
+	origDotfiles := os.Getenv("DOTFILES_DIR")
 	defer func() {
 		os.Setenv("XDG_CONFIG_HOME", origConfig)
-		os.Setenv("BLACKDOT_DIR", origDotfiles)
+		os.Setenv("DOTFILES_DIR", origDotfiles)
 	}()
 
 	os.Setenv("XDG_CONFIG_HOME", "/custom/config")
-	os.Setenv("BLACKDOT_DIR", "/custom/dotfiles")
+	os.Setenv("DOTFILES_DIR", "/custom/dotfiles")
 
 	m := DefaultManager()
 
-	expectedConfig := filepath.FromSlash("/custom/config/blackdot")
-	if m.configDir != expectedConfig {
-		t.Errorf("expected configDir='%s', got '%s'", expectedConfig, m.configDir)
+	if m.configDir != "/custom/config/dotfiles" {
+		t.Errorf("expected configDir='/custom/config/dotfiles', got '%s'", m.configDir)
 	}
 
-	expectedDotfiles := filepath.FromSlash("/custom/dotfiles")
-	if m.dotfilesDir != expectedDotfiles {
-		t.Errorf("expected dotfilesDir='%s', got '%s'", expectedDotfiles, m.dotfilesDir)
+	if m.dotfilesDir != "/custom/dotfiles" {
+		t.Errorf("expected dotfilesDir='/custom/dotfiles', got '%s'", m.dotfilesDir)
 	}
 }
 
@@ -70,14 +68,12 @@ func TestDefaultManagerWithEnv(t *testing.T) {
 func TestConfigPaths(t *testing.T) {
 	m := NewManager("/config", "/dotfiles")
 
-	expectedUser := filepath.FromSlash("/config/config.json")
-	if m.UserConfigPath() != expectedUser {
-		t.Errorf("unexpected UserConfigPath: got %s, want %s", m.UserConfigPath(), expectedUser)
+	if m.UserConfigPath() != "/config/config.json" {
+		t.Errorf("unexpected UserConfigPath: %s", m.UserConfigPath())
 	}
 
-	expectedMachine := filepath.FromSlash("/config/machine.json")
-	if m.MachineConfigPath() != expectedMachine {
-		t.Errorf("unexpected MachineConfigPath: got %s, want %s", m.MachineConfigPath(), expectedMachine)
+	if m.MachineConfigPath() != "/config/machine.json" {
+		t.Errorf("unexpected MachineConfigPath: %s", m.MachineConfigPath())
 	}
 }
 
@@ -240,9 +236,9 @@ func TestGetLayeredEnv(t *testing.T) {
 	m.Set("vault.backend", "bitwarden")
 
 	// Set env var (should take precedence)
-	orig := os.Getenv("BLACKDOT_VAULT_BACKEND")
-	os.Setenv("BLACKDOT_VAULT_BACKEND", "1password")
-	defer os.Setenv("BLACKDOT_VAULT_BACKEND", orig)
+	orig := os.Getenv("DOTFILES_VAULT_BACKEND")
+	os.Setenv("DOTFILES_VAULT_BACKEND", "1password")
+	defer os.Setenv("DOTFILES_VAULT_BACKEND", orig)
 
 	result, err := m.GetLayered("vault.backend")
 	if err != nil {
@@ -272,9 +268,9 @@ func TestGetLayeredUser(t *testing.T) {
 	m.Set("vault.backend", "bitwarden")
 
 	// Clear any env var
-	orig := os.Getenv("BLACKDOT_VAULT_BACKEND")
-	os.Unsetenv("BLACKDOT_VAULT_BACKEND")
-	defer os.Setenv("BLACKDOT_VAULT_BACKEND", orig)
+	orig := os.Getenv("DOTFILES_VAULT_BACKEND")
+	os.Unsetenv("DOTFILES_VAULT_BACKEND")
+	defer os.Setenv("DOTFILES_VAULT_BACKEND", orig)
 
 	result, err := m.GetLayered("vault.backend")
 	if err != nil {
@@ -301,9 +297,9 @@ func TestGetLayeredDefault(t *testing.T) {
 	m := NewManager(tmpDir, tmpDir)
 
 	// Clear env var
-	orig := os.Getenv("BLACKDOT_VAULT_BACKEND")
-	os.Unsetenv("BLACKDOT_VAULT_BACKEND")
-	defer os.Setenv("BLACKDOT_VAULT_BACKEND", orig)
+	orig := os.Getenv("DOTFILES_VAULT_BACKEND")
+	os.Unsetenv("DOTFILES_VAULT_BACKEND")
+	defer os.Setenv("DOTFILES_VAULT_BACKEND", orig)
 
 	result, err := m.GetLayered("vault.backend")
 	if err != nil {
@@ -368,8 +364,8 @@ func TestLayerConstants(t *testing.T) {
 
 // TestConfigFileConstants verifies file name constants
 func TestConfigFileConstants(t *testing.T) {
-	if ProjectConfigFile != ".blackdot.json" {
-		t.Error("ProjectConfigFile should be '.blackdot.json'")
+	if ProjectConfigFile != ".dotfiles.json" {
+		t.Error("ProjectConfigFile should be '.dotfiles.json'")
 	}
 	if MachineConfigFile != "machine.json" {
 		t.Error("MachineConfigFile should be 'machine.json'")
@@ -388,14 +384,8 @@ func TestProjectConfigPath(t *testing.T) {
 	}
 	defer os.RemoveAll(tmpDir)
 
-	// Resolve symlinks (macOS: /var -> /private/var)
-	tmpDir, err = filepath.EvalSymlinks(tmpDir)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	// Create project config in temp dir
-	projectConfig := filepath.Join(tmpDir, ".blackdot.json")
+	projectConfig := filepath.Join(tmpDir, ".dotfiles.json")
 	os.WriteFile(projectConfig, []byte(`{"version":3}`), 0644)
 
 	// Create subdirectory

@@ -1,16 +1,16 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    One-line installer for blackdot on Windows.
+    One-line installer for dotfiles on Windows.
 
 .DESCRIPTION
-    Downloads and installs blackdot for Windows PowerShell users.
+    Downloads and installs the dotfiles system for Windows PowerShell users.
 
     Usage:
-        irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/Install.ps1 | iex
+        irm https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/Install.ps1 | iex
 
     Or with options:
-        $script = irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/Install.ps1
+        $script = irm https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/Install.ps1
         & ([scriptblock]::Create($script)) -Preset developer -SkipPackages
 
 .PARAMETER Preset
@@ -29,7 +29,7 @@
     Specific version to download (default: latest)
 
 .EXAMPLE
-    irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/Install.ps1 | iex
+    irm https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/Install.ps1 | iex
 
 .EXAMPLE
     .\Install.ps1 -Preset developer
@@ -76,11 +76,11 @@ function Write-Fail  { param($Message) Write-Host "$($Colors.Red)[FAIL]$($Colors
 function Show-Banner {
     Write-Host ""
     Write-Host "$($Colors.Cyan)$($Colors.Bold)"
-    Write-Host "    ____  __    ___   ________ ____  ____  ______"
-    Write-Host "   / __ )/ /   /   | / ____/ //_/ / / / / / / __ \______"
-    Write-Host "  / __  / /   / /| |/ /   / ,<  / / / / / / / / // __  /"
-    Write-Host " / /_/ / /___/ ___ / /___/ /| |/ /_/ / /_/ / /_/ // /_/ /"
-    Write-Host "/_____/_____/_/  |_\____/_/ |_|\____/\____/\____/ \____/"
+    Write-Host "    ____        __  _____ __"
+    Write-Host "   / __ \____  / /_/ __(_) /__  _____"
+    Write-Host "  / / / / __ \/ __/ /_/ / / _ \/ ___/"
+    Write-Host " / /_/ / /_/ / /_/ __/ / /  __(__  )"
+    Write-Host "/_____/\____/\__/_/ /_/_/\___/____/"
     Write-Host ""
     Write-Host "$($Colors.Reset)"
     Write-Host "$($Colors.Bold)Vault-backed configuration that travels with you$($Colors.Reset)"
@@ -126,10 +126,10 @@ function Install-GoBinary {
 
     # Detect architecture
     $arch = if ([Environment]::Is64BitOperatingSystem) { "amd64" } else { "386" }
-    $binaryName = "blackdot-windows-$arch.exe"
+    $binaryName = "dotfiles-windows-$arch.exe"
 
     # GitHub release URL
-    $baseUrl = "https://github.com/blackwell-systems/blackdot/releases"
+    $baseUrl = "https://github.com/blackwell-systems/dotfiles/releases"
     $downloadUrl = if ($Version -eq "latest") {
         "$baseUrl/latest/download/$binaryName"
     } else {
@@ -144,7 +144,7 @@ function Install-GoBinary {
         New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
     }
 
-    $targetPath = Join-Path $InstallDir "blackdot.exe"
+    $targetPath = Join-Path $InstallDir "dotfiles.exe"
 
     try {
         # Download with progress
@@ -155,7 +155,7 @@ function Install-GoBinary {
         # Verify it works
         $versionOutput = & $targetPath version 2>&1
         if ($LASTEXITCODE -eq 0) {
-            Write-Pass "Installed blackdot binary to: $targetPath"
+            Write-Pass "Installed dotfiles binary to: $targetPath"
 
             # Check if in PATH
             $pathDirs = $env:PATH -split ';'
@@ -188,10 +188,10 @@ function Install-Repository {
         [string]$TargetDir
     )
 
-    $repoUrl = "https://github.com/blackwell-systems/blackdot.git"
+    $repoUrl = "https://github.com/blackwell-systems/dotfiles.git"
 
     if (Test-Path (Join-Path $TargetDir ".git")) {
-        Write-Info "Blackdot already installed at $TargetDir"
+        Write-Info "Dotfiles already installed at $TargetDir"
         Write-Info "Updating..."
 
         Push-Location $TargetDir
@@ -214,7 +214,7 @@ function Install-Repository {
             New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
         }
 
-        Write-Info "Cloning blackdot repository..."
+        Write-Info "Cloning dotfiles repository..."
         git clone $repoUrl $TargetDir 2>&1 | Out-Null
 
         if ($LASTEXITCODE -eq 0) {
@@ -231,12 +231,12 @@ function Install-Repository {
 # ============================================================
 # Install PowerShell Module
 # ============================================================
-function Install-BlackdotModule {
+function Install-DotfilesModule {
     param(
-        [string]$BlackdotDir
+        [string]$DotfilesDir
     )
 
-    $installScript = Join-Path $BlackdotDir "powershell\Install-Blackdot.ps1"
+    $installScript = Join-Path $DotfilesDir "powershell\Install-Dotfiles.ps1"
 
     if (-not (Test-Path $installScript)) {
         Write-Fail "Install script not found: $installScript"
@@ -245,7 +245,7 @@ function Install-BlackdotModule {
 
     Write-Info "Installing PowerShell module..."
 
-    Push-Location (Join-Path $BlackdotDir "powershell")
+    Push-Location (Join-Path $DotfilesDir "powershell")
     try {
         & $installScript
         if ($LASTEXITCODE -eq 0 -or $?) {
@@ -268,13 +268,13 @@ function Install-BlackdotModule {
 # ============================================================
 # Install Packages (Optional)
 # ============================================================
-function Install-BlackdotPackages {
+function Install-DotfilesPackages {
     param(
-        [string]$BlackdotDir,
+        [string]$DotfilesDir,
         [string]$Tier = "enhanced"
     )
 
-    $packagesScript = Join-Path $BlackdotDir "powershell\Install-Packages.ps1"
+    $packagesScript = Join-Path $DotfilesDir "powershell\Install-Packages.ps1"
 
     if (-not (Test-Path $packagesScript)) {
         Write-Warn "Packages script not found, skipping"
@@ -283,7 +283,7 @@ function Install-BlackdotPackages {
 
     Write-Info "Installing packages (tier: $Tier)..."
 
-    Push-Location (Join-Path $BlackdotDir "powershell")
+    Push-Location (Join-Path $DotfilesDir "powershell")
     try {
         & $packagesScript -Tier $Tier
         Write-Pass "Packages installed"
@@ -301,29 +301,29 @@ function Install-BlackdotPackages {
 # ============================================================
 # Apply Preset
 # ============================================================
-function Set-BlackdotPreset {
+function Set-DotfilesPreset {
     param(
         [string]$Preset
     )
 
     if (-not $Preset) { return $true }
 
-    $blackdot = Get-Command blackdot -ErrorAction SilentlyContinue
-    if (-not $blackdot) {
-        $blackdot = Get-Command blackdot.exe -ErrorAction SilentlyContinue
+    $dotfiles = Get-Command dotfiles -ErrorAction SilentlyContinue
+    if (-not $dotfiles) {
+        $dotfiles = Get-Command dotfiles.exe -ErrorAction SilentlyContinue
     }
 
-    if ($blackdot) {
+    if ($dotfiles) {
         Write-Info "Applying preset: $Preset"
-        & $blackdot.Source features preset $Preset
+        & $dotfiles.Source features preset $Preset
         if ($LASTEXITCODE -eq 0) {
             Write-Pass "Preset '$Preset' applied"
             return $true
         }
     }
 
-    Write-Warn "Could not apply preset (blackdot CLI not in PATH yet)"
-    Write-Host "  Run after restart: blackdot features preset $Preset"
+    Write-Warn "Could not apply preset (dotfiles CLI not in PATH yet)"
+    Write-Host "  Run after restart: dotfiles features preset $Preset"
     return $true
 }
 
@@ -338,11 +338,11 @@ function Main {
         exit 1
     }
 
-    $blackdotDir = Join-Path $WorkspaceTarget "blackdot"
+    $dotfilesDir = Join-Path $WorkspaceTarget "dotfiles"
 
     # Clone/update repository
     Write-Host ""
-    if (-not (Install-Repository -TargetDir $blackdotDir)) {
+    if (-not (Install-Repository -TargetDir $dotfilesDir)) {
         exit 1
     }
 
@@ -357,7 +357,7 @@ function Main {
 
     # Install PowerShell module
     Write-Host ""
-    if (-not (Install-BlackdotModule -BlackdotDir $blackdotDir)) {
+    if (-not (Install-DotfilesModule -DotfilesDir $dotfilesDir)) {
         Write-Warn "Module installation had issues, but continuing..."
     }
 
@@ -367,17 +367,17 @@ function Main {
         Write-Host "Install development packages via winget? (This may take a while)"
         $response = Read-Host "Install packages? [y/N]"
         if ($response -match '^[Yy]') {
-            Install-BlackdotPackages -BlackdotDir $blackdotDir
+            Install-DotfilesPackages -DotfilesDir $dotfilesDir
         } else {
             Write-Info "Skipping package installation"
-            Write-Host "  Run later: $blackdotDir\powershell\Install-Packages.ps1"
+            Write-Host "  Run later: $dotfilesDir\powershell\Install-Packages.ps1"
         }
     }
 
     # Apply preset
     if ($Preset) {
         Write-Host ""
-        Set-BlackdotPreset -Preset $Preset
+        Set-DotfilesPreset -Preset $Preset
     }
 
     # Success message
@@ -391,19 +391,19 @@ function Main {
     Write-Host "  1. Restart PowerShell to load the module"
     Write-Host ""
     Write-Host "  2. Set up vault and restore secrets:"
-    Write-Host "     $($Colors.Cyan)blackdot setup$($Colors.Reset)"
+    Write-Host "     $($Colors.Cyan)dotfiles setup$($Colors.Reset)"
     Write-Host ""
     Write-Host "  3. Verify installation:"
-    Write-Host "     $($Colors.Cyan)blackdot doctor$($Colors.Reset)"
+    Write-Host "     $($Colors.Cyan)dotfiles doctor$($Colors.Reset)"
     Write-Host ""
 
     if (-not $SkipPackages -and $response -notmatch '^[Yy]') {
         Write-Host "  Optional: Install development packages:"
-        Write-Host "     $($Colors.Cyan)$blackdotDir\powershell\Install-Packages.ps1$($Colors.Reset)"
+        Write-Host "     $($Colors.Cyan)$dotfilesDir\powershell\Install-Packages.ps1$($Colors.Reset)"
         Write-Host ""
     }
 
-    Write-Host "Documentation: $($Colors.Blue)https://github.com/blackwell-systems/blackdot$($Colors.Reset)"
+    Write-Host "Documentation: $($Colors.Blue)https://github.com/blackwell-systems/dotfiles$($Colors.Reset)"
     Write-Host ""
 }
 

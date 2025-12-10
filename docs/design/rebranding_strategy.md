@@ -1,4 +1,4 @@
-# Rebranding Strategy: dotfiles → blackdot
+# Rebranding Strategy: blackdot → blackdot
 
 > Analysis Date: 2025-12-10
 > Target: Rename framework from "dotfiles" to "blackdot"
@@ -47,9 +47,9 @@
 |---------|-----|--------|
 | `cmd/blackdot/` | `cmd/blackdot/` | Go package directory |
 | `bin/blackdot` | `bin/blackdot` | CLI binary |
-| `bootstrap/bootstrap-dotfiles.sh` | `bootstrap/bootstrap-blackdot.sh` | Setup script |
+| `bootstrap/bootstrap-blackdot.sh` | `bootstrap/bootstrap-blackdot.sh` | Setup script |
 | `zsh/completions/_dotfiles` | `zsh/completions/_blackdot` | Zsh completion |
-| `zsh/completions/_dotfiles-doctor` | `zsh/completions/_blackdot-doctor` | Zsh completion |
+| `zsh/completions/_blackdot-doctor` | `zsh/completions/_blackdot-doctor` | Zsh completion |
 | `powershell/Dotfiles.psm1` | `powershell/Blackdot.psm1` | PS module |
 | `powershell/Dotfiles.psd1` | `powershell/Blackdot.psd1` | PS manifest |
 | `powershell/Install-Dotfiles.ps1` | `powershell/Install-Blackdot.ps1` | PS installer |
@@ -57,7 +57,7 @@
 ### Test Fixtures (5 files)
 
 ```
-test/fixtures/vault-items/dotfiles-*.json → blackdot-*.json
+test/fixtures/vault-items/blackdot-*.json → blackdot-*.json
 ```
 
 ### Complexity: LOW
@@ -136,7 +136,7 @@ Automated find-and-replace, then `go build` to verify.
 | `BLACKDOT_DIR` | `BLACKDOT_DIR` | 67 | YES |
 | `BLACKDOT_VERSION` | `BLACKDOT_VERSION` | 2 | YES |
 | `BLACKDOT_SKIP_CHECKSUM` | `BLACKDOT_SKIP_CHECKSUM` | 1 | YES |
-| `DOTFILES_USE_GO` | (removed in v4) | - | N/A |
+| `BLACKDOT_USE_GO` | (removed in v4) | - | N/A |
 | `BLACKDOT_FEATURE_MODE` | `BLACKDOT_FEATURE_MODE` | 3 | YES |
 | `BLACKDOT_VAULT_BACKEND` | `BLACKDOT_VAULT_BACKEND` | 5 | YES |
 
@@ -179,7 +179,7 @@ Need backwards compatibility layer for existing users.
 
 | Current | New | Purpose |
 |---------|-----|---------|
-| `~/.config/blackdot/` | `~/.config/blackdot/` | Config directory |
+| `~/.config/dotfiles/` | `~/.config/blackdot/` | Config directory |
 | `~/.blackdot` | `~/.blackdot` | Default install location |
 | `~/.blackdot-backups/` | `~/.blackdot-backups/` | Backup storage |
 | `~/.blackdot-metrics.jsonl` | `~/.blackdot-metrics.jsonl` | Usage metrics |
@@ -383,7 +383,7 @@ Straightforward find-and-replace.
 **Build Commands:**
 ```yaml
 # OLD
-run: go build -o dotfiles ./cmd/blackdot/
+run: go build -o blackdot ./cmd/blackdot/
 
 # NEW
 run: go build -o blackdot ./cmd/blackdot/
@@ -392,7 +392,7 @@ run: go build -o blackdot ./cmd/blackdot/
 **Binary Naming:**
 ```yaml
 # OLD
-BINARY_NAME: "dotfiles-${{ matrix.goos }}-${{ matrix.goarch }}"
+BINARY_NAME: "blackdot-${{ matrix.goos }}-${{ matrix.goarch }}"
 
 # NEW
 BINARY_NAME: "blackdot-${{ matrix.goos }}-${{ matrix.goarch }}"
@@ -428,7 +428,7 @@ All markdown files in:
 |------|---------|-------|
 | Command examples | `blackdot setup` → `blackdot setup` | 200+ |
 | GitHub URLs | Repository links | 50+ |
-| Path references | `~/.config/blackdot` | 30+ |
+| Path references | `~/.config/dotfiles` | 30+ |
 | Env var refs | `BLACKDOT_DIR` | 20+ |
 
 ### CHANGELOG Special Case
@@ -453,7 +453,7 @@ High volume but simple replacement.
 
 - Add `BLACKDOT_DIR` (prefer over `BLACKDOT_DIR`)
 - Add `blackdot` command (symlink or alias)
-- Support both `~/.config/blackdot` and `~/.config/blackdot`
+- Support both `~/.config/dotfiles` and `~/.config/blackdot`
 - Show deprecation warnings
 
 ```go
@@ -466,14 +466,14 @@ if os.Getenv("BLACKDOT_DIR") != "" {
 #### Phase 2: Primary Rebrand (v5.0.0)
 
 - `blackdot` is the primary command
-- `blackdot` becomes alias (backwards compat)
+- `dotfiles` becomes alias (backwards compat)
 - Auto-migrate config paths on first run
 - Update all documentation
 
 #### Phase 3: Full Removal (v6.0.0)
 
-- Remove `DOTFILES_*` env var support
-- Remove `blackdot` command alias
+- Remove `BLACKDOT_*` env var support
+- Remove `dotfiles` command alias
 - Remove old path support
 
 ### User Migration Script
@@ -482,7 +482,7 @@ if os.Getenv("BLACKDOT_DIR") != "" {
 #!/bin/bash
 # blackdot-migrate.sh
 
-echo "Migrating from dotfiles to blackdot..."
+echo "Migrating from blackdot to blackdot..."
 
 # Config directory
 if [[ -d ~/.config/blackdot ]]; then
@@ -507,8 +507,8 @@ if grep -q "BLACKDOT_DIR" ~/.zshrc 2>/dev/null; then
     echo "  ! Update BLACKDOT_DIR → BLACKDOT_DIR in ~/.zshrc"
 fi
 
-if grep -q "dotfiles shell-init" ~/.zshrc 2>/dev/null; then
-    echo "  ! Update 'dotfiles shell-init' → 'blackdot shell-init' in ~/.zshrc"
+if grep -q "blackdot shell-init" ~/.zshrc 2>/dev/null; then
+    echo "  ! Update 'blackdot shell-init' → 'blackdot shell-init' in ~/.zshrc"
 fi
 
 echo "Migration complete!"
@@ -522,7 +522,7 @@ echo "Migration complete!"
 
 | Change | Impact | Mitigation |
 |--------|--------|------------|
-| Command name `blackdot` → `blackdot` | All scripts using `blackdot` break | Alias during transition |
+| Command name `dotfiles` → `blackdot` | All scripts using `dotfiles` break | Alias during transition |
 | `BLACKDOT_DIR` → `BLACKDOT_DIR` | CI/CD, custom scripts break | Support both for 2 releases |
 | Config path change | User settings location moves | Auto-migrate |
 | GitHub URL change | Existing clones point to old repo | Document re-clone process |
@@ -627,9 +627,9 @@ This gives users ~3-6 months notice and a smooth migration path.
 grep -r "dotfiles" --include="*.go" --include="*.sh" --include="*.md" --include="*.ps1" --include="*.yml"
 
 # Specific patterns
-grep -r "DOTFILES_" .                    # Environment variables
+grep -r "BLACKDOT_" .                    # Environment variables
 grep -r "github.com/blackwell-systems/blackdot" .  # Go imports
-grep -r "\.dotfiles" .                   # Config paths
+grep -r "\.blackdot" .                   # Config paths
 grep -r "bin/blackdot" .                 # Binary references
 ```
 
