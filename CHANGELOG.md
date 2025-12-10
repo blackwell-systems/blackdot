@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [5.0.0] - 2025-12-10
+## [4.0.0-rc3] - 2025-12-10
+
+**Release Candidate 3 - Complete Rebrand + Vault Go Parity**
 
 > **BREAKING CHANGE:** Complete rebrand from `dotfiles` to `blackdot`. All commands, environment variables, paths, and configuration locations have been renamed.
 
