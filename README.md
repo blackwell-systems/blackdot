@@ -307,38 +307,38 @@ BLACKDOT_SKIP_DRIFT_CHECK=1 blackdot vault pull   # No drift check (for CI/autom
 
 ## Framework Architecture
 
-**Three core systems provide the foundation:**
+```mermaid
+graph TB
+    subgraph CLI["blackdot CLI"]
+        FR[Feature Registry]
+        CL[Config Layers]
+        VM[Vaultmux]
+    end
 
+    FR -->|controls| Shell[Shell Modules]
+    FR -->|controls| Hooks[Hook System]
+    CL -->|resolves| Settings[5-Layer Priority]
+    VM -->|unified API| BW[Bitwarden]
+    VM -->|unified API| OP[1Password]
+    VM -->|unified API| Pass[pass]
+
+    Shell --> ZSH[zsh.d/]
+    Shell --> PS[PowerShell]
+
+    subgraph Portable[Portable Sessions]
+        WS["/workspace → ~/workspace"]
+        DC[dotclaude profiles]
+    end
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Feature Registry                          │
-│                   (lib/_features.sh)                         │
-│  Controls what's enabled/disabled, resolves dependencies,   │
-│  persists state, provides presets                           │
-└─────────────────────────────────────────────────────────────┘
-         │                              │
-         ▼                              ▼
-┌─────────────────────────┐   ┌───────────────────────────┐
-│  Configuration Layers   │   │  Claude Code Integration  │
-│ (lib/_config_layers.sh) │   │  (claude/, /workspace)    │
-│  5-layer priority for   │   │  Portable sessions,       │
-│  all settings           │   │  dotclaude, git hooks     │
-└─────────────────────────┘   └───────────────────────────┘
-```
 
-**1. Feature Registry** – Central control plane for all functionality. Enable/disable features, resolve dependencies, apply presets (minimal, developer, claude, full).
+| System | Purpose |
+|--------|---------|
+| **Feature Registry** | Control plane for all functionality. Presets: minimal, developer, claude, full |
+| **Config Layers** | 5-layer priority: Environment → Project → Machine → User → Defaults |
+| **Vaultmux** | Unified secrets API across Bitwarden, 1Password, and pass |
+| **Portable Sessions** | `/workspace` symlink + dotclaude profiles for cross-machine continuity |
 
-**2. Configuration Layers** – 5-layer priority system: Environment → Project → Machine → User → Defaults. Settings come from the right place automatically.
-
-**3. Claude Code Integration** – Portable sessions via `/workspace` symlink, vault-synced profiles with [dotclaude](https://github.com/blackwell-systems/dotclaude), git safety hooks, multi-backend support (Anthropic Max, AWS Bedrock, Google Vertex).
-
-**Additional capabilities:**
-
-- **Hook System** – 19 lifecycle hooks for custom behavior (vault sync, shell init, doctor checks)
-- **Multi-Vault Backend** – Bitwarden, 1Password, or pass with unified API
-- **Self-Healing** – `blackdot doctor --fix` repairs permissions and symlinks
-- **Machine Templates** – Generate machine-specific configs from templates
-- **Adaptive CLI** – Help and tab completion adjust based on enabled features
+**Also included:** 19 lifecycle hooks, self-healing doctor, machine templates, adaptive CLI completions
 
 ---
 
@@ -358,7 +358,7 @@ blackdot features enable X     # Enable a feature
 blackdot features preset Y     # Apply preset (minimal/developer/claude/full)
 ```
 
-The Feature Registry (`lib/_features.sh`) controls what's enabled/disabled across the system. Features can depend on other features (e.g., `claude_integration` requires `workspace_symlink`). Dependencies are resolved automatically.
+The Feature Registry controls what's enabled/disabled across the system. Features can depend on other features (e.g., `claude_integration` requires `workspace_symlink`). Dependencies are resolved automatically.
 
 **Presets:**
 - `minimal` - Shell config only
@@ -916,40 +916,6 @@ Bootstrap scripts check current state before changes. Already symlinked? Skip. A
 - Teams that need consistent tooling across heterogeneous environments
 - Anyone managing multiple AWS accounts with SSO
 - DevOps engineers who need reproducible, testable configurations
-
----
-
-## Prerequisites
-
-**Required:**
-- A computer running macOS, Linux, Windows (Git Bash/MSYS2), or WSL2
-- Internet access (for installing packages)
-
-**Auto-installed:**
-- Git (via Xcode tools on macOS or apt on Linux)
-- Homebrew/Linuxbrew (bootstrap will install)
-- Modern CLI tools (eza, fzf, ripgrep, etc. via Brewfile)
-
-**Optional (for vault features only):**
-- **Vault CLI** - Bitwarden (`bw`), 1Password (`op`), or pass for automated secret sync
-  - Skip with `--minimal` flag (or just don't run `blackdot vault` commands)
-  - Without vault: manually configure `~/.ssh`, `~/.aws`, `~/.gitconfig`
-
-**Optional (for Claude Code portable sessions):**
-- **Claude Code installed** - For cross-machine session sync
-  - Skip with `SKIP_CLAUDE_SETUP=true`
-
-**Optional (Brewfile package tiers):**
-The `blackdot setup` wizard presents three package tiers interactively:
-  - `minimal` - Essential tools only (18 packages, ~2 min)
-  - `enhanced` - Modern CLI tools without containers (43 packages, ~5 min) **← RECOMMENDED**
-  - `full` - Everything including Docker/Kubernetes (61 packages, ~10 min) [default]
-
-Your selection is saved in `~/.config/blackdot/config.json` and reused if you re-run setup.
-
-**Advanced users:** Set `BREWFILE_TIER` environment variable to bypass interactive selection.
-
-To clone via SSH (recommended), you'll also want an SSH key configured with GitHub. If you don't have Git yet, the bootstrap scripts will install it automatically.
 
 ---
 
