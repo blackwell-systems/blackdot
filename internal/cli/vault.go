@@ -3,6 +3,7 @@ package cli
 import (
 	"bufio"
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -371,9 +372,9 @@ func newVaultCreateCmd() *cobra.Command {
 		Long: `Create a new Secure Note item in the vault.
 
 Content can be provided as:
-  - An argument: dotfiles vault create My-Item "content here"
-  - From a file: dotfiles vault create My-Item --file ~/path/to/file
-  - From stdin: echo "content" | dotfiles vault create My-Item
+  - An argument: blackdot vault create My-Item "content here"
+  - From a file: blackdot vault create My-Item --file ~/path/to/file
+  - From stdin: echo "content" | blackdot vault create My-Item
 
 Options:
   --dry-run, -n  Show what would be created without making changes
@@ -381,9 +382,9 @@ Options:
   --file         Read content from file
 
 Examples:
-  dotfiles vault create API-Key "sk-1234567890"
-  dotfiles vault create SSH-Config --file ~/.ssh/config
-  dotfiles vault create --dry-run Git-Config --file ~/.gitconfig`,
+  blackdot vault create API-Key "sk-1234567890"
+  blackdot vault create SSH-Config --file ~/.ssh/config
+  blackdot vault create --dry-run Git-Config --file ~/.gitconfig`,
 		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := args[0]
@@ -443,9 +444,9 @@ Options:
   --force, -f    Skip confirmation prompts (except protected items)
 
 Examples:
-  dotfiles vault delete TEST-NOTE
-  dotfiles vault delete --dry-run OLD-KEY
-  dotfiles vault delete --force TEMP-1 TEMP-2 TEMP-3`,
+  blackdot vault delete TEST-NOTE
+  blackdot vault delete --dry-run OLD-KEY
+  blackdot vault delete --force TEMP-1 TEMP-2 TEMP-3`,
 		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return vaultDelete(args, dryRun, force)
@@ -465,13 +466,13 @@ Examples:
 // printVaultHelp prints styled help matching ZSH vault help exactly
 func printVaultHelp() {
 	// Title
-	BoldCyan.Print("dotfiles vault")
+	BoldCyan.Print("blackdot vault")
 	fmt.Print(" - Secret vault operations\n")
 	fmt.Println()
 
 	// Usage
 	Bold.Print("Usage:")
-	fmt.Print(" dotfiles vault <command> [options]\n")
+	fmt.Print(" blackdot vault <command> [options]\n")
 	fmt.Println()
 
 	// Session section
@@ -508,25 +509,25 @@ func printVaultHelp() {
 	// Examples
 	BoldCyan.Println("Examples:")
 	Dim.Println("  # Unlock vault")
-	fmt.Println("  dotfiles vault unlock")
+	fmt.Println("  blackdot vault unlock")
 	fmt.Println()
 	Dim.Println("  # Check status")
-	fmt.Println("  dotfiles vault status")
+	fmt.Println("  blackdot vault status")
 	fmt.Println()
 	Dim.Println("  # Pull secrets from vault")
-	fmt.Println("  dotfiles vault restore")
+	fmt.Println("  blackdot vault restore")
 	fmt.Println()
 	Dim.Println("  # Push local changes")
-	fmt.Println("  dotfiles vault push --all")
+	fmt.Println("  blackdot vault push --all")
 	fmt.Println()
 
 	// Typical Workflow
 	BoldCyan.Println("Typical Workflow:")
-	Dim.Println("  First time:   dotfiles vault init      → Choose backend & discover secrets")
-	Dim.Println("  Unlock:       dotfiles vault unlock    → Unlock vault for operations")
-	Dim.Println("  Add secrets:  dotfiles vault push      → Push local changes to vault")
-	Dim.Println("  New machine:  dotfiles vault restore   → Pull secrets from vault")
-	Dim.Println("  Re-scan:      dotfiles vault scan      → Find new SSH keys/configs")
+	Dim.Println("  First time:   blackdot vault init      → Choose backend & discover secrets")
+	Dim.Println("  Unlock:       blackdot vault unlock    → Unlock vault for operations")
+	Dim.Println("  Add secrets:  blackdot vault push      → Push local changes to vault")
+	Dim.Println("  New machine:  blackdot vault restore   → Pull secrets from vault")
+	Dim.Println("  Re-scan:      blackdot vault scan      → Find new SSH keys/configs")
 }
 
 // ============================================================
@@ -534,46 +535,260 @@ func printVaultHelp() {
 // ============================================================
 
 func vaultStatus() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	PrintHeader("Vault Status")
+	fmt.Println()
+	BoldCyan.Println("╔═══════════════════════════════════════════════════════╗")
+	BoldCyan.Println("║           Vault Status & Sync Summary                 ║")
+	BoldCyan.Println("╚═══════════════════════════════════════════════════════╝")
+	fmt.Println()
+
+	// Section 1: Vault Backend Configuration
+	BoldCyan.Println("Vault Backend")
+	fmt.Println("─────────────")
 
 	backendType := getVaultBackend()
 	sessionFile := getSessionFile()
-	fmt.Printf("Backend: %s\n", backendType)
-	fmt.Printf("Session file: %s\n", sessionFile)
-
-	// Check if session file exists
-	if info, err := os.Stat(sessionFile); err == nil {
-		fmt.Printf("Session cached: %s (%d bytes)\n", info.ModTime().Format("15:04:05"), info.Size())
-	} else {
-		fmt.Printf("Session cached: no\n")
-	}
-	fmt.Println()
 
 	backend, err := newVaultBackend()
 	if err != nil {
-		Fail("Failed to create backend: %v", err)
+		Fail("No vault backend configured")
+		fmt.Println()
+		fmt.Printf("  %s blackdot vault init\n", Green.Sprint("Setup:"))
 		return err
 	}
 	defer backend.Close()
 
 	if err := backend.Init(ctx); err != nil {
-		Fail("Backend not available: %v", err)
+		Fail("Backend CLI not available: %v", err)
 		return err
 	}
 
-	Pass("Backend initialized: %s", backend.Name())
+	Pass("Backend: %s", backend.Name())
 
-	// Check authentication - vaultmux handles reading session from cache
-	if backend.IsAuthenticated(ctx) {
-		Pass("Authenticated")
+	// Check authentication
+	authenticated := backend.IsAuthenticated(ctx)
+	if authenticated {
+		Pass("Logged in: Yes")
+
+		// Check session file
+		if info, err := os.Stat(sessionFile); err == nil {
+			Pass("Session cached: %s (%d bytes)", info.ModTime().Format("15:04:05"), info.Size())
+		} else {
+			Warn("Vault locked (session expired)")
+			fmt.Println()
+			fmt.Printf("  %s blackdot vault unlock\n", Green.Sprint("Unlock:"))
+		}
 	} else {
-		Warn("Not authenticated - run 'blackdot vault unlock'")
+		Fail("Not logged in to %s", backendType)
+		fmt.Println()
+		switch backendType {
+		case vaultmux.BackendBitwarden:
+			fmt.Printf("  %s bw login && blackdot vault unlock\n", Green.Sprint("Login:"))
+		case vaultmux.BackendOnePassword:
+			fmt.Printf("  %s blackdot vault unlock\n", Green.Sprint("Login:"))
+		default:
+			fmt.Printf("  %s blackdot vault unlock\n", Green.Sprint("Login:"))
+		}
+		return fmt.Errorf("not authenticated")
+	}
+
+	fmt.Println()
+
+	// Section 2: Vault Items Summary
+	BoldCyan.Println("Vault Items")
+	fmt.Println("───────────")
+
+	vaultItems, err := loadVaultItems()
+	if err == nil {
+		Pass("Config items: %d", len(vaultItems))
+
+		sshCount := 0
+		for _, item := range vaultItems {
+			if item.Type == "sshkey" {
+				sshCount++
+			}
+		}
+		if sshCount > 0 {
+			Pass("SSH keys: %d", sshCount)
+		}
+
+		// List items
+		fmt.Println()
+		Dim.Println("  Configured vault items:")
+		count := 0
+		for name := range vaultItems {
+			if count < 10 {
+				fmt.Printf("    • %s\n", name)
+			}
+			count++
+		}
+		if count > 10 {
+			Dim.Printf("    ... and %d more\n", count-10)
+		}
+	} else {
+		Warn("No vault items configured")
+		fmt.Println()
+		fmt.Printf("  %s blackdot vault scan\n", Green.Sprint("Scan:"))
+	}
+
+	fmt.Println()
+
+	// Section 3: Last Sync Timestamp
+	BoldCyan.Println("Sync History")
+	fmt.Println("────────────")
+
+	cfg := config.DefaultManager()
+	lastPull, _ := cfg.Get("vault.last_pull")
+	lastPush, _ := cfg.Get("vault.last_push")
+
+	if lastPull != "" {
+		Pass("Last pull: %s", formatTimeAgo(lastPull))
+	} else {
+		Info("Last pull: Never (or not tracked)")
+	}
+
+	if lastPush != "" {
+		Pass("Last push: %s", formatTimeAgo(lastPush))
+	} else {
+		Info("Last push: Never (or not tracked)")
+	}
+
+	fmt.Println()
+
+	// Section 4: Drift Detection
+	if authenticated && vaultItems != nil {
+		BoldCyan.Println("Drift Detection (Local vs Vault)")
+		fmt.Println("─────────────────────────────────")
+
+		session, err := backend.Authenticate(ctx)
+		if err == nil {
+			driftCount := 0
+			missingVault := 0
+			missingLocal := 0
+			checkedCount := 0
+			var driftedItems []string
+
+			for name, item := range vaultItems {
+				localPath := expandPath(item.Path)
+
+				// Check if local file exists
+				if _, err := os.Stat(localPath); os.IsNotExist(err) {
+					missingLocal++
+					continue
+				}
+
+				// Get vault content
+				vaultContent, err := backend.GetNotes(ctx, name, session)
+				if err != nil {
+					if errors.Is(err, vaultmux.ErrNotFound) {
+						Warn("%s: exists locally but not in vault", name)
+						missingVault++
+						driftedItems = append(driftedItems, name)
+					}
+					continue
+				}
+
+				checkedCount++
+
+				// Compare content
+				driftStatus := checkItemDrift(localPath, vaultContent)
+				if driftStatus == 1 {
+					Warn("%s: ⚠ DIFFERS from vault", name)
+					driftCount++
+					driftedItems = append(driftedItems, name)
+				} else {
+					Pass("%s: ✓ in sync", name)
+				}
+			}
+
+			fmt.Println()
+			fmt.Println("═══════════════════════════════════════════════════════")
+			fmt.Println()
+
+			if driftCount == 0 && missingVault == 0 {
+				Green.Println("  ✓ All items in sync!")
+				fmt.Println()
+				fmt.Printf("  %d items checked, no drift detected\n", checkedCount)
+			} else {
+				if driftCount > 0 {
+					Yellow.Printf("  ⚠ Drift detected: %d items differ\n", driftCount)
+				}
+				if missingVault > 0 {
+					Yellow.Printf("  ⚠ Not in vault: %d items\n", missingVault)
+				}
+				fmt.Println()
+
+				Bold.Println("  Affected items:")
+				for _, item := range driftedItems {
+					fmt.Printf("    • %s\n", item)
+				}
+			}
+
+			if missingLocal > 0 {
+				fmt.Println()
+				Dim.Printf("  %d items not found locally (not installed yet)\n", missingLocal)
+			}
+
+			fmt.Println()
+			fmt.Println("═══════════════════════════════════════════════════════")
+			fmt.Println()
+
+			// Next Actions
+			if driftCount > 0 || missingVault > 0 {
+				Bold.Println("Next Actions:")
+				fmt.Println()
+
+				if driftCount > 0 {
+					Cyan.Println("  Option 1: Save local changes to vault")
+					fmt.Printf("    %s blackdot vault push --all\n", Green.Sprint("→"))
+					fmt.Println()
+				}
+
+				if missingVault > 0 {
+					Cyan.Println("  Option 2: Scan and push new items to vault")
+					fmt.Printf("    %s blackdot vault scan\n", Green.Sprint("→"))
+					fmt.Printf("    %s blackdot vault push --all\n", Green.Sprint("→"))
+					fmt.Println()
+				}
+
+				if driftCount > 0 {
+					Cyan.Println("  Option 3: Restore from vault (discard local changes)")
+					fmt.Printf("    %s blackdot backup create  %s\n", Green.Sprint("→"), Dim.Sprint("# Safety first"))
+					fmt.Printf("    %s blackdot vault restore --force\n", Green.Sprint("→"))
+					fmt.Println()
+				}
+
+				Cyan.Println("  Option 4: View detailed diff")
+				fmt.Printf("    %s blackdot drift\n", Green.Sprint("→"))
+				fmt.Println()
+			}
+		}
 	}
 
 	return nil
+}
+
+// formatTimeAgo formats a timestamp as a human-readable time ago string
+func formatTimeAgo(timestamp string) string {
+	t, err := time.Parse(time.RFC3339, timestamp)
+	if err != nil {
+		return timestamp
+	}
+
+	secondsAgo := int(time.Since(t).Seconds())
+
+	if secondsAgo < 3600 {
+		minutesAgo := secondsAgo / 60
+		return fmt.Sprintf("%dm ago (%s)", minutesAgo, timestamp)
+	} else if secondsAgo < 86400 {
+		hoursAgo := secondsAgo / 3600
+		return fmt.Sprintf("%dh ago (%s)", hoursAgo, timestamp)
+	} else {
+		daysAgo := secondsAgo / 86400
+		return fmt.Sprintf("%dd ago (%s)", daysAgo, timestamp)
+	}
 }
 
 func vaultUnlock() error {
@@ -923,7 +1138,7 @@ func vaultQuick() error {
 
 	fmt.Println("  Status:     Not authenticated")
 	fmt.Println()
-	Info("Run: dotfiles vault unlock")
+	Info("Run: blackdot vault unlock")
 	return fmt.Errorf("vault not authenticated")
 }
 
@@ -933,6 +1148,12 @@ func vaultRestore(force, dryRun bool) error {
 	defer cancel()
 
 	PrintHeader("Vault Restore")
+
+	// Check offline mode
+	if isOfflineMode() {
+		Warn("Offline mode enabled (BLACKDOT_OFFLINE=1) - skipping vault operation")
+		return nil
+	}
 
 	// Validate vault-items.json first
 	Info("Validating vault-items.json schema...")
@@ -975,6 +1196,58 @@ func vaultRestore(force, dryRun bool) error {
 	if err != nil {
 		Fail("Failed to load vault-items.json: %v", err)
 		return err
+	}
+
+	// Pre-restore drift check (unless --force)
+	if !force && !dryRun {
+		Info("Checking for local changes before restore...")
+		driftedItems := []string{}
+
+		for name, item := range vaultItems {
+			path := expandPath(item.Path)
+
+			// Get vault content to compare
+			notes, err := backend.GetNotes(ctx, name, session)
+			if err != nil {
+				continue // Can't check drift if vault item doesn't exist
+			}
+
+			driftStatus := checkItemDrift(path, notes)
+			if driftStatus == 1 { // Drifted
+				driftedItems = append(driftedItems, name)
+			}
+		}
+
+		if len(driftedItems) > 0 {
+			Warn("Local files have changed since last vault sync:")
+			for _, item := range driftedItems {
+				fmt.Printf("  - %s\n", item)
+			}
+			fmt.Println()
+			fmt.Println("Options:")
+			fmt.Println("  1. Run 'blackdot vault push' first to save local changes")
+			fmt.Println("  2. Run restore with --force to overwrite local changes")
+			fmt.Println("  3. Run 'blackdot drift' to see detailed differences")
+			fmt.Println()
+			Fail("Restore aborted to prevent data loss")
+			return fmt.Errorf("local drift detected - use --force to overwrite")
+		}
+		Pass("No local drift detected - safe to restore")
+		fmt.Println()
+	}
+
+	// Auto-backup before restore (if not dry-run)
+	if !dryRun {
+		Info("Creating backup before restore...")
+		backupCmd := exec.Command(filepath.Join(DotfilesDir(), "bin", "blackdot"), "backup", "create")
+		backupCmd.Stdout = os.Stdout
+		backupCmd.Stderr = os.Stderr
+		if err := backupCmd.Run(); err != nil {
+			Warn("Backup failed (continuing anyway): %v", err)
+		} else {
+			Pass("Backup created")
+		}
+		fmt.Println()
 	}
 
 	if dryRun {
@@ -1026,13 +1299,76 @@ func vaultRestore(force, dryRun bool) error {
 			continue
 		}
 
-		// Determine file permissions
-		perm := os.FileMode(0644)
+		// Backup existing file before overwrite
+		if err := backupFile(path); err != nil {
+			Warn("%s: backup failed: %v", name, err)
+		}
+
+		// Handle SSH keys specially - extract private and public keys
 		if item.Type == "sshkey" {
+			// Extract and write private key
+			privateKey := extractSSHPrivateKey(notes)
+			if privateKey == "" {
+				Fail("%s: no private key found in vault item", name)
+				failed++
+				continue
+			}
+
+			// Ensure private key ends with newline
+			if !strings.HasSuffix(privateKey, "\n") {
+				privateKey += "\n"
+			}
+
+			if err := os.WriteFile(path, []byte(privateKey), 0600); err != nil {
+				Fail("%s: failed to write private key: %v", name, err)
+				failed++
+				continue
+			}
+
+			// Extract and write public key
+			publicKey := extractSSHPublicKey(notes)
+			if publicKey != "" {
+				pubPath := path + ".pub"
+				// Ensure public key ends with newline
+				if !strings.HasSuffix(publicKey, "\n") {
+					publicKey += "\n"
+				}
+				if err := os.WriteFile(pubPath, []byte(publicKey), 0644); err != nil {
+					Warn("%s: failed to write public key: %v", name, err)
+				} else {
+					Pass("%s → %s (+ .pub)", name, path)
+				}
+			} else {
+				Pass("%s → %s", name, path)
+			}
+			restored++
+			continue
+		}
+
+		// Handle environment secrets specially - create loader script
+		if name == "Environment-Secrets" || strings.HasSuffix(path, "env.secrets") {
+			if err := os.WriteFile(path, []byte(notes), 0600); err != nil {
+				Fail("%s: failed to write file: %v", name, err)
+				failed++
+				continue
+			}
+
+			// Create load-env.sh loader script
+			if err := createEnvLoader(path); err != nil {
+				Warn("%s: failed to create loader script: %v", name, err)
+			} else {
+				Pass("%s → %s (+ load-env.sh)", name, path)
+			}
+			restored++
+			continue
+		}
+
+		// Standard file restoration
+		perm := os.FileMode(0644)
+		if strings.Contains(path, ".aws/") || strings.Contains(path, ".ssh/") {
 			perm = 0600
 		}
 
-		// Write file
 		if err := os.WriteFile(path, []byte(notes), perm); err != nil {
 			Fail("%s: failed to write file: %v", name, err)
 			failed++
@@ -1057,6 +1393,20 @@ func vaultRestore(force, dryRun bool) error {
 	}
 	fmt.Println("========================================")
 
+	// Save timestamp and drift state (if not dry-run)
+	if !dryRun && failed == 0 {
+		if err := saveVaultTimestamp("vault.last_pull"); err != nil {
+			Warn("Failed to save timestamp: %v", err)
+		}
+
+		Info("Saving drift state for startup checks...")
+		if err := saveVaultDriftState(vaultItems); err != nil {
+			Warn("Failed to save drift state: %v", err)
+		} else {
+			Pass("Drift state saved to %s", getVaultDriftStatePath())
+		}
+	}
+
 	return nil
 }
 
@@ -1066,6 +1416,12 @@ func vaultPush(items []string, force, dryRun, all bool) error {
 	defer cancel()
 
 	PrintHeader("Push to Vault")
+
+	// Check offline mode
+	if isOfflineMode() {
+		Warn("Offline mode enabled (BLACKDOT_OFFLINE=1) - skipping vault operation")
+		return nil
+	}
 
 	// Validate vault-items.json first
 	Info("Validating vault-items.json schema...")
@@ -1218,6 +1574,13 @@ func vaultPush(items []string, force, dryRun, all bool) error {
 	}
 	fmt.Println("========================================")
 
+	// Save timestamp (if not dry-run and we synced something)
+	if !dryRun && synced > 0 && failed == 0 {
+		if err := saveVaultTimestamp("vault.last_push"); err != nil {
+			Warn("Failed to save timestamp: %v", err)
+		}
+	}
+
 	return nil
 }
 
@@ -1333,7 +1696,7 @@ func vaultScan() error {
 		"PyPI-Config":           filepath.Join(homeDir, ".pypirc"),
 		"Docker-Config":         filepath.Join(homeDir, ".docker", "config.json"),
 		"Environment-Secrets":   filepath.Join(homeDir, ".local", "env.secrets"),
-		"Template-Variables":    filepath.Join(homeDir, ".config", "dotfiles", "template-variables.sh"),
+		"Template-Variables":    filepath.Join(homeDir, ".config", "blackdot", "template-variables.sh"),
 	}
 	for name, path := range otherSecrets {
 		if _, err := os.Stat(path); err == nil {
@@ -1363,7 +1726,7 @@ func vaultScan() error {
 	// Build vault-items structure
 	vaultItemsJSON := map[string]interface{}{
 		"$schema":  "https://json-schema.org/draft/2020-12/schema",
-		"$comment": "Generated by dotfiles vault scan",
+		"$comment": "Generated by blackdot vault scan",
 	}
 
 	sshKeys := make(map[string]string)
@@ -1398,10 +1761,134 @@ func vaultScan() error {
 	if configDir == "" {
 		configDir = filepath.Join(homeDir, ".config")
 	}
-	vaultItemsPath := filepath.Join(configDir, "dotfiles", "vault-items.json")
+	vaultItemsPath := filepath.Join(configDir, "blackdot", "vault-items.json")
 
-	Info("To save this configuration:")
-	fmt.Printf("  Save to: %s\n", vaultItemsPath)
+	// Check if file already exists
+	existingConfig := false
+	if _, err := os.Stat(vaultItemsPath); err == nil {
+		existingConfig = true
+	}
+
+	// Prompt user for action
+	fmt.Println("What would you like to do?")
+	fmt.Println()
+	if existingConfig {
+		fmt.Println("  1) Merge - Add new items to existing config")
+		fmt.Println("  2) Replace - Overwrite with new config (backup created)")
+		fmt.Println("  3) Preview only - Don't save (copy JSON above)")
+	} else {
+		fmt.Println("  1) Save - Create new config file")
+		fmt.Println("  2) Preview only - Don't save (copy JSON above)")
+	}
+	fmt.Println()
+	fmt.Print("Select action [1]: ")
+
+	reader := bufio.NewReader(os.Stdin)
+	choice, _ := reader.ReadString('\n')
+	choice = strings.TrimSpace(choice)
+	if choice == "" {
+		choice = "1"
+	}
+
+	if existingConfig {
+		switch choice {
+		case "1":
+			// Merge with existing config
+			existingData, err := os.ReadFile(vaultItemsPath)
+			if err != nil {
+				Fail("Failed to read existing config: %v", err)
+				return err
+			}
+
+			var existingJSON map[string]interface{}
+			if err := json.Unmarshal(existingData, &existingJSON); err != nil {
+				Fail("Failed to parse existing config: %v", err)
+				return err
+			}
+
+			// Merge vault_items
+			if existingVaultItems, ok := existingJSON["vault_items"].(map[string]interface{}); ok {
+				for name, item := range vaultItems {
+					if _, exists := existingVaultItems[name]; !exists {
+						existingVaultItems[name] = item
+						Info("Added: %s", name)
+					}
+				}
+				vaultItemsJSON["vault_items"] = existingVaultItems
+			}
+
+			// Merge ssh_keys
+			if existingSSHKeys, ok := existingJSON["ssh_keys"].(map[string]interface{}); ok {
+				for name, path := range sshKeys {
+					if _, exists := existingSSHKeys[name]; !exists {
+						existingSSHKeys[name] = path
+					}
+				}
+				vaultItemsJSON["ssh_keys"] = existingSSHKeys
+			}
+
+			// Merge syncable_items
+			if existingSyncable, ok := existingJSON["syncable_items"].(map[string]interface{}); ok {
+				for name, path := range syncableItems {
+					if _, exists := existingSyncable[name]; !exists {
+						existingSyncable[name] = path
+					}
+				}
+				vaultItemsJSON["syncable_items"] = existingSyncable
+			}
+
+			// Write merged config
+			mergedBytes, _ := json.MarshalIndent(vaultItemsJSON, "", "  ")
+			if err := os.WriteFile(vaultItemsPath, mergedBytes, 0644); err != nil {
+				Fail("Failed to write config: %v", err)
+				return err
+			}
+			Pass("Merged config saved to %s", vaultItemsPath)
+
+		case "2":
+			// Backup and replace
+			backupPath := vaultItemsPath + ".bak-" + time.Now().Format("20060102150405")
+			if err := os.Rename(vaultItemsPath, backupPath); err != nil {
+				Fail("Failed to backup: %v", err)
+				return err
+			}
+			Info("Backed up to: %s", backupPath)
+
+			if err := os.WriteFile(vaultItemsPath, jsonBytes, 0644); err != nil {
+				Fail("Failed to write config: %v", err)
+				return err
+			}
+			Pass("Config saved to %s", vaultItemsPath)
+
+		default:
+			Info("Preview only - no changes made")
+			fmt.Printf("To save manually: copy the JSON above to %s\n", vaultItemsPath)
+		}
+	} else {
+		switch choice {
+		case "1":
+			// Create directory if needed
+			if err := os.MkdirAll(filepath.Dir(vaultItemsPath), 0755); err != nil {
+				Fail("Failed to create config directory: %v", err)
+				return err
+			}
+
+			if err := os.WriteFile(vaultItemsPath, jsonBytes, 0644); err != nil {
+				Fail("Failed to write config: %v", err)
+				return err
+			}
+			Pass("Config saved to %s", vaultItemsPath)
+
+		default:
+			Info("Preview only - no changes made")
+			fmt.Printf("To save manually: copy the JSON above to %s\n", vaultItemsPath)
+		}
+	}
+
+	fmt.Println()
+	fmt.Println("Next steps:")
+	fmt.Printf("  %s blackdot vault push --all   # Push secrets to vault\n", Green.Sprint("→"))
+	fmt.Printf("  %s blackdot vault status       # Check sync status\n", Green.Sprint("→"))
 
 	return nil
 }
@@ -1491,14 +1978,14 @@ func vaultCheck() error {
 	fmt.Println("========================================")
 	if missing == 0 {
 		Pass("All required vault items present!")
-		fmt.Println("You can safely run: dotfiles vault restore")
+		fmt.Println("You can safely run: blackdot vault restore")
 		return nil
 	}
 
 	Fail("Missing %d required item(s)", missing)
 	fmt.Println()
 	fmt.Println("To create missing items:")
-	fmt.Println("  dotfiles vault push ITEM-NAME")
+	fmt.Println("  blackdot vault push ITEM-NAME")
 	return fmt.Errorf("%d required items missing", missing)
 }
 
@@ -1513,7 +2000,7 @@ func vaultValidate() error {
 		configDir = filepath.Join(os.Getenv("HOME"), ".config")
 	}
 
-	vaultItemsPath := filepath.Join(configDir, "dotfiles", "vault-items.json")
+	vaultItemsPath := filepath.Join(configDir, "blackdot", "vault-items.json")
 
 	// Check if file exists
 	if _, err := os.Stat(vaultItemsPath); os.IsNotExist(err) {
@@ -1611,7 +2098,7 @@ func vaultInit() error {
 	if configDir == "" {
 		configDir = filepath.Join(os.Getenv("HOME"), ".config")
 	}
-	vaultConfigPath := filepath.Join(configDir, "dotfiles", "vault-items.json")
+	vaultConfigPath := filepath.Join(configDir, "blackdot", "vault-items.json")
 
 	if _, err := os.Stat(vaultConfigPath); err == nil {
 		Info("Existing configuration found: %s", vaultConfigPath)
@@ -1758,7 +2245,7 @@ func vaultInit() error {
 		switch selectedBackend {
 		case "bitwarden":
 			fmt.Println("  bw login")
-			fmt.Println("  dotfiles vault unlock")
+			fmt.Println("  blackdot vault unlock")
 		case "1password":
 			fmt.Println("  op signin")
 		case "pass":
@@ -1766,7 +2253,7 @@ func vaultInit() error {
 		}
 		fmt.Println()
 		fmt.Println("Then run setup again:")
-		fmt.Println("  dotfiles vault init")
+		fmt.Println("  blackdot vault init")
 		return fmt.Errorf("authentication required")
 	}
 
@@ -1821,8 +2308,8 @@ func vaultInit() error {
 	fmt.Println("  $EDITOR " + vaultConfigPath)
 	fmt.Println()
 	fmt.Println("When ready, run:")
-	fmt.Println("  dotfiles vault restore  - Restore from vault")
-	fmt.Println("  dotfiles vault push     - Backup to vault")
+	fmt.Println("  blackdot vault restore  - Restore from vault")
+	fmt.Println("  blackdot vault push     - Backup to vault")
 
 	return nil
 }
@@ -1838,13 +2325,188 @@ type VaultItem struct {
 	Required bool   `json:"required"`
 }
 
+// isOfflineMode checks if running in offline mode
+func isOfflineMode() bool {
+	return os.Getenv("BLACKDOT_OFFLINE") == "1"
+}
+
+// calculateChecksum returns SHA256 checksum of content
+func calculateChecksum(content []byte) string {
+	h := sha256.Sum256(content)
+	return fmt.Sprintf("%x", h)
+}
+
+// backupFile creates a timestamped backup of a file
+func backupFile(path string) error {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return nil // Nothing to backup
+	}
+
+	timestamp := time.Now().Format("20060102150405")
+	backupPath := fmt.Sprintf("%s.bak-%s", path, timestamp)
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("failed to read file for backup: %w", err)
+	}
+
+	if err := os.WriteFile(backupPath, content, 0600); err != nil {
+		return fmt.Errorf("failed to write backup: %w", err)
+	}
+
+	return nil
+}
+
+// extractSSHPrivateKey extracts the private key block from notes
+func extractSSHPrivateKey(notes string) string {
+	lines := strings.Split(notes, "\n")
+	var result []string
+	inKey := false
+
+	for _, line := range lines {
+		if strings.Contains(line, "BEGIN OPENSSH PRIVATE KEY") ||
+			strings.Contains(line, "BEGIN RSA PRIVATE KEY") ||
+			strings.Contains(line, "BEGIN EC PRIVATE KEY") ||
+			strings.Contains(line, "BEGIN DSA PRIVATE KEY") {
+			inKey = true
+		}
+		if inKey {
+			result = append(result, line)
+		}
+		if strings.Contains(line, "END OPENSSH PRIVATE KEY") ||
+			strings.Contains(line, "END RSA PRIVATE KEY") ||
+			strings.Contains(line, "END EC PRIVATE KEY") ||
+			strings.Contains(line, "END DSA PRIVATE KEY") {
+			inKey = false
+		}
+	}
+
+	return strings.Join(result, "\n")
+}
+
+// extractSSHPublicKey extracts the public key line from notes
+func extractSSHPublicKey(notes string) string {
+	lines := strings.Split(notes, "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "ssh-ed25519 ") ||
+			strings.HasPrefix(line, "ssh-rsa ") ||
+			strings.HasPrefix(line, "ssh-ecdsa ") ||
+			strings.HasPrefix(line, "ecdsa-sha2-") ||
+			strings.HasPrefix(line, "ssh-dss ") {
+			return line
+		}
+	}
+	return ""
+}
+
+// checkItemDrift checks if a local file differs from vault content
+// Returns: 0 = no drift, 1 = drifted, 2 = local missing
+func checkItemDrift(localPath, vaultContent string) int {
+	localContent, err := os.ReadFile(localPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return 2 // Local missing
+		}
+		return 0 // Can't check, assume no drift
+	}
+
+	if string(localContent) != vaultContent {
+		return 1 // Drifted
+	}
+	return 0 // No drift
+}
+
+// getVaultDriftStatePath returns the path to the vault drift state file
+func getVaultDriftStatePath() string {
+	cacheDir := os.Getenv("XDG_CACHE_HOME")
+	if cacheDir == "" {
+		home, _ := os.UserHomeDir()
+		cacheDir = filepath.Join(home, ".cache")
+	}
+	return filepath.Join(cacheDir, "blackdot", "vault-state.json")
+}
+
+// saveVaultDriftState saves the current vault drift state after restore
+func saveVaultDriftState(items map[string]VaultItem) error {
+	statePath := getVaultDriftStatePath()
+
+	// Create directory
+	if err := os.MkdirAll(filepath.Dir(statePath), 0755); err != nil {
+		return err
+	}
+
+	state := map[string]interface{}{
+		"timestamp": time.Now().UTC().Format(time.RFC3339),
+		"items":     make(map[string]interface{}),
+	}
+
+	itemsMap := state["items"].(map[string]interface{})
+
+	for name, item := range items {
+		path := expandPath(item.Path)
+		content, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+
+		info, _ := os.Stat(path)
+		modTime := ""
+		if info != nil {
+			modTime = info.ModTime().UTC().Format(time.RFC3339)
+		}
+
+		itemsMap[name] = map[string]interface{}{
+			"checksum":   calculateChecksum(content),
+			"mod_time":   modTime,
+			"local_path": path,
+		}
+	}
+
+	data, err := json.MarshalIndent(state, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(statePath, data, 0644)
+}
+
+// saveVaultTimestamp saves a timestamp to config
+func saveVaultTimestamp(key string) error {
+	cfg := config.DefaultManager()
+	timestamp := time.Now().UTC().Format(time.RFC3339)
+	return cfg.Set(key, timestamp)
+}
+
+// createEnvLoader creates the load-env.sh script
+func createEnvLoader(envSecretsPath string) error {
+	loaderPath := filepath.Join(filepath.Dir(envSecretsPath), "load-env.sh")
+
+	loaderContent := `#!/usr/bin/env bash
+# Auto-generated by blackdot vault restore
+# Source this file to load environment secrets: source ~/.local/load-env.sh
+
+ENV_FILE="$HOME/.local/env.secrets"
+
+if [[ -f "$ENV_FILE" ]]; then
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        # Skip empty lines and comments
+        [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+        # Export the variable
+        export "$line"
+    done < "$ENV_FILE"
+fi
+`
+	return os.WriteFile(loaderPath, []byte(loaderContent), 0700)
+}
+
 // loadVaultItems loads the vault_items section from vault-items.json
 func loadVaultItems() (map[string]VaultItem, error) {
 	configDir := os.Getenv("XDG_CONFIG_HOME")
 	if configDir == "" {
 		configDir = filepath.Join(os.Getenv("HOME"), ".config")
 	}
-	vaultItemsPath := filepath.Join(configDir, "dotfiles", "vault-items.json")
+	vaultItemsPath := filepath.Join(configDir, "blackdot", "vault-items.json")
 
 	data, err := os.ReadFile(vaultItemsPath)
 	if err != nil {
@@ -1868,7 +2530,7 @@ func loadSyncableItems() (map[string]string, error) {
 	if configDir == "" {
 		configDir = filepath.Join(os.Getenv("HOME"), ".config")
 	}
-	vaultItemsPath := filepath.Join(configDir, "dotfiles", "vault-items.json")
+	vaultItemsPath := filepath.Join(configDir, "blackdot", "vault-items.json")
 
 	data, err := os.ReadFile(vaultItemsPath)
 	if err != nil {
@@ -2017,12 +2679,12 @@ func vaultCreate(name, content string, dryRun, force bool) error {
 	}
 
 	fmt.Println()
-	fmt.Println("Verify with: dotfiles vault list")
+	fmt.Println("Verify with: blackdot vault list")
 
 	return nil
 }
 
-// isProtectedItem checks if an item is a protected dotfiles item
+// isProtectedItem checks if an item is a protected blackdot item
 func isProtectedItem(name string) bool {
 	protected := []string{
 		"SSH-", "AWS-", "Git-Config", "Environment-Secrets",
@@ -2098,8 +2760,8 @@ func vaultDelete(names []string, dryRun, force bool) error {
 		// Check if protected
 		if isProtectedItem(name) {
 			fmt.Println()
-			Warn("⚠ This is a protected dotfiles item!")
-			fmt.Println("Deleting this will break your dotfiles restore.")
+			Warn("⚠ This is a protected blackdot item!")
+			fmt.Println("Deleting this will break your blackdot restore.")
 			fmt.Println()
 
 			// Always require confirmation for protected items
