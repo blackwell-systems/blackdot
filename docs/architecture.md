@@ -328,7 +328,7 @@ dotfiles/
 │   ├── dotfiles-uninstall  # Clean removal
 │   └── blackdot-metrics    # Show metrics
 │
-├── zsh/
+├── zsh/                    # Zsh config (macOS/Linux)
 │   ├── .zshrc              # Main entry (symlinked)
 │   ├── .p10k.zsh           # Powerlevel10k theme
 │   ├── completions/        # Tab completions
@@ -338,12 +338,19 @@ dotfiles/
 │       ├── 10-environment.zsh
 │       ├── 20-history.zsh
 │       ├── 30-prompt.zsh
-│       ├── 40-aliases.zsh  # dotfiles command
+│       ├── 40-aliases.zsh  # blackdot command
 │       ├── 50-functions.zsh
 │       ├── 60-completions.zsh
 │       ├── 70-plugins.zsh
 │       ├── 80-tools.zsh
 │       └── 90-local.zsh
+│
+├── powershell/             # PowerShell module (Windows)
+│   ├── Blackdot.psm1       # Main module (hooks, aliases, tools)
+│   ├── Blackdot.psd1       # Module manifest
+│   ├── Install-Blackdot.ps1 # Module installer
+│   ├── Install-Packages.ps1 # Winget package installer
+│   └── packages.json       # Package definitions
 │
 ├── lib/                    # Shared libraries
 │   ├── _logging.sh         # Logging functions
@@ -411,6 +418,30 @@ flowchart LR
 | `70-plugins.zsh` | ZSH plugins |
 | `80-tools.zsh` | Tool integrations (nvm, etc.) |
 | `90-local.zsh` | Machine-specific overrides |
+
+## PowerShell Module (Windows)
+
+The PowerShell module provides equivalent functionality for Windows users:
+
+```powershell
+Import-Module Blackdot
+```
+
+| Component | Purpose |
+|-----------|---------|
+| `Blackdot.psm1` | Main module with all functions |
+| `Blackdot.psd1` | Module manifest (version, exports) |
+| Hooks | `Invoke-BlackdotHook`, `Enable-BlackdotHooks` |
+| Git aliases | `gst`, `gd`, `gco`, `gcm`, `gp`, `gl` |
+| Tool wrappers | `aws-*`, `docker-*`, `claude-*` |
+| Navigation | `z` (zoxide), `fnm-*` (Node.js) |
+
+**Installation:**
+```powershell
+irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
+```
+
+Both Zsh and PowerShell modules share the same aliases where possible, so commands like `gst` (git status) work in both shells.
 
 ## Vault System
 
