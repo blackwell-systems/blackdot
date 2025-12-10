@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# DOTFILES_DIR is parent of bootstrap/
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# BLACKDOT_DIR is parent of bootstrap/
+BLACKDOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OS="$(uname -s)"
 
-echo "Dotfiles repo: $DOTFILES_DIR"
+echo "Dotfiles repo: $BLACKDOT_DIR"
 echo "Detected OS: $OS"
 
 # Helper: safely create symlink, backing up existing real files
@@ -26,7 +26,7 @@ safe_symlink() {
 }
 
 # Zsh config (shared)
-safe_symlink "$DOTFILES_DIR/zsh/zshrc" "$HOME/.zshrc"
+safe_symlink "$BLACKDOT_DIR/zsh/zshrc" "$HOME/.zshrc"
 
 # Powerlevel10k theme config (only if p10k is installed or will be)
 setup_p10k_config() {
@@ -50,7 +50,7 @@ setup_p10k_config() {
   fi
 
   if [[ "$use_bundled" =~ ^[Yy] ]]; then
-    safe_symlink "$DOTFILES_DIR/zsh/p10k.zsh" "$HOME/.p10k.zsh"
+    safe_symlink "$BLACKDOT_DIR/zsh/p10k.zsh" "$HOME/.p10k.zsh"
     echo "Powerlevel10k config linked (classic powerline theme)"
   else
     echo "Skipping p10k config. Run 'p10k configure' to set up your own theme."
@@ -72,16 +72,16 @@ fi
 if [ "$OS" = "Darwin" ]; then
   GHOSTTY_DIR="$HOME/Library/Application Support/com.mitchellh.ghostty"
   mkdir -p "$GHOSTTY_DIR"
-  if [ -f "$DOTFILES_DIR/ghostty/config" ]; then
-    safe_symlink "$DOTFILES_DIR/ghostty/config" "$GHOSTTY_DIR/config"
+  if [ -f "$BLACKDOT_DIR/ghostty/config" ]; then
+    safe_symlink "$BLACKDOT_DIR/ghostty/config" "$GHOSTTY_DIR/config"
   fi
 fi
 
 # Zellij config (cross-platform)
 ZELLIJ_DIR="$HOME/.config/zellij"
 mkdir -p "$ZELLIJ_DIR"
-if [ -f "$DOTFILES_DIR/zellij/config.kdl" ]; then
-  safe_symlink "$DOTFILES_DIR/zellij/config.kdl" "$ZELLIJ_DIR/config.kdl"
+if [ -f "$BLACKDOT_DIR/zellij/config.kdl" ]; then
+  safe_symlink "$BLACKDOT_DIR/zellij/config.kdl" "$ZELLIJ_DIR/config.kdl"
   echo "Zellij config linked: ~/.config/zellij/config.kdl"
 fi
 
@@ -116,13 +116,13 @@ if [ "$SKIP_CLAUDE_SETUP" != "true" ]; then
   ln -sfn "$CLAUDE_SHARED" "$HOME/.claude"
 
   # Link Claude config files from dotfiles
-  if [ -f "$DOTFILES_DIR/claude/settings.json" ]; then
-    safe_symlink "$DOTFILES_DIR/claude/settings.json" "$CLAUDE_SHARED/settings.json"
+  if [ -f "$BLACKDOT_DIR/claude/settings.json" ]; then
+    safe_symlink "$BLACKDOT_DIR/claude/settings.json" "$CLAUDE_SHARED/settings.json"
   fi
 
   # Link slash commands
-  if [ -d "$DOTFILES_DIR/claude/commands" ]; then
-    for cmd in "$DOTFILES_DIR/claude/commands"/*.md; do
+  if [ -d "$BLACKDOT_DIR/claude/commands" ]; then
+    for cmd in "$BLACKDOT_DIR/claude/commands"/*.md; do
       [ -f "$cmd" ] && safe_symlink "$cmd" "$CLAUDE_SHARED/commands/$(basename "$cmd")"
     done
   fi

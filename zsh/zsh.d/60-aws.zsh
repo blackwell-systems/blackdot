@@ -125,7 +125,7 @@ awsclear() {
 awstools() {
   require_feature "aws_helpers" || return 1
   # Source theme colors
-  source "${DOTFILES_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
+  source "${BLACKDOT_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
 
   # Check auth status first to determine logo color
   local logo_color is_authenticated

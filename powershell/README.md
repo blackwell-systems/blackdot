@@ -1,6 +1,6 @@
-# Dotfiles PowerShell Module
+# Blackdot PowerShell Module
 
-Cross-platform PowerShell integration for the dotfiles system. Provides hooks, aliases, and developer tools for Windows users.
+Cross-platform PowerShell integration for the blackdot system. Provides hooks, aliases, and developer tools for Windows users.
 
 > **Full Windows Setup Guide**: See [docs/windows-setup.md](../docs/windows-setup.md) for complete installation instructions.
 
@@ -8,11 +8,11 @@ Cross-platform PowerShell integration for the dotfiles system. Provides hooks, a
 
 ```powershell
 # 1. Clone the repository
-git clone https://github.com/blackwell-systems/dotfiles.git $HOME\workspace\dotfiles
+git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\blackdot
 
 # 2. Install the PowerShell module
-cd $HOME\workspace\dotfiles\powershell
-.\Install-Dotfiles.ps1
+cd $HOME\workspace\blackdot\powershell
+.\Install-Blackdot.ps1
 
 # 3. Install development packages (optional but recommended)
 .\Install-Packages.ps1
@@ -37,13 +37,13 @@ cd $HOME\workspace\dotfiles\powershell
 
 - **PowerShell 5.1+** (Windows built-in) or **PowerShell 7+** (recommended)
 - **Git** - `winget install Git.Git`
-- **dotfiles Go CLI** - Built from source or downloaded
+- **blackdot Go CLI** - Built from source or downloaded
 
 ### Install Module
 
 ```powershell
-cd $HOME\workspace\dotfiles\powershell
-.\Install-Dotfiles.ps1
+cd $HOME\workspace\blackdot\powershell
+.\Install-Blackdot.ps1
 ```
 
 ### Install Packages
@@ -167,7 +167,7 @@ fnm auto-switches when entering directories with `.nvmrc` or `.node-version`.
 
 ### Navigation (zoxide)
 ```powershell
-z dotfiles            # Jump to ~/workspace/dotfiles
+z blackdot            # Jump to ~/workspace/blackdot
 z proj                # Jump to frequently used "proj" dir
 Initialize-Zoxide     # Manually init zoxide
 ```
@@ -187,24 +187,24 @@ Initialize-Zoxide     # Manually init zoxide
 | `post_vault_pull` | After vault restore |
 | `pre_vault_push` | Before vault sync |
 | `post_vault_push` | After vault sync |
-| `pre_install` | Before dotfiles install |
-| `post_install` | After dotfiles install |
+| `pre_install` | Before blackdot install |
+| `post_install` | After blackdot install |
 
 ### Hook Commands
 
 ```powershell
 # Run a hook manually
-Invoke-DotfilesHook -Point "shell_init"
+Invoke-BlackdotHook -Point "shell_init"
 
 # Dry run (preview)
-Invoke-DotfilesHook -Point "post_vault_pull" -DryRun
+Invoke-BlackdotHook -Point "post_vault_pull" -DryRun
 
 # Disable/enable hooks
-Disable-DotfilesHooks
-Enable-DotfilesHooks
+Disable-BlackdotHooks
+Enable-BlackdotHooks
 
 # Register custom hook
-Register-DotfilesHook -Point "directory_change" -Script {
+Register-BlackdotHook -Point "directory_change" -Script {
     Write-Host "Changed to: $PWD"
 }
 ```
@@ -215,8 +215,8 @@ Register-DotfilesHook -Point "directory_change" -Script {
 
 | Variable | Purpose |
 |----------|---------|
-| `DOTFILES_DIR` | Override dotfiles installation path |
-| `DOTFILES_HOOKS_DISABLED` | Disable all hooks if `true` |
+| `BLACKDOT_DIR` | Override blackdot installation path |
+| `BLACKDOT_HOOKS_DISABLED` | Disable all hooks if `true` |
 
 ---
 
@@ -240,20 +240,20 @@ Register-DotfilesHook -Point "directory_change" -Script {
 
 ```powershell
 # Check if installed
-Get-Module -ListAvailable Dotfiles
+Get-Module -ListAvailable Blackdot
 
 # Check profile imports it
-Get-Content $PROFILE | Select-String "Dotfiles"
+Get-Content $PROFILE | Select-String "Blackdot"
 
 # Force reimport
-Import-Module Dotfiles -Force -Verbose
+Import-Module Blackdot -Force -Verbose
 ```
 
-### dotfiles CLI not found
+### blackdot CLI not found
 
 ```powershell
 # Check if in PATH
-where.exe dotfiles
+where.exe blackdot
 
 # Add Go bin to PATH
 $env:PATH += ";$HOME\go\bin"
@@ -264,13 +264,13 @@ $env:PATH += ";$HOME\go\bin"
 
 ```powershell
 # Check if hooks are enabled
-Get-DotfilesHook
+Get-BlackdotHook
 
 # Verify CLI works
-dotfiles hook list
+blackdot hook list
 
 # Enable hooks
-Enable-DotfilesHooks
+Enable-BlackdotHooks
 ```
 
 ### fnm/zoxide not working
@@ -292,9 +292,9 @@ Initialize-Zoxide
 
 | File | Purpose |
 |------|---------|
-| `Dotfiles.psm1` | PowerShell module (85+ functions) |
-| `Dotfiles.psd1` | Module manifest |
-| `Install-Dotfiles.ps1` | Module installer |
+| `Blackdot.psm1` | PowerShell module (85+ functions) |
+| `Blackdot.psd1` | Module manifest |
+| `Install-Blackdot.ps1` | Module installer |
 | `Install-Packages.ps1` | winget package installer |
 | `packages.json` | Package manifest |
 

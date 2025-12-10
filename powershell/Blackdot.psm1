@@ -1,25 +1,25 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    Dotfiles PowerShell module - Cross-platform hooks and aliases for Windows
+    Blackdot PowerShell module - Cross-platform hooks and aliases for Windows
 
 .DESCRIPTION
-    This module provides PowerShell equivalents of ZSH dotfiles functionality:
+    This module provides PowerShell equivalents of ZSH blackdot functionality:
     - Full lifecycle hooks system (24 hook points)
     - File-based, function-based, and JSON-configured hooks
-    - Aliases for dotfiles tools commands
+    - Aliases for blackdot tools commands
     - Integration with the Go CLI
 
 .NOTES
-    Author: Dotfiles
-    Requires: dotfiles Go CLI in PATH
+    Author: Blackdot
+    Requires: blackdot Go CLI in PATH
 #>
 
 # ============================================================
 # Module-level state
 # ============================================================
-$script:DotfilesLastDirectory = $null
-$script:DotfilesHooksEnabled = $true
+$script:BlackdotLastDirectory = $null
+$script:BlackdotHooksEnabled = $true
 
 # Hook storage: registered PowerShell functions
 $script:RegisteredHooks = @{}
@@ -71,36 +71,36 @@ $script:HOOK_FEATURE_MAP = @{
 }
 
 # Configuration paths (cross-platform)
-$script:HOOKS_DIR = if ($env:DOTFILES_HOOKS_DIR) {
-    $env:DOTFILES_HOOKS_DIR
+$script:HOOKS_DIR = if ($env:BLACKDOT_HOOKS_DIR) {
+    $env:BLACKDOT_HOOKS_DIR
 } elseif ($script:HomeDir) {
-    Join-Path $script:HomeDir ".config/dotfiles/hooks"
+    Join-Path $script:HomeDir ".config/blackdot/hooks"
 } else {
     $null
 }
 
-$script:HOOKS_CONFIG = if ($env:DOTFILES_HOOKS_CONFIG) {
-    $env:DOTFILES_HOOKS_CONFIG
+$script:HOOKS_CONFIG = if ($env:BLACKDOT_HOOKS_CONFIG) {
+    $env:BLACKDOT_HOOKS_CONFIG
 } elseif ($script:HomeDir) {
-    Join-Path $script:HomeDir ".config/dotfiles/hooks.json"
+    Join-Path $script:HomeDir ".config/blackdot/hooks.json"
 } else {
     $null
 }
 
 # Settings (can be overridden by env vars or JSON config)
-$script:HOOKS_FAIL_FAST = if ($env:DOTFILES_HOOKS_FAIL_FAST -eq 'true') { $true } else { $false }
-$script:HOOKS_VERBOSE = if ($env:DOTFILES_HOOKS_VERBOSE -eq 'true') { $true } else { $false }
-$script:HOOKS_TIMEOUT = if ($env:DOTFILES_HOOKS_TIMEOUT) { [int]$env:DOTFILES_HOOKS_TIMEOUT } else { 30 }
+$script:HOOKS_FAIL_FAST = if ($env:BLACKDOT_HOOKS_FAIL_FAST -eq 'true') { $true } else { $false }
+$script:HOOKS_VERBOSE = if ($env:BLACKDOT_HOOKS_VERBOSE -eq 'true') { $true } else { $false }
+$script:HOOKS_TIMEOUT = if ($env:BLACKDOT_HOOKS_TIMEOUT) { [int]$env:BLACKDOT_HOOKS_TIMEOUT } else { 30 }
 
 #region Utility Functions
 
-function Get-DotfilesPath {
+function Get-BlackdotPath {
     <#
     .SYNOPSIS
-        Get the dotfiles installation directory (cross-platform)
+        Get the blackdot installation directory (cross-platform)
     #>
-    if ($env:DOTFILES_DIR) {
-        return $env:DOTFILES_DIR
+    if ($env:BLACKDOT_DIR) {
+        return $env:BLACKDOT_DIR
     }
 
     # Cross-platform candidates
@@ -108,9 +108,9 @@ function Get-DotfilesPath {
     if (-not $home) { return $null }
 
     $candidates = @(
-        (Join-Path $home "workspace/dotfiles"),
-        (Join-Path $home "dotfiles"),
-        (Join-Path $home ".dotfiles")
+        (Join-Path $home "workspace/blackdot"),
+        (Join-Path $home "blackdot"),
+        (Join-Path $home ".blackdot")
     )
 
     foreach ($path in $candidates) {
@@ -122,12 +122,12 @@ function Get-DotfilesPath {
     return $null
 }
 
-function Test-DotfilesCli {
+function Test-BlackdotCli {
     <#
     .SYNOPSIS
-        Check if dotfiles CLI is available
+        Check if blackdot CLI is available
     #>
-    $null -ne (Get-Command "dotfiles" -ErrorAction SilentlyContinue)
+    $null -ne (Get-Command "blackdot" -ErrorAction SilentlyContinue)
 }
 
 function Test-HookPoint {
@@ -144,7 +144,7 @@ function Test-HookPoint {
 
 #region Hook System Core
 
-function Register-DotfilesHook {
+function Register-BlackdotHook {
     <#
     .SYNOPSIS
         Register a PowerShell function as a hook
@@ -159,7 +159,7 @@ function Register-DotfilesHook {
         Optional name for the hook (defaults to auto-generated)
 
     .EXAMPLE
-        Register-DotfilesHook -Point "post_vault_pull" -ScriptBlock { ssh-add ~/.ssh/id_ed25519 }
+        Register-BlackdotHook -Point "post_vault_pull" -ScriptBlock { ssh-add ~/.ssh/id_ed25519 }
     #>
     [CmdletBinding()]
     param(
@@ -204,7 +204,7 @@ function Register-DotfilesHook {
     }
 }
 
-function Unregister-DotfilesHook {
+function Unregister-BlackdotHook {
     <#
     .SYNOPSIS
         Unregister a hook by name
@@ -229,7 +229,7 @@ function Unregister-DotfilesHook {
     }
 }
 
-function Invoke-DotfilesHook {
+function Invoke-BlackdotHook {
     <#
     .SYNOPSIS
         Run all hooks for a point
@@ -247,8 +247,8 @@ function Invoke-DotfilesHook {
         Skip hook execution entirely
 
     .EXAMPLE
-        Invoke-DotfilesHook -Point "shell_init"
-        Invoke-DotfilesHook -Point "post_vault_pull" -Verbose
+        Invoke-BlackdotHook -Point "shell_init"
+        Invoke-BlackdotHook -Point "post_vault_pull" -Verbose
     #>
     [CmdletBinding()]
     param(
@@ -271,7 +271,7 @@ function Invoke-DotfilesHook {
     }
 
     # Master disable check
-    if (-not $script:DotfilesHooksEnabled -or $env:DOTFILES_HOOKS_DISABLED -eq 'true') {
+    if (-not $script:BlackdotHooksEnabled -or $env:BLACKDOT_HOOKS_DISABLED -eq 'true') {
         if ($localVerbose) { Write-Host "hook_run: hooks disabled globally" -ForegroundColor Gray }
         return $true
     }
@@ -282,10 +282,10 @@ function Invoke-DotfilesHook {
         return $false
     }
 
-    # Check parent feature (if dotfiles CLI available)
+    # Check parent feature (if blackdot CLI available)
     $parentFeature = $script:HOOK_FEATURE_MAP[$Point]
-    if ($parentFeature -and (Test-DotfilesCli)) {
-        $featureCheck = & dotfiles features check $parentFeature 2>$null
+    if ($parentFeature -and (Test-BlackdotCli)) {
+        $featureCheck = & blackdot features check $parentFeature 2>$null
         if ($LASTEXITCODE -ne 0) {
             if ($localVerbose) {
                 Write-Host "hook_run: parent feature '$parentFeature' disabled for $Point" -ForegroundColor Gray
@@ -418,13 +418,13 @@ function Invoke-DotfilesHook {
     }
 
     # 4. Also call Go CLI hook run (for file-based .sh/.zsh hooks)
-    if (Test-DotfilesCli) {
+    if (Test-BlackdotCli) {
         try {
             $verboseFlag = if ($localVerbose) { "--verbose" } else { "" }
             if ($verboseFlag) {
-                & dotfiles hook run $verboseFlag $Point @Arguments 2>&1 | Out-Null
+                & blackdot hook run $verboseFlag $Point @Arguments 2>&1 | Out-Null
             } else {
-                & dotfiles hook run $Point @Arguments 2>&1 | Out-Null
+                & blackdot hook run $Point @Arguments 2>&1 | Out-Null
             }
         }
         catch {
@@ -435,7 +435,7 @@ function Invoke-DotfilesHook {
     return -not $failed
 }
 
-function Get-DotfilesHook {
+function Get-BlackdotHook {
     <#
     .SYNOPSIS
         List hooks for a point or all points
@@ -559,7 +559,7 @@ function Get-DotfilesHook {
     }
 }
 
-function Get-DotfilesHookPoints {
+function Get-BlackdotHookPoints {
     <#
     .SYNOPSIS
         List all available hook points with descriptions
@@ -572,7 +572,7 @@ function Get-DotfilesHookPoints {
         'post_install' = 'After install.sh completes'
         'pre_bootstrap' = 'Before bootstrap script'
         'post_bootstrap' = 'After bootstrap completes'
-        'pre_upgrade' = 'Before dotfiles upgrade'
+        'pre_upgrade' = 'Before blackdot upgrade'
         'post_upgrade' = 'After upgrade completes'
         'pre_vault_pull' = 'Before restoring secrets'
         'post_vault_pull' = 'After secrets restored (e.g., ssh-add)'
@@ -611,7 +611,7 @@ function Get-DotfilesHookPoints {
     }
 }
 
-function Add-DotfilesHook {
+function Add-BlackdotHook {
     <#
     .SYNOPSIS
         Add a hook script to a point
@@ -653,7 +653,7 @@ function Add-DotfilesHook {
     Write-Host "Hook will run during: $Point" -ForegroundColor Gray
 }
 
-function Remove-DotfilesHook {
+function Remove-BlackdotHook {
     <#
     .SYNOPSIS
         Remove a hook script from a point
@@ -684,7 +684,7 @@ function Remove-DotfilesHook {
     }
 }
 
-function Test-DotfilesHook {
+function Test-BlackdotHook {
     <#
     .SYNOPSIS
         Test hooks for a point (verbose dry-run style)
@@ -701,13 +701,13 @@ function Test-DotfilesHook {
     Write-Host "`nTesting hooks for: $Point" -ForegroundColor Cyan
     Write-Host ("=" * 60)
 
-    Get-DotfilesHook -Point $Point
+    Get-BlackdotHook -Point $Point
 
     Write-Host "`n" + ("-" * 60)
     Write-Host "Executing with verbose:" -ForegroundColor Yellow
     Write-Host ""
 
-    $result = Invoke-DotfilesHook -Point $Point -VerboseOutput
+    $result = Invoke-BlackdotHook -Point $Point -VerboseOutput
 
     Write-Host ""
     if ($result) {
@@ -718,22 +718,22 @@ function Test-DotfilesHook {
     }
 }
 
-function Enable-DotfilesHooks {
+function Enable-BlackdotHooks {
     <#
     .SYNOPSIS
-        Enable dotfiles hooks
+        Enable blackdot hooks
     #>
-    $script:DotfilesHooksEnabled = $true
-    Write-Host "Dotfiles hooks enabled" -ForegroundColor Green
+    $script:BlackdotHooksEnabled = $true
+    Write-Host "Blackdot hooks enabled" -ForegroundColor Green
 }
 
-function Disable-DotfilesHooks {
+function Disable-BlackdotHooks {
     <#
     .SYNOPSIS
-        Disable dotfiles hooks
+        Disable blackdot hooks
     #>
-    $script:DotfilesHooksEnabled = $false
-    Write-Host "Dotfiles hooks disabled" -ForegroundColor Yellow
+    $script:BlackdotHooksEnabled = $false
+    Write-Host "Blackdot hooks disabled" -ForegroundColor Yellow
 }
 
 #endregion
@@ -765,9 +765,9 @@ function Set-LocationWithHook {
     $currentLocation = Get-Location
 
     if ($previousLocation.Path -ne $currentLocation.Path) {
-        $env:DOTFILES_PREVIOUS_DIR = $previousLocation.Path
-        $env:DOTFILES_CURRENT_DIR = $currentLocation.Path
-        Invoke-DotfilesHook -Point "directory_change" | Out-Null
+        $env:BLACKDOT_PREVIOUS_DIR = $previousLocation.Path
+        $env:BLACKDOT_CURRENT_DIR = $currentLocation.Path
+        Invoke-BlackdotHook -Point "directory_change" | Out-Null
     }
 }
 
@@ -788,8 +788,8 @@ try {
 #region Shell Exit Hook
 
 $null = Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
-    if ($script:DotfilesHooksEnabled) {
-        Invoke-DotfilesHook -Point "shell_exit" | Out-Null
+    if ($script:BlackdotHooksEnabled) {
+        Invoke-BlackdotHook -Point "shell_exit" | Out-Null
     }
 }
 
@@ -798,22 +798,22 @@ $null = Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
 #region Tool Aliases
 
 # SSH Tools
-function ssh-keys { dotfiles tools ssh keys @args }
-function ssh-gen { dotfiles tools ssh gen @args }
-function ssh-list { dotfiles tools ssh list @args }
-function ssh-agent-status { dotfiles tools ssh agent @args }
-function ssh-fp { dotfiles tools ssh fp @args }
-function ssh-tunnel { dotfiles tools ssh tunnel @args }
-function ssh-socks { dotfiles tools ssh socks @args }
-function ssh-status { dotfiles tools ssh status @args }
-function ssh-copy { dotfiles tools ssh copy @args }
+function ssh-keys { blackdot tools ssh keys @args }
+function ssh-gen { blackdot tools ssh gen @args }
+function ssh-list { blackdot tools ssh list @args }
+function ssh-agent-status { blackdot tools ssh agent @args }
+function ssh-fp { blackdot tools ssh fp @args }
+function ssh-tunnel { blackdot tools ssh tunnel @args }
+function ssh-socks { blackdot tools ssh socks @args }
+function ssh-status { blackdot tools ssh status @args }
+function ssh-copy { blackdot tools ssh copy @args }
 
 # AWS Tools
-function aws-profiles { dotfiles tools aws profiles @args }
-function aws-who { dotfiles tools aws who @args }
-function aws-login { dotfiles tools aws login @args }
+function aws-profiles { blackdot tools aws profiles @args }
+function aws-who { blackdot tools aws who @args }
+function aws-login { blackdot tools aws login @args }
 function aws-switch {
-    $result = dotfiles tools aws switch @args
+    $result = blackdot tools aws switch @args
     if ($LASTEXITCODE -eq 0 -and $result) {
         $result | ForEach-Object {
             if ($_ -match '^export (\w+)=(.*)$') {
@@ -823,7 +823,7 @@ function aws-switch {
     }
 }
 function aws-assume {
-    $result = dotfiles tools aws assume @args
+    $result = blackdot tools aws assume @args
     if ($LASTEXITCODE -eq 0 -and $result) {
         $result | ForEach-Object {
             if ($_ -match '^export (\w+)=(.*)$') {
@@ -838,12 +838,12 @@ function aws-clear {
     Remove-Item env:AWS_SESSION_TOKEN -ErrorAction SilentlyContinue
     Write-Host "Cleared AWS temporary credentials" -ForegroundColor Green
 }
-function aws-status { dotfiles tools aws status @args }
+function aws-status { blackdot tools aws status @args }
 
 # CDK Tools
-function cdk-init { dotfiles tools cdk init @args }
+function cdk-init { blackdot tools cdk init @args }
 function cdk-env {
-    $result = dotfiles tools cdk env @args
+    $result = blackdot tools cdk env @args
     if ($LASTEXITCODE -eq 0 -and $result) {
         $result | ForEach-Object {
             if ($_ -match '^export (\w+)=(.*)$') {
@@ -857,58 +857,58 @@ function cdk-env-clear {
     Remove-Item env:CDK_DEFAULT_REGION -ErrorAction SilentlyContinue
     Write-Host "Cleared CDK environment variables" -ForegroundColor Green
 }
-function cdk-outputs { dotfiles tools cdk outputs @args }
-function cdk-context { dotfiles tools cdk context @args }
-function cdk-status { dotfiles tools cdk status @args }
+function cdk-outputs { blackdot tools cdk outputs @args }
+function cdk-context { blackdot tools cdk context @args }
+function cdk-status { blackdot tools cdk status @args }
 
 # Go Tools
-function go-new { dotfiles tools go new @args }
-function go-init { dotfiles tools go init @args }
-function go-test { dotfiles tools go test @args }
-function go-cover { dotfiles tools go cover @args }
-function go-lint { dotfiles tools go lint @args }
-function go-outdated { dotfiles tools go outdated @args }
-function go-update { dotfiles tools go update @args }
-function go-build-all { dotfiles tools go build-all @args }
-function go-bench { dotfiles tools go bench @args }
-function go-info { dotfiles tools go info @args }
+function go-new { blackdot tools go new @args }
+function go-init { blackdot tools go init @args }
+function go-test { blackdot tools go test @args }
+function go-cover { blackdot tools go cover @args }
+function go-lint { blackdot tools go lint @args }
+function go-outdated { blackdot tools go outdated @args }
+function go-update { blackdot tools go update @args }
+function go-build-all { blackdot tools go build-all @args }
+function go-bench { blackdot tools go bench @args }
+function go-info { blackdot tools go info @args }
 
 # Rust Tools
-function rust-new { dotfiles tools rust new @args }
-function rust-update { dotfiles tools rust update @args }
-function rust-switch { dotfiles tools rust switch @args }
-function rust-lint { dotfiles tools rust lint @args }
-function rust-fix { dotfiles tools rust fix @args }
-function rust-outdated { dotfiles tools rust outdated @args }
-function rust-expand { dotfiles tools rust expand @args }
-function rust-info { dotfiles tools rust info @args }
+function rust-new { blackdot tools rust new @args }
+function rust-update { blackdot tools rust update @args }
+function rust-switch { blackdot tools rust switch @args }
+function rust-lint { blackdot tools rust lint @args }
+function rust-fix { blackdot tools rust fix @args }
+function rust-outdated { blackdot tools rust outdated @args }
+function rust-expand { blackdot tools rust expand @args }
+function rust-info { blackdot tools rust info @args }
 
 # Python Tools
-function py-new { dotfiles tools python new @args }
-function py-clean { dotfiles tools python clean @args }
-function py-venv { dotfiles tools python venv @args }
-function py-test { dotfiles tools python test @args }
-function py-cover { dotfiles tools python cover @args }
-function py-info { dotfiles tools python info @args }
+function py-new { blackdot tools python new @args }
+function py-clean { blackdot tools python clean @args }
+function py-venv { blackdot tools python venv @args }
+function py-test { blackdot tools python test @args }
+function py-cover { blackdot tools python cover @args }
+function py-info { blackdot tools python info @args }
 
 # Docker Tools
-function docker-ps { dotfiles tools docker ps @args }
-function docker-images { dotfiles tools docker images @args }
-function docker-ip { dotfiles tools docker ip @args }
-function docker-env { dotfiles tools docker env @args }
-function docker-ports { dotfiles tools docker ports @args }
-function docker-stats { dotfiles tools docker stats @args }
-function docker-vols { dotfiles tools docker vols @args }
-function docker-nets { dotfiles tools docker nets @args }
-function docker-inspect { dotfiles tools docker inspect @args }
-function docker-clean { dotfiles tools docker clean @args }
-function docker-prune { dotfiles tools docker prune @args }
-function docker-status { dotfiles tools docker status @args }
+function docker-ps { blackdot tools docker ps @args }
+function docker-images { blackdot tools docker images @args }
+function docker-ip { blackdot tools docker ip @args }
+function docker-env { blackdot tools docker env @args }
+function docker-ports { blackdot tools docker ports @args }
+function docker-stats { blackdot tools docker stats @args }
+function docker-vols { blackdot tools docker vols @args }
+function docker-nets { blackdot tools docker nets @args }
+function docker-inspect { blackdot tools docker inspect @args }
+function docker-clean { blackdot tools docker clean @args }
+function docker-prune { blackdot tools docker prune @args }
+function docker-status { blackdot tools docker status @args }
 
 # Claude Tools
-function claude-status { dotfiles tools claude status @args }
-function claude-env { dotfiles tools claude env @args }
-function claude-init { dotfiles tools claude init @args }
+function claude-status { blackdot tools claude status @args }
+function claude-env { blackdot tools claude env @args }
+function claude-init { blackdot tools claude init @args }
 function claude-bedrock {
     <#
     .SYNOPSIS
@@ -923,7 +923,7 @@ function claude-bedrock {
 
     if ($Eval) {
         # Get the exports and set them
-        $output = dotfiles tools claude bedrock --eval 2>&1
+        $output = blackdot tools claude bedrock --eval 2>&1
         if ($LASTEXITCODE -ne 0) {
             Write-Error $output
             return
@@ -938,7 +938,7 @@ function claude-bedrock {
         }
         Write-Host "`nClaude Code configured for AWS Bedrock" -ForegroundColor Cyan
     } else {
-        dotfiles tools claude bedrock @args
+        blackdot tools claude bedrock @args
     }
 }
 function claude-max {
@@ -955,7 +955,7 @@ function claude-max {
 
     if ($Eval) {
         # Get the unsets and apply them
-        $output = dotfiles tools claude max --eval 2>&1
+        $output = blackdot tools claude max --eval 2>&1
         foreach ($line in $output -split "`n") {
             if ($line -match '^unset\s+(\w+)$') {
                 $varName = $matches[1]
@@ -965,7 +965,7 @@ function claude-max {
         }
         Write-Host "`nClaude Code configured for Anthropic Max" -ForegroundColor Cyan
     } else {
-        dotfiles tools claude max @args
+        blackdot tools claude max @args
     }
 }
 function claude-switch {
@@ -1016,29 +1016,29 @@ Set-Alias -Name cm -Value claude-max -Scope Global -Force  # Alias for cmax
 # Tool Group Aliases
 # These expose the full tool category as a single command
 # Usage: sshtools keys, awstools profiles, cdktools status, etc.
-function sshtools    { dotfiles tools ssh @args }
-function awstools    { dotfiles tools aws @args }
-function cdktools    { dotfiles tools cdk @args }
-function gotools     { dotfiles tools go @args }
-function rusttools   { dotfiles tools rust @args }
-function pytools     { dotfiles tools python @args }
-function dockertools { dotfiles tools docker @args }
-function claudetools { dotfiles tools claude @args }
+function sshtools    { blackdot tools ssh @args }
+function awstools    { blackdot tools aws @args }
+function cdktools    { blackdot tools cdk @args }
+function gotools     { blackdot tools go @args }
+function rusttools   { blackdot tools rust @args }
+function pytools     { blackdot tools python @args }
+function dockertools { blackdot tools docker @args }
+function claudetools { blackdot tools claude @args }
 
 #endregion
 
-#region Core Dotfiles Commands
+#region Core Blackdot Commands
 
-function dotfiles-status { dotfiles status @args }
-function dotfiles-doctor { dotfiles doctor @args }
-function dotfiles-setup { dotfiles setup @args }
-function dotfiles-vault { dotfiles vault @args }
-function dotfiles-hook { dotfiles hook @args }
+function blackdot-status { blackdot status @args }
+function blackdot-doctor { blackdot doctor @args }
+function blackdot-setup { blackdot setup @args }
+function blackdot-vault { blackdot vault @args }
+function blackdot-hook { blackdot hook @args }
 
-function dotfiles-features {
+function blackdot-features {
     <#
     .SYNOPSIS
-        Wrapper for dotfiles features that auto-reloads module after changes
+        Wrapper for blackdot features that auto-reloads module after changes
     .DESCRIPTION
         When enabling, disabling, or applying presets, the module is automatically
         reloaded to apply the changes. This is safe in PowerShell (just reloads
@@ -1054,9 +1054,9 @@ function dotfiles-features {
 
     # Run the actual command
     if ($Subcommand) {
-        & dotfiles features $Subcommand @RemainingArgs
+        & blackdot features $Subcommand @RemainingArgs
     } else {
-        & dotfiles features
+        & blackdot features
     }
     $exitCode = $LASTEXITCODE
 
@@ -1064,19 +1064,19 @@ function dotfiles-features {
     if ($exitCode -eq 0 -and $Subcommand -match '^(enable|disable|preset)$') {
         Write-Host ""
         Write-Host "Reloading module to apply feature changes..." -ForegroundColor Yellow
-        Import-Module Dotfiles -Force -Global
+        Import-Module Blackdot -Force -Global
     }
 
     return $exitCode
 }
 
 # Wrapper function that handles feature commands with auto-reload
-function Invoke-Dotfiles {
+function Invoke-Blackdot {
     <#
     .SYNOPSIS
-        Main dotfiles wrapper with feature change detection
+        Main blackdot wrapper with feature change detection
     .DESCRIPTION
-        Wraps the dotfiles CLI. When 'features enable/disable/preset' is used,
+        Wraps the blackdot CLI. When 'features enable/disable/preset' is used,
         auto-reloads the PowerShell module to apply changes. This is safe in
         PowerShell (Import-Module -Force just reloads, doesn't replace shell).
     #>
@@ -1090,9 +1090,9 @@ function Invoke-Dotfiles {
 
     # Run the actual command
     if ($Command) {
-        & dotfiles $Command @RemainingArgs
+        & blackdot $Command @RemainingArgs
     } else {
-        & dotfiles
+        & blackdot
     }
     $exitCode = $LASTEXITCODE
 
@@ -1102,7 +1102,7 @@ function Invoke-Dotfiles {
         if ($subcmd -match '^(enable|disable|preset)$') {
             Write-Host ""
             Write-Host "Reloading module to apply feature changes..." -ForegroundColor Yellow
-            Import-Module Dotfiles -Force -Global
+            Import-Module Blackdot -Force -Global
         }
     }
 
@@ -1110,13 +1110,13 @@ function Invoke-Dotfiles {
 }
 
 # Create aliases for export (must be in module scope, not global, for Export-ModuleMember)
-New-Alias -Name d -Value Invoke-Dotfiles -Force
+New-Alias -Name d -Value Invoke-Blackdot -Force
 
 #endregion
 
 #region Module Initialization
 
-function Initialize-DotfilesHooks {
+function Initialize-BlackdotHooks {
     <#
     .SYNOPSIS
         Initialize hooks system from JSON config
@@ -1148,25 +1148,25 @@ function Initialize-DotfilesHooks {
     }
 }
 
-function Initialize-Dotfiles {
+function Initialize-Blackdot {
     <#
     .SYNOPSIS
-        Initialize dotfiles module and run shell_init hook
+        Initialize blackdot module and run shell_init hook
     #>
 
-    if (-not (Test-DotfilesCli)) {
-        Write-Warning "dotfiles CLI not found in PATH. Some features will be unavailable."
-        Write-Warning "Install from: https://github.com/blackwell-systems/dotfiles"
+    if (-not (Test-BlackdotCli)) {
+        Write-Warning "blackdot CLI not found in PATH. Some features will be unavailable."
+        Write-Warning "Install from: https://github.com/blackwell-systems/blackdot"
     }
 
     # Initialize hooks configuration
-    Initialize-DotfilesHooks
+    Initialize-BlackdotHooks
 
     # Store initial directory
-    $script:DotfilesLastDirectory = Get-Location
+    $script:BlackdotLastDirectory = Get-Location
 
     # Run shell_init hook
-    Invoke-DotfilesHook -Point "shell_init" | Out-Null
+    Invoke-BlackdotHook -Point "shell_init" | Out-Null
 
     # Initialize zoxide if available (smarter cd)
     if (Get-Command zoxide -ErrorAction SilentlyContinue) {
@@ -1178,7 +1178,7 @@ function Initialize-Dotfiles {
         fnm env --use-on-cd | Out-String | Invoke-Expression
     }
 
-    Write-Verbose "Dotfiles PowerShell module initialized"
+    Write-Verbose "Blackdot PowerShell module initialized"
 }
 
 #endregion
@@ -1283,23 +1283,23 @@ function Initialize-Starship {
 
 Export-ModuleMember -Function @(
     # Hook system
-    'Register-DotfilesHook',
-    'Unregister-DotfilesHook',
-    'Invoke-DotfilesHook',
-    'Get-DotfilesHook',
-    'Get-DotfilesHookPoints',
-    'Add-DotfilesHook',
-    'Remove-DotfilesHook',
-    'Test-DotfilesHook',
-    'Enable-DotfilesHooks',
-    'Disable-DotfilesHooks',
+    'Register-BlackdotHook',
+    'Unregister-BlackdotHook',
+    'Invoke-BlackdotHook',
+    'Get-BlackdotHook',
+    'Get-BlackdotHookPoints',
+    'Add-BlackdotHook',
+    'Remove-BlackdotHook',
+    'Test-BlackdotHook',
+    'Enable-BlackdotHooks',
+    'Disable-BlackdotHooks',
 
     # Utilities
-    'Get-DotfilesPath',
-    'Test-DotfilesCli',
+    'Get-BlackdotPath',
+    'Test-BlackdotCli',
     'Test-HookPoint',
-    'Initialize-Dotfiles',
-    'Initialize-DotfilesHooks',
+    'Initialize-Blackdot',
+    'Initialize-BlackdotHooks',
 
     # CD wrapper
     'Set-LocationWithHook',
@@ -1342,15 +1342,15 @@ Export-ModuleMember -Function @(
     'Initialize-Starship',
 
     # Core commands
-    'dotfiles-status', 'dotfiles-doctor', 'dotfiles-setup',
-    'dotfiles-features', 'dotfiles-vault', 'dotfiles-hook',
+    'blackdot-status', 'blackdot-doctor', 'blackdot-setup',
+    'blackdot-features', 'blackdot-vault', 'blackdot-hook',
 
     # Tool group aliases (expose full tool category)
     'sshtools', 'awstools', 'cdktools', 'gotools',
     'rusttools', 'pytools', 'dockertools', 'claudetools',
 
     # Main wrapper (handles feature auto-reload)
-    'Invoke-Dotfiles'
+    'Invoke-Blackdot'
 )
 
 Export-ModuleMember -Alias @('cd', 'd')
@@ -1358,7 +1358,7 @@ Export-ModuleMember -Alias @('cd', 'd')
 #endregion
 
 # Auto-initialize when module is imported
-Initialize-Dotfiles
+Initialize-Blackdot
 
 # Auto-initialize Starship prompt if available (silent)
 Initialize-Starship -Quiet

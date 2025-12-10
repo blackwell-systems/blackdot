@@ -1,15 +1,15 @@
-#compdef dotfiles
+#compdef blackdot
 # ============================================================
-# ZSH completion for the dotfiles command
+# ZSH completion for the blackdot command
 # Provides tab completion for all subcommands and options
 # ============================================================
 
 # Helper: Get list of features from registry
-_dotfiles_features_list() {
+_blackdot_features_list() {
     local -a features
-    if [[ -f "$DOTFILES_DIR/lib/_features.sh" ]]; then
+    if [[ -f "$BLACKDOT_DIR/lib/_features.sh" ]]; then
         # Extract feature names from FEATURE_REGISTRY
-        features=($(grep -oP '^\s*\["\K[^"]+' "$DOTFILES_DIR/lib/_features.sh" 2>/dev/null | head -30))
+        features=($(grep -oP '^\s*\["\K[^"]+' "$BLACKDOT_DIR/lib/_features.sh" 2>/dev/null | head -30))
     fi
     if [[ ${#features[@]} -eq 0 ]]; then
         # Fallback static list
@@ -24,7 +24,7 @@ _dotfiles_features_list() {
 }
 
 # Helper: Get vault items
-_dotfiles_vault_items() {
+_blackdot_vault_items() {
     local -a items
     items=(
         'SSH-Config:SSH configuration file'
@@ -38,7 +38,7 @@ _dotfiles_vault_items() {
 }
 
 # Subcommand: features
-_dotfiles_features() {
+_blackdot_features() {
     local -a subcmds
     subcmds=(
         'list:List all features and their status'
@@ -53,7 +53,7 @@ _dotfiles_features() {
     case $words[3] in
         enable|disable|status|deps)
             local -a features
-            features=($(_dotfiles_features_list))
+            features=($(_blackdot_features_list))
             _describe 'feature' features
             ;;
         preset)
@@ -79,7 +79,7 @@ _dotfiles_features() {
 }
 
 # Subcommand: vault
-_dotfiles_vault() {
+_blackdot_vault() {
     local -a subcmds
     subcmds=(
         'init:Initialize vault backend'
@@ -103,7 +103,7 @@ _dotfiles_vault() {
             _describe 'backend' backends
             ;;
         get|sync|push|pull)
-            _dotfiles_vault_items
+            _blackdot_vault_items
             ;;
         *)
             _describe 'vault command' subcmds
@@ -112,7 +112,7 @@ _dotfiles_vault() {
 }
 
 # Subcommand: template
-_dotfiles_template() {
+_blackdot_template() {
     local -a subcmds
     subcmds=(
         'init:Interactive template setup'
@@ -153,7 +153,7 @@ _dotfiles_template() {
 }
 
 # Subcommand: hook
-_dotfiles_hook() {
+_blackdot_hook() {
     local -a subcmds
     subcmds=(
         'list:List registered hooks'
@@ -188,7 +188,7 @@ _dotfiles_hook() {
 }
 
 # Subcommand: config
-_dotfiles_config() {
+_blackdot_config() {
     local -a subcmds
     subcmds=(
         'get:Get a config value'
@@ -205,7 +205,7 @@ _dotfiles_config() {
         'vault.backend' 'vault.auto_sync' 'vault.auto_backup'
         'packages.tier' 'packages.auto_update'
         'backup.enabled' 'backup.retention_days'
-        'paths.workspace_target' 'paths.dotfiles_dir'
+        'paths.workspace_target' 'paths.blackdot_dir'
     )
 
     case $words[3] in
@@ -219,7 +219,7 @@ _dotfiles_config() {
 }
 
 # Subcommand: backup
-_dotfiles_backup() {
+_blackdot_backup() {
     local -a subcmds
     subcmds=(
         'create:Create a new backup'
@@ -249,7 +249,7 @@ _dotfiles_backup() {
 }
 
 # Subcommand: doctor
-_dotfiles_doctor() {
+_blackdot_doctor() {
     _arguments \
         '--fix[Auto-fix issues where possible]' \
         '--json[Output as JSON]' \
@@ -258,7 +258,7 @@ _dotfiles_doctor() {
 }
 
 # Subcommand: packages
-_dotfiles_packages() {
+_blackdot_packages() {
     _arguments \
         '--check[Check for missing packages]' \
         '--install[Install missing packages]' \
@@ -268,7 +268,7 @@ _dotfiles_packages() {
 }
 
 # Subcommand: encrypt (age encryption)
-_dotfiles_encrypt() {
+_blackdot_encrypt() {
     local -a subcmds
     subcmds=(
         'init:Initialize age encryption (generate keys)'
@@ -291,7 +291,7 @@ _dotfiles_encrypt() {
 }
 
 # Main completion function
-_dotfiles() {
+_blackdot() {
     local -a commands
     commands=(
         'status:Quick visual dashboard'
@@ -310,7 +310,7 @@ _dotfiles() {
         'lint:Lint configuration files'
         'encrypt:Age encryption operations'
         'migrate:Migration utilities'
-        'uninstall:Remove dotfiles'
+        'uninstall:Remove blackdot'
         'help:Show help'
     )
 
@@ -322,15 +322,15 @@ _dotfiles() {
     # fi
 
     case $words[2] in
-        features)   _dotfiles_features ;;
-        vault)      _dotfiles_vault ;;
-        template)   _dotfiles_template ;;
-        hook)       _dotfiles_hook ;;
-        config)     _dotfiles_config ;;
-        backup)     _dotfiles_backup ;;
-        doctor)     _dotfiles_doctor ;;
-        packages)   _dotfiles_packages ;;
-        encrypt)    _dotfiles_encrypt ;;
+        features)   _blackdot_features ;;
+        vault)      _blackdot_vault ;;
+        template)   _blackdot_template ;;
+        hook)       _blackdot_hook ;;
+        config)     _blackdot_config ;;
+        backup)     _blackdot_backup ;;
+        doctor)     _blackdot_doctor ;;
+        packages)   _blackdot_packages ;;
+        encrypt)    _blackdot_encrypt ;;
         status|s)
             _arguments '--json[Output as JSON]'
             ;;
@@ -372,4 +372,4 @@ _dotfiles() {
     esac
 }
 
-_dotfiles "$@"
+_blackdot "$@"

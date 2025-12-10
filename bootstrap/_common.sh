@@ -15,10 +15,10 @@ _BOOTSTRAP_COMMON_LOADED=1
 # Source shared logging (provides info, pass, warn, fail, etc.)
 # ============================================================
 BOOTSTRAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOTFILES_DIR="$(dirname "$BOOTSTRAP_DIR")"
+BLACKDOT_DIR="$(dirname "$BOOTSTRAP_DIR")"
 
 # shellcheck source=../lib/_logging.sh
-source "$DOTFILES_DIR/lib/_logging.sh"
+source "$BLACKDOT_DIR/lib/_logging.sh"
 
 # ============================================================
 # Hooks support (call zsh hooks from bash)
@@ -35,13 +35,13 @@ run_hook() {
     fi
 
     # Skip if hooks library doesn't exist
-    if [[ ! -f "$DOTFILES_DIR/lib/_hooks.sh" ]]; then
+    if [[ ! -f "$BLACKDOT_DIR/lib/_hooks.sh" ]]; then
         return 0
     fi
 
     # Run hooks via zsh (silently fail if hooks disabled)
     zsh -c "
-        source '$DOTFILES_DIR/lib/_hooks.sh' 2>/dev/null || exit 0
+        source '$BLACKDOT_DIR/lib/_hooks.sh' 2>/dev/null || exit 0
         hook_run '$hook_point' \"\$@\"
     " -- "$@" 2>/dev/null || true
 }
@@ -274,15 +274,15 @@ setup_workspace_symlink() {
 # ============================================================
 link_dotfiles() {
     echo "Linking dotfiles..."
-    "$DOTFILES_DIR/bootstrap/bootstrap-dotfiles.sh"
+    "$BLACKDOT_DIR/bootstrap/bootstrap-dotfiles.sh"
 }
 
 # ============================================================
 # Template rendering (machine-specific configs)
 # ============================================================
 render_templates() {
-    local dotfiles_bin="$DOTFILES_DIR/bin/dotfiles"
-    local local_vars="$DOTFILES_DIR/templates/_variables.local.sh"
+    local dotfiles_bin="$BLACKDOT_DIR/bin/blackdot"
+    local local_vars="$BLACKDOT_DIR/templates/_variables.local.sh"
 
     # Check if template system is configured
     if [[ ! -f "$local_vars" ]]; then
@@ -305,20 +305,20 @@ render_templates() {
 # ============================================================
 run_brew_bundle() {
     # Determine which Brewfile to use based on BREWFILE_TIER
-    local brewfile="$DOTFILES_DIR/Brewfile"
+    local brewfile="$BLACKDOT_DIR/Brewfile"
     local tier="${BREWFILE_TIER:-full}"
 
     case "$tier" in
         minimal)
-            brewfile="$DOTFILES_DIR/Brewfile.minimal"
+            brewfile="$BLACKDOT_DIR/Brewfile.minimal"
             echo "Using minimal tier (essentials only)..."
             ;;
         enhanced)
-            brewfile="$DOTFILES_DIR/Brewfile.enhanced"
+            brewfile="$BLACKDOT_DIR/Brewfile.enhanced"
             echo "Using enhanced tier (modern tools, no containers)..."
             ;;
         full|*)
-            brewfile="$DOTFILES_DIR/Brewfile"
+            brewfile="$BLACKDOT_DIR/Brewfile"
             echo "Using full tier (everything)..."
             ;;
     esac

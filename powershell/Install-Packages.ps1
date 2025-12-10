@@ -85,7 +85,7 @@ $PackagesToInstall = switch ($Tier) {
 }
 
 Write-Host ""
-Write-Host "Dotfiles Package Installer" -ForegroundColor Cyan
+Write-Host "Blackdot Package Installer" -ForegroundColor Cyan
 Write-Host "==========================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Tier: $Tier ($($PackagesToInstall.Count) packages)" -ForegroundColor Yellow
