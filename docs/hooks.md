@@ -1,6 +1,65 @@
 # Hook System
 
-The hook system allows you to inject custom behavior at key lifecycle points without modifying core dotfiles scripts. Hooks are shell scripts or commands that execute before/after major operations.
+The hook system allows you to inject custom behavior at key lifecycle points without modifying core blackdot code. Hooks are shell scripts, functions, or commands that execute before/after major operations.
+
+---
+
+## Architecture: Dual-Layer System
+
+Blackdot's hook system operates in two layers that work together:
+
+### Layer 1: Go CLI Management (`internal/cli/hook.go`)
+
+The Go binary provides hook management commands:
+
+```bash
+blackdot hook list [point]       # List hooks for all or specific point
+blackdot hook run <point>        # Manually trigger hooks
+blackdot hook test <point>       # Dry-run with verbose output
+blackdot hook add <point> <file> # Add a hook script
+blackdot hook remove <point> <name> # Remove a hook
+blackdot hook points             # List all hook points
+```
+
+**Purpose:** CLI interface for discovering, managing, and manually triggering hooks.
+
+### Layer 2: Shell Runtime Execution (`lib/_hooks.sh`)
+
+The shell library provides runtime hook execution:
+
+```bash
+# In shell scripts / runtime
+source "${BLACKDOT_DIR}/lib/_hooks.sh"
+hook_run "post_vault_pull"       # Execute hooks at runtime
+hook_register "my_point" "func"  # Register function as hook
+```
+
+**Purpose:** Execute hooks during actual operations (vault pull, setup, shell init, etc.)
+
+### How They Work Together
+
+```mermaid
+graph TB
+    User[User Action] --> CLI[blackdot vault pull]
+    CLI --> VMux[vaultmux pulls secrets]
+    VMux --> Runtime[Shell hook_run function]
+    Runtime --> Discover[Discover hooks from:]
+    Discover --> F[1. Files in ~/.config/blackdot/hooks/]
+    Discover --> R[2. Registered functions]
+    Discover --> J[3. JSON config]
+    F --> Exec[Execute in priority order]
+    R --> Exec
+    J --> Exec
+    Exec --> Feature{Feature enabled?}
+    Feature -->|Yes| Run[Run hook]
+    Feature -->|No| Skip[Skip hook]
+```
+
+**Key points:**
+- **Go CLI** = Management interface (list, add, test)
+- **Shell library** = Runtime execution (actually runs hooks during operations)
+- **Both** read from same `~/.config/blackdot/hooks/` directory
+- **Feature-gated**: Hooks respect feature registry (vault hooks skip if vault disabled)
 
 ---
 
@@ -19,11 +78,14 @@ echo "Fixed SSH permissions"
 EOF
 chmod +x ~/.config/blackdot/hooks/post_vault_pull/10-fix-permissions.sh
 
-# Verify it's registered
+# Verify it's registered (Go CLI)
 blackdot hook list post_vault_pull
 
-# Test the hook
+# Test the hook (Go CLI dry-run)
 blackdot hook test post_vault_pull
+
+# The hook will run automatically when you:
+blackdot vault pull  # ← post_vault_pull hooks execute here
 ```
 
 ---
@@ -87,7 +149,7 @@ blackdot hook test post_vault_pull
 
 ## Understanding ZSH Hooks
 
-ZSH provides native hook functions that execute at specific points in the shell lifecycle. The dotfiles hook system builds on these to provide a more structured, manageable approach.
+ZSH provides native hook functions that execute at specific points in the shell lifecycle. Blackdot's hook system builds on these to provide a more structured, manageable approach.
 
 ### Native ZSH Hook Functions
 
@@ -176,15 +238,15 @@ add-zsh-hook zshaddhistory _filter_history
 
 ### How Dotfiles Hooks Map to ZSH Hooks
 
-The dotfiles hook system provides a higher-level abstraction over native ZSH hooks:
+Blackdot's hook system provides a higher-level abstraction over native ZSH hooks:
 
-| Dotfiles Hook | Underlying ZSH Mechanism |
+| Blackdot Hook | Underlying ZSH Mechanism |
 |---------------|-------------------------|
 | `shell_init` | Sourced at end of `.zshrc` |
 | `shell_exit` | `zshexit_functions` array |
 | `directory_change` | `chpwd_functions` array |
 
-**Why use dotfiles hooks instead of native?**
+**Why use blackdot hooks instead of native?**
 
 1. **File-based organization** - Hooks live in `~/.config/blackdot/hooks/`, not scattered in `.zshrc`
 2. **Easy enable/disable** - Toggle with `blackdot features` or JSON config
@@ -195,7 +257,7 @@ The dotfiles hook system provides a higher-level abstraction over native ZSH hoo
 
 ### Using Both Systems Together
 
-You can use native ZSH hooks alongside dotfiles hooks:
+You can use native ZSH hooks alongside blackdot hooks:
 
 ```zsh
 # In ~/.zshrc.local - use native hooks for fast, inline operations
@@ -207,11 +269,11 @@ _update_title() {
 }
 add-zsh-hook precmd _update_title
 
-# Complex hook (dotfiles system) - lives in separate file
+# Complex hook (blackdot system) - lives in separate file
 # ~/.config/blackdot/hooks/directory_change/10-project-env.zsh
 ```
 
-**Best practice:** Use native hooks for simple, fast operations that need to run on every prompt. Use dotfiles hooks for more complex, configurable behavior.
+**Best practice:** Use native hooks for simple, fast operations that need to run on every prompt. Use blackdot hooks for more complex, configurable behavior.
 
 ### Performance Considerations
 
@@ -238,11 +300,15 @@ add-zsh-hook periodic _periodic_fetch
 
 ---
 
-## Registration Methods
+## Hook Execution: 3 Types
+
+The shell runtime (`lib/_hooks.sh`) discovers and executes hooks in 3 ways, in this order:
 
 ### 1. File-Based Hooks (Recommended)
 
-Place executable scripts in `~/.config/blackdot/hooks/<hook_point>/`:
+**Discovered from:** `~/.config/blackdot/hooks/<point>/*.sh`
+
+Place executable scripts in hook point directories:
 
 ```bash
 ~/.config/blackdot/hooks/
@@ -260,9 +326,36 @@ Place executable scripts in `~/.config/blackdot/hooks/<hook_point>/`:
 - `50-*` - Normal priority
 - `90-*` - Late execution
 
-### 2. JSON Configuration
+**Pros:** Easy to manage, visible in filesystem, easy to share
+**Cons:** Requires executable permissions
 
-Configure hooks in `~/.config/blackdot/hooks.json`:
+### 2. Function-Based Hooks
+
+**Registered via:** `hook_register()` in shell scripts
+
+Register shell functions programmatically:
+
+```bash
+# In your shell initialization or script
+source "${BLACKDOT_DIR}/lib/_hooks.sh"
+
+my_post_pull_hook() {
+    echo "Vault pulled, running custom logic"
+    ssh-add ~/.ssh/id_ed25519 2>/dev/null
+}
+
+# Register the function
+hook_register "post_vault_pull" "my_post_pull_hook"
+```
+
+**Pros:** Dynamic registration, conditional logic, embedded in scripts
+**Cons:** Not visible via `blackdot hook list`, requires shell script knowledge
+
+### 3. JSON-Configured Hooks
+
+**Configured in:** `~/.config/blackdot/hooks.json`
+
+Define hooks declaratively:
 
 ```json
 {
@@ -392,7 +485,7 @@ done
 ```bash
 #!/bin/bash
 # hooks/examples/doctor_check/10-custom-checks.sh
-# Add custom checks to dotfiles doctor
+# Add custom checks to blackdot doctor
 
 # Check VPN connection
 if command -v openconnect &>/dev/null; then
@@ -455,7 +548,7 @@ fi
 ```bash
 # Copy an example to your hooks directory
 mkdir -p ~/.config/blackdot/hooks/post_vault_pull
-cp ~/workspace/dotfiles/hooks/examples/post_vault_pull/10-fix-permissions.sh \
+cp ~/workspace/blackdot/hooks/examples/post_vault_pull/10-fix-permissions.sh \
    ~/.config/blackdot/hooks/post_vault_pull/
 chmod +x ~/.config/blackdot/hooks/post_vault_pull/10-fix-permissions.sh
 ```
