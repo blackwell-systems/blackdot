@@ -7,6 +7,130 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.0] - 2025-12-10
+
+> **BREAKING CHANGE:** Complete rebrand from `dotfiles` to `blackdot`. All commands, environment variables, paths, and configuration locations have been renamed.
+
+### Changed - Complete Rebrand (dotfiles → blackdot)
+
+- **Go Module & CLI**
+  - Renamed Go module from `github.com/user/dotfiles` to `github.com/blackwell-systems/blackdot`
+  - CLI binary renamed from `dotfiles` to `blackdot`
+  - All internal package paths updated
+
+- **Environment Variables** (DOTFILES_* → BLACKDOT_*)
+  - `DOTFILES_DIR` → `BLACKDOT_DIR`
+  - `DOTFILES_DEBUG` → `BLACKDOT_DEBUG`
+  - `DOTFILES_OFFLINE` → `BLACKDOT_OFFLINE`
+  - `DOTFILES_VAULT_BACKEND` → `BLACKDOT_VAULT_BACKEND`
+  - `DOTFILES_SKIP_CHECKSUM` → `BLACKDOT_SKIP_CHECKSUM`
+  - All other `DOTFILES_*` variables renamed to `BLACKDOT_*`
+
+- **Configuration Paths**
+  - `~/.config/dotfiles/` → `~/.config/blackdot/`
+  - `~/.cache/dotfiles/` → `~/.cache/blackdot/`
+  - `~/workspace/dotfiles/` → `~/workspace/blackdot/`
+
+- **Shell Scripts & Aliases**
+  - Command alias: `dotfiles` → `blackdot` (short alias `d` retained)
+  - Function names: `dotfiles-upgrade` → `blackdot-upgrade`
+  - Cache files: `.dotfiles-update-check` → `.blackdot-update-check`
+  - All zsh/zsh.d/*.zsh files updated
+  - All vault/*.sh scripts updated
+  - All lib/*.sh scripts updated
+
+- **Install & Deployment**
+  - install.sh updated with new ASCII art and paths
+  - Dockerfile.medium updated with new paths
+  - Binary names: `dotfiles-${os}-${arch}` → `blackdot-${os}-${arch}`
+
+- **Documentation**
+  - Selective update of command references, env vars, paths, URLs
+  - Preserved generic "dotfiles" references where conceptually appropriate
+
+### Added - Vault Go Implementation (Full Feature Parity)
+
+All shell script functionality now implemented in Go, enabling multi-backend support:
+
+- **SSH Key Handling**
+  - `extractSSHPrivateKey()` - Extracts private key block from vault notes
+  - `extractSSHPublicKey()` - Extracts public key and creates `.pub` file
+  - Validates key structure (OPENSSH, RSA, EC, DSA key formats)
+
+- **Pre-restore Safety**
+  - Drift check before restore (warns if local files differ from vault)
+  - Auto-backup via `blackdot backup create` before restore
+  - Per-file backup (`.bak-TIMESTAMP`) before overwriting
+
+- **Enhanced `vault status`**
+  - Full drift detection (local vs vault comparison)
+  - Shows drifted items, missing from vault, missing locally
+  - Displays `vault.last_pull` and `vault.last_push` timestamps
+  - Recommends next actions based on state
+
+- **Interactive Discovery (`vault scan`)**
+  - Merge/Replace/Preview options for existing config
+  - Automatic backup before overwrite
+  - Saves directly to `~/.config/blackdot/vault-items.json`
+
+- **Timestamps & State**
+  - Tracks `vault.last_pull` and `vault.last_push` in config.json
+  - Saves drift state to `~/.cache/blackdot/vault-state.json`
+  - Human-readable "Xm ago", "Xh ago", "Xd ago" display
+
+- **Offline Mode**
+  - `BLACKDOT_OFFLINE=1` skips vault operations gracefully
+
+- **Environment Secrets**
+  - Creates `~/.local/load-env.sh` loader script automatically
+  - Proper 600 permissions on secrets files
+
+- **CLI Help**
+  - Fixed subcommand help to show flags properly
+  - All vault subcommands now display their specific options
+
+### Added - Migration Support
+
+- **User Migration Script** (`scripts/migrate-dotfiles-to-blackdot.sh`)
+  - Renames config directories
+  - Updates environment variables in shell configs
+  - Migrates aliases and functions
+  - Backs up before making changes
+
+### Fixed
+
+- Vault subcommand help now shows proper flags (--force, --dry-run, etc.)
+- Config paths consistently use `blackdot` instead of `dotfiles`
+
+### Removed
+
+- Shell script vault fallback (Go implementation now has full parity)
+- Legacy `DOTFILES_*` environment variables (use `BLACKDOT_*`)
+
+### Migration Guide
+
+1. **Update shell config:**
+   ```bash
+   # Replace in ~/.zshrc or ~/.bashrc:
+   export DOTFILES_DIR=...  →  export BLACKDOT_DIR=...
+   ```
+
+2. **Move config directory:**
+   ```bash
+   mv ~/.config/dotfiles ~/.config/blackdot
+   ```
+
+3. **Or run the migration script:**
+   ```bash
+   ./scripts/migrate-dotfiles-to-blackdot.sh
+   ```
+
+4. **Update aliases:**
+   ```bash
+   # Old: dotfiles status
+   # New: blackdot status
+   ```
+
 ## [4.0.0-rc2] - 2025-12-10
 
 ### Added
