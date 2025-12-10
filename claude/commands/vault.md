@@ -29,6 +29,6 @@ Common fixes by backend:
 - Not initialized: `pass init <gpg-id>`
 
 **All backends:**
-- Check items exist: `dotfiles vault check`
-- Restore secrets: `dotfiles vault restore`
-- Sync local changes: `dotfiles vault sync --all`
+- Check items exist: `blackdot vault check`
+- Restore secrets: `blackdot vault restore`
+- Sync local changes: `blackdot vault sync --all`
