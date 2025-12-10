@@ -8,16 +8,16 @@ The backup system creates timestamped snapshots of your configuration files, ena
 
 ```bash
 # Create a backup
-blackdot backup
+dotfiles backup
 
 # List available backups
-blackdot backup --list
+dotfiles backup --list
 
 # Restore from latest backup
-blackdot backup restore
+dotfiles backup restore
 
 # Restore specific backup
-blackdot backup restore backup-20241205-143022
+dotfiles backup restore backup-20241205-143022
 ```
 
 ---
@@ -37,14 +37,14 @@ The backup system captures essential configuration files:
 | **Secrets** | `~/.local/env.secrets` |
 | **Templates** | `~/.config/dotfiles/template-variables.sh` |
 
-> **Note:** SSH private keys are NOT backed up by the backup system. Use the vault system (`blackdot vault push/pull`) for key management.
+> **Note:** SSH private keys are NOT backed up by the backup system. Use the vault system (`dotfiles vault push/pull`) for key management.
 
 ### Backup Format
 
 Each backup is stored as a compressed tar archive with a manifest:
 
 ```
-~/.blackdot-backups/
+~/.dotfiles-backups/
 ├── backup-20241205-143022.tar.gz
 ├── backup-20241204-091500.tar.gz
 └── backup-20241203-180000.tar.gz
@@ -67,12 +67,12 @@ The manifest contains metadata:
 
 ## Commands
 
-### `blackdot backup`
+### `dotfiles backup`
 
 Create a new backup of all tracked configuration files.
 
 ```bash
-blackdot backup
+dotfiles backup
 ```
 
 Output:
@@ -81,12 +81,12 @@ Output:
 [OK] Backup created: backup-20241205-143022.tar.gz (8 files, compressed)
 ```
 
-### `blackdot backup --list`
+### `dotfiles backup --list`
 
 List all available backups with their sizes and compression status.
 
 ```bash
-blackdot backup --list
+dotfiles backup --list
 ```
 
 Output:
@@ -97,20 +97,20 @@ Available backups (max: 10, retention: 30d):
   backup-20241204-091500  (24K) [compressed]
   backup-20241203-180000  (22K) [compressed]
 
-Restore with: blackdot backup restore [backup-name]
-Location: /Users/john/.blackdot-backups
+Restore with: dotfiles backup restore [backup-name]
+Location: /Users/john/.dotfiles-backups
 ```
 
-### `blackdot backup restore [ID]`
+### `dotfiles backup restore [ID]`
 
 Restore files from a backup. Uses the latest backup if no ID specified.
 
 ```bash
 # Restore from latest
-blackdot backup restore
+dotfiles backup restore
 
 # Restore specific backup
-blackdot backup restore backup-20241203-180000
+dotfiles backup restore backup-20241203-180000
 ```
 
 Output:
@@ -124,12 +124,12 @@ Output:
 [OK] Restored 4 files from backup-20241203-180000
 ```
 
-### `blackdot backup --config`
+### `dotfiles backup --config`
 
 Show current backup configuration.
 
 ```bash
-blackdot backup --config
+dotfiles backup --config
 ```
 
 Output:
@@ -140,7 +140,7 @@ Backup Configuration:
   max_snapshots:  10
   retention_days: 30
   compress:       true
-  location:       /Users/john/.blackdot-backups
+  location:       /Users/john/.dotfiles-backups
 ```
 
 ---
@@ -156,7 +156,7 @@ Configure the backup system in `~/.config/dotfiles/config.json`:
     "max_snapshots": 10,
     "retention_days": 30,
     "compress": true,
-    "location": "~/.blackdot-backups"
+    "location": "~/.dotfiles-backups"
   }
 }
 ```
@@ -169,7 +169,7 @@ Configure the backup system in `~/.config/dotfiles/config.json`:
 | `max_snapshots` | number | `10` | Maximum backups to keep |
 | `retention_days` | number | `30` | Days to keep backups (0 = forever) |
 | `compress` | boolean | `true` | Use gzip compression |
-| `location` | string | `~/.blackdot-backups` | Backup storage directory |
+| `location` | string | `~/.dotfiles-backups` | Backup storage directory |
 
 ### Setting Configuration
 
@@ -177,19 +177,19 @@ Use the config command to modify settings:
 
 ```bash
 # Increase max snapshots
-blackdot config set backup.max_snapshots 20
+dotfiles config set backup.max_snapshots 20
 
 # Change retention period
-blackdot config set backup.retention_days 60
+dotfiles config set backup.retention_days 60
 
 # Disable compression (for debugging)
-blackdot config set backup.compress false
+dotfiles config set backup.compress false
 
 # Change backup location
-blackdot config set backup.location "~/Dropbox/blackdot-backups"
+dotfiles config set backup.location "~/Dropbox/dotfiles-backups"
 
 # Disable backup system
-blackdot config set backup.enabled false
+dotfiles config set backup.enabled false
 ```
 
 ---
@@ -226,22 +226,22 @@ Create a backup before modifying critical configs:
 
 ```bash
 # Backup current state
-blackdot backup
+dotfiles backup
 
 # Make changes to .gitconfig, .ssh/config, etc.
 vim ~/.gitconfig
 
 # If something breaks, restore
-blackdot backup restore
+dotfiles backup restore
 ```
 
 ### Before Upgrades
 
-Backup before running blackdot upgrade:
+Backup before running dotfiles upgrade:
 
 ```bash
-blackdot backup
-blackdot upgrade
+dotfiles backup
+dotfiles upgrade
 ```
 
 ### Syncing with Cloud Storage
@@ -250,13 +250,13 @@ Store backups in cloud-synced folder:
 
 ```bash
 # Set backup location to Dropbox
-blackdot config set backup.location "~/Dropbox/blackdot-backups"
+dotfiles config set backup.location "~/Dropbox/dotfiles-backups"
 
 # Or iCloud
-blackdot config set backup.location "~/Library/Mobile Documents/com~apple~CloudDocs/blackdot-backups"
+dotfiles config set backup.location "~/Library/Mobile Documents/com~apple~CloudDocs/dotfiles-backups"
 
 # Create backup (now syncs to cloud)
-blackdot backup
+dotfiles backup
 ```
 
 ### Migrating to New Machine
@@ -264,22 +264,22 @@ blackdot backup
 On old machine:
 ```bash
 # Create backup
-blackdot backup
+dotfiles backup
 
 # Copy backup to new machine
-scp ~/.blackdot-backups/backup-*.tar.gz newmachine:~/.blackdot-backups/
+scp ~/.dotfiles-backups/backup-*.tar.gz newmachine:~/.dotfiles-backups/
 ```
 
 On new machine:
 ```bash
 # Install dotfiles
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
 
 # Create backup directory
-mkdir -p ~/.blackdot-backups
+mkdir -p ~/.dotfiles-backups
 
 # Restore from copied backup
-blackdot backup restore
+dotfiles backup restore
 ```
 
 ---
@@ -307,24 +307,24 @@ blackdot backup restore
 
 ```
 [WARN] Backup system is disabled in config
-Enable with: blackdot config set backup.enabled true
+Enable with: dotfiles config set backup.enabled true
 ```
 
 Enable with:
 ```bash
-blackdot config set backup.enabled true
+dotfiles config set backup.enabled true
 ```
 
 ### No Backups Found
 
 ```
-[WARN] No backups found in /Users/john/.blackdot-backups
-Create one with: blackdot backup
+[WARN] No backups found in /Users/john/.dotfiles-backups
+Create one with: dotfiles backup
 ```
 
 The backup directory doesn't exist or is empty. Create your first backup:
 ```bash
-blackdot backup
+dotfiles backup
 ```
 
 ### Corrupted Backup
@@ -335,8 +335,8 @@ blackdot backup
 
 The backup file is corrupted. Try restoring from a different backup:
 ```bash
-blackdot backup --list
-blackdot backup restore backup-20241204-091500
+dotfiles backup --list
+dotfiles backup restore backup-20241204-091500
 ```
 
 ### Disk Space
@@ -344,13 +344,13 @@ blackdot backup restore backup-20241204-091500
 If running low on disk space, reduce retention:
 ```bash
 # Keep only 5 backups
-blackdot config set backup.max_snapshots 5
+dotfiles config set backup.max_snapshots 5
 
 # Keep for only 7 days
-blackdot config set backup.retention_days 7
+dotfiles config set backup.retention_days 7
 
 # Run backup to trigger cleanup
-blackdot backup
+dotfiles backup
 ```
 
 ---
@@ -359,7 +359,7 @@ blackdot backup
 
 ### Doctor Checks
 
-`blackdot doctor` includes backup system health checks:
+`dotfiles doctor` includes backup system health checks:
 
 ```
 ── Backup System ──
@@ -370,10 +370,10 @@ blackdot backup
 
 ### Vault Pull
 
-`blackdot vault pull` creates an auto-backup before restoring secrets:
+`dotfiles vault pull` creates an auto-backup before restoring secrets:
 
 ```bash
-blackdot vault pull
+dotfiles vault pull
 # [INFO] Creating auto-backup before restore...
 # [OK] Backup created: backup-20241205-143022.tar.gz
 # [INFO] Restoring secrets from vault...
@@ -381,10 +381,10 @@ blackdot vault pull
 
 ### macOS Settings
 
-`blackdot macos apply --backup` backs up settings before applying:
+`dotfiles macos apply --backup` backs up settings before applying:
 
 ```bash
-blackdot macos apply --backup
+dotfiles macos apply --backup
 ```
 
 ---
@@ -424,7 +424,7 @@ backup-20241205-143022/
 
 ### Adding Custom Files
 
-To add additional files to backup, modify the `BACKUP_FILES` array in `bin/blackdot-backup`:
+To add additional files to backup, modify the `BACKUP_FILES` array in `bin/dotfiles-backup`:
 
 ```zsh
 BACKUP_FILES=(
