@@ -1,13 +1,13 @@
 #!/usr/bin/env zsh
 # ============================================================
 # FILE: lib/_colors.sh
-# Centralized color theme for dotfiles
+# Centralized color theme for blackdot
 #
 # This file provides consistent color definitions across all
-# dotfiles modules. Source this file to use themed colors.
+# blackdot modules. Source this file to use themed colors.
 #
 # Usage:
-#   source "${BLACKDOT_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
+#   source "${BLACKDOT_DIR:-$HOME/workspace/blackdot}/lib/_colors.sh"
 #
 # Semantic colors:
 #   $CLR_PRIMARY, $CLR_SECONDARY, $CLR_SUCCESS, $CLR_ERROR,
@@ -35,7 +35,7 @@ fi
 # User Theme Override
 # Source user's custom theme if it exists
 # ============================================================
-_user_theme="${HOME}/.config/dotfiles/theme.sh"
+_user_theme="${HOME}/.config/blackdot/theme.sh"
 
 # ============================================================
 # Default Theme - Semantic Colors

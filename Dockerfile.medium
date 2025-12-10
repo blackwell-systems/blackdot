@@ -1,5 +1,5 @@
-# Medium dotfiles container with Homebrew
-# Full dotfiles functionality without heavy packages
+# Medium blackdot container with Homebrew
+# Full blackdot functionality without heavy packages
 #
 # Image size: ~400MB | Build time: ~3-5 min
 
@@ -33,7 +33,7 @@ RUN NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.co
 
 ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
 
-# Install core tools via Homebrew (minimal set for dotfiles functionality)
+# Install core tools via Homebrew (minimal set for blackdot functionality)
 RUN brew install \
     zsh \
     jq \
@@ -46,20 +46,20 @@ RUN brew install --cask 1password-cli 2>/dev/null || \
     (curl -sSL "https://cache.agilebits.com/dist/1P/op2/pkg/v2.30.0/op_linux_amd64_v2.30.0.zip" -o /tmp/op.zip && \
      unzip /tmp/op.zip -d /usr/local/bin && rm /tmp/op.zip)
 
-WORKDIR /root/workspace/dotfiles
+WORKDIR /root/workspace/blackdot
 
-# Copy dotfiles
-COPY . /root/workspace/dotfiles/
+# Copy blackdot
+COPY . /root/workspace/blackdot/
 
 # Make scripts executable
-RUN chmod +x /root/workspace/dotfiles/bin/* && \
-    chmod +x /root/workspace/dotfiles/vault/*.sh && \
-    chmod +x /root/workspace/dotfiles/bootstrap/*.sh && \
-    chmod +x /root/workspace/dotfiles/test/mocks/*.sh 2>/dev/null || true
+RUN chmod +x /root/workspace/blackdot/bin/* && \
+    chmod +x /root/workspace/blackdot/vault/*.sh && \
+    chmod +x /root/workspace/blackdot/bootstrap/*.sh && \
+    chmod +x /root/workspace/blackdot/test/mocks/*.sh 2>/dev/null || true
 
 # Setup minimal zsh config (don't run full bootstrap)
-RUN mkdir -p /root/.config/dotfiles /root/.ssh /root/.aws && \
-    ln -sf /root/workspace/dotfiles/zsh/zshrc /root/.zshrc && \
+RUN mkdir -p /root/.config/blackdot /root/.ssh /root/.aws && \
+    ln -sf /root/workspace/blackdot/zsh/zshrc /root/.zshrc && \
     ln -s /root/workspace /workspace
 
 # Add welcome message to zshrc
@@ -68,18 +68,18 @@ RUN echo '' >> /root/.zshrc && \
     echo 'if [[ -z "$_WELCOME_SHOWN" ]]; then' >> /root/.zshrc && \
     echo '    echo ""' >> /root/.zshrc && \
     echo '    echo "\\033[0;36m═══════════════════════════════════════════════════════════\\033[0m"' >> /root/.zshrc && \
-    echo '    echo "\\033[0;36m  Dotfiles Test Container (medium)\\033[0m"' >> /root/.zshrc && \
+    echo '    echo "\\033[0;36m  Blackdot Test Container (medium)\\033[0m"' >> /root/.zshrc && \
     echo '    echo "\\033[0;36m═══════════════════════════════════════════════════════════\\033[0m"' >> /root/.zshrc && \
     echo '    echo ""' >> /root/.zshrc && \
     echo '    echo "\\033[1mQuick Start:\\033[0m"' >> /root/.zshrc && \
-    echo '    echo "  dotfiles help          # Show available commands"' >> /root/.zshrc && \
-    echo '    echo "  dotfiles doctor        # Run health checks"' >> /root/.zshrc && \
-    echo '    echo "  dotfiles status        # Show dashboard"' >> /root/.zshrc && \
+    echo '    echo "  blackdot help          # Show available commands"' >> /root/.zshrc && \
+    echo '    echo "  blackdot doctor        # Run health checks"' >> /root/.zshrc && \
+    echo '    echo "  blackdot status        # Show dashboard"' >> /root/.zshrc && \
     echo '    echo ""' >> /root/.zshrc && \
     echo '    echo "\\033[1mTest Vault with Mock Credentials (pass backend):\\033[0m"' >> /root/.zshrc && \
     echo '    echo "  ./test/mocks/setup-mock-vault.sh --no-pass  # Creates fake GPG key + pass store"' >> /root/.zshrc && \
     echo '    echo "  export BLACKDOT_VAULT_BACKEND=pass          # Switch to pass backend"' >> /root/.zshrc && \
-    echo '    echo "  dotfiles vault check                        # Test vault commands"' >> /root/.zshrc && \
+    echo '    echo "  blackdot vault check                        # Test vault commands"' >> /root/.zshrc && \
     echo '    echo ""' >> /root/.zshrc && \
     echo '    echo "\\033[2mThis container has Homebrew. Install packages with: brew install <pkg>\\033[0m"' >> /root/.zshrc && \
     echo '    echo ""' >> /root/.zshrc && \
@@ -93,13 +93,13 @@ CMD ["zsh"]
 
 # =============================================================================
 # Usage:
-#   docker build -f Dockerfile.medium -t dotfiles-medium .
-#   docker run -it --rm dotfiles-medium
+#   docker build -f Dockerfile.medium -t blackdot-medium .
+#   docker run -it --rm blackdot-medium
 #
 # This container has:
 #   - Homebrew (can install any brew package)
 #   - Bitwarden CLI, 1Password CLI, pass/GPG
-#   - Full dotfiles CLI functionality
+#   - Full blackdot CLI functionality
 #   - /workspace symlink for portable paths
 #
 # It does NOT have (to keep size down):

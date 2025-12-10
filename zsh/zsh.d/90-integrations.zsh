@@ -126,7 +126,7 @@ add-zsh-hook chpwd _nvm_auto_switch 2>/dev/null
 # Zoxide (smarter cd)
 # =========================
 # Initialize zoxide if installed - use 'z' to jump to directories
-# It learns your habits: z dot → ~/workspace/dotfiles
+# It learns your habits: z black → ~/workspace/blackdot
 if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init zsh)"
 fi
@@ -138,13 +138,13 @@ if command -v glow >/dev/null 2>&1; then
 fi
 
 # =========================
-# Dotfiles Update Checker
+# Blackdot Update Checker
 # =========================
-# Checks once per day if dotfiles repo has upstream updates
+# Checks once per day if blackdot repo has upstream updates
 # Shows notification if updates are available
-check_dotfiles_updates() {
-  local cache="$HOME/.dotfiles-update-check"
-  local dotfiles_dir="${HOME}/workspace/dotfiles"
+check_blackdot_updates() {
+  local cache="$HOME/.blackdot-update-check"
+  local dotfiles_dir="${HOME}/workspace/blackdot"
 
   # Skip if not in a git repo
   [[ ! -d "$dotfiles_dir/.git" ]] && return 0
@@ -175,7 +175,7 @@ check_dotfiles_updates() {
       local behind=$(git rev-list --count HEAD..@{u} 2>/dev/null || echo 0)
 
       if [[ $behind -gt 0 ]]; then
-        echo "⚠️  Dotfiles: $behind update(s) available (run: dotfiles-upgrade)"
+        echo "⚠️  Blackdot: $behind update(s) available (run: blackdot-upgrade)"
       fi
 
       # Update cache timestamp
@@ -185,7 +185,7 @@ check_dotfiles_updates() {
 }
 
 # Run update check on shell startup (non-blocking)
-check_dotfiles_updates
+check_blackdot_updates
 
 # =========================
 # Drift Detection (local vs vault)
@@ -193,7 +193,7 @@ check_dotfiles_updates
 # Quick check if local config files have changed since last vault pull
 # Runs in <50ms (local checksum comparison only, no vault access)
 check_vault_drift() {
-  local dotfiles_dir="${HOME}/workspace/dotfiles"
+  local dotfiles_dir="${HOME}/workspace/blackdot"
   local drift_lib="$dotfiles_dir/lib/_drift.sh"
   local state_file="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/vault-state.json"
 
@@ -229,8 +229,8 @@ fi
 # =========================
 # Source hooks library and run shell_init hooks
 # Enables custom behavior at shell lifecycle points
-_dotfiles_init_hooks() {
-  local dotfiles_dir="${BLACKDOT_DIR:-${HOME}/workspace/dotfiles}"
+_blackdot_init_hooks() {
+  local dotfiles_dir="${BLACKDOT_DIR:-${HOME}/workspace/blackdot}"
   local hooks_lib="$dotfiles_dir/lib/_hooks.sh"
 
   # Skip if hooks library doesn't exist
@@ -243,10 +243,10 @@ _dotfiles_init_hooks() {
   hook_run "shell_init" 2>/dev/null || true
 
   # Set up directory change hook
-  _dotfiles_directory_change_hook() {
+  _blackdot_directory_change_hook() {
     hook_run "directory_change" "$PWD" 2>/dev/null || true
   }
-  add-zsh-hook chpwd _dotfiles_directory_change_hook 2>/dev/null
+  add-zsh-hook chpwd _blackdot_directory_change_hook 2>/dev/null
 
   # Set up shell exit hook
   zshexit() {
@@ -255,7 +255,7 @@ _dotfiles_init_hooks() {
 }
 
 # Initialize hooks (silently)
-_dotfiles_init_hooks
+_blackdot_init_hooks
 
 # =========================
 # zsh-syntax-highlighting (must be at the end)

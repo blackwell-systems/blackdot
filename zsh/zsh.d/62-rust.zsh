@@ -171,7 +171,7 @@ rust-expand() {
 rusttools() {
     require_feature "rust_tools" || return 1
     # Source theme colors
-    source "${BLACKDOT_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
+    source "${BLACKDOT_DIR:-$HOME/workspace/blackdot}/lib/_colors.sh"
 
     # Check if Rust is installed and if we're in a Rust project
     local logo_color has_rust in_project

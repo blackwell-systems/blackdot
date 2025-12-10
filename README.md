@@ -1,4 +1,4 @@
-# Dotfiles Management Framework
+# Blackdot - Dotfiles Management Framework
 
 [![Blackwell Systems™](https://raw.githubusercontent.com/blackwell-systems/blackwell-docs-theme/main/badge-trademark.svg)](https://github.com/blackwell-systems)
 [![Shell](https://img.shields.io/badge/Shell-Zsh-89e051?logo=zsh&logoColor=white)](https://www.zsh.org/)
@@ -43,11 +43,11 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/ins
 ```console
 $ curl -fsSL ... | bash && blackdot setup
 
-    ____        __  _____ __
-   / __ \____  / /_/ __(_) /__  _____
-  / / / / __ \/ __/ /_/ / / _ \/ ___/
- / /_/ / /_/ / /_/ __/ / /  __(__  )
-/_____/\____/\__/_/ /_/_/\___/____/
+    ____  __    ___   ________ ____  ____  ______
+   / __ )/ /   /   | / ____/ //_/ / / / / / / __ \______
+  / __  / /   / /| |/ /   / ,<  / / / / / / / / // __  /
+ / /_/ / /___/ ___ / /___/ /| |/ /_/ / /_/ / /_/ // /_/ /
+/_____/_____/_/  |_\____/_/ |_|\____/\____/\____/ \____/
 
               Setup Wizard
 

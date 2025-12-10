@@ -2,7 +2,7 @@
 # ============================================================
 # FILE: vault/status.sh
 # Show comprehensive vault sync status and drift detection
-# Usage: dotfiles vault status
+# Usage: blackdot vault status
 # ============================================================
 set -uo pipefail
 
@@ -31,7 +31,7 @@ section "Vault Backend"
 if ! vault_init 2>/dev/null; then
     fail "No vault backend configured"
     echo ""
-    echo -e "${DIM}Setup vault:${NC} ${GREEN}dotfiles vault setup${NC}"
+    echo -e "${DIM}Setup vault:${NC} ${GREEN}blackdot vault setup${NC}"
     echo ""
     exit 1
 fi
@@ -52,10 +52,10 @@ if vault_login_check; then
         echo ""
         case "$BLACKDOT_VAULT_BACKEND" in
             bitwarden)
-                echo -e "${DIM}Unlock:${NC} ${GREEN}dotfiles vault unlock${NC}"
+                echo -e "${DIM}Unlock:${NC} ${GREEN}blackdot vault unlock${NC}"
                 ;;
             1password)
-                echo -e "${DIM}Unlock:${NC} ${GREEN}dotfiles vault unlock${NC}"
+                echo -e "${DIM}Unlock:${NC} ${GREEN}blackdot vault unlock${NC}"
                 ;;
             pass)
                 echo -e "${DIM}Info:${NC} GPG agent handles unlocking automatically"
@@ -69,10 +69,10 @@ else
     echo ""
     case "$BLACKDOT_VAULT_BACKEND" in
         bitwarden)
-            echo -e "${DIM}Login:${NC} ${GREEN}bw login && dotfiles vault unlock${NC}"
+            echo -e "${DIM}Login:${NC} ${GREEN}bw login && blackdot vault unlock${NC}"
             ;;
         1password)
-            echo -e "${DIM}Login:${NC} ${GREEN}dotfiles vault unlock${NC}"
+            echo -e "${DIM}Login:${NC} ${GREEN}blackdot vault unlock${NC}"
             ;;
         pass)
             echo -e "${DIM}Setup:${NC} ${GREEN}pass init <gpg-id>${NC}"
@@ -88,7 +88,7 @@ fi
 section "Vault Items"
 
 # Load vault-items.json
-VAULT_ITEMS_FILE="$HOME/.config/dotfiles/vault-items.json"
+VAULT_ITEMS_FILE="$HOME/.config/blackdot/vault-items.json"
 if [[ -f "$VAULT_ITEMS_FILE" ]]; then
     ITEM_COUNT=$(jq -r '.vault_items | length' "$VAULT_ITEMS_FILE" 2>/dev/null || echo "0")
     SSH_COUNT=$(jq -r '.ssh_keys | length' "$VAULT_ITEMS_FILE" 2>/dev/null || echo "0")
@@ -116,7 +116,7 @@ if [[ -f "$VAULT_ITEMS_FILE" ]]; then
 else
     warn "No vault items configured"
     echo ""
-    echo -e "${DIM}Scan for secrets:${NC} ${GREEN}dotfiles vault scan${NC}"
+    echo -e "${DIM}Scan for secrets:${NC} ${GREEN}blackdot vault scan${NC}"
 fi
 
 # ============================================================
@@ -277,26 +277,26 @@ if [[ $DRIFT_COUNT -gt 0 || $MISSING_VAULT -gt 0 ]]; then
 
     if [[ $DRIFT_COUNT -gt 0 ]]; then
         echo -e "  ${CYAN}Option 1:${NC} Save local changes to vault"
-        echo -e "    ${GREEN}→${NC} dotfiles vault push --all"
+        echo -e "    ${GREEN}→${NC} blackdot vault push --all"
         echo ""
     fi
 
     if [[ $MISSING_VAULT -gt 0 ]]; then
         echo -e "  ${CYAN}Option 2:${NC} Scan and push new items to vault"
-        echo -e "    ${GREEN}→${NC} dotfiles vault scan"
-        echo -e "    ${GREEN}→${NC} dotfiles vault push --all"
+        echo -e "    ${GREEN}→${NC} blackdot vault scan"
+        echo -e "    ${GREEN}→${NC} blackdot vault push --all"
         echo ""
     fi
 
     if [[ $DRIFT_COUNT -gt 0 ]]; then
         echo -e "  ${CYAN}Option 3:${NC} Restore from vault (discard local changes)"
-        echo -e "    ${GREEN}→${NC} dotfiles backup create ${DIM}# Safety first${NC}"
-        echo -e "    ${GREEN}→${NC} dotfiles vault pull --force"
+        echo -e "    ${GREEN}→${NC} blackdot backup create ${DIM}# Safety first${NC}"
+        echo -e "    ${GREEN}→${NC} blackdot vault pull --force"
         echo ""
     fi
 
     echo -e "  ${CYAN}Option 4:${NC} View detailed diff"
-    echo -e "    ${GREEN}→${NC} dotfiles drift"
+    echo -e "    ${GREEN}→${NC} blackdot drift"
     echo ""
 fi
 

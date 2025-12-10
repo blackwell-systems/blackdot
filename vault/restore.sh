@@ -65,7 +65,7 @@ if is_offline; then
     echo ""
     echo "To restore from vault later:"
     echo "  unset BLACKDOT_OFFLINE"
-    echo "  dotfiles vault pull"
+    echo "  blackdot vault pull"
     exit 0
 fi
 
@@ -104,7 +104,7 @@ if ! skip_drift_check && [[ "$FORCE" != "true" ]]; then
     echo ""
     if ! check_pre_restore_drift "$SESSION" "$FORCE"; then
         echo ""
-        echo "To force restore: dotfiles vault pull --force"
+        echo "To force restore: blackdot vault pull --force"
         exit 1
     fi
 fi
@@ -177,13 +177,13 @@ done
 
 if [[ "$has_files_to_backup" == "true" ]]; then
     # Use Go binary if available, otherwise skip backup
-    local backup_cmd="$BLACKDOT_ROOT/bin/dotfiles"
+    local backup_cmd="$BLACKDOT_ROOT/bin/blackdot"
     if [[ -x "$backup_cmd" ]] && "$backup_cmd" backup create >/dev/null 2>&1; then
-        backup_dir="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/backups"
+        backup_dir="${XDG_CONFIG_HOME:-$HOME/.config}/blackdot/backups"
         latest_backup=$(ls -t "$backup_dir" 2>/dev/null | head -1)
         if [[ -n "$latest_backup" ]]; then
             pass "Backup created: $backup_dir/$latest_backup"
-            echo "     ${DIM}Restore with: dotfiles backup restore $latest_backup${NC}"
+            echo "     ${DIM}Restore with: blackdot backup restore $latest_backup${NC}"
         else
             pass "Backup created"
         fi
@@ -226,4 +226,4 @@ fi
 # Save drift state for quick startup checks
 info "Saving drift state for startup checks..."
 drift_save_state
-pass "Drift state saved to ~/.cache/dotfiles/vault-state.json"
+pass "Drift state saved to ~/.cache/blackdot/vault-state.json"

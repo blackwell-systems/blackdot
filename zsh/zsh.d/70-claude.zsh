@@ -53,7 +53,7 @@ claude() {
       echo "│      machines for conversation history to sync properly.        │"
       echo "│                                                                  │"
       echo "│ TIP: Always use /workspace instead of ~/workspace               │"
-      echo "│    Example: cd /workspace/dotfiles && claude                    │"
+      echo "│    Example: cd /workspace/blackdot && claude                    │"
       echo "│                                                                  │"
       echo "│ This enables the same session on macOS, Lima, WSL, and Linux.   │"
       echo "╰──────────────────────────────────────────────────────────────────╯"

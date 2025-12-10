@@ -276,7 +276,7 @@ dbuild-fresh() {
 dockertools() {
     require_feature "docker_tools" || return 1
     # Source theme colors
-    source "${BLACKDOT_DIR:-$HOME/workspace/dotfiles}/lib/_colors.sh"
+    source "${BLACKDOT_DIR:-$HOME/workspace/blackdot}/lib/_colors.sh"
 
     # Check Docker status
     local logo_color daemon_running containers_running

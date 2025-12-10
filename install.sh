@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # ============================================================
-# One-line installer for dotfiles
+# One-line installer for blackdot
 #
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 #
-# After installation, run 'dotfiles setup' to configure vault and secrets.
+# After installation, run 'blackdot setup' to configure vault and secrets.
 #
 # Options:
 #   --minimal      Skip optional features (vault, Claude setup)
@@ -75,7 +75,7 @@ install_go_binary() {
     # Build binary name
     local suffix=""
     [[ "$os" == "windows" ]] && suffix=".exe"
-    local binary_name="dotfiles-${os}-${arch}${suffix}"
+    local binary_name="blackdot-${os}-${arch}${suffix}"
 
     # GitHub release URL
     local base_url="https://github.com/blackwell-systems/blackdot/releases"
@@ -97,7 +97,7 @@ install_go_binary() {
     mkdir -p "$install_dir"
 
     # Download binary
-    local target="${install_dir}/dotfiles${suffix}"
+    local target="${install_dir}/blackdot${suffix}"
     if command -v curl >/dev/null 2>&1; then
         curl -fsSL "$download_url" -o "$target" || {
             fail "Failed to download binary. Release may not exist yet."
@@ -168,7 +168,7 @@ install_go_binary() {
     # Verify it works
     local verify_output
     if verify_output=$("$target" version 2>&1); then
-        pass "Installed dotfiles binary to: $target"
+        pass "Installed blackdot binary to: $target"
         info "Version: $verify_output"
 
         # Add to PATH hint if needed
@@ -228,7 +228,7 @@ WORKSPACE_TARGET="${WORKSPACE_TARGET:-$HOME/workspace}"
 # Expand ~ if present
 WORKSPACE_TARGET="${WORKSPACE_TARGET/#\~/$HOME}"
 
-INSTALL_DIR="$WORKSPACE_TARGET/dotfiles"
+INSTALL_DIR="$WORKSPACE_TARGET/blackdot"
 
 # Parse arguments
 MINIMAL=false
@@ -260,7 +260,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --help|-h)
-            echo "Dotfiles Installer"
+            echo "Blackdot Installer"
             echo ""
             echo "Usage:"
             echo "  curl -fsSL <url> | bash                         # Full install with Go binary (recommended)"
@@ -285,7 +285,7 @@ while [[ $# -gt 0 ]]; do
             echo "  BLACKDOT_VERSION=v4.0.0 ./install.sh                 # Specific version"
             echo "  curl -fsSL <url> | bash -s -- --minimal --no-binary  # Minimal, no binary"
             echo ""
-            echo "After installation, run 'dotfiles setup' to configure your environment."
+            echo "After installation, run 'blackdot setup' to configure your environment."
             exit 0
             ;;
         *)
@@ -299,11 +299,11 @@ done
 echo ""
 echo -e "${CYAN}${BOLD}"
 cat << 'EOF'
-    ____        __  _____ __
-   / __ \____  / /_/ __(_) /__  _____
-  / / / / __ \/ __/ /_/ / / _ \/ ___/
- / /_/ / /_/ / /_/ __/ / /  __(__  )
-/_____/\____/\__/_/ /_/_/\___/____/
+    ____  __    ___   ________ ____  ____  ______
+   / __ )/ /   /   | / ____/ //_/ / / / / / / __ \______
+  / __  / /   / /| |/ /   / ,<  / / / / / / / / // __  /
+ / /_/ / /___/ ___ / /___/ /| |/ /_/ / /_/ / /_/ // /_/ /
+/_____/_____/_/  |_\____/_/ |_|\____/\____/\____/ \____/
 
 EOF
 echo -e "${NC}"
@@ -316,7 +316,7 @@ if $BINARY_ONLY; then
     echo ""
     echo -e "${GREEN}${BOLD}Binary installation complete!${NC}"
     echo ""
-    echo "Run 'dotfiles version' to verify the installation."
+    echo "Run 'blackdot version' to verify the installation."
     exit 0
 fi
 
@@ -366,13 +366,13 @@ mkdir -p "$WORKSPACE_TARGET"
 
 # Clone or update repository
 if [[ -d "$INSTALL_DIR/.git" ]]; then
-    info "Dotfiles already installed at $INSTALL_DIR"
+    info "Blackdot already installed at $INSTALL_DIR"
     info "Updating..."
     cd "$INSTALL_DIR"
     git pull --rebase origin main
     pass "Updated to latest version"
 else
-    info "Cloning dotfiles repository..."
+    info "Cloning blackdot repository..."
     if $USE_SSH; then
         git clone "$REPO_SSH" "$INSTALL_DIR"
     else
@@ -411,7 +411,7 @@ if [[ "$PLATFORM" == "Windows (Git Bash)" || "$PLATFORM" == "Windows" ]]; then
     if [[ -f "$PS_INSTALL_SCRIPT" ]] && command -v powershell.exe >/dev/null 2>&1; then
         echo ""
         echo -e "${CYAN}PowerShell module available${NC}"
-        echo "This will set up dotfiles commands in PowerShell (recommended if you use both shells)"
+        echo "This will set up blackdot commands in PowerShell (recommended if you use both shells)"
         echo ""
         echo -n "Also set up PowerShell? [y/N]: "
         read -r setup_ps
@@ -455,16 +455,16 @@ if ! $MINIMAL; then
         cd "$INSTALL_DIR"
         if [[ -x "$INSTALL_DIR/bin/blackdot" ]]; then
             "$INSTALL_DIR/bin/blackdot" setup
-        elif [[ -x "${BLACKDOT_BIN_DIR:-$HOME/.local/bin}/dotfiles" ]]; then
-            "${BLACKDOT_BIN_DIR:-$HOME/.local/bin}/dotfiles" setup
+        elif [[ -x "${BLACKDOT_BIN_DIR:-$HOME/.local/bin}/blackdot" ]]; then
+            "${BLACKDOT_BIN_DIR:-$HOME/.local/bin}/blackdot" setup
         else
-            fail "Go binary not found. Setup requires the dotfiles binary."
+            fail "Go binary not found. Setup requires the blackdot binary."
             echo ""
             echo "To install the binary manually:"
-            echo "  curl -fsSL https://github.com/blackwell-systems/blackdot/releases/latest/download/dotfiles-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/') -o ~/.local/bin/blackdot"
+            echo "  curl -fsSL https://github.com/blackwell-systems/blackdot/releases/latest/download/blackdot-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/') -o ~/.local/bin/blackdot"
             echo "  chmod +x ~/.local/bin/blackdot"
             echo ""
-            echo "Then run: dotfiles setup"
+            echo "Then run: blackdot setup"
         fi
 
         echo ""
@@ -474,10 +474,10 @@ if ! $MINIMAL; then
         echo ""
         echo "You can run the setup wizard later with:"
         echo -e "  ${CYAN}exec zsh${NC}"
-        echo -e "  ${CYAN}dotfiles setup${NC}"
+        echo -e "  ${CYAN}blackdot setup${NC}"
         echo ""
         echo "Then verify installation:"
-        echo -e "  ${CYAN}dotfiles doctor${NC}"
+        echo -e "  ${CYAN}blackdot doctor${NC}"
     fi
 else
     echo "Next steps (minimal mode):"
@@ -491,7 +491,7 @@ else
     echo -e "     ${CYAN}~/.gitconfig${NC}"
     echo ""
     echo "  3. Verify installation:"
-    echo -e "     ${CYAN}dotfiles doctor${NC}"
+    echo -e "     ${CYAN}blackdot doctor${NC}"
 fi
 echo ""
 echo -e "Documentation: ${BLUE}https://github.com/blackwell-systems/blackdot${NC}"

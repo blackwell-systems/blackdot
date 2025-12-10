@@ -28,7 +28,7 @@ ARGUMENTS:
     FILE-PATH        Path to local file (optional if ITEM-NAME is in config)
 
 CONFIGURATION:
-    Item paths are loaded from ~/.config/dotfiles/vault-items.json
+    Item paths are loaded from ~/.config/blackdot/vault-items.json
     Run without arguments to see configured items.
 
 EXAMPLES:
@@ -142,7 +142,7 @@ if [[ -n "$EXISTING_JSON" ]]; then
     echo ""
 
     if ! $FORCE; then
-        fail "Use --force to overwrite, or use 'dotfiles vault push' to update"
+        fail "Use --force to overwrite, or use 'blackdot vault push' to update"
         exit 1
     fi
 
