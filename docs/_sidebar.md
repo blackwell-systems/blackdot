@@ -1,7 +1,7 @@
 <!-- docs/_sidebar.md -->
 
 - **Getting Started**
-  - [Dotfiles](/)
+  - [Blackdot](/)
   - [Docker Containers](docker.md)
   - [Windows Setup](windows-setup.md)
   - [One-Line Install](/#one-line-install)
