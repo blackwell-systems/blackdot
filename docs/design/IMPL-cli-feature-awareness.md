@@ -56,7 +56,7 @@ The `dotfiles` command in `zsh/zsh.d/40-aliases.zsh` shows all commands uncondit
 
 ```bash
 # Current help output shows everything
-blackdot help
+dotfiles help
 # Shows vault, template, macos, features, config...
 # Even if vault feature is disabled
 ```
@@ -137,11 +137,11 @@ cli_command_feature() {
 #### Default Mode: Feature-Filtered
 
 ```bash
-$ blackdot help
+$ dotfiles help
 
-blackdot - Manage your dotfiles
+dotfiles - Manage your dotfiles
 
-Usage: blackdot <command> [options]
+Usage: dotfiles <command> [options]
 
 Setup & Health:
   setup             Interactive setup wizard
@@ -162,23 +162,23 @@ Configuration:
   config list       Show configuration layer status
 
 Other Commands:
-  cd                Change to blackdot directory
-  edit              Open blackdot in editor
+  cd                Change to dotfiles directory
+  edit              Open dotfiles in editor
   help              Show this help
 
 ─────────────────────────────────────────────────────
-Some commands hidden. Run 'blackdot help --all' to see all.
+Some commands hidden. Run 'dotfiles help --all' to see all.
 Disabled features: vault, templates, macos_settings
 ```
 
 #### Full Mode: Show All with Indicators
 
 ```bash
-$ blackdot help --all
+$ dotfiles help --all
 
-blackdot - Manage your dotfiles
+dotfiles - Manage your dotfiles
 
-Usage: blackdot <command> [options]
+Usage: dotfiles <command> [options]
 
 Setup & Health:
   setup             Interactive setup wizard
@@ -208,7 +208,7 @@ macOS Settings:                                           [feature: macos_settin
 
 ─────────────────────────────────────────────────────
 Legend: ● enabled  ○ disabled
-Enable features: blackdot features enable <name>
+Enable features: dotfiles features enable <name>
 ```
 
 ### Running Disabled Commands
@@ -216,15 +216,15 @@ Enable features: blackdot features enable <name>
 When user runs a command for a disabled feature:
 
 ```bash
-$ blackdot vault pull
+$ dotfiles vault pull
 
 ⚠ The 'vault' feature is not enabled.
 
 To enable vault support:
-  blackdot features enable vault
+  dotfiles features enable vault
 
 Or run with --force to execute anyway:
-  blackdot vault pull --force
+  dotfiles vault pull --force
 ```
 
 Implementation:
@@ -258,10 +258,10 @@ _cli_feature_disabled_message() {
     echo -e "${YELLOW}⚠${NC} The '${CYAN}$feature${NC}' feature is not enabled."
     echo ""
     echo "To enable ${feature} support:"
-    echo -e "  ${GREEN}blackdot features enable $feature${NC}"
+    echo -e "  ${GREEN}dotfiles features enable $feature${NC}"
     echo ""
     echo "Or run with --force to execute anyway:"
-    echo -e "  ${DIM}blackdot $command --force${NC}"
+    echo -e "  ${DIM}dotfiles $command --force${NC}"
     echo ""
 }
 ```
@@ -285,10 +285,10 @@ _cli_feature_disabled_message() {
 
 | Feature | Priority | Notes |
 |---------|----------|-------|
-| `BLACKDOT_CLI_SHOW_ALL` env var | Low | For scripting |
-| `BLACKDOT_FORCE` env var | Low | For scripting |
+| `DOTFILES_CLI_SHOW_ALL` env var | Low | For scripting |
+| `DOTFILES_FORCE` env var | Low | For scripting |
 | Subcommand awareness (Phase 4) | Low | Not critical for v1 |
-| `blackdot help <command>` | Low | Nice-to-have |
+| `dotfiles help <command>` | Low | Nice-to-have |
 | Tab completion filtering | Low | Future enhancement |
 
 ---
@@ -303,8 +303,8 @@ _cli_feature_disabled_message() {
 
 ```bash
 # 40-aliases.zsh
-source "$BLACKDOT_DIR/lib/_features.sh"
-source "$BLACKDOT_DIR/lib/_cli_features.sh"  # New
+source "$DOTFILES_DIR/lib/_features.sh"
+source "$DOTFILES_DIR/lib/_cli_features.sh"  # New
 ```
 
 ### Phase 2: Help Filtering ✅
@@ -374,7 +374,7 @@ vault)
 
 ### Phase 4: Subcommand Awareness (Week 3)
 
-Handle nested commands like `blackdot vault setup`:
+Handle nested commands like `dotfiles vault setup`:
 
 ```bash
 # lib/_cli_features.sh
@@ -424,7 +424,7 @@ This allows users to disable the filtering if they prefer seeing all commands:
 
 ```bash
 # Show all commands always
-blackdot features disable cli_feature_filter
+dotfiles features disable cli_feature_filter
 ```
 
 ---
@@ -435,10 +435,10 @@ For scripting and advanced users:
 
 ```bash
 # Always show all commands (ignore feature filtering)
-export BLACKDOT_CLI_SHOW_ALL=true
+export DOTFILES_CLI_SHOW_ALL=true
 
 # Force command execution without feature check
-BLACKDOT_FORCE=true blackdot vault pull
+DOTFILES_FORCE=true dotfiles vault pull
 ```
 
 ---
@@ -448,12 +448,12 @@ BLACKDOT_FORCE=true blackdot vault pull
 ### Feature-Specific Help
 
 ```bash
-$ blackdot help vault
+$ dotfiles help vault
 
-blackdot vault - Secret vault operations
+dotfiles vault - Secret vault operations
 
 Status: ○ DISABLED (feature: vault)
-Enable: blackdot features enable vault
+Enable: dotfiles features enable vault
 
 Commands (run with --force to use while disabled):
   setup       Setup vault backend (first-time setup)
@@ -468,7 +468,7 @@ Commands (run with --force to use while disabled):
 ### What's Available
 
 ```bash
-$ blackdot help --available
+$ dotfiles help --available
 
 Enabled Features & Commands:
 
@@ -485,15 +485,15 @@ Disabled Features:
 
 ○ vault
   → vault, secrets, sync, drift, diff
-  Enable: blackdot features enable vault
+  Enable: dotfiles features enable vault
 
 ○ templates
   → template, tmpl
-  Enable: blackdot features enable templates
+  Enable: dotfiles features enable templates
 
 ○ macos_settings
   → macos
-  Enable: blackdot features enable macos_settings
+  Enable: dotfiles features enable macos_settings
 ```
 
 ---
@@ -503,7 +503,7 @@ Disabled Features:
 1. **No breaking changes** - Commands still work, just with prompts
 2. **--force flag** - Execute disabled commands if needed
 3. **--all flag** - See all commands in help
-4. **Environment override** - `BLACKDOT_CLI_SHOW_ALL=true`
+4. **Environment override** - `DOTFILES_CLI_SHOW_ALL=true`
 5. **Feature toggle** - Disable filtering entirely with `cli_feature_filter`
 
 ---
@@ -531,7 +531,7 @@ Disabled Features:
 }
 
 @test "help --all shows disabled commands" {
-    run zsh -c "source 40-aliases.zsh; blackdot help --all"
+    run zsh -c "source 40-aliases.zsh; dotfiles help --all"
     [[ "$output" == *"[feature: vault"* ]]
 }
 
@@ -540,7 +540,7 @@ Disabled Features:
         source lib/_features.sh
         feature_disable 'vault'
         source 40-aliases.zsh
-        blackdot vault pull
+        dotfiles vault pull
     "
     [[ "$output" == *"feature is not enabled"* ]]
     [[ "$output" == *"features enable vault"* ]]
@@ -552,12 +552,12 @@ Disabled Features:
 ```bash
 @test "help output changes when feature enabled/disabled" {
     # Disable vault
-    blackdot features disable vault
-    output1=$(blackdot help)
+    dotfiles features disable vault
+    output1=$(dotfiles help)
 
     # Enable vault
-    blackdot features enable vault
-    output2=$(blackdot help)
+    dotfiles features enable vault
+    output2=$(dotfiles help)
 
     # Vault commands should appear in output2 but not output1
     [[ "$output1" != *"vault setup"* ]]

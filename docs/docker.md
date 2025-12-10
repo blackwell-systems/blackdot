@@ -1,8 +1,8 @@
 # Docker Containers
 
-Test blackdot in isolated containers before installing on your system.
+Test dotfiles in isolated containers before installing on your system.
 
-> All containers include full blackdot functionality: schema validation, progress visualization, JSON configuration, and vault operations. No special configuration needed.
+> All containers include full dotfiles functionality: schema validation, progress visualization, JSON configuration, and vault operations. No special configuration needed.
 
 ## Container Options
 
@@ -20,8 +20,8 @@ Test blackdot in isolated containers before installing on your system.
 **The fastest option for quick exploration.**
 
 ```bash
-docker build -f Dockerfile.extralite -t blackdot-extralite .
-docker run -it --rm blackdot-extralite
+docker build -f Dockerfile.extralite -t dotfiles-extralite .
+docker run -it --rm dotfiles-extralite
 ```
 
 **Includes:**
@@ -43,8 +43,8 @@ docker run -it --rm blackdot-extralite
 **Alpine with vault CLI support.**
 
 ```bash
-docker build -f Dockerfile.lite -t blackdot-lite .
-docker run -it --rm blackdot-lite
+docker build -f Dockerfile.lite -t dotfiles-lite .
+docker run -it --rm dotfiles-lite
 ```
 
 **Includes:**
@@ -57,14 +57,14 @@ docker run -it --rm blackdot-lite
 
 ```bash
 # Bitwarden
-docker run -it --rm -e BW_SESSION="$BW_SESSION" blackdot-lite
+docker run -it --rm -e BW_SESSION="$BW_SESSION" dotfiles-lite
 
 # 1Password
-docker run -it --rm blackdot-lite
+docker run -it --rm dotfiles-lite
 # Then: eval $(op signin)
 
 # pass (mount GPG keys)
-docker run -it --rm -v ~/.gnupg:/root/.gnupg:ro blackdot-lite
+docker run -it --rm -v ~/.gnupg:/root/.gnupg:ro dotfiles-lite
 ```
 
 **Best for:** Testing vault restore/sync, verifying secrets integration.
@@ -76,8 +76,8 @@ docker run -it --rm -v ~/.gnupg:/root/.gnupg:ro blackdot-lite
 **Ubuntu with Homebrew - can install any package.**
 
 ```bash
-docker build -f Dockerfile.medium -t blackdot-medium .
-docker run -it --rm blackdot-medium
+docker build -f Dockerfile.medium -t dotfiles-medium .
+docker run -it --rm dotfiles-medium
 ```
 
 **Includes:**
@@ -109,8 +109,8 @@ brew bundle --file=/root/workspace/dotfiles/Brewfile
 **Complete environment with all packages.**
 
 ```bash
-docker build -t blackdot-full .
-docker run -it --rm blackdot-full
+docker build -t dotfiles-full .
+docker run -it --rm dotfiles-full
 ```
 
 **Includes:**
@@ -126,11 +126,11 @@ docker run -it --rm blackdot-full
 
 | Feature | extralite | lite | medium | full |
 |---------|-----------|------|--------|------|
-| `blackdot help` | ✓ | ✓ | ✓ | ✓ |
-| `blackdot status` | ✓ | ✓ | ✓ | ✓ |
-| `blackdot doctor` | ✓ | ✓ | ✓ | ✓ |
-| `blackdot setup` | ✓ | ✓ | ✓ | ✓ |
-| `blackdot vault pull` | ✗ | ✓ | ✓ | ✓ |
+| `dotfiles help` | ✓ | ✓ | ✓ | ✓ |
+| `dotfiles status` | ✓ | ✓ | ✓ | ✓ |
+| `dotfiles doctor` | ✓ | ✓ | ✓ | ✓ |
+| `dotfiles setup` | ✓ | ✓ | ✓ | ✓ |
+| `dotfiles vault pull` | ✗ | ✓ | ✓ | ✓ |
 | Bitwarden CLI | ✗ | ✓ | ✓ | ✓ |
 | 1Password CLI | ✗ | ✓ | ✓ | ✓ |
 | pass + GPG | ✗ | ✓ | ✓ | ✓ |
@@ -148,18 +148,18 @@ Test vault functionality without real credentials using the mock vault setup. Th
 
 ```bash
 # Start lite container
-docker run -it --rm blackdot-lite
+docker run -it --rm dotfiles-lite
 
 # Inside container: setup mock vault with fake credentials
 ./test/mocks/setup-mock-vault.sh --no-pass  # Creates fake GPG key + pass store
 
 # Switch to pass backend
-export BLACKDOT_VAULT_BACKEND=pass
+export DOTFILES_VAULT_BACKEND=pass
 
 # Test vault commands
-blackdot vault check
-blackdot vault pull --preview
-blackdot drift
+dotfiles vault check
+dotfiles vault pull --preview
+dotfiles drift
 ```
 
 **What it creates:**
@@ -185,22 +185,22 @@ blackdot drift
 
 ## Tips
 
-### Mount local blackdot for testing changes
+### Mount local dotfiles for testing changes
 
 ```bash
-docker run -it --rm -v $PWD:/root/workspace/blackdot blackdot-lite
+docker run -it --rm -v $PWD:/root/workspace/dotfiles dotfiles-lite
 ```
 
 ### Persist home directory between runs
 
 ```bash
-docker run -it --rm -v blackdot-home:/root blackdot-lite
+docker run -it --rm -v dotfiles-home:/root dotfiles-lite
 ```
 
 ### Run specific command and exit
 
 ```bash
-docker run --rm blackdot-lite blackdot doctor
+docker run --rm dotfiles-lite dotfiles doctor
 ```
 
 ---

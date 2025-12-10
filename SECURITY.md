@@ -2,7 +2,7 @@
 
 ## Overview
 
-This blackdot repository contains configurations and scripts for managing development environments. While the repository itself contains no secrets (all sensitive data is stored in your vault—Bitwarden, 1Password, or pass), we take security seriously.
+This dotfiles repository contains configurations and scripts for managing development environments. While the repository itself contains no secrets (all sensitive data is stored in your vault—Bitwarden, 1Password, or pass), we take security seriously.
 
 ## Supported Versions
 
@@ -22,7 +22,7 @@ We provide security updates for the latest release only:
 If you discover a security vulnerability, please help us responsibly:
 
 **Preferred Method: GitHub Security Advisories**
-1. Go to https://github.com/blackwell-systems/blackdot/security/advisories
+1. Go to https://github.com/blackwell-systems/dotfiles/security/advisories
 2. Click "Report a vulnerability"
 3. Provide detailed information about the issue
 
@@ -99,10 +99,10 @@ The health check validates file permissions:
 
 ```bash
 # Check permissions
-blackdot doctor
+dotfiles doctor
 
 # Auto-fix permission issues
-blackdot doctor --fix
+dotfiles doctor --fix
 ```
 
 Expected permissions:
@@ -116,7 +116,7 @@ Expected permissions:
 
 ```bash
 # Update dotfiles
-blackdot-upgrade
+dotfiles-upgrade
 
 # Update Homebrew packages
 brew update && brew upgrade
@@ -197,7 +197,7 @@ When contributing code:
 ## Questions?
 
 For general security questions (not vulnerabilities):
-- Open a [GitHub Discussion](https://github.com/blackwell-systems/blackdot/discussions)
+- Open a [GitHub Discussion](https://github.com/blackwell-systems/dotfiles/discussions)
 - Review the [Security Maintenance](README.md#security-maintenance) section in README
 
 ## Contact

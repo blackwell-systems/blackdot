@@ -10,19 +10,19 @@ The template system generates machine-specific configuration files from template
 
 ```bash
 # 1. Initialize template variables
-blackdot template init
+dotfiles template init
 
 # 2. Edit your configuration
-blackdot template edit
+dotfiles template edit
 
 # 3. Review detected values
-blackdot template vars
+dotfiles template vars
 
 # 4. Generate configuration files
-blackdot template render
+dotfiles template render
 
 # 5. Create symlinks to destinations
-blackdot template link
+dotfiles template link
 ```
 
 ---
@@ -67,7 +67,7 @@ dotfiles/
 
 ## Commands
 
-### `blackdot template init`
+### `dotfiles template init`
 
 Interactive setup wizard that:
 1. Detects your system (hostname, OS, architecture)
@@ -75,19 +75,19 @@ Interactive setup wizard that:
 3. Opens the file in your editor
 
 ```bash
-blackdot template init
+dotfiles template init
 ```
 
-### `blackdot template vars`
+### `dotfiles template vars`
 
 Display all template variables and their current values:
 
 ```bash
 # Show all variables with values
-blackdot template vars
+dotfiles template vars
 
 # Show variable names only
-blackdot template vars --quiet
+dotfiles template vars --quiet
 ```
 
 Output example:
@@ -108,34 +108,34 @@ User-configured:
   aws_profile          = default
 ```
 
-### `blackdot template render`
+### `dotfiles template render`
 
 Render templates to the `generated/` directory:
 
 ```bash
 # Render all templates
-blackdot template render
+dotfiles template render
 
 # Preview without writing files
-blackdot template render --dry-run
+dotfiles template render --dry-run
 
 # Force re-render even if up to date
-blackdot template render --force
+dotfiles template render --force
 
 # Render specific template
-blackdot template render gitconfig
+dotfiles template render gitconfig
 ```
 
-### `blackdot template link`
+### `dotfiles template link`
 
 Create symlinks from generated files to their destinations:
 
 ```bash
 # Create symlinks
-blackdot template link
+dotfiles template link
 
 # Preview without creating
-blackdot template link --dry-run
+dotfiles template link --dry-run
 ```
 
 Destination mapping:
@@ -146,12 +146,12 @@ Destination mapping:
 | `ssh-config` | `~/.ssh/config` |
 | `claude.local` | `~/.claude.local` |
 
-### `blackdot template check`
+### `dotfiles template check`
 
 Validate template syntax without rendering:
 
 ```bash
-blackdot template check
+dotfiles template check
 ```
 
 Checks for:
@@ -159,32 +159,32 @@ Checks for:
 - Unclosed variable tags
 - Malformed syntax
 
-### `blackdot template diff`
+### `dotfiles template diff`
 
 Show differences between templates and generated files:
 
 ```bash
 # Quick check
-blackdot template diff
+dotfiles template diff
 
 # Show detailed diffs
-blackdot template diff --verbose
+dotfiles template diff --verbose
 ```
 
-### `blackdot template edit`
+### `dotfiles template edit`
 
 Open `_variables.local.sh` in your editor:
 
 ```bash
-blackdot template edit
+dotfiles template edit
 ```
 
-### `blackdot template list`
+### `dotfiles template list`
 
 List available templates and their status:
 
 ```bash
-blackdot template list
+dotfiles template list
 ```
 
 Output:
@@ -196,19 +196,19 @@ Available Templates
   ssh-config                ✗ not generated
 ```
 
-### `blackdot template arrays`
+### `dotfiles template arrays`
 
 Manage JSON/shell arrays for `{{#each}}` loops:
 
 ```bash
 # View loaded arrays and their source
-blackdot template arrays
+dotfiles template arrays
 
 # Validate JSON arrays file syntax
-blackdot template arrays --validate
+dotfiles template arrays --validate
 
 # Export shell arrays to JSON format
-blackdot template arrays --export-json
+dotfiles template arrays --export-json
 ```
 
 Output example:
@@ -223,25 +223,25 @@ ssh_hosts (3 items):
   • work-server | server.company.com | deploy | ~/.ssh/id_work | ProxyJump bastion
 ```
 
-### `blackdot template vault`
+### `dotfiles template vault`
 
 Sync template variables with your vault for cross-machine portability:
 
 ```bash
 # Push local variables to vault
-blackdot template vault push
+dotfiles template vault push
 
 # Pull from vault to local
-blackdot template vault pull
+dotfiles template vault pull
 
 # Show differences between local and vault
-blackdot template vault diff
+dotfiles template vault diff
 
 # Bidirectional sync with conflict detection
-blackdot template vault sync
+dotfiles template vault sync
 
 # Check sync status
-blackdot template vault status
+dotfiles template vault status
 ```
 
 **Options:**
@@ -257,13 +257,13 @@ blackdot template vault status
 
 ```bash
 # First machine: backup your config to vault
-blackdot template init
-blackdot template vault push
+dotfiles template init
+dotfiles template vault push
 
 # New machine: restore from vault
-blackdot vault pull           # Get vault access
-blackdot template vault pull  # Pull template variables
-blackdot template render      # Generate configs
+dotfiles vault pull           # Get vault access
+dotfiles template vault pull  # Pull template variables
+dotfiles template render      # Generate configs
 ```
 
 ---
@@ -363,7 +363,7 @@ alias home='cd {{ home | squote }}'
 
 ```bash
 # Show all filters with descriptions
-blackdot template filters
+dotfiles template filters
 ```
 
 ### Conditional Blocks
@@ -488,13 +488,13 @@ For cleaner array definitions, use JSON format instead of shell arrays:
 
 ```bash
 # View loaded arrays (shows source: JSON or shell)
-blackdot template arrays
+dotfiles template arrays
 
 # Validate JSON syntax
-blackdot template arrays --validate
+dotfiles template arrays --validate
 
 # Export existing shell arrays to JSON format
-blackdot template arrays --export-json
+dotfiles template arrays --export-json
 ```
 
 The template system automatically prefers JSON arrays if `_arrays.local.json` exists and `jq` is available. Falls back to shell arrays otherwise.
@@ -544,9 +544,9 @@ The template system automatically prefers JSON arrays if `_arrays.local.json` ex
 
 Variables are resolved in this order (highest priority first):
 
-1. **Environment variables** (`BLACKDOT_TMPL_*`)
+1. **Environment variables** (`DOTFILES_TMPL_*`)
    ```bash
-   BLACKDOT_TMPL_GIT_EMAIL="other@example.com" blackdot template render
+   DOTFILES_TMPL_GIT_EMAIL="other@example.com" dotfiles template render
    ```
 
 2. **Local overrides** (`templates/_variables.local.sh`)
@@ -573,7 +573,7 @@ Variables are resolved in this order (highest priority first):
 
 The template system automatically detects your machine type based on:
 
-1. **Environment variable**: `BLACKDOT_MACHINE_TYPE`
+1. **Environment variable**: `DOTFILES_MACHINE_TYPE`
 2. **Hostname patterns**:
    - Contains `work`, `corp`, `office` → `work`
    - Contains `personal`, `home`, `macbook`, `imac` → `personal`
@@ -702,7 +702,7 @@ Generates Claude Code local settings:
 The template system integrates with the bootstrap process:
 
 1. **First bootstrap**: Templates are not rendered (no `_variables.local.sh` yet)
-2. **After `blackdot template init`**: Bootstrap will render templates
+2. **After `dotfiles template init`**: Bootstrap will render templates
 3. **Subsequent bootstraps**: Templates re-render if configured
 
 Bootstrap calls `render_templates()` which:
@@ -714,7 +714,7 @@ Bootstrap calls `render_templates()` which:
 
 ## Health Checks
 
-`blackdot doctor` includes template system checks:
+`dotfiles doctor` includes template system checks:
 
 ```
 ── Template System ──
@@ -741,31 +741,31 @@ ls -la templates/_variables.local.sh
 
 **If missing, initialize:**
 ```bash
-blackdot template init
+dotfiles template init
 ```
 
 ### Wrong Variable Values
 
 **Check current values:**
 ```bash
-blackdot template vars
+dotfiles template vars
 ```
 
 **Check precedence:**
 ```bash
-DEBUG=1 blackdot template render --dry-run
+DEBUG=1 dotfiles template render --dry-run
 ```
 
 ### Stale Generated Files
 
 **Check status:**
 ```bash
-blackdot template diff
+dotfiles template diff
 ```
 
 **Force re-render:**
 ```bash
-blackdot template render --force
+dotfiles template render --force
 ```
 
 ### Unresolved Variables
@@ -779,7 +779,7 @@ Templates warn about unresolved `{{ variable }}` placeholders. Check:
 
 **Check current detection:**
 ```bash
-blackdot template vars | grep machine_type
+dotfiles template vars | grep machine_type
 ```
 
 **Force machine type:**
@@ -792,7 +792,7 @@ TMPL_AUTO[machine_type]="work"
 
 ## Best Practices
 
-1. **Always run `blackdot template vars`** after editing `_variables.local.sh` to verify values
+1. **Always run `dotfiles template vars`** after editing `_variables.local.sh` to verify values
 
 2. **Use `--dry-run`** first when testing template changes
 
@@ -815,11 +815,11 @@ Template variables can be stored in your vault for portable restoration across m
 The template system has built-in vault commands:
 
 ```bash
-blackdot template vault push      # Backup to vault
-blackdot template vault pull      # Restore from vault
-blackdot template vault diff      # Compare local vs vault
-blackdot template vault sync      # Bidirectional sync
-blackdot template vault status    # Show sync status
+dotfiles template vault push      # Backup to vault
+dotfiles template vault pull      # Restore from vault
+dotfiles template vault diff      # Compare local vs vault
+dotfiles template vault sync      # Bidirectional sync
+dotfiles template vault status    # Show sync status
 ```
 
 ### Variable File Location
@@ -834,33 +834,33 @@ The template vault commands sync `templates/_variables.local.sh`:
 ### Storing Template Variables in Vault
 
 ```bash
-# After running `blackdot template init`
-blackdot template vault push      # Push to vault
+# After running `dotfiles template init`
+dotfiles template vault push      # Push to vault
 
 # Or check status first
-blackdot template vault status    # Shows sync state
+dotfiles template vault status    # Shows sync state
 ```
 
 ### Restoring on a New Machine
 
 ```bash
 # 1. Pull template variables from vault
-blackdot template vault pull
+dotfiles template vault pull
 
 # 2. Render templates - uses variables from vault
-blackdot template render
+dotfiles template render
 
 # 3. Create symlinks
-blackdot template link
+dotfiles template link
 ```
 
 ### Discovery
 
-The `blackdot vault scan` (discover-secrets.sh) command automatically detects template variables:
+The `dotfiles vault scan` (discover-secrets.sh) command automatically detects template variables:
 
 ```bash
 # Preview what would be discovered
-blackdot vault scan --dry-run
+dotfiles vault scan --dry-run
 
 # Output includes:
 # [OK]   Found: ~/.config/dotfiles/template-variables.sh
@@ -891,22 +891,22 @@ With template variables in vault, setting up a new machine becomes:
 
 ```bash
 # 1. Clone dotfiles
-git clone https://github.com/you/blackdot ~/dotfiles
+git clone https://github.com/you/dotfiles ~/dotfiles
 
 # 2. Bootstrap (installs dependencies, sets up vault)
-cd ~/blackdot && ./install.sh
+cd ~/dotfiles && ./install.sh
 
 # 3. Pull SSH keys, AWS config, etc from vault
-blackdot vault pull
+dotfiles vault pull
 
 # 4. Pull template variables from vault
-blackdot template vault pull
+dotfiles template vault pull
 
 # 5. Render all templates
-blackdot template render
+dotfiles template render
 
 # 6. Create symlinks
-blackdot template link
+dotfiles template link
 
 # Done! All configs are now in place
 ```

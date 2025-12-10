@@ -8,16 +8,16 @@ Run these commands first to understand your system state:
 
 ```bash
 # Visual dashboard
-blackdot status
+dotfiles status
 
 # Comprehensive health check
-blackdot doctor
+dotfiles doctor
 
 # Check with auto-fix
-blackdot doctor --fix
+dotfiles doctor --fix
 
 # Compare local vs vault
-blackdot drift
+dotfiles drift
 ```
 
 ## Installation Issues
@@ -29,10 +29,10 @@ blackdot drift
 **Solution:**
 ```bash
 # Don't use sudo for the install script
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
 
 # If you need to fix permissions afterward
-blackdot doctor --fix
+dotfiles doctor --fix
 ```
 
 ### Install hangs on "Waiting for vault"
@@ -46,7 +46,7 @@ blackdot doctor --fix
 
 # Option 2: Run setup wizard and choose "skip" when prompted for vault
 ./install.sh
-blackdot setup   # Choose "Skip" when asked about vault backend
+dotfiles setup   # Choose "Skip" when asked about vault backend
 ```
 
 ### Homebrew not found (macOS)
@@ -156,40 +156,40 @@ bw unlock --check --session "$BW_SESSION"
 
 ### "Vault item not found"
 
-**Symptom:** `blackdot vault pull` can't find items.
+**Symptom:** `dotfiles vault pull` can't find items.
 
 **Solution:**
 ```bash
 # List available items
-blackdot vault list
+dotfiles vault list
 
 # Check expected item names
-# Items should be named: blackdot-SSH-Config, blackdot-AWS-Config, etc.
+# Items should be named: dotfiles-SSH-Config, dotfiles-AWS-Config, etc.
 
 # Verify items exist in vault
-blackdot vault list
+dotfiles vault list
 
 # Create missing items
-blackdot vault create
+dotfiles vault create
 ```
 
 ### Drift detection shows differences
 
-**Symptom:** `blackdot drift` shows local differs from vault.
+**Symptom:** `dotfiles drift` shows local differs from vault.
 
 **Solution:**
 ```bash
 # Preview what would change
-blackdot diff --restore   # See what restore would do
-blackdot diff --sync      # See what sync would do
+dotfiles diff --restore   # See what restore would do
+dotfiles diff --sync      # See what sync would do
 
 # Best: Smart sync auto-detects direction for each file
-blackdot sync             # Auto push/pull based on what changed
-blackdot sync --dry-run   # Preview first
+dotfiles sync             # Auto push/pull based on what changed
+dotfiles sync --dry-run   # Preview first
 
 # Or choose direction manually:
-blackdot vault pull       # Pull vault → local (overwrites local)
-blackdot vault push --all # Push local → vault (overwrites vault)
+dotfiles vault pull       # Pull vault → local (overwrites local)
+dotfiles vault push --all # Push local → vault (overwrites vault)
 ```
 
 ### Vault CLI not found
@@ -226,7 +226,7 @@ chmod 600 ~/.ssh/id_*
 chmod 644 ~/.ssh/*.pub
 
 # Or use doctor
-blackdot doctor --fix
+dotfiles doctor --fix
 ```
 
 ### AWS credentials permissions
@@ -239,25 +239,25 @@ chmod 600 ~/.aws/credentials
 chmod 600 ~/.aws/config
 
 # Or use doctor
-blackdot doctor --fix
+dotfiles doctor --fix
 ```
 
 ## Backup / Restore Issues
 
 ### "No backups found"
 
-**Symptom:** `blackdot backup restore` says no backups exist.
+**Symptom:** `dotfiles backup restore` says no backups exist.
 
 **Solution:**
 ```bash
 # Check backup directory
-ls -la ~/.blackdot-backups/
+ls -la ~/.dotfiles-backups/
 
 # Create a backup first
-blackdot backup
+dotfiles backup
 
 # List available backups
-blackdot backup --list
+dotfiles backup --list
 ```
 
 ### Restore from specific backup
@@ -267,13 +267,13 @@ blackdot backup --list
 **Solution:**
 ```bash
 # List backups with dates
-blackdot backup --list
+dotfiles backup --list
 
 # Interactive restore (shows selection)
-blackdot backup restore
+dotfiles backup restore
 
 # Manual restore
-tar -xzf ~/.blackdot-backups/backup-YYYYMMDD-HHMMSS.tar.gz -C /
+tar -xzf ~/.dotfiles-backups/backup-YYYYMMDD-HHMMSS.tar.gz -C /
 ```
 
 ## Platform-Specific Issues
@@ -315,19 +315,19 @@ ls -la /workspace
 
 **Solution:**
 ```bash
-# Mount blackdot as volume
-docker run -v ~/workspace/dotfiles:/root/workspace/blackdot ...
+# Mount dotfiles as volume
+docker run -v ~/workspace/dotfiles:/root/workspace/dotfiles ...
 
 # Or use the development image
-docker build -t blackdot-dev .
-docker run -it blackdot-dev
+docker build -t dotfiles-dev .
+docker run -it dotfiles-dev
 ```
 
 ## Upgrade Issues
 
 ### Upgrade fails with merge conflicts
 
-**Symptom:** `blackdot upgrade` fails with git errors.
+**Symptom:** `dotfiles upgrade` fails with git errors.
 
 **Solution:**
 ```bash
@@ -369,30 +369,30 @@ head -5 ~/workspace/dotfiles/README.md
 
 1. **Run full diagnostics:**
    ```bash
-   blackdot doctor
-   blackdot status
+   dotfiles doctor
+   dotfiles status
    ```
 
 2. **Check logs:**
    ```bash
    # Installation metrics
-   cat ~/.blackdot-metrics.jsonl | tail -20
+   cat ~/.dotfiles-metrics.jsonl | tail -20
    ```
 
 3. **Reset to clean state:**
    ```bash
    # Backup first!
-   blackdot backup
+   dotfiles backup
 
    # Uninstall
-   blackdot uninstall --dry-run  # Preview
-   blackdot uninstall            # Execute
+   dotfiles uninstall --dry-run  # Preview
+   dotfiles uninstall            # Execute
 
    # Reinstall
-   curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
+   curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
    ```
 
 4. **Report an issue:**
-   - [Open GitHub Issue](https://github.com/blackwell-systems/blackdot/issues/new)
-   - Include output of `blackdot doctor`
+   - [Open GitHub Issue](https://github.com/blackwell-systems/dotfiles/issues/new)
+   - Include output of `dotfiles doctor`
    - Include your OS version and shell version
