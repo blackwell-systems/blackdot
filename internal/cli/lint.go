@@ -31,13 +31,13 @@ func newLintCmd() *cobra.Command {
 
 Checks:
   - ZSH syntax in zsh/zsh.d/*.zsh
-  - Bash syntax in bin/*.sh, lib/*.sh, bootstrap/*.sh
+  - Bash syntax in lib/*.sh, bootstrap/*.sh
   - Shellcheck warnings (if installed)
 
 Examples:
-  dotfiles lint              # Check all files
-  dotfiles lint --verbose    # Show all files checked
-  dotfiles lint --fix        # Show fix suggestions`,
+  blackdot lint              # Check all files
+  blackdot lint --verbose    # Show all files checked
+  blackdot lint --fix        # Show fix suggestions`,
 		RunE: runLint,
 	}
 
@@ -131,10 +131,6 @@ func runLint(cmd *cobra.Command, args []string) error {
 	// bootstrap/*.sh
 	bootstrapFiles, _ := filepath.Glob(filepath.Join(dotfilesDir, "bootstrap", "*.sh"))
 	shellFiles = append(shellFiles, bootstrapFiles...)
-
-	// vault/*.sh
-	vaultFiles, _ := filepath.Glob(filepath.Join(dotfilesDir, "vault", "*.sh"))
-	shellFiles = append(shellFiles, vaultFiles...)
 
 	// lib/*.sh
 	libFiles, _ := filepath.Glob(filepath.Join(dotfilesDir, "lib", "*.sh"))
