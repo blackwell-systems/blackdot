@@ -104,8 +104,19 @@ All shell script functionality now implemented in Go, enabling multi-backend sup
 
 ### Removed
 
+- **Vault Shell Scripts** - Deleted 16 scripts (4,283 lines) now that Go has full parity:
+  - `vault/*.sh` (restore-*.sh, sync-*.sh, create-*.sh, delete-*.sh, etc.)
+  - All functionality now in `internal/cli/vault.go`
 - Shell script vault fallback (Go implementation now has full parity)
 - Legacy `DOTFILES_*` environment variables (use `BLACKDOT_*`)
+- Old backup file `README_12_03_2025.md`
+
+### Repository
+
+- **Repo rename ready**: `blackwell-systems/dotfiles` → `blackwell-systems/blackdot`
+  - All internal references updated
+  - Docsify config updated
+  - Install/uninstall URLs updated
 
 ### Migration Guide
 
