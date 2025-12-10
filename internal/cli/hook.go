@@ -715,11 +715,11 @@ func printHookHelp() {
 	fmt.Print("  ")
 	Yellow.Print("Hooks directory")
 	fmt.Print("   ")
-	Dim.Println("~/.config/dotfiles/hooks/")
+	Dim.Println("~/.config/blackdot/hooks/")
 	fmt.Print("  ")
 	Yellow.Print("JSON config")
 	fmt.Print("       ")
-	Dim.Println("~/.config/dotfiles/hooks.json")
+	Dim.Println("~/.config/blackdot/hooks.json")
 	fmt.Println()
 
 	// Examples

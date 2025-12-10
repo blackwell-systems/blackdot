@@ -174,7 +174,7 @@ func newConfigSourceCmd() *cobra.Command {
 		Long: `Returns JSON with value and its source layer.
 
 Example output:
-  {"value": "bitwarden", "layer": "user", "path": "~/.config/dotfiles/config.json"}`,
+  {"value": "bitwarden", "layer": "user", "path": "~/.config/blackdot/config.json"}`,
 		Args: cobra.RangeArgs(1, 2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			key := args[0]

@@ -526,7 +526,7 @@ func createVaultItem(itemName, content, session string) error {
 
 func updateSyncTimestamps(timestamp string, pushed, pulled bool) {
 	home, _ := os.UserHomeDir()
-	configFile := filepath.Join(home, ".config/dotfiles/config.json")
+	configFile := filepath.Join(home, ".config/blackdot/config.json")
 
 	// Read existing config
 	data, err := os.ReadFile(configFile)

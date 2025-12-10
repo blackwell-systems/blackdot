@@ -638,7 +638,7 @@ func printEncryptHelp() {
 
 	// Security Notes
 	BoldCyan.Println("Security:")
-	Dim.Println("  - Private key stored in ~/.config/dotfiles/age-key.txt (mode 600)")
+	Dim.Println("  - Private key stored in ~/.config/blackdot/age-key.txt (mode 600)")
 	Dim.Println("  - Back up your private key: dotfiles encrypt push-key")
 	Dim.Println("  - Without the private key, encrypted files cannot be recovered")
 	Dim.Println("  - Public key can be safely shared for others to encrypt files for you")

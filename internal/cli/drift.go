@@ -21,7 +21,7 @@ var driftTrackedFiles = map[string]string{
 	"AWS-Credentials":      ".aws/credentials",
 	"Git-Config":           ".gitconfig",
 	"Environment-Secrets":  ".local/env.secrets",
-	"Template-Variables":   ".config/dotfiles/template-variables.sh",
+	"Template-Variables":   ".config/blackdot/template-variables.sh",
 	"Claude-Profiles":      ".claude/profiles.json",
 }
 
