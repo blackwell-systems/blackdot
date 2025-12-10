@@ -236,7 +236,7 @@ func showDiff(itemName, localPath, session string, bold, green, yellow, red, cya
 }
 
 func showSyncPreview(home, session string, bold, green, yellow, blue func(a ...interface{}) string) error {
-	fmt.Println(bold("Preview: What 'dotfiles vault sync' would push to Bitwarden"))
+	fmt.Println(bold("Preview: What 'blackdot vault sync' would push to Bitwarden"))
 	fmt.Println()
 
 	for itemName, relPath := range diffTrackedItems {
@@ -262,7 +262,7 @@ func showSyncPreview(home, session string, bold, green, yellow, blue func(a ...i
 }
 
 func showRestorePreview(home, session string, bold, green, yellow, blue func(a ...interface{}) string) error {
-	fmt.Println(bold("Preview: What 'dotfiles vault restore' would change locally"))
+	fmt.Println(bold("Preview: What 'blackdot vault restore' would change locally"))
 	fmt.Println()
 
 	for itemName, relPath := range diffTrackedItems {

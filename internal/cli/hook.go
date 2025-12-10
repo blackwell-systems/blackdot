@@ -381,7 +381,7 @@ func runHookList(args []string) error {
 			fmt.Println()
 		}
 
-		fmt.Printf("%s\n", dim("Use 'dotfiles hook list <point>' for details on a specific point."))
+		fmt.Printf("%s\n", dim("Use 'blackdot hook list <point>' for details on a specific point."))
 	}
 
 	return nil

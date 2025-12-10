@@ -93,7 +93,7 @@ func runDriftQuick(home string, green, yellow, dim func(a ...interface{}) string
 
 	// Check if state file exists
 	if _, err := os.Stat(stateFile); os.IsNotExist(err) {
-		fmt.Println("No drift state available. Run 'dotfiles vault pull' first.")
+		fmt.Println("No drift state available. Run 'blackdot vault pull' first.")
 		return nil
 	}
 

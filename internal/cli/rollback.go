@@ -21,8 +21,8 @@ func newRollbackCmd() *cobra.Command {
 		Short: "Instant rollback to last backup",
 		Long: `Quickly rollback to the most recent backup (or a specific one).
 
-This is a convenience command equivalent to 'dotfiles backup restore'.
-For more backup options, use 'dotfiles backup'.`,
+This is a convenience command equivalent to 'blackdot backup restore'.
+For more backup options, use 'blackdot backup'.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Check feature
 			if !force {
@@ -30,7 +30,7 @@ For more backup options, use 'dotfiles backup'.`,
 				if !reg.Enabled("backup_auto") {
 					Fail("Feature 'backup_auto' is not enabled")
 					fmt.Println()
-					Info("Enable with: dotfiles features enable backup_auto")
+					Info("Enable with: blackdot features enable backup_auto")
 					Info("Or run with --force to bypass")
 					return fmt.Errorf("feature not enabled")
 				}
@@ -188,13 +188,13 @@ func rollbackList() error {
 
 	if len(backups) > limit {
 		fmt.Println()
-		Dim.Printf("  ... and %d more (use 'dotfiles backup list' to see all)\n", len(backups)-limit)
+		Dim.Printf("  ... and %d more (use 'blackdot backup list' to see all)\n", len(backups)-limit)
 	}
 
 	fmt.Println()
 	fmt.Println("Rollback with:")
-	fmt.Printf("  dotfiles rollback                  # restore latest\n")
-	fmt.Printf("  dotfiles rollback --to <backup-id> # restore specific\n")
+	fmt.Printf("  blackdot rollback                  # restore latest\n")
+	fmt.Printf("  blackdot rollback --to <backup-id> # restore specific\n")
 	fmt.Println()
 	Dim.Printf("Location: %s\n", cfg.backupDir)
 

@@ -59,7 +59,7 @@ func runMetrics(cmd *cobra.Command, args []string) error {
 
 	// Check if metrics file exists
 	if _, err := os.Stat(metricsFile); os.IsNotExist(err) {
-		fmt.Println("No metrics found. Run 'dotfiles doctor' to start collecting metrics.")
+		fmt.Println("No metrics found. Run 'blackdot doctor' to start collecting metrics.")
 		return nil
 	}
 
@@ -70,7 +70,7 @@ func runMetrics(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(entries) == 0 {
-		fmt.Println("No metrics found. Run 'dotfiles doctor' to start collecting metrics.")
+		fmt.Println("No metrics found. Run 'blackdot doctor' to start collecting metrics.")
 		return nil
 	}
 

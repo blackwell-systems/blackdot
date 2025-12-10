@@ -212,10 +212,10 @@ func runPackages(cmd *cobra.Command, args []string) error {
 		totalMissing := len(missingFormulas) + len(missingCasks)
 		fmt.Printf("%s %d package(s) missing from %s tier\n", yellow("[WARN]"), totalMissing, tier)
 		fmt.Println()
-		fmt.Println("Run 'dotfiles packages --check' for details")
-		fmt.Println("Run 'dotfiles packages --install' to install")
+		fmt.Println("Run 'blackdot packages --check' for details")
+		fmt.Println("Run 'blackdot packages --install' to install")
 		fmt.Println()
-		fmt.Println(dim("Change tier with: dotfiles packages --tier minimal|enhanced|full"))
+		fmt.Println(dim("Change tier with: blackdot packages --tier minimal|enhanced|full"))
 	}
 
 	// Suggest dotclaude for Claude users

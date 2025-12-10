@@ -361,7 +361,7 @@ func listFeaturesCmd(cmd *cobra.Command, args []string, filterCategory string, j
 	}
 
 	PrintLegend()
-	PrintHint("Use 'dotfiles features enable <name>' to enable a feature")
+	PrintHint("Use 'blackdot features enable <name>' to enable a feature")
 }
 
 func listFeaturesJSON(reg *feature.Registry) {

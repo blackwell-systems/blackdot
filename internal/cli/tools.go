@@ -167,7 +167,7 @@ func printToolsHelp() {
 	Dim.Println("# Show Claude configuration")
 	fmt.Println()
 
-	Dim.Println("Run 'dotfiles tools <category> --help' for category details.")
+	Dim.Println("Run 'blackdot tools <category> --help' for category details.")
 }
 
 // printToolsCmd prints a tools category with description

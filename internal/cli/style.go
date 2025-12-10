@@ -127,7 +127,7 @@ func printRootHelp() {
 	printCmd("help", "Show this help")
 	fmt.Println()
 
-	Dim.Println("Run 'dotfiles <command> --help' for detailed options.")
+	Dim.Println("Run 'blackdot <command> --help' for detailed options.")
 	fmt.Println()
 	Dim.Printf("Runtime: Go CLI (%s)\n", versionStr)
 }
@@ -210,7 +210,7 @@ func printCommandHelp(cmd *cobra.Command) {
 		fmt.Println()
 	}
 
-	Dim.Printf("Run 'dotfiles %s <command> --help' for subcommand details.\n", cmd.Name())
+	Dim.Printf("Run 'blackdot %s <command> --help' for subcommand details.\n", cmd.Name())
 }
 
 // RunCommand executes the root command (used by main)

@@ -570,7 +570,7 @@ func vaultStatus() error {
 	if backend.IsAuthenticated(ctx) {
 		Pass("Authenticated")
 	} else {
-		Warn("Not authenticated - run 'dotfiles vault unlock'")
+		Warn("Not authenticated - run 'blackdot vault unlock'")
 	}
 
 	return nil
@@ -858,7 +858,7 @@ func vaultHealth() error {
 		Pass("Authenticated")
 	} else {
 		Warn("Not authenticated")
-		PrintHint("Run 'dotfiles vault unlock' to authenticate")
+		PrintHint("Run 'blackdot vault unlock' to authenticate")
 	}
 
 	// Check session file
@@ -885,7 +885,7 @@ func vaultQuick() error {
 	if backendType == "" {
 		fmt.Println("  Backend:    Not configured")
 		fmt.Println()
-		Info("Run 'dotfiles setup' to configure a vault")
+		Info("Run 'blackdot setup' to configure a vault")
 		return fmt.Errorf("vault not configured")
 	}
 
@@ -1713,7 +1713,7 @@ func vaultInit() error {
 	if choice == len(available)+1 {
 		cfg := config.DefaultManager()
 		cfg.Set("vault.backend", "none")
-		Info("Vault setup skipped. Run 'dotfiles vault init' anytime.")
+		Info("Vault setup skipped. Run 'blackdot vault init' anytime.")
 		return nil
 	} else if choice >= 1 && choice <= len(available) {
 		selectedBackend = available[choice-1]
