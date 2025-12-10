@@ -20,13 +20,13 @@ This directory contains scripts for **bidirectional secret management** with mul
 
 ### Switching Backends
 
-> **Note:** "Multi-vault" means the system **supports multiple backends**, not that you use them simultaneously. You configure **one active backend at a time**. To switch backends, reconfigure with `dotfiles vault setup`.
+> **Note:** "Multi-vault" means the system **supports multiple backends**, not that you use them simultaneously. You configure **one active backend at a time**. To switch backends, reconfigure with `blackdot vault setup`.
 
 ```bash
 # Set your preferred backend (stored in config.json, or override with env var)
-export DOTFILES_VAULT_BACKEND=bitwarden  # default
-export DOTFILES_VAULT_BACKEND=1password
-export DOTFILES_VAULT_BACKEND=pass
+export BLACKDOT_VAULT_BACKEND=bitwarden  # default
+export BLACKDOT_VAULT_BACKEND=1password
+export BLACKDOT_VAULT_BACKEND=pass
 
 # For 1Password, optionally set vault name
 export ONEPASSWORD_VAULT=Personal  # default
@@ -37,10 +37,10 @@ export PASS_PREFIX=dotfiles  # default, items stored as dotfiles/Git-Config
 
 **Switching backends:**
 ```bash
-dotfiles vault setup  # Interactive reconfiguration, updates config.json
+blackdot vault setup  # Interactive reconfiguration, updates config.json
 ```
 
-All `dotfiles vault` commands work identically regardless of which backend you've configured.
+All `blackdot vault` commands work identically regardless of which backend you've configured.
 
 ---
 
@@ -48,39 +48,39 @@ All `dotfiles vault` commands work identically regardless of which backend you'v
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| `init-vault.sh` | Configure vault backend with location support | `dotfiles vault setup` |
-| `restore.sh` | Orchestrates all restores | `dotfiles vault pull` |
+| `init-vault.sh` | Configure vault backend with location support | `blackdot vault setup` |
+| `restore.sh` | Orchestrates all restores | `blackdot vault pull` |
 | `restore-ssh.sh` | Restores SSH keys + config | Called by bootstrap |
 | `restore-aws.sh` | Restores AWS config/creds | Called by bootstrap |
 | `restore-env.sh` | Restores env secrets | Called by bootstrap |
 | `restore-git.sh` | Restores gitconfig | Called by bootstrap |
-| `create-vault-item.sh` | Creates new vault items | `dotfiles vault create ITEM` |
-| `sync-to-vault.sh` | Syncs local → vault | `dotfiles vault push --all` |
-| `dotfiles-sync` | Smart bidirectional sync | `dotfiles sync` or `dotfiles vault sync` |
-| `validate-schema.sh` | Validates vault item schema | `dotfiles vault validate` |
-| `delete-vault-item.sh` | Deletes items from vault | `dotfiles vault delete ITEM` |
-| `check-vault-items.sh` | Pre-flight validation | `dotfiles vault check` |
-| `list-vault-items.sh` | Debug/inventory tool | `dotfiles vault list` |
+| `create-vault-item.sh` | Creates new vault items | `blackdot vault create ITEM` |
+| `sync-to-vault.sh` | Syncs local → vault | `blackdot vault push --all` |
+| `dotfiles-sync` | Smart bidirectional sync | `blackdot sync` or `blackdot vault sync` |
+| `validate-schema.sh` | Validates vault item schema | `blackdot vault validate` |
+| `delete-vault-item.sh` | Deletes items from vault | `blackdot vault delete ITEM` |
+| `check-vault-items.sh` | Pre-flight validation | `blackdot vault check` |
+| `list-vault-items.sh` | Debug/inventory tool | `blackdot vault list` |
 | `_common.sh` | Shared functions library | Sourced by other scripts |
 
 ### Commands
 
-All vault operations are accessed via the unified `dotfiles vault` command:
+All vault operations are accessed via the unified `blackdot vault` command:
 
 ```bash
-dotfiles vault setup             # Configure or reconfigure vault backend
-dotfiles vault pull          # Restore all secrets (checks for local drift first)
-dotfiles vault pull --force  # Skip drift check, overwrite local changes
-dotfiles vault push             # Sync local changes to vault
-dotfiles vault push --all       # Sync all items
-dotfiles vault sync             # Smart bidirectional sync (auto push/pull)
-dotfiles vault sync --force-local   # Force push local to vault
-dotfiles vault sync --force-vault   # Force pull vault to local
-dotfiles vault create           # Create new vault item
-dotfiles vault validate         # Validate vault item schema
-dotfiles vault delete           # Delete vault item
-dotfiles vault list             # List all vault items
-dotfiles vault check            # Validate required items exist
+blackdot vault setup             # Configure or reconfigure vault backend
+blackdot vault pull          # Restore all secrets (checks for local drift first)
+blackdot vault pull --force  # Skip drift check, overwrite local changes
+blackdot vault push             # Sync local changes to vault
+blackdot vault push --all       # Sync all items
+blackdot vault sync             # Smart bidirectional sync (auto push/pull)
+blackdot vault sync --force-local   # Force push local to vault
+blackdot vault sync --force-vault   # Force pull vault to local
+blackdot vault create           # Create new vault item
+blackdot vault validate         # Validate vault item schema
+blackdot vault delete           # Delete vault item
+blackdot vault list             # List all vault items
+blackdot vault check            # Validate required items exist
 ```
 
 ---
@@ -117,7 +117,7 @@ dotfiles vault check            # Validate required items exist
 - `name` - Unique identifier (used in vault item title)
 - `path` - Local file path (supports `~` expansion)
 - `type` - `ssh-key`, `file`, or custom
-- `required` - `true` = `dotfiles vault check` validates existence
+- `required` - `true` = `blackdot vault check` validates existence
 - `sync` - `always` (auto-sync) or `manual` (on-demand only)
 - `backup` - `true` = include in backups
 
@@ -148,7 +148,7 @@ brew install --cask 1password-cli
 op signin
 
 # Set backend
-export DOTFILES_VAULT_BACKEND=1password
+export BLACKDOT_VAULT_BACKEND=1password
 
 # Optionally specify vault
 export ONEPASSWORD_VAULT=Personal
@@ -164,7 +164,7 @@ brew install pass gnupg
 pass init "your-gpg-id@email.com"
 
 # Set backend
-export DOTFILES_VAULT_BACKEND=pass
+export BLACKDOT_VAULT_BACKEND=pass
 
 # Items will be stored under dotfiles/ prefix
 # e.g., dotfiles/Git-Config, dotfiles/SSH-Config
@@ -196,7 +196,7 @@ The vault setup wizard v2 introduces location-based organization. Instead of sca
 
 ### Setup Wizard v2 Flow
 
-The wizard (`dotfiles vault init`) now has three modes:
+The wizard (`blackdot vault init`) now has three modes:
 
 1. **Existing Items** - You have secrets in your vault already
    - Select or create a location (folder/directory)
@@ -244,23 +244,23 @@ Vault items are defined in a user-editable JSON configuration file. This allows 
 ### Location
 
 ```
-~/.config/dotfiles/vault-items.json
+~/.config/blackdot/vault-items.json
 ```
 
 ### Getting Started
 
 ```bash
 # Copy the example configuration
-mkdir -p ~/.config/dotfiles
-cp vault/vault-items.example.json ~/.config/dotfiles/vault-items.json
+mkdir -p ~/.config/blackdot
+cp vault/vault-items.example.json ~/.config/blackdot/vault-items.json
 
 # Edit to match your vault items
-$EDITOR ~/.config/dotfiles/vault-items.json
+$EDITOR ~/.config/blackdot/vault-items.json
 ```
 
 Or use the setup wizard which creates this automatically:
 ```bash
-dotfiles setup
+blackdot setup
 ```
 
 ### Configuration Structure
@@ -306,7 +306,7 @@ dotfiles setup
 | `ssh_keys` | Maps vault item names to local SSH key paths |
 | `vault_items` | All managed items with metadata (path, required, type) |
 | `syncable_items` | Items that can sync bidirectionally |
-| `aws_expected_profiles` | AWS profiles validated by `dotfiles doctor` |
+| `aws_expected_profiles` | AWS profiles validated by `blackdot doctor` |
 
 ### Item Types
 
@@ -315,7 +315,7 @@ dotfiles setup
 
 ### Required vs Optional
 
-- `required: true` - `dotfiles vault check` will fail if missing
+- `required: true` - `blackdot vault check` will fail if missing
 - `required: false` - Restored if present, skipped if not
 
 ---
@@ -325,7 +325,7 @@ dotfiles setup
 The restore command automatically checks if your local files have changed since the last vault push. This prevents accidental data loss:
 
 ```bash
-$ dotfiles vault pull
+$ blackdot vault pull
 [INFO] Checking for local changes before restore...
 [WARN] Local files have changed since last vault push:
   - Git-Config (~/.gitconfig)
@@ -342,7 +342,7 @@ Options:
 To skip this check (for automation or when you intentionally want to overwrite):
 ```bash
 # Use --force flag
-dotfiles vault pull --force
+blackdot vault pull --force
 
 # Or set environment variable
 DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull
@@ -364,8 +364,8 @@ DOTFILES_OFFLINE=1 dotfiles vault push     # Exits gracefully
 ```
 
 When offline mode is enabled:
-- `dotfiles vault pull` - Skips restore, keeps existing local files
-- `dotfiles vault push` - Skips sync with helpful message
+- `blackdot vault pull` - Skips restore, keeps existing local files
+- `blackdot vault push` - Skips sync with helpful message
 - All other dotfiles commands work normally
 
 ---
@@ -391,7 +391,7 @@ When offline mode is enabled:
 │                     ↓                                            │
 │   _common.sh (validation, drift detection, config loader)       │
 │                     ↓                                            │
-│   ~/.config/dotfiles/vault-items.json (user configuration)      │
+│   ~/.config/blackdot/vault-items.json (user configuration)      │
 │                     ↓                                            │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
@@ -401,7 +401,7 @@ When offline mode is enabled:
 │   vault_sync()         vault_get_notes()  vault_update_item()   │
 │   vault_login_check()  vault_item_exists() vault_delete_item()  │
 │                     ↓                                            │
-│   Loads backend based on DOTFILES_VAULT_BACKEND                 │
+│   Loads backend based on BLACKDOT_VAULT_BACKEND                 │
 │                     ↓                                            │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
@@ -419,7 +419,7 @@ When offline mode is enabled:
 
 1. Create `vault/backends/newbackend.sh`
 2. Implement required functions (see `backends/_interface.md`)
-3. Test with `DOTFILES_VAULT_BACKEND=newbackend dotfiles vault list`
+3. Test with `BLACKDOT_VAULT_BACKEND=newbackend dotfiles vault list`
 
 ---
 
@@ -434,17 +434,17 @@ op signin                   # 1Password
 # (pass uses GPG, no login needed)
 
 # 2. Push your existing secrets to vault
-dotfiles vault push --all
+blackdot vault push --all
 
 # 3. Verify items were created
-dotfiles vault list
+blackdot vault list
 ```
 
 ### New Machine Setup
 
 ```bash
 # 1. Clone dotfiles
-git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
+git clone git@github.com:blackwell-systems/blackdot.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
 # 2. Bootstrap the system
@@ -456,7 +456,7 @@ op signin                   # 1Password
 # (pass uses GPG, no login needed)
 
 # 4. Restore all secrets
-dotfiles vault pull
+blackdot vault pull
 ```
 
 ### Daily Operations
@@ -466,34 +466,34 @@ dotfiles vault pull
 vim ~/.ssh/config
 
 # Smart sync - auto-detects push/pull direction
-dotfiles sync
+blackdot sync
 
 # Or explicitly push changes to vault
-dotfiles vault push SSH-Config
+blackdot vault push SSH-Config
 
 # Check vault health
-dotfiles vault check
+blackdot vault check
 
 # Validate vault schema
-dotfiles vault validate
+blackdot vault validate
 ```
 
 ### Switching Backends
 
 ```bash
 # 1. Export from current backend
-dotfiles vault list  # Note all items
+blackdot vault list  # Note all items
 
 # 2. Set new backend
-export DOTFILES_VAULT_BACKEND=1password
+export BLACKDOT_VAULT_BACKEND=1password
 
 # 3. Create items in new backend
-dotfiles vault create Git-Config
-dotfiles vault create SSH-Config
+blackdot vault create Git-Config
+blackdot vault create SSH-Config
 # ... etc
 
 # 4. Verify
-dotfiles vault check
+blackdot vault check
 ```
 
 ---
@@ -527,7 +527,7 @@ File-based config items contain the full file content in the notes field:
 | `AWS-Credentials` | `~/.aws/credentials` |
 | `Git-Config` | `~/.gitconfig` |
 | `Environment-Secrets` | `~/.local/env.secrets` |
-| `Template-Variables` | `~/.config/dotfiles/template-variables.sh` |
+| `Template-Variables` | `~/.config/blackdot/template-variables.sh` |
 
 ---
 
@@ -537,7 +537,7 @@ The vault system can store and restore machine-specific template variables, enab
 
 ### What are Template Variables?
 
-Template variables customize dotfiles per-machine. They're stored in `~/.config/dotfiles/template-variables.sh`:
+Template variables customize dotfiles per-machine. They're stored in `~/.config/blackdot/template-variables.sh`:
 
 ```bash
 # Machine-specific template variables
@@ -551,25 +551,25 @@ TMPL_DEFAULTS[company]="ACME Corp"
 **Push to vault (current machine):**
 ```bash
 # Store template variables in your vault
-pass insert -mf dotfiles/Template-Variables < ~/.config/dotfiles/template-variables.sh
+pass insert -mf dotfiles/Template-Variables < ~/.config/blackdot/template-variables.sh
 
 # Or with Bitwarden (via vault scripts)
-dotfiles vault push Template-Variables
+blackdot vault push Template-Variables
 ```
 
 **Pull from vault (new machine):**
 ```bash
 # Restore template variables from vault
-pass show dotfiles/Template-Variables > ~/.config/dotfiles/template-variables.sh
+pass show dotfiles/Template-Variables > ~/.config/blackdot/template-variables.sh
 
 # Then render templates
-dotfiles template render --all
+blackdot template render --all
 ```
 
 ### Location Priority
 
 The template system loads variables from these locations (in order):
-1. `~/.config/dotfiles/template-variables.sh` (XDG, vault-portable)
+1. `~/.config/blackdot/template-variables.sh` (XDG, vault-portable)
 2. `templates/_variables.local.sh` (repo-specific fallback)
 3. `templates/_variables.sh` (defaults)
 
@@ -585,10 +585,10 @@ cd ~/dotfiles
 
 # 3. Login to vault and pull secrets
 bw login  # or: op signin / pass init
-dotfiles vault pull
+blackdot vault pull
 
 # 4. Render templates (uses restored variables)
-dotfiles template render --all
+blackdot template render --all
 ```
 
 ---
@@ -599,7 +599,7 @@ The `validate-config.sh` script validates your `vault-items.json` configuration 
 
 ```bash
 # Validate configuration
-dotfiles vault validate
+blackdot vault validate
 ```
 
 **What it validates:**
@@ -610,8 +610,8 @@ dotfiles vault validate
 - ✅ Path format (must start with ~, /, or $)
 
 **Validation runs automatically:**
-- Before `dotfiles vault push` operations
-- Before `dotfiles vault pull` operations
+- Before `blackdot vault push` operations
+- Before `blackdot vault pull` operations
 - During setup wizard vault configuration phase
 
 **Interactive error recovery:**
@@ -630,7 +630,7 @@ After you fix errors and save, validation re-runs automatically.
   Vault Configuration Schema Validation
 ════════════════════════════════════════════════════════════
 
-Validating: /home/user/.config/dotfiles/vault-items.json
+Validating: /home/user/.config/blackdot/vault-items.json
 
 Configuration summary:
   • 5 vault items configured
@@ -644,7 +644,7 @@ Configuration summary:
 - `Missing required field: vault_items` → Add empty object: `"vault_items": {}`
 - `Item X: missing required field (path, required, or type)` → Add missing fields
 - `Item X: invalid type "folder"` → Change to "file" or "sshkey"
-- `Invalid JSON syntax` → Run `jq . ~/.config/dotfiles/vault-items.json` to find syntax errors
+- `Invalid JSON syntax` → Run `jq . ~/.config/blackdot/vault-items.json` to find syntax errors
 
 ---
 
@@ -668,10 +668,10 @@ op signin
 
 ```bash
 # List all items to verify name
-dotfiles vault list
+blackdot vault list
 
 # Check for typos in item name
-dotfiles vault check
+blackdot vault check
 ```
 
 ### Permission Errors
@@ -697,4 +697,4 @@ chmod 600 ~/.ssh/config
 **Learn More:**
 - [Main Documentation](/)
 - [Full README](README-FULL.md)
-- [GitHub Repository](https://github.com/blackwell-systems/dotfiles)
+- [GitHub Repository](https://github.com/blackwell-systems/blackdot)

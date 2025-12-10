@@ -8,7 +8,7 @@
 
 ## 1. Command Inventory
 
-### Bash Commands (bin/dotfiles-*)
+### Bash Commands (bin/blackdot-*)
 
 | Command | Go Version | Status |
 |---------|------------|--------|
@@ -22,7 +22,7 @@
 | `dotfiles-go` | ⊘ | Wrapper - not needed |
 | `dotfiles-hook` | ✅ | Full parity + enhancements |
 | `dotfiles-lint` | ✅ | Full parity |
-| `dotfiles-metrics` | ✅ | Full parity |
+| `blackdot-metrics` | ✅ | Full parity |
 | `dotfiles-migrate` | ⊘ | Dropped (one-time v2→v3) |
 | `dotfiles-migrate-config` | ⊘ | Dropped (helper) |
 | `dotfiles-migrate-vault-schema` | ⊘ | Dropped (helper) |
@@ -163,7 +163,7 @@ All 15 missing subcommands were implemented on 2025-12-08:
 
 ### Config (3 new subcommands)
 - `source` - Returns JSON with value and source layer
-- `init` - Creates machine.json or .dotfiles.json
+- `init` - Creates machine.json or .blackdot.json
 - `edit` - Opens config in $EDITOR
 
 ### Template (5 new subcommands)

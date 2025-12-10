@@ -228,5 +228,5 @@ defaults write com.apple.dock orientation -string "bottom"
 
 **Learn More:**
 - [Main Documentation](/)
-- [macOS Scripts](https://github.com/blackwell-systems/dotfiles/tree/main/macos)
-- [GitHub Repository](https://github.com/blackwell-systems/dotfiles)
+- [macOS Scripts](https://github.com/blackwell-systems/blackdot/tree/main/macos)
+- [GitHub Repository](https://github.com/blackwell-systems/blackdot)

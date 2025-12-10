@@ -30,15 +30,15 @@ Each tool suite is independently toggleable:
 
 ```bash
 # Enable/disable at runtime
-dotfiles features enable rust_tools
-dotfiles features disable cdk_tools
+blackdot features enable rust_tools
+blackdot features disable cdk_tools
 
 # Persist across sessions
-dotfiles features enable aws_helpers --persist
-dotfiles features disable go_tools --persist
+blackdot features enable aws_helpers --persist
+blackdot features disable go_tools --persist
 
 # Check what's enabled
-dotfiles features list integration
+blackdot features list integration
 ```
 
 ---
@@ -660,9 +660,9 @@ All tool commands have tab completion:
 awsswitch <TAB>              # Shows profile names
 
 # dotfiles
-dotfiles <TAB>               # Shows subcommands
-dotfiles features <TAB>      # Shows: enable disable list preset status
-dotfiles features enable <TAB>  # Shows: vault aws_helpers rust_tools ...
+blackdot <TAB>               # Shows subcommands
+blackdot features <TAB>      # Shows: enable disable list preset status
+blackdot features enable <TAB>  # Shows: vault aws_helpers rust_tools ...
 
 # Rust
 cargo <TAB>                  # Standard cargo completions
@@ -696,16 +696,16 @@ Over time, this trains muscle memory for the shortcuts.
 A dedicated command to list and search aliases:
 
 ```bash
-dotfiles aliases             # List all by category
-dotfiles aliases rust        # Show Rust aliases
-dotfiles aliases search test # Find aliases containing "test"
+blackdot aliases             # List all by category
+blackdot aliases rust        # Show Rust aliases
+blackdot aliases search test # Find aliases containing "test"
 ```
 
 ---
 
 ## Adding Custom Aliases
 
-Add your own aliases in `~/.config/dotfiles/aliases.local.zsh`:
+Add your own aliases in `~/.config/blackdot/aliases.local.zsh`:
 
 ```zsh
 # My custom aliases

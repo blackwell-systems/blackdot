@@ -60,13 +60,13 @@ The feature registry is the central system for enabling and disabling optional f
 
 ```bash
 # List all features
-dotfiles features
+blackdot features
 
 # Enable a feature
-dotfiles features enable vault --persist
+blackdot features enable vault --persist
 
 # Use a preset
-dotfiles features preset developer --persist
+blackdot features preset developer --persist
 ```
 
 **Available Features:**
@@ -112,7 +112,7 @@ Priority (highest to lowest):
 config_get_layered "vault.backend"  # Checks all layers in priority order
 
 # Show where a setting comes from
-dotfiles config layers              # Displays effective config with sources
+blackdot config layers              # Displays effective config with sources
 ```
 
 **Layer Files:**
@@ -121,8 +121,8 @@ dotfiles config layers              # Displays effective config with sources
 |-------|------|----------|
 | Environment | `$DOTFILES_*` vars | CI/CD, temporary overrides |
 | Project | `.dotfiles.local` | Repository-specific settings |
-| Machine | `~/.config/dotfiles/machine.json` | Per-machine preferences |
-| User | `~/.config/dotfiles/config.json` | User preferences |
+| Machine | `~/.config/blackdot/machine.json` | Per-machine preferences |
+| User | `~/.config/blackdot/config.json` | User preferences |
 | Defaults | `lib/_config_layers.sh` | Built-in fallbacks |
 
 ### CLI Feature Awareness
@@ -130,7 +130,7 @@ dotfiles config layers              # Displays effective config with sources
 The CLI adapts based on enabled features:
 
 ```bash
-dotfiles help  # Shows only commands for enabled features
+blackdot help  # Shows only commands for enabled features
 ```
 
 **Behavior:**
@@ -140,7 +140,7 @@ dotfiles help  # Shows only commands for enabled features
 
 ```bash
 # Example: vault feature disabled
-$ dotfiles vault pull
+$ blackdot vault pull
 Feature 'vault' is not enabled.
 Run: dotfiles features enable vault
 ```
@@ -169,13 +169,13 @@ cli_command_available "vault:pull"  # Returns 0 if vault enabled
 | **Vault System** | Optional | `vault` | Select "Skip" in wizard or `--minimal` | Multi-backend secrets (Bitwarden/1Password/pass) |
 | **/workspace Symlink** | Optional | `workspace_symlink` | `SKIP_WORKSPACE_SYMLINK=true` | For portable Claude sessions |
 | **Claude Integration** | Optional | `claude_integration` | `SKIP_CLAUDE_SETUP=true` or `--minimal` | dotclaude + hooks + settings |
-| **Template Engine** | Optional | `templates` | Don't run `dotfiles template` | Machine-specific configs |
+| **Template Engine** | Optional | `templates` | Don't run `blackdot template` | Machine-specific configs |
 
 ### Install Modes
 
 ```bash
 # Full install - Everything (recommended for Claude Code users)
-curl -fsSL [...]/install.sh | bash && dotfiles setup
+curl -fsSL [...]/install.sh | bash && blackdot setup
 
 # Minimal install - Shell config only
 curl -fsSL [...]/install.sh | bash -s -- --minimal
@@ -200,7 +200,7 @@ All optional components can be controlled via environment variables:
 | `DOTFILES_OFFLINE=1` | Skip all vault operations | Air-gapped/offline environments |
 | `DOTFILES_SKIP_DRIFT_CHECK=1` | Skip drift detection | CI/automation pipelines |
 
-**Note:** The `dotfiles setup` wizard now presents tier selection interactively. Environment variables are available for advanced/automated setups.
+**Note:** The `blackdot setup` wizard now presents tier selection interactively. Environment variables are available for advanced/automated setups.
 
 ### Component Dependencies
 
@@ -228,7 +228,7 @@ graph TD
 
 **Key Design Principles:**
 - **No hard dependencies** - Optional components gracefully degrade if missing
-- **Enable later** - Started minimal? Run `dotfiles setup` to add features
+- **Enable later** - Started minimal? Run `blackdot setup` to add features
 - **Progressive disclosure** - Setup wizard guides you through choices
 - **Safe defaults** - Full install gives best experience, minimal still works
 
@@ -236,7 +236,7 @@ graph TD
 
 ### CLI Entry Point
 
-The unified `dotfiles` command provides a single entry point for all operations:
+The unified `blackdot` command provides a single entry point for all operations:
 
 ```mermaid
 graph LR
@@ -326,7 +326,7 @@ dotfiles/
 │   ├── dotfiles-migrate-config    # INI→JSON config migration
 │   ├── dotfiles-migrate-vault-schema # Legacy vault schema migration
 │   ├── dotfiles-uninstall  # Clean removal
-│   └── dotfiles-metrics    # Show metrics
+│   └── blackdot-metrics    # Show metrics
 │
 ├── zsh/
 │   ├── .zshrc              # Main entry (symlinked)
@@ -405,7 +405,7 @@ flowchart LR
 | `10-environment.zsh` | PATH, environment variables |
 | `20-history.zsh` | History configuration |
 | `30-prompt.zsh` | Powerlevel10k prompt |
-| `40-aliases.zsh` | Shell aliases, `dotfiles` command |
+| `40-aliases.zsh` | Shell aliases, `blackdot` command |
 | `50-functions.zsh` | Shell functions, `status` |
 | `60-completions.zsh` | Tab completion setup |
 | `70-plugins.zsh` | ZSH plugins |
@@ -421,8 +421,8 @@ The vault system provides bidirectional sync with multiple backends (Bitwarden, 
 Vault items are defined in a user-editable config file:
 
 ```
-~/.config/dotfiles/vault-items.json    # Vault schema (single secrets[] array)
-~/.config/dotfiles/config.json         # Config (vault backend, state, paths)
+~/.config/blackdot/vault-items.json    # Vault schema (single secrets[] array)
+~/.config/blackdot/config.json         # Config (vault backend, state, paths)
 ```
 
 **Vault Schema:** Uses a single `secrets[]` array for all secrets. Each item has granular control for sync, backup, and required status.
@@ -434,12 +434,12 @@ See `vault/vault-items.example.json` for the template.
 The vault system validates `vault-items.json` before all sync operations:
 
 ```bash
-dotfiles vault validate  # Manual validation
+blackdot vault validate  # Manual validation
 ```
 
 **Automatic validation:**
-- Before `dotfiles vault push` operations
-- Before `dotfiles vault pull` operations
+- Before `blackdot vault push` operations
+- Before `blackdot vault pull` operations
 - During setup wizard vault configuration phase
 
 **Validates:**
@@ -458,7 +458,7 @@ If validation fails during setup, offers to open editor for immediate fixes with
 sequenceDiagram
     participant User
     participant CLI as dotfiles CLI
-    participant Config as ~/.config/dotfiles
+    participant Config as ~/.config/blackdot
     participant Local as Local Files
     participant BW as Bitwarden
 
@@ -517,8 +517,8 @@ The hook system (`lib/_hooks.sh`) allows custom behavior at lifecycle events wit
 
 ### Registration Methods
 
-1. **File-based** - Scripts in `~/.config/dotfiles/hooks/<hook_point>/`
-2. **JSON config** - Hooks defined in `~/.config/dotfiles/hooks.json`
+1. **File-based** - Scripts in `~/.config/blackdot/hooks/<hook_point>/`
+2. **JSON config** - Hooks defined in `~/.config/blackdot/hooks.json`
 3. **Inline** - Registered programmatically via `hook_register`
 
 ### Integration Points
@@ -539,7 +539,7 @@ See [Hook System](hooks.md) for complete documentation.
 
 ## Setup Wizard
 
-The interactive setup wizard (`dotfiles setup`) guides users through installation with visual feedback:
+The interactive setup wizard (`blackdot setup`) guides users through installation with visual feedback:
 
 ### Progress Visualization
 
@@ -570,7 +570,7 @@ The interactive setup wizard (`dotfiles setup`) guides users through installatio
 
 ### State Persistence
 
-State is saved to `~/.config/dotfiles/config.json`:
+State is saved to `~/.config/blackdot/config.json`:
 - Setup completion status per phase
 - User preferences (vault backend, package tier)
 - Can resume if interrupted
@@ -579,7 +579,7 @@ See [State Management](state-management.md) for details.
 
 ## Health Check System
 
-The `dotfiles doctor` command validates system state:
+The `blackdot doctor` command validates system state:
 
 ```mermaid
 flowchart TD
@@ -606,7 +606,7 @@ The backup system creates timestamped archives:
 flowchart LR
     A[dotfiles backup] --> B[Collect Files]
     B --> C[Create tar.gz]
-    C --> D[~/.dotfiles-backups/]
+    C --> D[~/.blackdot-backups/]
     D --> E[Auto-cleanup > 10]
 
     F[dotfiles backup restore] --> G[List Backups]
@@ -638,10 +638,10 @@ graph TB
 | Flow | Source | Destination | Command |
 |------|--------|-------------|---------|
 | Install | GitHub | Local | `curl ... \| bash` |
-| Bootstrap | Scripts | System | `dotfiles setup` |
-| Pull | Bitwarden | Local | `dotfiles vault pull` |
-| Push | Local | Bitwarden | `dotfiles vault push` |
-| Backup | Config | Archive | `dotfiles backup` |
-| Restore | Archive | Config | `dotfiles backup restore` |
-| Upgrade | GitHub | Local | `dotfiles upgrade` |
-| Remove | Local | (deleted) | `dotfiles uninstall` |
+| Bootstrap | Scripts | System | `blackdot setup` |
+| Pull | Bitwarden | Local | `blackdot vault pull` |
+| Push | Local | Bitwarden | `blackdot vault push` |
+| Backup | Config | Archive | `blackdot backup` |
+| Restore | Archive | Config | `blackdot backup restore` |
+| Upgrade | GitHub | Local | `blackdot upgrade` |
+| Remove | Local | (deleted) | `blackdot uninstall` |

@@ -5,7 +5,7 @@
 > Modular dotfiles framework for the AI-assisted development era
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash && blackdot setup
 ```
 
 - **Claude Code Integration** - Portable sessions, dotclaude profiles, git safety hooks
@@ -17,6 +17,6 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 - **Cross-Platform** - macOS • Linux • Windows • WSL2 • Docker
 
 [Get Started](#one-line-install)
-[VIEW ON GITHUB](https://github.com/blackwell-systems/dotfiles)
+[VIEW ON GITHUB](https://github.com/blackwell-systems/blackdot)
 
 ![color](#1a1a1a)

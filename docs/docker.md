@@ -26,7 +26,7 @@ docker run -it --rm dotfiles-extralite
 
 **Includes:**
 - Zsh, bash, git, jq, curl
-- All `dotfiles` CLI commands
+- All `blackdot` CLI commands
 - `/workspace` symlink
 
 **Does NOT include:**
@@ -126,11 +126,11 @@ docker run -it --rm dotfiles-full
 
 | Feature | extralite | lite | medium | full |
 |---------|-----------|------|--------|------|
-| `dotfiles help` | ✓ | ✓ | ✓ | ✓ |
-| `dotfiles status` | ✓ | ✓ | ✓ | ✓ |
-| `dotfiles doctor` | ✓ | ✓ | ✓ | ✓ |
-| `dotfiles setup` | ✓ | ✓ | ✓ | ✓ |
-| `dotfiles vault pull` | ✗ | ✓ | ✓ | ✓ |
+| `blackdot help` | ✓ | ✓ | ✓ | ✓ |
+| `blackdot status` | ✓ | ✓ | ✓ | ✓ |
+| `blackdot doctor` | ✓ | ✓ | ✓ | ✓ |
+| `blackdot setup` | ✓ | ✓ | ✓ | ✓ |
+| `blackdot vault pull` | ✗ | ✓ | ✓ | ✓ |
 | Bitwarden CLI | ✗ | ✓ | ✓ | ✓ |
 | 1Password CLI | ✗ | ✓ | ✓ | ✓ |
 | pass + GPG | ✗ | ✓ | ✓ | ✓ |
@@ -154,12 +154,12 @@ docker run -it --rm dotfiles-lite
 ./test/mocks/setup-mock-vault.sh --no-pass  # Creates fake GPG key + pass store
 
 # Switch to pass backend
-export DOTFILES_VAULT_BACKEND=pass
+export BLACKDOT_VAULT_BACKEND=pass
 
 # Test vault commands
-dotfiles vault check
-dotfiles vault pull --preview
-dotfiles drift
+blackdot vault check
+blackdot vault pull --preview
+blackdot drift
 ```
 
 **What it creates:**

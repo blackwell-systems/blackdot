@@ -45,7 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.0.0-rc1] - 2025-12-09
 
 > **WARNING - Breaking Changes:** This is a major release. The Go binary is now the sole CLI implementation.
-> Shell fallback (`DOTFILES_USE_GO=0`) has been removed. Direct calls to `bin/dotfiles-*` scripts
+> Shell fallback (`DOTFILES_USE_GO=0`) has been removed. Direct calls to `bin/blackdot-*` scripts
 > and sourcing `lib/*.sh` libraries will no longer work.
 
 ### Known Issues
@@ -57,9 +57,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Phase 3 Migration Complete** - Go binary is now the sole CLI implementation
-  - Renamed binary from `dotfiles-go` to `dotfiles`
+  - Renamed binary from `dotfiles-go` to `blackdot`
   - Removed shell fallback (`DOTFILES_USE_GO` escape hatch no longer available)
-  - Deleted 19 deprecated `bin/dotfiles-*` shell scripts (~7,500 lines)
+  - Deleted 19 deprecated `bin/blackdot-*` shell scripts (~7,500 lines)
   - Deleted 12 deprecated `lib/*.sh` libraries (~5,500 lines)
   - Simplified `40-aliases.zsh` by removing fallback code (~550 lines)
   - Total reduction: ~13,500 lines of shell code
@@ -71,7 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Shell Init Command** - New `dotfiles shell-init` for shell function initialization
+- **Shell Init Command** - New `blackdot shell-init` for shell function initialization
   - Outputs `feature_enabled`, `require_feature`, `feature_exists`, `feature_status` functions
   - Supports zsh, bash, fish, and PowerShell
   - Usage: `eval "$(dotfiles shell-init zsh)"` in shell config
@@ -88,16 +88,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Automatically downloads `SHA256SUMS.txt` from release
   - Supports both `sha256sum` (Linux) and `shasum` (macOS)
   - Graceful fallback if checksums unavailable
-  - Skip with `DOTFILES_SKIP_CHECKSUM=true` if needed
+  - Skip with `BLACKDOT_SKIP_CHECKSUM=true` if needed
 
 ### Removed
 
-- `bin/dotfiles-backup`, `bin/dotfiles-config`, `bin/dotfiles-diff`
-- `bin/dotfiles-doctor`, `bin/dotfiles-drift`, `bin/dotfiles-encrypt`
-- `bin/dotfiles-features`, `bin/dotfiles-hook`, `bin/dotfiles-lint`
-- `bin/dotfiles-metrics`, `bin/dotfiles-migrate`, `bin/dotfiles-packages`
-- `bin/dotfiles-setup`, `bin/dotfiles-sync`, `bin/dotfiles-template`
-- `bin/dotfiles-uninstall`, `bin/dotfiles-vault`
+- `bin/blackdot-backup`, `bin/blackdot-config`, `bin/blackdot-diff`
+- `bin/blackdot-doctor`, `bin/blackdot-drift`, `bin/blackdot-encrypt`
+- `bin/blackdot-features`, `bin/blackdot-hook`, `bin/blackdot-lint`
+- `bin/blackdot-metrics`, `bin/blackdot-migrate`, `bin/blackdot-packages`
+- `bin/blackdot-setup`, `bin/blackdot-sync`, `bin/blackdot-template`
+- `bin/blackdot-uninstall`, `bin/blackdot-vault`
 - `lib/_cli_features.sh`, `lib/_config.sh`, `lib/_config_layers.sh`
 - `lib/_drift.sh`, `lib/_encryption.sh`, `lib/_errors.sh`
 - `lib/_features.sh`, `lib/_paths.sh`, `lib/_progress.sh`
@@ -117,7 +117,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Phase 2 Shell Switchover Complete** - Go binary is now the primary CLI
-  - ZSH `dotfiles` function delegates to Go binary when available
+  - ZSH `blackdot` function delegates to Go binary when available
   - Shell-only commands (cd, edit) stay in shell
   - Features enable/disable updates both Go config and in-memory shell state
   - Escape hatch: `DOTFILES_USE_GO=0` forces shell implementation
@@ -150,20 +150,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Consistent styling: bold cyan titles, yellow commands, dim descriptions
   - Unknown command error handling matches ZSH: "Unknown command: X" with help hint
 
-- **ZSH encrypt command** - Age encryption now accessible via `dotfiles encrypt`
-  - Wired `bin/dotfiles-encrypt` into the dotfiles() function
+- **ZSH encrypt command** - Age encryption now accessible via `blackdot encrypt`
+  - Wired `bin/blackdot-encrypt` into the dotfiles() function
   - Added Security section to help output
   - Commands: init, encrypt, decrypt, edit, list, status, push-key
 
 - **Runtime Feature Guards** - All shell tool modules now support instant enable/disable
-  - No shell reload required when toggling features with `dotfiles features enable/disable`
+  - No shell reload required when toggling features with `blackdot features enable/disable`
   - Converted modules: `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `docker_tools`, `ssh_tools`, `claude_integration`, `modern_cli`, `nvm_integration`, `sdkman_integration`
   - Pattern: Aliases converted to wrapper functions with `require_feature` guards
   - Blocked commands show helpful message: "Feature 'X' is disabled. Enable with: dotfiles features enable X"
   - Fixed: `set -euo pipefail` removed from `_features.sh` (was killing interactive shells)
   - Fixed: `_logging.sh` now sourced in `00-init.zsh` for `pass`/`fail`/`warn`/`info` functions
 
-- **Cross-Platform Developer Tools** (`dotfiles tools`)
+- **Cross-Platform Developer Tools** (`blackdot tools`)
   - New `tools` parent command with 8 tool categories
   - All tools work on Linux, macOS, and Windows
   - **Feature Flag Integration** - Tools respect their feature flags like ZSH:
@@ -171,7 +171,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `go` → `go_tools`, `rust` → `rust_tools`, `python` → `python_tools`
     - `docker` → `docker_tools`, `claude` → `claude_integration`
     - Disabled tools show helpful error with enable command
-  - **SSH Tools** (`dotfiles tools ssh`)
+  - **SSH Tools** (`blackdot tools ssh`)
     - `keys` - List SSH keys with fingerprints
     - `gen` - Generate ED25519 key pairs
     - `list` - List configured SSH hosts
@@ -181,7 +181,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `tunnel` - Create SSH port forward tunnel
     - `socks` - Create SOCKS5 proxy
     - `status` - Color-coded ASCII art status banner
-  - **AWS Tools** (`dotfiles tools aws`)
+  - **AWS Tools** (`blackdot tools aws`)
     - `profiles` - List all AWS profiles
     - `who` - Show current AWS identity
     - `login` - SSO login to AWS profile
@@ -189,14 +189,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `assume` - Assume IAM role for cross-account access
     - `clear` - Clear temporary credentials
     - `status` - Color-coded ASCII art status banner
-  - **CDK Tools** (`dotfiles tools cdk`)
+  - **CDK Tools** (`blackdot tools cdk`)
     - `init` - Initialize new CDK project
     - `env` - Set CDK_DEFAULT_ACCOUNT/REGION from AWS profile
     - `env-clear` - Clear CDK environment variables
     - `outputs` - Show CloudFormation stack outputs
     - `context` - Show or clear CDK context
     - `status` - Color-coded ASCII art status banner
-  - **Go Tools** (`dotfiles tools go`)
+  - **Go Tools** (`blackdot tools go`)
     - `new` - Create new Go project with standard structure
     - `init` - Initialize Go module
     - `test` - Run tests with options
@@ -207,7 +207,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `build-all` - Cross-compile for all platforms
     - `bench` - Run benchmarks
     - `info` - Show Go environment info
-  - **Rust Tools** (`dotfiles tools rust`)
+  - **Rust Tools** (`blackdot tools rust`)
     - `new` - Create new Rust project
     - `update` - Update Rust toolchain
     - `switch` - Switch Rust toolchain
@@ -216,14 +216,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `outdated` - Show outdated dependencies
     - `expand` - Expand macros (for debugging)
     - `info` - Show Rust environment info
-  - **Python Tools** (`dotfiles tools python`)
+  - **Python Tools** (`blackdot tools python`)
     - `new` - Create new Python project with uv
     - `clean` - Clean Python artifacts
     - `venv` - Create virtual environment
     - `test` - Run pytest
     - `cover` - Run pytest with coverage
     - `info` - Show Python environment info
-  - **Docker Tools** (`dotfiles tools docker`)
+  - **Docker Tools** (`blackdot tools docker`)
     - `ps` - List containers (with `-a` for all)
     - `images` - List Docker images
     - `ip` - Get container IP address
@@ -236,7 +236,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `clean` - Remove stopped containers and dangling images
     - `prune` - System prune (with `-a` for aggressive)
     - `status` - Color-coded ASCII art status banner
-  - **Claude Tools** (`dotfiles tools claude`)
+  - **Claude Tools** (`blackdot tools claude`)
     - `status` - Show Claude Code configuration (Bedrock profile, SSO status, paths)
     - `bedrock` - Print export commands for AWS Bedrock backend
     - `max` - Print export commands for Anthropic Max backend
@@ -274,7 +274,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Template: `pre_template_render`, `post_template_render`
     - Encryption: `pre_encrypt`, `post_decrypt`
   - **Hook Registration Methods**
-    - File-based: `~/.config/dotfiles/hooks/<point>/*.ps1`
+    - File-based: `~/.config/blackdot/hooks/<point>/*.ps1`
     - Function-based: `Register-DotfilesHook -Point "..." -ScriptBlock {...}`
     - JSON config: Same `hooks.json` format as ZSH
   - **Hook Features**
@@ -287,7 +287,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `Invoke-DotfilesHook` (hook_run equivalent)
     - `Get-DotfilesHook` / `Get-DotfilesHookPoints`
     - `Add-DotfilesHook` / `Remove-DotfilesHook` / `Test-DotfilesHook`
-  - **Tool Aliases** - 50+ functions wrapping `dotfiles tools` commands
+  - **Tool Aliases** - 50+ functions wrapping `blackdot tools` commands
     - SSH: `ssh-keys`, `ssh-gen`, `ssh-tunnel`, `ssh-status`
     - AWS: `aws-profiles`, `aws-who`, `aws-login`, `aws-switch`, `aws-status`
     - CDK: `cdk-init`, `cdk-env`, `cdk-outputs`, `cdk-status`
@@ -296,7 +296,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Python: `py-new`, `py-test`, `py-info`
   - **Environment Management** - Proper handling of env vars for `aws-switch`, `aws-assume`, `cdk-env`
   - **Installation Script** - `Install-Dotfiles.ps1` for easy setup
-  - Short alias `d` for `dotfiles` command
+  - Short alias `d` for `blackdot` command
 
 - **Windows Package Management** (`powershell/Install-Packages.ps1`)
   - winget-based package installer (equivalent to `brew bundle`)
@@ -340,7 +340,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `setup`, `uninstall`, `packages` - Setup wizard
   - Side-by-side testing confirms identical behavior
 
-- **Chezmoi Import Tool** (`dotfiles import chezmoi`)
+- **Chezmoi Import Tool** (`blackdot import chezmoi`)
   - Migrate from chezmoi repositories to blackwell-dotfiles
   - Converts Go template syntax to Handlebars automatically
   - Handles chezmoi prefixes: `dot_`, `private_`, `executable_`, `symlink_`, etc.
@@ -349,7 +349,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Dry-run mode for previewing changes
   - Verbose mode for detailed progress
 
-- **Vault Create/Delete Commands** (`dotfiles vault create|delete`)
+- **Vault Create/Delete Commands** (`blackdot vault create|delete`)
   - `vault create <item-name> [content]` - Create new vault items
     - Content from argument, file (`--file`), or stdin
     - Dry-run mode (`-n`) to preview without changes
@@ -397,7 +397,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Handles bash wrapper directory format in archives
 
 - **Go Metrics Command** (`internal/cli/metrics.go`)
-  - JSONL metrics visualization from `~/.dotfiles-metrics.jsonl`
+  - JSONL metrics visualization from `~/.blackdot-metrics.jsonl`
   - Three modes: summary (default), `--graph` (ASCII bar chart), `--all` (full list)
   - Statistics: average score, total errors/warnings/fixed, perfect runs %
   - Trend analysis: compares last 5 vs previous 5 health checks
@@ -448,8 +448,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Subcommands: list, run, add, remove, points, test
   - 7 hook categories: Lifecycle, Vault, Doctor, Shell, Setup, Template, Encryption
   - 23 hook points with descriptions
-  - File-based hooks: `~/.config/dotfiles/hooks/<point>/*.sh`
-  - JSON-configured hooks: `~/.config/dotfiles/hooks.json`
+  - File-based hooks: `~/.config/blackdot/hooks/<point>/*.sh`
+  - JSON-configured hooks: `~/.config/blackdot/hooks.json`
   - Timeout support and fail-fast option
   - Verbose mode for debugging hook execution
 
@@ -468,7 +468,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `--fix/-f`: Auto-fix permission issues (SSH keys, AWS credentials)
   - `--quick/-q`: Fast checks only (skip vault status)
   - Failed checks and warnings tracking with fix suggestions
-  - Metrics saving to `~/.dotfiles-metrics.jsonl`
+  - Metrics saving to `~/.blackdot-metrics.jsonl`
   - Banner with ASCII art matching bash implementation
 
 - **Go Sync Command** (`internal/cli/sync.go`)
@@ -494,7 +494,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Claude/dotclaude integration detection
   - Template system detection
 
-- **Interactive Template Setup** (`dotfiles template init`)
+- **Interactive Template Setup** (`blackdot template init`)
   - Prompts for essential variables: git name, email, machine type, GitHub username
   - Auto-detects defaults from `git config --global`
   - Machine type choice menu with detected value highlighted
@@ -502,7 +502,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Offers editor for advanced configuration after essentials
   - Replaces "copy example file and edit" workflow with guided setup
 
-- **Template-Vault Integration** (`dotfiles template vault`)
+- **Template-Vault Integration** (`blackdot template vault`)
   - Push/pull template variables to/from vault for cross-machine portability
   - `vault push` - Backup local config to vault
   - `vault pull` - Restore config from vault on new machines
@@ -512,11 +512,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Supports all vault backends (bitwarden, 1password, pass)
   - Automatic backup on pull, conflict resolution options
 
-- **Short alias `d` for `dotfiles` command**
+- **Short alias `d` for `blackdot` command**
   - Quick access: `d status`, `d doctor`, `d features`, etc.
 
-- **macOS Settings Command** (`dotfiles macos`) - Go CLI
-  - Full parity with ZSH `dotfiles macos` command
+- **macOS Settings Command** (`blackdot macos`) - Go CLI
+  - Full parity with ZSH `blackdot macos` command
   - `apply` - Apply settings from macos/settings.sh
   - `preview` - Dry-run showing what would change
   - `discover` - Discover current macOS settings (with `--generate`, `--snapshot`, `--compare`)
@@ -537,14 +537,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fix: Use `getFromJSONFile()` to read arbitrary nested keys from config layers
 
 - **Age encryption in minimal tier**
-  - Added `age` to `Brewfile.minimal` - required for `dotfiles encrypt` feature
+  - Added `age` to `Brewfile.minimal` - required for `blackdot encrypt` feature
   - Added `FiloSottile.age` to Windows `$MinimalPackages` in `Install-Packages.ps1`
 
 - **PowerShell `d` alias not exported**
   - Fixed: Alias was created with `-Scope Global` which prevented export
   - Changed to `New-Alias` in module scope for proper export via `Export-ModuleMember`
 
-- **Vault session caching** (`dotfiles vault unlock/status`)
+- **Vault session caching** (`blackdot vault unlock/status`)
   - Fixed: `vault status` always showing "Not authenticated" even after successful unlock
   - Root cause: Bitwarden CLI's `--session` argument doesn't work reliably; must use `BW_SESSION` env var
   - Fix: Updated vaultmux v0.3.1 to use `BW_SESSION` environment variable instead of `--session` CLI argument
@@ -623,7 +623,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CLI Color Styling**
   - Consistent color scheme across all dotfiles help commands
   - Bold+Cyan headers, Yellow commands, Dim descriptions
-  - Styled: `dotfiles help`, `dotfiles macos`, `dotfiles vault`, `dotfiles template`
+  - Styled: `blackdot help`, `blackdot macos`, `blackdot vault`, `blackdot template`
   - Styled: `dotfiles-backup`, `dotfiles-drift`, `dotfiles-lint`, `dotfiles-packages`, `dotfiles-migrate`
 
 ### Changed
@@ -635,17 +635,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Hook command early loop exit** (`bin/dotfiles-hook`)
+- **Hook command early loop exit** (`bin/blackdot-hook`)
   - Fixed `((i++))` returning falsy value when i=0, causing loop to exit prematurely
   - Changed to safe increment pattern: `i=$((i + 1))` and `count=$((count + 1))`
-  - `dotfiles hook list` now correctly shows all hooks and categories
+  - `blackdot hook list` now correctly shows all hooks and categories
 
-- **Missing Template & Encryption hook categories** (`bin/dotfiles-hook`)
+- **Missing Template & Encryption hook categories** (`bin/blackdot-hook`)
   - Added Template hooks (`pre_template_render`, `post_template_render`) to list and points
   - Added Encryption hooks (`pre_encrypt`, `post_decrypt`) to list and points
   - Updated usage help text with all 7 hook categories
 
-- **Metrics now saved after `dotfiles doctor`** - Health scores written to `~/.dotfiles-metrics.jsonl`
+- **Metrics now saved after `blackdot doctor`** - Health scores written to `~/.blackdot-metrics.jsonl`
 - **Vault unlock errexit issues** - Fixed silent exit on `((attempts++))` and session caching
 - **Vault session persistence** - Use `BW_SESSION` env var instead of `--session` flag
 
@@ -661,13 +661,13 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 
 - **Hook System** - Extensible event-driven hook system (`lib/_hooks.sh`)
   - Event-based hook triggers at 8 lifecycle points: `shell_init`, `directory_change`, `pre_vault_pull`, `post_vault_pull`, `pre_vault_push`, `post_vault_push`, `doctor_check`, `pre_uninstall`
-  - `dotfiles hook` command for managing hooks
-  - `dotfiles hook list` - Show all available hooks and their status
-  - `dotfiles hook run <event> [--dry-run]` - Manually trigger hooks
-  - `dotfiles hook enable <path>` - Enable hook script
-  - `dotfiles hook disable <path>` - Disable hook script
-  - `dotfiles hook validate [path]` - Validate hook scripts
-  - Automatic hook discovery from `~/hooks/` and `$DOTFILES_DIR/hooks/`
+  - `blackdot hook` command for managing hooks
+  - `blackdot hook list` - Show all available hooks and their status
+  - `blackdot hook run <event> [--dry-run]` - Manually trigger hooks
+  - `blackdot hook enable <path>` - Enable hook script
+  - `blackdot hook disable <path>` - Disable hook script
+  - `blackdot hook validate [path]` - Validate hook scripts
+  - Automatic hook discovery from `~/hooks/` and `$BLACKDOT_DIR/hooks/`
   - Per-directory hook support via `.dotfiles-hooks/`
   - Hook script naming convention: `[priority]-descriptive-name.{sh,zsh}`
   - Priority-based execution (00-99, lower runs first)
@@ -691,8 +691,8 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - 206 test cases for template functionality
 
 - **CLI Feature Awareness** - Smart CLI that adapts to enabled features (`lib/_cli_features.sh`)
-  - `dotfiles help` only shows commands for enabled features (cleaner UX)
-  - `dotfiles help --all` shows all commands with enabled/disabled indicators (● / ○)
+  - `blackdot help` only shows commands for enabled features (cleaner UX)
+  - `blackdot help --all` shows all commands with enabled/disabled indicators (● / ○)
   - Feature guards prevent running disabled commands with helpful enable message
   - `--force` flag bypasses feature guard for any command
   - Command-to-feature mapping: vault→vault, config→config_layers, backup→backup_auto, etc.
@@ -702,28 +702,28 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - `DOTFILES_FORCE=true` env var - Bypass all feature guards (for scripting/CI)
   - `cli_feature_filter` meta-feature - Disable to show all commands, bypass all guards
   - Subcommand awareness - `vault:pull`, `config:get` have granular feature mappings
-  - Per-command help - `dotfiles help <cmd>` shows feature status and subcommands
+  - Per-command help - `blackdot help <cmd>` shows feature status and subcommands
 
 - **Configuration Layers System** - Hierarchical config resolution (`lib/_config_layers.sh`)
   - 5-layer priority: env > project > machine > user > defaults
-  - `dotfiles config get <key> [default]` - Get value with layer resolution
-  - `dotfiles config set <layer> <key> <value>` - Set in specific layer
-  - `dotfiles config show <key>` - Display value from all layers
-  - `dotfiles config source <key>` - Get value with source info (JSON)
-  - `dotfiles config list` - Show layer locations and status
-  - `dotfiles config merged` - Show merged config from all layers
-  - `dotfiles config init machine|project` - Initialize layer configs
-  - Project config (`.dotfiles.json`) travels with repos
-  - Machine config (`~/.config/dotfiles/machine.json`) stays local
-  - Environment variable override: `DOTFILES_<KEY>` (e.g., `DOTFILES_VAULT_BACKEND`)
+  - `blackdot config get <key> [default]` - Get value with layer resolution
+  - `blackdot config set <layer> <key> <value>` - Set in specific layer
+  - `blackdot config show <key>` - Display value from all layers
+  - `blackdot config source <key>` - Get value with source info (JSON)
+  - `blackdot config list` - Show layer locations and status
+  - `blackdot config merged` - Show merged config from all layers
+  - `blackdot config init machine|project` - Initialize layer configs
+  - Project config (`.blackdot.json`) travels with repos
+  - Machine config (`~/.config/blackdot/machine.json`) stays local
+  - Environment variable override: `DOTFILES_<KEY>` (e.g., `BLACKDOT_VAULT_BACKEND`)
 
 - **Feature Registry** - Centralized control for all optional features (`lib/_features.sh`)
-  - `dotfiles features` - List all features with enabled/disabled status
-  - `dotfiles features enable <name> [--persist]` - Enable a feature (optionally persist to config)
-  - `dotfiles features disable <name> [--persist]` - Disable a feature
-  - `dotfiles features preset <name> [--persist]` - Apply a preset (minimal, developer, claude, full)
-  - `dotfiles features check <name>` - Check if enabled (for scripts, returns exit code)
-  - `dotfiles features --json` - JSON output for automation
+  - `blackdot features` - List all features with enabled/disabled status
+  - `blackdot features enable <name> [--persist]` - Enable a feature (optionally persist to config)
+  - `blackdot features disable <name> [--persist]` - Disable a feature
+  - `blackdot features preset <name> [--persist]` - Apply a preset (minimal, developer, claude, full)
+  - `blackdot features check <name>` - Check if enabled (for scripts, returns exit code)
+  - `blackdot features --json` - JSON output for automation
   - Three categories: core (always enabled), optional, integration
   - Dependency resolution: enabling `claude_integration` auto-enables `workspace_symlink`
   - Backward compatible with `SKIP_*` environment variables
@@ -770,7 +770,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - `prompt_file_path()` - Validated prompt for file paths
 
 ### Fixed
-- **Missing feature guard on config command** - `dotfiles config` now properly respects `config_layers` feature state
+- **Missing feature guard on config command** - `blackdot config` now properly respects `config_layers` feature state
   - Shows helpful "feature not enabled" message when disabled
   - Consistent with other feature-gated commands (vault, backup, template)
   - Use `--force` to bypass if needed
@@ -786,16 +786,16 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 
 - **Recursive dependency collection in feature enable** - Transitive dependencies now correctly listed
   - `dep` variable in for loop wasn't `local`, causing nested deps to be lost in recursion
-  - Before: `dotfiles features enable dotclaude` showed "Enabling: workspace_symlink"
+  - Before: `blackdot features enable dotclaude` showed "Enabling: workspace_symlink"
   - After: Shows "Enabling: workspace_symlink claude_integration" (full chain)
-  - Affects `bin/dotfiles-features` dependency collection
+  - Affects `bin/blackdot-features` dependency collection
 
-- **Missing color variables in CLI help** - `dotfiles help` now works without errors
+- **Missing color variables in CLI help** - `blackdot help` now works without errors
   - `$BOLD`, `$CYAN`, `$NC` weren't defined in shell context
   - Added color definitions to `40-aliases.zsh` with TTY detection
   - Fixes "parameter not set" error when running help commands
 
-- **`dotfiles vault status` hanging** - Status command no longer prompts for password
+- **`blackdot vault status` hanging** - Status command no longer prompts for password
   - Changed from `vault_get_session()` (interactive) to `vault_check_session()` (non-interactive)
   - Shows "Vault locked" with unlock instructions instead of hanging
   - Introduced `vault_check_session()` function for non-interactive session validation
@@ -813,11 +813,11 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - Changed to `((++attempts))` (pre-increment) to return success on first iteration
 
 - **Color escape codes showing raw** - Fixed across multiple commands
-  - `dotfiles config list` - Changed printf to echo -e
-  - `dotfiles config help` - Changed heredoc to echo -e statements
-  - `dotfiles hook help` - Changed heredoc to echo -e statements
+  - `blackdot config list` - Changed printf to echo -e
+  - `blackdot config help` - Changed heredoc to echo -e statements
+  - `blackdot hook help` - Changed heredoc to echo -e statements
 
-- **`dotfiles lint` path detection** - Fixed "Could not find dotfiles directory" error
+- **`blackdot lint` path detection** - Fixed "Could not find dotfiles directory" error
   - Simplified path detection to match other scripts
   - Added shebang-aware syntax checking (zsh files use `zsh -n`, bash use `bash -n`)
 
@@ -827,15 +827,15 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 
 ### Added - CLI Improvements
 
-- **`dotfiles vault` CLI** - Unified vault management command wrapping all vault operations
-  - `dotfiles vault unlock` - Unlock vault with clear password prompt (hidden input)
-  - `dotfiles vault lock` - Lock vault and clear cached session
-  - `dotfiles vault status` - Full status with drift detection
-  - `dotfiles vault quick` - Quick status check (login/unlock only)
-  - `dotfiles vault restore/pull` - Restore secrets from vault
-  - `dotfiles vault push` - Push local secrets to vault
-  - `dotfiles vault list` - List vault items
-  - `dotfiles vault scan` - Scan for local secrets
+- **`blackdot vault` CLI** - Unified vault management command wrapping all vault operations
+  - `blackdot vault unlock` - Unlock vault with clear password prompt (hidden input)
+  - `blackdot vault lock` - Lock vault and clear cached session
+  - `blackdot vault status` - Full status with drift detection
+  - `blackdot vault quick` - Quick status check (login/unlock only)
+  - `blackdot vault restore/pull` - Restore secrets from vault
+  - `blackdot vault push` - Push local secrets to vault
+  - `blackdot vault list` - List vault items
+  - `blackdot vault scan` - Scan for local secrets
   - Provides clearer UX than raw `bw` commands
 
 - **Feature preset selection in setup wizard** - Choose feature presets during setup
@@ -867,7 +867,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - JSON schema for vault-items.json with comprehensive validation rules
   - `vault_validate_schema()` function in `lib/_vault.sh` validates required fields, types, naming conventions
   - Automatic validation before all vault sync operations (push/pull)
-  - Standalone `dotfiles vault validate` command for manual validation
+  - Standalone `blackdot vault validate` command for manual validation
   - Clear error messages showing exactly what's wrong and how to fix it
   - Graceful degradation when jq is not installed (warning instead of failure)
   - Schema file: `vault/vault-items.schema.json` with JSON Schema Draft 2020-12
@@ -897,10 +897,10 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - Shows potential score improvement: "95/100 if all issues fixed"
   - Auto-fix suggestions for permission-related issues
   - Celebrates perfect scores with emoji and encouragement
-  - Enhanced `bin/dotfiles-doctor` with comprehensive summary section
+  - Enhanced `bin/blackdot-doctor` with comprehensive summary section
 
 - **Vault Status Command** (Pain Point #12) - Full visibility into vault sync state
-  - `dotfiles vault status` - Comprehensive vault status dashboard
+  - `blackdot vault status` - Comprehensive vault status dashboard
   - Shows backend configuration (type, login status, unlock status)
   - Lists all vault items with counts (config items, SSH keys)
   - Sync history with human-readable timestamps ("2h ago", "3d ago")
@@ -926,17 +926,17 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - See: vault/README.md for complete command reference
 
 - **Top-Level Backup & Rollback Commands** - Safety features promoted to first-class
-  - `dotfiles backup` - Create backup of current configuration
-  - `dotfiles backup list` - List all available backups
-  - `dotfiles backup restore <name>` - Restore specific backup
-  - `dotfiles rollback` - Instant rollback to last backup
-  - `dotfiles rollback --to <name>` - Rollback to specific backup
+  - `blackdot backup` - Create backup of current configuration
+  - `blackdot backup list` - List all available backups
+  - `blackdot backup restore <name>` - Restore specific backup
+  - `blackdot rollback` - Instant rollback to last backup
+  - `blackdot rollback --to <name>` - Rollback to specific backup
   - Backup moved out of vault namespace for clearer separation
   - Implements v3.0 design goal: mandatory safety features
 
 - **Enhanced Help Text** - Clean, focused CLI help
-  - Main help (`dotfiles help`) shows complete command structure
-  - Vault help (`dotfiles vault help`) with clear command categories
+  - Main help (`blackdot help`) shows complete command structure
+  - Vault help (`blackdot vault help`) with clear command categories
   - Color-coded sections for better readability
   - Removed version labels and migration noise
 
@@ -951,10 +951,10 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - Default config with sensible defaults for all v3.0 settings
 
 - **Migration Tools** (v3.0) - Automated migration from v2.x to v3.0
-  - `bin/dotfiles-migrate` - Unified migration orchestrator
-  - `bin/dotfiles-migrate-config` - INI→JSON config migration
-  - `bin/dotfiles-migrate-vault-schema` - v2→v3 vault schema migration
-  - `dotfiles migrate` - Top-level command in main CLI
+  - `bin/blackdot-migrate` - Unified migration orchestrator
+  - `bin/blackdot-migrate-config` - INI→JSON config migration
+  - `bin/blackdot-migrate-vault-schema` - v2→v3 vault schema migration
+  - `blackdot migrate` - Top-level command in main CLI
   - Interactive confirmation with --yes flag to skip
   - Timestamped backups before all migrations
   - Detects if migration is needed (idempotent)
@@ -995,7 +995,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - State stored in setup.completed[] array instead of INI sections
   - API unchanged: state_completed(), state_complete(), state_reset() still work
   - Backward compatible: existing scripts don't need changes
-  - Config stored in ~/.config/dotfiles/config.json (v3 format)
+  - Config stored in ~/.config/blackdot/config.json (v3 format)
 
 - **v3.0 Breaking Changes Design** - Comprehensive redesign proposal (DESIGN-v3.md)
   - Git-inspired command names: setup, scan, pull, push (replaces init, discover, restore, sync)
@@ -1021,16 +1021,16 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - **Progress bar division by zero** (CRITICAL): Added guards to prevent crash if total=0 or current>total
     - `show_progress()` now validates inputs and clamps values to safe ranges
     - Prevents overflow when current step exceeds total steps
-    - File: `bin/dotfiles-setup` lines 75-95
+    - File: `bin/blackdot-setup` lines 75-95
   - **Lost package installation exit status** (CRITICAL): Fixed exit code capture in brew bundle
     - Changed from `$?` (captures while loop status) to `${pipestatus[1]}` (captures brew status)
     - Prevents false "success" reports when package installation actually failed
-    - File: `bin/dotfiles-setup` line 370
+    - File: `bin/blackdot-setup` line 370
   - **Missing schema validation in setup wizard** (HIGH): Added validation to vault configuration phase
     - Setup wizard now validates `vault-items.json` immediately after creation/editing
     - Interactive fix flow: detects errors → opens editor → re-validates → confirms before continuing
     - Prevents proceeding with invalid config that would fail mysteriously during vault operations
-    - File: `bin/dotfiles-setup` lines 513-544
+    - File: `bin/blackdot-setup` lines 513-544
   - **Test environment stderr pollution** (HIGH): Fixed unit test failure in CI
     - Config initialization messages were leaking into test output (4 lines instead of expected 2)
     - Suppressed stderr during _common.sh sourcing in test helper functions
@@ -1055,7 +1055,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
     - Updated in README.md and docs/README.md
   - **Multi-vault clarification** (#9): Clarified "multi-vault" means one backend at a time
     - Added note explaining system supports multiple backends but you use one active backend
-    - Documented switching process with `dotfiles vault setup`
+    - Documented switching process with `blackdot vault setup`
     - Updated docs/vault-README.md
   - **Vault merge preview** (#5): Improved confusing "manual items" terminology
     - Changed "Preserved manual items" → "Preserved items in config but not discovered"
@@ -1089,7 +1089,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 - **Automatic Backup Before Restore** - Vault restore now auto-creates backup
   - Creates timestamped backup before overwriting any local secrets
   - Shows backup location and restore command
-  - Added `dotfiles vault backup` command (exposed existing bin/dotfiles-backup)
+  - Added `blackdot vault backup` command (exposed existing bin/blackdot-backup)
   - Eliminates fear of losing local changes during restore
   - Addresses pain-point #2: "No rollback/undo" concern
 
@@ -1115,9 +1115,9 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 
 ### Fixed
 - **Dynamic Path Resolution** - Fixed hardcoded paths in zsh configuration
-  - All `dotfiles` commands now work regardless of installation location
-  - Introduced `$DOTFILES_DIR` environment variable (auto-detected from config location)
-  - Replaced all hardcoded `$HOME/workspace/dotfiles` paths with `$DOTFILES_DIR`
+  - All `blackdot` commands now work regardless of installation location
+  - Introduced `$BLACKDOT_DIR` environment variable (auto-detected from config location)
+  - Replaced all hardcoded `$HOME/workspace/dotfiles` paths with `$BLACKDOT_DIR`
   - Fixed initial path calculation bug (needed :h:h:h not :h:h for 3 directory levels)
   - Fixes issue where commands would fail if dotfiles weren't at exact expected path
   - Fixes "vault/discover-secrets.sh: no such file or directory" error
@@ -1155,15 +1155,15 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - Handles Apple Silicon (/opt/homebrew) vs Intel (/usr/local) correctly
 
 ### Added
-- **Vault Init Command** - New `dotfiles vault init` for easy vault configuration
+- **Vault Init Command** - New `blackdot vault init` for easy vault configuration
   - Configure or reconfigure vault backend anytime
   - No need to reset setup state or run full wizard
   - Detects existing configuration and asks to reconfigure
   - Clear guidance when skipping vault setup
-  - Accessible via `dotfiles vault init` or `dotfiles vault init --force`
+  - Accessible via `blackdot vault init` or `blackdot vault init --force`
 
 - **Vault Auto-Discovery** - Automatically detect secrets in standard locations
-  - New `dotfiles vault discover` command scans for existing secrets
+  - New `blackdot vault discover` command scans for existing secrets
   - Auto-detects SSH keys in ~/.ssh/ (all key types)
   - Discovers AWS configs, Git config, npm, pypi, docker configs
   - Supports custom paths: `--ssh-path` and `--config-path` options
@@ -1174,7 +1174,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
     - Creates automatic backup before merge
     - Use `--force` to skip merge and overwrite completely
     - Requires `jq` for merge (gracefully falls back if not available)
-  - Integrated into `dotfiles vault init` with auto-discover option
+  - Integrated into `blackdot vault init` with auto-discover option
   - No more manual JSON editing for standard setups
   - Preview mode with `--dry-run` flag
   - Eliminates biggest UX friction point in vault setup
@@ -1200,9 +1200,9 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 
 - **Setup Completion** - Context-aware next steps after wizard completes
   - Shows dynamic recommendations based on what was configured
-  - Vault configured → Suggests `dotfiles vault restore`
-  - Templates configured → Suggests `dotfiles template render`
-  - Always shows `dotfiles doctor` for health check
+  - Vault configured → Suggests `blackdot vault restore`
+  - Templates configured → Suggests `blackdot template render`
+  - Always shows `blackdot doctor` for health check
   - Helpful commands and documentation links
 
 - **Setup Progress Indicators** - Shows "Step X of 6" for all wizard phases
@@ -1223,7 +1223,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - Helps users discover what they just installed
 
 - **Vault Schema Validation** - Suggests running validation after vault configuration
-  - Setup completion now recommends `dotfiles vault validate`
+  - Setup completion now recommends `blackdot vault validate`
   - Catches schema errors before attempting restore
   - Audit recommendation: Proactive error prevention
 
@@ -1260,11 +1260,11 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - macOS-specific casks automatically skipped on Linux
 
 - **Templates Onboarding** - Added interactive template setup to setup wizard
-  - New STEP 6 in `dotfiles setup` guides users through template configuration
+  - New STEP 6 in `blackdot setup` guides users through template configuration
   - Explains use cases: work vs personal git email, different SSH keys, machine-specific env vars
-  - Runs `dotfiles template init` interactively during onboarding
+  - Runs `blackdot template init` interactively during onboarding
   - Defaults to "No" (opt-in) to keep setup fast for users who don't need templates
-  - Shows how to enable later: `dotfiles template init`
+  - Shows how to enable later: `blackdot template init`
   - Integrates with state management system (resume support)
   - Updated README hero section to show complete 6-step flow
   - Makes templates discoverable without forcing complexity
@@ -1293,20 +1293,20 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - `create-vault-item.sh` supports custom file paths for non-standard locations
   - Dramatically improves onboarding for users who already have local credentials
 - **Vault Items Configuration File** - User-editable JSON config for vault items
-  - `~/.config/dotfiles/vault-items.json` defines SSH keys, vault items, syncable items
+  - `~/.config/blackdot/vault-items.json` defines SSH keys, vault items, syncable items
   - No more hardcoded organization-specific values in source code
   - `vault/vault-items.example.json` provides template to customize
-  - `dotfiles setup` creates config automatically during wizard
+  - `blackdot setup` creates config automatically during wizard
   - `require_vault_config()` ensures config exists before vault operations
-- **Template CLI Help Improvements** - Better discoverability in `dotfiles template help`
+- **Template CLI Help Improvements** - Better discoverability in `blackdot template help`
   - Added `list` command to help output (shows available templates with status)
   - Added `{{#each}}` loop syntax to template syntax section
   - Added DOCUMENTATION section with links to docs/templates.md and online guide
 - **Template JSON Arrays** - `{{#each}}` loops now support JSON configuration
   - New `templates/_arrays.local.json` for cleaner array definitions
-  - `dotfiles template arrays` command to view/manage arrays
-  - `dotfiles template arrays --export-json` exports shell arrays to JSON format
-  - `dotfiles template arrays --validate` validates JSON syntax
+  - `blackdot template arrays` command to view/manage arrays
+  - `blackdot template arrays --export-json` exports shell arrays to JSON format
+  - `blackdot template arrays --validate` validates JSON syntax
   - Falls back to shell arrays if no JSON file present
 - **Docker Container Taxonomy** - Multiple container sizes for different needs
   - `Dockerfile.extralite` (~50MB) - Ultra-minimal for quick exploration
@@ -1318,7 +1318,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 - **Mock Vault for Testing** - Test vault commands without real credentials
   - `test/mocks/setup-mock-vault.sh` creates fake GPG key + pass store
   - Populates all expected vault items with mock credentials
-  - Works with `pass` backend (`export DOTFILES_VAULT_BACKEND=pass`)
+  - Works with `pass` backend (`export BLACKDOT_VAULT_BACKEND=pass`)
   - Options: `--no-pass` (no passphrase), `--clean` (reset)
 - **Minimal Mode Documentation** - Clarified what `--minimal` skips and how to enable features later
 
@@ -1335,49 +1335,49 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 ## [2.0.1] - 2025-12-02
 
 ### Added
-- **Help hint for subcommand options** - Main `dotfiles help` now shows: "Run 'dotfiles <command> --help' for detailed options"
+- **Help hint for subcommand options** - Main `blackdot help` now shows: "Run 'dotfiles <command> --help' for detailed options"
 - **State Management in Quick Navigation** - Added link to `state-management.md` in docsify homepage
 
 ## [2.0.0] - 2025-12-02
 
 ### Breaking Changes
-- **Removed `dotfiles init` command** - Now use `dotfiles setup` instead
-- **Removed `install.sh --interactive` flag** - Bootstrap now prompts to run `dotfiles setup`
+- **Removed `blackdot init` command** - Now use `blackdot setup` instead
+- **Removed `install.sh --interactive` flag** - Bootstrap now prompts to run `blackdot setup`
 - **Renamed `vault/bootstrap-vault.sh`** to `vault/restore.sh` for clarity
 
 ### Added
-- **Unified Setup Wizard** (`dotfiles setup`) - New interactive setup with persistent state
+- **Unified Setup Wizard** (`blackdot setup`) - New interactive setup with persistent state
   - Five-phase setup: symlinks → packages → vault → secrets → claude
-  - Progress persistence in `~/.config/dotfiles/state.ini` and `~/.config/dotfiles/config.ini`
+  - Progress persistence in `~/.config/blackdot/state.ini` and `~/.config/blackdot/config.ini`
   - Resume support: continue where you left off if interrupted
   - State inference: auto-detects existing installations from filesystem
-  - Visual status dashboard with checkmarks (`dotfiles setup --status`)
-  - Reset capability (`dotfiles setup --reset`)
+  - Visual status dashboard with checkmarks (`blackdot setup --status`)
+  - Reset capability (`blackdot setup --reset`)
 - **State Management Library** (`lib/_state.sh`) - Pure zsh INI file parsing
   - Functions: `state_init`, `state_completed`, `state_complete`, `state_needs_setup`
   - Config API: `config_get`, `config_set` for persistent preferences
   - State inference: `state_infer` detects symlinks, packages, vault, secrets, Claude
-  - Files: `~/.config/dotfiles/state.ini` (phase completion), `~/.config/dotfiles/config.ini` (user prefs)
-- **macOS Settings Command** (`dotfiles macos`) - Expose macOS settings management
-  - `dotfiles macos apply` - Apply settings from settings.sh
-  - `dotfiles macos preview` - Dry-run mode
-  - `dotfiles macos discover` - Capture current settings
-- **Vault Restore Preview** - `dotfiles vault restore --preview` shows what would be restored without making changes
+  - Files: `~/.config/blackdot/state.ini` (phase completion), `~/.config/blackdot/config.ini` (user prefs)
+- **macOS Settings Command** (`blackdot macos`) - Expose macOS settings management
+  - `blackdot macos apply` - Apply settings from settings.sh
+  - `blackdot macos preview` - Dry-run mode
+  - `blackdot macos discover` - Capture current settings
+- **Vault Restore Preview** - `blackdot vault restore --preview` shows what would be restored without making changes
 - **Documentation Updates**
   - New `docs/state-management.md` - Dedicated state system documentation
   - State Management section in `docs/cli-reference.md` with INI file format examples
-  - `dotfiles macos` command reference with all subcommands and options
-  - Updated all references from `dotfiles init` to `dotfiles setup`
+  - `blackdot macos` command reference with all subcommands and options
+  - Updated all references from `blackdot init` to `blackdot setup`
   - Added `macos` command to architecture diagram
 
 ### Changed
 - **Renamed `bootstrap-vault.sh` to `restore.sh`** - Clearer naming for vault orchestrator
-- **Removed `dotfiles init`** - Replaced by `dotfiles setup` with better state management
+- **Removed `blackdot init`** - Replaced by `blackdot setup` with better state management
 - **Vault Backend Persistence** - Backend choice now saved to config file
   - Priority: config file → environment variable → default (bitwarden)
   - Persists across sessions without needing to export env var
 - **Simplified `install.sh`** - Removed `--interactive` flag
-  - Bootstrap scripts now tell user to run `dotfiles setup`
+  - Bootstrap scripts now tell user to run `blackdot setup`
   - Cleaner separation: install.sh handles clone/bootstrap, setup handles configuration
 - **dotfiles-drift Multi-Backend Support** - Now works with all vault backends (Bitwarden, 1Password, pass)
   - Uses `lib/_vault.sh` abstraction instead of hardcoded Bitwarden commands
@@ -1442,13 +1442,13 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 - **DOTFILES_SKIP_DRIFT_CHECK** documentation - Added missing environment variable to Optional Components
 
 ### Changed
-- **Vault-Agnostic `dotfiles init`** - Major refactor of interactive setup wizard
+- **Vault-Agnostic `blackdot init`** - Major refactor of interactive setup wizard
   - Auto-detects all vault backends (Bitwarden, 1Password, pass)
   - Prompts user to choose vault (never auto-selects)
   - Option to skip vault setup entirely
   - Backend-specific login/unlock flows
   - Fixes Alpine/Linux issue where pass was auto-selected
-- **Integrated `install.sh` with `dotfiles init`** - `install.sh --interactive` now calls the wizard automatically
+- **Integrated `install.sh` with `blackdot init`** - `install.sh --interactive` now calls the wizard automatically
 - **Simplified Quick Start** - Reduced from 4 manual steps to 2 (clone → dotfiles init)
 - **Reordered README Sections** - End sections now: Acknowledgments → Trademarks → License
 - **Updated Project Structure** - Added lib/_vault.sh and test/fixtures/ subdirectory
@@ -1456,7 +1456,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 
 ### Documentation
 - Updated README.md, docs/README.md, docs/README-FULL.md with simplified install flow
-- Updated docs/cli-reference.md with comprehensive `dotfiles init` documentation
+- Updated docs/cli-reference.md with comprehensive `blackdot init` documentation
 - All install documentation now consistently promotes 2-step flow
 
 ## [1.8.2] - 2025-12-01
@@ -1481,12 +1481,12 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 
 ### Added
 - **dotclaude Integration** - Claude Code profile management across machines
-  - `dotfiles status` shows active Claude profile (if dotclaude installed)
-  - `dotfiles doctor` validates Claude/dotclaude setup with install hints
-  - `dotfiles vault` syncs `~/.claude/profiles.json` to vault
-  - `dotfiles drift` detects Claude profile changes vs vault
-  - `dotfiles packages` suggests dotclaude for Claude users
-  - `dotfiles init` offers dotclaude installation during setup wizard
+  - `blackdot status` shows active Claude profile (if dotclaude installed)
+  - `blackdot doctor` validates Claude/dotclaude setup with install hints
+  - `blackdot vault` syncs `~/.claude/profiles.json` to vault
+  - `blackdot drift` detects Claude profile changes vs vault
+  - `blackdot packages` suggests dotclaude for Claude users
+  - `blackdot init` offers dotclaude installation during setup wizard
   - See [docs/claude-code.md](docs/claude-code.md#dotclaude-integration) for details
 - **Dockerfile.lite** - Lightweight Alpine container for CLI exploration
 - **`{{#each}}` Template Loops** - Iterate over arrays with named fields
@@ -1521,7 +1521,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - `1password.sh` - 1Password CLI v2 backend
   - `pass.sh` - pass (GPG) backend
   - `_interface.md` - Interface specification for backend implementations
-- **`DOTFILES_VAULT_BACKEND`** - Environment variable to select backend (defaults to `bitwarden`)
+- **`BLACKDOT_VAULT_BACKEND`** - Environment variable to select backend (defaults to `bitwarden`)
 
 #### Backward Compatibility
 - Legacy `bw_*` functions still work (aliased to new `vault_*` API)
@@ -1547,7 +1547,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 - **`bootstrap-lima.sh` symlink** - Deprecated alias for bootstrap-linux.sh
 
 ### Changed
-- Bootstrap scripts updated to find DOTFILES_DIR from parent directory
+- Bootstrap scripts updated to find BLACKDOT_DIR from parent directory
 - `install.sh` updated with new bootstrap script paths
 - `Dockerfile` updated with new bootstrap script path
 - All CI workflow paths updated for new locations
@@ -1569,11 +1569,11 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - `dotfiles-backup` - Backup/restore
   - `dotfiles-diff` - Preview changes
   - `dotfiles-init` - Setup wizard
-  - `dotfiles-metrics` - Metrics visualization (renamed from show-metrics.sh)
+  - `blackdot-metrics` - Metrics visualization (renamed from show-metrics.sh)
   - `dotfiles-uninstall` - Clean removal (renamed from uninstall.sh)
 
 ### Changed
-- Scripts now source `lib/_logging.sh` from `$DOTFILES_DIR/lib/` (parent of bin/)
+- Scripts now source `lib/_logging.sh` from `$BLACKDOT_DIR/lib/` (parent of bin/)
 - `zsh/zsh.d/40-aliases.zsh` updated to reference `bin/` paths
 - All test files updated with new paths
 - CI/CD workflow updated with new paths
@@ -1627,7 +1627,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
   - `add_brew_to_zprofile()` - Homebrew PATH setup
 
 #### Pre-Restore Drift Check
-- **Safety feature** - Prevents accidental data loss during `dotfiles vault restore`
+- **Safety feature** - Prevents accidental data loss during `blackdot vault restore`
   - Detects when local files have changed since last vault sync
   - Warns user and suggests options: sync first, force restore, or review diff
   - `check_item_drift()` - Check single item for drift
@@ -1639,7 +1639,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 - `bootstrap-mac.sh` - Now sources `bootstrap/_common.sh` for shared functions
 - `bootstrap-linux.sh` - Now sources `bootstrap/_common.sh` for shared functions
 - `vault/bootstrap-vault.sh` - Added drift check before restore
-- Help text updated for `dotfiles vault restore --force`
+- Help text updated for `blackdot vault restore --force`
 - Reduced code duplication by ~60% in bootstrap scripts
 
 ### Documentation
@@ -1751,27 +1751,27 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 
 ### Added - CLI Commands
 
-#### Unified `dotfiles` Command Expansion
-- **`dotfiles diff`** - Preview changes before sync or restore
-  - `dotfiles diff --sync` - Show what would be synced to vault
-  - `dotfiles diff --restore` - Show what restore would change
+#### Unified `blackdot` Command Expansion
+- **`blackdot diff`** - Preview changes before sync or restore
+  - `blackdot diff --sync` - Show what would be synced to vault
+  - `blackdot diff --restore` - Show what restore would change
   - Unified diff output with color coding
 
-- **`dotfiles backup`** - Backup and restore configuration
-  - Creates timestamped tar.gz archives in `~/.dotfiles-backups/`
-  - `dotfiles backup` - Create new backup
-  - `dotfiles backup --list` - List available backups
-  - `dotfiles backup restore` - Interactive restore from backup
+- **`blackdot backup`** - Backup and restore configuration
+  - Creates timestamped tar.gz archives in `~/.blackdot-backups/`
+  - `blackdot backup` - Create new backup
+  - `blackdot backup --list` - List available backups
+  - `blackdot backup restore` - Interactive restore from backup
   - Auto-cleanup keeps only 10 most recent backups
 
-- **`dotfiles init`** - First-time setup wizard
+- **`blackdot init`** - First-time setup wizard
   - Interactive walkthrough for new installations
   - Guides through bootstrap, Bitwarden setup, secret restoration
   - ASCII art banner and step-by-step progress
 
-- **`dotfiles uninstall`** - Clean removal script
-  - `dotfiles uninstall --dry-run` - Preview what would be removed
-  - `dotfiles uninstall --keep-secrets` - Remove dotfiles but keep SSH/AWS/Git
+- **`blackdot uninstall`** - Clean removal script
+  - `blackdot uninstall --dry-run` - Preview what would be removed
+  - `blackdot uninstall --keep-secrets` - Remove dotfiles but keep SSH/AWS/Git
   - Safe removal with confirmation prompts
 
 #### Tab Completion
@@ -1820,7 +1820,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 - Updated `40-aliases.zsh` with new commands (diff, backup, init, uninstall)
 - Updated test workflow to validate new scripts
 - Updated documentation with new commands and features
-- Expanded `dotfiles help` output with all new commands
+- Expanded `blackdot help` output with all new commands
 
 ### Infrastructure
 - New scripts made executable with proper permissions
@@ -1850,7 +1850,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 
 #### Health Metrics System
 - **Automatic Metrics Collection** in `check-health.sh`
-  - Records health check results to `~/.dotfiles-metrics.jsonl`
+  - Records health check results to `~/.blackdot-metrics.jsonl`
   - Tracks: errors, warnings, fixes, health score (0-100)
   - Includes git branch, commit hash, hostname, OS
   - Timestamped entries for trend analysis
@@ -1965,7 +1965,7 @@ This is a comprehensive framework redesign that transforms dotfiles from a colle
 #### .gitignore Updates
 - Added `*.local` to exclude machine-specific overrides
 - Added `.dotfiles-update-check` cache file
-- Added `.dotfiles-metrics.jsonl` metrics file
+- Added `.blackdot-metrics.jsonl` metrics file
 
 #### New Scripts
 - `show-metrics.sh` - Health metrics visualization (183 lines)

@@ -7,22 +7,22 @@ Complete reference for all dotfiles commands, options, and environment variables
 ## Quick Reference
 
 ```bash
-dotfiles status          # Visual dashboard
-dotfiles doctor          # Health check
-dotfiles doctor --fix    # Auto-fix issues
-dotfiles sync            # Smart bidirectional vault sync
-dotfiles vault pull      # Pull secrets from vault
-dotfiles vault push      # Push local changes to vault
-dotfiles template init   # Setup machine-specific configs
-dotfiles encrypt init    # Initialize age encryption
-dotfiles help            # Show all commands
+blackdot status          # Visual dashboard
+blackdot doctor          # Health check
+blackdot doctor --fix    # Auto-fix issues
+blackdot sync            # Smart bidirectional vault sync
+blackdot vault pull      # Pull secrets from vault
+blackdot vault push      # Push local changes to vault
+blackdot template init   # Setup machine-specific configs
+blackdot encrypt init    # Initialize age encryption
+blackdot help            # Show all commands
 ```
 
 ---
 
-## The `dotfiles` Command
+## The `blackdot` Command
 
-The unified command for managing your dotfiles. All subcommands are accessed via `dotfiles <command>`.
+The unified command for managing your dotfiles. All subcommands are accessed via `blackdot <command>`.
 
 ### Command Overview
 
@@ -56,13 +56,13 @@ The unified command for managing your dotfiles. All subcommands are accessed via
 
 ## Status & Health Commands
 
-### `dotfiles status`
+### `blackdot status`
 
 Display a visual dashboard showing the current state of your dotfiles configuration.
 
 ```bash
-dotfiles status
-dotfiles s              # Alias
+blackdot status
+blackdot s              # Alias
 ```
 
 **Output includes:**
@@ -74,13 +74,13 @@ dotfiles s              # Alias
 
 ---
 
-### `dotfiles doctor`
+### `blackdot doctor`
 
 Run a comprehensive health check on your dotfiles installation.
 
 ```bash
-dotfiles doctor [OPTIONS]
-dotfiles health         # Alias
+blackdot doctor [OPTIONS]
+blackdot health         # Alias
 ```
 
 **Options:**
@@ -94,9 +94,9 @@ dotfiles health         # Alias
 **Examples:**
 
 ```bash
-dotfiles doctor              # Full health check
-dotfiles doctor --fix        # Auto-repair permissions
-dotfiles doctor --quick      # Fast checks (skip vault status)
+blackdot doctor              # Full health check
+blackdot doctor --fix        # Auto-repair permissions
+blackdot doctor --quick      # Fast checks (skip vault status)
 ```
 
 **Checks performed:**
@@ -117,13 +117,13 @@ dotfiles doctor --quick      # Fast checks (skip vault status)
 
 ## Feature Management
 
-### `dotfiles features`
+### `blackdot features`
 
 Central registry for managing optional features. Enable, disable, and query the status of all optional dotfiles functionality.
 
 ```bash
-dotfiles features [COMMAND] [OPTIONS]
-dotfiles feat               # Alias
+blackdot features [COMMAND] [OPTIONS]
+blackdot feat               # Alias
 ```
 
 **Commands:**
@@ -172,33 +172,33 @@ dotfiles feat               # Alias
 
 ```bash
 # List all features with status
-dotfiles features
-dotfiles features list
+blackdot features
+blackdot features list
 
 # Filter by category
-dotfiles features list optional
-dotfiles features list integration
+blackdot features list optional
+blackdot features list integration
 
 # Show with dependencies
-dotfiles features list --all
+blackdot features list --all
 
 # JSON output (for scripting)
-dotfiles features list --json
+blackdot features list --json
 
 # Enable a feature (runtime only)
-dotfiles features enable vault
+blackdot features enable vault
 
 # Enable and persist to config file
-dotfiles features enable vault --persist
+blackdot features enable vault --persist
 
 # Disable a feature
-dotfiles features disable health_metrics
+blackdot features disable health_metrics
 
 # Enable a preset
-dotfiles features preset developer --persist
+blackdot features preset developer --persist
 
 # List available presets
-dotfiles features preset --list
+blackdot features preset --list
 
 # Check if feature enabled (for scripts)
 if dotfiles features check vault; then
@@ -235,12 +235,12 @@ DOTFILES_FEATURE_VAULT=false   # Disable vault
 
 ## Hook Commands
 
-### `dotfiles hook`
+### `blackdot hook`
 
 Manage lifecycle hooks for custom behavior at key points.
 
 ```bash
-dotfiles hook [COMMAND] [OPTIONS] [HOOK_POINT]
+blackdot hook [COMMAND] [OPTIONS] [HOOK_POINT]
 ```
 
 **Commands:**
@@ -262,19 +262,19 @@ dotfiles hook [COMMAND] [OPTIONS] [HOOK_POINT]
 
 ```bash
 # List all hook points
-dotfiles hook list
+blackdot hook list
 
 # List hooks for a specific point
-dotfiles hook list post_vault_pull
+blackdot hook list post_vault_pull
 
 # Run hooks for a point
-dotfiles hook run post_vault_pull
+blackdot hook run post_vault_pull
 
 # Run with verbose output
-dotfiles hook run --verbose shell_init
+blackdot hook run --verbose shell_init
 
 # Test hooks (dry-run + execute)
-dotfiles hook test doctor_check
+blackdot hook test doctor_check
 ```
 
 ### Hook Points
@@ -292,20 +292,20 @@ dotfiles hook test doctor_check
 **File-based hooks** (recommended):
 ```bash
 # Create hook directory
-mkdir -p ~/.config/dotfiles/hooks/post_vault_pull
+mkdir -p ~/.config/blackdot/hooks/post_vault_pull
 
 # Create executable script
-cat > ~/.config/dotfiles/hooks/post_vault_pull/10-fix-perms.sh << 'EOF'
+cat > ~/.config/blackdot/hooks/post_vault_pull/10-fix-perms.sh << 'EOF'
 #!/bin/bash
 chmod 600 ~/.ssh/id_* 2>/dev/null
 EOF
-chmod +x ~/.config/dotfiles/hooks/post_vault_pull/10-fix-perms.sh
+chmod +x ~/.config/blackdot/hooks/post_vault_pull/10-fix-perms.sh
 ```
 
 **JSON-based hooks:**
 ```bash
 # Configure in hooks.json
-cat > ~/.config/dotfiles/hooks.json << 'EOF'
+cat > ~/.config/blackdot/hooks.json << 'EOF'
 {
   "hooks": {
     "post_vault_pull": [
@@ -322,13 +322,13 @@ EOF
 
 ## Configuration Commands
 
-### `dotfiles config`
+### `blackdot config`
 
 View and manage configuration across all layers.
 
 ```bash
-dotfiles config [COMMAND] [OPTIONS]
-dotfiles cfg                # Alias
+blackdot config [COMMAND] [OPTIONS]
+blackdot cfg                # Alias
 ```
 
 **Commands:**
@@ -344,7 +344,7 @@ dotfiles cfg                # Alias
 
 ```bash
 # Show all config with sources
-dotfiles config layers
+blackdot config layers
 
 # Output:
 # vault.backend = bitwarden (user)
@@ -352,10 +352,10 @@ dotfiles config layers
 # setup.completed = ["symlinks","packages"] (machine)
 
 # Get specific value
-dotfiles config get vault.backend
+blackdot config get vault.backend
 
 # Set value in user config
-dotfiles config set vault.auto_backup true
+blackdot config set vault.auto_backup true
 ```
 
 **Layer Priority (highest to lowest):**
@@ -364,20 +364,20 @@ dotfiles config set vault.auto_backup true
 |----------|-------|--------|
 | 1 | Environment | `$DOTFILES_*` variables |
 | 2 | Project | `.dotfiles.local` in current directory |
-| 3 | Machine | `~/.config/dotfiles/machine.json` |
-| 4 | User | `~/.config/dotfiles/config.json` |
+| 3 | Machine | `~/.config/blackdot/machine.json` |
+| 4 | User | `~/.config/blackdot/config.json` |
 | 5 | Defaults | Built-in fallbacks |
 
 **See also:** [Architecture - Configuration Layers](architecture.md#configuration-layers)
 
 ---
 
-### `dotfiles drift`
+### `blackdot drift`
 
 Compare local configuration files against vault to detect differences.
 
 ```bash
-dotfiles drift [OPTIONS]
+blackdot drift [OPTIONS]
 ```
 
 **Options:**
@@ -400,7 +400,7 @@ dotfiles drift [OPTIONS]
 - AWS-Credentials (`~/.aws/credentials`)
 - Git-Config (`~/.gitconfig`)
 - Environment-Secrets (`~/.local/env.secrets`)
-- Template-Variables (`~/.config/dotfiles/template-variables.sh`)
+- Template-Variables (`~/.config/blackdot/template-variables.sh`)
 
 **Output:**
 - Shows which items are in sync
@@ -410,8 +410,8 @@ dotfiles drift [OPTIONS]
 **Examples:**
 
 ```bash
-dotfiles drift           # Full check (connects to vault)
-dotfiles drift --quick   # Fast check (local checksums only)
+blackdot drift           # Full check (connects to vault)
+blackdot drift --quick   # Fast check (local checksums only)
 ```
 
 **Shell Startup Integration:**
@@ -426,19 +426,19 @@ Drift detection runs automatically on shell startup using quick mode. If local f
 Disable with: `export DOTFILES_SKIP_DRIFT_CHECK=1`
 
 **How it works:**
-1. After `dotfiles vault pull`, checksums are saved to `~/.cache/dotfiles/vault-state.json`
+1. After `blackdot vault pull`, checksums are saved to `~/.cache/dotfiles/vault-state.json`
 2. On shell startup, local files are compared against cached checksums
 3. If checksums differ, a warning is shown
-4. Run full `dotfiles drift` to compare against actual vault content
+4. Run full `blackdot drift` to compare against actual vault content
 
 ---
 
-### `dotfiles sync`
+### `blackdot sync`
 
 Bidirectional sync between local files and vault. Intelligently determines sync direction based on what changed.
 
 ```bash
-dotfiles sync [OPTIONS] [ITEMS...]
+blackdot sync [OPTIONS] [ITEMS...]
 ```
 
 **Options:**
@@ -468,8 +468,8 @@ By default, sync determines the correct direction for each item:
 When both local and vault have changed since last sync:
 
 ```bash
-dotfiles sync --force-local   # Push local changes, overwrite vault
-dotfiles sync --force-vault   # Pull vault changes, overwrite local
+blackdot sync --force-local   # Push local changes, overwrite vault
+blackdot sync --force-vault   # Pull vault changes, overwrite local
 ```
 
 **Syncable Items:**
@@ -478,18 +478,18 @@ dotfiles sync --force-vault   # Pull vault changes, overwrite local
 - `AWS-Credentials` (`~/.aws/credentials`)
 - `Git-Config` (`~/.gitconfig`)
 - `Environment-Secrets` (`~/.local/env.secrets`)
-- `Template-Variables` (`~/.config/dotfiles/template-variables.sh`)
+- `Template-Variables` (`~/.config/blackdot/template-variables.sh`)
 - `Claude-Profiles` (`~/.claude/profiles.json`)
 
 **Examples:**
 
 ```bash
-dotfiles sync                     # Smart sync all items
-dotfiles sync --dry-run           # Preview what would be synced
-dotfiles sync Git-Config          # Sync single item
-dotfiles sync --force-local       # Push all local to vault
-dotfiles sync --force-vault       # Pull all vault to local
-dotfiles sync --verbose           # Show checksum details
+blackdot sync                     # Smart sync all items
+blackdot sync --dry-run           # Preview what would be synced
+blackdot sync Git-Config          # Sync single item
+blackdot sync --force-local       # Push all local to vault
+blackdot sync --force-vault       # Pull all vault to local
+blackdot sync --verbose           # Show checksum details
 ```
 
 **How it works:**
@@ -507,12 +507,12 @@ dotfiles sync --verbose           # Show checksum details
 
 ---
 
-### `dotfiles diff`
+### `blackdot diff`
 
 Preview differences between local files and vault before performing sync or restore operations.
 
 ```bash
-dotfiles diff [OPTIONS] [ITEM]
+blackdot diff [OPTIONS] [ITEM]
 ```
 
 **Options:**
@@ -532,22 +532,22 @@ dotfiles diff [OPTIONS] [ITEM]
 **Examples:**
 
 ```bash
-dotfiles diff                 # Show all differences
-dotfiles diff --sync          # What would be pushed to vault
-dotfiles diff --restore       # What would be restored locally
-dotfiles diff SSH-Config      # Diff specific item
+blackdot diff                 # Show all differences
+blackdot diff --sync          # What would be pushed to vault
+blackdot diff --restore       # What would be restored locally
+blackdot diff SSH-Config      # Diff specific item
 ```
 
 ---
 
 ## Backup & Restore
 
-### `dotfiles backup`
+### `blackdot backup`
 
 Create timestamped backups of configuration files or restore from previous backups.
 
 ```bash
-dotfiles backup [COMMAND] [OPTIONS]
+blackdot backup [COMMAND] [OPTIONS]
 ```
 
 **Commands:**
@@ -562,10 +562,10 @@ dotfiles backup [COMMAND] [OPTIONS]
 **Examples:**
 
 ```bash
-dotfiles backup              # Create new backup
-dotfiles backup --list       # List available backups
-dotfiles backup restore      # Restore from latest backup
-dotfiles backup restore backup-20240115-143022  # Restore specific
+blackdot backup              # Create new backup
+blackdot backup --list       # List available backups
+blackdot backup restore      # Restore from latest backup
+blackdot backup restore backup-20240115-143022  # Restore specific
 ```
 
 **Files backed up:**
@@ -579,18 +579,18 @@ dotfiles backup restore backup-20240115-143022  # Restore specific
 - `~/.p10k.zsh`
 
 **Storage:**
-- Backups stored in `~/.dotfiles-backups/`
+- Backups stored in `~/.blackdot-backups/`
 - Maximum 10 backups retained (oldest auto-deleted)
 - Each backup includes a manifest with metadata
 
 ---
 
-### `dotfiles migrate`
+### `blackdot migrate`
 
 **Configuration Migration** - Migrate legacy configuration formats to JSON.
 
 ```bash
-dotfiles migrate [OPTIONS]
+blackdot migrate [OPTIONS]
 ```
 
 **What it migrates:**
@@ -608,8 +608,8 @@ dotfiles migrate [OPTIONS]
 **Examples:**
 
 ```bash
-dotfiles migrate              # Interactive migration with confirmation
-dotfiles migrate --yes        # Skip confirmation, migrate immediately
+blackdot migrate              # Interactive migration with confirmation
+blackdot migrate --yes        # Skip confirmation, migrate immediately
 ```
 
 **Safety:**
@@ -621,12 +621,12 @@ dotfiles migrate --yes        # Skip confirmation, migrate immediately
 
 ## Vault Commands
 
-### `dotfiles vault`
+### `blackdot vault`
 
 Manage secrets stored in your vault. Supports multiple backends with a unified interface.
 
 ```bash
-dotfiles vault <command> [OPTIONS]
+blackdot vault <command> [OPTIONS]
 ```
 
 **Subcommands:**
@@ -652,7 +652,7 @@ dotfiles vault <command> [OPTIONS]
 Create a new Secure Note item in the vault.
 
 ```bash
-dotfiles vault create <item-name> [content] [OPTIONS]
+blackdot vault create <item-name> [content] [OPTIONS]
 ```
 
 **Options:**
@@ -664,27 +664,27 @@ dotfiles vault create <item-name> [content] [OPTIONS]
 | `--file` | | Read content from file instead of argument |
 
 **Content Sources (in order of precedence):**
-1. Command line argument: `dotfiles vault create Name "content"`
-2. File: `dotfiles vault create Name --file ~/path/to/file`
+1. Command line argument: `blackdot vault create Name "content"`
+2. File: `blackdot vault create Name --file ~/path/to/file`
 3. Stdin: `echo "content" | dotfiles vault create Name`
 
 **Examples:**
 
 ```bash
 # Create from argument
-dotfiles vault create API-Key "sk-1234567890"
+blackdot vault create API-Key "sk-1234567890"
 
 # Create from file
-dotfiles vault create SSH-Config --file ~/.ssh/config
+blackdot vault create SSH-Config --file ~/.ssh/config
 
 # Create from stdin
 cat ~/.gitconfig | dotfiles vault create Git-Config
 
 # Preview what would be created
-dotfiles vault create --dry-run Test-Item "preview content"
+blackdot vault create --dry-run Test-Item "preview content"
 
 # Overwrite existing item
-dotfiles vault create --force API-Key "new-key"
+blackdot vault create --force API-Key "new-key"
 ```
 
 ---
@@ -694,7 +694,7 @@ dotfiles vault create --force API-Key "new-key"
 Delete one or more items from the vault.
 
 ```bash
-dotfiles vault delete <item-name>... [OPTIONS]
+blackdot vault delete <item-name>... [OPTIONS]
 ```
 
 **Options:**
@@ -716,16 +716,16 @@ These items require typing the item name to confirm deletion, even with `--force
 
 ```bash
 # Delete single item (with confirmation)
-dotfiles vault delete OLD-API-KEY
+blackdot vault delete OLD-API-KEY
 
 # Delete multiple items with force
-dotfiles vault delete --force TEMP-1 TEMP-2 TEMP-3
+blackdot vault delete --force TEMP-1 TEMP-2 TEMP-3
 
 # Preview what would be deleted
-dotfiles vault delete --dry-run OLD-KEY
+blackdot vault delete --dry-run OLD-KEY
 
 # Protected item requires typing name even with force
-dotfiles vault delete SSH-Work
+blackdot vault delete SSH-Work
 # Type "SSH-Work" to confirm
 ```
 
@@ -745,12 +745,12 @@ The vault system supports three backends with identical functionality:
 
 ```bash
 # Set backend in ~/.zshrc or ~/.zshenv
-export DOTFILES_VAULT_BACKEND=bitwarden  # (default)
-export DOTFILES_VAULT_BACKEND=1password
-export DOTFILES_VAULT_BACKEND=pass
+export BLACKDOT_VAULT_BACKEND=bitwarden  # (default)
+export BLACKDOT_VAULT_BACKEND=1password
+export BLACKDOT_VAULT_BACKEND=pass
 ```
 
-All `dotfiles vault` commands work identically regardless of backend.
+All `blackdot vault` commands work identically regardless of backend.
 
 #### Backend Setup
 
@@ -765,7 +765,7 @@ export BW_SESSION="$(bw unlock --raw)"
 ```bash
 brew install --cask 1password-cli
 op signin
-export DOTFILES_VAULT_BACKEND=1password
+export BLACKDOT_VAULT_BACKEND=1password
 export ONEPASSWORD_VAULT=Personal  # optional, default vault
 ```
 
@@ -773,7 +773,7 @@ export ONEPASSWORD_VAULT=Personal  # optional, default vault
 ```bash
 brew install pass
 pass init <gpg-key-id>
-export DOTFILES_VAULT_BACKEND=pass
+export BLACKDOT_VAULT_BACKEND=pass
 export PASS_PREFIX=dotfiles  # optional, items stored as dotfiles/Git-Config
 ```
 
@@ -808,7 +808,7 @@ Vault items can be organized by location (folder, vault, directory) depending on
 - `prefix` - Name-based prefix filtering
 - `none` - No location filtering (legacy behavior)
 
-The setup wizard (`dotfiles vault init`) guides you through selecting or creating a location.
+The setup wizard (`blackdot vault init`) guides you through selecting or creating a location.
 
 ---
 
@@ -817,18 +817,18 @@ The setup wizard (`dotfiles vault init`) guides you through selecting or creatin
 Vault items are defined in a user-editable JSON config:
 
 ```
-~/.config/dotfiles/vault-items.json
+~/.config/blackdot/vault-items.json
 ```
 
 **Setup:**
 ```bash
 # Copy example and customize
-mkdir -p ~/.config/dotfiles
-cp vault/vault-items.example.json ~/.config/dotfiles/vault-items.json
-$EDITOR ~/.config/dotfiles/vault-items.json
+mkdir -p ~/.config/blackdot
+cp vault/vault-items.example.json ~/.config/blackdot/vault-items.json
+$EDITOR ~/.config/blackdot/vault-items.json
 
 # Or use the setup wizard
-dotfiles setup
+blackdot setup
 ```
 
 ### Example Managed Items
@@ -847,12 +847,12 @@ Define your items in the config file. Example structure:
 
 ---
 
-### `dotfiles vault pull`
+### `blackdot vault pull`
 
 Pull secrets from vault to local machine.
 
 ```bash
-dotfiles vault pull [OPTIONS]
+blackdot vault pull [OPTIONS]
 ```
 
 **Options:**
@@ -873,12 +873,12 @@ dotfiles vault pull [OPTIONS]
 
 ---
 
-### `dotfiles vault push`
+### `blackdot vault push`
 
 Push local configuration files to vault.
 
 ```bash
-dotfiles vault push [OPTIONS] [ITEMS...]
+blackdot vault push [OPTIONS] [ITEMS...]
 ```
 
 **Options:**
@@ -906,61 +906,61 @@ dotfiles vault push [OPTIONS] [ITEMS...]
 **Examples:**
 
 ```bash
-dotfiles vault push --all            # Push all items
-dotfiles vault push --dry-run --all  # Preview changes
-dotfiles vault push SSH-Config       # Push single item
-dotfiles vault push Git-Config AWS-Config  # Push multiple
+blackdot vault push --all            # Push all items
+blackdot vault push --dry-run --all  # Preview changes
+blackdot vault push SSH-Config       # Push single item
+blackdot vault push Git-Config AWS-Config  # Push multiple
 ```
 
 ---
 
-### `dotfiles vault sync`
+### `blackdot vault sync`
 
 Bidirectional sync - intelligently determines whether to push or pull each item.
 
 ```bash
-dotfiles vault sync [OPTIONS] [ITEMS...]
+blackdot vault sync [OPTIONS] [ITEMS...]
 ```
 
-Same as `dotfiles sync`. See [dotfiles sync](#dotfiles-sync) for full documentation.
+Same as `blackdot sync`. See [dotfiles sync](#dotfiles-sync) for full documentation.
 
 **Quick Examples:**
 
 ```bash
-dotfiles vault sync                  # Smart sync all items
-dotfiles vault sync --dry-run        # Preview changes
-dotfiles vault sync --force-local    # Force push local to vault
-dotfiles vault sync --force-vault    # Force pull vault to local
+blackdot vault sync                  # Smart sync all items
+blackdot vault sync --dry-run        # Preview changes
+blackdot vault sync --force-local    # Force push local to vault
+blackdot vault sync --force-vault    # Force pull vault to local
 ```
 
 ---
 
-### `dotfiles vault list`
+### `blackdot vault list`
 
 List vault items managed by dotfiles.
 
 ```bash
-dotfiles vault list
+blackdot vault list
 ```
 
 ---
 
-### `dotfiles vault check`
+### `blackdot vault check`
 
 Validate that required vault items exist.
 
 ```bash
-dotfiles vault check
+blackdot vault check
 ```
 
 ---
 
-### `dotfiles vault validate`
+### `blackdot vault validate`
 
 Validate vault item schema (structure, content format).
 
 ```bash
-dotfiles vault validate
+blackdot vault validate
 ```
 
 **Validates:**
@@ -972,13 +972,13 @@ dotfiles vault validate
 
 ## Template Commands
 
-### `dotfiles template`
+### `blackdot template`
 
 Manage machine-specific configuration templates.
 
 ```bash
-dotfiles template <command> [OPTIONS]
-dotfiles tmpl <command>   # Alias
+blackdot template <command> [OPTIONS]
+blackdot tmpl <command>   # Alias
 ```
 
 **Subcommands:**
@@ -998,12 +998,12 @@ dotfiles tmpl <command>   # Alias
 
 ---
 
-### `dotfiles template init`
+### `blackdot template init`
 
 Interactive setup wizard for the template system.
 
 ```bash
-dotfiles template init
+blackdot template init
 ```
 
 **What it does:**
@@ -1016,23 +1016,23 @@ Template variables can be stored in your vault for portable restoration across m
 
 ```bash
 # Store in vault (current machine)
-dotfiles vault push Template-Variables
+blackdot vault push Template-Variables
 
 # Restore from vault (new machine)
-dotfiles vault pull
-dotfiles template render --all
+blackdot vault pull
+blackdot template render --all
 ```
 
-Variables are stored at `~/.config/dotfiles/template-variables.sh` (XDG location).
+Variables are stored at `~/.config/blackdot/template-variables.sh` (XDG location).
 
 ---
 
-### `dotfiles template render`
+### `blackdot template render`
 
 Render templates to the `generated/` directory.
 
 ```bash
-dotfiles template render [OPTIONS] [FILE]
+blackdot template render [OPTIONS] [FILE]
 ```
 
 **Options:**
@@ -1052,19 +1052,19 @@ dotfiles template render [OPTIONS] [FILE]
 **Examples:**
 
 ```bash
-dotfiles template render              # Render all templates
-dotfiles template render --dry-run    # Preview changes
-dotfiles template render gitconfig    # Render specific template
+blackdot template render              # Render all templates
+blackdot template render --dry-run    # Preview changes
+blackdot template render gitconfig    # Render specific template
 ```
 
 ---
 
-### `dotfiles template vars`
+### `blackdot template vars`
 
 List all template variables and their current values.
 
 ```bash
-dotfiles template vars [OPTIONS]
+blackdot template vars [OPTIONS]
 ```
 
 **Options:**
@@ -1075,12 +1075,12 @@ dotfiles template vars [OPTIONS]
 
 ---
 
-### `dotfiles template link`
+### `blackdot template link`
 
 Create symlinks from generated files to their destinations.
 
 ```bash
-dotfiles template link [OPTIONS]
+blackdot template link [OPTIONS]
 ```
 
 **Options:**
@@ -1097,12 +1097,12 @@ dotfiles template link [OPTIONS]
 
 ---
 
-### `dotfiles template diff`
+### `blackdot template diff`
 
 Show differences between templates and generated files.
 
 ```bash
-dotfiles template diff [OPTIONS]
+blackdot template diff [OPTIONS]
 ```
 
 **Options:**
@@ -1113,13 +1113,13 @@ dotfiles template diff [OPTIONS]
 
 ---
 
-### `dotfiles template list`
+### `blackdot template list`
 
 List available templates and their status.
 
 ```bash
-dotfiles template list
-dotfiles template ls    # Alias
+blackdot template list
+blackdot template ls    # Alias
 ```
 
 **Status indicators:**
@@ -1129,12 +1129,12 @@ dotfiles template ls    # Alias
 
 ---
 
-### `dotfiles template vault`
+### `blackdot template vault`
 
 Sync template variables (`_variables.local.sh`) with your vault for cross-machine portability.
 
 ```bash
-dotfiles template vault <command> [OPTIONS]
+blackdot template vault <command> [OPTIONS]
 ```
 
 **Subcommands:**
@@ -1161,19 +1161,19 @@ dotfiles template vault <command> [OPTIONS]
 
 ```bash
 # Backup template variables to vault
-dotfiles template vault push
+blackdot template vault push
 
 # Restore on new machine
-dotfiles template vault pull
+blackdot template vault pull
 
 # Check sync status
-dotfiles template vault status
+blackdot template vault status
 
 # See differences
-dotfiles template vault diff
+blackdot template vault diff
 
 # Sync with conflict resolution
-dotfiles template vault sync --prefer-local
+blackdot template vault sync --prefer-local
 ```
 
 **Vault Item:** `Template-Variables`
@@ -1184,12 +1184,12 @@ Works with all vault backends (Bitwarden, 1Password, pass).
 
 ## Encryption Commands
 
-### `dotfiles encrypt`
+### `blackdot encrypt`
 
 Manage file encryption using the `age` tool. Encrypts sensitive files that aren't managed by vault (like template variables).
 
 ```bash
-dotfiles encrypt <command> [OPTIONS]
+blackdot encrypt <command> [OPTIONS]
 ```
 
 **Subcommands:**
@@ -1215,33 +1215,33 @@ dotfiles encrypt <command> [OPTIONS]
 
 ---
 
-### `dotfiles encrypt init`
+### `blackdot encrypt init`
 
 Initialize age encryption by generating a new key pair.
 
 ```bash
-dotfiles encrypt init [--force]
+blackdot encrypt init [--force]
 ```
 
 **What it creates:**
-- `~/.config/dotfiles/age-key.txt` - Private key (mode 600)
-- `~/.config/dotfiles/age-recipients.txt` - Public key
+- `~/.config/blackdot/age-key.txt` - Private key (mode 600)
+- `~/.config/blackdot/age-recipients.txt` - Public key
 
 **Example:**
 
 ```bash
-dotfiles encrypt init          # Generate new key pair
-dotfiles encrypt init --force  # Regenerate keys (WARNING: loses access to encrypted files)
+blackdot encrypt init          # Generate new key pair
+blackdot encrypt init --force  # Regenerate keys (WARNING: loses access to encrypted files)
 ```
 
 ---
 
-### `dotfiles encrypt <file>`
+### `blackdot encrypt <file>`
 
 Encrypt a file using age.
 
 ```bash
-dotfiles encrypt <file> [--keep]
+blackdot encrypt <file> [--keep]
 ```
 
 **Behavior:**
@@ -1253,23 +1253,23 @@ dotfiles encrypt <file> [--keep]
 
 ```bash
 # Encrypt template variables
-dotfiles encrypt templates/_variables.local.sh
+blackdot encrypt templates/_variables.local.sh
 
 # Keep original file
-dotfiles encrypt templates/_arrays.local.json --keep
+blackdot encrypt templates/_arrays.local.json --keep
 
 # Preview
-dotfiles encrypt templates/_variables.local.sh --dry-run
+blackdot encrypt templates/_variables.local.sh --dry-run
 ```
 
 ---
 
-### `dotfiles encrypt decrypt <file>`
+### `blackdot encrypt decrypt <file>`
 
 Decrypt an `.age` file.
 
 ```bash
-dotfiles encrypt decrypt <file.age> [--keep]
+blackdot encrypt decrypt <file.age> [--keep]
 ```
 
 **Behavior:**
@@ -1280,20 +1280,20 @@ dotfiles encrypt decrypt <file.age> [--keep]
 
 ```bash
 # Decrypt template variables
-dotfiles encrypt decrypt templates/_variables.local.sh.age
+blackdot encrypt decrypt templates/_variables.local.sh.age
 
 # Keep encrypted file
-dotfiles encrypt decrypt templates/_variables.local.sh.age --keep
+blackdot encrypt decrypt templates/_variables.local.sh.age --keep
 ```
 
 ---
 
-### `dotfiles encrypt edit`
+### `blackdot encrypt edit`
 
 Edit an encrypted file in place.
 
 ```bash
-dotfiles encrypt edit <file>
+blackdot encrypt edit <file>
 ```
 
 **Workflow:**
@@ -1304,17 +1304,17 @@ dotfiles encrypt edit <file>
 **Example:**
 
 ```bash
-dotfiles encrypt edit templates/_variables.local.sh.age
+blackdot encrypt edit templates/_variables.local.sh.age
 ```
 
 ---
 
-### `dotfiles encrypt list`
+### `blackdot encrypt list`
 
 List encrypted files and files that should be encrypted.
 
 ```bash
-dotfiles encrypt list
+blackdot encrypt list
 ```
 
 **Output shows:**
@@ -1323,12 +1323,12 @@ dotfiles encrypt list
 
 ---
 
-### `dotfiles encrypt status`
+### `blackdot encrypt status`
 
 Show encryption status and key information.
 
 ```bash
-dotfiles encrypt status
+blackdot encrypt status
 ```
 
 **Output includes:**
@@ -1339,20 +1339,20 @@ dotfiles encrypt status
 
 ---
 
-### `dotfiles encrypt push-key`
+### `blackdot encrypt push-key`
 
 Push your private key to vault for backup and recovery on other machines.
 
 ```bash
-dotfiles encrypt push-key
+blackdot encrypt push-key
 ```
 
 **Vault item:** `Age-Private-Key`
 
 **Recovery on new machine:**
 ```bash
-dotfiles vault pull        # Restores age key via post_vault_pull hook
-dotfiles encrypt status    # Verify key restored
+blackdot vault pull        # Restores age key via post_vault_pull hook
+blackdot encrypt status    # Verify key restored
 ```
 
 ---
@@ -1372,16 +1372,16 @@ The encryption system integrates with dotfiles hooks:
 
 ```bash
 # First machine: encrypt and commit
-dotfiles encrypt templates/_variables.local.sh
-dotfiles encrypt push-key
+blackdot encrypt templates/_variables.local.sh
+blackdot encrypt push-key
 git add templates/_variables.local.sh.age
 git commit -m "Add encrypted template vars"
 git push
 
 # New machine: clone and decrypt
 git pull
-dotfiles vault pull          # Restores age key
-dotfiles template render     # Auto-decrypts via hook
+blackdot vault pull          # Restores age key
+blackdot template render     # Auto-decrypts via hook
 ```
 
 ---
@@ -1401,12 +1401,12 @@ dotfiles template render     # Auto-decrypts via hook
 
 ## Maintenance Commands
 
-### `dotfiles lint`
+### `blackdot lint`
 
 Validate shell configuration syntax.
 
 ```bash
-dotfiles lint [OPTIONS]
+blackdot lint [OPTIONS]
 ```
 
 **Options:**
@@ -1426,20 +1426,20 @@ dotfiles lint [OPTIONS]
 **Examples:**
 
 ```bash
-dotfiles lint              # Check all configs
-dotfiles lint --fix        # Fix permissions
-dotfiles lint --verbose    # Detailed output
+blackdot lint              # Check all configs
+blackdot lint --fix        # Fix permissions
+blackdot lint --verbose    # Detailed output
 ```
 
 ---
 
-### `dotfiles packages`
+### `blackdot packages`
 
 Check and install Brewfile packages.
 
 ```bash
-dotfiles packages [OPTIONS]
-dotfiles pkg [OPTIONS]    # Alias
+blackdot packages [OPTIONS]
+blackdot pkg [OPTIONS]    # Alias
 ```
 
 **Options:**
@@ -1454,21 +1454,21 @@ dotfiles pkg [OPTIONS]    # Alias
 **Examples:**
 
 ```bash
-dotfiles packages              # Overview
-dotfiles packages --check      # Show missing packages
-dotfiles packages --install    # Install from Brewfile
-dotfiles packages --outdated   # Show outdated
+blackdot packages              # Overview
+blackdot packages --check      # Show missing packages
+blackdot packages --install    # Install from Brewfile
+blackdot packages --outdated   # Show outdated
 ```
 
 ---
 
-### `dotfiles upgrade`
+### `blackdot upgrade`
 
 Pull latest changes and run bootstrap.
 
 ```bash
-dotfiles upgrade
-dotfiles update          # Alias
+blackdot upgrade
+blackdot update          # Alias
 ```
 
 **What it does:**
@@ -1479,12 +1479,12 @@ dotfiles update          # Alias
 
 ---
 
-### `dotfiles setup`
+### `blackdot setup`
 
 Interactive setup wizard with persistent state. **Use this after bootstrap** for guided configuration.
 
 ```bash
-dotfiles setup [OPTIONS]
+blackdot setup [OPTIONS]
 ```
 
 **Options:**
@@ -1503,7 +1503,7 @@ dotfiles setup [OPTIONS]
 5. **Claude Code** - Optionally installs dotclaude for profile management
 
 **Features:**
-- **Progress persistence** - Saves state to `~/.config/dotfiles/`
+- **Progress persistence** - Saves state to `~/.config/blackdot/`
 - **Resume support** - Continue where you left off if interrupted
 - **State inference** - Detects existing installations automatically
 
@@ -1516,19 +1516,19 @@ dotfiles setup [OPTIONS]
 **Examples:**
 
 ```bash
-dotfiles setup              # Run interactive wizard
-dotfiles setup --status     # Check progress
-dotfiles setup --reset      # Start over
+blackdot setup              # Run interactive wizard
+blackdot setup --status     # Check progress
+blackdot setup --reset      # Start over
 ```
 
 ---
 
-### `dotfiles uninstall`
+### `blackdot uninstall`
 
 Remove dotfiles configuration.
 
 ```bash
-dotfiles uninstall [OPTIONS]
+blackdot uninstall [OPTIONS]
 ```
 
 **Options:**
@@ -1542,19 +1542,19 @@ dotfiles uninstall [OPTIONS]
 **Examples:**
 
 ```bash
-dotfiles uninstall --dry-run        # Preview removal
-dotfiles uninstall --keep-secrets   # Remove but keep secrets
-dotfiles uninstall                  # Full removal (prompts)
+blackdot uninstall --dry-run        # Preview removal
+blackdot uninstall --keep-secrets   # Remove but keep secrets
+blackdot uninstall                  # Full removal (prompts)
 ```
 
 ---
 
-### `dotfiles metrics`
+### `blackdot metrics`
 
 Visualize health check metrics over time.
 
 ```bash
-dotfiles metrics [OPTIONS]
+blackdot metrics [OPTIONS]
 ```
 
 **Options:**
@@ -1568,21 +1568,21 @@ dotfiles metrics [OPTIONS]
 **Examples:**
 
 ```bash
-dotfiles metrics              # Summary
-dotfiles metrics --graph      # Trend visualization
-dotfiles metrics --all        # All entries
+blackdot metrics              # Summary
+blackdot metrics --graph      # Trend visualization
+blackdot metrics --all        # All entries
 ```
 
 ---
 
 ## macOS Commands
 
-### `dotfiles macos`
+### `blackdot macos`
 
 Manage macOS system preferences (macOS only).
 
 ```bash
-dotfiles macos <command>
+blackdot macos <command>
 ```
 
 **Subcommands:**
@@ -1596,12 +1596,12 @@ dotfiles macos <command>
 
 ---
 
-### `dotfiles macos apply`
+### `blackdot macos apply`
 
 Apply macOS system preferences from `settings.sh`.
 
 ```bash
-dotfiles macos apply [OPTIONS]
+blackdot macos apply [OPTIONS]
 ```
 
 **Options:**
@@ -1621,30 +1621,30 @@ dotfiles macos apply [OPTIONS]
 **Example:**
 
 ```bash
-dotfiles macos apply          # Apply all settings
-dotfiles macos apply --backup # Backup first, then apply
+blackdot macos apply          # Apply all settings
+blackdot macos apply --backup # Backup first, then apply
 ```
 
 ---
 
-### `dotfiles macos preview`
+### `blackdot macos preview`
 
 Show what settings would be changed without making changes.
 
 ```bash
-dotfiles macos preview
+blackdot macos preview
 ```
 
-Same as `dotfiles macos apply --dry-run`.
+Same as `blackdot macos apply --dry-run`.
 
 ---
 
-### `dotfiles macos discover`
+### `blackdot macos discover`
 
 Discover and capture current macOS settings.
 
 ```bash
-dotfiles macos discover [OPTIONS]
+blackdot macos discover [OPTIONS]
 ```
 
 **Options:**
@@ -1662,37 +1662,37 @@ dotfiles macos discover [OPTIONS]
 
 ```bash
 # Discover workflow
-dotfiles macos discover --snapshot   # Take snapshot
+blackdot macos discover --snapshot   # Take snapshot
 # Make changes in System Preferences
-dotfiles macos discover --diff       # See what changed
-dotfiles macos discover --generate   # Generate settings.sh
+blackdot macos discover --diff       # See what changed
+blackdot macos discover --generate   # Generate settings.sh
 
 # Inspect specific domain
-dotfiles macos discover --domain com.apple.dock
+blackdot macos discover --domain com.apple.dock
 ```
 
 ---
 
 ## Navigation Commands
 
-### `dotfiles cd`
+### `blackdot cd`
 
 Change to the dotfiles directory.
 
 ```bash
-dotfiles cd
+blackdot cd
 ```
 
 Equivalent to: `cd ~/workspace/dotfiles`
 
 ---
 
-### `dotfiles edit`
+### `blackdot edit`
 
 Open dotfiles in your editor.
 
 ```bash
-dotfiles edit
+blackdot edit
 ```
 
 Uses `$EDITOR` (defaults to vim).
@@ -1706,7 +1706,7 @@ Uses `$EDITOR` (defaults to vim).
 One-line installer for dotfiles.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 ```
 
 **Options:**
@@ -1719,19 +1719,19 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 
 **After installation:**
 
-Run `dotfiles setup` for interactive configuration of vault, secrets, and Claude Code.
+Run `blackdot setup` for interactive configuration of vault, secrets, and Claude Code.
 
 **Examples:**
 
 ```bash
 # Default install (one-liner)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 
 # Minimal mode (no vault, no Claude)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh -o install.sh && bash install.sh --minimal
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh -o install.sh && bash install.sh --minimal
 
 # Clone via SSH
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh -o install.sh && bash install.sh --ssh
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh -o install.sh && bash install.sh --ssh
 ```
 
 ---
@@ -1748,7 +1748,7 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 | `BREWFILE_TIER` | `enhanced` | Modern CLI tools without containers (43 packages, ~5 min) **← RECOMMENDED** |
 | `BREWFILE_TIER` | `full` | Everything including Docker/Node (61 packages, ~10 min) [default] |
 
-**Note:** The `dotfiles setup` wizard now presents tier selection interactively. These environment variables are for advanced/automated setups.
+**Note:** The `blackdot setup` wizard now presents tier selection interactively. These environment variables are for advanced/automated setups.
 
 **Examples:**
 
@@ -1775,18 +1775,18 @@ BREWFILE_TIER=enhanced SKIP_CLAUDE_SETUP=true ./bootstrap/bootstrap-mac.sh
 
 | Variable | Values | Description |
 |----------|--------|-------------|
-| `DOTFILES_VAULT_BACKEND` | `bitwarden`, `1password`, `pass` | Vault backend to use (default: `bitwarden`) |
+| `BLACKDOT_VAULT_BACKEND` | `bitwarden`, `1password`, `pass` | Vault backend to use (default: `bitwarden`) |
 | `DOTFILES_OFFLINE` | `1` | Skip all vault operations |
 | `DOTFILES_SKIP_DRIFT_CHECK` | `1` | Skip drift check before restore |
 | `BW_SESSION` | session token | Bitwarden session (set by `bw unlock`) |
 | `ONEPASSWORD_VAULT` | vault name | 1Password vault name (default: `Personal`) |
-| `PASS_PREFIX` | prefix | Pass store prefix (default: `dotfiles`) |
+| `PASS_PREFIX` | prefix | Pass store prefix (default: `blackdot`) |
 
 **Examples:**
 
 ```bash
 # Use 1Password instead of Bitwarden
-export DOTFILES_VAULT_BACKEND=1password
+export BLACKDOT_VAULT_BACKEND=1password
 
 # Offline mode (air-gapped environments)
 DOTFILES_OFFLINE=1 ./bootstrap/bootstrap-linux.sh
@@ -1825,7 +1825,7 @@ DEBUG=1 dotfiles template render
 | Variable | Values | Description |
 |----------|--------|-------------|
 | `DEBUG` | `1` | Enable debug output in vault and template operations |
-| `DOTFILES_DIR` | path | Override dotfiles directory location |
+| `BLACKDOT_DIR` | path | Override dotfiles directory location |
 
 ---
 
@@ -1835,7 +1835,7 @@ These functions are available after sourcing the zsh configuration.
 
 ### `status`
 
-Same as `dotfiles status`. Visual dashboard.
+Same as `blackdot status`. Visual dashboard.
 
 ```bash
 status
@@ -1867,7 +1867,7 @@ Notes stored in `~/workspace/.notes.md`.
 
 ### `dotfiles-upgrade`
 
-Same as `dotfiles upgrade`. Pull and update.
+Same as `blackdot upgrade`. Pull and update.
 
 ```bash
 dotfiles-upgrade
@@ -1891,26 +1891,26 @@ Most commands follow these conventions:
 | File | Purpose |
 |------|---------|
 | `~/workspace/dotfiles/` | Dotfiles repository |
-| `~/.dotfiles-backups/` | Backup storage |
-| `~/.dotfiles-metrics.jsonl` | Health check metrics |
+| `~/.blackdot-backups/` | Backup storage |
+| `~/.blackdot-metrics.jsonl` | Health check metrics |
 | `~/workspace/.notes.md` | Quick notes |
 | `vault/.vault-session` | Cached vault session |
 | `templates/_variables.local.sh` | Local template overrides (repo-specific) |
-| `~/.config/dotfiles/template-variables.sh` | Template variables (XDG, vault-portable) |
+| `~/.config/blackdot/template-variables.sh` | Template variables (XDG, vault-portable) |
 | `generated/` | Rendered templates |
-| `~/.config/dotfiles/config.json` | All configuration and state (JSON format) |
-| `~/.config/dotfiles/vault-items.json` | Vault items schema |
+| `~/.config/blackdot/config.json` | All configuration and state (JSON format) |
+| `~/.config/blackdot/vault-items.json` | Vault items schema |
 | `~/.cache/dotfiles/vault-state.json` | Drift detection cache (file checksums from last vault pull) |
 
 ---
 
 ## State Management
 
-The `dotfiles setup` wizard uses persistent state in JSON format. See [State Management](state-management.md) for full documentation.
+The `blackdot setup` wizard uses persistent state in JSON format. See [State Management](state-management.md) for full documentation.
 
 ### Configuration File
 
-#### `~/.config/dotfiles/config.json`
+#### `~/.config/blackdot/config.json`
 
 All state and configuration in a single JSON file:
 
@@ -1928,7 +1928,7 @@ All state and configuration in a single JSON file:
   },
   "paths": {
     "dotfiles_dir": "~/workspace/dotfiles",
-    "config_dir": "~/.config/dotfiles"
+    "config_dir": "~/.config/blackdot"
   }
 }
 ```
@@ -1949,13 +1949,13 @@ All state and configuration in a single JSON file:
 ### State Commands
 
 ```bash
-dotfiles setup --status    # Show current setup state
-dotfiles setup --reset     # Reset state and re-run setup
+blackdot setup --status    # Show current setup state
+blackdot setup --reset     # Reset state and re-run setup
 ```
 
 ### State Inference
 
-If state files don't exist, `dotfiles setup` infers state from the filesystem:
+If state files don't exist, `blackdot setup` infers state from the filesystem:
 - Symlinks: Checks if `~/.zshrc` points to dotfiles
 - Packages: Checks if Homebrew is installed
 - Vault: Checks for vault CLI and credentials
@@ -2272,7 +2272,7 @@ Notes stored in `~/workspace/.notes.md`.
 
 ### `dotfiles-upgrade`
 
-Same as `dotfiles upgrade`. Pull latest and update.
+Same as `blackdot upgrade`. Pull latest and update.
 
 ```bash
 dotfiles-upgrade

@@ -53,7 +53,7 @@ This project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDU
 
 3. **Add upstream remote:**
    ```bash
-   git remote add upstream https://github.com/blackwell-systems/dotfiles.git
+   git remote add upstream https://github.com/blackwell-systems/blackdot.git
    ```
 
 4. **Install the pre-commit hook:**
@@ -120,7 +120,7 @@ shellcheck your-script.sh
 zsh -n vault/your-script.sh
 
 # 3. Run health check
-dotfiles doctor
+blackdot doctor
 
 # 4. Test on clean environment (if possible)
 # macOS:
@@ -151,7 +151,7 @@ cd vault
 ./restore-ssh.sh --help
 
 # Test with dry-run mode (where available)
-dotfiles vault push --dry-run SSH-Config
+blackdot vault push --dry-run SSH-Config
 ```
 
 ### Integration Testing
@@ -160,7 +160,7 @@ dotfiles vault push --dry-run SSH-Config
 ```bash
 # Test full bootstrap on macOS
 ./bootstrap/bootstrap-mac.sh
-dotfiles doctor --fix
+blackdot doctor --fix
 ```
 
 **Linux (Docker):**
@@ -169,7 +169,7 @@ dotfiles doctor --fix
 docker run -it --rm -v $PWD:/dotfiles ubuntu:24.04 bash
 cd /dotfiles
 ./bootstrap/bootstrap-linux.sh
-dotfiles doctor
+blackdot doctor
 ```
 
 ### CI/CD
@@ -311,7 +311,7 @@ Once approved:
 
 ### Feature Requests
 
-Browse [open issues](https://github.com/blackwell-systems/dotfiles/issues) for ideas, or propose your own:
+Browse [open issues](https://github.com/blackwell-systems/blackdot/issues) for ideas, or propose your own:
 
 **Desired features:**
 - [ ] Support for additional secret managers (age, pass, 1Password)
@@ -343,14 +343,14 @@ Help test and improve support for:
 ## Questions?
 
 **Before asking:**
-1. Check existing [issues](https://github.com/blackwell-systems/dotfiles/issues)
+1. Check existing [issues](https://github.com/blackwell-systems/blackdot/issues)
 2. Read the [README.md](README.md) thoroughly
-3. Search [discussions](https://github.com/blackwell-systems/dotfiles/discussions) (if enabled)
+3. Search [discussions](https://github.com/blackwell-systems/blackdot/discussions) (if enabled)
 
 **How to ask:**
-- Open a [GitHub Issue](https://github.com/blackwell-systems/dotfiles/issues/new/choose)
+- Open a [GitHub Issue](https://github.com/blackwell-systems/blackdot/issues/new/choose)
 - Provide details: OS, version, error messages, steps to reproduce
-- Include output from `dotfiles doctor`
+- Include output from `blackdot doctor`
 
 **For bugs:**
 - Use the [bug report template](.github/ISSUE_TEMPLATE/bug_report.md)
@@ -369,7 +369,7 @@ export BW_SESSION="$(bw unlock --raw)"
 
 # Test vault operations (use test account!)
 ./vault/check-vault-items.sh -v
-dotfiles vault push --dry-run SSH-Config
+blackdot vault push --dry-run SSH-Config
 ```
 
 ### Debugging
@@ -387,7 +387,7 @@ bash -x ./bootstrap/bootstrap-mac.sh
 **Check logs:**
 ```bash
 # Health check history
-cat ~/.dotfiles-metrics.jsonl | jq .
+cat ~/.blackdot-metrics.jsonl | jq .
 
 # Git operations
 git log --oneline --graph

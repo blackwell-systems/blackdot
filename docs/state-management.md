@@ -1,8 +1,8 @@
 # State Management
 
-The `dotfiles setup` wizard uses a persistent state system to track progress, save preferences, and enable resume capability. State management is a foundation component that works with the [Configuration Layers](architecture.md#configuration-layers) system.
+The `blackdot setup` wizard uses a persistent state system to track progress, save preferences, and enable resume capability. State management is a foundation component that works with the [Configuration Layers](architecture.md#configuration-layers) system.
 
-> **v3.0 Update:** State management now uses JSON configuration format. Run `dotfiles migrate` to upgrade from v2.x INI files.
+> **v3.0 Update:** State management now uses JSON configuration format. Run `blackdot migrate` to upgrade from v2.x INI files.
 
 ---
 
@@ -22,7 +22,7 @@ State management provides:
 
 All state and configuration is stored in a single JSON file:
 
-**`~/.config/dotfiles/config.json`**
+**`~/.config/blackdot/config.json`**
 
 ```json
 {
@@ -51,7 +51,7 @@ All state and configuration is stored in a single JSON file:
   },
   "paths": {
     "dotfiles_dir": "~/workspace/dotfiles",
-    "config_dir": "~/.config/dotfiles",
+    "config_dir": "~/.config/blackdot",
     "backup_dir": "~/.local/share/dotfiles/backups"
   },
   "features": {
@@ -97,7 +97,7 @@ All settings are now stored in the same `config.json` file:
 
 **Paths (`paths.*`):**
 - `paths.dotfiles_dir` - Custom dotfiles installation directory
-- `paths.config_dir` - Configuration directory (default: `~/.config/dotfiles`)
+- `paths.config_dir` - Configuration directory (default: `~/.config/blackdot`)
 - `paths.backup_dir` - Backup storage location
 
 **Feature State (`features.*`):**
@@ -112,13 +112,13 @@ The feature registry persists enabled/disabled features in the config file:
 
 ```bash
 # Enable a feature and persist to config
-dotfiles features enable vault --persist
+blackdot features enable vault --persist
 
 # Disable a feature and persist
-dotfiles features disable drift_check --persist
+blackdot features disable drift_check --persist
 
 # Apply a preset and persist all features
-dotfiles features preset developer --persist
+blackdot features preset developer --persist
 ```
 
 **Priority order for feature state:**
@@ -132,18 +132,18 @@ dotfiles features preset developer --persist
 If you're upgrading from v2.x (INI files):
 
 ```bash
-dotfiles migrate              # Interactive migration
-dotfiles migrate --yes        # Skip confirmation
+blackdot migrate              # Interactive migration
+blackdot migrate --yes        # Skip confirmation
 
 # Old files (v2.x):
-~/.config/dotfiles/state.ini
-~/.config/dotfiles/config.ini
+~/.config/blackdot/state.ini
+~/.config/blackdot/config.ini
 
 # New file (v3.0):
-~/.config/dotfiles/config.json
+~/.config/blackdot/config.json
 
 # Backup location:
-~/.config/dotfiles/backups/pre-v3-migration-YYYYMMDD_HHMMSS/
+~/.config/blackdot/backups/pre-v3-migration-YYYYMMDD_HHMMSS/
 ```
 
 ---
@@ -153,7 +153,7 @@ dotfiles migrate --yes        # Skip confirmation
 ### Check Setup Status
 
 ```bash
-dotfiles setup --status
+blackdot setup --status
 ```
 
 Shows current setup progress with visual checkmarks:
@@ -173,7 +173,7 @@ Setup Status
 ### Reset State
 
 ```bash
-dotfiles setup --reset
+blackdot setup --reset
 ```
 
 Clears all state and re-runs setup from the beginning. Useful when:
@@ -184,10 +184,10 @@ Clears all state and re-runs setup from the beginning. Useful when:
 ### Resume Setup
 
 ```bash
-dotfiles setup
+blackdot setup
 ```
 
-If interrupted, simply run `dotfiles setup` again. It automatically:
+If interrupted, simply run `blackdot setup` again. It automatically:
 1. Reads existing state from `config.json`
 2. Skips completed phases
 3. Continues from where you left off
@@ -196,7 +196,7 @@ If interrupted, simply run `dotfiles setup` again. It automatically:
 
 ## State Inference
 
-When state files don't exist (fresh install or after reset), `dotfiles setup` infers state from the filesystem:
+When state files don't exist (fresh install or after reset), `blackdot setup` infers state from the filesystem:
 
 | Phase | Detection Method |
 |-------|------------------|
@@ -207,7 +207,7 @@ When state files don't exist (fresh install or after reset), `dotfiles setup` in
 | Secrets | Checks for `~/.ssh/config`, `~/.gitconfig`, `~/.aws/config` |
 | Claude | Checks if `claude` CLI is in PATH |
 
-This means you can run `dotfiles setup` on an existing installation and it will recognize what's already configured.
+This means you can run `blackdot setup` on an existing installation and it will recognize what's already configured.
 
 ---
 
@@ -293,15 +293,15 @@ The vault backend preference is persisted in `config.json`:
 
 ```bash
 # Priority order for vault backend:
-# 1. Config file (~/.config/dotfiles/config.json → vault.backend)
-# 2. Environment variable (DOTFILES_VAULT_BACKEND)
+# 1. Config file (~/.config/blackdot/config.json → vault.backend)
+# 2. Environment variable (BLACKDOT_VAULT_BACKEND)
 # 3. Default (bitwarden)
 ```
 
-When you select a vault during `dotfiles setup`, it's saved to the config file. This means:
-- No need to export `DOTFILES_VAULT_BACKEND` in your shell
+When you select a vault during `blackdot setup`, it's saved to the config file. This means:
+- No need to export `BLACKDOT_VAULT_BACKEND` in your shell
 - Preference persists across shell restarts
-- Works automatically with all `dotfiles vault` commands
+- Works automatically with all `blackdot vault` commands
 
 ---
 
@@ -337,7 +337,7 @@ Configuration uses JSON format for flexibility and nested structure support:
 Check file permissions:
 
 ```bash
-ls -la ~/.config/dotfiles/
+ls -la ~/.config/blackdot/
 # Should show: drwx------ (700) for directory
 # config.json should be: -rw------- (600)
 ```
@@ -345,8 +345,8 @@ ls -la ~/.config/dotfiles/
 Fix permissions:
 
 ```bash
-chmod 700 ~/.config/dotfiles
-chmod 600 ~/.config/dotfiles/config.json
+chmod 700 ~/.config/blackdot
+chmod 600 ~/.config/blackdot/config.json
 ```
 
 ### Wrong Vault Backend
@@ -354,20 +354,20 @@ chmod 600 ~/.config/dotfiles/config.json
 Check current config:
 
 ```bash
-cat ~/.config/dotfiles/config.json
+cat ~/.config/blackdot/config.json
 # Or pretty-print:
-jq '.' ~/.config/dotfiles/config.json
+jq '.' ~/.config/blackdot/config.json
 ```
 
 Change vault backend:
 
 ```bash
 # Edit with jq
-jq '.vault.backend = "1password"' ~/.config/dotfiles/config.json > /tmp/config.json && \
-    mv /tmp/config.json ~/.config/dotfiles/config.json
+jq '.vault.backend = "1password"' ~/.config/blackdot/config.json > /tmp/config.json && \
+    mv /tmp/config.json ~/.config/blackdot/config.json
 
 # Or reset and re-run setup
-dotfiles setup --reset
+blackdot setup --reset
 ```
 
 ### Invalid JSON
@@ -376,15 +376,15 @@ If config.json gets corrupted:
 
 ```bash
 # Validate JSON
-jq empty ~/.config/dotfiles/config.json
+jq empty ~/.config/blackdot/config.json
 
 # If invalid, restore from backup
-ls ~/.config/dotfiles/backups/
-cp ~/.config/dotfiles/backups/config-YYYYMMDD_HHMMSS.json ~/.config/dotfiles/config.json
+ls ~/.config/blackdot/backups/
+cp ~/.config/blackdot/backups/config-YYYYMMDD_HHMMSS.json ~/.config/blackdot/config.json
 
 # Or reset to defaults
-rm ~/.config/dotfiles/config.json
-dotfiles setup  # Will create new config
+rm ~/.config/blackdot/config.json
+blackdot setup  # Will create new config
 ```
 
 ### State Out of Sync
@@ -393,12 +393,12 @@ If state doesn't match reality:
 
 ```bash
 # Option 1: Let inference fix it
-jq '.setup.completed = []' ~/.config/dotfiles/config.json > /tmp/config.json && \
-    mv /tmp/config.json ~/.config/dotfiles/config.json
-dotfiles setup  # Will infer from filesystem
+jq '.setup.completed = []' ~/.config/blackdot/config.json > /tmp/config.json && \
+    mv /tmp/config.json ~/.config/blackdot/config.json
+blackdot setup  # Will infer from filesystem
 
 # Option 2: Full reset
-dotfiles setup --reset
+blackdot setup --reset
 ```
 
 ### Manual State Editing
@@ -408,11 +408,11 @@ You can edit config.json directly with jq:
 ```bash
 # Mark a phase as incomplete (remove from array)
 jq '.setup.completed = (.setup.completed | map(select(. != "packages")))' \
-    ~/.config/dotfiles/config.json > /tmp/config.json && \
-    mv /tmp/config.json ~/.config/dotfiles/config.json
+    ~/.config/blackdot/config.json > /tmp/config.json && \
+    mv /tmp/config.json ~/.config/blackdot/config.json
 
 # Or edit manually with vim (be careful with JSON syntax!)
-vim ~/.config/dotfiles/config.json
+vim ~/.config/blackdot/config.json
 ```
 
 ---

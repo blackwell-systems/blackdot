@@ -202,4 +202,4 @@ https://blackwell-systems.github.io/dotfiles/
 
 ---
 
-**Need help?** [Open an issue](https://github.com/blackwell-systems/dotfiles/issues)
+**Need help?** [Open an issue](https://github.com/blackwell-systems/blackdot/issues)

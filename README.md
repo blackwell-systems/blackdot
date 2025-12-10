@@ -4,10 +4,10 @@
 [![Shell](https://img.shields.io/badge/Shell-Zsh-89e051?logo=zsh&logoColor=white)](https://www.zsh.org/)
 [![Claude Code](https://img.shields.io/badge/Built_for-Claude_Code-8A2BE2?logo=anthropic)](https://claude.ai/claude-code)
 [![dotclaude](https://img.shields.io/badge/Integrates-dotclaude-8A2BE2?logo=anthropic)](https://github.com/blackwell-systems/dotclaude)
-[![Secrets](https://img.shields.io/badge/Secrets-Multi--Vault-ff4081)](https://github.com/blackwell-systems/dotfiles#vault--secrets)
-[![Version](https://img.shields.io/github/v/release/blackwell-systems/dotfiles)](https://github.com/blackwell-systems/dotfiles/releases)
-[![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)](https://github.com/blackwell-systems/dotfiles)
-[![Test Status](https://github.com/blackwell-systems/dotfiles/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/dotfiles/actions)
+[![Secrets](https://img.shields.io/badge/Secrets-Multi--Vault-ff4081)](https://github.com/blackwell-systems/blackdot#vault--secrets)
+[![Version](https://img.shields.io/github/v/release/blackwell-systems/blackdot)](https://github.com/blackwell-systems/blackdot/releases)
+[![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)](https://github.com/blackwell-systems/blackdot)
+[![Test Status](https://github.com/blackwell-systems/blackdot/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/blackdot/actions)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
 
@@ -23,16 +23,16 @@ Choose your install level:
 
 ```bash
 # Full: Everything (recommended for Claude Code users)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash && blackdot setup
 
 # Minimal: Just shell config (skip Homebrew, vault, Claude, /workspace)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash -s -- --minimal
 
 # Custom workspace: Install to ~/code instead of ~/workspace
-WORKSPACE_TARGET=~/code curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+WORKSPACE_TARGET=~/code curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 
 # Custom: Pick components in the interactive wizard
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash && blackdot setup
 # (wizard lets you skip vault, Claude, packages, etc.)
 ```
 
@@ -41,7 +41,7 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/ins
 **For users with existing credentials (SSH keys, AWS config, Git config):**
 
 ```console
-$ curl -fsSL ... | bash && dotfiles setup
+$ curl -fsSL ... | bash && blackdot setup
 
     ____        __  _____ __
    / __ \____  / /_/ __(_) /__  _____
@@ -89,7 +89,7 @@ This wizard will guide you through 7 steps:
      Optional: work vs personal configs
 
 ✓ Safe to exit anytime - Progress is saved automatically
-✓ Resume anytime - Just run 'dotfiles setup' again
+✓ Resume anytime - Just run 'blackdot setup' again
 
 ═══════════════════════════════════════════════════════════════
 
@@ -170,9 +170,9 @@ Next steps based on your configuration:
 - **Fully modular** - Everything optional except shell config. Use `--minimal` for just ZSH, or pick exactly what you need
 - **Tiered packages** - Choose minimal (18), enhanced (43), or full (61) - or skip with `--minimal`
 - **Smart credential onboarding** - Detects existing SSH/AWS/Git, offers to vault them
-- **Smart bidirectional sync** - `dotfiles sync` auto-detects push/pull direction per file
+- **Smart bidirectional sync** - `blackdot sync` auto-detects push/pull direction per file
 - **Claude Code + dotclaude integration** - Profile sync, git safety hooks, portable sessions. Built for AI-assisted development
-- **Resume support** - Interrupted? Just run `dotfiles setup` again
+- **Resume support** - Interrupted? Just run `blackdot setup` again
 
 **5-minute setup. Works on macOS, Linux, WSL2, Docker.**
 
@@ -181,7 +181,7 @@ Next steps based on your configuration:
 Test in a disposable Docker container (no installation):
 
 ```bash
-docker run -it --rm ghcr.io/blackwell-systems/dotfiles:lite
+docker run -it --rm ghcr.io/blackwell-systems/blackdot:lite
 ```
 
 See [Docker Guide](docs/docker.md) for container options.
@@ -198,7 +198,7 @@ See [Docker Guide](docs/docker.md) for container options.
 - **Session portability** - `/workspace` paths work identically on macOS/Linux/WSL2 (target is configurable)
 - **Context isolation** - Keep work and personal projects separate
 
-**Automatically installed during `dotfiles setup` (STEP 5).** Or install standalone:
+**Automatically installed during `blackdot setup` (STEP 5).** Or install standalone:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh | bash
@@ -216,10 +216,10 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/in
 
 ```bash
 # Full install (recommended for Claude Code users)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash && blackdot setup
 
 # Minimal: Shell config only (no vault, no Claude integration, no packages)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash -s -- --minimal
 
 # Custom: Skip specific components with environment variables
 SKIP_WORKSPACE_SYMLINK=true ./bootstrap/bootstrap-mac.sh  # Shell + packages, no /workspace
@@ -239,11 +239,11 @@ WORKSPACE_TARGET=~/code ./bootstrap/bootstrap-mac.sh      # Use ~/code as worksp
 | **Portable Sessions** | `/workspace` symlink for Claude sync | `SKIP_WORKSPACE_SYMLINK=true` | Yes - use OS-specific paths |
 | **Workspace Target** | Directory `/workspace` points to | `WORKSPACE_TARGET=~/code` | N/A (uses ~/workspace by default) |
 | **Claude Integration** | dotclaude + hooks + settings | `SKIP_CLAUDE_SETUP=true` or `--minimal` | Yes - works without Claude |
-| **Template Engine** | Machine-specific configs | Don't run `dotfiles template` | Yes - use static configs |
+| **Template Engine** | Machine-specific configs | Don't run `blackdot template` | Yes - use static configs |
 
 #### Brewfile Tiers (Choose Your Package Level)
 
-The `dotfiles setup` wizard presents three package tiers **interactively** with real-time counts:
+The `blackdot setup` wizard presents three package tiers **interactively** with real-time counts:
 
 | Tier | Packages | Time | What's Included |
 |------|----------|------|-----------------|
@@ -253,7 +253,7 @@ The `dotfiles setup` wizard presents three package tiers **interactively** with 
 
 **How it works:**
 - Setup wizard shows this menu with current package counts
-- Your selection is saved in `~/.config/dotfiles/config.json`
+- Your selection is saved in `~/.config/blackdot/config.json`
 - Re-running setup reuses your saved preference
 
 **Advanced:** Bypass wizard with environment variable:
@@ -267,34 +267,34 @@ BREWFILE_TIER=enhanced ./bootstrap/bootstrap-mac.sh
 
 ```bash
 # See what's available and enabled
-dotfiles features                         # List all features and status
+blackdot features                         # List all features and status
 
 # Enable/disable features
-dotfiles features enable vault --persist  # Enable vault support
-dotfiles features disable drift_check     # Turn off drift checking
+blackdot features enable vault --persist  # Enable vault support
+blackdot features disable drift_check     # Turn off drift checking
 
 # Apply presets for quick setup
-dotfiles features preset minimal          # Just shell (fastest)
-dotfiles features preset developer        # vault, aws_helpers, git_hooks, modern_cli
-dotfiles features preset claude           # Claude Code optimized
-dotfiles features preset full --persist   # Everything, saved to config
+blackdot features preset minimal          # Just shell (fastest)
+blackdot features preset developer        # vault, aws_helpers, git_hooks, modern_cli
+blackdot features preset claude           # Claude Code optimized
+blackdot features preset full --persist   # Everything, saved to config
 ```
 
 **Enable features later if you change your mind:**
 
 ```bash
 # Started with --minimal? Add vault later:
-dotfiles setup                    # Run wizard, select vault backend
+blackdot setup                    # Run wizard, select vault backend
 
 # Want portable sessions now?
 sudo ln -sfn ~/workspace /workspace  # Or use WORKSPACE_TARGET=~/code for custom location
 
 # Install missing packages:
-dotfiles packages --install       # Uses Brewfile
+blackdot packages --install       # Uses Brewfile
 
 # Setup templates:
-dotfiles template init            # Configure machine variables
-dotfiles template render          # Generate configs
+blackdot template init            # Configure machine variables
+blackdot template render          # Generate configs
 ```
 
 **Use in offline/air-gapped environments:**
@@ -344,7 +344,7 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull   # No drift check (for CI/autom
 
 - **Hook System** – 19 lifecycle hooks for custom behavior (vault sync, shell init, doctor checks)
 - **Multi-Vault Backend** – Bitwarden, 1Password, or pass with unified API
-- **Self-Healing** – `dotfiles doctor --fix` repairs permissions and symlinks
+- **Self-Healing** – `blackdot doctor --fix` repairs permissions and symlinks
 - **Machine Templates** – Generate machine-specific configs from templates
 - **Adaptive CLI** – Help and tab completion adjust based on enabled features
 
@@ -361,9 +361,9 @@ DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull   # No drift check (for CI/autom
 <summary><b>Feature Registry</b> - Central control plane for all functionality</summary>
 
 ```bash
-dotfiles features              # List all features with status
-dotfiles features enable X     # Enable a feature
-dotfiles features preset Y     # Apply preset (minimal/developer/claude/full)
+blackdot features              # List all features with status
+blackdot features enable X     # Enable a feature
+blackdot features preset Y     # Apply preset (minimal/developer/claude/full)
 ```
 
 The Feature Registry (`lib/_features.sh`) controls what's enabled/disabled across the system. Features can depend on other features (e.g., `claude_integration` requires `workspace_symlink`). Dependencies are resolved automatically.
@@ -382,16 +382,16 @@ The Feature Registry (`lib/_features.sh`) controls what's enabled/disabled acros
 <summary><b>Configuration Layers</b> - 5-layer priority hierarchy for settings</summary>
 
 ```bash
-dotfiles config layers         # Show all config with sources
-dotfiles config get vault.backend
+blackdot config layers         # Show all config with sources
+blackdot config get vault.backend
 ```
 
 Settings resolve through 5 layers (highest to lowest priority):
 
 1. **Environment** - `$DOTFILES_*` variables (CI/CD, temporary overrides)
 2. **Project** - `.dotfiles.local` in current directory
-3. **Machine** - `~/.config/dotfiles/machine.json` (per-machine settings)
-4. **User** - `~/.config/dotfiles/config.json` (user preferences)
+3. **Machine** - `~/.config/blackdot/machine.json` (per-machine settings)
+4. **User** - `~/.config/blackdot/config.json` (user preferences)
 5. **Defaults** - Built-in fallbacks
 
 This allows machine-specific overrides without editing the main config, project-level settings for repositories, and environment-based CI/CD configuration.
@@ -402,8 +402,8 @@ This allows machine-specific overrides without editing the main config, project-
 <summary><b>Claude Code Integration</b> - Portable AI-assisted development</summary>
 
 ```bash
-dotfiles setup     # Step 6: Claude Code integration
-dotfiles doctor    # Validates Claude setup
+blackdot setup     # Step 6: Claude Code integration
+blackdot doctor    # Validates Claude setup
 ```
 
 **Portable sessions:** `/workspace` symlink provides consistent paths across machines, so Claude Code conversations continue seamlessly between macOS, Linux, and WSL2.
@@ -420,9 +420,9 @@ dotfiles doctor    # Validates Claude setup
 <summary><b>Hook System</b> - Custom behavior at lifecycle points</summary>
 
 ```bash
-dotfiles hook list              # Show all available hook points
-dotfiles hook list post_vault_pull  # Show hooks for specific point
-dotfiles hook test post_vault_pull  # Dry-run hooks
+blackdot hook list              # Show all available hook points
+blackdot hook list post_vault_pull  # Show hooks for specific point
+blackdot hook test post_vault_pull  # Dry-run hooks
 ```
 
 **19 lifecycle hooks** let you inject custom scripts at key moments:
@@ -436,12 +436,12 @@ dotfiles hook test post_vault_pull  # Dry-run hooks
 
 **Creating a hook:**
 ```bash
-mkdir -p ~/.config/dotfiles/hooks/post_vault_pull
-cat > ~/.config/dotfiles/hooks/post_vault_pull/10-ssh-agent.sh << 'EOF'
+mkdir -p ~/.config/blackdot/hooks/post_vault_pull
+cat > ~/.config/blackdot/hooks/post_vault_pull/10-ssh-agent.sh << 'EOF'
 #!/bin/bash
 ssh-add ~/.ssh/id_ed25519 2>/dev/null
 EOF
-chmod +x ~/.config/dotfiles/hooks/post_vault_pull/10-ssh-agent.sh
+chmod +x ~/.config/blackdot/hooks/post_vault_pull/10-ssh-agent.sh
 ```
 
 Hooks run in numeric order (10-*, 20-*, etc.). [Full documentation](docs/hooks.md)
@@ -481,7 +481,7 @@ Different paths = different sessions = lost conversation history.
 <summary><b>Interactive Setup Wizard</b> - One command, complete setup</summary>
 
 ```bash
-dotfiles setup  # Guides you through everything
+blackdot setup  # Guides you through everything
 ```
 
 Auto-detects your platform (macOS, Linux, WSL2), detects available vault CLIs (Bitwarden, 1Password, pass), prompts you to choose. Option to skip vault entirely for minimal setups. One command handles bootstrap, vault selection, secret restoration, and health validation. Progress is saved—resume anytime if interrupted.
@@ -495,7 +495,7 @@ Auto-detects your platform (macOS, Linux, WSL2), detects available vault CLIs (B
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
-**State persistence:** If interrupted, just run `dotfiles setup` again—it picks up where you left off.
+**State persistence:** If interrupted, just run `blackdot setup` again—it picks up where you left off.
 
 </details>
 
@@ -503,8 +503,8 @@ Auto-detects your platform (macOS, Linux, WSL2), detects available vault CLIs (B
 <summary><b>Smart Secrets Onboarding</b> - Auto-discovery & guided vault setup</summary>
 
 ```bash
-dotfiles vault setup       # Configure vault backend
-dotfiles vault scan   # Auto-detect existing secrets
+blackdot vault setup       # Configure vault backend
+blackdot vault scan   # Auto-detect existing secrets
 ```
 
 **Auto-Discovery** - Automatically finds your existing secrets:
@@ -516,7 +516,7 @@ dotfiles vault scan   # Auto-detect existing secrets
 - Supports custom paths: `--ssh-path` and `--config-path` options
 
 **Manual Setup** - For non-standard configurations:
-- Copy example: `cp vault/vault-items.example.json ~/.config/dotfiles/vault-items.json`
+- Copy example: `cp vault/vault-items.example.json ~/.config/blackdot/vault-items.json`
 - Edit to match your setup
 - Validates schema before sync
 
@@ -528,11 +528,11 @@ Perfect for users with existing credentials who want to sync them across machine
 <summary><b>Multi-Vault Secrets</b> - Choose your vault backend</summary>
 
 ```bash
-export DOTFILES_VAULT_BACKEND=bitwarden  # or 1password, pass
-dotfiles sync              # Smart bidirectional sync (auto push/pull)
-dotfiles vault push --all  # Push local secrets to vault
-dotfiles vault pull        # Pull secrets on new machine
-dotfiles vault validate    # Validate configuration schema (v3.0+)
+export BLACKDOT_VAULT_BACKEND=bitwarden  # or 1password, pass
+blackdot sync              # Smart bidirectional sync (auto push/pull)
+blackdot vault push --all  # Push local secrets to vault
+blackdot vault pull        # Pull secrets on new machine
+blackdot vault validate    # Validate configuration schema (v3.0+)
 ```
 
 Unified API across Bitwarden, 1Password, and pass. Syncs SSH keys, AWS credentials, Git config, environment secrets. **Smart bidirectional sync** automatically detects which direction each item needs (local→vault or vault→local). Drift detection warns before overwrites.
@@ -556,11 +556,11 @@ All credential types are stored as vault items (secure notes):
 <summary><b>Age Encryption</b> - Encrypt non-vault secrets</summary>
 
 ```bash
-dotfiles encrypt init              # Generate age key pair
-dotfiles encrypt <file>            # Encrypt a file
-dotfiles encrypt decrypt <file>    # Decrypt a file
-dotfiles encrypt edit <file>       # Decrypt, edit, re-encrypt
-dotfiles encrypt push-key          # Backup key to vault
+blackdot encrypt init              # Generate age key pair
+blackdot encrypt <file>            # Encrypt a file
+blackdot encrypt decrypt <file>    # Decrypt a file
+blackdot encrypt edit <file>       # Decrypt, edit, re-encrypt
+blackdot encrypt push-key          # Backup key to vault
 ```
 
 **The problem:** Vault stores secrets remotely, but some files need to be committed to git (template variables, local configs with emails/signing keys).
@@ -573,13 +573,13 @@ dotfiles encrypt push-key          # Backup key to vault
 **Workflow:**
 ```bash
 # Encrypt and commit
-dotfiles encrypt templates/_variables.local.sh
+blackdot encrypt templates/_variables.local.sh
 git add templates/_variables.local.sh.age
 git commit -m "Add encrypted template vars"
 
 # On new machine
-dotfiles vault pull          # Restores age key via hook
-dotfiles template render     # Auto-decrypts via hook
+blackdot vault pull          # Restores age key via hook
+blackdot template render     # Auto-decrypts via hook
 ```
 
 **Key insight:** Vault is for secrets that live remotely. Encryption is for secrets that live in git.
@@ -612,14 +612,14 @@ The `/workspace` symlink creates identical paths across platforms. Claude Code s
 <summary><b>Self-Healing Configuration</b> - Never breaks</summary>
 
 ```bash
-dotfiles doctor           # Validate everything
-dotfiles doctor --fix     # Auto-repair issues
-dotfiles drift            # Check local vs vault
+blackdot doctor           # Validate everything
+blackdot doctor --fix     # Auto-repair issues
+blackdot drift            # Check local vs vault
 ```
 
 Validates symlinks, SSH keys (permissions 600/644), AWS config, vault status, shell setup. Auto-repair fixes permissions, broken symlinks, missing dependencies. Drift detection catches unsync'd changes before switching machines.
 
-**Metrics collection:** Tracks health over time in `~/.dotfiles-metrics.jsonl` for trend analysis.
+**Metrics collection:** Tracks health over time in `~/.blackdot-metrics.jsonl` for trend analysis.
 
 </details>
 
@@ -665,9 +665,9 @@ CI runs shellcheck, zsh validation, all tests on every push. Code coverage via k
 <summary><b>Machine-Specific Templates</b> - One config, many machines</summary>
 
 ```bash
-dotfiles template init    # Setup machine variables
-dotfiles template render  # Generate configs from templates
-dotfiles template link    # Symlink generated configs to destinations
+blackdot template init    # Setup machine variables
+blackdot template render  # Generate configs from templates
+blackdot template link    # Symlink generated configs to destinations
 ```
 
 **The Problem:** You have work laptop, personal desktop, home server. Each needs different:
@@ -753,19 +753,19 @@ export AWS_PROFILE="personal"
 
 ```bash
 # 1. Initialize template system (creates _variables.local.sh)
-dotfiles template init
+blackdot template init
 
 # 2. Edit your variables
-vim ~/.config/dotfiles/templates/_variables.local.sh
+vim ~/.config/blackdot/templates/_variables.local.sh
 
 # 3. Generate configs from templates
-dotfiles template render
+blackdot template render
 
 # 4. Link generated configs to their destinations
-dotfiles template link
+blackdot template link
 
 # 5. Check for stale templates (template newer than generated file)
-dotfiles doctor  # Shows: "3 templates need re-rendering"
+blackdot doctor  # Shows: "3 templates need re-rendering"
 ```
 
 ### Auto-Detected Variables
@@ -790,7 +790,7 @@ Available in all templates without manual definition:
 
 **Team Onboarding:**
 - New developer clones dotfiles
-- Runs `dotfiles template init` with their name/email
+- Runs `blackdot template init` with their name/email
 - All configs generate with their info
 
 [Complete Template Guide →](docs/templates.md)
@@ -803,7 +803,7 @@ Available in all templates without manual definition:
 ```bash
 # Switch Claude contexts while keeping secrets synced
 dotclaude activate client-work
-dotfiles vault pull     # Secrets follow your profile
+blackdot vault pull     # Secrets follow your profile
 
 # Profiles managed by dotclaude, secrets by dotfiles
 # Both use /workspace for portability
@@ -819,12 +819,12 @@ Seamless integration with [dotclaude](https://github.com/blackwell-systems/dotcl
 <summary><b>Backup & Restore</b> - Time-travel for your dotfiles</summary>
 
 ```bash
-dotfiles backup           # Create timestamped backup
-dotfiles backup --list    # Show available backups
-dotfiles backup restore   # Interactive restore
+blackdot backup           # Create timestamped backup
+blackdot backup --list    # Show available backups
+blackdot backup restore   # Interactive restore
 ```
 
-Timestamped tar.gz archives in `~/.dotfiles-backups/`. Includes all dotfiles, configs, optional secrets. Interactive restore with preview. Auto-cleanup keeps only 10 most recent.
+Timestamped tar.gz archives in `~/.blackdot-backups/`. Includes all dotfiles, configs, optional secrets. Interactive restore with preview. Auto-cleanup keeps only 10 most recent.
 
 </details>
 
@@ -834,13 +834,13 @@ Timestamped tar.gz archives in `~/.dotfiles-backups/`. Includes all dotfiles, co
 <summary><b>Unified CLI Interface</b> - Everything under one command</summary>
 
 ```bash
-dotfiles status    # Visual dashboard
-dotfiles doctor    # Health check
-dotfiles vault     # Secret management
-dotfiles template  # Config generation
-dotfiles backup    # Backup/restore
-dotfiles packages  # Package management
-dotfiles help      # Full command list
+blackdot status    # Visual dashboard
+blackdot doctor    # Health check
+blackdot vault     # Secret management
+blackdot template  # Config generation
+blackdot backup    # Backup/restore
+blackdot packages  # Package management
+blackdot help      # Full command list
 ```
 
 Consistent flags across all subcommands. Full tab completion for commands, flags, and context-aware arguments.
@@ -885,8 +885,8 @@ awsassume     # Assume role
 <summary><b>Package Management</b> - Keep tools in sync</summary>
 
 ```bash
-dotfiles packages            # Check Brewfile status
-dotfiles packages --install  # Install missing packages
+blackdot packages            # Check Brewfile status
+blackdot packages --install  # Install missing packages
 ```
 
 Shows which Brewfile packages are installed, missing, or outdated. Works across macOS (Homebrew) and Linux (Linuxbrew). Unified Brewfile means same tools everywhere. Supports conditional packages (macOS-only casks, Linux-only tools).
@@ -926,10 +926,10 @@ All tools include shell completions and helper functions. See [Developer Tools D
 
 Enable individual tools:
 ```bash
-dotfiles features enable rust_tools
-dotfiles features enable python_tools
+blackdot features enable rust_tools
+blackdot features enable python_tools
 # Or use presets:
-dotfiles features preset developer  # Enables all dev tools
+blackdot features preset developer  # Enables all dev tools
 ```
 
 </details>
@@ -971,11 +971,11 @@ Platform detection auto-adapts (macOS uses `pbcopy`, Linux uses `xclip`/`wl-copy
 <summary><b>Metrics & Observability</b> - Track health over time</summary>
 
 ```bash
-dotfiles doctor    # Auto-collects metrics
-dotfiles metrics   # Visualize trends
+blackdot doctor    # Auto-collects metrics
+blackdot metrics   # Visualize trends
 ```
 
-Writes to `~/.dotfiles-metrics.jsonl`: timestamp, hostname, OS, errors, warnings, fixes, health score (0-100), git branch/commit. ASCII graphs show health trends. Track average score, total errors/warnings, perfect run percentage.
+Writes to `~/.blackdot-metrics.jsonl`: timestamp, hostname, OS, errors, warnings, fixes, health score (0-100), git branch/commit. ASCII graphs show health trends. Track average score, total errors/warnings, perfect run percentage.
 
 </details>
 
@@ -983,9 +983,9 @@ Writes to `~/.dotfiles-metrics.jsonl`: timestamp, hostname, OS, errors, warnings
 <summary><b>Clean Uninstall</b> - Leave no trace</summary>
 
 ```bash
-dotfiles uninstall                # Full removal
-dotfiles uninstall --dry-run      # Preview only
-dotfiles uninstall --keep-secrets # Keep SSH/AWS/Git
+blackdot uninstall                # Full removal
+blackdot uninstall --dry-run      # Preview only
+blackdot uninstall --keep-secrets # Keep SSH/AWS/Git
 ```
 
 Removes all dotfiles, symlinks, configurations. Interactive confirmation prevents accidents. Dry-run shows exactly what would be deleted.
@@ -1039,7 +1039,7 @@ Bootstrap scripts check current state before changes. Already symlinked? Skip. A
 
 **Optional (for vault features only):**
 - **Vault CLI** - Bitwarden (`bw`), 1Password (`op`), or pass for automated secret sync
-  - Skip with `--minimal` flag (or just don't run `dotfiles vault` commands)
+  - Skip with `--minimal` flag (or just don't run `blackdot vault` commands)
   - Without vault: manually configure `~/.ssh`, `~/.aws`, `~/.gitconfig`
 
 **Optional (for Claude Code portable sessions):**
@@ -1047,12 +1047,12 @@ Bootstrap scripts check current state before changes. Already symlinked? Skip. A
   - Skip with `SKIP_CLAUDE_SETUP=true`
 
 **Optional (Brewfile package tiers):**
-The `dotfiles setup` wizard presents three package tiers interactively:
+The `blackdot setup` wizard presents three package tiers interactively:
   - `minimal` - Essential tools only (18 packages, ~2 min)
   - `enhanced` - Modern CLI tools without containers (43 packages, ~5 min) **← RECOMMENDED**
   - `full` - Everything including Docker/Kubernetes (61 packages, ~10 min) [default]
 
-Your selection is saved in `~/.config/dotfiles/config.json` and reused if you re-run setup.
+Your selection is saved in `~/.config/blackdot/config.json` and reused if you re-run setup.
 
 **Advanced users:** Set `BREWFILE_TIER` environment variable to bypass interactive selection.
 
@@ -1065,10 +1065,10 @@ To clone via SSH (recommended), you'll also want an SSH key configured with GitH
 ### One-Line Install (Recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash && dotfiles setup
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash && blackdot setup
 ```
 
-The install script clones the repository and runs bootstrap. Then `dotfiles setup` guides you through:
+The install script clones the repository and runs bootstrap. Then `blackdot setup` guides you through:
 - Platform detection and configuration
 - Vault selection (Bitwarden, 1Password, pass, or skip)
 - Secret restoration (SSH keys, AWS, Git config)
@@ -1081,29 +1081,29 @@ Progress is saved—resume anytime if interrupted.
 Shell config only, no secrets integration:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash -s -- --minimal
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash -s -- --minimal
 ```
 
-**You still get:** Zsh + Powerlevel10k, all CLI tools (eza, fzf, ripgrep, etc.), aliases, functions, and the `dotfiles` command.
+**You still get:** Zsh + Powerlevel10k, all CLI tools (eza, fzf, ripgrep, etc.), aliases, functions, and the `blackdot` command.
 
-**To enable vault later:** Run `dotfiles setup`
+**To enable vault later:** Run `blackdot setup`
 
 ### Manual Clone
 
 ```bash
 # 1. Clone (to your workspace directory - defaults to ~/workspace)
-git clone git@github.com:blackwell-systems/dotfiles.git ~/workspace/dotfiles
+git clone git@github.com:blackwell-systems/blackdot.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 
 # Or use a custom workspace location
-WORKSPACE_TARGET=~/code git clone git@github.com:blackwell-systems/dotfiles.git ~/code/dotfiles
+WORKSPACE_TARGET=~/code git clone git@github.com:blackwell-systems/blackdot.git ~/code/dotfiles
 
 # 2. Run platform bootstrap
 ./bootstrap/bootstrap-mac.sh   # macOS
 ./bootstrap/bootstrap-linux.sh # Linux/WSL
 
 # 3. Run interactive setup wizard
-dotfiles setup
+blackdot setup
 ```
 
 ### Windows (PowerShell)
@@ -1112,7 +1112,7 @@ Native Windows users should use the PowerShell module:
 
 ```powershell
 # 1. Clone the repository
-git clone https://github.com/blackwell-systems/dotfiles.git $HOME\workspace\dotfiles
+git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\dotfiles
 
 # 2. Install PowerShell module
 cd $HOME\workspace\dotfiles\powershell
@@ -1288,7 +1288,7 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 ### Update Dotfiles
 
 ```bash
-dotfiles upgrade  # Pull latest, run bootstrap, check health
+blackdot upgrade  # Pull latest, run bootstrap, check health
 ```
 
 ### Sync Secrets
@@ -1296,10 +1296,10 @@ dotfiles upgrade  # Pull latest, run bootstrap, check health
 ```bash
 # Update SSH config locally, then sync to vault
 vim ~/.ssh/config
-dotfiles vault push SSH-Config
+blackdot vault push SSH-Config
 
 # View what would be synced (dry run)
-dotfiles vault push --dry-run --all
+blackdot vault push --dry-run --all
 ```
 
 ### Add New SSH Key
@@ -1309,14 +1309,14 @@ dotfiles vault push --dry-run --all
 ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey
 
 # 2. Add to vault config
-vim ~/.config/dotfiles/vault-items.json
+vim ~/.config/blackdot/vault-items.json
 
 # 3. Sync to vault
-dotfiles vault push SSH-GitHub-NewKey
+blackdot vault push SSH-GitHub-NewKey
 
 # 4. Update SSH config
 vim ~/.ssh/config
-dotfiles vault push SSH-Config
+blackdot vault push SSH-Config
 ```
 
 See [Maintenance Checklists](docs/README-FULL.md#maintenance-checklists) for more.
@@ -1332,16 +1332,16 @@ See [Maintenance Checklists](docs/README-FULL.md#maintenance-checklists) for mor
 
 ```bash
 # Run diagnostics
-dotfiles doctor          # Check all systems
-dotfiles doctor --fix    # Auto-repair issues
-dotfiles status          # Visual dashboard
+blackdot doctor          # Check all systems
+blackdot doctor --fix    # Auto-repair issues
+blackdot status          # Visual dashboard
 ```
 
 ### Common Issues
 
 **SSH keys not working:**
 ```bash
-dotfiles doctor --fix    # Fix permissions
+blackdot doctor --fix    # Fix permissions
 ssh-add -l               # Verify keys loaded
 ssh -T git@github.com    # Test connection
 ```
@@ -1386,7 +1386,7 @@ See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community guidelines.
 - Pre-commit hooks prevent secret leaks
 - Regular security audits (see [SECURITY.md](SECURITY.md))
 
-**Report vulnerabilities:** Use [GitHub Security Advisories](https://github.com/blackwell-systems/dotfiles/security/advisories)
+**Report vulnerabilities:** Use [GitHub Security Advisories](https://github.com/blackwell-systems/blackdot/security/advisories)
 
 ---
 
@@ -1429,4 +1429,4 @@ Apache License 2.0 - see [LICENSE](LICENSE) for details.
 
 ---
 
-**Questions?** Open an [issue](https://github.com/blackwell-systems/dotfiles/issues) or check the [full documentation](docs/README-FULL.md).
+**Questions?** Open an [issue](https://github.com/blackwell-systems/blackdot/issues) or check the [full documentation](docs/README-FULL.md).

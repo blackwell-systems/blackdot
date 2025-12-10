@@ -22,7 +22,7 @@ We provide security updates for the latest release only:
 If you discover a security vulnerability, please help us responsibly:
 
 **Preferred Method: GitHub Security Advisories**
-1. Go to https://github.com/blackwell-systems/dotfiles/security/advisories
+1. Go to https://github.com/blackwell-systems/blackdot/security/advisories
 2. Click "Report a vulnerability"
 3. Provide detailed information about the issue
 
@@ -99,10 +99,10 @@ The health check validates file permissions:
 
 ```bash
 # Check permissions
-dotfiles doctor
+blackdot doctor
 
 # Auto-fix permission issues
-dotfiles doctor --fix
+blackdot doctor --fix
 ```
 
 Expected permissions:
@@ -197,7 +197,7 @@ When contributing code:
 ## Questions?
 
 For general security questions (not vulnerabilities):
-- Open a [GitHub Discussion](https://github.com/blackwell-systems/dotfiles/discussions)
+- Open a [GitHub Discussion](https://github.com/blackwell-systems/blackdot/discussions)
 - Review the [Security Maintenance](README.md#security-maintenance) section in README
 
 ## Contact

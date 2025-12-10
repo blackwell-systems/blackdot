@@ -37,7 +37,7 @@ The Hook System integrates with the **Feature Registry** (`lib/_features.sh`) wh
 - The hook system registers as the `hooks` feature (optional category)
 - Vault hooks only run if `vault` feature is enabled
 - Hooks can call `feature_enabled()` to conditionally execute
-- `dotfiles features disable hooks` disables all hook execution
+- `blackdot features disable hooks` disables all hook execution
 
 ---
 
@@ -60,7 +60,7 @@ The Hook System integrates with the **Feature Registry** (`lib/_features.sh`) wh
 | `post_install` | After `install.sh` completes | Run custom setup |
 | `pre_bootstrap` | Before bootstrap script | Check prerequisites |
 | `post_bootstrap` | After bootstrap completes | Install extra packages |
-| `pre_upgrade` | Before `dotfiles upgrade` | Backup config |
+| `pre_upgrade` | Before `blackdot upgrade` | Backup config |
 | `post_upgrade` | After upgrade completes | Run migrations |
 
 ### Vault Hooks
@@ -100,10 +100,10 @@ The Hook System integrates with the **Feature Registry** (`lib/_features.sh`) wh
 
 ## Hook Configuration
 
-### File-based Registration (`~/.config/dotfiles/hooks/`)
+### File-based Registration (`~/.config/blackdot/hooks/`)
 
 ```
-~/.config/dotfiles/hooks/
+~/.config/blackdot/hooks/
 ├── post_vault_pull/
 │   ├── 10-ssh-add.sh
 │   ├── 20-gpg-import.sh
@@ -116,7 +116,7 @@ The Hook System integrates with the **Feature Registry** (`lib/_features.sh`) wh
 
 Scripts are executed in alphabetical order (use numeric prefixes).
 
-### JSON Configuration (`~/.config/dotfiles/hooks.json`)
+### JSON Configuration (`~/.config/blackdot/hooks.json`)
 
 ```json
 {
@@ -130,7 +130,7 @@ Scripts are executed in alphabetical order (use numeric prefixes).
       },
       {
         "name": "notify",
-        "script": "~/.config/dotfiles/hooks/notify.sh",
+        "script": "~/.config/blackdot/hooks/notify.sh",
         "enabled": true
       }
     ],
@@ -178,8 +178,8 @@ load_work_config() {
 typeset -gA HOOKS  # HOOKS[point]="func1 func2 func3"
 
 # Configuration
-HOOKS_DIR="${HOOKS_DIR:-$HOME/.config/dotfiles/hooks}"
-HOOKS_CONFIG="${HOOKS_CONFIG:-$HOME/.config/dotfiles/hooks.json}"
+HOOKS_DIR="${HOOKS_DIR:-$HOME/.config/blackdot/hooks}"
+HOOKS_CONFIG="${HOOKS_CONFIG:-$HOME/.config/blackdot/hooks.json}"
 HOOKS_FAIL_FAST="${HOOKS_FAIL_FAST:-false}"
 HOOKS_VERBOSE="${HOOKS_VERBOSE:-false}"
 HOOKS_TIMEOUT="${HOOKS_TIMEOUT:-30}"
@@ -436,11 +436,11 @@ hook_init() {
 
 ---
 
-## CLI Command (`bin/dotfiles-hook`)
+## CLI Command (`bin/blackdot-hook`)
 
 ```bash
 #!/usr/bin/env bash
-# bin/dotfiles-hook - Hook management CLI
+# bin/blackdot-hook - Hook management CLI
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -502,7 +502,7 @@ cmd_add() {
         exit 1
     fi
 
-    local hooks_dir="$HOME/.config/dotfiles/hooks/$point"
+    local hooks_dir="$HOME/.config/blackdot/hooks/$point"
     mkdir -p "$hooks_dir"
 
     local basename=$(basename "$script")
@@ -516,7 +516,7 @@ cmd_remove() {
     local point="${1:?Hook point required}"
     local name="${2:?Hook name required}"
 
-    local hook_path="$HOME/.config/dotfiles/hooks/$point/$name"
+    local hook_path="$HOME/.config/blackdot/hooks/$point/$name"
     if [[ -f "$hook_path" ]]; then
         rm "$hook_path"
         pass "Removed hook: $hook_path"
@@ -564,7 +564,7 @@ esac
 
 ```bash
 # bootstrap-mac.sh
-source "$DOTFILES_DIR/lib/_hooks.sh"
+source "$BLACKDOT_DIR/lib/_hooks.sh"
 
 hook_run "pre_bootstrap"
 
@@ -577,7 +577,7 @@ hook_run "post_bootstrap"
 
 ```bash
 # vault/restore-secrets.sh
-source "$DOTFILES_DIR/lib/_hooks.sh"
+source "$BLACKDOT_DIR/lib/_hooks.sh"
 
 hook_run "pre_vault_pull"
 
@@ -590,7 +590,7 @@ hook_run "post_vault_pull"
 
 ```zsh
 # zsh/zsh.d/99-hooks.zsh
-source "${DOTFILES_DIR}/lib/_hooks.sh"
+source "${BLACKDOT_DIR}/lib/_hooks.sh"
 hook_init
 
 # Run shell_init hooks
@@ -766,12 +766,12 @@ enabled=$(jq -r '.enabled' hooks.json)
 Allow hooks config from multiple sources (like config_layers):
 ```bash
 # Priority: env > project > user
-# Project hooks in .dotfiles.json
-# User hooks in ~/.config/dotfiles/hooks.json
+# Project hooks in .blackdot.json
+# User hooks in ~/.config/blackdot/hooks.json
 
 _hooks_get_config() {
     local project_hooks=""
-    [[ -f .dotfiles.json ]] && project_hooks=$(jq -r '.hooks // empty' .dotfiles.json)
+    [[ -f .blackdot.json ]] && project_hooks=$(jq -r '.hooks // empty' .blackdot.json)
 
     # Merge project + user hooks
 }
@@ -815,7 +815,7 @@ All hook tests need zsh:
 Hook settings should respect config layer precedence:
 ```bash
 # Allow project-level hook overrides
-# .dotfiles.json in repo can add project-specific hooks
+# .blackdot.json in repo can add project-specific hooks
 {
   "hooks": {
     "post_install": [
@@ -861,18 +861,18 @@ The following existing functionality in the codebase would be brought under hook
 
 | Current Location | Function | Hook Point |
 |-----------------|----------|------------|
-| `bin/dotfiles-setup:328` | Create symlinks | `setup_symlinks` |
-| `bin/dotfiles-setup:662` | `chmod 600` vault session | `post_setup_vault` |
-| `bin/dotfiles-setup:947` | Template init | `post_setup` |
+| `bin/blackdot-setup:328` | Create symlinks | `setup_symlinks` |
+| `bin/blackdot-setup:662` | `chmod 600` vault session | `post_setup_vault` |
+| `bin/blackdot-setup:947` | Template init | `post_setup` |
 
-**Migration benefit:** Project-specific setup hooks via `.dotfiles.json`.
+**Migration benefit:** Project-specific setup hooks via `.blackdot.json`.
 
 ### Template Hooks
 
 | Current Location | Function | Hook Point |
 |-----------------|----------|------------|
 | `lib/_templates.sh` | Render templates | `template_render` |
-| `bin/dotfiles-template:link` | Create symlinks | `post_template_render` |
+| `bin/blackdot-template:link` | Create symlinks | `post_template_render` |
 
 **Migration benefit:** Custom post-render hooks for file permissions, notifications.
 
@@ -880,7 +880,7 @@ The following existing functionality in the codebase would be brought under hook
 
 | Current Location | Function | Hook Point |
 |-----------------|----------|------------|
-| `bin/dotfiles-doctor:302,334` | Auto-fix permissions | `doctor_fix` |
+| `bin/blackdot-doctor:302,334` | Auto-fix permissions | `doctor_fix` |
 
 **Migration benefit:** Extensible auto-fix system with user-defined repairs.
 
@@ -902,7 +902,7 @@ These are already implemented as Claude Code native hooks and serve as the refer
 # vault/restore-ssh.sh:79
 chmod 600 "$priv_path"
 
-# Becomes a hook in ~/.config/dotfiles/hooks.json:
+# Becomes a hook in ~/.config/blackdot/hooks.json:
 {
   "post_vault_pull": [
     {

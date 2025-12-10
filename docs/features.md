@@ -18,16 +18,16 @@ The registry provides:
 
 ```bash
 # List all features and their status
-dotfiles features
+blackdot features
 
 # Enable a feature (runtime only)
-dotfiles features enable vault
+blackdot features enable vault
 
 # Enable and persist to config file
-dotfiles features enable vault --persist
+blackdot features enable vault --persist
 
 # Enable a preset (group of features)
-dotfiles features preset developer
+blackdot features preset developer
 
 # Check if a feature is enabled (for scripts)
 if dotfiles features check vault; then
@@ -87,33 +87,33 @@ Core features cannot be disabled—they're essential for the dotfiles system to 
 
 ```bash
 # List all features with status
-dotfiles features
-dotfiles features list
+blackdot features
+blackdot features list
 
 # Filter by category
-dotfiles features list core
-dotfiles features list optional
-dotfiles features list integration
+blackdot features list core
+blackdot features list optional
+blackdot features list integration
 
 # Show with dependencies
-dotfiles features list --all
+blackdot features list --all
 
 # Output as JSON (for scripting)
-dotfiles features list --json
+blackdot features list --json
 ```
 
 ### Enable/Disable Features
 
 ```bash
 # Enable at runtime (doesn't persist across shell sessions)
-dotfiles features enable vault
+blackdot features enable vault
 
 # Enable and save to config file
-dotfiles features enable vault --persist
+blackdot features enable vault --persist
 
 # Disable a feature
-dotfiles features disable vault
-dotfiles features disable vault --persist
+blackdot features disable vault
+blackdot features disable vault --persist
 ```
 
 ### Presets
@@ -122,11 +122,11 @@ Presets enable groups of related features:
 
 ```bash
 # List available presets
-dotfiles features preset --list
+blackdot features preset --list
 
 # Enable a preset
-dotfiles features preset developer
-dotfiles features preset developer --persist
+blackdot features preset developer
+blackdot features preset developer --persist
 ```
 
 **Available Presets:**
@@ -180,7 +180,7 @@ export DOTFILES_FEATURE_AWS_HELPERS=false
 
 ## Configuration File
 
-Features can be persisted in `~/.config/dotfiles/config.json`:
+Features can be persisted in `~/.config/blackdot/config.json`:
 
 ```json
 {
@@ -194,7 +194,7 @@ Features can be persisted in `~/.config/dotfiles/config.json`:
 }
 ```
 
-Use `dotfiles features enable <name> --persist` to update this file automatically.
+Use `blackdot features enable <name> --persist` to update this file automatically.
 
 ---
 
@@ -204,7 +204,7 @@ When checking if a feature is enabled, the system checks in this order (highest 
 
 1. **Runtime state** - `feature_enable`/`feature_disable` in current session
 2. **Environment variables** - `DOTFILES_FEATURE_*` or `SKIP_*` vars
-3. **Config file** - `~/.config/dotfiles/config.json`
+3. **Config file** - `~/.config/blackdot/config.json`
 4. **Registry defaults** - Built-in defaults in `lib/_features.sh`
 
 ---
@@ -217,7 +217,7 @@ Use feature guards to conditionally run code:
 
 ```bash
 #!/usr/bin/env zsh
-source "$DOTFILES_DIR/lib/_features.sh"
+source "$BLACKDOT_DIR/lib/_features.sh"
 
 # Skip if feature not enabled
 feature_guard "vault" || return 0
@@ -245,10 +245,10 @@ fi
 
 ```bash
 # Get all features as JSON
-dotfiles features list --json | jq '.vault.enabled'
+blackdot features list --json | jq '.vault.enabled'
 
 # Get specific feature status
-dotfiles features status vault
+blackdot features status vault
 ```
 
 ---
@@ -283,28 +283,28 @@ Format: `"default|description|category|dependencies"`
 curl -fsSL .../install.sh | bash -s -- --minimal
 
 # Later, enable only what you need
-dotfiles features enable vault --persist
-dotfiles features enable modern_cli --persist
+blackdot features enable vault --persist
+blackdot features enable modern_cli --persist
 ```
 
 ### Developer Workstation
 
 ```bash
 # Enable developer preset
-dotfiles features preset developer --persist
+blackdot features preset developer --persist
 
 # Check what's enabled
-dotfiles features
+blackdot features
 ```
 
 ### Claude Code User
 
 ```bash
 # Enable claude preset (includes workspace_symlink, vault, git_hooks)
-dotfiles features preset claude --persist
+blackdot features preset claude --persist
 
 # Verify
-dotfiles features list optional
+blackdot features list optional
 ```
 
 ### CI/CD Environment
@@ -315,7 +315,7 @@ export SKIP_WORKSPACE_SYMLINK=true
 export DOTFILES_SKIP_DRIFT_CHECK=1
 
 # Or use minimal preset
-dotfiles features preset minimal
+blackdot features preset minimal
 ```
 
 ---
@@ -325,14 +325,14 @@ dotfiles features preset minimal
 ### Feature Won't Enable
 
 1. Check if it's a core feature (cannot be disabled)
-2. Check if dependencies are met: `dotfiles features status <feature>`
+2. Check if dependencies are met: `blackdot features status <feature>`
 3. Check environment variables: `env | grep -E 'SKIP_|DOTFILES_FEATURE_'`
 
 ### Changes Don't Persist
 
 Use `--persist` flag:
 ```bash
-dotfiles features enable vault --persist
+blackdot features enable vault --persist
 ```
 
 ### Feature Enabled But Not Working
@@ -344,7 +344,7 @@ exec zsh
 
 Or source the feature registry:
 ```bash
-source "$DOTFILES_DIR/lib/_features.sh"
+source "$BLACKDOT_DIR/lib/_features.sh"
 ```
 
 ---
@@ -373,12 +373,12 @@ The Claude Code integration provides portable AI-assisted development across mac
 - **Multi-backend** – Works with Anthropic Max, AWS Bedrock, Google Vertex AI
 
 ```bash
-dotfiles setup   # Step 6: Claude Code integration
-dotfiles doctor  # Validates Claude setup
+blackdot setup   # Step 6: Claude Code integration
+blackdot doctor  # Validates Claude setup
 ```
 
 See [Claude Code + dotclaude](claude-code.md) for the full guide.
 
 ---
 
-**Questions?** See the [CLI Reference](cli-reference.md) or [open an issue](https://github.com/blackwell-systems/dotfiles/issues).
+**Questions?** See the [CLI Reference](cli-reference.md) or [open an issue](https://github.com/blackwell-systems/blackdot/issues).

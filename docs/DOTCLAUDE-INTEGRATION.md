@@ -68,7 +68,7 @@ flowchart TB
 Both systems installed:
 ```bash
 # Install dotfiles first
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 
 # Then install dotclaude
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh | bash
@@ -92,7 +92,7 @@ No manual configuration needed. Both systems coordinate automatically.
 
 ```bash
 # Check dotfiles setup
-dotfiles doctor
+blackdot doctor
 
 # Check dotclaude setup
 dotclaude show
@@ -114,7 +114,7 @@ dotclaude create client-acme    # Acme Corp project
 dotclaude create client-beta    # Beta Inc project
 
 # Store client-specific secrets in vault
-dotfiles vault create          # Interactive prompts
+blackdot vault create          # Interactive prompts
 # Item: acme-ssh-key
 # Item: acme-aws-creds
 # Item: beta-ssh-key
@@ -122,11 +122,11 @@ dotfiles vault create          # Interactive prompts
 
 # Switch contexts
 dotclaude activate client-acme
-dotfiles vault pull acme-*   # Restore Acme secrets
+blackdot vault pull acme-*   # Restore Acme secrets
 
 # Later: switch to Beta
 dotclaude activate client-beta
-dotfiles vault pull beta-*   # Restore Beta secrets
+blackdot vault pull beta-*   # Restore Beta secrets
 ```
 
 **Result**: Profile standards change, secrets change, both synced across machines.
@@ -143,7 +143,7 @@ dotclaude activate oss-projects
 # - Community-friendly tone
 
 # OSS secrets (dotfiles)
-dotfiles vault pull oss-*
+blackdot vault pull oss-*
 # - Personal SSH key
 # - Personal AWS (for demos)
 # - GitHub personal account Git config
@@ -155,7 +155,7 @@ dotclaude activate work-employer
 # - Corporate tone
 
 # Work secrets (dotfiles)
-dotfiles vault pull work-*
+blackdot vault pull work-*
 # - Corporate SSH key
 # - Corporate AWS
 # - GitLab work account Git config
@@ -170,13 +170,13 @@ dotfiles vault pull work-*
 ```bash
 # On macOS
 dotclaude activate my-project
-dotfiles vault pull
+blackdot vault pull
 cd /workspace/my-project && claude
 # ... work, exit ...
 
 # In Lima VM
 dotclaude activate my-project  # Same profile name
-dotfiles vault pull         # Same secrets
+blackdot vault pull         # Same secrets
 cd /workspace/my-project && claude
 # SAME conversation continues!
 ```
@@ -189,7 +189,7 @@ cd /workspace/my-project && claude
 
 ```bash
 # 1. Bootstrap dotfiles (handles /workspace, vault, shell)
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 
 # 2. Install dotclaude
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/install.sh | bash
@@ -199,7 +199,7 @@ cd ~/workspace/dotclaude-profiles
 git pull
 
 # 4. Restore secrets
-dotfiles vault pull
+blackdot vault pull
 
 # 5. Activate profile
 dotclaude activate my-preferred-profile
@@ -231,11 +231,11 @@ cd /workspace/oss/contrib && claude
 ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_newkey
 
 # Update vault
-dotfiles vault push ssh
+blackdot vault push ssh
 
 # Propagate to other machines
 # (on other machine)
-dotfiles vault pull ssh
+blackdot vault pull ssh
 ```
 
 ## Configuration
@@ -290,10 +290,10 @@ The systems coordinate via:
 **Solution**: dotclaude only manages Claude config. Secrets are separate:
 ```bash
 dotclaude activate new-profile    # Changes Claude context
-dotfiles vault pull new-*      # Manually restore new secrets
+blackdot vault pull new-*      # Manually restore new secrets
 ```
 
-**Future enhancement**: Hook in dotclaude to auto-run `dotfiles vault pull`
+**Future enhancement**: Hook in dotclaude to auto-run `blackdot vault pull`
 
 ### Issue: /workspace Paths Don't Work
 
@@ -312,20 +312,20 @@ cd ~/workspace/dotfiles
 
 **Solution**: dotclaude takes precedence. dotfiles will detect and skip:
 ```bash
-dotfiles doctor
+blackdot doctor
 # ~/.claude managed by dotclaude: OK
 ```
 
 If you uninstall dotclaude, dotfiles can take over:
 ```bash
 dotclaude uninstall
-dotfiles doctor --fix
+blackdot doctor --fix
 # ~/.claude now managed by dotfiles
 ```
 
 ### Issue: Vault Items Not Found After Profile Switch
 
-**Symptom**: `dotfiles vault pull` fails after switching profile
+**Symptom**: `blackdot vault pull` fails after switching profile
 
 **Cause**: Vault item names don't match profile names
 
@@ -337,7 +337,7 @@ profile-name-aws-creds
 profile-name-git-config
 
 # Restore by pattern:
-dotfiles vault pull "profile-name-*"
+blackdot vault pull "profile-name-*"
 ```
 
 ## Advanced Integration
@@ -368,7 +368,7 @@ Both systems can use environment variables:
 ```bash
 # In ~/.zshrc (managed by dotfiles)
 export DOTCLAUDE_PROFILE_DIR="$HOME/workspace/dotclaude-profiles"
-export DOTFILES_VAULT_BACKEND="bitwarden"
+export BLACKDOT_VAULT_BACKEND="bitwarden"
 
 # Now both systems know where to find things
 ```
@@ -420,7 +420,7 @@ Some secrets are per-machine (not synced):
 ~/.aws/config             # Can have machine-specific profiles
 
 # Use dotfiles templates for customization
-dotfiles template init    # Set machine variables
+blackdot template init    # Set machine variables
 ```
 
 ## Migration Guides
@@ -447,13 +447,13 @@ Already using dotclaude? Add dotfiles:
 
 ```bash
 # Install dotfiles
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 
 # It detects dotclaude and coordinates automatically
 # Your existing ~/.claude profiles stay intact
 
 # Add secret management
-dotfiles vault push --all    # Push current secrets to vault
+blackdot vault push --all    # Push current secrets to vault
 ```
 
 ## Best Practices
@@ -497,6 +497,6 @@ dotfiles vault push --all    # Push current secrets to vault
 ## Support
 
 Issues with integration:
-- **dotfiles**: https://github.com/blackwell-systems/dotfiles/issues
+- **dotfiles**: https://github.com/blackwell-systems/blackdot/issues
 - **dotclaude**: https://github.com/blackwell-systems/dotclaude/issues
 - **Integration**: Open issue in either repo, tag with `integration`

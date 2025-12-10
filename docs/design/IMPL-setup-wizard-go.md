@@ -8,7 +8,7 @@
 
 ## Overview
 
-~~The current `bin/dotfiles-setup` is a ~1200 line ZSH script that only works on Unix with ZSH installed.~~
+~~The current `bin/blackdot-setup` is a ~1200 line ZSH script that only works on Unix with ZSH installed.~~
 
 **UPDATE (2025-12-09):** Windows support has been implemented directly in the existing Go `setup` command (`internal/cli/setup.go`). The implementation:
 
@@ -406,7 +406,7 @@ The setup wizard will:
   7. Initialize machine-specific templates
 
 Your progress is saved automatically. If interrupted,
-run 'dotfiles setup' again to continue.`,
+run 'blackdot setup' again to continue.`,
     RunE: runSetup,
 }
 
@@ -557,7 +557,7 @@ func runSetup(cmd *cobra.Command, args []string) error {
 2. ~~**Feature flag**: `DOTFILES_SETUP_GO=1` to opt-in~~ (Not needed - Go is already default)
 3. **Test extensively** on all platforms - Linux ✅, Windows pending
 4. ~~**Make Go default** when stable~~ ✅ Already default via Phase 2 shell switchover
-5. **Remove ZSH version** in Phase 3 cleanup - `bin/dotfiles-setup` can be deprecated
+5. **Remove ZSH version** in Phase 3 cleanup - `bin/blackdot-setup` can be deprecated
 
 ---
 

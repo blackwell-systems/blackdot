@@ -127,7 +127,7 @@ The `claude/commands/` directory can contain custom slash commands for Claude Co
 Claude Code integration is **automatic** when you run the bootstrap:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 ```
 
 To skip the `/workspace` symlink (not recommended for Claude users):
@@ -266,12 +266,12 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
 
 | Command | Claude Integration |
 |---------|-------------------|
-| `dotfiles status` | Shows active Claude profile |
-| `dotfiles doctor` | Validates Claude/dotclaude setup |
-| `dotfiles vault pull` | Restores Claude profiles.json |
-| `dotfiles drift` | Detects profile changes vs vault |
-| `dotfiles packages` | Suggests dotclaude for Claude users |
-| `dotfiles setup` | Offers dotclaude installation |
+| `blackdot status` | Shows active Claude profile |
+| `blackdot doctor` | Validates Claude/dotclaude setup |
+| `blackdot vault pull` | Restores Claude profiles.json |
+| `blackdot drift` | Detects profile changes vs vault |
+| `blackdot packages` | Suggests dotclaude for Claude users |
+| `blackdot setup` | Offers dotclaude installation |
 
 ### How It Works
 
@@ -302,10 +302,10 @@ dotclaude create my-project
 dotclaude activate my-project
 
 # Sync to vault
-dotfiles vault push Claude-Profiles
+blackdot vault push Claude-Profiles
 
 # On new machine, restore everything including Claude profiles
-dotfiles vault pull
+blackdot vault pull
 ```
 
 ### New Developer Onboarding
@@ -317,10 +317,10 @@ curl -fsSL .../install.sh | bash
 # Unlock vault and restore secrets (including Claude profiles)
 bw login
 export BW_SESSION="$(bw unlock --raw)"
-dotfiles vault pull
+blackdot vault pull
 
 # Verify setup
-dotfiles doctor
+blackdot doctor
 # All systems green, including Claude
 
 # Ready to work
@@ -331,9 +331,9 @@ dotclaude list
 ### Without dotclaude
 
 If you use Claude Code without dotclaude:
-- `dotfiles status` shows a gentle hint: `try: dotclaude`
-- `dotfiles doctor` suggests installation with instructions
-- `dotfiles packages` mentions dotclaude availability
+- `blackdot status` shows a gentle hint: `try: dotclaude`
+- `blackdot doctor` suggests installation with instructions
+- `blackdot packages` mentions dotclaude availability
 - No impact on other dotfiles functionality - completely optional
 
 ---
@@ -352,6 +352,6 @@ Potential capabilities:
 
 ## Related Documentation
 
-- [CLAUDE.md](https://github.com/blackwell-systems/dotfiles/blob/main/CLAUDE.md) - Session guidelines
-- [claude/hooks/README.md](https://github.com/blackwell-systems/dotfiles/blob/main/claude/hooks/README.md) - Hook customization
+- [CLAUDE.md](https://github.com/blackwell-systems/blackdot/blob/main/CLAUDE.md) - Session guidelines
+- [claude/hooks/README.md](https://github.com/blackwell-systems/blackdot/blob/main/claude/hooks/README.md) - Hook customization
 - [Roadmap](ROADMAP.md) - Future plans including MCP

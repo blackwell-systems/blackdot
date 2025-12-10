@@ -8,7 +8,7 @@
 
 ```bash
 # Clone and build
-git clone https://github.com/blackwell-systems/dotfiles.git
+git clone https://github.com/blackwell-systems/blackdot.git
 cd dotfiles
 docker build -f Dockerfile.lite -t dotfiles-lite .
 
@@ -27,7 +27,7 @@ When you're done, type `exit` or press `Ctrl+D`. The container is destroyed inst
 ### 1. Check Your Environment
 
 ```zsh
-dotfiles status
+blackdot status
 ```
 
 You'll see the city skyline dashboard showing:
@@ -43,7 +43,7 @@ You'll see the city skyline dashboard showing:
 ### 2. Run Health Check
 
 ```zsh
-dotfiles doctor
+blackdot doctor
 ```
 
 This validates:
@@ -62,13 +62,13 @@ This validates:
 ls vault/
 
 # Check vault functions
-dotfiles vault help
+blackdot vault help
 
 # View available backends
 ls vault/backends/
 
 # Preview what sync would do (dry run)
-dotfiles sync --help
+blackdot sync --help
 ```
 
 **What this shows:** Multi-backend secret management (Bitwarden, 1Password, pass) with smart bidirectional sync - no vendor lock-in.
@@ -88,7 +88,7 @@ cat templates/configs/ssh-config.tmpl
 cat templates/_variables.sh
 
 # Template variables can also be stored in vault for portability:
-# ~/.config/dotfiles/template-variables.sh (XDG location, vault-synced)
+# ~/.config/blackdot/template-variables.sh (XDG location, vault-synced)
 # templates/_variables.local.sh (repo-local overrides)
 ```
 
@@ -112,11 +112,11 @@ dotclaude create test-project
 dotclaude activate test-project
 
 # Now check status again
-dotfiles status
+blackdot status
 # ↑ You'll see: profile ◆ test-project
 
 # Check doctor
-dotfiles doctor
+blackdot doctor
 # ↑ Claude Code section shows ✓ all green
 ```
 
@@ -153,18 +153,18 @@ exit
 
 ```zsh
 # Try all CLI commands
-dotfiles help
-dotfiles doctor
-dotfiles status
-dotfiles sync --help
-dotfiles packages --help
-dotfiles vault help
+blackdot help
+blackdot doctor
+blackdot status
+blackdot sync --help
+blackdot packages --help
+blackdot vault help
 
 # Check what doctor validates
-dotfiles doctor | grep "^──"
+blackdot doctor | grep "^──"
 
 # See all available scripts
-ls bin/dotfiles-*
+ls bin/blackdot-*
 
 exit
 ```
@@ -180,13 +180,13 @@ Mount your actual dotfiles for testing:
 ```bash
 # From host
 docker run -it --rm \
-  -v ~/.config/dotfiles:/root/workspace/dotfiles \
+  -v ~/.config/blackdot:/root/workspace/dotfiles \
   dotfiles-lite
 
 # Inside container
 cd /root/workspace/dotfiles
-dotfiles status
-dotfiles doctor
+blackdot status
+blackdot doctor
 
 exit
 ```
@@ -236,7 +236,7 @@ Some features require a real system:
 curl -fsSL https://dotfiles.blackwell.systems/install | bash
 
 # Or manual
-git clone https://github.com/blackwell-systems/dotfiles.git ~/workspace/dotfiles
+git clone https://github.com/blackwell-systems/blackdot.git ~/workspace/dotfiles
 cd ~/workspace/dotfiles
 ./bootstrap/bootstrap-mac.sh  # or ./bootstrap/bootstrap-linux.sh
 ```
@@ -266,7 +266,7 @@ A: Remove the `--rm` flag and use `docker commit` to save the container state. B
 A: You could mount your Bitwarden session, but that's risky. Better to test with mock credentials first.
 
 **Q: How do I test the dotclaude integration properly?**
-A: Install dotclaude in the container (it's just a shell script). Create test profiles. Check integration with `dotfiles status` and `dotfiles doctor`.
+A: Install dotclaude in the container (it's just a shell script). Create test profiles. Check integration with `blackdot status` and `blackdot doctor`.
 
 ---
 
@@ -310,4 +310,4 @@ exec zsh
 
 **Ready to trust it?** Install for real: [Installation Guide](README-FULL.md#installation)
 
-**Still skeptical?** Read the code: [github.com/blackwell-systems/dotfiles](https://github.com/blackwell-systems/dotfiles)
+**Still skeptical?** Read the code: [github.com/blackwell-systems/blackdot](https://github.com/blackwell-systems/blackdot)

@@ -37,7 +37,7 @@ The Plugin System builds on the **Feature Registry** (`lib/_features.sh`) which 
 - Plugins register themselves as features in the `integration` category
 - `plugin_load()` checks `feature_enabled()` before loading
 - Plugin dependencies can require other features (not just commands)
-- `dotfiles features enable <plugin>` enables a plugin's feature
+- `blackdot features enable <plugin>` enables a plugin's feature
 
 ---
 
@@ -189,7 +189,7 @@ dclean() {
 # lib/_plugins.sh - Plugin system library
 
 # Plugin directories
-PLUGINS_DIR="${DOTFILES_DIR}/plugins"
+PLUGINS_DIR="${BLACKDOT_DIR}/plugins"
 PLUGINS_AVAILABLE="${PLUGINS_DIR}/available"
 PLUGINS_ENABLED="${PLUGINS_DIR}/enabled"
 PLUGINS_LOCAL="${PLUGINS_DIR}/local"
@@ -452,7 +452,7 @@ Description of what this plugin does.
 ## Installation
 
 \`\`\`bash
-dotfiles plugin enable ${name}
+blackdot plugin enable ${name}
 \`\`\`
 
 ## Usage
@@ -467,11 +467,11 @@ EOF
 
 ---
 
-## CLI Command (`bin/dotfiles-plugin`)
+## CLI Command (`bin/blackdot-plugin`)
 
 ```bash
 #!/usr/bin/env bash
-# bin/dotfiles-plugin - Plugin management CLI
+# bin/blackdot-plugin - Plugin management CLI
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -605,8 +605,8 @@ Add to `zsh/zsh.d/95-plugins.zsh`:
 
 ```zsh
 # Load plugin system
-if [[ -f "${DOTFILES_DIR}/lib/_plugins.sh" ]]; then
-    source "${DOTFILES_DIR}/lib/_plugins.sh"
+if [[ -f "${BLACKDOT_DIR}/lib/_plugins.sh" ]]; then
+    source "${BLACKDOT_DIR}/lib/_plugins.sh"
     plugin_load_all
 fi
 ```
@@ -703,13 +703,13 @@ feature_enabled "plugins" || return 0
 Always provide bypass for guards:
 ```bash
 # Enable plugin even if deps missing
-dotfiles plugin enable docker-helpers --force
+blackdot plugin enable docker-helpers --force
 ```
 
 ### 4. Per-Plugin Help with Feature Status
 Show plugin details with enable hints:
 ```bash
-dotfiles plugin info docker-helpers
+blackdot plugin info docker-helpers
 # Shows: enabled/disabled, deps status, enable command
 ```
 

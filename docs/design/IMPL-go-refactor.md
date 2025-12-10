@@ -7,7 +7,7 @@
 
 ## Summary
 
-The Go CLI rewrite is **complete**. All commands are now provided by the Go binary (`bin/dotfiles`). Shell fallback has been removed. The Go binary is the sole CLI implementation.
+The Go CLI rewrite is **complete**. All commands are now provided by the Go binary (`bin/blackdot`). Shell fallback has been removed. The Go binary is the sole CLI implementation.
 
 ### What's Done
 
@@ -38,13 +38,13 @@ The Go CLI rewrite is **complete**. All commands are now provided by the Go bina
 
 ### Phase 3 Changes (2025-12-09)
 
-- Renamed binary from `dotfiles-go` to `dotfiles`
+- Renamed binary from `dotfiles-go` to `blackdot`
 - Removed shell fallback (`DOTFILES_USE_GO` escape hatch)
-- Deleted 19 deprecated `bin/dotfiles-*` shell scripts (~7500 lines)
+- Deleted 19 deprecated `bin/blackdot-*` shell scripts (~7500 lines)
 - Deleted 12 deprecated `lib/*.sh` libraries (~5500 lines)
 - Simplified `40-aliases.zsh` (~550 lines removed)
 - Updated CI workflows for Go-first testing
-- Added `dotfiles shell-init` command for shell function initialization
+- Added `blackdot shell-init` command for shell function initialization
 - Updated `00-init.zsh` to use Go binary for feature checks
 - Total reduction: ~13,500 lines of shell code
 
@@ -72,7 +72,7 @@ The Go CLI rewrite is **complete**. All commands are now provided by the Go bina
 **Commands that PRINT but can't APPLY:**
 ```bash
 # Go binary can PRINT what to do...
-$ dotfiles tools aws switch prod
+$ blackdot tools aws switch prod
 export AWS_PROFILE=prod
 export AWS_REGION=us-east-1
 
@@ -100,7 +100,7 @@ function aws-switch {
 
 ```
 zsh/zsh.d/
-├── 00-init.zsh          # PATH, DOTFILES_DIR, instant prompt
+├── 00-init.zsh          # PATH, BLACKDOT_DIR, instant prompt
 ├── 10-plugins.zsh       # Zinit plugin loading
 ├── 20-env.zsh           # Environment variables
 ├── 30-tools.zsh         # Tool init (fzf, zoxide, starship)
@@ -180,13 +180,13 @@ curl -fsSL <url> | bash -s -- --binary
 curl -fsSL <url> | bash -s -- --binary-only
 
 # Specific version
-DOTFILES_VERSION=v3.1.0 ./install.sh --binary
+BLACKDOT_VERSION=v3.1.0 ./install.sh --binary
 ```
 
 **Features implemented:**
 - [x] Platform detection (darwin/linux/windows, amd64/arm64)
 - [x] Downloads from GitHub releases
-- [x] Installs to `~/.local/bin/dotfiles-go`
+- [x] Installs to `~/.local/bin/blackdot-go`
 - [x] Fallback to shell if binary download fails
 
 ### 1.2 Onboarding Experience by Platform
@@ -210,7 +210,7 @@ For users who don't want shell integration (ZSH or PowerShell modules):
 # Just the CLI binary, no repo, no shell config
 curl -fsSL <url> | bash -s -- --binary-only
 
-# Result: ~/.local/bin/dotfiles-go
+# Result: ~/.local/bin/blackdot-go
 ```
 
 **Windows PowerShell:**
@@ -218,11 +218,11 @@ curl -fsSL <url> | bash -s -- --binary-only
 # Just the CLI binary, no module, no profile changes
 .\Install-Dotfiles.ps1 -BinaryOnly
 
-# Result: ~/.local/bin/dotfiles-go.exe
+# Result: ~/.local/bin/blackdot-go.exe
 ```
 
 **Binary-only user experience:**
-- User calls `dotfiles-go` directly (not `dotfiles`)
+- User calls `dotfiles-go` directly (not `blackdot`)
 - Full CLI functionality: features, doctor, vault, tools, etc.
 - No shell wrappers, no hook system, no auto-loading
 - Can add their own alias if desired: `alias dotfiles=dotfiles-go`
@@ -239,7 +239,7 @@ One-liner for native Windows users:
 
 ```powershell
 # One command in PowerShell
-irm https://raw.githubusercontent.com/blackwell-systems/dotfiles/main/Install.ps1 | iex
+irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/Install.ps1 | iex
 
 # With options
 .\Install.ps1 -Preset developer -SkipPackages
@@ -297,7 +297,7 @@ The `/workspace` symlink enables portable Claude Code sessions across machines. 
 
 ### 2.1 Update 40-aliases.zsh ✅
 
-**Current state:** The `dotfiles` function is a large dispatcher calling shell scripts
+**Current state:** The `blackdot` function is a large dispatcher calling shell scripts
 
 **Target state:** Thin wrapper calling Go binary
 
@@ -313,8 +313,8 @@ dotfiles() {
 
 # After: 10-line wrapper
 dotfiles() {
-    if [[ -x "$DOTFILES_DIR/bin/dotfiles" ]]; then
-        "$DOTFILES_DIR/bin/dotfiles" "$@"
+    if [[ -x "$BLACKDOT_DIR/bin/blackdot" ]]; then
+        "$BLACKDOT_DIR/bin/blackdot" "$@"
     else
         # Fallback to shell (temporary)
         _dotfiles_shell "$@"
@@ -358,23 +358,23 @@ eval "$(dotfiles shell-init zsh)"
 
 **Tasks:**
 - [x] Audit all `feature_enabled` calls in zsh.d/*.zsh
-- [x] Implement `dotfiles shell-init zsh` command
+- [x] Implement `blackdot shell-init zsh` command
 - [x] Update shell modules to use Go binary (via shell-init)
 
 ### 2.4 Tool Group Aliases ✅
 
-Expose `dotfiles tools X` as convenient `Xtools` commands:
+Expose `blackdot tools X` as convenient `Xtools` commands:
 
 **ZSH (functions in 40-aliases.zsh):**
 ```zsh
 # Tool group aliases - delegate to Go binary
-sshtools()    { "$DOTFILES_DIR/bin/dotfiles-go" tools ssh "$@"; }
-awstools()    { "$DOTFILES_DIR/bin/dotfiles-go" tools aws "$@"; }
-cdktools()    { "$DOTFILES_DIR/bin/dotfiles-go" tools cdk "$@"; }
-gotools()     { "$DOTFILES_DIR/bin/dotfiles-go" tools go "$@"; }
-rusttools()   { "$DOTFILES_DIR/bin/dotfiles-go" tools rust "$@"; }
-pytools()     { "$DOTFILES_DIR/bin/dotfiles-go" tools python "$@"; }
-dockertools() { "$DOTFILES_DIR/bin/dotfiles-go" tools docker "$@"; }
+sshtools()    { "$BLACKDOT_DIR/bin/blackdot-go" tools ssh "$@"; }
+awstools()    { "$BLACKDOT_DIR/bin/blackdot-go" tools aws "$@"; }
+cdktools()    { "$BLACKDOT_DIR/bin/blackdot-go" tools cdk "$@"; }
+gotools()     { "$BLACKDOT_DIR/bin/blackdot-go" tools go "$@"; }
+rusttools()   { "$BLACKDOT_DIR/bin/blackdot-go" tools rust "$@"; }
+pytools()     { "$BLACKDOT_DIR/bin/blackdot-go" tools python "$@"; }
+dockertools() { "$BLACKDOT_DIR/bin/blackdot-go" tools docker "$@"; }
 ```
 
 **PowerShell (functions in Dotfiles.psm1):**
@@ -404,7 +404,7 @@ sshtools gen mykey    # Generate key
 ```
 
 **Benefits:**
-- Short, memorable commands (`cdktools` vs `dotfiles tools cdk`)
+- Short, memorable commands (`cdktools` vs `blackdot tools cdk`)
 - Consistent across ZSH and PowerShell
 - Both call same Go binary = identical behavior
 - Works alongside individual aliases (`ssh-keys`, `aws-profiles`, etc.)
@@ -433,7 +433,7 @@ sshtools gen mykey    # Generate key
 │                                                                      │
 │  ~/workspace/dotfiles/     ← Optional repo (for shell integration)   │
 │  ├── zsh/zsh.d/                                                      │
-│  │   ├── 00-init.zsh       PATH, DOTFILES_DIR, instant prompt        │
+│  │   ├── 00-init.zsh       PATH, BLACKDOT_DIR, instant prompt        │
 │  │   ├── 30-tools.zsh      Tool initializers (fzf, zoxide)           │
 │  │   └── 40-aliases.zsh    MINIMAL: only env/cd wrappers             │
 │  └── powershell/                                                     │
@@ -446,7 +446,7 @@ sshtools gen mykey    # Generate key
 
 | Current (Transition) | Production (v1.0) |
 |---------------------|-------------------|
-| Binary: `dotfiles-go` | Binary: `dotfiles` |
+| Binary: `dotfiles-go` | Binary: `blackdot` |
 | ZSH function intercepts all commands | Binary called directly |
 | Shell fallback exists (`DOTFILES_USE_GO=0`) | No shell fallback |
 | `--binary-only` = special mode | Binary-first is default |
@@ -478,11 +478,11 @@ function cdk-env    { Invoke-Expression (dotfiles tools cdk env @args) }
 ```bash
 # Unix
 curl -fsSL <url> | bash -s -- --binary-only
-# Result: ~/.local/bin/dotfiles (just works)
+# Result: ~/.local/bin/blackdot (just works)
 
 # Windows
 .\Install-Dotfiles.ps1 -BinaryOnly
-# Result: ~/.local/bin/dotfiles.exe (just works)
+# Result: ~/.local/bin/blackdot.exe (just works)
 ```
 
 **Mode 2: Full (binary + shell integration)**
@@ -499,10 +499,10 @@ curl -fsSL <url> | bash
 ### 3.4 Migration Tasks
 
 **3.4.1 Rename Binary**
-- [ ] Change `dotfiles-go` → `dotfiles` in install.sh
-- [ ] Change `dotfiles-go` → `dotfiles` in Install-Dotfiles.ps1
+- [ ] Change `dotfiles-go` → `blackdot` in install.sh
+- [ ] Change `dotfiles-go` → `blackdot` in Install-Dotfiles.ps1
 - [ ] Update GitHub Actions to produce `dotfiles-{os}-{arch}` (no `-go` suffix)
-- [ ] Update Makefile: `make build` outputs `bin/dotfiles`
+- [ ] Update Makefile: `make build` outputs `bin/blackdot`
 
 **3.4.2 Simplify Shell Wrappers**
 - [ ] Remove `dotfiles()` function that intercepts all commands
@@ -513,14 +513,14 @@ curl -fsSL <url> | bash
 
 **3.4.3 Implement Setup Wizard in Go** ✅ DONE
 
-~~The current `bin/dotfiles-setup` is ZSH-only, which breaks Windows/binary-only users.~~
+~~The current `bin/blackdot-setup` is ZSH-only, which breaks Windows/binary-only users.~~
 
-**IMPLEMENTED (2025-12-09):** Windows support added to `dotfiles setup` command.
+**IMPLEMENTED (2025-12-09):** Windows support added to `blackdot setup` command.
 
 > **📋 Detailed Implementation Plan:** See [IMPL-setup-wizard-go.md](IMPL-setup-wizard-go.md)
 
 **Phases implemented:**
-- [x] `dotfiles setup` - Main entry point with progress tracking ✅
+- [x] `blackdot setup` - Main entry point with progress tracking ✅
 - [x] Phase 1: Workspace configuration ✅ (`C:\workspace` on Windows)
 - [x] Phase 2: Symlinks ✅ (PowerShell profile on Windows)
 - [x] Phase 3: Packages ✅ (winget on Windows, Homebrew on Unix)
@@ -531,8 +531,8 @@ curl -fsSL <url> | bash
 
 **State management:** ✅
 - Reuses existing `config.json` state tracking
-- `dotfiles setup --status` shows progress
-- `dotfiles setup --reset` clears state
+- `blackdot setup --status` shows progress
+- `blackdot setup --reset` clears state
 
 **Platform-specific handling:** ✅
 - Unix: Symlink `.zshrc`, prompt for p10k config
@@ -541,24 +541,24 @@ curl -fsSL <url> | bash
 
 **3.4.4 Delete Deprecated Shell Scripts**
 ```
-bin/dotfiles-backup      → DELETE (Go: dotfiles backup)
-bin/dotfiles-config      → DELETE (Go: dotfiles config)
-bin/dotfiles-diff        → DELETE (Go: dotfiles diff)
-bin/dotfiles-doctor      → DELETE (Go: dotfiles doctor)
-bin/dotfiles-drift       → DELETE (Go: dotfiles drift)
-bin/dotfiles-encrypt     → DELETE (Go: dotfiles encrypt)
-bin/dotfiles-features    → DELETE (Go: dotfiles features)
-bin/dotfiles-hook        → DELETE (Go: dotfiles hook)
-bin/dotfiles-lint        → DELETE (Go: dotfiles lint)
-bin/dotfiles-metrics     → DELETE (Go: dotfiles metrics)
-bin/dotfiles-migrate     → DELETE (Go: dotfiles migrate)
-bin/dotfiles-packages    → DELETE (Go: dotfiles packages)
-bin/dotfiles-setup       → DELETE (Go: dotfiles setup) ← NEW
-bin/dotfiles-status      → DELETE (Go: dotfiles status)
-bin/dotfiles-sync        → DELETE (Go: dotfiles sync)
-bin/dotfiles-template    → DELETE (Go: dotfiles template)
-bin/dotfiles-uninstall   → DELETE (Go: dotfiles uninstall)
-bin/dotfiles-vault       → DELETE (Go: dotfiles vault)
+bin/blackdot-backup      → DELETE (Go: dotfiles backup)
+bin/blackdot-config      → DELETE (Go: dotfiles config)
+bin/blackdot-diff        → DELETE (Go: dotfiles diff)
+bin/blackdot-doctor      → DELETE (Go: dotfiles doctor)
+bin/blackdot-drift       → DELETE (Go: dotfiles drift)
+bin/blackdot-encrypt     → DELETE (Go: dotfiles encrypt)
+bin/blackdot-features    → DELETE (Go: dotfiles features)
+bin/blackdot-hook        → DELETE (Go: dotfiles hook)
+bin/blackdot-lint        → DELETE (Go: dotfiles lint)
+bin/blackdot-metrics     → DELETE (Go: dotfiles metrics)
+bin/blackdot-migrate     → DELETE (Go: dotfiles migrate)
+bin/blackdot-packages    → DELETE (Go: dotfiles packages)
+bin/blackdot-setup       → DELETE (Go: dotfiles setup) ← NEW
+bin/blackdot-status      → DELETE (Go: dotfiles status)
+bin/blackdot-sync        → DELETE (Go: dotfiles sync)
+bin/blackdot-template    → DELETE (Go: dotfiles template)
+bin/blackdot-uninstall   → DELETE (Go: dotfiles uninstall)
+bin/blackdot-vault       → DELETE (Go: dotfiles vault)
 ```
 
 **3.4.5 Archive Shell Libraries**
@@ -603,7 +603,7 @@ The Go template engine supports both syntaxes:
 - Old: `{{?OS_TYPE="darwin"}}` (legacy)
 
 **Tasks:**
-- [x] Run `dotfiles template lint` to find old syntax usage (none found)
+- [x] Run `blackdot template lint` to find old syntax usage (none found)
 - [x] Migrate remaining templates to Handlebars syntax (already migrated)
 - [x] Consider removing old syntax support from Go engine (none exists)
 
@@ -647,8 +647,8 @@ jobs:
 ### 3.8 Success Criteria
 
 Phase 3 is complete when:
-- [ ] `dotfiles` command runs Go binary directly (no shell interception)
-- [ ] All shell scripts in `bin/dotfiles-*` deleted (except setup)
+- [ ] `blackdot` command runs Go binary directly (no shell interception)
+- [ ] All shell scripts in `bin/blackdot-*` deleted (except setup)
 - [ ] Shell wrappers only exist for env/cd commands
 - [ ] Binary-only installation is clean and documented
 - [ ] All tests pass on all platforms (Linux, macOS, Windows)
@@ -684,13 +684,13 @@ Comprehensive audit of cross-platform support status:
 
 | Component | Current | Needed | Plan |
 |-----------|---------|--------|------|
-| **Setup Wizard** | `bin/dotfiles-setup` (ZSH) | `dotfiles setup` (Go) | [IMPL-setup-wizard-go.md](IMPL-setup-wizard-go.md) |
+| **Setup Wizard** | `bin/blackdot-setup` (ZSH) | `blackdot setup` (Go) | [IMPL-setup-wizard-go.md](IMPL-setup-wizard-go.md) |
 
 #### Legacy (Will Be Deprecated) 📦
 
 | Category | Files | Replacement |
 |----------|-------|-------------|
-| `bin/dotfiles-*` | 20 shell scripts | Go CLI commands |
+| `bin/blackdot-*` | 20 shell scripts | Go CLI commands |
 | `lib/*.sh` | 15 shell libraries | Go packages |
 | `vault/*.sh` | 19 shell scripts | Go vault commands |
 
@@ -734,13 +734,13 @@ make build
 go test ./...
 
 # Compare Go vs Shell output
-diff <(dotfiles features list) <(./bin/dotfiles features list)
-diff <(dotfiles doctor) <(./bin/dotfiles doctor)
-diff <(dotfiles vault status) <(./bin/dotfiles vault status)
+diff <(dotfiles features list) <(./bin/blackdot features list)
+diff <(dotfiles doctor) <(./bin/blackdot doctor)
+diff <(dotfiles vault status) <(./bin/blackdot vault status)
 
 # Verify on fresh shell
 exec zsh
-dotfiles version  # Should show Go version
+blackdot version  # Should show Go version
 ```
 
 ---
@@ -755,7 +755,7 @@ export DOTFILES_USE_GO=0
 exec zsh
 
 # Or: Remove Go binary to force shell fallback
-rm $DOTFILES_DIR/bin/dotfiles
+rm $BLACKDOT_DIR/bin/blackdot
 exec zsh
 ```
 
@@ -768,8 +768,8 @@ Shell implementation remains intact until Phase 3 cleanup.
 ### Current Binary Location
 
 ```
-$DOTFILES_DIR/bin/dotfiles     # Go binary (19 commands)
-$DOTFILES_DIR/bin/dotfiles-*   # Shell scripts (deprecated)
+$BLACKDOT_DIR/bin/blackdot     # Go binary (19 commands)
+$BLACKDOT_DIR/bin/blackdot-*   # Shell scripts (deprecated)
 ```
 
 ### Release Workflow

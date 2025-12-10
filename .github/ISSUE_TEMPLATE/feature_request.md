@@ -69,6 +69,6 @@ Which platforms should this feature support?
 
 <!-- Links to similar implementations, documentation, or discussions -->
 
-- [ ] I have checked existing [feature requests](https://github.com/blackwell-systems/dotfiles/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
+- [ ] I have checked existing [feature requests](https://github.com/blackwell-systems/blackdot/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
 - [ ] I have read the [CONTRIBUTING](../../CONTRIBUTING.md) guide
 - [ ] I would be willing to contribute this feature myself
