@@ -1,6 +1,6 @@
-![logo](assets/dotfiles_logo.png ':size=250')
+![logo](assets/blackdot_logo.png ':size=250')
 
-# dotfiles
+# blackdot
 
 > Modular dotfiles framework for the AI-assisted development era
 
