@@ -202,7 +202,7 @@ blackdot features preset --list
 
 # Check if feature enabled (for scripts)
 if dotfiles features check vault; then
-    dotfiles vault pull
+    blackdot vault pull
 fi
 ```
 
@@ -420,7 +420,7 @@ Drift detection runs automatically on shell startup using quick mode. If local f
 
 ```
 ⚠ Drift detected: Git-Config Template-Variables
-  Run: dotfiles drift (to compare) or dotfiles vault pull (to restore)
+  Run: blackdot drift (to compare) or blackdot vault pull (to restore)
 ```
 
 Disable with: `export DOTFILES_SKIP_DRIFT_CHECK=1`
@@ -1792,7 +1792,7 @@ export BLACKDOT_VAULT_BACKEND=1password
 DOTFILES_OFFLINE=1 ./bootstrap/bootstrap-linux.sh
 
 # Force pull without drift check
-DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull
+DOTFILES_SKIP_DRIFT_CHECK=1 blackdot vault pull
 ```
 
 ---

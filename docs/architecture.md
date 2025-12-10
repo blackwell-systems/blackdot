@@ -142,7 +142,7 @@ blackdot help  # Shows only commands for enabled features
 # Example: vault feature disabled
 $ blackdot vault pull
 Feature 'vault' is not enabled.
-Run: dotfiles features enable vault
+Run: blackdot features enable vault
 ```
 
 **Implementation:**
@@ -462,16 +462,16 @@ sequenceDiagram
     participant Local as Local Files
     participant BW as Bitwarden
 
-    User->>CLI: dotfiles vault setup
+    User->>CLI: blackdot vault setup
     CLI->>Config: Create vault-items.json
     CLI->>Config: Set backend (bitwarden/1password/pass)
 
-    User->>CLI: dotfiles vault pull
+    User->>CLI: blackdot vault pull
     CLI->>BW: Fetch secrets
     BW-->>CLI: Return encrypted data
     CLI->>Local: Write files (600 perms)
 
-    User->>CLI: dotfiles vault push
+    User->>CLI: blackdot vault push
     CLI->>Local: Read files
     CLI->>BW: Update vault items
 ```

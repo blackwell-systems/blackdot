@@ -208,7 +208,7 @@ macOS Settings:                                           [feature: macos_settin
 
 ─────────────────────────────────────────────────────
 Legend: ● enabled  ○ disabled
-Enable features: dotfiles features enable <name>
+Enable features: blackdot features enable <name>
 ```
 
 ### Running Disabled Commands
@@ -221,10 +221,10 @@ $ blackdot vault pull
 ⚠ The 'vault' feature is not enabled.
 
 To enable vault support:
-  dotfiles features enable vault
+  blackdot features enable vault
 
 Or run with --force to execute anyway:
-  dotfiles vault pull --force
+  blackdot vault pull --force
 ```
 
 Implementation:
@@ -258,7 +258,7 @@ _cli_feature_disabled_message() {
     echo -e "${YELLOW}⚠${NC} The '${CYAN}$feature${NC}' feature is not enabled."
     echo ""
     echo "To enable ${feature} support:"
-    echo -e "  ${GREEN}dotfiles features enable $feature${NC}"
+    echo -e "  ${GREEN}blackdot features enable $feature${NC}"
     echo ""
     echo "Or run with --force to execute anyway:"
     echo -e "  ${DIM}dotfiles $command --force${NC}"
@@ -438,7 +438,7 @@ For scripting and advanced users:
 export DOTFILES_CLI_SHOW_ALL=true
 
 # Force command execution without feature check
-DOTFILES_FORCE=true dotfiles vault pull
+DOTFILES_FORCE=true blackdot vault pull
 ```
 
 ---
@@ -453,7 +453,7 @@ $ blackdot help vault
 blackdot vault - Secret vault operations
 
 Status: ○ DISABLED (feature: vault)
-Enable: dotfiles features enable vault
+Enable: blackdot features enable vault
 
 Commands (run with --force to use while disabled):
   setup       Setup vault backend (first-time setup)
@@ -485,15 +485,15 @@ Disabled Features:
 
 ○ vault
   → vault, secrets, sync, drift, diff
-  Enable: dotfiles features enable vault
+  Enable: blackdot features enable vault
 
 ○ templates
   → template, tmpl
-  Enable: dotfiles features enable templates
+  Enable: blackdot features enable templates
 
 ○ macos_settings
   → macos
-  Enable: dotfiles features enable macos_settings
+  Enable: blackdot features enable macos_settings
 ```
 
 ---
@@ -540,7 +540,7 @@ Disabled Features:
         source lib/_features.sh
         feature_disable 'vault'
         source 40-aliases.zsh
-        dotfiles vault pull
+        blackdot vault pull
     "
     [[ "$output" == *"feature is not enabled"* ]]
     [[ "$output" == *"features enable vault"* ]]
@@ -556,7 +556,7 @@ Disabled Features:
     output1=$(dotfiles help)
 
     # Enable vault
-    dotfiles features enable vault
+    blackdot features enable vault
     output2=$(dotfiles help)
 
     # Vault commands should appear in output2 but not output1

@@ -735,7 +735,7 @@ if [[ "${1:-}" != "--no-hooks" ]]; then
     hook_run "pre_vault_pull"
 fi
 
-# Usage: dotfiles vault pull --no-hooks
+# Usage: blackdot vault pull --no-hooks
 ```
 
 ### 4. Helpful Error Messages with Enable Hints

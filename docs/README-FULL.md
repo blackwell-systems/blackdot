@@ -798,7 +798,7 @@ flowchart TB
     subgraph setup["Setup Phase"]
         bootstrap["Bootstrap<br/><small>bootstrap-mac/linux.sh</small><br/>Install packages, tools, shell"]
         restore["Restore Secrets<br/><small>restore.sh</small><br/>SSH, AWS, Git, env"]
-        verify["Health Check<br/><small>dotfiles doctor</small><br/>Verify installation"]
+        verify["Health Check<br/><small>blackdot doctor</small><br/>Verify installation"]
     end
 
     subgraph tools["Package Sources"]
@@ -2347,7 +2347,7 @@ The shell automatically checks for drift when you open a new terminal. This uses
 
 ```
 ⚠ Drift detected: Git-Config Template-Variables
-  Run: dotfiles drift (to compare) or dotfiles vault pull (to restore)
+  Run: blackdot drift (to compare) or blackdot vault pull (to restore)
 ```
 
 **Disable automatic checks:**
@@ -2366,7 +2366,7 @@ Add this to `~/.zshrc.local` to permanently disable.
 [WARN] Git-Config: LOCAL DIFFERS from vault
 
 To sync local changes to vault:
-  dotfiles vault push --all
+  blackdot vault push --all
 ```
 
 ### Bidirectional Sync

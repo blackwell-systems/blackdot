@@ -234,7 +234,7 @@ state_reset "vault"
 
 # Check if setup is needed (any incomplete phases)
 if state_needs_setup; then
-    echo "Run: dotfiles setup"
+    echo "Run: blackdot setup"
 fi
 
 # Get next incomplete phase

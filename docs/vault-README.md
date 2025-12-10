@@ -332,9 +332,9 @@ $ blackdot vault pull
   - SSH-Config (~/.ssh/config)
 
 Options:
-  1. Run 'dotfiles vault push' first to save local changes
+  1. Run 'blackdot vault push' first to save local changes
   2. Run restore with --force to overwrite local changes
-  3. Run 'dotfiles drift' to see detailed differences
+  3. Run 'blackdot drift' to see detailed differences
 
 [FAIL] Restore aborted to prevent data loss
 ```
@@ -345,7 +345,7 @@ To skip this check (for automation or when you intentionally want to overwrite):
 blackdot vault pull --force
 
 # Or set environment variable
-DOTFILES_SKIP_DRIFT_CHECK=1 dotfiles vault pull
+DOTFILES_SKIP_DRIFT_CHECK=1 blackdot vault pull
 ```
 
 ---
@@ -359,8 +359,8 @@ For air-gapped environments, vault outages, or when you simply don't have vault 
 DOTFILES_OFFLINE=1 ./bootstrap/bootstrap-mac.sh
 
 # Or for individual commands
-DOTFILES_OFFLINE=1 dotfiles vault pull  # Exits gracefully
-DOTFILES_OFFLINE=1 dotfiles vault push     # Exits gracefully
+DOTFILES_OFFLINE=1 blackdot vault pull  # Exits gracefully
+DOTFILES_OFFLINE=1 blackdot vault push     # Exits gracefully
 ```
 
 When offline mode is enabled:
@@ -381,7 +381,7 @@ When offline mode is enabled:
 │                                                                  │
 │   USER COMMANDS                                                  │
 │   ═══════════════════════════════════════════════════════════    │
-│   dotfiles vault pull | sync | create | delete | list        │
+│   blackdot vault pull | sync | create | delete | list        │
 │                     ↓                                            │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
