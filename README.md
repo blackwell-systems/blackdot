@@ -348,7 +348,7 @@ graph TB
 ## Features
 
 <details>
-<summary><b>View All Features (24)</b></summary>
+<summary><b>View All Features (25)</b></summary>
 
 ### Framework Systems
 
@@ -805,6 +805,10 @@ awslogin       # SSO login with profile picker
 - **uv** integration: 10 aliases for fast package management (`uvs`, `uvr`, `uva`, `uvl`, `uvu`)
 - **pytest** integration: 8 aliases (`pt`, `ptv`, `ptx`, `ptc`, `pts`)
 - **Auto-venv**: Prompts to activate virtualenv on `cd` (configurable: notify/auto/off)
+
+**SSH Tools** (`ssh_tools`): SSH config management, key generation, agent helpers, tunnel management
+
+**Docker Tools** (`docker_tools`): Container management (`dps`, `dex`, `dlogs`), compose shortcuts (`dcu`, `dcd`), network/volume helpers
 
 **NVM** (`nvm_integration`): Lazy-loaded Node.js version management, auto-switches based on `.nvmrc`
 
