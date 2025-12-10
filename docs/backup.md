@@ -424,15 +424,16 @@ backup-20241205-143022/
 
 ### Adding Custom Files
 
-To add additional files to backup, modify the `BACKUP_FILES` array in `bin/blackdot-backup`:
+To add additional files to backup, modify the backup file list in `internal/cli/backup.go`:
 
-```zsh
-BACKUP_FILES=(
-    "$HOME/.ssh/config"
-    "$HOME/.ssh/known_hosts"
-    # ... existing files ...
-    "$HOME/.config/my-app/settings.json"  # Add custom file
-)
+```go
+// Default backup files
+var defaultBackupFiles = []string{
+    ".ssh/config",
+    ".ssh/known_hosts",
+    // ... existing files ...
+    ".config/my-app/settings.json",  // Add custom file
+}
 ```
 
 ---

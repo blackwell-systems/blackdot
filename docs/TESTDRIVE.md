@@ -163,8 +163,11 @@ blackdot vault help
 # Check what doctor validates
 blackdot doctor | grep "^──"
 
-# See all available scripts
-ls bin/blackdot-*
+# See the compiled Go binary
+ls -lh bin/blackdot
+
+# List all available commands
+blackdot --help
 
 exit
 ```

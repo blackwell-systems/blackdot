@@ -47,7 +47,7 @@ Priority (highest → lowest)
 | Project | `.blackdot.json` (project root) | Yes | Project-specific settings |
 | Machine | `~/.config/blackdot/machine.json` | No | Machine-specific settings |
 | User | `~/.config/blackdot/config.json` | No | User preferences |
-| Defaults | `lib/_config.sh` | Yes | Built-in defaults |
+| Defaults | `internal/config/config.go` | Yes | Built-in defaults |
 
 ---
 
@@ -332,7 +332,7 @@ The dotfiles system distinguishes between **state** (what happened) and **config
 | Preferences | `vault.backend` | Yes | Can differ by machine |
 | Feature state | `features.vault` | Yes | Can be overridden per-project |
 
-**State management** (`lib/_state.sh`) always uses direct access to track what has happened on this specific machine. Configuration layers handle preferences that can vary.
+**State management** (setup wizard state in `internal/cli/setup.go`) always uses direct access to track what has happened on this specific machine. Configuration layers handle preferences that can vary.
 
 ---
 

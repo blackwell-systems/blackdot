@@ -21,7 +21,6 @@
   - [Template System](templates.md)
   - [Vault System](vault-README.md)
   - [Backup System](backup.md)
-  - [Extending Vault Backends](extending-backends.md)
   - [State Management](state-management.md)
   - [macOS Settings](macos-settings.md)
 

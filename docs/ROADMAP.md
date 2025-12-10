@@ -46,11 +46,14 @@ Improve Bitwarden session handling:
 **Status:** Not Started
 
 Generate documentation for all exported functions:
-- `vault/_common.sh` - 27 functions
-- `lib/_logging.sh` - 8 functions
-- `lib/_state.sh` - 10+ functions
-- `lib/_vault.sh` - 15+ functions
-- `zsh/zsh.d/50-functions.zsh` - 15+ functions
+- Go packages (use `godoc` or `pkgsite`):
+  - `internal/cli/*.go` - CLI commands
+  - `internal/feature/*.go` - Feature registry
+  - `internal/config/*.go` - Configuration management
+- Shell helpers:
+  - `lib/_logging.sh` - Logging functions (info, pass, warn, fail)
+  - `lib/_hooks.sh` - Hook system helpers
+  - `zsh/zsh.d/50-functions.zsh` - Shell utility functions
 
 ---
 

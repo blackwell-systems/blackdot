@@ -259,8 +259,9 @@ Deployed files (after bootstrap):
 
 Key pieces:
 
-- **lib/_features.sh**: Feature Registry - the control plane for enabling/disabling functionality
-- **zsh/zsh.d/**: Modular shell configuration (14 modules loaded in numeric order)
+- **internal/feature/registry.go**: Feature Registry - the control plane for enabling/disabling functionality
+- **internal/cli/**: Go CLI commands (vault, doctor, status, setup, etc.)
+- **zsh/zsh.d/**: Modular shell configuration (18 modules loaded in numeric order)
 - **zsh/zshrc**: Main Zsh config that sources zsh.d modules
 - **zsh/p10k.zsh**: Powerlevel10k theme configuration
 - **ghostty/config**: Ghostty terminal configuration
@@ -320,9 +321,10 @@ These work on **any platform** without modification:
 - Just needs: `zsh`, vault CLI, `jq`
 - Works on Linux, macOS, BSD, WSL, Docker
 
-**Health & Metrics** (100% portable)
-- `bin/blackdot-doctor` / `bin/blackdot-drift`
-- `bin/blackdot-metrics`
+**Health & Metrics** (Go CLI - 100% portable)
+- `blackdot doctor` - System health validation
+- `blackdot vault status` - Drift detection
+- `blackdot status` - Visual dashboard with metrics
 - Cross-platform file permissions handling
 
 **Shell Configuration** (OS-aware)
@@ -1671,8 +1673,8 @@ declare -A SSH_KEYS=(
 ```
 
 This automatically propagates to:
-- `restore-ssh.sh` (restores the key from vault)
-- `bin/blackdot-doctor` (validates key exists with correct permissions)
+- `blackdot vault restore` (restores the key from vault via vaultmux)
+- `blackdot doctor` (validates key exists with correct permissions)
 
 ### 4. Add to SSH config
 
