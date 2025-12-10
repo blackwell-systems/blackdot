@@ -20,6 +20,22 @@ This will:
 
 After installation, restart PowerShell and run `blackdot setup`.
 
+### Minimal Mode
+
+For a minimal installation (shell config only, no setup wizard):
+
+```powershell
+$env:BLACKDOT_MINIMAL = '1'; irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
+```
+
+### Skip Binary Download
+
+If you don't need the Go binary:
+
+```powershell
+$env:BLACKDOT_NO_BINARY = '1'; irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
+```
+
 ---
 
 ## Manual Installation
@@ -198,7 +214,7 @@ fnm auto-switches Node versions when entering directories with `.nvmrc` or `.nod
 | **Docker** | `docker-ps`, `docker-images`, `docker-clean`, `docker-status` | Docker management |
 | **Node.js** | `fnm-install`, `fnm-use`, `fnm-list`, `Initialize-Fnm` | Node version management |
 | **Navigation** | `z` (via zoxide), `Initialize-Zoxide` | Smart directory jumping |
-| **Hooks** | `Invoke-DotfilesHook`, `Register-DotfilesHook` | 24 hook points |
+| **Hooks** | `Invoke-BlackdotHook`, `Register-BlackdotHook` | 24 hook points |
 
 ### Go CLI Features
 
@@ -252,7 +268,7 @@ blackdot setup
 
 ```powershell
 # Check if module is installed
-Get-Module -ListAvailable Dotfiles
+Get-Module -ListAvailable Blackdot
 
 # Check profile imports it
 Get-Content $PROFILE
@@ -297,15 +313,15 @@ After installation:
 ```
 $HOME\
 ├── workspace\
-│   └── dotfiles\           # Repository clone
+│   └── blackdot\           # Repository clone
 │       ├── powershell\     # PowerShell module source
 │       └── ...
 ├── Documents\
 │   └── PowerShell\
 │       └── Modules\
-│           └── Dotfiles\   # Installed module
+│           └── Blackdot\   # Installed module
 └── .config\
-    └── dotfiles\
+    └── blackdot\
         └── config.json     # Configuration
 ```
 
@@ -347,7 +363,7 @@ Move-Item -Force dotfiles.exe $HOME\.local\bin\
 
 - **Documentation**: https://github.com/blackwell-systems/blackdot
 - **Issues**: https://github.com/blackwell-systems/blackdot/issues
-- **PowerShell Commands**: `Get-Command -Module Dotfiles`
+- **PowerShell Commands**: `Get-Command -Module Blackdot`
 
 ---
 

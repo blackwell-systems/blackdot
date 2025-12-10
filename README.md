@@ -1117,19 +1117,31 @@ blackdot setup
 
 ### Windows (PowerShell)
 
-Native Windows users should use the PowerShell module:
+**One-liner:**
+
+```powershell
+irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
+```
+
+**Minimal mode:**
+
+```powershell
+$env:BLACKDOT_MINIMAL = '1'; irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
+```
+
+**Manual installation:**
 
 ```powershell
 # 1. Clone the repository
-git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\dotfiles
+git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\blackdot
 
 # 2. Install PowerShell module
-cd $HOME\workspace\dotfiles\powershell
-.\Install-Dotfiles.ps1
+cd $HOME\workspace\blackdot\powershell
+.\Install-Blackdot.ps1
 
 # 3. Restart PowerShell and verify
-Import-Module Dotfiles
-dotfiles-status
+Import-Module Blackdot
+blackdot status
 ```
 
 **You get:** SSH, AWS, Docker, Go, Rust, Python tool aliases, hook system, and full CLI access.

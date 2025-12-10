@@ -127,8 +127,8 @@ jobs:
         run: |
           Write-Host "Validating PowerShell scripts..."
           $scripts = @(
-            "powershell/Install-Dotfiles.ps1",
-            "powershell/Dotfiles.psm1",
+            "powershell/Install-Blackdot.ps1",
+            "powershell/Blackdot.psm1",
             "powershell/Install-Packages.ps1"
           )
           foreach ($script in $scripts) {

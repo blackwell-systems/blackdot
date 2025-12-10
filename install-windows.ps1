@@ -9,26 +9,40 @@
     Usage:
         irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
 
+    Minimal mode (via environment variable):
+        $env:BLACKDOT_MINIMAL = '1'; irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
+
 .PARAMETER WorkspaceTarget
-    Where to clone the repository. Defaults to ~/workspace
+    Where to clone the repository. Defaults to ~/workspace (or WORKSPACE_TARGET env var)
 
 .PARAMETER Minimal
-    Skip optional features (just shell config)
+    Skip optional features (just shell config). Can also set BLACKDOT_MINIMAL=1
 
 .PARAMETER NoBinary
-    Skip Go binary download
+    Skip Go binary download. Can also set BLACKDOT_NO_BINARY=1
 
 .EXAMPLE
     irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
+
+.EXAMPLE
+    $env:BLACKDOT_MINIMAL = '1'; irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
 #>
 [CmdletBinding()]
 param(
-    [string]$WorkspaceTarget = "$HOME\workspace",
+    [string]$WorkspaceTarget = $(if ($env:WORKSPACE_TARGET) { $env:WORKSPACE_TARGET } else { "$HOME\workspace" }),
     [switch]$Minimal,
     [switch]$NoBinary
 )
 
 $ErrorActionPreference = 'Stop'
+
+# Support environment variables for switches (useful for piped execution)
+if ($env:BLACKDOT_MINIMAL -eq '1' -or $env:BLACKDOT_MINIMAL -eq 'true') {
+    $Minimal = $true
+}
+if ($env:BLACKDOT_NO_BINARY -eq '1' -or $env:BLACKDOT_NO_BINARY -eq 'true') {
+    $NoBinary = $true
+}
 
 # Colors
 function Write-Info { param($msg) Write-Host "[INFO] $msg" -ForegroundColor Blue }

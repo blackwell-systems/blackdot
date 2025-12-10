@@ -407,7 +407,7 @@ fi
 
 # Windows: Offer to set up PowerShell module
 if [[ "$PLATFORM" == "Windows (Git Bash)" || "$PLATFORM" == "Windows" ]]; then
-    PS_INSTALL_SCRIPT="$INSTALL_DIR/powershell/Install-Dotfiles.ps1"
+    PS_INSTALL_SCRIPT="$INSTALL_DIR/powershell/Install-Blackdot.ps1"
     if [[ -f "$PS_INSTALL_SCRIPT" ]] && command -v powershell.exe >/dev/null 2>&1; then
         echo ""
         echo -e "${CYAN}PowerShell module available${NC}"

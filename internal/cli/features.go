@@ -617,7 +617,7 @@ func printShellReloadHint() {
 
 	// Detect platform and show appropriate reload command
 	if isWindows() {
-		fmt.Println("  Import-Module Dotfiles -Force")
+		fmt.Println("  Import-Module Blackdot -Force")
 		Dim.Println("  (or restart PowerShell)")
 	} else {
 		fmt.Println("  source ~/.zshrc")
