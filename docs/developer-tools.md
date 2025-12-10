@@ -2,7 +2,7 @@
 
 > **Deep Integration:** Not just aliases—helpers, completions, and workflow automation for your entire toolchain.
 
-The dotfiles framework provides deep integrations with modern developer tools. Each tool suite is feature-gated and can be enabled/disabled independently.
+Blackdot provides deep integrations with modern developer tools. Each tool suite is feature-gated and can be enabled/disabled independently.
 
 ---
 
@@ -63,7 +63,7 @@ blackdot features list integration
   ╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝       ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
 ```
 
-**Feature:** `aws_helpers` | **File:** `zsh/zsh.d/50-aws.zsh`
+**Feature:** `aws_helpers` | **File:** `zsh/zsh.d/60-aws.zsh`
 
 ### Commands
 
@@ -124,7 +124,7 @@ awslogout
   AWS Cloud Development Kit
 ```
 
-**Feature:** `cdk_tools` | **File:** `zsh/zsh.d/55-cdk.zsh` | **Depends on:** `aws_helpers`
+**Feature:** `cdk_tools` | **File:** `zsh/zsh.d/61-cdk.zsh` | **Depends on:** `aws_helpers`
 
 ### Commands
 
@@ -581,7 +581,7 @@ dprune                  # Interactive prune
 ## NVM (Node.js)
 
 **Feature:** `nvm_integration`
-**File:** `zsh/zsh.d/70-nvm.zsh`
+**File:** `zsh/zsh.d/90-integrations.zsh`
 
 ### Lazy Loading
 
@@ -623,7 +623,7 @@ node --version
 ## SDKMAN (Java)
 
 **Feature:** `sdkman_integration`
-**File:** `zsh/zsh.d/75-sdkman.zsh`
+**File:** `zsh/zsh.d/90-integrations.zsh`
 
 ### Lazy Loading
 
