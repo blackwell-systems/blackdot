@@ -457,7 +457,7 @@ print_usage() {
 main() {
     echo ""
     echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
-    echo -e "${CYAN}  Dotfiles Mock Vault Setup${NC}"
+    echo -e "${CYAN}  Blackdot Mock Vault Setup${NC}"
     echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
     echo ""
 

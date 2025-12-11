@@ -417,9 +417,9 @@ func runEncryptEdit(cmd *cobra.Command, args []string) error {
 
 func runEncryptList(cmd *cobra.Command, args []string) error {
 	home, _ := os.UserHomeDir()
-	dotfilesDir := os.Getenv("BLACKDOT_DIR")
-	if dotfilesDir == "" {
-		dotfilesDir = filepath.Join(home, ".blackdot")
+	blackdotDir := os.Getenv("BLACKDOT_DIR")
+	if blackdotDir == "" {
+		blackdotDir = filepath.Join(home, ".blackdot")
 	}
 
 	bold := color.New(color.Bold).SprintFunc()
@@ -427,7 +427,7 @@ func runEncryptList(cmd *cobra.Command, args []string) error {
 
 	fmt.Println(bold("Encrypted files (.age):"))
 	foundEncrypted := false
-	filepath.Walk(dotfilesDir, func(path string, info os.FileInfo, err error) error {
+	filepath.Walk(blackdotDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil
 		}
@@ -445,7 +445,7 @@ func runEncryptList(cmd *cobra.Command, args []string) error {
 	fmt.Println(bold("Files that should be encrypted:"))
 	foundUnencrypted := false
 	for _, pattern := range encryptPatterns {
-		filepath.Walk(dotfilesDir, func(path string, info os.FileInfo, err error) error {
+		filepath.Walk(blackdotDir, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return nil
 			}
@@ -508,13 +508,13 @@ func runEncryptStatus(cmd *cobra.Command, args []string) error {
 
 	// Count encrypted files
 	home, _ := os.UserHomeDir()
-	dotfilesDir := os.Getenv("BLACKDOT_DIR")
-	if dotfilesDir == "" {
-		dotfilesDir = filepath.Join(home, ".blackdot")
+	blackdotDir := os.Getenv("BLACKDOT_DIR")
+	if blackdotDir == "" {
+		blackdotDir = filepath.Join(home, ".blackdot")
 	}
 
 	count := 0
-	filepath.Walk(dotfilesDir, func(path string, info os.FileInfo, err error) error {
+	filepath.Walk(blackdotDir, func(path string, info os.FileInfo, err error) error {
 		if err == nil && !info.IsDir() && strings.HasSuffix(path, ".age") {
 			count++
 		}
@@ -541,9 +541,9 @@ func runEncryptPushKey(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Pushing age key to vault as '%s'...\n", vaultItem)
 
 	// Try to use blackdot vault set
-	dotfilesCmd := exec.Command("blackdot", "vault", "set", vaultItem, "--stdin")
-	dotfilesCmd.Stdin = strings.NewReader(string(keyContent))
-	if err := dotfilesCmd.Run(); err != nil {
+	blackdotCmd := exec.Command("blackdot", "vault", "set", vaultItem, "--stdin")
+	blackdotCmd.Stdin = strings.NewReader(string(keyContent))
+	if err := blackdotCmd.Run(); err != nil {
 		fmt.Println()
 		fmt.Println(color.YellowString("[NOTE]") + " Vault push not implemented yet. Manually save this key:")
 		fmt.Printf("  Item name: %s\n", vaultItem)

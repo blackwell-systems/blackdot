@@ -5,7 +5,7 @@ set -euo pipefail
 BLACKDOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OS="$(uname -s)"
 
-echo "Dotfiles repo: $BLACKDOT_DIR"
+echo "Blackdot repo: $BLACKDOT_DIR"
 echo "Detected OS: $OS"
 
 # Helper: safely create symlink, backing up existing real files

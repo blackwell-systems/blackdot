@@ -281,7 +281,7 @@ link_blackdot() {
 # Template rendering (machine-specific configs)
 # ============================================================
 render_templates() {
-    local dotfiles_bin="$BLACKDOT_DIR/bin/blackdot"
+    local blackdot_bin="$BLACKDOT_DIR/bin/blackdot"
     local local_vars="$BLACKDOT_DIR/templates/_variables.local.sh"
 
     # Check if template system is configured
@@ -292,11 +292,11 @@ render_templates() {
     fi
 
     # Render templates if configured
-    if [[ -x "$dotfiles_bin" ]]; then
+    if [[ -x "$blackdot_bin" ]]; then
         echo "Rendering machine-specific templates..."
-        "$dotfiles_bin" template render --force
+        "$blackdot_bin" template render --force
     else
-        echo "blackdot binary not found: $dotfiles_bin"
+        echo "blackdot binary not found: $blackdot_bin"
     fi
 }
 

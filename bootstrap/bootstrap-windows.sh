@@ -94,7 +94,7 @@ if [[ "${SKIP_WORKSPACE_SYMLINK:-}" != "true" ]]; then
 fi
 
 # ============================================================
-# 5. Dotfiles symlinks (shared)
+# 5. Blackdot symlinks (shared)
 # ============================================================
 link_blackdot
 

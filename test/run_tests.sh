@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# Test runner for dotfiles unit and integration tests
+# Test runner for blackdot unit and integration tests
 # Usage: ./run_tests.sh [unit|integration|all]
 # ============================================================
 set -euo pipefail
@@ -32,7 +32,7 @@ if ! command -v bats >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "Dotfiles Test Runner"
+echo "Blackdot Test Runner"
 echo "bats version: $(bats --version)"
 echo ""
 

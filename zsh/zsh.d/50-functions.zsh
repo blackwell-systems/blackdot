@@ -230,7 +230,7 @@ blackdot-upgrade() {
 
 # Check for blackdot updates (once per day)
 _check_blackdot_updates() {
-    local dotfiles_dir="$BLACKDOT_DIR"
+    local blackdot_dir="$BLACKDOT_DIR"
     local cache_file="$HOME/.blackdot-update-check"
 
     # Skip if checked recently (within last day)
@@ -248,9 +248,9 @@ _check_blackdot_updates() {
     fi
 
     # Fetch and compare (silently)
-    (cd "$dotfiles_dir" && git fetch origin -q 2>/dev/null) || return
-    local current_branch=$(cd "$dotfiles_dir" && git rev-parse --abbrev-ref HEAD 2>/dev/null)
-    local behind=$(cd "$dotfiles_dir" && git rev-list --count HEAD..origin/"$current_branch" 2>/dev/null)
+    (cd "$blackdot_dir" && git fetch origin -q 2>/dev/null) || return
+    local current_branch=$(cd "$blackdot_dir" && git rev-parse --abbrev-ref HEAD 2>/dev/null)
+    local behind=$(cd "$blackdot_dir" && git rev-list --count HEAD..origin/"$current_branch" 2>/dev/null)
 
     if [[ -n "$behind" && "$behind" -gt 0 ]]; then
         echo ""

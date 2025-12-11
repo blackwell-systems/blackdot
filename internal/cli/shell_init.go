@@ -57,7 +57,7 @@ Usage:
 
 func outputPosixInit() error {
 	// Get the blackdot binary path
-	blackdotDir := DotfilesDir()
+	blackdotDir := BlackdotDir()
 	binaryPath := fmt.Sprintf("%s/bin/blackdot", blackdotDir)
 
 	// Check if running on Windows (Git Bash/MSYS)
@@ -142,7 +142,7 @@ feature_status() {
 }
 
 func outputFishInit() error {
-	blackdotDir := DotfilesDir()
+	blackdotDir := BlackdotDir()
 	binaryPath := fmt.Sprintf("%s/bin/blackdot", blackdotDir)
 
 	if runtime.GOOS == "windows" {
@@ -199,7 +199,7 @@ end
 }
 
 func outputPowerShellInit() error {
-	blackdotDir := DotfilesDir()
+	blackdotDir := BlackdotDir()
 	binaryPath := fmt.Sprintf("%s\\bin\\blackdot.exe", blackdotDir)
 
 	// Use forward slashes for cross-platform compatibility

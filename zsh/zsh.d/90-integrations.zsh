@@ -144,10 +144,10 @@ fi
 # Shows notification if updates are available
 check_blackdot_updates() {
   local cache="$HOME/.blackdot-update-check"
-  local dotfiles_dir="${HOME}/workspace/blackdot"
+  local blackdot_dir="${BLACKDOT_DIR:-${HOME}/.blackdot}"
 
   # Skip if not in a git repo
-  [[ ! -d "$dotfiles_dir/.git" ]] && return 0
+  [[ ! -d "$blackdot_dir/.git" ]] && return 0
 
   # Get age of cache file
   local age=0
@@ -168,7 +168,7 @@ check_blackdot_updates() {
   if [[ $age -gt 86400 ]]; then
     # Fetch updates in background (don't block shell startup)
     (
-      cd "$dotfiles_dir" 2>/dev/null || exit 0
+      cd "$blackdot_dir" 2>/dev/null || exit 0
       git fetch --quiet origin 2>/dev/null || exit 0
 
       # Count commits behind upstream
@@ -193,8 +193,8 @@ check_blackdot_updates
 # Quick check if local config files have changed since last vault pull
 # Runs in <50ms (local checksum comparison only, no vault access)
 check_vault_drift() {
-  local dotfiles_dir="${HOME}/workspace/blackdot"
-  local drift_lib="$dotfiles_dir/lib/_drift.sh"
+  local blackdot_dir="${BLACKDOT_DIR:-${HOME}/.blackdot}"
+  local drift_lib="$blackdot_dir/lib/_drift.sh"
   local state_file="${XDG_CACHE_HOME:-$HOME/.cache}/blackdot/vault-state.json"
 
   # Skip if disabled
@@ -230,8 +230,8 @@ fi
 # Source hooks library and run shell_init hooks
 # Enables custom behavior at shell lifecycle points
 _blackdot_init_hooks() {
-  local dotfiles_dir="${BLACKDOT_DIR:-${HOME}/workspace/blackdot}"
-  local hooks_lib="$dotfiles_dir/lib/_hooks.sh"
+  local blackdot_dir="${BLACKDOT_DIR:-${HOME}/.blackdot}"
+  local hooks_lib="$blackdot_dir/lib/_hooks.sh"
 
   # Skip if hooks library doesn't exist
   [[ -f "$hooks_lib" ]] || return 0

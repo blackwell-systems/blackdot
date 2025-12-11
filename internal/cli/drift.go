@@ -150,9 +150,9 @@ func runDriftQuick(home string, green, yellow, dim func(a ...interface{}) string
 
 // runDriftFull performs a full drift check against vault
 func runDriftFull(home string, green, yellow, cyan, dim func(a ...interface{}) string) error {
-	dotfilesDir := os.Getenv("BLACKDOT_DIR")
-	if dotfilesDir == "" {
-		dotfilesDir = filepath.Join(home, ".blackdot")
+	blackdotDir := os.Getenv("BLACKDOT_DIR")
+	if blackdotDir == "" {
+		blackdotDir = filepath.Join(home, ".blackdot")
 	}
 
 	// For full mode, we'd need to connect to vault
@@ -164,7 +164,7 @@ func runDriftFull(home string, green, yellow, cyan, dim func(a ...interface{}) s
 	fmt.Println()
 
 	// Check for vault session
-	vaultSessionFile := filepath.Join(dotfilesDir, "vault", ".bw-session")
+	vaultSessionFile := filepath.Join(blackdotDir, "vault", ".bw-session")
 	bwSession := os.Getenv("BW_SESSION")
 	if bwSession == "" {
 		if data, err := os.ReadFile(vaultSessionFile); err == nil {

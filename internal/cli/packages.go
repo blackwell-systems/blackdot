@@ -233,7 +233,7 @@ func runPackages(cmd *cobra.Command, args []string) error {
 
 // getPackageTier determines which tier to use
 // Priority: --tier flag > config.json > BREWFILE_TIER env > default (full)
-func getPackageTier(tierOverride, dotfilesDir string) string {
+func getPackageTier(tierOverride, blackdotDir string) string {
 	// 1. Command line override
 	if tierOverride != "" {
 		return tierOverride
