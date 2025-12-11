@@ -989,6 +989,6 @@ blackdot template link
 ## Related Documentation
 
 - [Main README](README.md) - Overview
-- [Full Documentation](README-FULL.md) - Complete guide
+- [Architecture](architecture.md) - Complete guide
 - [Vault System](vault-README.md) - Secret management
 - [Architecture](architecture.md) - System design

@@ -50,7 +50,7 @@ docs/
 ├── _sidebar.md         # Navigation sidebar
 ├── .nojekyll          # Tell GitHub Pages to skip Jekyll
 ├── README.md          # Main documentation (home page)
-├── README-FULL.md     # Comprehensive documentation
+├── architecture.md    # System architecture & platform support
 ├── vault-README.md    # Vault system documentation
 ├── macos-settings.md  # macOS settings guide
 ├── CONTRIBUTING.md    # Contribution guide
