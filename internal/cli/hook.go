@@ -677,6 +677,7 @@ func runHookTest(args []string) error {
 // printHookHelp prints styled help matching ZSH format
 func printHookHelp() {
 	// Title
+	fmt.Print("⚫ ")
 	BoldCyan.Print("blackdot hook")
 	fmt.Print(" - Hook system management\n")
 	fmt.Println()

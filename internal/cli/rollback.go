@@ -59,6 +59,7 @@ For more backup options, use 'blackdot backup'.`,
 // printRollbackHelp prints styled help matching ZSH style
 func printRollbackHelp() {
 	// Title
+	fmt.Print("⚫ ")
 	BoldCyan.Print("blackdot rollback")
 	fmt.Print(" - ")
 	Dim.Println("Instant rollback to last backup")

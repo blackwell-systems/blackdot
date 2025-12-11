@@ -110,6 +110,7 @@ func newToolsCmd() *cobra.Command {
 // printToolsHelp prints styled help matching ZSH style
 func printToolsHelp() {
 	// Title
+	fmt.Print("⚫ ")
 	BoldCyan.Print("blackdot tools")
 	fmt.Print(" - ")
 	Dim.Println("Cross-platform developer tools")

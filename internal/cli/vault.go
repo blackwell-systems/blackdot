@@ -472,6 +472,7 @@ Examples:
 // printVaultHelp prints styled help matching ZSH vault help exactly
 func printVaultHelp() {
 	// Title
+	fmt.Print("⚫ ")
 	BoldCyan.Print("blackdot vault")
 	fmt.Print(" - Secret vault operations\n")
 	fmt.Println()

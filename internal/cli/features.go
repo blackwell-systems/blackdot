@@ -70,6 +70,7 @@ categories: core, optional, and integration.`,
 // printFeaturesHelp prints styled help matching ZSH features help
 func printFeaturesHelp() {
 	// Title
+	fmt.Print("⚫ ")
 	BoldCyan.Print("blackdot features")
 	fmt.Print(" - ")
 	Dim.Println("Feature registry management")

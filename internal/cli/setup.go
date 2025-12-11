@@ -170,7 +170,7 @@ func runSetup(reset, statusOnly bool) error {
 	fmt.Println(cyan(` / /_/ / / /_/ / /__/ ,< / /_/ / /_/ / /_`))
 	fmt.Println(cyan(`/_____/_/\__,_/\___/_/|_|\__,_/\____/\__/`))
 	fmt.Println()
-	fmt.Println(bold("              Setup Wizard"))
+	fmt.Println(bold("           ⚫ Setup Wizard"))
 	fmt.Println()
 
 	// Show current status
@@ -271,7 +271,7 @@ func runSetup(reset, statusOnly bool) error {
 	if !needsSetup(cfg) {
 		fmt.Println()
 		fmt.Println(green(bold("╔════════════════════════════════════════════════════════════╗")))
-		fmt.Println(green(bold("║              Setup Complete!                               ║")))
+		fmt.Println(green(bold("║           ⚫ Setup Complete!                               ║")))
 		fmt.Println(green(bold("╚════════════════════════════════════════════════════════════╝")))
 		fmt.Println()
 
