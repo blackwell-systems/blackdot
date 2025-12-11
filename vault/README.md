@@ -192,8 +192,8 @@ New backends are implemented in the `vaultmux` Go library:
 
 ```bash
 # 1. Clone dotfiles
-git clone git@github.com:YOUR-USERNAME/dotfiles.git ~/workspace/dotfiles
-cd ~/workspace/dotfiles
+git clone git@github.com:YOUR-USERNAME/dotfiles.git ~/workspace/blackdot
+cd ~/workspace/blackdot
 
 # 2. Run bootstrap (packages, symlinks)
 ./bootstrap/bootstrap-mac.sh  # or ./bootstrap/bootstrap-linux.sh

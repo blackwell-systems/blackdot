@@ -279,9 +279,9 @@ blackdot aliases search <term>    # Search aliases by name or expansion
 
 ## Design Decisions
 
-### Path Convention: `~/workspace/dotfiles`
+### Path Convention: `~/workspace/blackdot`
 
-The system is designed around `~/workspace/dotfiles` as the canonical location:
+The system is designed around `~/workspace/blackdot` as the canonical location:
 
 1. **`/workspace` symlink** enables Claude Code session portability
 2. **Install script** clones to `$HOME/workspace/dotfiles`

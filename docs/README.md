@@ -181,8 +181,8 @@ blackdot features enable cdk_tools --persist
 **macOS / Linux / WSL:**
 ```bash
 # 1. Clone
-git clone git@github.com:blackwell-systems/blackdot.git ~/workspace/dotfiles
-cd ~/workspace/dotfiles
+git clone git@github.com:blackwell-systems/blackdot.git ~/workspace/blackdot
+cd ~/workspace/blackdot
 
 # 2. Run platform bootstrap
 ./bootstrap/bootstrap-mac.sh   # macOS

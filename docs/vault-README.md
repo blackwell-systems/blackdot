@@ -293,8 +293,8 @@ blackdot vault list
 
 ```bash
 # 1. Clone dotfiles
-git clone git@github.com:blackwell-systems/blackdot.git ~/workspace/dotfiles
-cd ~/workspace/dotfiles
+git clone git@github.com:blackwell-systems/blackdot.git ~/workspace/blackdot
+cd ~/workspace/blackdot
 
 # 2. Bootstrap the system
 ./bootstrap/bootstrap-mac.sh  # or bootstrap-linux.sh

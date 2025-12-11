@@ -37,17 +37,17 @@ var uninstallSecretFiles = []string{
 func newUninstallCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "uninstall",
-		Short: "Remove dotfiles configuration",
-		Long: `Uninstall dotfiles by removing symlinks and configurations.
+		Short: "Remove blackdot configuration",
+		Long: `Uninstall blackdot by removing symlinks and configurations.
 
 Options:
   --dry-run, -n      Show what would be removed (don't delete)
   --keep-secrets, -k Keep SSH keys and AWS credentials
 
 Examples:
-  dotfiles uninstall              # Interactive uninstall
-  dotfiles uninstall --dry-run    # Preview what would be removed
-  dotfiles uninstall -k           # Keep secrets`,
+  blackdot uninstall              # Interactive uninstall
+  blackdot uninstall --dry-run    # Preview what would be removed
+  blackdot uninstall -k           # Keep secrets`,
 		RunE: runUninstall,
 	}
 
@@ -141,7 +141,7 @@ func runUninstall(cmd *cobra.Command, args []string) error {
 			fmt.Printf("  %s: %s (repository)\n", yellow("Would remove"), dotfilesDir)
 		} else {
 			reader := bufio.NewReader(os.Stdin)
-			fmt.Print("Remove dotfiles repository? (yes/no): ")
+			fmt.Print("Remove blackdot repository? (yes/no): ")
 			confirm, _ := reader.ReadString('\n')
 			confirm = strings.TrimSpace(confirm)
 

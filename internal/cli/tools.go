@@ -31,7 +31,7 @@ func checkToolFeature(toolName string) error {
 
 	reg := initRegistry()
 	if !reg.Enabled(featureName) {
-		return fmt.Errorf("feature '%s' is disabled\nEnable with: dotfiles features enable %s", featureName, featureName)
+		return fmt.Errorf("feature '%s' is disabled\nEnable with: blackdot features enable %s", featureName, featureName)
 	}
 	return nil
 }
@@ -110,14 +110,14 @@ func newToolsCmd() *cobra.Command {
 // printToolsHelp prints styled help matching ZSH style
 func printToolsHelp() {
 	// Title
-	BoldCyan.Print("dotfiles tools")
+	BoldCyan.Print("blackdot tools")
 	fmt.Print(" - ")
 	Dim.Println("Cross-platform developer tools")
 	fmt.Println()
 
 	// Usage
 	Bold.Print("Usage:")
-	fmt.Println(" dotfiles tools <category> <command> [options]")
+	fmt.Println(" blackdot tools <category> <command> [options]")
 	fmt.Println()
 
 	// Categories
@@ -142,27 +142,27 @@ func printToolsHelp() {
 	// Examples
 	BoldCyan.Println("Examples:")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles tools ssh keys")
+	Yellow.Print("blackdot tools ssh keys")
 	fmt.Print("           ")
 	Dim.Println("# List SSH keys with fingerprints")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles tools ssh status")
+	Yellow.Print("blackdot tools ssh status")
 	fmt.Print("         ")
 	Dim.Println("# Show SSH status with ASCII art")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles tools aws profiles")
+	Yellow.Print("blackdot tools aws profiles")
 	fmt.Print("       ")
 	Dim.Println("# List AWS profiles")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles tools docker ps")
+	Yellow.Print("blackdot tools docker ps")
 	fmt.Print("          ")
 	Dim.Println("# List running containers")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles tools docker clean")
+	Yellow.Print("blackdot tools docker clean")
 	fmt.Print("       ")
 	Dim.Println("# Remove stopped containers")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles tools claude status")
+	Yellow.Print("blackdot tools claude status")
 	fmt.Print("      ")
 	Dim.Println("# Show Claude configuration")
 	fmt.Println()

@@ -76,7 +76,7 @@ brew "lz4"
 brew "jq"
 brew "awscli"
 brew "bitwarden-cli"
-brew "age"                       # Modern file encryption (for dotfiles encrypt)
+brew "age"                       # Modern file encryption (for blackdot encrypt)
 
 # ============================================================
 # macOS-only casks (GUI apps)

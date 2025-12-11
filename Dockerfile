@@ -1,4 +1,4 @@
-# Dotfiles Bootstrap in Docker
+# Blackdot Bootstrap in Docker
 # =============================
 # Demonstrates running bootstrap in a clean container environment.
 # Useful for CI/CD, testing, or reproducible development containers.
@@ -26,17 +26,17 @@ RUN useradd -m -s /bin/bash developer && \
 USER developer
 WORKDIR /home/developer
 
-# Clone dotfiles (replace with your fork)
+# Clone blackdot (replace with your fork)
 # For CI, you might mount the repo instead
 ARG BLACKDOT_REPO=https://github.com/blackwell-systems/blackdot.git
-RUN git clone "$BLACKDOT_REPO" /home/developer/workspace/dotfiles
+RUN git clone "$BLACKDOT_REPO" /home/developer/workspace/blackdot
 
 # Run bootstrap
-WORKDIR /home/developer/workspace/dotfiles
+WORKDIR /home/developer/workspace/blackdot
 RUN ./bootstrap/bootstrap-linux.sh
 
 # Make mock scripts executable
-RUN chmod +x /home/developer/workspace/dotfiles/test/mocks/*.sh 2>/dev/null || true
+RUN chmod +x /home/developer/workspace/blackdot/test/mocks/*.sh 2>/dev/null || true
 
 # Add welcome message
 RUN echo '' >> /home/developer/.zshrc && \
@@ -44,25 +44,25 @@ RUN echo '' >> /home/developer/.zshrc && \
     echo 'if [[ -z "$_WELCOME_SHOWN" ]]; then' >> /home/developer/.zshrc && \
     echo '    echo ""' >> /home/developer/.zshrc && \
     echo '    echo "\\033[0;36m═══════════════════════════════════════════════════════════\\033[0m"' >> /home/developer/.zshrc && \
-    echo '    echo "\\033[0;36m  Dotfiles Test Container (full)\\033[0m"' >> /home/developer/.zshrc && \
+    echo '    echo "\\033[0;36m  Blackdot Test Container (full)\\033[0m"' >> /home/developer/.zshrc && \
     echo '    echo "\\033[0;36m═══════════════════════════════════════════════════════════\\033[0m"' >> /home/developer/.zshrc && \
     echo '    echo ""' >> /home/developer/.zshrc && \
     echo '    echo "\\033[1mQuick Start:\\033[0m"' >> /home/developer/.zshrc && \
-    echo '    echo "  dotfiles help          # Show available commands"' >> /home/developer/.zshrc && \
-    echo '    echo "  dotfiles doctor        # Run health checks"' >> /home/developer/.zshrc && \
-    echo '    echo "  dotfiles status        # Show dashboard"' >> /home/developer/.zshrc && \
+    echo '    echo "  blackdot help          # Show available commands"' >> /home/developer/.zshrc && \
+    echo '    echo "  blackdot doctor        # Run health checks"' >> /home/developer/.zshrc && \
+    echo '    echo "  blackdot status        # Show dashboard"' >> /home/developer/.zshrc && \
     echo '    echo ""' >> /home/developer/.zshrc && \
     echo '    echo "\\033[1mTest Vault with Mock Credentials (pass backend):\\033[0m"' >> /home/developer/.zshrc && \
     echo '    echo "  ./test/mocks/setup-mock-vault.sh --no-pass  # Creates fake GPG key + pass store"' >> /home/developer/.zshrc && \
     echo '    echo "  export BLACKDOT_VAULT_BACKEND=pass          # Switch to pass backend"' >> /home/developer/.zshrc && \
-    echo '    echo "  dotfiles vault check                        # Test vault commands"' >> /home/developer/.zshrc && \
+    echo '    echo "  blackdot vault check                        # Test vault commands"' >> /home/developer/.zshrc && \
     echo '    echo ""' >> /home/developer/.zshrc && \
     echo '    export _WELCOME_SHOWN=1' >> /home/developer/.zshrc && \
     echo 'fi' >> /home/developer/.zshrc
 
 # Optional: Restore secrets from Bitwarden
 # Requires BW_SESSION to be passed at runtime:
-#   docker run -e BW_SESSION="$BW_SESSION" dotfiles-dev
+#   docker run -e BW_SESSION="$BW_SESSION" blackdot-dev
 
 # Set default shell to zsh
 SHELL ["/bin/zsh", "-c"]
@@ -75,23 +75,23 @@ CMD ["zsh"]
 # =============================================================================
 #
 # Build image:
-#   docker build -t dotfiles-dev .
+#   docker build -t blackdot-dev .
 #
 # Run interactive shell:
-#   docker run -it --rm dotfiles-dev
+#   docker run -it --rm blackdot-dev
 #
 # Run with Bitwarden vault restore:
 #   export BW_SESSION="$(bw unlock --raw)"
-#   docker run -it --rm -e BW_SESSION="$BW_SESSION" dotfiles-dev
+#   docker run -it --rm -e BW_SESSION="$BW_SESSION" blackdot-dev
 #
-# Mount local dotfiles (for testing):
-#   docker run -it --rm -v $PWD:/home/developer/workspace/dotfiles dotfiles-dev
+# Mount local blackdot (for testing):
+#   docker run -it --rm -v $PWD:/home/developer/workspace/blackdot blackdot-dev
 #
 # Use in CI (GitLab example):
 #   test:
-#     image: dotfiles-dev:latest
+#     image: blackdot-dev:latest
 #     script:
-#       - dotfiles doctor
+#       - blackdot doctor
 #
 # Docker Compose:
 #   services:
@@ -100,5 +100,5 @@ CMD ["zsh"]
 #       environment:
 #         - BW_SESSION
 #       volumes:
-#         - ./:/home/developer/workspace/dotfiles
+#         - ./:/home/developer/workspace/blackdot
 #       command: zsh

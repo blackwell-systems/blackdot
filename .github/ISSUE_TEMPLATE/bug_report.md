@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a problem with the dotfiles
+about: Report a problem with blackdot
 title: '[BUG] '
 labels: bug
 assignees: ''
@@ -41,7 +41,7 @@ assignees: ''
 
 ## Health Check Output
 
-<!-- Run 'dotfiles doctor' and paste output -->
+<!-- Run 'blackdot doctor'' and paste output -->
 
 ```bash
 # Paste health check output here

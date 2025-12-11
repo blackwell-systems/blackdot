@@ -175,7 +175,7 @@ _get_workspace_target() {
     fi
 
     # 2. Check config file
-    local config_file="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/config.json"
+    local config_file="${XDG_CONFIG_HOME:-$HOME/.config}/blackdot/config.json"
     if [[ -f "$config_file" ]] && command -v jq &>/dev/null; then
         local configured
         configured=$(jq -r '.paths.workspace_target // empty' "$config_file" 2>/dev/null)
@@ -287,7 +287,7 @@ render_templates() {
     # Check if template system is configured
     if [[ ! -f "$local_vars" ]]; then
         echo "Template system not configured yet."
-        echo "Run 'dotfiles template init' after bootstrap to set up machine-specific configs."
+        echo "Run 'blackdot template init' after bootstrap to set up machine-specific configs."
         return 0
     fi
 

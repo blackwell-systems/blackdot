@@ -431,7 +431,7 @@ sshtools gen mykey    # Generate key
 │  └── dotfiles              ← Go binary (THE CLI, renamed from        │
 │                              dotfiles-go)                            │
 │                                                                      │
-│  ~/workspace/dotfiles/     ← Optional repo (for shell integration)   │
+│  ~/workspace/blackdot/     ← Optional repo (for shell integration)   │
 │  ├── zsh/zsh.d/                                                      │
 │  │   ├── 00-init.zsh       PATH, BLACKDOT_DIR, instant prompt        │
 │  │   ├── 30-tools.zsh      Tool initializers (fzf, zoxide)           │

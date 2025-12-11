@@ -8,14 +8,14 @@
 #   10-plugins.zsh      - Completions, plugin loading, prompt configuration
 #   20-env.zsh          - Environment variables, workspace paths, history settings
 #   30-tools.zsh        - Modern CLI tools (eza, fzf, dust, yazi, etc.)
-#   40-aliases.zsh      - Navigation, bitwarden, dotfiles, and utility aliases
-#   50-functions.zsh    - Shell functions (status, j, notes, dotfiles-upgrade, ssh)
+#   40-aliases.zsh      - Navigation, bitwarden, blackdot, and utility aliases
+#   50-functions.zsh    - Shell functions (status, j, notes, blackdot-upgrade, ssh)
 #   60-aws.zsh          - AWS profile management and SSO helpers
 #   70-claude.zsh       - Claude Code wrapper and routing logic
 #   80-git.zsh          - Git shortcuts and clipboard utilities
 #   90-integrations.zsh - Tool integrations (SDKMAN, NVM, zoxide, glow, syntax highlighting)
 #
-# To customize: Edit individual module files in ~/workspace/dotfiles/zsh/zsh.d/
+# To customize: Edit individual module files in ~/workspace/blackdot/zsh/zsh.d/
 # For machine-specific overrides: Create 99-local.zsh (see 99-local.zsh.example)
 
 # Load all configuration modules in order

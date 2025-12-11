@@ -107,13 +107,13 @@ brew install --cask font-meslo-lg-nerd-font
 ```bash
 # Ensure zshrc is linked
 ls -la ~/.zshrc
-# Should show: .zshrc -> ~/workspace/dotfiles/zsh/.zshrc
+# Should show: .zshrc -> ~/workspace/blackdot/zsh/.zshrc
 
 # If not linked, re-run bootstrap
 ./bootstrap/bootstrap-mac.sh  # or bootstrap-linux.sh
 
 # Or manually link
-ln -sf ~/workspace/dotfiles/zsh/.zshrc ~/.zshrc
+ln -sf ~/workspace/blackdot/zsh/.zshrc ~/.zshrc
 
 # Reload shell
 exec zsh
@@ -133,7 +133,7 @@ rm -f ~/.zcompdump*
 exec zsh
 
 # Verify completion file exists
-ls ~/workspace/dotfiles/zsh/completions/_blackdot
+ls ~/workspace/blackdot/zsh/completions/_blackdot
 ```
 
 **PowerShell Solution:**
@@ -153,13 +153,13 @@ Get-ArgumentCompleter -Native | Where-Object { $_.CommandName -eq 'blackdot' }
 **Solution:**
 ```bash
 # Check which modules loaded
-ls -la ~/workspace/dotfiles/zsh/zsh.d/
+ls -la ~/workspace/blackdot/zsh/zsh.d/
 
 # Verify symlink
 ls -la ~/.zshrc
 
 # Check for syntax errors
-for f in ~/workspace/dotfiles/zsh/zsh.d/*.zsh; do
+for f in ~/workspace/blackdot/zsh/zsh.d/*.zsh; do
   zsh -n "$f" || echo "Error in $f"
 done
 ```
@@ -382,7 +382,7 @@ ls -la /workspace
 **Solution:**
 ```bash
 # Mount dotfiles as volume
-docker run -v ~/workspace/dotfiles:/root/workspace/dotfiles ...
+docker run -v ~/workspace/blackdot:/root/workspace/dotfiles ...
 
 # Or use the development image
 docker build -t dotfiles-dev .
@@ -397,7 +397,7 @@ docker run -it dotfiles-dev
 
 **Solution:**
 ```bash
-cd ~/workspace/dotfiles
+cd ~/workspace/blackdot
 
 # Check status
 git status
@@ -428,7 +428,7 @@ git stash pop
 exec zsh
 
 # Check version
-head -5 ~/workspace/dotfiles/README.md
+head -5 ~/workspace/blackdot/README.md
 ```
 
 **PowerShell Solution:**

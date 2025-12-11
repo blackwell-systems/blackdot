@@ -110,10 +110,10 @@ CMD ["zsh"]
 # Test with Mock Vault:
 #   ./test/mocks/setup-mock-vault.sh --no-pass
 #   export BLACKDOT_VAULT_BACKEND=pass
-#   dotfiles vault check
+#   blackdot vault check
 #
 # To get full setup:
-#   brew bundle --file=/root/workspace/dotfiles/Brewfile
+#   brew bundle --file=/root/workspace/blackdot/Brewfile
 #
 # Or run bootstrap:
 #   ./bootstrap/bootstrap-linux.sh

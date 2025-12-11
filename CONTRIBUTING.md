@@ -1,6 +1,6 @@
 # Contributing to Dotfiles
 
-Thank you for your interest in contributing to this dotfiles repository! This guide will help you get started.
+Thank you for your interest in contributing to this blackdot repository! This guide will help you get started.
 
 ## Table of Contents
 
@@ -48,8 +48,8 @@ This project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDU
 
 2. **Clone your fork** locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/workspace/dotfiles
-   cd ~/workspace/dotfiles
+   git clone https://github.com/YOUR_USERNAME/blackdot.git ~/workspace/blackdot
+   cd ~/workspace/blackdot
    ```
 
 3. **Add upstream remote:**
@@ -173,8 +173,8 @@ blackdot doctor --fix
 **Linux (Docker):**
 ```bash
 # Test in Docker (Ubuntu)
-docker run -it --rm -v $PWD:/dotfiles ubuntu:24.04 bash
-cd /dotfiles
+docker run -it --rm -v $PWD:/blackdot ubuntu:24.04 bash
+cd /blackdot
 ./bootstrap/bootstrap-linux.sh
 blackdot doctor
 ```

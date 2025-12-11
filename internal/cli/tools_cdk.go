@@ -89,7 +89,7 @@ func newCDKEnvCmd() *cobra.Command {
 Prints export commands to set CDK_DEFAULT_ACCOUNT and CDK_DEFAULT_REGION.
 
 Usage:
-  eval "$(dotfiles tools cdk env myprofile)"`,
+  eval "$(blackdot tools cdk env myprofile)"`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile := os.Getenv("AWS_PROFILE")
 			if len(args) > 0 {
@@ -104,7 +104,7 @@ Usage:
 				"--profile", profile, "--query", "Account", "--output", "text")
 			out, err := stsCmd.Output()
 			if err != nil {
-				return fmt.Errorf("failed to get account ID - are you authenticated? Run: dotfiles tools aws login %s", profile)
+				return fmt.Errorf("failed to get account ID - are you authenticated? Run: blackdot tools aws login %s", profile)
 			}
 			account := strings.TrimSpace(string(out))
 
@@ -132,7 +132,7 @@ func newCDKEnvClearCmd() *cobra.Command {
 		Long: `Print unset commands to clear CDK environment variables.
 
 Usage:
-  eval "$(dotfiles tools cdk env-clear)"`,
+  eval "$(blackdot tools cdk env-clear)"`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			fmt.Println("unset CDK_DEFAULT_ACCOUNT")
 			fmt.Println("unset CDK_DEFAULT_REGION")

@@ -24,7 +24,7 @@ func newStatusCmd() *cobra.Command {
 		Use:     "status",
 		Aliases: []string{"s"},
 		Short:   "Show quick status dashboard",
-		Long: `Display a quick visual dashboard of dotfiles status.
+		Long: `Display a quick visual dashboard of blackdot status.
 
 Shows:
   - Symlink status (zshrc, claude, /workspace)
@@ -34,8 +34,8 @@ Shows:
   - Claude profile (if dotclaude available)
 
 Examples:
-  dotfiles status    # Quick visual dashboard
-  dotfiles s         # Short alias`,
+  blackdot status    # Quick visual dashboard
+  blackdot s         # Short alias`,
 		RunE: runStatus,
 	}
 
@@ -58,11 +58,11 @@ func runStatus(cmd *cobra.Command, args []string) error {
 	zshrcItem := statusItem{name: "zshrc"}
 	if isSymlink(zshrcPath) {
 		zshrcItem.ok = true
-		zshrcItem.info = dim("→ dotfiles/zsh/zshrc")
+		zshrcItem.info = dim("→ blackdot/zsh/zshrc")
 	} else {
 		zshrcItem.ok = false
 		zshrcItem.info = "not linked"
-		zshrcItem.fix = "zshrc: bootstrap-dotfiles.sh"
+		zshrcItem.fix = "zshrc: run bootstrap"
 		fixes = append(fixes, zshrcItem.fix)
 	}
 	items = append(items, zshrcItem)
@@ -104,7 +104,7 @@ func runStatus(cmd *cobra.Command, args []string) error {
 	} else {
 		sshItem.ok = false
 		sshItem.info = red("no keys")
-		sshItem.fix = "ssh: dotfiles vault restore"
+		sshItem.fix = "ssh: blackdot vault restore"
 		fixes = append(fixes, sshItem.fix)
 	}
 	items = append(items, sshItem)

@@ -242,10 +242,10 @@ blackdot vault pull ssh
 
 ### dotfiles Configuration
 
-Located in `~/workspace/dotfiles/`:
+Located in `~/workspace/blackdot/`:
 
 ```bash
-~/workspace/dotfiles/
+~/workspace/blackdot/
 ├── vault/
 │   ├── restore-ssh.sh       # SSH key restoration
 │   ├── restore-aws.sh       # AWS credential restoration
@@ -303,7 +303,7 @@ blackdot vault pull new-*      # Manually restore new secrets
 
 **Solution**: Run dotfiles bootstrap:
 ```bash
-cd ~/workspace/dotfiles
+cd ~/workspace/blackdot
 ./bootstrap/bootstrap-dotfiles.sh
 # Creates /workspace -> ~/workspace symlink
 ```
@@ -354,7 +354,7 @@ Add to your dotclaude profile's `settings.json`:
     "PostActivate": [
       {
         "type": "command",
-        "command": "bash -c 'cd ~/workspace/dotfiles && ./vault/restore-ssh.sh $DOTCLAUDE_PROFILE'"
+        "command": "bash -c 'cd ~/workspace/blackdot && ./vault/restore-ssh.sh $DOTCLAUDE_PROFILE'"
       }
     ]
   }

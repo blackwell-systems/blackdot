@@ -160,10 +160,10 @@ func newClaudeBedrockCmd() *cobra.Command {
 		Long: `Print shell commands to configure Claude Code for AWS Bedrock.
 
 Use with eval to set environment:
-  eval "$(dotfiles tools claude bedrock)"
+  eval "$(blackdot tools claude bedrock)"
 
 Or use --eval flag:
-  dotfiles tools claude bedrock --eval`,
+  blackdot tools claude bedrock --eval`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runClaudeBedrock(evalMode)
 		},
@@ -209,7 +209,7 @@ func runClaudeBedrock(evalMode bool) error {
 			fmt.Printf("  %s\n", e)
 		}
 		fmt.Println()
-		fmt.Println("Or use: eval \"$(dotfiles tools claude bedrock --eval)\"")
+		fmt.Println("Or use: eval \"$(blackdot tools claude bedrock --eval)\"")
 	}
 
 	return nil
@@ -228,10 +228,10 @@ This clears any Bedrock-related environment variables to use your
 logged-in Anthropic Max session.
 
 Use with eval to set environment:
-  eval "$(dotfiles tools claude max)"
+  eval "$(blackdot tools claude max)"
 
 Or use --eval flag:
-  dotfiles tools claude max --eval`,
+  blackdot tools claude max --eval`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runClaudeMax(evalMode)
 		},
@@ -268,7 +268,7 @@ func runClaudeMax(evalMode bool) error {
 			fmt.Printf("  %s\n", u)
 		}
 		fmt.Println()
-		fmt.Println("Or use: eval \"$(dotfiles tools claude max --eval)\"")
+		fmt.Println("Or use: eval \"$(blackdot tools claude max --eval)\"")
 	}
 
 	return nil
@@ -282,9 +282,9 @@ func newClaudeSwitchCmd() *cobra.Command {
 		Long: `Switch between Claude Code backends interactively or by name.
 
 Examples:
-  dotfiles tools claude switch           # Interactive selection
-  dotfiles tools claude switch bedrock   # Switch to Bedrock
-  dotfiles tools claude switch max       # Switch to Max`,
+  blackdot tools claude switch           # Interactive selection
+  blackdot tools claude switch bedrock   # Switch to Bedrock
+  blackdot tools claude switch max       # Switch to Max`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				return runClaudeSwitchTo(args[0])
@@ -342,7 +342,7 @@ func newClaudeInitCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialize Claude Code hooks and commands",
-		Long: `Initialize Claude Code configuration from dotfiles templates.
+		Long: `Initialize Claude Code configuration from blackdot templates.
 
 This copies the claude/ directory contents to ~/.claude/ including:
   - settings.json  (permissions and preferences)

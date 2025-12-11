@@ -2,7 +2,7 @@
 
 ## Overview
 
-This dotfiles repository contains configurations and scripts for managing development environments. While the repository itself contains no secrets (all sensitive data is stored in your vault—Bitwarden, 1Password, or pass), we take security seriously.
+This blackdot repository contains configurations and scripts for managing development environments. While the repository itself contains no secrets (all sensitive data is stored in your vault—Bitwarden, 1Password, or pass), we take security seriously.
 
 ## Supported Versions
 
@@ -59,7 +59,7 @@ Not security issues:
 
 ## Security Best Practices
 
-When using these dotfiles:
+When using blackdot:
 
 ### 1. Never Commit Secrets
 
@@ -115,8 +115,8 @@ Expected permissions:
 ### 5. Keep Software Updated
 
 ```bash
-# Update dotfiles
-dotfiles-upgrade
+# Update blackdot
+blackdot upgrade
 
 # Update Homebrew packages
 brew update && brew upgrade

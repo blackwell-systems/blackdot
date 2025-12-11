@@ -48,7 +48,7 @@ All state and configuration is stored in a single JSON file:
     "parallel_install": false
   },
   "paths": {
-    "dotfiles_dir": "~/workspace/dotfiles",
+    "dotfiles_dir": "~/workspace/blackdot",
     "config_dir": "~/.config/blackdot",
     "backup_dir": "~/.local/share/dotfiles/backups"
   },
