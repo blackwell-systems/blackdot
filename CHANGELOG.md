@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Release Candidate 6 - Documentation Refinement**
 
+### Added
+
+- **CLI Enhancements**
+  - Shell completion command (`blackdot completion`) for bash, zsh, fish, and powershell
+  - `--dry-run` flag for `backup restore` - preview files before restoring
+  - `--dry-run` flag for `rollback` - preview rollback without making changes
+  - `--dry-run` flag for `features enable/disable/preset` - preview feature changes
+
 ### Changed
 
 - **Documentation Improvements**
