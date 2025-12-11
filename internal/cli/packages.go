@@ -86,17 +86,17 @@ func runPackages(cmd *cobra.Command, args []string) error {
 	var brewfilePath string
 	switch tier {
 	case "minimal":
-		brewfilePath = filepath.Join(blackdotDir, "Brewfile.minimal")
+		brewfilePath = filepath.Join(blackdotDir, "brew", "Brewfile.minimal")
 	case "enhanced":
-		brewfilePath = filepath.Join(blackdotDir, "Brewfile.enhanced")
+		brewfilePath = filepath.Join(blackdotDir, "brew", "Brewfile.enhanced")
 	default:
-		brewfilePath = filepath.Join(blackdotDir, "Brewfile")
+		brewfilePath = filepath.Join(blackdotDir, "brew", "Brewfile")
 		tier = "full"
 	}
 
 	// Check Brewfile exists, fall back to main if needed
 	if _, err := os.Stat(brewfilePath); os.IsNotExist(err) {
-		mainBrewfile := filepath.Join(blackdotDir, "Brewfile")
+		mainBrewfile := filepath.Join(blackdotDir, "brew", "Brewfile")
 		if _, err := os.Stat(mainBrewfile); err == nil {
 			fmt.Printf("%s Brewfile for '%s' tier not found, using full Brewfile\n", yellow("[WARN]"), tier)
 			brewfilePath = mainBrewfile
