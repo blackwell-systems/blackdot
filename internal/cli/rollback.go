@@ -15,6 +15,7 @@ func newRollbackCmd() *cobra.Command {
 	var toBackup string
 	var listBackups bool
 	var yes bool
+	var dryRun bool
 
 	cmd := &cobra.Command{
 		Use:   "rollback",
@@ -40,7 +41,7 @@ For more backup options, use 'blackdot backup'.`,
 				return rollbackList()
 			}
 
-			return rollbackRestore(toBackup, yes)
+			return rollbackRestore(toBackup, yes, dryRun)
 		},
 	}
 
@@ -52,6 +53,7 @@ For more backup options, use 'blackdot backup'.`,
 	cmd.Flags().StringVar(&toBackup, "to", "", "Rollback to specific backup ID")
 	cmd.Flags().BoolVarP(&listBackups, "list", "l", false, "List available backups")
 	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "Skip confirmation prompt")
+	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "Preview what would be rolled back without making changes")
 
 	return cmd
 }
@@ -203,7 +205,7 @@ func rollbackList() error {
 }
 
 // rollbackRestore performs the actual restore
-func rollbackRestore(specificBackup string, skipConfirm bool) error {
+func rollbackRestore(specificBackup string, skipConfirm bool, dryRun bool) error {
 	cfg := getBackupConfig()
 
 	// Find backup to restore
@@ -275,6 +277,14 @@ func rollbackRestore(specificBackup string, skipConfirm bool) error {
 	// Confirm we have a valid path
 	if _, err := os.Stat(backupPath); err != nil {
 		return fmt.Errorf("backup not found: %s", backupPath)
+	}
+
+	// In dry-run mode, skip the warning and confirmation
+	if dryRun {
+		Info("Preview rollback to: %s", backupID)
+		fmt.Println()
+		// Use the backup restore logic with dry-run
+		return runBackupRestoreWithDryRun(nil, []string{backupID}, true)
 	}
 
 	fmt.Println()

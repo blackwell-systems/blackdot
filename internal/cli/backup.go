@@ -63,6 +63,23 @@ func newBackupCmd() *cobra.Command {
 		printBackupHelp()
 	})
 
+	// Restore command with dry-run flag
+	var restoreDryRun bool
+	restoreCmd := &cobra.Command{
+		Use:   "restore [backup-id]",
+		Short: "Restore specific backup",
+		Long: `Restore a backup. If no backup-id is given, restores the latest.
+
+Examples:
+  blackdot backup restore                  # Restore latest
+  blackdot backup restore 20231207_120000  # Restore specific
+  blackdot backup restore --dry-run        # Preview what would be restored`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runBackupRestoreWithDryRun(cmd, args, restoreDryRun)
+		},
+	}
+	restoreCmd.Flags().BoolVarP(&restoreDryRun, "dry-run", "n", false, "preview what would be restored without making changes")
+
 	cmd.AddCommand(
 		&cobra.Command{
 			Use:   "create",
@@ -74,16 +91,7 @@ func newBackupCmd() *cobra.Command {
 			Short: "List all backups",
 			RunE:  runBackupList,
 		},
-		&cobra.Command{
-			Use:   "restore [backup-id]",
-			Short: "Restore specific backup",
-			Long: `Restore a backup. If no backup-id is given, restores the latest.
-
-Examples:
-  blackdot backup restore                  # Restore latest
-  blackdot backup restore 20231207_120000  # Restore specific`,
-			RunE: runBackupRestore,
-		},
+		restoreCmd,
 		&cobra.Command{
 			Use:   "clean",
 			Short: "Remove old backups (keeps newest 10)",
@@ -330,12 +338,22 @@ func runBackupList(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// runBackupRestoreWithDryRun wraps runBackupRestore with dry-run support
+func runBackupRestoreWithDryRun(cmd *cobra.Command, args []string, dryRun bool) error {
+	return runBackupRestoreImpl(cmd, args, dryRun)
+}
+
 func runBackupRestore(cmd *cobra.Command, args []string) error {
+	return runBackupRestoreImpl(cmd, args, false)
+}
+
+func runBackupRestoreImpl(cmd *cobra.Command, args []string, dryRun bool) error {
 	cfg := getBackupConfig()
 	home, _ := os.UserHomeDir()
 
 	green := color.New(color.FgGreen).SprintFunc()
 	yellow := color.New(color.FgYellow).SprintFunc()
+	cyan := color.New(color.FgCyan).SprintFunc()
 
 	// Find backup to restore
 	var backupPath string
@@ -392,8 +410,13 @@ func runBackupRestore(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println()
-	fmt.Println(color.New(color.Bold).Sprint("Restoring Backup"))
-	fmt.Println("=================")
+	if dryRun {
+		fmt.Println(color.New(color.Bold).Sprint("Restore Preview (dry-run)"))
+		fmt.Println("==========================")
+	} else {
+		fmt.Println(color.New(color.Bold).Sprint("Restoring Backup"))
+		fmt.Println("=================")
+	}
 	fmt.Printf("From: %s\n\n", backupPath)
 
 	// Open backup
@@ -454,6 +477,17 @@ func runBackupRestore(cmd *cobra.Command, args []string) error {
 			destPath = filepath.Join(home, relPath)
 		}
 
+		if dryRun {
+			// In dry-run mode, just show what would be restored
+			exists := ""
+			if _, err := os.Stat(destPath); err == nil {
+				exists = " (exists, would overwrite)"
+			}
+			fmt.Printf("  %s %s → %s%s\n", cyan("→"), relPath, destPath, exists)
+			restored++
+			continue
+		}
+
 		// Create parent directory
 		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 			fmt.Printf("  %s %s: %v\n", yellow("⚠"), relPath, err)
@@ -478,7 +512,13 @@ func runBackupRestore(cmd *cobra.Command, args []string) error {
 		restored++
 	}
 
-	fmt.Printf("\nRestored %d files\n", restored)
+	if dryRun {
+		fmt.Printf("\nWould restore %d files\n", restored)
+		fmt.Println()
+		Yellow.Println("Run without --dry-run to actually restore")
+	} else {
+		fmt.Printf("\nRestored %d files\n", restored)
+	}
 	return nil
 }
 

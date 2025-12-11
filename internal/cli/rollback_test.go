@@ -142,7 +142,7 @@ func TestRollbackRestoreNoBackups(t *testing.T) {
 	defer os.Setenv("HOME", originalHome)
 
 	// Try to restore with no backups - should error
-	err = rollbackRestore("", true) // skipConfirm=true
+	err = rollbackRestore("", true, false) // skipConfirm=true, dryRun=false
 	if err == nil {
 		t.Error("rollbackRestore should error when no backups exist")
 	}
@@ -169,7 +169,7 @@ func TestRollbackRestoreSpecificNotFound(t *testing.T) {
 	defer os.Setenv("HOME", originalHome)
 
 	// Try to restore non-existent backup
-	err = rollbackRestore("nonexistent-backup", true)
+	err = rollbackRestore("nonexistent-backup", true, false) // skipConfirm=true, dryRun=false
 	if err == nil {
 		t.Error("rollbackRestore should error for non-existent backup")
 	}

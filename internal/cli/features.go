@@ -214,6 +214,7 @@ Categories: core, optional, integration`,
 
 func newFeaturesEnableCmd() *cobra.Command {
 	var persist bool
+	var dryRun bool
 
 	cmd := &cobra.Command{
 		Use:   "enable <feature>",
@@ -224,17 +225,19 @@ If the feature has dependencies, they will be enabled automatically.
 Use --persist to save to config file.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return enableFeature(args[0], persist)
+			return enableFeature(args[0], persist, dryRun)
 		},
 	}
 
 	cmd.Flags().BoolVarP(&persist, "persist", "p", false, "save to config file")
+	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "preview what would be enabled without making changes")
 
 	return cmd
 }
 
 func newFeaturesDisableCmd() *cobra.Command {
 	var persist bool
+	var dryRun bool
 
 	cmd := &cobra.Command{
 		Use:   "disable <feature>",
@@ -244,11 +247,12 @@ func newFeaturesDisableCmd() *cobra.Command {
 Core features cannot be disabled. Use --persist to save to config file.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return disableFeature(args[0], persist)
+			return disableFeature(args[0], persist, dryRun)
 		},
 	}
 
 	cmd.Flags().BoolVarP(&persist, "persist", "p", false, "save to config file")
+	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "preview what would be disabled without making changes")
 
 	return cmd
 }
@@ -256,6 +260,7 @@ Core features cannot be disabled. Use --persist to save to config file.`,
 func newFeaturesPresetCmd() *cobra.Command {
 	var listPresets bool
 	var persist bool
+	var dryRun bool
 
 	cmd := &cobra.Command{
 		Use:   "preset [name]",
@@ -272,12 +277,13 @@ Available presets:
 				listPresetsCmd()
 				return nil
 			}
-			return applyPreset(args[0], persist)
+			return applyPreset(args[0], persist, dryRun)
 		},
 	}
 
 	cmd.Flags().BoolVarP(&listPresets, "list", "l", false, "list available presets")
 	cmd.Flags().BoolVarP(&persist, "persist", "p", false, "save to config file")
+	cmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "preview what would be changed without making changes")
 
 	return cmd
 }
@@ -381,7 +387,7 @@ func listFeaturesJSON(reg *feature.Registry) {
 	fmt.Println(string(data))
 }
 
-func enableFeature(name string, persist bool) error {
+func enableFeature(name string, persist bool, dryRun bool) error {
 	reg := initRegistry()
 
 	if !reg.Exists(name) {
@@ -410,6 +416,21 @@ func enableFeature(name string, persist bool) error {
 		}
 	}
 
+	// Dry-run mode: show what would happen
+	if dryRun {
+		PrintHeader("Enable Preview (dry-run)")
+		fmt.Printf("Would enable: %s\n", name)
+		if len(depsToEnable) > 0 {
+			fmt.Printf("Would also enable dependencies: %s\n", strings.Join(depsToEnable, ", "))
+		}
+		if persist {
+			fmt.Println("Would save to config file")
+		}
+		fmt.Println()
+		Yellow.Println("Run without --dry-run to actually enable")
+		return nil
+	}
+
 	if len(depsToEnable) > 0 {
 		Info("Enabling dependencies first: %s", strings.Join(depsToEnable, ", "))
 	}
@@ -435,7 +456,7 @@ func enableFeature(name string, persist bool) error {
 	return nil
 }
 
-func disableFeature(name string, persist bool) error {
+func disableFeature(name string, persist bool, dryRun bool) error {
 	reg := initRegistry()
 
 	if !reg.Exists(name) {
@@ -448,6 +469,18 @@ func disableFeature(name string, persist bool) error {
 	if f.Category == feature.CategoryCore {
 		Fail("Cannot disable core feature: %s", name)
 		return fmt.Errorf("cannot disable core feature: %s", name)
+	}
+
+	// Dry-run mode: show what would happen
+	if dryRun {
+		PrintHeader("Disable Preview (dry-run)")
+		fmt.Printf("Would disable: %s\n", name)
+		if persist {
+			fmt.Println("Would save to config file")
+		}
+		fmt.Println()
+		Yellow.Println("Run without --dry-run to actually disable")
+		return nil
 	}
 
 	// Disable the feature
@@ -482,7 +515,7 @@ func listPresetsCmd() {
 	}
 }
 
-func applyPreset(name string, persist bool) error {
+func applyPreset(name string, persist bool, dryRun bool) error {
 	reg := initRegistry()
 
 	preset, ok := feature.GetPreset(name)
@@ -494,6 +527,25 @@ func applyPreset(name string, persist bool) error {
 			fmt.Printf("  %s\n", n)
 		}
 		return fmt.Errorf("unknown preset: %s", name)
+	}
+
+	// Dry-run mode: show what would happen
+	if dryRun {
+		PrintHeader("Preset Preview (dry-run)")
+		fmt.Printf("Would apply preset: %s\n", name)
+		fmt.Printf("Description: %s\n", preset.Description)
+		fmt.Println()
+		fmt.Println("Would enable features:")
+		for _, fname := range preset.Features {
+			Cyan.Printf("  → %s\n", fname)
+		}
+		if persist {
+			fmt.Println()
+			fmt.Println("Would save to config file")
+		}
+		fmt.Println()
+		Yellow.Println("Run without --dry-run to actually apply")
+		return nil
 	}
 
 	if err := reg.ApplyPreset(name); err != nil {
