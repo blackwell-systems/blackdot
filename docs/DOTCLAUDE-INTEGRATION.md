@@ -254,7 +254,8 @@ Located in `~/workspace/blackdot/`:
 │   └── zshrc                # Shell config for Unix/Linux/macOS
 ├── powershell/
 │   └── Blackdot.psm1        # PowerShell module for Windows
-└── Brewfile                 # Packages (macOS/Linux)
+└── brew/
+    └── Brewfile             # Packages (macOS/Linux)
 ```
 
 ### dotclaude Configuration

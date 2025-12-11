@@ -292,7 +292,7 @@ jobs:
           REQUIRED=(
             "README.md"
             "CHANGELOG.md"
-            "Brewfile"
+            "brew/Brewfile"
             "zsh/zshrc"
             "zsh/p10k.zsh"
             "cmd/blackdot/main.go"

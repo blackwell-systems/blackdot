@@ -27,7 +27,7 @@ ignore:
   - ".github/**/*"
   - "**/*.md"
   - "**/*.json"
-  - "Brewfile"
+  - "brew/Brewfile*"
   - ".gitignore"
 
 # Comment configuration for PRs
