@@ -188,7 +188,7 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 │   ├── zshrc                           # Main Zsh config (sources zsh.d modules)
 │   ├── p10k.zsh                        # Powerlevel10k theme configuration
 │   ├── completions/                    # Zsh completion scripts
-│   └── zsh.d/                          # Modular shell configuration (18 modules)
+│   └── zsh.d/                          # Modular shell configuration (16 modules)
 │       ├── 00-init.zsh                 # Core initialization
 │       ├── 10-plugins.zsh              # Plugin loading
 │       ├── 20-env.zsh                  # Environment variables
@@ -200,6 +200,8 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 │       ├── 62-rust.zsh                 # Rust/Cargo aliases
 │       ├── 63-go.zsh                   # Go aliases and helpers
 │       ├── 64-python.zsh               # Python/UV aliases and helpers
+│       ├── 65-ssh.zsh                  # SSH agent and key management
+│       ├── 66-docker.zsh               # Docker aliases and helpers
 │       ├── 70-claude.zsh               # Claude Code integration
 │       ├── 80-git.zsh                  # Git aliases
 │       └── 90-integrations.zsh         # External tool integrations
@@ -281,7 +283,7 @@ Key pieces:
 - **powershell/Blackdot.psm1**: Complete PowerShell module with hook system, feature management, shell integration (Windows)
 - **lib/**: Only 3 minimal shell helpers remain (_colors.sh, _logging.sh, _hooks.sh) - all business logic moved to Go
 - **zsh/zshrc**: Main Zsh config that sources zsh.d modules (Unix/Linux/macOS)
-- **zsh/zsh.d/**: Modular shell configuration (18 modules loaded in numeric order)
+- **zsh/zsh.d/**: Modular shell configuration (16 modules loaded in numeric order)
 - **zsh/p10k.zsh**: Powerlevel10k theme configuration
 - **templates/configs/**: Handlebars templates for machine-specific configuration
 - **vault/**: Vault item templates managed by vaultmux (external Go library)
