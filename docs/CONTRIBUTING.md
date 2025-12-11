@@ -1,4 +1,4 @@
-# Contributing to Dotfiles
+# Contributing to Blackdot
 
 Thank you for your interest in contributing to this blackdot repository! This guide will help you get started.
 

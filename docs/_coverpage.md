@@ -2,7 +2,7 @@
 
 # blackdot
 
-> Modular dotfiles framework for the AI-assisted development era
+> Modular configuration framework for the AI-assisted development era
 
 ```bash
 # macOS / Linux / WSL

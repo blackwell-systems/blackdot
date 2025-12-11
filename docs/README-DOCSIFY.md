@@ -1,10 +1,10 @@
 # Docsify Documentation Site
 
-This directory contains the Docsify-powered documentation website for the dotfiles repository.
+This directory contains the Docsify-powered documentation website for the blackdot repository.
 
 ## 🌐 Live Site
 
-**URL:** https://blackwell-systems.github.io/dotfiles/
+**URL:** https://blackwell-systems.github.io/blackdot/
 
 (Configure this in GitHub Settings → Pages → Source: `main` branch, `/docs` folder)
 
@@ -76,7 +76,7 @@ Edit `docs/index.html` to customize:
 
 ```javascript
 window.$docsify = {
-  name: 'Dotfiles',           // Site name in sidebar
+  name: 'Blackdot',           // Site name in sidebar
   repo: 'user/repo',          // GitHub repo link
   themeColor: '#8A2BE2',      // Brand color
   loadSidebar: true,          // Use _sidebar.md
@@ -150,7 +150,7 @@ Add to `index.html`:
 
 GitHub will automatically deploy your site to:
 ```
-https://blackwell-systems.github.io/dotfiles/
+https://blackwell-systems.github.io/blackdot/
 ```
 
 ### Custom Domain (Optional)

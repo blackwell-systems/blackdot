@@ -1,6 +1,6 @@
 # Test Drive: Try Before You Trust
 
-> **Don't trust random install scripts?** Smart. Test dotfiles in an isolated Alpine container before touching your system.
+> **Don't trust random install scripts?** Smart. Test blackdot in an isolated Alpine container before touching your system.
 
 ---
 
@@ -9,11 +9,11 @@
 ```bash
 # Clone and build
 git clone https://github.com/blackwell-systems/blackdot.git
-cd dotfiles
-docker build -f Dockerfile.lite -t dotfiles-lite .
+cd blackdot
+docker build -f Dockerfile.lite -t blackdot-lite .
 
 # Run interactive container
-docker run -it --rm dotfiles-lite
+docker run -it --rm blackdot-lite
 
 # You're now in a safe container - nothing touches your host
 ```
@@ -36,7 +36,7 @@ You'll see the city skyline dashboard showing:
 - ssh keys (none - safe default)
 - Claude profile (none - unless you add dotclaude)
 
-**What this shows:** The visual health monitoring system that keeps your dotfiles in sync.
+**What this shows:** The visual health monitoring system that keeps your configs in sync.
 
 ---
 
@@ -120,7 +120,7 @@ blackdot doctor
 # ↑ Claude Code section shows ✓ all green
 ```
 
-**What this shows:** Seamless integration between dotfiles and dotclaude for portable Claude sessions.
+**What this shows:** Seamless integration between blackdot and dotclaude for portable Claude sessions.
 
 ---
 
@@ -130,7 +130,7 @@ blackdot doctor
 
 ```zsh
 # Just browse the code
-cd /root/workspace/dotfiles
+cd /root/workspace/blackdot
 
 # Read the zsh configuration
 cat zsh/zshrc
@@ -178,16 +178,16 @@ exit
 
 ### Workflow 3: Test with Your Config (Advanced)
 
-Mount your actual dotfiles for testing:
+Mount your actual blackdot for testing:
 
 ```bash
 # From host
 docker run -it --rm \
-  -v ~/.config/blackdot:/root/workspace/dotfiles \
-  dotfiles-lite
+  -v ~/.config/blackdot:/root/workspace/blackdot \
+  blackdot-lite
 
 # Inside container
-cd /root/workspace/dotfiles
+cd /root/workspace/blackdot
 blackdot status
 blackdot doctor
 
@@ -220,7 +220,7 @@ Some features require a real system:
 - bash, zsh
 - git, jq
 - coreutils, util-linux
-- dotfiles CLI (pre-installed)
+- blackdot CLI (pre-installed)
 
 **Does NOT include:**
 - Homebrew
@@ -236,7 +236,7 @@ Some features require a real system:
 
 ```bash
 # One-line install
-curl -fsSL https://dotfiles.blackwell.systems/install | bash
+curl -fsSL https://blackdot.dev/install | bash
 
 # Or manual
 git clone https://github.com/blackwell-systems/blackdot.git ~/workspace/blackdot
@@ -286,7 +286,7 @@ Install Docker:
 
 ```bash
 # Clean rebuild
-docker build --no-cache -f Dockerfile.lite -t dotfiles-lite .
+docker build --no-cache -f Dockerfile.lite -t blackdot-lite .
 ```
 
 ### Container won't start
@@ -296,7 +296,7 @@ docker build --no-cache -f Dockerfile.lite -t dotfiles-lite .
 docker ps
 
 # Try with explicit shell
-docker run -it --rm dotfiles-lite zsh
+docker run -it --rm blackdot-lite zsh
 ```
 
 ### Commands not found in container
