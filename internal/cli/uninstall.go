@@ -79,7 +79,7 @@ func runUninstall(cmd *cobra.Command, args []string) error {
 	blue := color.New(color.FgBlue).SprintFunc()
 
 	fmt.Println()
-	bold.Add(color.FgRed).Println("Dotfiles Uninstaller")
+	bold.Add(color.FgRed).Println("Blackdot Uninstaller")
 	fmt.Println()
 
 	if dryRun {
