@@ -129,7 +129,9 @@ jobs:
           $scripts = @(
             "powershell/Install-Blackdot.ps1",
             "powershell/Blackdot.psm1",
-            "powershell/Install-Packages.ps1"
+            "powershell/Install-Packages.ps1",
+            "install-windows.ps1",
+            "Install.ps1"
           )
           foreach ($script in $scripts) {
             if (Test-Path $script) {
@@ -148,6 +150,45 @@ jobs:
             }
           }
           Write-Host "All PowerShell scripts valid!"
+
+      - name: Test PowerShell module import
+        shell: pwsh
+        run: |
+          Write-Host "Testing PowerShell module import..."
+          $modulePath = Join-Path $PWD "powershell/Blackdot.psm1"
+          Import-Module $modulePath -Force -ErrorAction Stop
+          Write-Host "✅ Module imported successfully"
+
+          # Verify key functions exist
+          $requiredFunctions = @(
+            "Invoke-BlackdotHook",
+            "Register-BlackdotHook",
+            "Get-BlackdotHook",
+            "Enable-BlackdotHooks",
+            "Disable-BlackdotHooks"
+          )
+          foreach ($func in $requiredFunctions) {
+            if (Get-Command $func -ErrorAction SilentlyContinue) {
+              Write-Host "✅ $func exists"
+            } else {
+              Write-Host "❌ $func not found"
+              exit 1
+            }
+          }
+          Write-Host "All required functions present!"
+
+      - name: Validate packages.json
+        shell: pwsh
+        run: |
+          Write-Host "Validating packages.json..."
+          $json = Get-Content "powershell/packages.json" -Raw | ConvertFrom-Json
+          if ($json.packages) {
+            $count = ($json.packages | Measure-Object).Count
+            Write-Host "✅ Found $count packages defined"
+          } else {
+            Write-Host "❌ No packages array found"
+            exit 1
+          }
 
   # Integration tests - actually run the binary on each platform
   integration-tests:
