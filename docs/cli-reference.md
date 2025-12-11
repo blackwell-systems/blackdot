@@ -40,7 +40,7 @@ The unified command for managing your blackdot configuration. All subcommands ar
 | `vault` | - | Secret vault operations |
 | `template` | `tmpl` | Machine-specific config templates |
 | `encrypt` | - | **Age Encryption** - encrypt sensitive files |
-| `lint` | - | Validate shell config syntax |
+| `lint` | - | Comprehensive linter (shell, Go, JSON, YAML, PowerShell) |
 | `migrate` | - | Migrate legacy config formats (INI→JSON) |
 | `packages` | `pkg` | Check/install Brewfile packages |
 | `metrics` | - | Visualize health check metrics over time |
@@ -1403,7 +1403,7 @@ blackdot template render     # Auto-decrypts via hook
 
 ### `blackdot lint`
 
-Validate shell configuration syntax.
+Comprehensive linter for blackdot configuration and code.
 
 ```bash
 blackdot lint [OPTIONS]
@@ -1413,27 +1413,48 @@ blackdot lint [OPTIONS]
 
 | Option | Short | Description |
 |--------|-------|-------------|
-| `--fix` | `-f` | Auto-fix what's possible (permissions) |
-| `--verbose` | `-v` | Show detailed output |
+| `--fix` | `-f` | Show fix suggestions (requires shellcheck) |
+| `--verbose` | `-v` | Show all files checked |
 | `--help` | `-h` | Show help |
 
-**Checks (Unix):**
-- Zsh syntax in `zsh/zsh.d/*.zsh`
-- Bash syntax in `bootstrap/*.sh`
-- Shellcheck warnings (if installed)
-- Config file existence (Brewfile, p10k.zsh)
+**Checks:**
 
-**Checks (Windows):**
-- PowerShell syntax in `powershell/*.ps1`
-- Module manifest validity (`Blackdot.psd1`)
-- packages.json schema validation
+| Category | What's Checked |
+|----------|----------------|
+| **ZSH syntax** | `zsh/zsh.d/*.zsh`, `zshrc`, `p10k.zsh` |
+| **Bash syntax** | `bootstrap/*.sh`, `lib/*.sh` |
+| **Go code** | `go vet` (errors), `gofmt` (formatting) |
+| **JSON files** | `packages.json`, `~/.config/blackdot/config.json` |
+| **YAML files** | `.github/workflows/*.yml` |
+| **Brewfile tiers** | All 3 tiers exist (Brewfile, .minimal, .enhanced) |
+| **PowerShell** | `*.psm1`, `*.ps1` syntax (if `pwsh` available) |
+| **Shellcheck** | Static analysis for shell scripts (if installed) |
 
 **Examples:**
 
 ```bash
 blackdot lint              # Check all configs
-blackdot lint --fix        # Fix permissions
-blackdot lint --verbose    # Detailed output
+blackdot lint --verbose    # Show all files checked
+blackdot lint --fix        # Show shellcheck fix suggestions
+```
+
+**Sample Output:**
+
+```
+Blackdot Configuration Linter
+==============================
+
+→ Checking ZSH syntax...
+→ Checking Bash syntax...
+→ Checking Go code...
+→ Validating JSON files...
+→ Validating YAML files...
+→ Checking Brewfile tiers...
+→ Checking PowerShell syntax...
+
+==============================
+Files checked: 39
+[OK] All checks passed!
 ```
 
 ---
