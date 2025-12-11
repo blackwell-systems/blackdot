@@ -399,7 +399,7 @@ blackdot() {
 }
 
 # Short alias for blackdot command
-alias d=blackdot
+alias b=blackdot
 
 # =========================
 # Tool Group Aliases

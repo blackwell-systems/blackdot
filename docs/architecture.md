@@ -223,12 +223,12 @@ graph TD
     CLAUDE -.->|uses if present| WORKSPACE
     TEMPLATE -.->|independent| SHELL
 
-    style SHELL fill:#4CAF50
-    style BREW fill:#FFC107
-    style VAULT fill:#FFC107
-    style WORKSPACE fill:#FFC107
-    style CLAUDE fill:#FFC107
-    style TEMPLATE fill:#FFC107
+    style SHELL fill:#22543d,stroke:#2f855a,color:#e2e8f0
+    style BREW fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style VAULT fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style WORKSPACE fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style CLAUDE fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style TEMPLATE fill:#2c5282,stroke:#4299e1,color:#e2e8f0
 ```
 
 **Key Design Principles:**
@@ -497,11 +497,11 @@ blackdot vault validate  # Manual validation
 - During setup wizard vault configuration phase
 
 **Validates:**
-- ✅ Valid JSON syntax
-- ✅ Required fields (path, required, type)
-- ✅ Valid type values ("file" or "sshkey")
-- ✅ Naming conventions (capital letter start)
-- ✅ Path format (~, /, or $ prefix)
+- Valid JSON syntax
+- Required fields (path, required, type)
+- Valid type values ("file" or "sshkey")
+- Naming conventions (capital letter start)
+- Path format (~, /, or $ prefix)
 
 **Interactive error recovery:**
 If validation fails during setup, offers to open editor for immediate fixes with automatic re-validation after save.
@@ -714,11 +714,11 @@ Blackdot is designed for extensibility across multiple platforms with **90% shar
 
 | Platform | Bootstrap Script | Status | Notes |
 |----------|-----------------|---------|-------|
-| **macOS** | `bootstrap-mac.sh` | ✅ Fully tested | Apple Silicon & Intel |
-| **Windows** | `install-windows.ps1` | ✅ Fully tested | Native PowerShell module |
-| **Lima VM** | `bootstrap-linux.sh` | ✅ Fully tested | Ubuntu 24.04 |
-| **WSL2** | `bootstrap-linux.sh` | ✅ Auto-detected | Windows 10/11 with Linux |
-| **Ubuntu/Debian** | `bootstrap-linux.sh` | ✅ Compatible | Bare metal or VM |
+| **macOS** | `bootstrap-mac.sh` | Fully tested | Apple Silicon & Intel |
+| **Windows** | `install-windows.ps1` | Fully tested | Native PowerShell module |
+| **Lima VM** | `bootstrap-linux.sh` | Fully tested | Ubuntu 24.04 |
+| **WSL2** | `bootstrap-linux.sh` | Auto-detected | Windows 10/11 with Linux |
+| **Ubuntu/Debian** | `bootstrap-linux.sh` | Compatible | Bare metal or VM |
 
 ### Extensible to (~30 minutes each):
 - Docker containers
