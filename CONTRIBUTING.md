@@ -33,13 +33,14 @@ This project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDU
 
 ### Prerequisites
 
-- Basic knowledge of shell scripting (bash/zsh)
+- Basic knowledge of shell scripting (bash/zsh or PowerShell)
 - Familiarity with Git and GitHub
 - One of the supported platforms:
   - macOS (12.0+)
   - Ubuntu/Debian Linux
-  - Lima VM
+  - Windows (PowerShell 5.1+)
   - WSL2
+  - Lima VM
 
 ### Fork and Clone
 
@@ -85,8 +86,8 @@ git checkout -b fix/issue-number-description
 
 **Key principles:**
 - **Idempotency** - Scripts should be safe to run multiple times
-- **Cross-platform** - Test on both macOS and Linux if possible
-- **Error handling** - Use `set -euo pipefail` in bash/zsh scripts
+- **Cross-platform** - Test on macOS, Linux, and Windows (PowerShell) if possible
+- **Error handling** - Use `set -euo pipefail` in bash/zsh, `$ErrorActionPreference = 'Stop'` in PowerShell
 - **Documentation** - Update README.md if adding features
 - **Security** - Never commit secrets or credentials
 
@@ -181,8 +182,10 @@ blackdot doctor
 ### CI/CD
 
 All pull requests automatically run:
-- ShellCheck validation
-- ZSH syntax validation
+- ShellCheck validation (Bash scripts)
+- Zsh syntax validation
+- PowerShell syntax validation (Windows)
+- PowerShell module import tests
 - Markdown linting
 - Repository structure checks
 
@@ -324,7 +327,7 @@ Browse [open issues](https://github.com/blackwell-systems/blackdot/issues) for i
 - [ ] Web-based metrics dashboard
 - [ ] Automated rollback on failed upgrades
 - [ ] Plugin system for extensibility
-- [ ] Windows native support (not just WSL)
+- [x] Windows native support (PowerShell module with 85+ functions)
 - [ ] Ansible/Terraform alternatives
 
 ### Documentation Improvements
@@ -338,6 +341,7 @@ Browse [open issues](https://github.com/blackwell-systems/blackdot/issues) for i
 ### Platform Support
 
 Help test and improve support for:
+- Windows (PowerShell Core on Windows Server)
 - Debian/Ubuntu variants
 - Arch Linux
 - Fedora/RHEL
