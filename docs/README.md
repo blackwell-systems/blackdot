@@ -73,7 +73,7 @@ The wizard guides you through:
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash -s -- --minimal
 ```
 
-Skips: `/workspace` symlink, vault setup, Claude integration. You still get Zsh, CLI tools, and aliases. Run `blackdot setup` later to enable full features.
+Skips: `/workspace` symlink, vault setup, Claude integration. You still get shell config (Zsh on Unix, PowerShell on Windows), CLI tools, and aliases. Run `blackdot setup` later to enable full features.
 
 **Custom workspace** (use `~/code` instead of `~/workspace`):
 
@@ -178,6 +178,7 @@ blackdot features enable cdk_tools --persist
 
 ## Quick Start (Manual)
 
+**macOS / Linux / WSL:**
 ```bash
 # 1. Clone
 git clone git@github.com:blackwell-systems/blackdot.git ~/workspace/dotfiles
@@ -189,6 +190,20 @@ cd ~/workspace/dotfiles
 
 # 3. Run setup wizard
 blackdot setup
+```
+
+**Windows (PowerShell):**
+```powershell
+# 1. Clone
+git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\blackdot
+cd $HOME\workspace\blackdot\powershell
+
+# 2. Install PowerShell module
+.\Install-Blackdot.ps1
+
+# 3. Restart PowerShell and verify
+Import-Module Blackdot
+blackdot status
 ```
 
 **That's it!** The wizard handles:
@@ -253,9 +268,9 @@ blackdot lint            # Validate syntax
 |----------|--------|-------|
 | macOS (Apple Silicon) | Fully tested | Primary development environment |
 | macOS (Intel) | Fully tested | Auto-detects architecture |
-| Lima (Ubuntu 24.04) | Fully tested | Recommended Linux VM for macOS |
+| Windows (PowerShell) | Fully tested | Native PowerShell module (85+ functions) |
 | WSL2 (Windows) | Auto-detected | Uses Linux bootstrap |
-| Windows (Git Bash/MSYS2) | Native support | Uses Windows bootstrap |
+| Lima (Ubuntu 24.04) | Fully tested | Recommended Linux VM for macOS |
 | Ubuntu/Debian | Compatible | Tested on Ubuntu 24.04 |
 
 ---

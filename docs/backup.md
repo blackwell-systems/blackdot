@@ -33,7 +33,8 @@ The backup system captures essential configuration files:
 | **SSH** | `~/.ssh/config`, `~/.ssh/known_hosts` |
 | **Git** | `~/.gitconfig` |
 | **AWS** | `~/.aws/config`, `~/.aws/credentials` |
-| **Shell** | `~/.zshrc`, `~/.p10k.zsh` |
+| **Shell (Unix)** | `~/.zshrc`, `~/.p10k.zsh` |
+| **Shell (Windows)** | `$PROFILE`, PowerShell settings |
 | **Secrets** | `~/.local/env.secrets` |
 | **Templates** | `~/.config/blackdot/template-variables.sh` |
 

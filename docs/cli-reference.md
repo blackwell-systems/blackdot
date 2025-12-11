@@ -1417,11 +1417,16 @@ blackdot lint [OPTIONS]
 | `--verbose` | `-v` | Show detailed output |
 | `--help` | `-h` | Show help |
 
-**Checks:**
-- ZSH syntax in `zsh/zsh.d/*.zsh`
-- Bash syntax in `bootstrap/*.sh`, `vault/*.sh`
+**Checks (Unix):**
+- Zsh syntax in `zsh/zsh.d/*.zsh`
+- Bash syntax in `bootstrap/*.sh`
 - Shellcheck warnings (if installed)
 - Config file existence (Brewfile, p10k.zsh)
+
+**Checks (Windows):**
+- PowerShell syntax in `powershell/*.ps1`
+- Module manifest validity (`Blackdot.psd1`)
+- packages.json schema validation
 
 **Examples:**
 
@@ -1435,7 +1440,7 @@ blackdot lint --verbose    # Detailed output
 
 ### `blackdot packages`
 
-Check and install Brewfile packages.
+Check and install packages from Brewfile (Unix) or packages.json (Windows).
 
 ```bash
 blackdot packages [OPTIONS]
@@ -1446,7 +1451,7 @@ blackdot pkg [OPTIONS]    # Alias
 
 | Option | Short | Description |
 |--------|-------|-------------|
-| `--check` | `-c` | Show what's missing from Brewfile |
+| `--check` | `-c` | Show what's missing from package manifest |
 | `--install` | `-i` | Install missing packages |
 | `--outdated` | `-o` | Show outdated packages |
 | `--help` | `-h` | Show help |
@@ -1456,9 +1461,13 @@ blackdot pkg [OPTIONS]    # Alias
 ```bash
 blackdot packages              # Overview
 blackdot packages --check      # Show missing packages
-blackdot packages --install    # Install from Brewfile
+blackdot packages --install    # Install from Brewfile (Unix) or packages.json (Windows)
 blackdot packages --outdated   # Show outdated
 ```
+
+**Package Manifests:**
+- **Unix (macOS/Linux):** `Brewfile` with Homebrew
+- **Windows:** `powershell/packages.json` with winget
 
 ---
 
@@ -1831,7 +1840,12 @@ DEBUG=1 blackdot template render
 
 ## Shell Functions
 
-These functions are available after sourcing the zsh configuration.
+These functions are available in your shell after setup.
+
+**Zsh (macOS/Linux):** Loaded from `zsh/zsh.d/*.zsh`
+**PowerShell (Windows):** Loaded from `Blackdot.psm1`
+
+Most functions work identically across shells.
 
 ### `status`
 

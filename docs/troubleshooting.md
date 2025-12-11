@@ -66,6 +66,24 @@ eval "$(/usr/local/bin/brew shellenv)"
 ./bootstrap/bootstrap-mac.sh
 ```
 
+### PowerShell module not loading (Windows)
+
+**Symptom:** `blackdot: The term 'blackdot' is not recognized` after install.
+
+**Solution:**
+```powershell
+# Check if module is imported
+Get-Module -Name Blackdot
+
+# If not, import it manually
+Import-Module $HOME\workspace\blackdot\powershell\Blackdot.psm1
+
+# Add to your PowerShell profile for auto-loading
+Add-Content $PROFILE "`nImport-Module $HOME\workspace\blackdot\powershell\Blackdot.psm1"
+
+# Restart PowerShell
+```
+
 ## Shell Issues
 
 ### Prompt looks wrong or broken
@@ -105,7 +123,7 @@ exec zsh
 
 **Symptom:** Tab completion for `blackdot` command doesn't work.
 
-**Solution:**
+**Zsh Solution:**
 ```bash
 # Check if completions directory is in fpath
 echo $fpath | tr ' ' '\n' | grep completions
@@ -116,6 +134,16 @@ exec zsh
 
 # Verify completion file exists
 ls ~/workspace/dotfiles/zsh/completions/_blackdot
+```
+
+**PowerShell Solution:**
+```powershell
+# Reload the module to refresh completions
+Remove-Module Blackdot -ErrorAction SilentlyContinue
+Import-Module Blackdot
+
+# Check if argument completers are registered
+Get-ArgumentCompleter -Native | Where-Object { $_.CommandName -eq 'blackdot' }
 ```
 
 ### ZSH modules not loading
@@ -197,18 +225,26 @@ blackdot vault push --all # Push local → vault (overwrites vault)
 **Symptom:** Vault CLI not installed.
 
 **Solution:**
+
+**macOS:**
 ```bash
-# Bitwarden
-brew install bitwarden-cli  # macOS
-npm install -g @bitwarden/cli  # Linux
+brew install bitwarden-cli       # Bitwarden
+brew install --cask 1password-cli # 1Password
+brew install pass                 # pass
+```
 
-# 1Password
-brew install --cask 1password-cli  # macOS
+**Linux:**
+```bash
+npm install -g @bitwarden/cli    # Bitwarden
+sudo apt install pass            # pass
 # See 1Password docs for Linux
+```
 
-# pass
-brew install pass  # macOS
-sudo apt install pass  # Linux
+**Windows (PowerShell):**
+```powershell
+winget install Bitwarden.CLI     # Bitwarden
+winget install AgileBits.1Password.CLI  # 1Password
+# pass not natively supported on Windows
 ```
 
 ## Permission Issues
@@ -277,6 +313,36 @@ tar -xzf ~/.blackdot-backups/backup-YYYYMMDD-HHMMSS.tar.gz -C /
 ```
 
 ## Platform-Specific Issues
+
+### Windows: Execution policy blocking scripts
+
+**Symptom:** PowerShell says "running scripts is disabled on this system"
+
+**Solution:**
+```powershell
+# Check current policy
+Get-ExecutionPolicy
+
+# Set to allow local scripts (run as Administrator)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# Retry import
+Import-Module Blackdot
+```
+
+### Windows: Module not found after install
+
+**Symptom:** `Import-Module Blackdot` fails with "module not found"
+
+**Solution:**
+```powershell
+# Add to PSModulePath
+$modulePath = "$HOME\workspace\blackdot\powershell"
+$env:PSModulePath = "$modulePath;$env:PSModulePath"
+
+# Or copy to standard module location
+Copy-Item -Recurse $modulePath\* $HOME\Documents\PowerShell\Modules\Blackdot\
+```
 
 ### WSL2: Slow shell startup
 
@@ -353,7 +419,7 @@ git stash pop
 
 **Symptom:** New features not available after upgrade.
 
-**Solution:**
+**Zsh Solution:**
 ```bash
 # Ensure bootstrap ran
 ./bootstrap/bootstrap-mac.sh  # or bootstrap-linux.sh
@@ -363,6 +429,20 @@ exec zsh
 
 # Check version
 head -5 ~/workspace/dotfiles/README.md
+```
+
+**PowerShell Solution:**
+```powershell
+# Pull latest changes
+cd $HOME\workspace\blackdot
+git pull
+
+# Reload the module
+Remove-Module Blackdot -ErrorAction SilentlyContinue
+Import-Module .\powershell\Blackdot.psm1
+
+# Check status
+blackdot status
 ```
 
 ## Still Having Issues?
