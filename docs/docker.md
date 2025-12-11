@@ -97,7 +97,7 @@ docker run -it --rm blackdot-medium
 brew install eza fzf ripgrep bat
 
 # Or install full Brewfile
-brew bundle --file=/root/workspace/blackdot/Brewfile
+brew bundle --file=/root/workspace/blackdot/brew/Brewfile
 ```
 
 **Best for:** Testing with specific brew packages, development workflows.

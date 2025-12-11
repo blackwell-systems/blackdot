@@ -113,7 +113,7 @@ CMD ["zsh"]
 #   blackdot vault check
 #
 # To get full setup:
-#   brew bundle --file=/root/workspace/blackdot/Brewfile
+#   brew bundle --file=/root/workspace/blackdot/brew/Brewfile
 #
 # Or run bootstrap:
 #   ./bootstrap/bootstrap-linux.sh

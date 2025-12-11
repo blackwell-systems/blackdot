@@ -119,7 +119,7 @@ jobs:
           REQUIRED_FILES=(
             "README.md"
             "CHANGELOG.md"
-            "Brewfile"
+            "brew/Brewfile"
             "zsh/zshrc"
             "cmd/blackdot/main.go"
             "internal/cli/root.go"

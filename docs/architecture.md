@@ -786,7 +786,7 @@ sudo pacman -Syu --noconfirm git zsh curl base-devel
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # 3. SHARED: Use same Brewfile
-brew bundle --file="$BLACKDOT_DIR/Brewfile"
+brew bundle --file="$BLACKDOT_DIR/brew/Brewfile"
 
 # 4. SHARED: Use same blackdot bootstrap
 "$BLACKDOT_DIR/bootstrap/bootstrap-blackdot.sh"
