@@ -18,4 +18,4 @@ package cli
 // Dropped from Go CLI:
 // migrate - one-time v2→v3 migration, users on v3 don't need it
 
-// Note: All bin/dotfiles-* commands are now implemented in Go
+// Note: All CLI commands are implemented in Go

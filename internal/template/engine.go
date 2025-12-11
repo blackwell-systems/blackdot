@@ -1,4 +1,4 @@
-// Package template provides a Handlebars-like template engine for dotfiles.
+// Package template provides a Handlebars-like template engine for blackdot.
 //
 // Syntax supported:
 //   - {{ variable }}           - Simple substitution

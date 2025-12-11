@@ -1,4 +1,4 @@
-// Package cli implements the dotfiles command-line interface using Cobra.
+// Package cli implements the blackdot command-line interface using Cobra.
 package cli
 
 import (

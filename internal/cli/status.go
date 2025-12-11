@@ -76,7 +76,7 @@ func runStatus(cmd *cobra.Command, args []string) error {
 	} else {
 		claudeItem.ok = false
 		claudeItem.info = "not linked"
-		claudeItem.fix = "claude: bootstrap-dotfiles.sh"
+		claudeItem.fix = "claude: bootstrap-blackdot.sh"
 		fixes = append(fixes, claudeItem.fix)
 	}
 	items = append(items, claudeItem)

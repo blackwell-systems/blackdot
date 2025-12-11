@@ -24,7 +24,7 @@ var encryptPatterns = []string{
 func newEncryptCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "encrypt",
-		Short: "Age encryption management for dotfiles",
+		Short: "Age encryption management for blackdot",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// If first arg is a file, treat as encrypt shortcut
 			if len(args) > 0 {

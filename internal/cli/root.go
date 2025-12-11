@@ -85,7 +85,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 	rootCmd.PersistentFlags().BoolVar(&force, "force", false, "bypass feature checks")
 
-	// Add subcommands - mirrors bin/dotfiles-* commands
+	// Add subcommands
 	rootCmd.AddCommand(
 		newVersionCmd(),
 		newFeaturesCmd(),

@@ -692,9 +692,9 @@ func phaseSymlinks(cfg *SetupConfig) error {
 		}
 	} else {
 		// Unix: Run bootstrap script
-		bootstrapScript := filepath.Join(dotfilesDir, "bootstrap", "bootstrap-dotfiles.sh")
+		bootstrapScript := filepath.Join(dotfilesDir, "bootstrap", "bootstrap-blackdot.sh")
 		if _, err := os.Stat(bootstrapScript); err != nil {
-			return fmt.Errorf("bootstrap-dotfiles.sh not found")
+			return fmt.Errorf("bootstrap-blackdot.sh not found")
 		}
 
 		cmd := exec.Command("bash", bootstrapScript)
