@@ -803,15 +803,15 @@ func phasePackages(cfg *SetupConfig) error {
 		return count
 	}
 
-	minimalCount := countPackages("Brewfile.minimal")
+	minimalCount := countPackages("brew/Brewfile.minimal")
 	if minimalCount == 0 {
 		minimalCount = 18
 	}
-	enhancedCount := countPackages("Brewfile.enhanced")
+	enhancedCount := countPackages("brew/Brewfile.enhanced")
 	if enhancedCount == 0 {
 		enhancedCount = 43
 	}
-	fullCount := countPackages("Brewfile")
+	fullCount := countPackages("brew/Brewfile")
 	if fullCount == 0 {
 		fullCount = 61
 	}
@@ -860,19 +860,19 @@ func phasePackages(cfg *SetupConfig) error {
 
 	switch selectedTier {
 	case "minimal":
-		brewfile = filepath.Join(blackdotDir, "Brewfile.minimal")
+		brewfile = filepath.Join(blackdotDir, "brew", "Brewfile.minimal")
 		packageCount = minimalCount
 		timeEstimate = "~2 min"
 	case "enhanced":
-		brewfile = filepath.Join(blackdotDir, "Brewfile.enhanced")
+		brewfile = filepath.Join(blackdotDir, "brew", "Brewfile.enhanced")
 		packageCount = enhancedCount
 		timeEstimate = "~5 min"
 	case "full":
-		brewfile = filepath.Join(blackdotDir, "Brewfile")
+		brewfile = filepath.Join(blackdotDir, "brew", "Brewfile")
 		packageCount = fullCount
 		timeEstimate = "~10 min"
 	default:
-		brewfile = filepath.Join(blackdotDir, "Brewfile")
+		brewfile = filepath.Join(blackdotDir, "brew", "Brewfile")
 		packageCount = fullCount
 		timeEstimate = "~10 min"
 	}

@@ -488,7 +488,7 @@ blackdot status
 - Environment secrets (from vault)
 - Claude Code settings (shared workspace)
 
-See [Brewfile](Brewfile) (Unix) or [packages.json](powershell/packages.json) (Windows) for complete package lists.
+See [Brewfile](brew/Brewfile) (Unix) or [packages.json](powershell/packages.json) (Windows) for complete package lists.
 
 ---
 
