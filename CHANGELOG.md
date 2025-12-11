@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0-rc4] - 2025-12-11
+
+**Release Candidate 4 - Rebrand Completion & CI Improvements**
+
+### Changed
+
+- **Complete Rebrand Finalization**
+  - Shell scripts and templates updated with blackdot branding
+  - Go CLI fully rebranded (commands, paths, config)
+  - All hooks and shell modules updated
+  - Setup detection now uses blackdot directory name
+  - Config CLI uses blackdot paths throughout
+
+### Added
+
+- **Documentation Improvements**
+  - Comprehensive cross-platform documentation updates
+  - Improved cross-platform awareness in README
+  - Updated README-FULL.md for Go-first architecture
+  - Condensed Features section in README (563 to 24 lines)
+  - Added missing ssh_tools and docker_tools feature documentation
+
+- **CI/CD Enhancements**
+  - Enhanced Windows testing with module import validation
+  - Package validation for winget schema
+  - Corrected packages.json validation path
+
+### Fixed
+
+- Setup detection to use blackdot directory name consistently
+- Config CLI paths and branding throughout codebase
+- CI validation paths for Windows package schema
+
 ## [4.0.0-rc3] - 2025-12-10
 
 **Release Candidate 3 - Complete Rebrand + Vault Go Parity**
