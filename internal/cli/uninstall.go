@@ -66,9 +66,9 @@ func runUninstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("cannot determine home directory: %w", err)
 	}
 
-	dotfilesDir := os.Getenv("BLACKDOT_DIR")
-	if dotfilesDir == "" {
-		dotfilesDir = filepath.Join(home, ".blackdot")
+	blackdotDir := os.Getenv("BLACKDOT_DIR")
+	if blackdotDir == "" {
+		blackdotDir = filepath.Join(home, ".blackdot")
 	}
 
 	// Colors
@@ -79,7 +79,7 @@ func runUninstall(cmd *cobra.Command, args []string) error {
 	blue := color.New(color.FgBlue).SprintFunc()
 
 	fmt.Println()
-	bold.Add(color.FgRed).Println("Dotfiles Uninstaller")
+	bold.Add(color.FgRed).Println("Blackdot Uninstaller")
 	fmt.Println()
 
 	if dryRun {
@@ -136,9 +136,9 @@ func runUninstall(cmd *cobra.Command, args []string) error {
 	// Handle blackdot repository
 	fmt.Println()
 	fmt.Println(blue("Blackdot repository..."))
-	if info, err := os.Stat(dotfilesDir); err == nil && info.IsDir() {
+	if info, err := os.Stat(blackdotDir); err == nil && info.IsDir() {
 		if dryRun {
-			fmt.Printf("  %s: %s (repository)\n", yellow("Would remove"), dotfilesDir)
+			fmt.Printf("  %s: %s (repository)\n", yellow("Would remove"), blackdotDir)
 		} else {
 			reader := bufio.NewReader(os.Stdin)
 			fmt.Print("Remove blackdot repository? (yes/no): ")
@@ -146,10 +146,10 @@ func runUninstall(cmd *cobra.Command, args []string) error {
 			confirm = strings.TrimSpace(confirm)
 
 			if confirm == "yes" {
-				if err := os.RemoveAll(dotfilesDir); err != nil {
-					red.Printf("  Failed to remove: %s: %v\n", dotfilesDir, err)
+				if err := os.RemoveAll(blackdotDir); err != nil {
+					red.Printf("  Failed to remove: %s: %v\n", blackdotDir, err)
 				} else {
-					fmt.Printf("  %s: %s\n", green("Removed"), dotfilesDir)
+					fmt.Printf("  %s: %s\n", green("Removed"), blackdotDir)
 				}
 			} else {
 				fmt.Println("  Keeping repository.")

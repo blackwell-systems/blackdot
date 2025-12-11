@@ -32,21 +32,21 @@ type backupConfig struct {
 	backupDir   string
 	maxBackups  int
 	compress    bool
-	dotfilesDir string
+	blackdotDir string
 }
 
 func getBackupConfig() *backupConfig {
 	home, _ := os.UserHomeDir()
-	dotfilesDir := os.Getenv("BLACKDOT_DIR")
-	if dotfilesDir == "" {
-		dotfilesDir = filepath.Join(home, ".blackdot")
+	blackdotDir := os.Getenv("BLACKDOT_DIR")
+	if blackdotDir == "" {
+		blackdotDir = filepath.Join(home, ".blackdot")
 	}
 
 	return &backupConfig{
 		backupDir:   filepath.Join(home, ".blackdot-backups"),
 		maxBackups:  10,
 		compress:    true,
-		dotfilesDir: dotfilesDir,
+		blackdotDir: blackdotDir,
 	}
 }
 
@@ -129,7 +129,7 @@ func printBackupHelp() {
 	Dim.Println("  - Git configuration")
 	Dim.Println("  - AWS credentials (if present)")
 	Dim.Println("  - Zsh configuration")
-	Dim.Println("  - Dotfiles config.json")
+	Dim.Println("  - Blackdot config.json")
 	Dim.Println("  - Template variables")
 	fmt.Println()
 
@@ -234,7 +234,7 @@ func runBackupCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Also backup templates/_variables.local.sh if it exists
-	varFile := filepath.Join(cfg.dotfilesDir, "templates", "_variables.local.sh")
+	varFile := filepath.Join(cfg.blackdotDir, "templates", "_variables.local.sh")
 	if info, err := os.Stat(varFile); err == nil {
 		data, err := os.ReadFile(varFile)
 		if err == nil {
@@ -447,7 +447,7 @@ func runBackupRestore(cmd *cobra.Command, args []string) error {
 		var destPath string
 		if strings.HasPrefix(relPath, "blackdot/") {
 			// Blackdot-relative path
-			destPath = filepath.Join(cfg.dotfilesDir, strings.TrimPrefix(relPath, "blackdot/"))
+			destPath = filepath.Join(cfg.blackdotDir, strings.TrimPrefix(relPath, "blackdot/"))
 		} else {
 			// Home-relative path
 			destPath = filepath.Join(home, relPath)

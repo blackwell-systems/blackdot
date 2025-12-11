@@ -23,8 +23,8 @@ var (
 	verbose bool
 	force   bool
 
-	// dotfilesDir is resolved at init
-	dotfilesDir string
+	// blackdotDir is resolved at init
+	blackdotDir string
 )
 
 // rootCmd represents the base command
@@ -123,8 +123,8 @@ func init() {
 // initConfig resolves the blackdot directory
 func initConfig() {
 	// Check BLACKDOT_DIR env var first
-	dotfilesDir = os.Getenv("BLACKDOT_DIR")
-	if dotfilesDir != "" {
+	blackdotDir = os.Getenv("BLACKDOT_DIR")
+	if blackdotDir != "" {
 		return
 	}
 
@@ -135,12 +135,12 @@ func initConfig() {
 		return
 	}
 
-	dotfilesDir = filepath.Join(home, ".blackdot")
+	blackdotDir = filepath.Join(home, ".blackdot")
 }
 
-// DotfilesDir returns the resolved blackdot directory path
-func DotfilesDir() string {
-	return dotfilesDir
+// BlackdotDir returns the resolved blackdot directory path
+func BlackdotDir() string {
+	return blackdotDir
 }
 
 // ConfigDir returns the config directory (~/.config/blackdot)

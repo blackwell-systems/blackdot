@@ -1,20 +1,20 @@
 # Hook Examples
 
-Example hook scripts you can copy to `~/.config/dotfiles/hooks/` to extend dotfiles behavior.
+Example hook scripts you can copy to `~/.config/blackdot/hooks/` to extend blackdot behavior.
 
 ## Installation
 
 ```bash
 # Create hooks directory
-mkdir -p ~/.config/dotfiles/hooks
+mkdir -p ~/.config/blackdot/hooks
 
 # Copy a hook (example: permissions fix after vault pull)
-mkdir -p ~/.config/dotfiles/hooks/post_vault_pull
-cp post_vault_pull/10-fix-permissions.sh ~/.config/dotfiles/hooks/post_vault_pull/
-chmod +x ~/.config/dotfiles/hooks/post_vault_pull/10-fix-permissions.sh
+mkdir -p ~/.config/blackdot/hooks/post_vault_pull
+cp post_vault_pull/10-fix-permissions.sh ~/.config/blackdot/hooks/post_vault_pull/
+chmod +x ~/.config/blackdot/hooks/post_vault_pull/10-fix-permissions.sh
 
 # Verify it's registered
-dotfiles hook list post_vault_pull
+blackdot hook list post_vault_pull
 ```
 
 ## Available Examples
@@ -60,7 +60,7 @@ Scripts are executed in alphabetical order. Use numeric prefixes:
 Instead of file-based hooks, you can configure hooks in JSON:
 
 ```bash
-cat > ~/.config/dotfiles/hooks.json << 'EOF'
+cat > ~/.config/blackdot/hooks.json << 'EOF'
 {
   "hooks": {
     "post_vault_pull": [
@@ -76,13 +76,13 @@ EOF
 
 ```bash
 # List hooks for a point
-dotfiles hook list post_vault_pull
+blackdot hook list post_vault_pull
 
 # Test hooks (verbose dry-run)
-dotfiles hook test post_vault_pull
+blackdot hook test post_vault_pull
 
 # Run hooks manually with verbose output
-dotfiles hook run --verbose post_vault_pull
+blackdot hook run --verbose post_vault_pull
 ```
 
 ## Hook Points Reference

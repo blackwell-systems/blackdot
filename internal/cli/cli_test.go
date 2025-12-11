@@ -89,8 +89,8 @@ func TestGlobalFlags(t *testing.T) {
 	}
 }
 
-// TestDotfilesDir verifies directory resolution
-func TestDotfilesDir(t *testing.T) {
+// TestBlackdotDir verifies directory resolution
+func TestBlackdotDir(t *testing.T) {
 	// Save original env
 	original := os.Getenv("BLACKDOT_DIR")
 	defer os.Setenv("BLACKDOT_DIR", original)
@@ -98,14 +98,14 @@ func TestDotfilesDir(t *testing.T) {
 	// Test with env var set
 	os.Setenv("BLACKDOT_DIR", "/custom/path")
 	initConfig()
-	if DotfilesDir() != "/custom/path" {
-		t.Errorf("expected '/custom/path', got '%s'", DotfilesDir())
+	if BlackdotDir() != "/custom/path" {
+		t.Errorf("expected '/custom/path', got '%s'", BlackdotDir())
 	}
 
 	// Test with env var unset (uses default)
 	os.Unsetenv("BLACKDOT_DIR")
 	initConfig()
-	dir := DotfilesDir()
+	dir := BlackdotDir()
 	if !strings.HasSuffix(dir, ".blackdot") {
 		t.Errorf("expected path ending in '.blackdot', got '%s'", dir)
 	}

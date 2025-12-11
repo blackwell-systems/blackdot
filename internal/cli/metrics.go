@@ -128,7 +128,7 @@ func runMetrics(cmd *cobra.Command, args []string) error {
 	} else {
 		// Summary mode (default)
 		fmt.Println()
-		fmt.Println(bold("=== Dotfiles Health Metrics Summary ==="))
+		fmt.Println(bold("=== Blackdot Health Metrics Summary ==="))
 		fmt.Println()
 
 		// Total checks

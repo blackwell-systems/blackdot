@@ -64,9 +64,9 @@ func runDiff(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("cannot determine home directory: %w", err)
 	}
 
-	dotfilesDir := os.Getenv("BLACKDOT_DIR")
-	if dotfilesDir == "" {
-		dotfilesDir = filepath.Join(home, ".blackdot")
+	blackdotDir := os.Getenv("BLACKDOT_DIR")
+	if blackdotDir == "" {
+		blackdotDir = filepath.Join(home, ".blackdot")
 	}
 
 	// Colors
@@ -78,11 +78,11 @@ func runDiff(cmd *cobra.Command, args []string) error {
 	cyan := color.New(color.FgCyan).SprintFunc()
 
 	fmt.Println()
-	fmt.Println(bold(blue("Dotfiles Diff")))
+	fmt.Println(bold(blue("Blackdot Diff")))
 	fmt.Println()
 
 	// Get vault session
-	session, err := getVaultSession(dotfilesDir)
+	session, err := getVaultSession(blackdotDir)
 	if err != nil {
 		fmt.Printf("%s Bitwarden not unlocked\n", red("[ERROR]"))
 		fmt.Println()
@@ -121,10 +121,10 @@ func runDiff(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func getVaultSession(dotfilesDir string) (string, error) {
+func getVaultSession(blackdotDir string) (string, error) {
 	session := os.Getenv("BW_SESSION")
 	if session == "" {
-		sessionFile := filepath.Join(dotfilesDir, "vault", ".bw-session")
+		sessionFile := filepath.Join(blackdotDir, "vault", ".bw-session")
 		if data, err := os.ReadFile(sessionFile); err == nil {
 			session = strings.TrimSpace(string(data))
 		}

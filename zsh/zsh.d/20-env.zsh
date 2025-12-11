@@ -8,7 +8,7 @@
 # SHARED ENV / TOOLING
 # =========================
 
-# Dotfiles directory (derive from this file's location)
+# Blackdot directory (derive from this file's location)
 # ${(%):-%x} gives the path to the current file being sourced
 # :h:h:h goes up 3 levels: zsh.d → zsh → blackdot
 export BLACKDOT_DIR="${${(%):-%x}:A:h:h:h}"

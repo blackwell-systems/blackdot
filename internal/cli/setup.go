@@ -430,9 +430,9 @@ func inferState(cfg *SetupConfig) {
 	if !isPhaseCompleted(cfg, "template") {
 		var templateFile string
 		if isWindows() {
-			templateFile = filepath.Join(DotfilesDir(), "templates", "_variables.local.ps1")
+			templateFile = filepath.Join(BlackdotDir(), "templates", "_variables.local.ps1")
 		} else {
-			templateFile = filepath.Join(DotfilesDir(), "templates", "_variables.local.sh")
+			templateFile = filepath.Join(BlackdotDir(), "templates", "_variables.local.sh")
 		}
 		if _, err := os.Stat(templateFile); err == nil {
 			markPhaseComplete(cfg, "template")
@@ -661,7 +661,7 @@ func phaseSymlinks(cfg *SetupConfig) error {
 		return nil
 	}
 
-	dotfilesDir := DotfilesDir()
+	blackdotDir := BlackdotDir()
 	home, _ := os.UserHomeDir()
 	fmt.Println("This will link your shell configuration files.")
 	fmt.Println()
@@ -670,11 +670,11 @@ func phaseSymlinks(cfg *SetupConfig) error {
 	if isWindows() {
 		// Windows: PowerShell profile
 		psProfileDir := filepath.Join(home, "Documents", "PowerShell")
-		fmt.Printf("  %s\\profile.ps1 → %s\\powershell\\profile.ps1\n", psProfileDir, dotfilesDir)
+		fmt.Printf("  %s\\profile.ps1 → %s\\powershell\\profile.ps1\n", psProfileDir, blackdotDir)
 	} else {
 		// Unix: ZSH config
-		fmt.Printf("  ~/.zshrc     → %s/zsh/zshrc\n", dotfilesDir)
-		fmt.Printf("  ~/.p10k.zsh  → %s/zsh/p10k.zsh\n", dotfilesDir)
+		fmt.Printf("  ~/.zshrc     → %s/zsh/zshrc\n", blackdotDir)
+		fmt.Printf("  ~/.p10k.zsh  → %s/zsh/p10k.zsh\n", blackdotDir)
 	}
 	fmt.Println()
 
@@ -686,13 +686,13 @@ func phaseSymlinks(cfg *SetupConfig) error {
 
 	if isWindows() {
 		// Windows: Create PowerShell profile symlink
-		if err := createWindowsSymlinks(dotfilesDir, home); err != nil {
+		if err := createWindowsSymlinks(blackdotDir, home); err != nil {
 			fmt.Printf("%s Failed to create symlinks: %v\n", yellow("!"), err)
 			return err
 		}
 	} else {
 		// Unix: Run bootstrap script
-		bootstrapScript := filepath.Join(dotfilesDir, "bootstrap", "bootstrap-blackdot.sh")
+		bootstrapScript := filepath.Join(blackdotDir, "bootstrap", "bootstrap-blackdot.sh")
 		if _, err := os.Stat(bootstrapScript); err != nil {
 			return fmt.Errorf("bootstrap-blackdot.sh not found")
 		}
@@ -711,7 +711,7 @@ func phaseSymlinks(cfg *SetupConfig) error {
 }
 
 // createWindowsSymlinks creates shell config symlinks on Windows
-func createWindowsSymlinks(dotfilesDir, home string) error {
+func createWindowsSymlinks(blackdotDir, home string) error {
 	green := color.New(color.FgGreen).SprintFunc()
 
 	// Create PowerShell profile directory if needed
@@ -721,7 +721,7 @@ func createWindowsSymlinks(dotfilesDir, home string) error {
 	}
 
 	// Source and target for profile
-	source := filepath.Join(dotfilesDir, "powershell", "profile.ps1")
+	source := filepath.Join(blackdotDir, "powershell", "profile.ps1")
 	target := filepath.Join(psProfileDir, "profile.ps1")
 
 	// Check if source exists
@@ -768,12 +768,12 @@ func phasePackages(cfg *SetupConfig) error {
 		return nil
 	}
 
-	dotfilesDir := DotfilesDir()
+	blackdotDir := BlackdotDir()
 	pkgMgr := packageManagerName()
 
 	// Platform-specific package manager check
 	if isWindows() {
-		return phasePackagesWindows(cfg, dotfilesDir, green, yellow, bold, dim)
+		return phasePackagesWindows(cfg, blackdotDir, green, yellow, bold, dim)
 	}
 
 	// Unix: Check if Homebrew is available
@@ -787,7 +787,7 @@ func phasePackages(cfg *SetupConfig) error {
 
 	// Count packages for each tier
 	countPackages := func(filename string) int {
-		path := filepath.Join(dotfilesDir, filename)
+		path := filepath.Join(blackdotDir, filename)
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return 0
@@ -860,19 +860,19 @@ func phasePackages(cfg *SetupConfig) error {
 
 	switch selectedTier {
 	case "minimal":
-		brewfile = filepath.Join(dotfilesDir, "Brewfile.minimal")
+		brewfile = filepath.Join(blackdotDir, "Brewfile.minimal")
 		packageCount = minimalCount
 		timeEstimate = "~2 min"
 	case "enhanced":
-		brewfile = filepath.Join(dotfilesDir, "Brewfile.enhanced")
+		brewfile = filepath.Join(blackdotDir, "Brewfile.enhanced")
 		packageCount = enhancedCount
 		timeEstimate = "~5 min"
 	case "full":
-		brewfile = filepath.Join(dotfilesDir, "Brewfile")
+		brewfile = filepath.Join(blackdotDir, "Brewfile")
 		packageCount = fullCount
 		timeEstimate = "~10 min"
 	default:
-		brewfile = filepath.Join(dotfilesDir, "Brewfile")
+		brewfile = filepath.Join(blackdotDir, "Brewfile")
 		packageCount = fullCount
 		timeEstimate = "~10 min"
 	}
@@ -887,7 +887,7 @@ func phasePackages(cfg *SetupConfig) error {
 	fmt.Printf("Running brew bundle with %s tier...\n", selectedTier)
 
 	cmd := exec.Command("brew", "bundle", "--file="+brewfile)
-	cmd.Dir = dotfilesDir
+	cmd.Dir = blackdotDir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
@@ -901,7 +901,7 @@ func phasePackages(cfg *SetupConfig) error {
 }
 
 // phasePackagesWindows handles package installation on Windows using winget
-func phasePackagesWindows(cfg *SetupConfig, dotfilesDir string, green, yellow, bold, dim func(a ...interface{}) string) error {
+func phasePackagesWindows(cfg *SetupConfig, blackdotDir string, green, yellow, bold, dim func(a ...interface{}) string) error {
 	// Check if winget is available
 	if _, err := exec.LookPath("winget"); err != nil {
 		fmt.Printf("%s winget not installed - skipping package installation\n", yellow("!"))
@@ -913,7 +913,7 @@ func phasePackagesWindows(cfg *SetupConfig, dotfilesDir string, green, yellow, b
 	fmt.Println("This will install packages using winget.")
 
 	// Check for winget export file
-	wingetFile := filepath.Join(dotfilesDir, "winget.json")
+	wingetFile := filepath.Join(blackdotDir, "winget.json")
 	if _, err := os.Stat(wingetFile); os.IsNotExist(err) {
 		fmt.Printf("%s No winget.json found in blackdot\n", yellow("!"))
 		fmt.Println("Create one with: winget export -o winget.json")
@@ -1041,7 +1041,7 @@ func phaseVault(cfg *SetupConfig) error {
 
 	// Check/create vault items configuration
 	vaultConfig := filepath.Join(ConfigDir(), "vault-items.json")
-	vaultExample := filepath.Join(DotfilesDir(), "vault", "vault-items.example.json")
+	vaultExample := filepath.Join(BlackdotDir(), "vault", "vault-items.example.json")
 
 	if _, err := os.Stat(vaultConfig); os.IsNotExist(err) {
 		fmt.Println("Vault items configuration needed.")
@@ -1244,7 +1244,7 @@ func phaseTemplate(cfg *SetupConfig) error {
 		fmt.Println("Initializing template system...")
 		fmt.Println()
 
-		templateCmd := filepath.Join(DotfilesDir(), "bin", "blackdot-template")
+		templateCmd := filepath.Join(BlackdotDir(), "bin", "blackdot-template")
 		if _, err := os.Stat(templateCmd); err == nil {
 			cmd := exec.Command("bash", templateCmd, "init")
 			cmd.Stdin = os.Stdin
@@ -1343,7 +1343,7 @@ func showNextSteps(cfg *SetupConfig) {
 	}
 
 	// Template-specific next steps
-	templateFile := filepath.Join(DotfilesDir(), "templates", "_variables.local.sh")
+	templateFile := filepath.Join(BlackdotDir(), "templates", "_variables.local.sh")
 	if _, err := os.Stat(templateFile); err == nil {
 		fmt.Printf("  %s Templates configured\n", cyan("✓"))
 		fmt.Printf("    %s %s   %s\n", dim("→"), bold("blackdot template render"), dim("# Generate configs"))

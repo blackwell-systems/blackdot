@@ -57,12 +57,12 @@ Usage:
 
 func outputPosixInit() error {
 	// Get the blackdot binary path
-	dotfilesDir := DotfilesDir()
-	binaryPath := fmt.Sprintf("%s/bin/blackdot", dotfilesDir)
+	blackdotDir := BlackdotDir()
+	binaryPath := fmt.Sprintf("%s/bin/blackdot", blackdotDir)
 
 	// Check if running on Windows (Git Bash/MSYS)
 	if runtime.GOOS == "windows" {
-		binaryPath = fmt.Sprintf("%s/bin/blackdot.exe", dotfilesDir)
+		binaryPath = fmt.Sprintf("%s/bin/blackdot.exe", blackdotDir)
 	}
 
 	script := fmt.Sprintf(`# blackdot shell initialization
@@ -142,11 +142,11 @@ feature_status() {
 }
 
 func outputFishInit() error {
-	dotfilesDir := DotfilesDir()
-	binaryPath := fmt.Sprintf("%s/bin/blackdot", dotfilesDir)
+	blackdotDir := BlackdotDir()
+	binaryPath := fmt.Sprintf("%s/bin/blackdot", blackdotDir)
 
 	if runtime.GOOS == "windows" {
-		binaryPath = fmt.Sprintf("%s/bin/blackdot.exe", dotfilesDir)
+		binaryPath = fmt.Sprintf("%s/bin/blackdot.exe", blackdotDir)
 	}
 
 	script := fmt.Sprintf(`# blackdot shell initialization for fish
@@ -199,12 +199,12 @@ end
 }
 
 func outputPowerShellInit() error {
-	dotfilesDir := DotfilesDir()
-	binaryPath := fmt.Sprintf("%s\\bin\\blackdot.exe", dotfilesDir)
+	blackdotDir := BlackdotDir()
+	binaryPath := fmt.Sprintf("%s\\bin\\blackdot.exe", blackdotDir)
 
 	// Use forward slashes for cross-platform compatibility
 	if runtime.GOOS != "windows" {
-		binaryPath = fmt.Sprintf("%s/bin/blackdot", dotfilesDir)
+		binaryPath = fmt.Sprintf("%s/bin/blackdot", blackdotDir)
 	}
 
 	// Build script with string concatenation to handle backtick in PowerShell regex

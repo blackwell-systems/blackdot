@@ -137,7 +137,7 @@ func runDoctor(fixMode, quickMode bool) error {
 	}
 
 	home, _ := os.UserHomeDir()
-	dotfilesDir := getDotfilesDir()
+	blackdotDir := getBlackdotDir()
 
 	// Banner
 	fmt.Println()
@@ -153,11 +153,11 @@ func runDoctor(fixMode, quickMode bool) error {
 
 	// Section 1: Version & Updates
 	state.section("Version & Updates")
-	checkVersionAndUpdates(state, dotfilesDir)
+	checkVersionAndUpdates(state, blackdotDir)
 
 	// Section 2: Core Components
 	state.section("Core Components")
-	checkCoreComponents(state, home, dotfilesDir)
+	checkCoreComponents(state, home, blackdotDir)
 
 	// Section 3: Required Commands
 	state.section("Required Commands")
@@ -180,7 +180,7 @@ func runDoctor(fixMode, quickMode bool) error {
 
 	// Section 7: Shell Configuration
 	state.section("Shell Configuration")
-	checkShellConfiguration(state, home, dotfilesDir)
+	checkShellConfiguration(state, home, blackdotDir)
 
 	// Section 8: Claude Code (optional)
 	if _, err := exec.LookPath("claude"); err == nil {
@@ -190,13 +190,13 @@ func runDoctor(fixMode, quickMode bool) error {
 
 	// Section 9: Template System
 	state.section("Template System")
-	checkTemplateSystem(state, dotfilesDir)
+	checkTemplateSystem(state, blackdotDir)
 
 	// Summary
 	printSummary(state, fixMode)
 
 	// Save metrics
-	saveMetrics(state, dotfilesDir, home)
+	saveMetrics(state, blackdotDir, home)
 
 	// Exit code
 	if state.checksFailed > 0 {
@@ -205,7 +205,7 @@ func runDoctor(fixMode, quickMode bool) error {
 	return nil
 }
 
-func getDotfilesDir() string {
+func getBlackdotDir() string {
 	if dir := os.Getenv("BLACKDOT_DIR"); dir != "" {
 		return dir
 	}
@@ -213,8 +213,8 @@ func getDotfilesDir() string {
 		return "/workspace/blackdot"
 	}
 	home, _ := os.UserHomeDir()
-	if _, err := os.Stat(filepath.Join(home, "workspace/blackdot")); err == nil {
-		return filepath.Join(home, "workspace/blackdot")
+	if _, err := os.Stat(filepath.Join(home, ".blackdot")); err == nil {
+		return filepath.Join(home, ".blackdot")
 	}
 	return ""
 }
@@ -247,9 +247,9 @@ func (s *doctorState) info(msg string) {
 	fmt.Printf("%s %s\n", s.blue("ℹ"), msg)
 }
 
-func checkVersionAndUpdates(state *doctorState, dotfilesDir string) {
+func checkVersionAndUpdates(state *doctorState, blackdotDir string) {
 	// Check version from CHANGELOG.md
-	changelogPath := filepath.Join(dotfilesDir, "CHANGELOG.md")
+	changelogPath := filepath.Join(blackdotDir, "CHANGELOG.md")
 	if content, err := os.ReadFile(changelogPath); err == nil {
 		lines := strings.Split(string(content), "\n")
 		for _, line := range lines {
@@ -271,22 +271,22 @@ func checkVersionAndUpdates(state *doctorState, dotfilesDir string) {
 	}
 
 	// Check for git updates
-	if _, err := os.Stat(filepath.Join(dotfilesDir, ".git")); err == nil {
+	if _, err := os.Stat(filepath.Join(blackdotDir, ".git")); err == nil {
 		// Try to fetch
-		fetchCmd := exec.Command("git", "-C", dotfilesDir, "fetch", "origin", "main", "--dry-run")
+		fetchCmd := exec.Command("git", "-C", blackdotDir, "fetch", "origin", "main", "--dry-run")
 		if err := fetchCmd.Run(); err == nil {
-			localCmd := exec.Command("git", "-C", dotfilesDir, "rev-parse", "HEAD")
+			localCmd := exec.Command("git", "-C", blackdotDir, "rev-parse", "HEAD")
 			localOut, _ := localCmd.Output()
 			local := strings.TrimSpace(string(localOut))
 
-			remoteCmd := exec.Command("git", "-C", dotfilesDir, "rev-parse", "origin/main")
+			remoteCmd := exec.Command("git", "-C", blackdotDir, "rev-parse", "origin/main")
 			remoteOut, _ := remoteCmd.Output()
 			remote := strings.TrimSpace(string(remoteOut))
 
 			if local == remote {
 				state.pass("Up to date with origin/main")
 			} else {
-				behindCmd := exec.Command("git", "-C", dotfilesDir, "rev-list", "--count", "HEAD..origin/main")
+				behindCmd := exec.Command("git", "-C", blackdotDir, "rev-list", "--count", "HEAD..origin/main")
 				behindOut, _ := behindCmd.Output()
 				behind := strings.TrimSpace(string(behindOut))
 				state.warn(fmt.Sprintf("Behind origin/main by %s commit(s)", behind), "blackdot upgrade")
@@ -299,7 +299,7 @@ func checkVersionAndUpdates(state *doctorState, dotfilesDir string) {
 	}
 }
 
-func checkCoreComponents(state *doctorState, home, dotfilesDir string) {
+func checkCoreComponents(state *doctorState, home, blackdotDir string) {
 	// Check symlinks
 	checkSymlink := func(name, link, target string) {
 		info, err := os.Lstat(link)
@@ -311,7 +311,7 @@ func checkCoreComponents(state *doctorState, home, dotfilesDir string) {
 		if info.Mode()&os.ModeSymlink != 0 {
 			actualTarget, _ := os.Readlink(link)
 			expectedTarget := target
-			expectedFullPath := filepath.Join(dotfilesDir, target)
+			expectedFullPath := filepath.Join(blackdotDir, target)
 
 			if actualTarget == expectedTarget || actualTarget == expectedFullPath {
 				state.pass(fmt.Sprintf("%s symlink OK", name))
@@ -328,7 +328,7 @@ func checkCoreComponents(state *doctorState, home, dotfilesDir string) {
 	checkSymlink("~/.zshrc", filepath.Join(home, ".zshrc"), "zsh/zshrc")
 	checkSymlink("~/.p10k.zsh", filepath.Join(home, ".p10k.zsh"), "zsh/p10k.zsh")
 
-	// Check ~/.claude symlink (special case - not relative to dotfilesDir)
+	// Check ~/.claude symlink (special case - not relative to blackdotDir)
 	workspaceTarget := filepath.Join(home, "workspace")
 	if wt := os.Getenv("WORKSPACE_TARGET"); wt != "" {
 		workspaceTarget = wt
@@ -528,7 +528,7 @@ func checkVaultStatus(state *doctorState) {
 	}
 }
 
-func checkShellConfiguration(state *doctorState, home, dotfilesDir string) {
+func checkShellConfiguration(state *doctorState, home, blackdotDir string) {
 	// Check default shell
 	shell := os.Getenv("SHELL")
 	if strings.Contains(shell, "zsh") {
@@ -538,7 +538,7 @@ func checkShellConfiguration(state *doctorState, home, dotfilesDir string) {
 	}
 
 	// Check zsh modules
-	zshDDir := filepath.Join(dotfilesDir, "zsh/zsh.d")
+	zshDDir := filepath.Join(blackdotDir, "zsh/zsh.d")
 	if entries, err := os.ReadDir(zshDDir); err == nil {
 		moduleCount := 0
 		for _, e := range entries {
@@ -590,9 +590,9 @@ func checkClaudeCode(state *doctorState, home string) {
 	}
 }
 
-func checkTemplateSystem(state *doctorState, dotfilesDir string) {
-	templatesDir := filepath.Join(dotfilesDir, "templates")
-	generatedDir := filepath.Join(dotfilesDir, "generated")
+func checkTemplateSystem(state *doctorState, blackdotDir string) {
+	templatesDir := filepath.Join(blackdotDir, "templates")
+	generatedDir := filepath.Join(blackdotDir, "generated")
 
 	// Check if template system is configured
 	if _, err := os.Stat(filepath.Join(templatesDir, "_variables.local.sh")); err == nil {
@@ -803,14 +803,14 @@ func printSummary(state *doctorState, fixMode bool) {
 	_ = total
 }
 
-func saveMetrics(state *doctorState, dotfilesDir, home string) {
+func saveMetrics(state *doctorState, blackdotDir, home string) {
 	metricsFile := filepath.Join(home, ".blackdot-metrics.jsonl")
 
 	// Get metadata
 	timestamp := time.Now().UTC().Format("2006-01-02T15:04:05+00:00")
 
 	gitBranch := "unknown"
-	if cmd := exec.Command("git", "-C", dotfilesDir, "rev-parse", "--abbrev-ref", "HEAD"); cmd != nil {
+	if cmd := exec.Command("git", "-C", blackdotDir, "rev-parse", "--abbrev-ref", "HEAD"); cmd != nil {
 		if out, err := cmd.Output(); err == nil {
 			gitBranch = strings.TrimSpace(string(out))
 		}

@@ -45,7 +45,7 @@ func getSessionFile() string {
 	if file := os.Getenv("VAULT_SESSION_FILE"); file != "" {
 		return file
 	}
-	return filepath.Join(DotfilesDir(), "vault", ".vault-session")
+	return filepath.Join(BlackdotDir(), "vault", ".vault-session")
 }
 
 // newVaultBackend creates a new vault backend with config
@@ -1245,7 +1245,7 @@ func vaultRestore(force, dryRun bool) error {
 	// Auto-backup before restore (if not dry-run)
 	if !dryRun {
 		Info("Creating backup before restore...")
-		backupCmd := exec.Command(filepath.Join(DotfilesDir(), "bin", "blackdot"), "backup", "create")
+		backupCmd := exec.Command(filepath.Join(BlackdotDir(), "bin", "blackdot"), "backup", "create")
 		backupCmd.Stdout = os.Stdout
 		backupCmd.Stderr = os.Stderr
 		if err := backupCmd.Run(); err != nil {
@@ -2013,7 +2013,7 @@ func vaultValidate() error {
 		Fail("vault-items.json not found at %s", vaultItemsPath)
 		fmt.Println()
 		Info("Copy the example file:")
-		fmt.Printf("  cp %s/vault/vault-items.example.json %s\n", DotfilesDir(), vaultItemsPath)
+		fmt.Printf("  cp %s/vault/vault-items.example.json %s\n", BlackdotDir(), vaultItemsPath)
 		return err
 	}
 
@@ -2285,7 +2285,7 @@ func vaultInit() error {
 	}
 
 	// Manual setup - copy example file
-	exampleFile := filepath.Join(DotfilesDir(), "vault", "vault-items.example.json")
+	exampleFile := filepath.Join(BlackdotDir(), "vault", "vault-items.example.json")
 	if _, err := os.Stat(exampleFile); err == nil {
 		os.MkdirAll(filepath.Dir(vaultConfigPath), 0755)
 		data, _ := os.ReadFile(exampleFile)

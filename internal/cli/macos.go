@@ -156,7 +156,7 @@ func macosApply(backup bool) error {
 		return err
 	}
 
-	script := filepath.Join(DotfilesDir(), "macos", "apply-settings.sh")
+	script := filepath.Join(BlackdotDir(), "macos", "apply-settings.sh")
 	if _, err := os.Stat(script); os.IsNotExist(err) {
 		Fail("Script not found: %s", script)
 		return err
@@ -182,7 +182,7 @@ func macosPreview() error {
 		return err
 	}
 
-	script := filepath.Join(DotfilesDir(), "macos", "apply-settings.sh")
+	script := filepath.Join(BlackdotDir(), "macos", "apply-settings.sh")
 	if _, err := os.Stat(script); os.IsNotExist(err) {
 		Fail("Script not found: %s", script)
 		return err
@@ -202,7 +202,7 @@ func macosDiscover(generate, snapshot bool, compare string) error {
 		return err
 	}
 
-	script := filepath.Join(DotfilesDir(), "macos", "discover-settings.sh")
+	script := filepath.Join(BlackdotDir(), "macos", "discover-settings.sh")
 	if _, err := os.Stat(script); os.IsNotExist(err) {
 		Fail("Script not found: %s", script)
 		return err

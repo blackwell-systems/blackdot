@@ -73,30 +73,30 @@ func runPackages(cmd *cobra.Command, args []string) error {
 	}
 
 	// Determine blackdot directory
-	dotfilesDir := os.Getenv("BLACKDOT_DIR")
-	if dotfilesDir == "" {
+	blackdotDir := os.Getenv("BLACKDOT_DIR")
+	if blackdotDir == "" {
 		home, _ := os.UserHomeDir()
-		dotfilesDir = filepath.Join(home, ".blackdot")
+		blackdotDir = filepath.Join(home, ".blackdot")
 	}
 
 	// Determine tier
-	tier := getPackageTier(tierOverride, dotfilesDir)
+	tier := getPackageTier(tierOverride, blackdotDir)
 
 	// Map tier to Brewfile
 	var brewfilePath string
 	switch tier {
 	case "minimal":
-		brewfilePath = filepath.Join(dotfilesDir, "Brewfile.minimal")
+		brewfilePath = filepath.Join(blackdotDir, "Brewfile.minimal")
 	case "enhanced":
-		brewfilePath = filepath.Join(dotfilesDir, "Brewfile.enhanced")
+		brewfilePath = filepath.Join(blackdotDir, "Brewfile.enhanced")
 	default:
-		brewfilePath = filepath.Join(dotfilesDir, "Brewfile")
+		brewfilePath = filepath.Join(blackdotDir, "Brewfile")
 		tier = "full"
 	}
 
 	// Check Brewfile exists, fall back to main if needed
 	if _, err := os.Stat(brewfilePath); os.IsNotExist(err) {
-		mainBrewfile := filepath.Join(dotfilesDir, "Brewfile")
+		mainBrewfile := filepath.Join(blackdotDir, "Brewfile")
 		if _, err := os.Stat(mainBrewfile); err == nil {
 			fmt.Printf("%s Brewfile for '%s' tier not found, using full Brewfile\n", yellow("[WARN]"), tier)
 			brewfilePath = mainBrewfile
@@ -107,7 +107,7 @@ func runPackages(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println()
-	fmt.Println(bold("Dotfiles Package Manager"))
+	fmt.Println(bold("Blackdot Package Manager"))
 	fmt.Println("========================")
 	fmt.Printf("%s\n", dim(fmt.Sprintf("Tier: %s (%s)", tier, filepath.Base(brewfilePath))))
 	fmt.Println()
@@ -233,7 +233,7 @@ func runPackages(cmd *cobra.Command, args []string) error {
 
 // getPackageTier determines which tier to use
 // Priority: --tier flag > config.json > BREWFILE_TIER env > default (full)
-func getPackageTier(tierOverride, dotfilesDir string) string {
+func getPackageTier(tierOverride, blackdotDir string) string {
 	// 1. Command line override
 	if tierOverride != "" {
 		return tierOverride

@@ -82,7 +82,7 @@ setup_workspace_layout
 setup_workspace_symlink
 
 # ============================================================
-# 6. Dotfiles symlinks (shared)
+# 6. Blackdot symlinks (shared)
 # ============================================================
 link_blackdot
 

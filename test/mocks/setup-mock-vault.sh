@@ -38,13 +38,13 @@ fail()  { echo -e "${RED}[FAIL]${NC} $1"; }
 # ============================================================
 # Configuration
 # ============================================================
-GPG_TEST_NAME="Dotfiles Test User"
-GPG_TEST_EMAIL="test@dotfiles.local"
+GPG_TEST_NAME="Blackdot Test User"
+GPG_TEST_EMAIL="test@blackdot.local"
 GPG_TEST_KEY_ID=""
 
 PASSWORD_STORE_DIR="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 GNUPGHOME="${GNUPGHOME:-$HOME/.gnupg}"
-PASS_PREFIX="dotfiles"
+PASS_PREFIX="blackdot"
 
 NO_PASSPHRASE=false
 CLEAN_FIRST=false
@@ -83,7 +83,7 @@ done
 cleanup_mock_vault() {
     info "Cleaning up existing mock vault..."
 
-    # Remove password store dotfiles prefix
+    # Remove password store blackdot prefix
     if [[ -d "$PASSWORD_STORE_DIR/$PASS_PREFIX" ]]; then
         rm -rf "$PASSWORD_STORE_DIR/$PASS_PREFIX"
         pass_ok "Removed $PASSWORD_STORE_DIR/$PASS_PREFIX"
@@ -435,7 +435,7 @@ print_usage() {
     echo ""
     echo "  blackdot vault check"
     echo "  blackdot vault restore --preview"
-    echo "  dotfiles drift"
+    echo "  blackdot drift"
     echo ""
     echo "Mock items created:"
     echo "  - SSH-GitHub-Enterprise  (mock SSH key)"
@@ -457,7 +457,7 @@ print_usage() {
 main() {
     echo ""
     echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
-    echo -e "${CYAN}  Dotfiles Mock Vault Setup${NC}"
+    echo -e "${CYAN}  Blackdot Mock Vault Setup${NC}"
     echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
     echo ""
 

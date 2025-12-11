@@ -66,14 +66,14 @@ type LayerResult struct {
 // Manager handles configuration operations
 type Manager struct {
 	configDir   string
-	dotfilesDir string
+	blackdotDir string
 }
 
 // NewManager creates a new config manager
-func NewManager(configDir, dotfilesDir string) *Manager {
+func NewManager(configDir, blackdotDir string) *Manager {
 	return &Manager{
 		configDir:   configDir,
-		dotfilesDir: dotfilesDir,
+		blackdotDir: blackdotDir,
 	}
 }
 
@@ -89,16 +89,16 @@ func DefaultManager() *Manager {
 	}
 	configDir = filepath.Join(configDir, "blackdot")
 
-	dotfilesDir := os.Getenv("BLACKDOT_DIR")
-	if dotfilesDir == "" {
+	blackdotDir := os.Getenv("BLACKDOT_DIR")
+	if blackdotDir == "" {
 		home, _ := os.UserHomeDir()
-		dotfilesDir = filepath.Join(home, ".blackdot")
+		blackdotDir = filepath.Join(home, ".blackdot")
 	} else {
 		// Normalize path separators for cross-platform consistency
-		dotfilesDir = filepath.Clean(dotfilesDir)
+		blackdotDir = filepath.Clean(blackdotDir)
 	}
 
-	return NewManager(configDir, dotfilesDir)
+	return NewManager(configDir, blackdotDir)
 }
 
 // UserConfigPath returns the path to user config

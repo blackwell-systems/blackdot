@@ -126,16 +126,16 @@ func runImportChezmoi(sourceDir, configFile string, dryRun, verbose bool) error 
 	fmt.Println()
 
 	// Get target directory
-	dotfilesDir := os.Getenv("BLACKDOT_DIR")
-	if dotfilesDir == "" {
+	blackdotDir := os.Getenv("BLACKDOT_DIR")
+	if blackdotDir == "" {
 		home, _ := os.UserHomeDir()
-		dotfilesDir = filepath.Join(home, ".blackdot")
+		blackdotDir = filepath.Join(home, ".blackdot")
 	}
 
 	importer := &chezmoiImporter{
 		sourceDir:  sourceDir,
 		configFile: configFile,
-		targetDir:  dotfilesDir,
+		targetDir:  blackdotDir,
 		dryRun:     dryRun,
 		verbose:    verbose,
 		configData: make(map[string]interface{}),
