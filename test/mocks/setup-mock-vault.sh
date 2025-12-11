@@ -4,7 +4,7 @@
 # Creates a mock vault with test credentials using pass
 #
 # This script sets up a complete mock vault environment for testing
-# the dotfiles vault integration without real credentials.
+# the blackdot vault integration without real credentials.
 #
 # Usage:
 #   ./setup-mock-vault.sh           # Interactive - prompts for GPG passphrase
@@ -211,7 +211,7 @@ QyNTUxOQAAACBTRVNUX0tFWV9GT1JfR0lUSFVCX0VOVEVSUFJJU0UAAAAAAAAAAAAAAAG
 XAAAAEHRlc3RAZXhhbXBsZS5jb20BAgMEBQYHCAkKCwwNDg8QAAAAAAAAAAAAAAAAAAA=
 -----END OPENSSH PRIVATE KEY-----
 # MOCK KEY - DO NOT USE IN PRODUCTION
-# This is a test key for dotfiles vault testing"
+# This is a test key for blackdot vault testing"
 
     insert_item "SSH-GitHub-Blackwell" "-----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
@@ -219,7 +219,7 @@ QyNTUxOQAAACBURVNUX0tFWV9GT1JfR0lUSFVCX0JMQUNLV0VMTAAAAAAAAAAAAAAAAAG
 XAAAAEHRlc3RAZXhhbXBsZS5jb20BAgMEBQYHCAkKCwwNDg8QAAAAAAAAAAAAAAAAAAA=
 -----END OPENSSH PRIVATE KEY-----
 # MOCK KEY - DO NOT USE IN PRODUCTION
-# This is a test key for dotfiles vault testing"
+# This is a test key for blackdot vault testing"
 
     # ============================================================
     # SSH Config
@@ -427,14 +427,14 @@ print_usage() {
     echo -e "${GREEN}Mock vault setup complete!${NC}"
     echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
     echo ""
-    echo "To use with dotfiles vault commands:"
+    echo "To use with blackdot vault commands:"
     echo ""
     echo -e "  ${BOLD}export BLACKDOT_VAULT_BACKEND=pass${NC}"
     echo ""
     echo "Then test with:"
     echo ""
-    echo "  dotfiles vault check"
-    echo "  dotfiles vault restore --preview"
+    echo "  blackdot vault check"
+    echo "  blackdot vault restore --preview"
     echo "  dotfiles drift"
     echo ""
     echo "Mock items created:"

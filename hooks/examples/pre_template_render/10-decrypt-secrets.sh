@@ -3,7 +3,7 @@
 # Example Hook: pre_template_render/10-decrypt-secrets.sh
 # Auto-decrypts .age files in templates directory before rendering
 #
-# This hook runs before 'dotfiles template render' to ensure
+# This hook runs before 'blackdot template render' to ensure
 # encrypted template variables and arrays are decrypted.
 #
 # Installation:
