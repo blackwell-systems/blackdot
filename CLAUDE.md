@@ -112,11 +112,12 @@ blackdot/
 ├── cmd/blackdot/             # Go CLI entry point
 │   └── main.go
 ├── internal/
-│   ├── cli/                  # Cobra commands (20+ files)
+│   ├── cli/                  # Cobra commands (30+ files, ~19K lines)
 │   │   ├── root.go
 │   │   ├── features.go       # Feature management
 │   │   ├── vault.go          # Vault operations
 │   │   ├── doctor.go         # Health checks
+│   │   ├── completion.go     # Shell completions
 │   │   └── ...
 │   ├── feature/              # Feature registry
 │   │   └── registry.go
@@ -155,6 +156,8 @@ blackdot doctor                # Health check
 blackdot doctor --fix          # Auto-fix issues
 blackdot status                # Visual dashboard
 blackdot vault restore         # Restore secrets from vault
+blackdot completion zsh        # Generate shell completions
+blackdot backup restore --dry-run  # Preview restore (many commands support --dry-run)
 ```
 
 ---
@@ -290,4 +293,4 @@ All CLI commands work identically across platforms via the Go binary.
 
 ---
 
-*Last Updated: 2025-12-10*
+*Last Updated: 2025-12-11*
