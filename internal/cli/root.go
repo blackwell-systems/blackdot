@@ -88,6 +88,7 @@ func init() {
 	// Add subcommands
 	rootCmd.AddCommand(
 		newVersionCmd(),
+		newCompletionCmd(),
 		newFeaturesCmd(),
 		newConfigCmd(),
 		newDoctorCmd(),
