@@ -13,14 +13,14 @@ import (
 
 // Config layer paths
 var (
-	configLayerUser    = filepath.Join(os.Getenv("HOME"), ".config", "dotfiles", "config.json")
-	configLayerMachine = filepath.Join(os.Getenv("HOME"), ".config", "dotfiles", "machine.json")
+	configLayerUser    = filepath.Join(os.Getenv("HOME"), ".config", "blackdot", "config.json")
+	configLayerMachine = filepath.Join(os.Getenv("HOME"), ".config", "blackdot", "machine.json")
 )
 
 func init() {
 	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" {
-		configLayerUser = filepath.Join(xdg, "dotfiles", "config.json")
-		configLayerMachine = filepath.Join(xdg, "dotfiles", "machine.json")
+		configLayerUser = filepath.Join(xdg, "blackdot", "config.json")
+		configLayerMachine = filepath.Join(xdg, "blackdot", "machine.json")
 	}
 }
 
@@ -29,7 +29,7 @@ func newConfigCmd() *cobra.Command {
 		Use:     "config",
 		Aliases: []string{"cfg"},
 		Short:   "Manage configuration",
-		Long:    `Manage dotfiles configuration`,
+		Long:    `Manage blackdot configuration`,
 		Run: func(cmd *cobra.Command, args []string) {
 			printConfigHelp()
 		},
@@ -57,13 +57,13 @@ func newConfigCmd() *cobra.Command {
 // printConfigHelp prints styled help matching ZSH style
 func printConfigHelp() {
 	// Title
-	BoldCyan.Print("dotfiles config")
+	BoldCyan.Print("blackdot config")
 	fmt.Print(" - Manage configuration with layered resolution\n")
 	fmt.Println()
 
 	// Usage
 	Bold.Print("Usage:")
-	fmt.Print(" dotfiles config <command> [options]\n")
+	fmt.Print(" blackdot config <command> [options]\n")
 	fmt.Println()
 
 	// Commands
@@ -105,19 +105,19 @@ func printConfigHelp() {
 	// Examples
 	BoldCyan.Println("Examples:")
 	Dim.Println("  # Get a config value")
-	fmt.Println("  dotfiles config get vault.backend")
+	fmt.Println("  blackdot config get vault.backend")
 	fmt.Println()
 	Dim.Println("  # Set a value in specific layer")
-	fmt.Println("  dotfiles config set user vault.backend 1password")
+	fmt.Println("  blackdot config set user vault.backend 1password")
 	fmt.Println()
 	Dim.Println("  # Show where a value comes from")
-	fmt.Println("  dotfiles config show vault.backend")
+	fmt.Println("  blackdot config show vault.backend")
 	fmt.Println()
 	Dim.Println("  # View all layers")
-	fmt.Println("  dotfiles config list")
+	fmt.Println("  blackdot config list")
 	fmt.Println()
 	Dim.Println("  # Initialize machine config")
-	fmt.Println("  dotfiles config init machine work-mac")
+	fmt.Println("  blackdot config init machine work-mac")
 	fmt.Println()
 }
 
@@ -146,9 +146,9 @@ func newConfigSetCmd() *cobra.Command {
 Layers: user, machine, project
 
 Examples:
-  dotfiles config set user vault.backend 1password
-  dotfiles config set machine features.debug true
-  dotfiles config set project shell.theme minimal`,
+  blackdot config set user vault.backend 1password
+  blackdot config set machine features.debug true
+  blackdot config set project shell.theme minimal`,
 		Args: cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return configSet(args[0], args[1], args[2])
@@ -216,8 +216,8 @@ func newConfigInitCmd() *cobra.Command {
 Layers: machine, project
 
 Examples:
-  dotfiles config init machine work-macbook
-  dotfiles config init project`,
+  blackdot config init machine work-macbook
+  blackdot config init project`,
 		Args: cobra.RangeArgs(1, 2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			layer := args[0]
@@ -441,7 +441,7 @@ func configList() error {
 	if projectConfig != "" {
 		fmt.Printf("  project:   %s %s\n", projectConfig, Green.Sprint("✓"))
 	} else {
-		fmt.Printf("  project:   %s\n", Dim.Sprint(".dotfiles.json (not found)"))
+		fmt.Printf("  project:   %s\n", Dim.Sprint(".blackdot.json (not found)"))
 	}
 
 	// Machine
@@ -545,7 +545,7 @@ func configInitMachine(identifier string) error {
 
 func configInitProject() error {
 	cwd, _ := os.Getwd()
-	projectConfig := filepath.Join(cwd, ".dotfiles.json")
+	projectConfig := filepath.Join(cwd, ".blackdot.json")
 
 	// Check if already exists
 	if _, err := os.Stat(projectConfig); err == nil {
@@ -615,10 +615,10 @@ func configEdit(layer string) error {
 // ============================================================
 
 func findProjectConfig() string {
-	// Search up from current directory for .dotfiles.json
+	// Search up from current directory for .blackdot.json
 	dir, _ := os.Getwd()
 	for {
-		configPath := filepath.Join(dir, ".dotfiles.json")
+		configPath := filepath.Join(dir, ".blackdot.json")
 		if _, err := os.Stat(configPath); err == nil {
 			return configPath
 		}
