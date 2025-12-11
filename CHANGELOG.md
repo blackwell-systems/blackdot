@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0-rc6] - TBD
+
+**Release Candidate 6 - Documentation Refinement**
+
+### Changed
+
+- **Documentation Improvements**
+  - Updated architecture diagram to night mode for better visibility
+  - Renamed primary alias from `d` to `b` for blackdot branding consistency
+  - Removed README-FULL.md, moved unique content to subdocs
+  - Updated directory structure documentation to reflect Go-based architecture
+
+### Fixed
+
+- Architecture diagram contrast and readability
+
 ## [4.0.0-rc5] - 2025-12-11
 
 **Release Candidate 5 - Final Blackdot Rebrand Polish**
