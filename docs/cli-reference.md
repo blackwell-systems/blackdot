@@ -22,7 +22,7 @@ blackdot help            # Show all commands
 
 ## The `blackdot` Command
 
-The unified command for managing your dotfiles. All subcommands are accessed via `blackdot <command>`.
+The unified command for managing your blackdot configuration. All subcommands are accessed via `blackdot <command>`.
 
 ### Command Overview
 
@@ -47,9 +47,9 @@ The unified command for managing your dotfiles. All subcommands are accessed via
 | `setup` | - | Interactive setup wizard |
 | `macos` | - | macOS system settings (macOS only) |
 | `upgrade` | `update` | Pull latest and run bootstrap |
-| `uninstall` | - | Remove dotfiles configuration |
-| `cd` | - | Change to dotfiles directory |
-| `edit` | - | Open dotfiles in $EDITOR |
+| `uninstall` | - | Remove blackdot configuration |
+| `cd` | - | Change to blackdot directory |
+| `edit` | - | Open blackdot in $EDITOR |
 | `help` | `-h`, `--help` | Show help |
 
 ---
@@ -58,7 +58,7 @@ The unified command for managing your dotfiles. All subcommands are accessed via
 
 ### `blackdot status`
 
-Display a visual dashboard showing the current state of your dotfiles configuration.
+Display a visual dashboard showing the current state of your blackdot configuration.
 
 ```bash
 blackdot status
@@ -76,7 +76,7 @@ blackdot s              # Alias
 
 ### `blackdot doctor`
 
-Run a comprehensive health check on your dotfiles installation.
+Run a comprehensive health check on your blackdot installation.
 
 ```bash
 blackdot doctor [OPTIONS]
@@ -119,7 +119,7 @@ blackdot doctor --quick      # Fast checks (skip vault status)
 
 ### `blackdot features`
 
-Central registry for managing optional features. Enable, disable, and query the status of all optional dotfiles functionality.
+Central registry for managing optional features. Enable, disable, and query the status of all optional blackdot functionality.
 
 ```bash
 blackdot features [COMMAND] [OPTIONS]
@@ -426,7 +426,7 @@ Drift detection runs automatically on shell startup using quick mode. If local f
 Disable with: `export BLACKDOT_SKIP_DRIFT_CHECK=1`
 
 **How it works:**
-1. After `blackdot vault pull`, checksums are saved to `~/.cache/dotfiles/vault-state.json`
+1. After `blackdot vault pull`, checksums are saved to `~/.cache/blackdot/vault-state.json`
 2. On shell startup, local files are compared against cached checksums
 3. If checksums differ, a warning is shown
 4. Run full `blackdot drift` to compare against actual vault content
@@ -493,7 +493,7 @@ blackdot sync --verbose           # Show checksum details
 ```
 
 **How it works:**
-1. Loads cached checksums from `~/.cache/dotfiles/vault-state.json` (baseline from last sync)
+1. Loads cached checksums from `~/.cache/blackdot/vault-state.json` (baseline from last sync)
 2. Calculates current checksums for local files
 3. Fetches vault content and calculates checksums
 4. Compares each against baseline to determine which side changed
@@ -774,7 +774,7 @@ export ONEPASSWORD_VAULT=Personal  # optional, default vault
 brew install pass
 pass init <gpg-key-id>
 export BLACKDOT_VAULT_BACKEND=pass
-export PASS_PREFIX=dotfiles  # optional, items stored as dotfiles/Git-Config
+export PASS_PREFIX=blackdot  # optional, items stored as blackdot/Git-Config
 ```
 
 ---
@@ -785,16 +785,16 @@ Vault items can be organized by location (folder, vault, directory) depending on
 
 | Backend | Location Type | Example |
 |---------|---------------|---------|
-| **Bitwarden** | `folder` | Items in "dotfiles" folder |
+| **Bitwarden** | `folder` | Items in "blackdot" folder |
 | **1Password** | `vault` or `tag` | Items in "Personal" vault (planned) |
-| **pass** | `directory` | Items in `dotfiles/` prefix directory |
+| **pass** | `directory` | Items in `blackdot/` prefix directory |
 
 **Configuration in `vault-items.json`:**
 ```json
 {
   "vault_location": {
     "type": "folder",
-    "value": "dotfiles"
+    "value": "blackdot"
   },
   "vault_items": { ... }
 }
@@ -937,7 +937,7 @@ blackdot vault sync --force-vault    # Force pull vault to local
 
 ### `blackdot vault list`
 
-List vault items managed by dotfiles.
+List vault items managed by blackdot.
 
 ```bash
 blackdot vault list
@@ -1359,7 +1359,7 @@ blackdot encrypt status    # Verify key restored
 
 ### Encryption + Hooks Integration
 
-The encryption system integrates with dotfiles hooks:
+The encryption system integrates with blackdot hooks:
 
 | Hook | When | Action |
 |------|------|--------|
@@ -1534,7 +1534,7 @@ blackdot setup --reset      # Start over
 
 ### `blackdot uninstall`
 
-Remove dotfiles configuration.
+Remove blackdot configuration.
 
 ```bash
 blackdot uninstall [OPTIONS]
@@ -1686,7 +1686,7 @@ blackdot macos discover --domain com.apple.dock
 
 ### `blackdot cd`
 
-Change to the dotfiles directory.
+Change to the blackdot directory.
 
 ```bash
 blackdot cd
@@ -1698,7 +1698,7 @@ Equivalent to: `cd ~/workspace/blackdot`
 
 ### `blackdot edit`
 
-Open dotfiles in your editor.
+Open blackdot in your editor.
 
 ```bash
 blackdot edit
@@ -1712,7 +1712,7 @@ Uses `$EDITOR` (defaults to vim).
 
 ### `install.sh`
 
-One-line installer for dotfiles.
+One-line installer for blackdot.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
@@ -1834,7 +1834,7 @@ DEBUG=1 blackdot template render
 | Variable | Values | Description |
 |----------|--------|-------------|
 | `DEBUG` | `1` | Enable debug output in vault and template operations |
-| `BLACKDOT_DIR` | path | Override dotfiles directory location |
+| `BLACKDOT_DIR` | path | Override blackdot directory location |
 
 ---
 
@@ -1915,7 +1915,7 @@ Most commands follow these conventions:
 | `generated/` | Rendered templates |
 | `~/.config/blackdot/config.json` | All configuration and state (JSON format) |
 | `~/.config/blackdot/vault-items.json` | Vault items schema |
-| `~/.cache/dotfiles/vault-state.json` | Drift detection cache (file checksums from last vault pull) |
+| `~/.cache/blackdot/vault-state.json` | Drift detection cache (file checksums from last vault pull) |
 
 ---
 
@@ -1942,7 +1942,7 @@ All state and configuration in a single JSON file:
     "current_tier": "enhanced"
   },
   "paths": {
-    "dotfiles_dir": "~/workspace/blackdot",
+    "blackdot_dir": "~/workspace/blackdot",
     "config_dir": "~/.config/blackdot"
   }
 }
@@ -1951,7 +1951,7 @@ All state and configuration in a single JSON file:
 **Key Sections:**
 - `setup.completed[]` - Array of completed setup phases
 - `vault.backend` - Preferred vault backend (`bitwarden`, `1password`, `pass`)
-- `paths.dotfiles_dir` - Custom dotfiles installation directory
+- `paths.blackdot_dir` - Custom blackdot installation directory
 
 **Completed Phases:**
 - `symlinks` - Shell configuration symlinks created
@@ -1971,7 +1971,7 @@ blackdot setup --reset     # Reset state and re-run setup
 ### State Inference
 
 If state files don't exist, `blackdot setup` infers state from the filesystem:
-- Symlinks: Checks if `~/.zshrc` points to dotfiles
+- Symlinks: Checks if `~/.zshrc` points to blackdot
 - Packages: Checks if Homebrew is installed
 - Vault: Checks for vault CLI and credentials
 - Secrets: Checks for `~/.ssh/config`, `~/.gitconfig`
