@@ -82,10 +82,10 @@ If you just want the developer tool aliases:
 
 ```powershell
 # Clone
-git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\dotfiles
+git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\blackdot
 
 # Install module
-cd $HOME\workspace\dotfiles\powershell
+cd $HOME\workspace\blackdot\powershell
 .\Install-Blackdot.ps1
 
 # Done! Restart PowerShell
@@ -102,8 +102,8 @@ For complete functionality including vault sync:
 
 ```powershell
 # Clone
-git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\dotfiles
-cd $HOME\workspace\dotfiles
+git clone https://github.com/blackwell-systems/blackdot.git $HOME\workspace\blackdot
+cd $HOME\workspace\blackdot
 
 # Build and install the Go CLI
 go build -o blackdot.exe ./cmd/blackdot
@@ -141,7 +141,7 @@ Similar to `brew bundle` on macOS/Linux, Windows has a package installer script:
 
 ```powershell
 # Full installation (all packages)
-cd $HOME\workspace\dotfiles\powershell
+cd $HOME\workspace\blackdot\powershell
 .\Install-Packages.ps1
 
 # Minimal (essential CLI tools only)
@@ -241,7 +241,7 @@ winget install Bitwarden.CLI
 bw login
 $env:BW_SESSION = $(bw unlock --raw)
 
-# Configure dotfiles
+# Configure blackdot
 blackdot setup
 # Select Bitwarden as vault backend
 ```
@@ -255,7 +255,7 @@ winget install AgileBits.1Password.CLI
 # Sign in
 op signin
 
-# Configure dotfiles
+# Configure blackdot
 blackdot setup
 # Select 1Password as vault backend
 ```
@@ -280,8 +280,8 @@ Import-Module Blackdot -Verbose
 ### Commands not found
 
 ```powershell
-# Ensure dotfiles CLI is in PATH
-where.exe dotfiles
+# Ensure blackdot CLI is in PATH
+where.exe blackdot
 
 # If not found, add to PATH
 $env:Path += ";$HOME\.local\bin"
@@ -331,7 +331,7 @@ $HOME\
 
 ```powershell
 # Update repository
-cd $HOME\workspace\dotfiles
+cd $HOME\workspace\blackdot
 git pull
 
 # Reinstall module
@@ -339,8 +339,8 @@ cd powershell
 .\Install-Blackdot.ps1 -Force
 
 # Rebuild CLI (if using Go)
-go build -o dotfiles.exe ./cmd/blackdot
-Move-Item -Force dotfiles.exe $HOME\.local\bin\
+go build -o blackdot.exe ./cmd/blackdot
+Move-Item -Force blackdot.exe $HOME\.local\bin\
 ```
 
 ---

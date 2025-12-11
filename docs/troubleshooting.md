@@ -99,7 +99,7 @@ brew install --cask font-meslo-lg-nerd-font
 # Then restart your terminal
 ```
 
-### "command not found: dotfiles"
+### "command not found: blackdot"
 
 **Symptom:** `blackdot` command doesn't work.
 
@@ -192,7 +192,7 @@ bw unlock --check --session "$BW_SESSION"
 blackdot vault list
 
 # Check expected item names
-# Items should be named: dotfiles-SSH-Config, dotfiles-AWS-Config, etc.
+# Items should be named: blackdot-SSH-Config, blackdot-AWS-Config, etc.
 
 # Verify items exist in vault
 blackdot vault list
@@ -381,12 +381,12 @@ ls -la /workspace
 
 **Solution:**
 ```bash
-# Mount dotfiles as volume
-docker run -v ~/workspace/blackdot:/root/workspace/dotfiles ...
+# Mount blackdot as volume
+docker run -v ~/workspace/blackdot:/root/workspace/blackdot ...
 
 # Or use the development image
-docker build -t dotfiles-dev .
-docker run -it dotfiles-dev
+docker build -t blackdot-dev .
+docker run -it blackdot-dev
 ```
 
 ## Upgrade Issues
