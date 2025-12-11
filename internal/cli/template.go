@@ -19,27 +19,27 @@ import (
 
 // templateConfig holds template-related paths
 type templateConfig struct {
-	dotfilesDir  string
+	blackdotDir  string
 	templateDir  string
 	generatedDir string
 	variablesDir string
 }
 
 func getTemplateConfig() (*templateConfig, error) {
-	dotfilesDir := os.Getenv("BLACKDOT_DIR")
-	if dotfilesDir == "" {
+	blackdotDir := os.Getenv("BLACKDOT_DIR")
+	if blackdotDir == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return nil, fmt.Errorf("cannot determine home directory: %w", err)
 		}
-		dotfilesDir = filepath.Join(home, ".blackdot")
+		blackdotDir = filepath.Join(home, ".blackdot")
 	}
 
 	return &templateConfig{
-		dotfilesDir:  dotfilesDir,
-		templateDir:  filepath.Join(dotfilesDir, "templates", "configs"),
-		generatedDir: filepath.Join(dotfilesDir, "generated"),
-		variablesDir: filepath.Join(dotfilesDir, "templates"),
+		blackdotDir:  blackdotDir,
+		templateDir:  filepath.Join(blackdotDir, "templates", "configs"),
+		generatedDir: filepath.Join(blackdotDir, "generated"),
+		variablesDir: filepath.Join(blackdotDir, "templates"),
 	}, nil
 }
 
@@ -775,7 +775,7 @@ func runTemplateLink(cmd *cobra.Command, args []string) error {
 	home := os.Getenv("HOME")
 	linkMap := map[string]string{
 		"gitconfig":    filepath.Join(home, ".gitconfig"),
-		"99-local.zsh": filepath.Join(cfg.dotfilesDir, "zsh", "zsh.d", "99-local.zsh"),
+		"99-local.zsh": filepath.Join(cfg.blackdotDir, "zsh", "zsh.d", "99-local.zsh"),
 		"ssh-config":   filepath.Join(home, ".ssh", "config"),
 		"claude.local": filepath.Join(home, ".claude.local"),
 	}

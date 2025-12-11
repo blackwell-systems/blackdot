@@ -115,9 +115,9 @@ func runSync(args []string, dryRun, forceLocal, forceVault, verbose, all bool) e
 	}
 
 	home, _ := os.UserHomeDir()
-	dotfilesDir := os.Getenv("BLACKDOT_DIR")
-	if dotfilesDir == "" {
-		dotfilesDir = filepath.Join(home, ".blackdot")
+	blackdotDir := os.Getenv("BLACKDOT_DIR")
+	if blackdotDir == "" {
+		blackdotDir = filepath.Join(home, ".blackdot")
 	}
 
 	// Check offline mode
@@ -135,7 +135,7 @@ func runSync(args []string, dryRun, forceLocal, forceVault, verbose, all bool) e
 	fmt.Printf("%s%s── Blackdot Sync ──%s\n", "\033[1m", "\033[36m", "\033[0m")
 
 	// Get vault session
-	session, err := getVaultSession(dotfilesDir)
+	session, err := getVaultSession(blackdotDir)
 	if err != nil {
 		fmt.Printf("%s Vault not unlocked\n", red("[ERROR]"))
 		fmt.Println()

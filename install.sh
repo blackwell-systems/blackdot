@@ -31,20 +31,20 @@ fail()  { echo -e "${RED}[FAIL]${NC} $1"; }
 # Run hook via zsh (requires repo to be cloned first)
 run_hook() {
     local hook_point="$1"
-    local dotfiles_dir="${INSTALL_DIR:-}"
+    local blackdot_dir="${INSTALL_DIR:-}"
 
     # Skip if repo not cloned yet
-    [[ -z "$dotfiles_dir" || ! -d "$dotfiles_dir" ]] && return 0
+    [[ -z "$blackdot_dir" || ! -d "$blackdot_dir" ]] && return 0
 
     # Skip if zsh not available
     command -v zsh &>/dev/null || return 0
 
     # Skip if hooks library doesn't exist
-    [[ -f "$dotfiles_dir/lib/_hooks.sh" ]] || return 0
+    [[ -f "$blackdot_dir/lib/_hooks.sh" ]] || return 0
 
     # Run hooks via zsh (silently fail if hooks disabled)
     zsh -c "
-        source '$dotfiles_dir/lib/_hooks.sh' 2>/dev/null || exit 0
+        source '$blackdot_dir/lib/_hooks.sh' 2>/dev/null || exit 0
         hook_run '$hook_point'
     " 2>/dev/null || true
 }

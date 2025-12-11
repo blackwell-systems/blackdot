@@ -159,7 +159,7 @@ func TestGetSessionFile(t *testing.T) {
 	os.Setenv("BLACKDOT_DIR", "/test/blackdot")
 	initConfig() // Re-init to pick up BLACKDOT_DIR
 	path = getSessionFile()
-	expected := filepath.Join(DotfilesDir(), "vault", ".vault-session")
+	expected := filepath.Join(BlackdotDir(), "vault", ".vault-session")
 	if path != expected {
 		t.Errorf("expected '%s', got '%s'", expected, path)
 	}
@@ -307,7 +307,7 @@ func TestVaultItemsPath(t *testing.T) {
 
 	// Vault items should be in vault/ subdirectory
 	expected := filepath.FromSlash("/test/blackdot/vault")
-	vaultDir := filepath.Join(DotfilesDir(), "vault")
+	vaultDir := filepath.Join(BlackdotDir(), "vault")
 	if vaultDir != expected {
 		t.Errorf("expected vault dir '%s', got '%s'", expected, vaultDir)
 	}

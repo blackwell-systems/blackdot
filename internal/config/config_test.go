@@ -8,7 +8,7 @@ import (
 
 // TestNewManager verifies manager creation
 func TestNewManager(t *testing.T) {
-	m := NewManager("/config", "/dotfiles")
+	m := NewManager("/config", "/blackdot")
 
 	if m == nil {
 		t.Fatal("NewManager should not return nil")
@@ -18,8 +18,8 @@ func TestNewManager(t *testing.T) {
 		t.Errorf("expected configDir='/config', got '%s'", m.configDir)
 	}
 
-	if m.dotfilesDir != "/dotfiles" {
-		t.Errorf("expected dotfilesDir='/dotfiles', got '%s'", m.dotfilesDir)
+	if m.blackdotDir != "/blackdot" {
+		t.Errorf("expected blackdotDir='/blackdot', got '%s'", m.blackdotDir)
 	}
 }
 
@@ -35,8 +35,8 @@ func TestDefaultManager(t *testing.T) {
 		t.Error("configDir should not be empty")
 	}
 
-	if m.dotfilesDir == "" {
-		t.Error("dotfilesDir should not be empty")
+	if m.blackdotDir == "" {
+		t.Error("blackdotDir should not be empty")
 	}
 }
 
@@ -44,10 +44,10 @@ func TestDefaultManager(t *testing.T) {
 func TestDefaultManagerWithEnv(t *testing.T) {
 	// Save original env
 	origConfig := os.Getenv("XDG_CONFIG_HOME")
-	origDotfiles := os.Getenv("BLACKDOT_DIR")
+	origBlackdot := os.Getenv("BLACKDOT_DIR")
 	defer func() {
 		os.Setenv("XDG_CONFIG_HOME", origConfig)
-		os.Setenv("BLACKDOT_DIR", origDotfiles)
+		os.Setenv("BLACKDOT_DIR", origBlackdot)
 	}()
 
 	os.Setenv("XDG_CONFIG_HOME", "/custom/config")
@@ -61,14 +61,14 @@ func TestDefaultManagerWithEnv(t *testing.T) {
 	}
 
 	expectedBlackdot := filepath.FromSlash("/custom/blackdot")
-	if m.dotfilesDir != expectedBlackdot {
-		t.Errorf("expected dotfilesDir='%s', got '%s'", expectedBlackdot, m.dotfilesDir)
+	if m.blackdotDir != expectedBlackdot {
+		t.Errorf("expected blackdotDir='%s', got '%s'", expectedBlackdot, m.blackdotDir)
 	}
 }
 
 // TestConfigPaths verifies path methods
 func TestConfigPaths(t *testing.T) {
-	m := NewManager("/config", "/dotfiles")
+	m := NewManager("/config", "/blackdot")
 
 	expectedUser := filepath.FromSlash("/config/config.json")
 	if m.UserConfigPath() != expectedUser {

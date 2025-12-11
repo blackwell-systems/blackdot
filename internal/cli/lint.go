@@ -51,13 +51,13 @@ func runLint(cmd *cobra.Command, args []string) error {
 	verbose, _ := cmd.Flags().GetBool("verbose")
 	showFix, _ := cmd.Flags().GetBool("fix")
 
-	dotfilesDir := os.Getenv("BLACKDOT_DIR")
-	if dotfilesDir == "" {
+	blackdotDir := os.Getenv("BLACKDOT_DIR")
+	if blackdotDir == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return fmt.Errorf("cannot determine home directory: %w", err)
 		}
-		dotfilesDir = filepath.Join(home, ".blackdot")
+		blackdotDir = filepath.Join(home, ".blackdot")
 	}
 
 	green := color.New(color.FgGreen).SprintFunc()
@@ -81,7 +81,7 @@ func runLint(cmd *cobra.Command, args []string) error {
 
 	// 1. Check ZSH files in zsh.d/
 	fmt.Printf("%s Checking ZSH syntax...\n", cyan("→"))
-	zshFiles, _ := filepath.Glob(filepath.Join(dotfilesDir, "zsh", "zsh.d", "*.zsh"))
+	zshFiles, _ := filepath.Glob(filepath.Join(blackdotDir, "zsh", "zsh.d", "*.zsh"))
 	for _, file := range zshFiles {
 		result := checkZshSyntax(file)
 		stats.checked++
@@ -95,7 +95,7 @@ func runLint(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check main zshrc
-	zshrcPath := filepath.Join(dotfilesDir, "zsh", "zshrc")
+	zshrcPath := filepath.Join(blackdotDir, "zsh", "zshrc")
 	if _, err := os.Stat(zshrcPath); err == nil {
 		result := checkZshSyntax(zshrcPath)
 		stats.checked++
@@ -109,7 +109,7 @@ func runLint(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check p10k.zsh
-	p10kPath := filepath.Join(dotfilesDir, "zsh", "p10k.zsh")
+	p10kPath := filepath.Join(blackdotDir, "zsh", "p10k.zsh")
 	if _, err := os.Stat(p10kPath); err == nil {
 		result := checkZshSyntax(p10kPath)
 		stats.checked++
@@ -129,11 +129,11 @@ func runLint(cmd *cobra.Command, args []string) error {
 	var shellFiles []string
 
 	// bootstrap/*.sh
-	bootstrapFiles, _ := filepath.Glob(filepath.Join(dotfilesDir, "bootstrap", "*.sh"))
+	bootstrapFiles, _ := filepath.Glob(filepath.Join(blackdotDir, "bootstrap", "*.sh"))
 	shellFiles = append(shellFiles, bootstrapFiles...)
 
 	// lib/*.sh
-	libFiles, _ := filepath.Glob(filepath.Join(dotfilesDir, "lib", "*.sh"))
+	libFiles, _ := filepath.Glob(filepath.Join(blackdotDir, "lib", "*.sh"))
 	shellFiles = append(shellFiles, libFiles...)
 
 	for _, file := range shellFiles {
@@ -152,7 +152,7 @@ func runLint(cmd *cobra.Command, args []string) error {
 	fmt.Printf("%s Validating config files...\n", cyan("→"))
 
 	// Check Brewfile exists
-	brewfilePath := filepath.Join(dotfilesDir, "Brewfile")
+	brewfilePath := filepath.Join(blackdotDir, "Brewfile")
 	if _, err := os.Stat(brewfilePath); err == nil {
 		stats.checked++
 		if verbose {
