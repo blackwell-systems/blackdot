@@ -315,6 +315,62 @@ vim ~/.ssh/config              # Edit locally
 blackdot vault push SSH-Config # Push to vault
 ```
 
+### Bidirectional Sync
+
+Instead of manually choosing `vault push` or `vault pull`, use the smart **sync** command that automatically determines the correct direction for each file:
+
+```bash
+blackdot sync                     # Smart sync all items
+blackdot sync --dry-run           # Preview what would happen
+blackdot sync Git-Config          # Sync specific item
+```
+
+**How it determines direction:**
+
+| Condition | Action |
+|-----------|--------|
+| Local changed, vault unchanged | Push to vault |
+| Vault changed, local unchanged | Pull from vault |
+| Both changed | **Conflict** - requires resolution |
+| Neither changed | Skip (already in sync) |
+
+**Resolving conflicts:**
+
+When both sides have changed, use force flags:
+
+```bash
+blackdot sync --force-local   # Push local changes, overwrite vault
+blackdot sync --force-vault   # Pull vault changes, overwrite local
+```
+
+**Example sync output:**
+
+```
+=== Blackdot Sync ===
+Syncing 6 items with Bitwarden
+
+--- Git-Config ---
+    Local: ~/.gitconfig
+[INFO] Local → Vault
+[OK] Pushed Git-Config to Bitwarden
+
+--- AWS-Config ---
+    Local: ~/.aws/config
+[OK] Already in sync
+
+--- SSH-Config ---
+    Local: ~/.ssh/config
+[INFO] Vault → Local
+[OK] Pulled SSH-Config to ~/.ssh/config
+
+========================================
+SYNC SUMMARY:
+  Pushed to vault:    1
+  Pulled from vault:  1
+  Already in sync:    4
+========================================
+```
+
 ---
 
 ## Vault Items Structure
@@ -408,5 +464,5 @@ chmod 600 ~/.ssh/config
 
 **Learn More:**
 - [Main Documentation](/)
-- [Full README](README-FULL.md)
+- [Architecture](architecture.md)
 - [GitHub Repository](https://github.com/blackwell-systems/blackdot)

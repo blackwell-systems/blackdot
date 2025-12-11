@@ -246,7 +246,7 @@ cd ~/workspace/blackdot
 
 ### Want to Learn More?
 
-- [Full Documentation](README-FULL.md) - Complete 1,900+ line guide
+- [Architecture](architecture.md) - Complete 1,900+ line guide
 - [CLI Reference](cli-reference.md) - All commands and flags
 - [Vault System](vault-README.md) - Secret management deep dive
 - [Templates](templates.md) - Machine-specific configuration
@@ -311,6 +311,6 @@ exec zsh
 
 ---
 
-**Ready to trust it?** Install for real: [Installation Guide](README-FULL.md#installation)
+**Ready to trust it?** Install for real: [Installation Guide](/#one-line-install)
 
 **Still skeptical?** Read the code: [github.com/blackwell-systems/blackdot](https://github.com/blackwell-systems/blackdot)
