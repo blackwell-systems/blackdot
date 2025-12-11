@@ -99,7 +99,7 @@ func newEncryptCmd() *cobra.Command {
 
 func getEncryptionDir() string {
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".config", "dotfiles")
+	return filepath.Join(home, ".config", "blackdot")
 }
 
 func getAgeKeyFile() string {
@@ -419,7 +419,7 @@ func runEncryptList(cmd *cobra.Command, args []string) error {
 	home, _ := os.UserHomeDir()
 	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
-		dotfilesDir = filepath.Join(home, ".dotfiles")
+		dotfilesDir = filepath.Join(home, ".blackdot")
 	}
 
 	bold := color.New(color.Bold).SprintFunc()
@@ -510,7 +510,7 @@ func runEncryptStatus(cmd *cobra.Command, args []string) error {
 	home, _ := os.UserHomeDir()
 	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
-		dotfilesDir = filepath.Join(home, ".dotfiles")
+		dotfilesDir = filepath.Join(home, ".blackdot")
 	}
 
 	count := 0
@@ -541,7 +541,7 @@ func runEncryptPushKey(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Pushing age key to vault as '%s'...\n", vaultItem)
 
 	// Try to use blackdot vault set
-	dotfilesCmd := exec.Command("dotfiles", "vault", "set", vaultItem, "--stdin")
+	dotfilesCmd := exec.Command("blackdot", "vault", "set", vaultItem, "--stdin")
 	dotfilesCmd.Stdin = strings.NewReader(string(keyContent))
 	if err := dotfilesCmd.Run(); err != nil {
 		fmt.Println()

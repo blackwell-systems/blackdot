@@ -21,8 +21,8 @@ var uninstallSymlinks = []string{
 
 // Config files to remove
 var uninstallConfigFiles = []string{
-	".dotfiles-metrics.jsonl",
-	".dotfiles-backups",
+	".blackdot-metrics.jsonl",
+	".blackdot-backups",
 }
 
 // Secret files (only removed if --keep-secrets is not set)
@@ -68,7 +68,7 @@ func runUninstall(cmd *cobra.Command, args []string) error {
 
 	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
-		dotfilesDir = filepath.Join(home, ".dotfiles")
+		dotfilesDir = filepath.Join(home, ".blackdot")
 	}
 
 	// Colors

@@ -129,7 +129,7 @@ func runImportChezmoi(sourceDir, configFile string, dryRun, verbose bool) error 
 	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
 		home, _ := os.UserHomeDir()
-		dotfilesDir = filepath.Join(home, ".dotfiles")
+		dotfilesDir = filepath.Join(home, ".blackdot")
 	}
 
 	importer := &chezmoiImporter{

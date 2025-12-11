@@ -1,11 +1,11 @@
-# dotclaude + dotfiles Integration Guide
+# dotclaude + blackdot Integration Guide
 
 ## Overview
 
-**[dotclaude](https://github.com/blackwell-systems/dotclaude)** and **dotfiles** are complementary systems that work together seamlessly:
+**[dotclaude](https://github.com/blackwell-systems/dotclaude)** and **blackdot** are complementary systems that work together seamlessly:
 
 - **dotclaude**: Manages Claude Code profiles (CLAUDE.md, agents, standards, settings)
-- **dotfiles**: Manages secrets (SSH, AWS, Git), shell configuration, and multi-platform setup
+- **blackdot**: Manages secrets (SSH, AWS, Git), shell configuration, and multi-platform setup
 
 Together, they enable context switching with synchronized secrets across all your machines.
 
@@ -18,7 +18,7 @@ flowchart TB
         base["Base Config<br/>• Global standards<br/>• Shared agents"]
     end
 
-    subgraph dotfiles["dotfiles System"]
+    subgraph blackdot["blackdot System"]
         vault["Vault Secrets<br/>• SSH keys<br/>• AWS credentials<br/>• Git config<br/>• Env secrets"]
         shell["Shell & Tools<br/>• Zsh config<br/>• CLI tools<br/>• Brewfile"]
     end
@@ -35,7 +35,7 @@ flowchart TB
     claude_dir --> workspace
 
     style dotclaude fill:#8A2BE2,stroke:#9333EA,color:#e2e8f0
-    style dotfiles fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style blackdot fill:#2c5282,stroke:#4299e1,color:#e2e8f0
     style shared fill:#22543d,stroke:#2f855a,color:#e2e8f0
     style workspace fill:#2f855a,stroke:#48bb78,color:#e2e8f0
 ```
@@ -49,7 +49,7 @@ flowchart TB
 - **settings.json**: Claude Code settings per profile
 - **Profile switching**: `dotclaude activate <profile>`
 
-### dotfiles Manages:
+### blackdot Manages:
 - **Secrets**: SSH keys, AWS credentials, Git config, environment variables
 - **Vault sync**: Multi-backend (Bitwarden, 1Password, pass)
 - **Shell configuration**: Zsh, Powerlevel10k, CLI tools
@@ -58,7 +58,7 @@ flowchart TB
 
 ### Shared Components:
 - **~/workspace/**: Both systems use this for portable paths
-- **~/.claude/**: dotclaude manages, dotfiles respects
+- **~/.claude/**: dotclaude manages, blackdot respects
 - **Portable sessions**: Both contribute to session portability
 
 ## Setup
@@ -67,7 +67,7 @@ flowchart TB
 
 Both systems installed:
 ```bash
-# Install dotfiles first
+# Install blackdot first
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 
 # Then install dotclaude
@@ -79,7 +79,7 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/in
 The bootstrap scripts detect each other:
 
 ```bash
-# dotfiles bootstrap detects dotclaude
+# blackdot bootstrap detects dotclaude
 ./bootstrap/bootstrap-mac.sh
 # Detected: dotclaude is installed
 # Ensuring compatibility with dotclaude profile management...
@@ -142,7 +142,7 @@ dotclaude activate oss-projects
 # - Public licensing agents
 # - Community-friendly tone
 
-# OSS secrets (dotfiles)
+# OSS secrets (blackdot)
 blackdot vault pull oss-*
 # - Personal SSH key
 # - Personal AWS (for demos)
@@ -154,7 +154,7 @@ dotclaude activate work-employer
 # - Compliance agents
 # - Corporate tone
 
-# Work secrets (dotfiles)
+# Work secrets (blackdot)
 blackdot vault pull work-*
 # - Corporate SSH key
 # - Corporate AWS
@@ -188,7 +188,7 @@ cd /workspace/my-project && claude
 ### New Machine Setup
 
 ```bash
-# 1. Bootstrap dotfiles (handles /workspace, vault, shell)
+# 1. Bootstrap blackdot (handles /workspace, vault, shell)
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 
 # 2. Install dotclaude
@@ -240,7 +240,7 @@ blackdot vault pull ssh
 
 ## Configuration
 
-### dotfiles Configuration
+### blackdot Configuration
 
 Located in `~/workspace/blackdot/`:
 
@@ -279,9 +279,9 @@ Located in your dotclaude repository (typically `~/workspace/dotclaude-profiles/
 
 The systems coordinate via:
 
-1. **~/.claude/**: dotclaude manages, dotfiles respects
+1. **~/.claude/**: dotclaude manages, blackdot respects
 2. **~/workspace/**: Both use for portable paths
-3. **/workspace symlink**: Created by dotfiles, used by dotclaude
+3. **/workspace symlink**: Created by blackdot, used by dotclaude
 
 ## Troubleshooting
 
@@ -301,10 +301,10 @@ blackdot vault pull new-*      # Manually restore new secrets
 
 **Symptom**: dotclaude profiles reference `/workspace/...` but symlink missing
 
-**Solution**: Run dotfiles bootstrap:
+**Solution**: Run blackdot bootstrap:
 ```bash
 cd ~/workspace/blackdot
-./bootstrap/bootstrap-dotfiles.sh
+./bootstrap/bootstrap-blackdot.sh
 # Creates /workspace -> ~/workspace symlink
 ```
 
@@ -312,17 +312,17 @@ cd ~/workspace/blackdot
 
 **Symptom**: Both systems trying to manage `~/.claude/`
 
-**Solution**: dotclaude takes precedence. dotfiles will detect and skip:
+**Solution**: dotclaude takes precedence. blackdot will detect and skip:
 ```bash
 blackdot doctor
 # ~/.claude managed by dotclaude: OK
 ```
 
-If you uninstall dotclaude, dotfiles can take over:
+If you uninstall dotclaude, blackdot can take over:
 ```bash
 dotclaude uninstall
 blackdot doctor --fix
-# ~/.claude now managed by dotfiles
+# ~/.claude now managed by blackdot
 ```
 
 ### Issue: Vault Items Not Found After Profile Switch
@@ -370,7 +370,7 @@ Both systems can use environment variables:
 **Zsh (Unix/Linux/macOS)** - in `~/.zshrc`:
 
 ```bash
-# Shell environment (managed by dotfiles)
+# Shell environment (managed by blackdot)
 export DOTCLAUDE_PROFILE_DIR="$HOME/workspace/dotclaude-profiles"
 export BLACKDOT_VAULT_BACKEND="bitwarden"
 ```
@@ -378,7 +378,7 @@ export BLACKDOT_VAULT_BACKEND="bitwarden"
 **PowerShell (Windows)** - in `$PROFILE`:
 
 ```powershell
-# Shell environment (managed by dotfiles)
+# Shell environment (managed by blackdot)
 $env:DOTCLAUDE_PROFILE_DIR = "$HOME\workspace\dotclaude-profiles"
 $env:BLACKDOT_VAULT_BACKEND = "bitwarden"
 ```
@@ -391,7 +391,7 @@ Recommended workspace organization:
 
 ```bash
 ~/workspace/
-├── dotfiles/              # dotfiles repo
+├── blackdot/              # blackdot repo
 ├── dotclaude-profiles/    # dotclaude repo
 ├── .claude/              # Claude state (symlinked)
 ├── code/
@@ -437,9 +437,9 @@ blackdot template init    # Set machine variables
 
 ## Migration Guides
 
-### From Standalone dotfiles
+### From Standalone blackdot
 
-Already using dotfiles? Add dotclaude:
+Already using blackdot? Add dotclaude:
 
 ```bash
 # Install dotclaude
@@ -455,10 +455,10 @@ dotclaude activate my-profile
 
 ### From Standalone dotclaude
 
-Already using dotclaude? Add dotfiles:
+Already using dotclaude? Add blackdot:
 
 ```bash
-# Install dotfiles
+# Install blackdot
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 
 # It detects dotclaude and coordinates automatically
@@ -482,7 +482,7 @@ blackdot vault push --all    # Push current secrets to vault
    # "Project located at /workspace/client/api"
    ```
 
-3. **Separate concerns**: Claude config in dotclaude, secrets in dotfiles
+3. **Separate concerns**: Claude config in dotclaude, secrets in blackdot
    ```bash
    # Don't put AWS keys in CLAUDE.md
    # Don't put coding standards in vault
@@ -490,7 +490,7 @@ blackdot vault push --all    # Push current secrets to vault
 
 4. **Test on VM**: Use Lima/Docker to test integration
    ```bash
-   lima shell dotfiles
+   lima shell blackdot
    # Install both, verify they work together
    ```
 
@@ -503,12 +503,12 @@ blackdot vault push --all    # Push current secrets to vault
 ## Further Reading
 
 - **[dotclaude Documentation](https://github.com/blackwell-systems/dotclaude)** - Profile management
-- **[dotfiles Vault Guide](VAULT.md)** - Secret management
+- **[blackdot Vault Guide](VAULT.md)** - Secret management
 - **[Workspace Architecture](README-FULL.md#canonical-workspace)** - How /workspace works
 
 ## Support
 
 Issues with integration:
-- **dotfiles**: https://github.com/blackwell-systems/blackdot/issues
+- **blackdot**: https://github.com/blackwell-systems/blackdot/issues
 - **dotclaude**: https://github.com/blackwell-systems/dotclaude/issues
 - **Integration**: Open issue in either repo, tag with `integration`

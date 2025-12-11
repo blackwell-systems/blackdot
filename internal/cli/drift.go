@@ -89,7 +89,7 @@ func runDriftQuick(home string, green, yellow, dim func(a ...interface{}) string
 	if cacheDir == "" {
 		cacheDir = filepath.Join(home, ".cache")
 	}
-	stateFile := filepath.Join(cacheDir, "dotfiles", "vault-state.json")
+	stateFile := filepath.Join(cacheDir, "blackdot", "vault-state.json")
 
 	// Check if state file exists
 	if _, err := os.Stat(stateFile); os.IsNotExist(err) {
