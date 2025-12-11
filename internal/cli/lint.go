@@ -152,7 +152,7 @@ func runLint(cmd *cobra.Command, args []string) error {
 	fmt.Printf("%s Validating config files...\n", cyan("→"))
 
 	// Check Brewfile exists
-	brewfilePath := filepath.Join(blackdotDir, "Brewfile")
+	brewfilePath := filepath.Join(blackdotDir, "brew", "Brewfile")
 	if _, err := os.Stat(brewfilePath); err == nil {
 		stats.checked++
 		if verbose {
