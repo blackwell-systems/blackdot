@@ -217,7 +217,7 @@ blackdot-upgrade() {
     # Update Homebrew packages
     if command -v brew >/dev/null 2>&1; then
         echo "   Updating Homebrew packages..."
-        brew bundle --file="$BLACKDOT_DIR/Brewfile" --quiet
+        brew bundle --file="$BLACKDOT_DIR/brew/Brewfile" --quiet
     fi
 
     # Run health check with auto-fix
