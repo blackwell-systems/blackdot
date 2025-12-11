@@ -305,20 +305,20 @@ render_templates() {
 # ============================================================
 run_brew_bundle() {
     # Determine which Brewfile to use based on BREWFILE_TIER
-    local brewfile="$BLACKDOT_DIR/Brewfile"
+    local brewfile="$BLACKDOT_DIR/brew/Brewfile"
     local tier="${BREWFILE_TIER:-full}"
 
     case "$tier" in
         minimal)
-            brewfile="$BLACKDOT_DIR/Brewfile.minimal"
+            brewfile="$BLACKDOT_DIR/brew/Brewfile.minimal"
             echo "Using minimal tier (essentials only)..."
             ;;
         enhanced)
-            brewfile="$BLACKDOT_DIR/Brewfile.enhanced"
+            brewfile="$BLACKDOT_DIR/brew/Brewfile.enhanced"
             echo "Using enhanced tier (modern tools, no containers)..."
             ;;
         full|*)
-            brewfile="$BLACKDOT_DIR/Brewfile"
+            brewfile="$BLACKDOT_DIR/brew/Brewfile"
             echo "Using full tier (everything)..."
             ;;
     esac

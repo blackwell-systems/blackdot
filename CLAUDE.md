@@ -123,14 +123,14 @@ blackdot/
 │   │   └── registry.go
 │   └── config/               # JSON config management
 │       └── config.go
-├── lib/                      # Minimal shell helpers
-│   ├── _colors.sh            # Color output
-│   ├── _logging.sh           # Shell logging
-│   └── _hooks.sh             # Hook helpers
+├── bootstrap/                # Platform bootstrap scripts
+├── brew/                     # Homebrew Brewfiles (minimal/enhanced/full)
+├── docker/                   # Docker configurations
+├── lib/                      # Minimal shell helpers (3 files)
 ├── zsh/zsh.d/                # Shell modules (aliases, integrations)
 ├── powershell/               # PowerShell module for Windows
 ├── vault/                    # Vault item templates
-└── docs/                     # Documentation
+└── docs/                     # Documentation + assets
 ```
 
 ### Key Files
