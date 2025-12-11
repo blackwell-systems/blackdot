@@ -182,11 +182,12 @@ jobs:
         run: |
           Write-Host "Validating packages.json..."
           $json = Get-Content "powershell/packages.json" -Raw | ConvertFrom-Json
-          if ($json.packages) {
-            $count = ($json.packages | Measure-Object).Count
+          # winget schema: sources[0].packages
+          if ($json.sources -and $json.sources[0].packages) {
+            $count = ($json.sources[0].packages | Measure-Object).Count
             Write-Host "✅ Found $count packages defined"
           } else {
-            Write-Host "❌ No packages array found"
+            Write-Host "❌ No packages array found (expected sources[0].packages)"
             exit 1
           }
 
