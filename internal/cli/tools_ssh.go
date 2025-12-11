@@ -176,9 +176,9 @@ Creates key at ~/.ssh/id_ed25519_<name> with optional comment.
 ED25519 keys are recommended for their security and performance.
 
 Examples:
-  dotfiles tools ssh gen github
-  dotfiles tools ssh gen work --comment "Work laptop"
-  dotfiles tools ssh gen deploy --no-passphrase`,
+  blackdot tools ssh gen github
+  blackdot tools ssh gen work --comment "Work laptop"
+  blackdot tools ssh gen deploy --no-passphrase`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := args[0]
@@ -515,8 +515,8 @@ func newSSHFingerprintCmd() *cobra.Command {
 If no key is specified, shows fingerprints for all keys.
 
 Examples:
-  dotfiles tools ssh fp           # All keys
-  dotfiles tools ssh fp github    # Specific key`,
+  blackdot tools ssh fp           # All keys
+  blackdot tools ssh fp github    # Specific key`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				return runSSHFingerprint(args[0])
@@ -635,8 +635,8 @@ func newSSHCopyCmd() *cobra.Command {
 Uses ssh-copy-id under the hood.
 
 Examples:
-  dotfiles tools ssh copy myserver
-  dotfiles tools ssh copy user@host --key ~/.ssh/id_ed25519_work.pub`,
+  blackdot tools ssh copy myserver
+  blackdot tools ssh copy user@host --key ~/.ssh/id_ed25519_work.pub`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runSSHCopy(args[0], keyPath)
@@ -674,8 +674,8 @@ Forwards localhost:local_port to host:remote_port.
 If remote_port is not specified, uses the same as local_port.
 
 Examples:
-  dotfiles tools ssh tunnel myserver 8080 80
-  dotfiles tools ssh tunnel db-server 5432`,
+  blackdot tools ssh tunnel myserver 8080 80
+  blackdot tools ssh tunnel db-server 5432`,
 		Args: cobra.RangeArgs(2, 3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			host := args[0]
@@ -716,8 +716,8 @@ func newSSHSocksCmd() *cobra.Command {
 Configure browser/apps to use socks5://localhost:<port>
 
 Examples:
-  dotfiles tools ssh socks myserver
-  dotfiles tools ssh socks myserver --port 9050`,
+  blackdot tools ssh socks myserver
+  blackdot tools ssh socks myserver --port 9050`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runSSHSocks(args[0], port)

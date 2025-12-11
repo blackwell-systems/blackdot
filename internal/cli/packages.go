@@ -36,10 +36,10 @@ Tiers:
   full        ~61 packages  - Everything (Docker, etc.)
 
 Examples:
-  dotfiles packages                        # Status overview
-  dotfiles packages --check                # See what needs installing
-  dotfiles packages --install              # Install from saved tier
-  dotfiles packages --install --tier minimal  # Install minimal tier`,
+  blackdot packages                        # Status overview
+  blackdot packages --check                # See what needs installing
+  blackdot packages --install              # Install from saved tier
+  blackdot packages --install --tier minimal  # Install minimal tier`,
 		RunE: runPackages,
 	}
 
@@ -76,7 +76,7 @@ func runPackages(cmd *cobra.Command, args []string) error {
 	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
 		home, _ := os.UserHomeDir()
-		dotfilesDir = filepath.Join(home, ".dotfiles")
+		dotfilesDir = filepath.Join(home, ".blackdot")
 	}
 
 	// Determine tier
@@ -241,7 +241,7 @@ func getPackageTier(tierOverride, dotfilesDir string) string {
 
 	// 2. Config file (packages.tier)
 	home, _ := os.UserHomeDir()
-	configPath := filepath.Join(home, ".config", "dotfiles", "config.json")
+	configPath := filepath.Join(home, ".config", "blackdot", "config.json")
 	if data, err := os.ReadFile(configPath); err == nil {
 		var cfg map[string]interface{}
 		if json.Unmarshal(data, &cfg) == nil {

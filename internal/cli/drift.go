@@ -52,8 +52,8 @@ The quick mode compares local files against the last vault pull.
 Full mode connects to vault and compares current vault contents.
 
 Examples:
-  dotfiles drift          # Full check (connects to vault)
-  dotfiles drift --quick  # Fast check against cached state`,
+  blackdot drift          # Full check (connects to vault)
+  blackdot drift --quick  # Fast check against cached state`,
 		RunE: runDrift,
 	}
 
@@ -141,8 +141,8 @@ func runDriftQuick(home string, green, yellow, dim func(a ...interface{}) string
 		fmt.Printf("%s\n", yellow(fmt.Sprintf("%d of %d items have local changes", driftCount, checkedCount)))
 		fmt.Println()
 		fmt.Println("Options:")
-		fmt.Println("  dotfiles vault push --all  # Push local changes to vault")
-		fmt.Println("  dotfiles vault pull        # Overwrite local with vault")
+		fmt.Println("  blackdot vault push --all  # Push local changes to vault")
+		fmt.Println("  blackdot vault pull        # Overwrite local with vault")
 	}
 
 	return nil
@@ -152,7 +152,7 @@ func runDriftQuick(home string, green, yellow, dim func(a ...interface{}) string
 func runDriftFull(home string, green, yellow, cyan, dim func(a ...interface{}) string) error {
 	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
-		dotfilesDir = filepath.Join(home, ".dotfiles")
+		dotfilesDir = filepath.Join(home, ".blackdot")
 	}
 
 	// For full mode, we'd need to connect to vault
@@ -175,7 +175,7 @@ func runDriftFull(home string, green, yellow, cyan, dim func(a ...interface{}) s
 	if bwSession == "" {
 		fmt.Printf("%s Vault not unlocked - cannot check drift\n", yellow("[WARN]"))
 		fmt.Println()
-		fmt.Printf("%s For quick local check: dotfiles drift --quick\n", cyan("[INFO]"))
+		fmt.Printf("%s For quick local check: blackdot drift --quick\n", cyan("[INFO]"))
 		fmt.Printf("%s To unlock vault: export BW_SESSION=\"$(bw unlock --raw)\"\n", cyan("[INFO]"))
 		return nil
 	}
@@ -228,10 +228,10 @@ func runDriftFull(home string, green, yellow, cyan, dim func(a ...interface{}) s
 		fmt.Printf("%s\n", yellow(fmt.Sprintf("%d of %d items have drifted", driftCount, checkedCount)))
 		fmt.Println()
 		fmt.Printf("%s To sync local changes to vault:\n", cyan("[INFO]"))
-		fmt.Println("  dotfiles vault sync --all")
+		fmt.Println("  blackdot vault sync --all")
 		fmt.Println()
 		fmt.Printf("%s To restore from vault (overwrite local):\n", cyan("[INFO]"))
-		fmt.Println("  dotfiles vault restore")
+		fmt.Println("  blackdot vault restore")
 	}
 	fmt.Println("========================================")
 

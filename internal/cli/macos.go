@@ -87,12 +87,12 @@ Use --generate to create a settings.sh file from your current preferences.`,
 
 // printMacOSHelp prints styled help for macOS command
 func printMacOSHelp() {
-	BoldCyan.Print("dotfiles macos")
+	BoldCyan.Print("blackdot macos")
 	fmt.Print(" - macOS system settings\n")
 	fmt.Println()
 
 	Bold.Print("Usage:")
-	fmt.Print(" dotfiles macos <command> [options]\n")
+	fmt.Print(" blackdot macos <command> [options]\n")
 	fmt.Println()
 
 	BoldCyan.Println("Commands:")
@@ -103,23 +103,23 @@ func printMacOSHelp() {
 
 	BoldCyan.Println("Examples:")
 	Dim.Println("  # See what settings would be applied")
-	fmt.Println("  dotfiles macos preview")
+	fmt.Println("  blackdot macos preview")
 	fmt.Println()
 	Dim.Println("  # Apply settings")
-	fmt.Println("  dotfiles macos apply")
+	fmt.Println("  blackdot macos apply")
 	fmt.Println()
 	Dim.Println("  # Generate settings.sh from current preferences")
-	fmt.Println("  dotfiles macos discover --generate")
+	fmt.Println("  blackdot macos discover --generate")
 	fmt.Println()
 	Dim.Println("  # Create a backup before applying")
-	fmt.Println("  dotfiles macos apply --backup")
+	fmt.Println("  blackdot macos apply --backup")
 	fmt.Println()
 
 	BoldCyan.Println("Workflow:")
 	Dim.Println("  1. Configure macOS manually via System Settings")
-	Dim.Println("  2. Run: dotfiles macos discover --generate")
+	Dim.Println("  2. Run: blackdot macos discover --generate")
 	Dim.Println("  3. Review/edit macos/settings.sh")
-	Dim.Println("  4. On new machine: dotfiles macos apply")
+	Dim.Println("  4. On new machine: blackdot macos apply")
 
 	// Show platform warning if not on macOS
 	if runtime.GOOS != "darwin" {
@@ -140,7 +140,7 @@ func checkMacOS() error {
 		if !reg.Enabled("macos_settings") {
 			Fail("Feature 'macos_settings' is not enabled")
 			fmt.Println()
-			Info("Enable with: dotfiles features enable macos_settings")
+			Info("Enable with: blackdot features enable macos_settings")
 			Info("Or run with --force to bypass")
 			return fmt.Errorf("feature not enabled")
 		}

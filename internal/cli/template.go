@@ -76,9 +76,9 @@ If no files are specified, renders all .tmpl files in templates/configs/.
 Output goes to the generated/ directory.
 
 Examples:
-  dotfiles template render                    # Render all templates
-  dotfiles template render gitconfig.tmpl     # Render specific template
-  dotfiles template render --stdout file.tmpl # Output to stdout`,
+  blackdot template render                    # Render all templates
+  blackdot template render gitconfig.tmpl     # Render specific template
+  blackdot template render --stdout file.tmpl # Output to stdout`,
 		RunE: runTemplateRender,
 	}
 	renderCmd.Flags().Bool("stdout", false, "Output to stdout instead of file")
@@ -618,7 +618,7 @@ func runTemplateArrays(cmd *cobra.Command, args []string) error {
 	if exportJSON {
 		// Export shell arrays to JSON format
 		Info("Shell array export not implemented in Go CLI")
-		fmt.Println("Use: dotfiles template arrays --export-json (bash version)")
+		fmt.Println("Use: blackdot template arrays --export-json (bash version)")
 		return nil
 	}
 
@@ -677,7 +677,7 @@ func runTemplateInit(cmd *cobra.Command, args []string) error {
 	// Check if already exists
 	if _, err := os.Stat(localFile); err == nil {
 		Warn("Local variables file already exists: %s", localFile)
-		fmt.Println("Edit it with: dotfiles template edit")
+		fmt.Println("Edit it with: blackdot template edit")
 		return nil
 	}
 
@@ -755,9 +755,9 @@ TMPL_AUTO[machine_type]="unknown"
 	Pass("Created: %s", localFile)
 	fmt.Println()
 	fmt.Println("Next steps:")
-	fmt.Println("  1. dotfiles template edit    - Customize variables")
-	fmt.Println("  2. dotfiles template vars    - Review all variables")
-	fmt.Println("  3. dotfiles template render  - Generate config files")
+	fmt.Println("  1. blackdot template edit    - Customize variables")
+	fmt.Println("  2. blackdot template vars    - Review all variables")
+	fmt.Println("  3. blackdot template render  - Generate config files")
 
 	return nil
 }
@@ -995,7 +995,7 @@ func runTemplateVaultPull(cmd *cobra.Command, args []string) error {
 	vaultContent, err := backend.GetNotes(ctx, templateVaultItemName, session)
 	if err != nil {
 		Fail("Item '%s' not found in vault", templateVaultItemName)
-		fmt.Println("Push with: dotfiles template vault push")
+		fmt.Println("Push with: blackdot template vault push")
 		return err
 	}
 
@@ -1072,13 +1072,13 @@ func runTemplateVaultDiff(cmd *cobra.Command, args []string) error {
 
 	if !localExists {
 		fmt.Println("Vault has content, local file missing")
-		fmt.Println("Run: dotfiles template vault pull")
+		fmt.Println("Run: blackdot template vault pull")
 		return nil
 	}
 
 	if !vaultExists {
 		fmt.Println("Local file exists, vault item missing")
-		fmt.Println("Run: dotfiles template vault push")
+		fmt.Println("Run: blackdot template vault push")
 		return nil
 	}
 
@@ -1120,8 +1120,8 @@ func runTemplateVaultDiff(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println()
-	fmt.Println("To update vault:  dotfiles template vault push --force")
-	fmt.Println("To update local:  dotfiles template vault pull --force")
+	fmt.Println("To update vault:  blackdot template vault push --force")
+	fmt.Println("To update local:  blackdot template vault pull --force")
 
 	return nil
 }
@@ -1178,7 +1178,7 @@ func runTemplateVaultSync(cmd *cobra.Command, args []string) error {
 	// Sync logic
 	if !localExists && !vaultExists {
 		Info("Neither local file nor vault item exists")
-		fmt.Println("Run: dotfiles template init")
+		fmt.Println("Run: blackdot template init")
 		return nil
 	}
 
@@ -1200,9 +1200,9 @@ func runTemplateVaultSync(cmd *cobra.Command, args []string) error {
 	Warn("Conflict detected: local and vault differ")
 	fmt.Println()
 	fmt.Println("To resolve:")
-	fmt.Println("  dotfiles template vault push  - Use local (push to vault)")
-	fmt.Println("  dotfiles template vault pull  - Use vault (pull to local)")
-	fmt.Println("  dotfiles template vault diff  - See differences")
+	fmt.Println("  blackdot template vault push  - Use local (push to vault)")
+	fmt.Println("  blackdot template vault pull  - Use vault (pull to local)")
+	fmt.Println("  blackdot template vault diff  - See differences")
 
 	return fmt.Errorf("conflict detected")
 }
@@ -1272,18 +1272,18 @@ func runTemplateVaultStatus(cmd *cobra.Command, args []string) error {
 	localContent, localErr := os.ReadFile(localFile)
 	if localErr != nil && err != nil {
 		fmt.Printf("  %-20s %s\n", "Status:", Yellow.Sprint("no data"))
-		fmt.Println("  Run: dotfiles template init")
+		fmt.Println("  Run: blackdot template init")
 	} else if localErr != nil {
 		fmt.Printf("  %-20s %s\n", "Status:", Yellow.Sprint("local missing"))
-		fmt.Println("  Run: dotfiles template vault pull")
+		fmt.Println("  Run: blackdot template vault pull")
 	} else if err != nil {
 		fmt.Printf("  %-20s %s\n", "Status:", Yellow.Sprint("vault missing"))
-		fmt.Println("  Run: dotfiles template vault push")
+		fmt.Println("  Run: blackdot template vault push")
 	} else if string(localContent) == vaultContent {
 		fmt.Printf("  %-20s %s\n", "Status:", Green.Sprint("in sync"))
 	} else {
 		fmt.Printf("  %-20s %s\n", "Status:", Yellow.Sprint("out of sync"))
-		fmt.Println("  Run: dotfiles template vault diff")
+		fmt.Println("  Run: blackdot template vault diff")
 	}
 
 	return nil

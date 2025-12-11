@@ -36,10 +36,10 @@ func newFeaturesCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "features",
 		Aliases: []string{"feature", "feat"},
-		Short:   "Manage dotfiles features",
-		Long: `Manage dotfiles features - enable, disable, and query feature status.
+		Short:   "Manage blackdot features",
+		Long: `Manage blackdot features - enable, disable, and query feature status.
 
-Features control which functionality is available in your dotfiles setup.
+Features control which functionality is available in your blackdot setup.
 They can have dependencies on other features and are organized into
 categories: core, optional, and integration.`,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -70,14 +70,14 @@ categories: core, optional, and integration.`,
 // printFeaturesHelp prints styled help matching ZSH features help
 func printFeaturesHelp() {
 	// Title
-	BoldCyan.Print("dotfiles features")
+	BoldCyan.Print("blackdot features")
 	fmt.Print(" - ")
 	Dim.Println("Feature registry management")
 	fmt.Println()
 
 	// Usage
 	Bold.Print("Usage:")
-	fmt.Println(" dotfiles features <command> [options]")
+	fmt.Println(" blackdot features <command> [options]")
 	fmt.Println()
 
 	// Commands section
@@ -131,27 +131,27 @@ func printFeaturesHelp() {
 	// Examples section
 	BoldCyan.Println("Examples:")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles features")
+	Yellow.Print("blackdot features")
 	fmt.Print("                      ")
 	Dim.Println("# List all features")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles features list optional")
+	Yellow.Print("blackdot features list optional")
 	fmt.Print("        ")
 	Dim.Println("# List optional features only")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles features enable vault")
+	Yellow.Print("blackdot features enable vault")
 	fmt.Print("         ")
 	Dim.Println("# Enable vault (runtime)")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles features enable vault -p")
+	Yellow.Print("blackdot features enable vault -p")
 	fmt.Print("      ")
 	Dim.Println("# Enable and persist")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles features preset developer")
+	Yellow.Print("blackdot features preset developer")
 	fmt.Print("     ")
 	Dim.Println("# Enable developer preset")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles features check vault && ...")
+	Yellow.Print("blackdot features check vault && ...")
 	fmt.Print("  ")
 	Dim.Println("# Conditional execution")
 	fmt.Println()

@@ -38,9 +38,9 @@ Modes:
   --all, -a     Show all metric entries
 
 Examples:
-  dotfiles metrics           # Summary view
-  dotfiles metrics --graph   # Health score trend
-  dotfiles metrics --all     # All entries`,
+  blackdot metrics           # Summary view
+  blackdot metrics --graph   # Health score trend
+  blackdot metrics --all     # All entries`,
 		RunE: runMetrics,
 	}
 
@@ -52,7 +52,7 @@ Examples:
 
 func runMetrics(cmd *cobra.Command, args []string) error {
 	home, _ := os.UserHomeDir()
-	metricsFile := filepath.Join(home, ".dotfiles-metrics.jsonl")
+	metricsFile := filepath.Join(home, ".blackdot-metrics.jsonl")
 
 	showAll, _ := cmd.Flags().GetBool("all")
 	showGraph, _ := cmd.Flags().GetBool("graph")

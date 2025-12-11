@@ -49,15 +49,15 @@ func newImportCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",
 		Short: "Import from other dotfile managers",
-		Long: `Import dotfiles from other dotfile managers.
+		Long: `Import configuration from other dotfile managers.
 
 Supported sources:
   chezmoi    Import from a chezmoi repository
 
 Examples:
-  dotfiles import chezmoi                    # Import from default chezmoi location
-  dotfiles import chezmoi --source ~/chezmoi # Import from custom location
-  dotfiles import chezmoi --dry-run          # Preview without making changes`,
+  blackdot import chezmoi                    # Import from default chezmoi location
+  blackdot import chezmoi --source ~/chezmoi # Import from custom location
+  blackdot import chezmoi --dry-run          # Preview without making changes`,
 	}
 
 	cmd.AddCommand(newImportChezmoiCmd())
@@ -73,7 +73,7 @@ func newImportChezmoiCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "chezmoi",
 		Short: "Import from chezmoi repository",
-		Long: `Import dotfiles from a chezmoi repository.
+		Long: `Import configuration from a chezmoi repository.
 
 Converts:
   - File prefixes (dot_, private_, executable_, etc.)
@@ -82,9 +82,9 @@ Converts:
   - .chezmoiignore patterns
 
 Examples:
-  dotfiles import chezmoi
-  dotfiles import chezmoi --source ~/.local/share/chezmoi
-  dotfiles import chezmoi --dry-run --verbose`,
+  blackdot import chezmoi
+  blackdot import chezmoi --source ~/.local/share/chezmoi
+  blackdot import chezmoi --dry-run --verbose`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runImportChezmoi(sourceDir, configFile, dryRun, verbose)
 		},

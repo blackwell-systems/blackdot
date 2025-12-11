@@ -111,7 +111,7 @@ func (m *Manager) MachineConfigPath() string {
 	return filepath.Join(m.configDir, MachineConfigFile)
 }
 
-// ProjectConfigPath finds .dotfiles.json by walking up from cwd
+// ProjectConfigPath finds .blackdot.json by walking up from cwd
 func (m *Manager) ProjectConfigPath() string {
 	dir, err := os.Getwd()
 	if err != nil {

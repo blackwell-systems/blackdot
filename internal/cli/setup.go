@@ -542,7 +542,7 @@ func phaseWorkspace(cfg *SetupConfig) error {
 	}
 
 	symlinkPath := workspaceSymlinkPath()
-	fmt.Println("The workspace directory is where dotfiles and projects are stored.")
+	fmt.Println("The workspace directory is where blackdot and projects are stored.")
 	fmt.Printf("The %s symlink will point to this directory for Claude Code portability.\n", symlinkPath)
 	fmt.Println()
 	fmt.Printf("Current target: %s\n", defaultTarget)
@@ -915,7 +915,7 @@ func phasePackagesWindows(cfg *SetupConfig, dotfilesDir string, green, yellow, b
 	// Check for winget export file
 	wingetFile := filepath.Join(dotfilesDir, "winget.json")
 	if _, err := os.Stat(wingetFile); os.IsNotExist(err) {
-		fmt.Printf("%s No winget.json found in dotfiles\n", yellow("!"))
+		fmt.Printf("%s No winget.json found in blackdot\n", yellow("!"))
 		fmt.Println("Create one with: winget export -o winget.json")
 		fmt.Println()
 		fmt.Println("Alternatively, install packages manually:")

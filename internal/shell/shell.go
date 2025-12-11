@@ -58,7 +58,7 @@ func ExportVar(name, value string) string {
 }
 
 // EvalOutput generates output suitable for eval in shell
-// Example: eval "$(dotfiles env)"
+// Example: eval "$(blackdot env)"
 func EvalOutput(vars map[string]string) string {
 	var lines []string
 	for name, value := range vars {

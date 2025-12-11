@@ -227,7 +227,7 @@ func runEncryptInit(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println()
 	fmt.Println("IMPORTANT: Back up your private key to your vault:")
-	fmt.Println("  dotfiles encrypt push-key")
+	fmt.Println("  blackdot encrypt push-key")
 
 	return nil
 }
@@ -238,7 +238,7 @@ func runEncryptFile(cmd *cobra.Command, args []string) error {
 
 	if len(args) == 0 {
 		fmt.Println(color.RedString("[FAIL]") + " No file specified")
-		fmt.Println("Usage: dotfiles encrypt file <file>")
+		fmt.Println("Usage: blackdot encrypt file <file>")
 		return fmt.Errorf("no file specified")
 	}
 
@@ -257,7 +257,7 @@ func runEncryptFile(cmd *cobra.Command, args []string) error {
 
 	if !isEncryptionInitialized() {
 		fmt.Println(color.RedString("[FAIL]") + " Encryption not initialized")
-		fmt.Println("Run: dotfiles encrypt init")
+		fmt.Println("Run: blackdot encrypt init")
 		return fmt.Errorf("encryption not initialized")
 	}
 
@@ -295,7 +295,7 @@ func runDecryptFile(cmd *cobra.Command, args []string) error {
 
 	if len(args) == 0 {
 		fmt.Println(color.RedString("[FAIL]") + " No file specified")
-		fmt.Println("Usage: dotfiles encrypt decrypt <file.age>")
+		fmt.Println("Usage: blackdot encrypt decrypt <file.age>")
 		return fmt.Errorf("no file specified")
 	}
 
@@ -314,7 +314,7 @@ func runDecryptFile(cmd *cobra.Command, args []string) error {
 
 	if !isEncryptionInitialized() {
 		fmt.Println(color.RedString("[FAIL]") + " Encryption not initialized")
-		fmt.Println("Run: dotfiles encrypt init")
+		fmt.Println("Run: blackdot encrypt init")
 		return fmt.Errorf("encryption not initialized")
 	}
 
@@ -349,7 +349,7 @@ func runDecryptFile(cmd *cobra.Command, args []string) error {
 func runEncryptEdit(cmd *cobra.Command, args []string) error {
 	if len(args) == 0 {
 		fmt.Println(color.RedString("[FAIL]") + " No file specified")
-		fmt.Println("Usage: dotfiles encrypt edit <file>")
+		fmt.Println("Usage: blackdot encrypt edit <file>")
 		return fmt.Errorf("no file specified")
 	}
 
@@ -500,7 +500,7 @@ func runEncryptStatus(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		fmt.Printf("Keys initialized: %s\n", red("NO"))
-		fmt.Println("  Run: dotfiles encrypt init")
+		fmt.Println("  Run: blackdot encrypt init")
 		return fmt.Errorf("encryption not initialized")
 	}
 
@@ -540,7 +540,7 @@ func runEncryptPushKey(cmd *cobra.Command, args []string) error {
 	vaultItem := "Age-Private-Key"
 	fmt.Printf("Pushing age key to vault as '%s'...\n", vaultItem)
 
-	// Try to use dotfiles vault set
+	// Try to use blackdot vault set
 	dotfilesCmd := exec.Command("dotfiles", "vault", "set", vaultItem, "--stdin")
 	dotfilesCmd.Stdin = strings.NewReader(string(keyContent))
 	if err := dotfilesCmd.Run(); err != nil {
@@ -570,11 +570,11 @@ func runEncryptPushKey(cmd *cobra.Command, args []string) error {
 // printEncryptHelp prints styled help matching ZSH format
 func printEncryptHelp() {
 	// Title
-	BoldCyan.Print("dotfiles encrypt")
+	BoldCyan.Print("blackdot encrypt")
 	fmt.Print(" - Age encryption management\n")
 	fmt.Println()
 	Bold.Print("Usage:")
-	fmt.Print(" dotfiles encrypt <command> [options]\n")
+	fmt.Print(" blackdot encrypt <command> [options]\n")
 	fmt.Println()
 
 	// Commands
@@ -607,24 +607,24 @@ func printEncryptHelp() {
 	// Examples
 	BoldCyan.Println("Examples:")
 	Dim.Println("  # First-time setup")
-	fmt.Println("  dotfiles encrypt init")
+	fmt.Println("  blackdot encrypt init")
 	fmt.Println()
 	Dim.Println("  # Encrypt sensitive template variables")
-	fmt.Println("  dotfiles encrypt templates/_variables.local.sh")
+	fmt.Println("  blackdot encrypt templates/_variables.local.sh")
 	fmt.Println()
 	Dim.Println("  # Decrypt to view/use")
-	fmt.Println("  dotfiles encrypt decrypt templates/_variables.local.sh.age")
+	fmt.Println("  blackdot encrypt decrypt templates/_variables.local.sh.age")
 	fmt.Println()
 	Dim.Println("  # Edit encrypted file directly")
-	fmt.Println("  dotfiles encrypt edit templates/_variables.local.sh.age")
+	fmt.Println("  blackdot encrypt edit templates/_variables.local.sh.age")
 	fmt.Println()
 	Dim.Println("  # Backup key to vault")
-	fmt.Println("  dotfiles encrypt push-key")
+	fmt.Println("  blackdot encrypt push-key")
 	fmt.Println()
 
 	// Hook Integration
 	BoldCyan.Println("Hook Integration:")
-	Dim.Println("  The encryption system integrates with dotfiles hooks:")
+	Dim.Println("  The encryption system integrates with blackdot hooks:")
 	fmt.Println()
 	fmt.Print("  ")
 	Yellow.Print("pre_template_render")
@@ -639,7 +639,7 @@ func printEncryptHelp() {
 	// Security Notes
 	BoldCyan.Println("Security:")
 	Dim.Println("  - Private key stored in ~/.config/blackdot/age-key.txt (mode 600)")
-	Dim.Println("  - Back up your private key: dotfiles encrypt push-key")
+	Dim.Println("  - Back up your private key: blackdot encrypt push-key")
 	Dim.Println("  - Without the private key, encrypted files cannot be recovered")
 	Dim.Println("  - Public key can be safely shared for others to encrypt files for you")
 }

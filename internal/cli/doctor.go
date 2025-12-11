@@ -41,8 +41,8 @@ func newDoctorCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "doctor",
 		Aliases: []string{"health"},
-		Short:   "Comprehensive dotfiles health check",
-		Long:    `Comprehensive dotfiles health check`,
+		Short:   "Comprehensive blackdot health check",
+		Long:    `Comprehensive blackdot health check`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runDoctor(fixMode, quickMode)
 		},
@@ -64,7 +64,7 @@ func printDoctorHelp() {
 	// Title
 	BoldCyan.Print("blackdot doctor")
 	fmt.Print(" - ")
-	Dim.Println("Comprehensive dotfiles health check")
+	Dim.Println("Comprehensive blackdot health check")
 	fmt.Println()
 
 	// Usage
@@ -148,7 +148,7 @@ func runDoctor(fixMode, quickMode bool) error {
  / /_/ / / /_/ / /__/ ,< / /_/ / /_/ / /_/_____/ /_/ / /_/ / /__/ /_/ /_/ / /
 /_____/_/\__,_/\___/_/|_|\__,_/\____/\__/     /_____/\____/\___/\__/\____/_/`))
 	fmt.Println()
-	fmt.Println(state.dim("Comprehensive dotfiles health check"))
+	fmt.Println(state.dim("Comprehensive blackdot health check"))
 	fmt.Println()
 
 	// Section 1: Version & Updates
@@ -792,7 +792,7 @@ func printSummary(state *doctorState, fixMode bool) {
 
 	// Perfect score celebration
 	if healthScore == 100 {
-		fmt.Printf("  %s\n", state.green(state.bold("🎉 Perfect score! Your dotfiles are healthy.")))
+		fmt.Printf("  %s\n", state.green(state.bold("🎉 Perfect score! Your blackdot setup is healthy.")))
 		fmt.Println()
 	}
 

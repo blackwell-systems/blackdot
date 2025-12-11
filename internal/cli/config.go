@@ -299,7 +299,7 @@ func configSet(layer, key, value string) error {
 		configFile = findProjectConfig()
 		if configFile == "" {
 			Fail("No project config found")
-			fmt.Println("Create one with: dotfiles config init project")
+			fmt.Println("Create one with: blackdot config init project")
 			return fmt.Errorf("no project config")
 		}
 	default:
@@ -515,7 +515,7 @@ func configInitMachine(identifier string) error {
 	// Check if already exists
 	if _, err := os.Stat(configLayerMachine); err == nil {
 		Warn("Machine config already exists: %s", configLayerMachine)
-		fmt.Println("Edit it with: dotfiles config edit machine")
+		fmt.Println("Edit it with: blackdot config edit machine")
 		return nil
 	}
 
@@ -539,7 +539,7 @@ func configInitMachine(identifier string) error {
 	Pass("Created machine config: %s", configLayerMachine)
 	fmt.Printf("  Identifier: %s\n", identifier)
 	fmt.Println()
-	fmt.Println("Edit with: dotfiles config edit machine")
+	fmt.Println("Edit with: blackdot config edit machine")
 	return nil
 }
 
@@ -550,14 +550,14 @@ func configInitProject() error {
 	// Check if already exists
 	if _, err := os.Stat(projectConfig); err == nil {
 		Warn("Project config already exists: %s", projectConfig)
-		fmt.Println("Edit it with: dotfiles config edit project")
+		fmt.Println("Edit it with: blackdot config edit project")
 		return nil
 	}
 
 	// Create initial config
 	initialConfig := map[string]interface{}{
 		"$schema": "https://json-schema.org/draft/2020-12/schema",
-		"$comment": "Project-specific dotfiles configuration",
+		"$comment": "Project-specific blackdot configuration",
 	}
 
 	data, _ := json.MarshalIndent(initialConfig, "", "  ")
@@ -568,7 +568,7 @@ func configInitProject() error {
 
 	Pass("Created project config: %s", projectConfig)
 	fmt.Println()
-	fmt.Println("Edit with: dotfiles config edit project")
+	fmt.Println("Edit with: blackdot config edit project")
 	return nil
 }
 
@@ -588,7 +588,7 @@ func configEdit(layer string) error {
 		configFile = findProjectConfig()
 		if configFile == "" {
 			Fail("No project config found")
-			fmt.Println("Create one with: dotfiles config init project")
+			fmt.Println("Create one with: blackdot config init project")
 			return fmt.Errorf("no project config")
 		}
 	default:
@@ -599,7 +599,7 @@ func configEdit(layer string) error {
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		Fail("Config file does not exist: %s", configFile)
-		fmt.Printf("Create it with: dotfiles config init %s\n", layer)
+		fmt.Printf("Create it with: blackdot config init %s\n", layer)
 		return err
 	}
 

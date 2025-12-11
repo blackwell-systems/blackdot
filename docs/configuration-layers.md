@@ -28,16 +28,41 @@ blackdot config merged
 
 Settings resolve from highest to lowest priority:
 
+```mermaid
+flowchart TB
+    subgraph Resolution["Configuration Resolution"]
+        direction TB
+        Q[/"blackdot config get vault.backend"/]
+
+        Q --> E{{"1. Environment<br/>BLACKDOT_VAULT_BACKEND"}}
+        E -->|not set| P{{"2. Project<br/>.blackdot.json"}}
+        P -->|not set| M{{"3. Machine<br/>~/.config/blackdot/machine.json"}}
+        M -->|not set| U{{"4. User<br/>~/.config/blackdot/config.json"}}
+        U -->|not set| D{{"5. Default<br/>Built-in"}}
+
+        E -->|"found"| R1[/"Return value"/]
+        P -->|"found"| R2[/"Return value"/]
+        M -->|"found"| R3[/"Return value"/]
+        U -->|"found"| R4[/"Return value"/]
+        D --> R5[/"Return default"/]
+    end
+
+    style E fill:#ff6b6b,color:#fff
+    style P fill:#feca57,color:#000
+    style M fill:#48dbfb,color:#000
+    style U fill:#1dd1a1,color:#000
+    style D fill:#c8d6e5,color:#000
 ```
-Priority (highest → lowest)
-─────────────────────────────────────────────────────────
- 1. Session     Environment variables (BLACKDOT_*)
- 2. Project     .blackdot.json in project root
- 3. Machine     ~/.config/blackdot/machine.json
- 4. User        ~/.config/blackdot/config.json
- 5. Defaults    Built-in defaults
-─────────────────────────────────────────────────────────
-```
+
+**Priority order:** Environment → Project → Machine → User → Default
+
+| Priority | Layer | Location | Scope |
+|----------|-------|----------|-------|
+| 1 (highest) | **Session** | `BLACKDOT_*` env vars | Current shell only |
+| 2 | **Project** | `.blackdot.json` in repo | This project |
+| 3 | **Machine** | `~/.config/blackdot/machine.json` | This computer |
+| 4 | **User** | `~/.config/blackdot/config.json` | All machines |
+| 5 (lowest) | **Default** | Built into CLI | Fallback |
 
 ### File Locations
 

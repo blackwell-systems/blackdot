@@ -59,14 +59,14 @@ For more backup options, use 'blackdot backup'.`,
 // printRollbackHelp prints styled help matching ZSH style
 func printRollbackHelp() {
 	// Title
-	BoldCyan.Print("dotfiles rollback")
+	BoldCyan.Print("blackdot rollback")
 	fmt.Print(" - ")
 	Dim.Println("Instant rollback to last backup")
 	fmt.Println()
 
 	// Usage
 	Bold.Print("Usage:")
-	fmt.Println(" dotfiles rollback [flags]")
+	fmt.Println(" blackdot rollback [flags]")
 	fmt.Println()
 
 	// Flags
@@ -92,23 +92,23 @@ func printRollbackHelp() {
 	// Examples
 	BoldCyan.Println("Examples:")
 	Dim.Println("  # Quick rollback to most recent backup")
-	fmt.Println("  dotfiles rollback")
+	fmt.Println("  blackdot rollback")
 	fmt.Println()
 	Dim.Println("  # Rollback to a specific backup")
-	fmt.Println("  dotfiles rollback --to backup-20250101-120000")
+	fmt.Println("  blackdot rollback --to backup-20250101-120000")
 	fmt.Println()
 	Dim.Println("  # List available backups")
-	fmt.Println("  dotfiles rollback --list")
+	fmt.Println("  blackdot rollback --list")
 	fmt.Println()
 
 	// See also
 	BoldCyan.Println("See Also:")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles backup")
+	Yellow.Print("blackdot backup")
 	fmt.Print("         ")
 	Dim.Println("Create a new backup")
 	fmt.Print("  ")
-	Yellow.Print("dotfiles backup --list")
+	Yellow.Print("blackdot backup --list")
 	fmt.Print("  ")
 	Dim.Println("List all backups with details")
 	fmt.Println()
@@ -127,7 +127,7 @@ func rollbackList() error {
 	if err != nil {
 		if os.IsNotExist(err) {
 			Warn("No backups found")
-			Info("Create one with: dotfiles backup")
+			Info("Create one with: blackdot backup")
 			return nil
 		}
 		return fmt.Errorf("reading backup directory: %w", err)
@@ -144,7 +144,7 @@ func rollbackList() error {
 
 	if len(backups) == 0 {
 		Warn("No backups found")
-		Info("Create one with: dotfiles backup")
+		Info("Create one with: blackdot backup")
 		return nil
 	}
 
@@ -239,7 +239,7 @@ func rollbackRestore(specificBackup string, skipConfirm bool) error {
 		if err != nil {
 			if os.IsNotExist(err) {
 				Fail("No backups found")
-				Info("Create one with: dotfiles backup")
+				Info("Create one with: blackdot backup")
 				return fmt.Errorf("no backups found")
 			}
 			return fmt.Errorf("reading backup directory: %w", err)
@@ -256,7 +256,7 @@ func rollbackRestore(specificBackup string, skipConfirm bool) error {
 
 		if len(backups) == 0 {
 			Fail("No backups found")
-			Info("Create one with: dotfiles backup")
+			Info("Create one with: blackdot backup")
 			return fmt.Errorf("no backups found")
 		}
 

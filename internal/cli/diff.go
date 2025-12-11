@@ -36,10 +36,10 @@ Items:
   SSH-Config, AWS-Config, AWS-Credentials, Git-Config, Environment-Secrets
 
 Examples:
-  dotfiles diff              # Show all differences
-  dotfiles diff --sync       # Preview what sync would push
-  dotfiles diff --restore    # Preview what restore would change
-  dotfiles diff SSH-Config   # Show diff for specific item`,
+  blackdot diff              # Show all differences
+  blackdot diff --sync       # Preview what sync would push
+  blackdot diff --restore    # Preview what restore would change
+  blackdot diff SSH-Config   # Show diff for specific item`,
 		RunE: runDiff,
 	}
 
@@ -66,7 +66,7 @@ func runDiff(cmd *cobra.Command, args []string) error {
 
 	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
-		dotfilesDir = filepath.Join(home, ".dotfiles")
+		dotfilesDir = filepath.Join(home, ".blackdot")
 	}
 
 	// Colors

@@ -200,7 +200,7 @@ end
 
 func outputPowerShellInit() error {
 	dotfilesDir := DotfilesDir()
-	binaryPath := fmt.Sprintf("%s\\bin\\dotfiles.exe", dotfilesDir)
+	binaryPath := fmt.Sprintf("%s\\bin\\blackdot.exe", dotfilesDir)
 
 	// Use forward slashes for cross-platform compatibility
 	if runtime.GOOS != "windows" {
