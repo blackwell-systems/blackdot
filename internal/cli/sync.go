@@ -117,7 +117,7 @@ func runSync(args []string, dryRun, forceLocal, forceVault, verbose, all bool) e
 	home, _ := os.UserHomeDir()
 	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
-		dotfilesDir = filepath.Join(home, ".dotfiles")
+		dotfilesDir = filepath.Join(home, ".blackdot")
 	}
 
 	// Check offline mode
@@ -177,9 +177,9 @@ func runSync(args []string, dryRun, forceLocal, forceVault, verbose, all bool) e
 	failed := 0
 
 	// Get drift state for baseline checksums
-	driftStateFile := filepath.Join(os.Getenv("XDG_CACHE_HOME"), "dotfiles", "vault-state.json")
-	if driftStateFile == "/dotfiles/vault-state.json" {
-		driftStateFile = filepath.Join(home, ".cache", "dotfiles", "vault-state.json")
+	driftStateFile := filepath.Join(os.Getenv("XDG_CACHE_HOME"), "blackdot", "vault-state.json")
+	if driftStateFile == "/blackdot/vault-state.json" {
+		driftStateFile = filepath.Join(home, ".cache", "blackdot", "vault-state.json")
 	}
 
 	// Process each item

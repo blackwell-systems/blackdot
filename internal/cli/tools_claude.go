@@ -364,11 +364,11 @@ func runClaudeInit(force bool) error {
 	green := color.New(color.FgGreen).SprintFunc()
 	yellow := color.New(color.FgYellow).SprintFunc()
 
-	// Find dotfiles directory
+	// Find blackdot directory
 	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
 		home, _ := os.UserHomeDir()
-		dotfilesDir = filepath.Join(home, "workspace", "dotfiles")
+		dotfilesDir = filepath.Join(home, "workspace", "blackdot")
 	}
 
 	srcDir := filepath.Join(dotfilesDir, "claude")

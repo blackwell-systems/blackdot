@@ -57,7 +57,7 @@ func runLint(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("cannot determine home directory: %w", err)
 		}
-		dotfilesDir = filepath.Join(home, ".dotfiles")
+		dotfilesDir = filepath.Join(home, ".blackdot")
 	}
 
 	green := color.New(color.FgGreen).SprintFunc()
@@ -66,7 +66,7 @@ func runLint(cmd *cobra.Command, args []string) error {
 	cyan := color.New(color.FgCyan).SprintFunc()
 
 	fmt.Println()
-	fmt.Println(color.New(color.Bold).Sprint("Dotfiles Configuration Linter"))
+	fmt.Println(color.New(color.Bold).Sprint("Blackdot Configuration Linter"))
 	fmt.Println("==============================")
 	fmt.Println()
 

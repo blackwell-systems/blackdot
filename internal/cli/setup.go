@@ -1244,7 +1244,7 @@ func phaseTemplate(cfg *SetupConfig) error {
 		fmt.Println("Initializing template system...")
 		fmt.Println()
 
-		templateCmd := filepath.Join(DotfilesDir(), "bin", "dotfiles-template")
+		templateCmd := filepath.Join(DotfilesDir(), "bin", "blackdot-template")
 		if _, err := os.Stat(templateCmd); err == nil {
 			cmd := exec.Command("bash", templateCmd, "init")
 			cmd.Stdin = os.Stdin

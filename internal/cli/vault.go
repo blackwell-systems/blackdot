@@ -56,7 +56,7 @@ func newVaultBackend() (vaultmux.Backend, error) {
 		Backend:     backendType,
 		SessionFile: getSessionFile(),
 		SessionTTL:  1800, // 30 minutes
-		Prefix:      "dotfiles",
+		Prefix:      "blackdot",
 	}
 
 	return vaultmux.New(cfg)

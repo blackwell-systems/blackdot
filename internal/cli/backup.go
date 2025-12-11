@@ -39,7 +39,7 @@ func getBackupConfig() *backupConfig {
 	home, _ := os.UserHomeDir()
 	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
-		dotfilesDir = filepath.Join(home, ".dotfiles")
+		dotfilesDir = filepath.Join(home, ".blackdot")
 	}
 
 	return &backupConfig{
@@ -239,7 +239,7 @@ func runBackupCreate(cmd *cobra.Command, args []string) error {
 		data, err := os.ReadFile(varFile)
 		if err == nil {
 			header := &tar.Header{
-				Name:    "dotfiles/templates/_variables.local.sh",
+				Name:    "blackdot/templates/_variables.local.sh",
 				Size:    info.Size(),
 				Mode:    int64(info.Mode()),
 				ModTime: info.ModTime(),
@@ -445,9 +445,9 @@ func runBackupRestore(cmd *cobra.Command, args []string) error {
 
 		// Determine destination
 		var destPath string
-		if strings.HasPrefix(relPath, "dotfiles/") {
-			// Dotfiles-relative path
-			destPath = filepath.Join(cfg.dotfilesDir, strings.TrimPrefix(relPath, "dotfiles/"))
+		if strings.HasPrefix(relPath, "blackdot/") {
+			// Blackdot-relative path
+			destPath = filepath.Join(cfg.dotfilesDir, strings.TrimPrefix(relPath, "blackdot/"))
 		} else {
 			// Home-relative path
 			destPath = filepath.Join(home, relPath)
