@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0-rc5] - 2025-12-11
+
+**Release Candidate 5 - Final Blackdot Rebrand Polish**
+
+### Changed
+
+- **Complete Rebrand Finalization**
+  - Final pass on all JSON and fixture files
+  - Documentation and config files fully updated
+  - CLI branding refinement with visual identity
+  - All remaining Dotfiles strings replaced in user-facing output
+
+### Added
+
+- Binary name added to .gitignore for cleaner repository
+- Visual branding enhancement in CLI output
+- Improved cross-platform consistency in naming
+
+### Fixed
+
+- Remaining references to Dotfiles in Go CLI
+- User-facing strings now consistently use blackdot terminology
+- Documentation consistency across all file types
+
 ## [4.0.0-rc4] - 2025-12-11
 
 **Release Candidate 4 - Rebrand Completion & CI Improvements**
