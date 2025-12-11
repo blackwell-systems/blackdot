@@ -504,7 +504,7 @@ blackdot vault push --all    # Push current secrets to vault
 
 - **[dotclaude Documentation](https://github.com/blackwell-systems/dotclaude)** - Profile management
 - **[blackdot Vault Guide](VAULT.md)** - Secret management
-- **[Workspace Architecture](README-FULL.md#canonical-workspace)** - How /workspace works
+- **[Workspace Architecture](architecture.md#workspace-architecture)** - How /workspace works
 
 ## Support
 

@@ -10,7 +10,6 @@
 
 - **Reference**
   - [CLI Reference](cli-reference.md)
-  - [Full Guide](README-FULL.md)
 
 - **Features**
   - [Feature Registry](features.md)

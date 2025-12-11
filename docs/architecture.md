@@ -703,3 +703,227 @@ graph TB
 | Restore | Archive | Config | `blackdot backup restore` |
 | Upgrade | GitHub | Local | `blackdot upgrade` |
 | Remove | Local | (deleted) | `blackdot uninstall` |
+
+---
+
+## Multi-Platform Architecture
+
+Blackdot is designed for extensibility across multiple platforms with **90% shared code**.
+
+### Platform Support Matrix
+
+| Platform | Bootstrap Script | Status | Notes |
+|----------|-----------------|---------|-------|
+| **macOS** | `bootstrap-mac.sh` | ✅ Fully tested | Apple Silicon & Intel |
+| **Windows** | `install-windows.ps1` | ✅ Fully tested | Native PowerShell module |
+| **Lima VM** | `bootstrap-linux.sh` | ✅ Fully tested | Ubuntu 24.04 |
+| **WSL2** | `bootstrap-linux.sh` | ✅ Auto-detected | Windows 10/11 with Linux |
+| **Ubuntu/Debian** | `bootstrap-linux.sh` | ✅ Compatible | Bare metal or VM |
+
+### Extensible to (~30 minutes each):
+- Docker containers
+- Arch Linux
+- Fedora/RHEL
+- FreeBSD/OpenBSD
+- Any POSIX-compliant system with ZSH or Windows with PowerShell
+
+### Architecture Layers
+
+```mermaid
+flowchart TB
+    platform["<b>Platform-Specific Bootstrap</b><br/>(10% of code)<br/>━━━━━━━━━━━━━━━━━━━━━<br/>• Package manager setup (apt/brew/winget)<br/>• System-specific configuration<br/>• GUI tool installation"]
+
+    shared["<b>Shared Blackdot Layer</b><br/>(90% of code)<br/>━━━━━━━━━━━━━━━━━━━━━<br/>• Go CLI (blackdot commands)<br/>• Shell integration (Zsh/PowerShell)<br/>• Vault system (vaultmux)<br/>• Health checks & metrics<br/>• Feature Registry"]
+
+    platform --> shared
+
+    style platform fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style shared fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+```
+
+### Platform-Independent Components
+
+These work on **any platform** without modification:
+
+**Go CLI** (100% portable)
+- Single binary (`blackdot`) works on macOS, Linux, Windows
+- All commands: `doctor`, `vault`, `status`, `features`, `config`, etc.
+- Cross-platform file permissions handling
+- Identical behavior across all platforms
+
+**Vault System** (vaultmux - 100% portable)
+- Multi-backend support via vaultmux Go library
+- Backends: Bitwarden (`bw`), 1Password (`op`), pass (`pass/gpg`)
+- Works on Linux, macOS, BSD, WSL, Windows, Docker
+- Same vault operations across all platforms
+
+**Feature Registry** (Go - 100% portable)
+- `internal/feature/registry.go` - central control plane
+- Enable/disable features: `blackdot features enable/disable <name>`
+- Dependency resolution and conflict detection
+- Works identically everywhere
+
+**Shell Integration** (Platform-specific wrappers)
+- **Unix/Linux/macOS**: Zsh configuration (`zsh/zshrc`, `zsh.d/*.zsh`)
+- **Windows**: PowerShell module (`powershell/Blackdot.psm1`)
+- Both call the same Go CLI binary
+- Platform-specific aliases and helpers that invoke Go commands
+
+### Adding a New Platform
+
+Example: Adding Arch Linux support (~30 lines)
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+BLACKDOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# 1. System packages (platform-specific)
+sudo pacman -Syu --noconfirm git zsh curl base-devel
+
+# 2. Install Homebrew (optional but recommended)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# 3. SHARED: Use same Brewfile
+brew bundle --file="$BLACKDOT_DIR/Brewfile"
+
+# 4. SHARED: Use same blackdot bootstrap
+"$BLACKDOT_DIR/bootstrap/bootstrap-blackdot.sh"
+
+# 5. Set shell to zsh
+chsh -s $(command -v zsh)
+```
+
+Everything else (vault, health checks, configs, metrics) works without modification.
+
+### Platform Detection
+
+The bootstrap scripts auto-detect their environment:
+
+```bash
+# bootstrap-linux.sh detects:
+if grep -qiE "(microsoft|wsl)" /proc/version; then
+  PLATFORM="WSL2"
+  # Install Windows interop tools
+elif [[ -n "${LIMA_INSTANCE:-}" ]]; then
+  PLATFORM="Lima"
+  # Lima-specific tips
+fi
+```
+
+The `zshrc` also detects OS:
+
+```bash
+OS="$(uname -s)"
+case "$OS" in
+  Darwin)  # macOS-specific settings ;;
+  Linux)   # Linux-specific settings ;;
+  FreeBSD) # BSD-specific settings ;;
+esac
+```
+
+### Why Multi-Platform Matters
+
+**Portability**: Use the same configuration across:
+- Work and personal machines (macOS/Linux)
+- Development VMs (Lima/WSL)
+- CI/CD containers (Docker)
+- Cloud instances
+
+**Maintainability**: Fix bugs or add features **once**, benefits **all platforms**.
+
+**Extensibility**: New platform = ~30 lines of platform-specific code + reuse 90%.
+
+---
+
+## Workspace Architecture
+
+The canonical workspace directory at `~/workspace` (with `/workspace` symlink) enables portable paths across machines.
+
+### Visual Overview
+
+```mermaid
+flowchart TB
+    subgraph host["Host: /Users/username/ (macOS)"]
+        h_secrets["Secrets<br/>(.ssh, .aws, .gitconfig)<br/><small>Per-machine</small>"]
+        h_workspace["~/workspace/<br/><small>Shared files</small>"]
+    end
+
+    subgraph guest["Guest: /home/username/ (Lima/WSL)"]
+        g_secrets["Secrets<br/>(.ssh, .aws, .gitconfig)<br/><small>Per-machine</small>"]
+        g_workspace["~/workspace/<br/><small>Mounted from host</small>"]
+    end
+
+    subgraph shared["Shared: ~/workspace/ Content"]
+        direction LR
+        blackdot["blackdot/"]
+        code["code/"]
+        claude[".claude/"]
+    end
+
+    h_workspace <-->|same files| g_workspace
+    h_workspace -.-> shared
+    g_workspace -.-> shared
+
+    h_secrets <-.->|vault push| g_secrets
+
+    symlink["/workspace → ~/workspace<br/><small>Ensures identical paths across all machines</small>"]
+
+    style host fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style guest fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style shared fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style symlink fill:#22543d,stroke:#2f855a,color:#e2e8f0
+    style h_workspace fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style g_workspace fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style claude fill:#2f855a,stroke:#48bb78,color:#e2e8f0
+```
+
+**Key concepts:**
+- **Host & Guest** share `~/workspace/` (mounted/synced)
+- **Secrets** (.ssh, .aws, .gitconfig) are per-machine, synced via vault
+- **`/workspace` symlink** ensures identical paths: `cd /workspace/blackdot` works everywhere
+- **Claude Code sessions** are portable across machines via shared `.claude/` state
+
+### Bootstrap Flow
+
+```mermaid
+flowchart TB
+    machine["New Machine"]
+
+    subgraph setup["Setup Phase"]
+        bootstrap["Bootstrap<br/><small>bootstrap-mac/linux.sh</small><br/>Install packages, tools, shell"]
+        restore["Restore Secrets<br/><small>blackdot vault pull</small><br/>SSH, AWS, Git, env"]
+        verify["Health Check<br/><small>blackdot doctor</small><br/>Verify installation"]
+    end
+
+    subgraph tools["Package Sources"]
+        brewfile["Brewfile<br/><small>brew, zsh, plugins...</small>"]
+    end
+
+    subgraph vault["Multi-Vault Backend"]
+        vault_storage["Vault Storage<br/><small>Bitwarden / 1Password / pass</small><br/>• SSH keys<br/>• AWS credentials<br/>• Git config<br/>• Environment secrets"]
+    end
+
+    subgraph sync["Maintenance"]
+        sync_back["blackdot vault push<br/><small>Push local changes back</small>"]
+    end
+
+    machine --> bootstrap
+    bootstrap --> restore
+    restore --> verify
+
+    bootstrap -.->|installs| brewfile
+    restore -->|pulls from| vault_storage
+    verify -->|after changes| sync_back
+    sync_back -->|updates| vault_storage
+
+    style machine fill:#2d3748,stroke:#4a5568,color:#e2e8f0
+    style setup fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style tools fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style vault fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style sync fill:#1a365d,stroke:#2c5282,color:#e2e8f0
+    style bootstrap fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style restore fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style verify fill:#22543d,stroke:#2f855a,color:#e2e8f0
+```
