@@ -93,7 +93,7 @@ setup_workspace_symlink
 # ============================================================
 # 6. Dotfiles symlinks (shared)
 # ============================================================
-link_dotfiles
+link_blackdot
 
 # ============================================================
 # 7. Set default shell to zsh (Linux-specific)

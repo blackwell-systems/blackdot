@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ============================================================
 # Example Hook: doctor_check/10-custom-checks.sh
-# Add custom health checks to 'dotfiles doctor'
+# Add custom health checks to 'blackdot doctor'
 #
 # Installation:
-#   mkdir -p ~/.config/dotfiles/hooks/doctor_check
-#   cp this_file ~/.config/dotfiles/hooks/doctor_check/
-#   chmod +x ~/.config/dotfiles/hooks/doctor_check/10-custom-checks.sh
+#   mkdir -p ~/.config/blackdot/hooks/doctor_check
+#   cp this_file ~/.config/blackdot/hooks/doctor_check/
+#   chmod +x ~/.config/blackdot/hooks/doctor_check/10-custom-checks.sh
 #
 # Output format: Your output will appear in the doctor results
 # ============================================================

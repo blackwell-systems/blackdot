@@ -7,7 +7,7 @@
 # =========================
 # COMPLETIONS
 # =========================
-# Load custom completions from dotfiles
+# Load custom completions from blackdot
 BLACKDOT_COMPLETIONS="$BLACKDOT_DIR/zsh/completions"
 if [[ -d "$BLACKDOT_COMPLETIONS" ]]; then
   fpath=($BLACKDOT_COMPLETIONS $fpath)

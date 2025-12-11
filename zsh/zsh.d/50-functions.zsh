@@ -2,7 +2,7 @@
 # 50-functions.zsh
 # =========================
 # Shell functions for status checks, project navigation, notes, and system management
-# Includes status dashboard, project jumper, notes system, dotfiles upgrade, and SSH helpers
+# Includes status dashboard, project jumper, notes system, blackdot upgrade, and SSH helpers
 
 # Quick status dashboard - city skyline theme
 status() {
@@ -19,14 +19,14 @@ status() {
   if [[ -L ~/.zshrc ]]; then
     s_zshrc="${g}◆${n}"; s_zshrc_info="${d}→ blackdot/zsh/zshrc${n}"
   else
-    fixes+=("zshrc: bootstrap-dotfiles.sh")
+    fixes+=("zshrc: bootstrap-blackdot.sh")
   fi
 
   local s_claude="${r}◇${n}" s_claude_info="not linked"
   if [[ -L ~/.claude ]]; then
     s_claude="${g}◆${n}"; s_claude_info="${d}→ workspace/.claude${n}"
   else
-    fixes+=("claude: bootstrap-dotfiles.sh")
+    fixes+=("claude: bootstrap-blackdot.sh")
   fi
 
   local s_workspace="${r}◇${n}" s_workspace_info="missing"
@@ -212,7 +212,7 @@ blackdot-upgrade() {
 
     # Re-run bootstrap to update symlinks
     echo "   Re-bootstrapping..."
-    "$BLACKDOT_DIR/bootstrap-dotfiles.sh"
+    "$BLACKDOT_DIR/bootstrap-blackdot.sh"
 
     # Update Homebrew packages
     if command -v brew >/dev/null 2>&1; then

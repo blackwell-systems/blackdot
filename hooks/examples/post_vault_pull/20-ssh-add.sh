@@ -4,9 +4,9 @@
 # Adds SSH keys to the agent after vault pull
 #
 # Installation:
-#   mkdir -p ~/.config/dotfiles/hooks/post_vault_pull
-#   cp this_file ~/.config/dotfiles/hooks/post_vault_pull/
-#   chmod +x ~/.config/dotfiles/hooks/post_vault_pull/20-ssh-add.sh
+#   mkdir -p ~/.config/blackdot/hooks/post_vault_pull
+#   cp this_file ~/.config/blackdot/hooks/post_vault_pull/
+#   chmod +x ~/.config/blackdot/hooks/post_vault_pull/20-ssh-add.sh
 #
 # Note: Runs after 10-fix-permissions.sh (alphabetical order)
 # ============================================================

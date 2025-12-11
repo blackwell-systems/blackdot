@@ -115,7 +115,7 @@ if [ "$SKIP_CLAUDE_SETUP" != "true" ]; then
   fi
   ln -sfn "$CLAUDE_SHARED" "$HOME/.claude"
 
-  # Link Claude config files from dotfiles
+  # Link Claude config files from blackdot
   if [ -f "$BLACKDOT_DIR/claude/settings.json" ]; then
     safe_symlink "$BLACKDOT_DIR/claude/settings.json" "$CLAUDE_SHARED/settings.json"
   fi

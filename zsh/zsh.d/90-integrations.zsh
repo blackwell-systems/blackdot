@@ -195,7 +195,7 @@ check_blackdot_updates
 check_vault_drift() {
   local dotfiles_dir="${HOME}/workspace/blackdot"
   local drift_lib="$dotfiles_dir/lib/_drift.sh"
-  local state_file="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/vault-state.json"
+  local state_file="${XDG_CACHE_HOME:-$HOME/.cache}/blackdot/vault-state.json"
 
   # Skip if disabled
   [[ "${BLACKDOT_SKIP_DRIFT_CHECK:-}" == "1" ]] && return 0

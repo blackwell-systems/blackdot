@@ -4,9 +4,9 @@
 # Auto-activate environments when entering directories
 #
 # Installation:
-#   mkdir -p ~/.config/dotfiles/hooks/directory_change
-#   cp this_file ~/.config/dotfiles/hooks/directory_change/
-#   chmod +x ~/.config/dotfiles/hooks/directory_change/10-auto-env.zsh
+#   mkdir -p ~/.config/blackdot/hooks/directory_change
+#   cp this_file ~/.config/blackdot/hooks/directory_change/
+#   chmod +x ~/.config/blackdot/hooks/directory_change/10-auto-env.zsh
 #
 # Receives: $1 = new directory path (PWD)
 # ============================================================

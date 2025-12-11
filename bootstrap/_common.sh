@@ -270,11 +270,11 @@ setup_workspace_symlink() {
 }
 
 # ============================================================
-# Dotfiles symlinks (shared between macOS and Linux)
+# Blackdot symlinks (shared between macOS and Linux)
 # ============================================================
-link_dotfiles() {
-    echo "Linking dotfiles..."
-    "$BLACKDOT_DIR/bootstrap/bootstrap-dotfiles.sh"
+link_blackdot() {
+    echo "Linking blackdot..."
+    "$BLACKDOT_DIR/bootstrap/bootstrap-blackdot.sh"
 }
 
 # ============================================================

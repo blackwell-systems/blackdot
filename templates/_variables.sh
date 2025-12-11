@@ -14,8 +14,8 @@
 #   5. TMPL_AUTO (auto-detected, set by lib/_templates.sh)
 #
 # Usage:
-#   Run 'dotfiles template init' to create _variables.local.sh
-#   Run 'dotfiles template vars' to see all current values
+#   Run 'blackdot template init' to create _variables.local.sh
+#   Run 'blackdot template vars' to see all current values
 # ============================================================
 
 # ============================================================

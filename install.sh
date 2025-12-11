@@ -117,7 +117,7 @@ install_go_binary() {
     # Verify checksum (unless skipped)
     if [[ "$skip_checksum" != "true" ]]; then
         info "Verifying checksum..."
-        local checksum_file="/tmp/dotfiles-checksums-$$.txt"
+        local checksum_file="/tmp/blackdot-checksums-$$.txt"
         local expected_checksum=""
 
         # Download checksums file

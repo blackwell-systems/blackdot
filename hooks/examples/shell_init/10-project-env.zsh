@@ -4,9 +4,9 @@
 # Load project-specific environment at shell startup
 #
 # Installation:
-#   mkdir -p ~/.config/dotfiles/hooks/shell_init
-#   cp this_file ~/.config/dotfiles/hooks/shell_init/
-#   chmod +x ~/.config/dotfiles/hooks/shell_init/10-project-env.zsh
+#   mkdir -p ~/.config/blackdot/hooks/shell_init
+#   cp this_file ~/.config/blackdot/hooks/shell_init/
+#   chmod +x ~/.config/blackdot/hooks/shell_init/10-project-env.zsh
 # ============================================================
 
 # Load work environment if present

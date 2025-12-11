@@ -1,7 +1,7 @@
 # =========================
 # 40-aliases.zsh
 # =========================
-# Shell aliases for navigation, vault, dotfiles, and utilities
+# Shell aliases for navigation, vault, blackdot, and utilities
 # Convenient shortcuts for common operations
 
 # Color definitions for CLI output
@@ -58,7 +58,7 @@ typeset -gA CLI_COMMAND_HELP=(
   template link     Create symlinks from templates
   template diff     Show differences from rendered
   template vars     Show available template variables"
-    ["features"]="core|Feature Management|Enable/disable dotfiles features|
+    ["features"]="core|Feature Management|Enable/disable blackdot features|
   features          List all features and status
   features list     List features (optionally by category)
   features enable   Enable a feature
@@ -161,7 +161,7 @@ _blackdot_help() {
         return $?
     fi
 
-    echo "${BOLD}${CYAN}blackdot${NC} - Manage your dotfiles"
+    echo "${BOLD}${CYAN}blackdot${NC} - Manage your blackdot config"
     echo ""
     echo "${BOLD}Usage:${NC} blackdot <command> [options]"
     echo ""
@@ -310,9 +310,9 @@ _blackdot_help() {
     # Other Commands (always visible)
     echo "${BOLD}${CYAN}Other Commands:${NC}"
     echo "  ${YELLOW}migrate${NC}           ${DIM}Migrate config to v3.0 (INI→JSON, vault v2→v3)${NC}"
-    echo "  ${YELLOW}uninstall${NC}         ${DIM}Remove dotfiles configuration${NC}"
-    echo "  ${YELLOW}cd${NC}                ${DIM}Change to dotfiles directory${NC}"
-    echo "  ${YELLOW}edit${NC}              ${DIM}Open dotfiles in editor${NC}"
+    echo "  ${YELLOW}uninstall${NC}         ${DIM}Remove blackdot configuration${NC}"
+    echo "  ${YELLOW}cd${NC}                ${DIM}Change to blackdot directory${NC}"
+    echo "  ${YELLOW}edit${NC}              ${DIM}Open blackdot in editor${NC}"
     echo "  ${YELLOW}help${NC}              ${DIM}Show this help${NC}"
     echo ""
 

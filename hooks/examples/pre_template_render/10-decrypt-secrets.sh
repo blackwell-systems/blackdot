@@ -7,9 +7,9 @@
 # encrypted template variables and arrays are decrypted.
 #
 # Installation:
-#   mkdir -p ~/.config/dotfiles/hooks/pre_template_render
-#   cp this_file ~/.config/dotfiles/hooks/pre_template_render/
-#   chmod +x ~/.config/dotfiles/hooks/pre_template_render/10-decrypt-secrets.sh
+#   mkdir -p ~/.config/blackdot/hooks/pre_template_render
+#   cp this_file ~/.config/blackdot/hooks/pre_template_render/
+#   chmod +x ~/.config/blackdot/hooks/pre_template_render/10-decrypt-secrets.sh
 #
 # What it does:
 #   - Decrypts templates/_variables.local.sh.age if present
@@ -19,9 +19,9 @@
 
 set -euo pipefail
 
-BLACKDOT_DIR="${BLACKDOT_DIR:-$HOME/workspace/dotfiles}"
+BLACKDOT_DIR="${BLACKDOT_DIR:-$HOME/workspace/blackdot}"
 TEMPLATES_DIR="$BLACKDOT_DIR/templates"
-ENCRYPTION_DIR="${HOME}/.config/dotfiles"
+ENCRYPTION_DIR="${HOME}/.config/blackdot"
 AGE_KEY_FILE="${ENCRYPTION_DIR}/age-key.txt"
 
 # Skip if encryption not initialized

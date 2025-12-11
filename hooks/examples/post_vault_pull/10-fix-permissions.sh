@@ -4,9 +4,9 @@
 # Ensures correct permissions on sensitive files after vault pull
 #
 # Installation:
-#   mkdir -p ~/.config/dotfiles/hooks/post_vault_pull
-#   cp this_file ~/.config/dotfiles/hooks/post_vault_pull/
-#   chmod +x ~/.config/dotfiles/hooks/post_vault_pull/10-fix-permissions.sh
+#   mkdir -p ~/.config/blackdot/hooks/post_vault_pull
+#   cp this_file ~/.config/blackdot/hooks/post_vault_pull/
+#   chmod +x ~/.config/blackdot/hooks/post_vault_pull/10-fix-permissions.sh
 # ============================================================
 
 # SSH directory and keys
