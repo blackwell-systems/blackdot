@@ -1905,7 +1905,7 @@ Most commands follow these conventions:
 
 | File | Purpose |
 |------|---------|
-| `~/workspace/blackdot/` | Dotfiles repository |
+| `~/workspace/blackdot/` | Blackdot repository |
 | `~/.blackdot-backups/` | Backup storage |
 | `~/.blackdot-metrics.jsonl` | Health check metrics |
 | `~/workspace/.notes.md` | Quick notes |
