@@ -279,14 +279,21 @@ blackdot lint            # Validate syntax
 
 ```
 blackdot/
+├── cmd/blackdot/        # Go CLI entry point
+├── internal/            # Go implementation
+│   ├── cli/             # Cobra commands (20+ files)
+│   ├── feature/         # Feature Registry system
+│   ├── config/          # JSON configuration management
+│   └── template/        # Template rendering engine
 ├── bootstrap/           # Platform setup scripts
-├── bin/                 # CLI tools (doctor, drift, backup, etc.)
+├── zsh/zsh.d/           # Modular shell config (16 modules)
+├── powershell/          # Windows PowerShell module
 ├── vault/               # Multi-vault integration (Bitwarden, 1Password, pass)
-├── zsh/zsh.d/           # Modular shell config (10 modules)
 ├── templates/           # Machine-specific config templates
-├── lib/                 # Shared libraries
+├── lib/                 # Minimal shell helpers (colors, logging, hooks)
 ├── claude/              # Claude Code integration & hooks
-├── test/                # 80+ bats-core tests
+├── macos/               # macOS system settings management
+├── test/                # Test suite (Go tests + fixtures)
 └── docs/                # This documentation site
 ```
 
