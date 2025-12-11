@@ -1,11 +1,11 @@
 {
-  "id": "mock-aws-config-id",
+  "id": "mock-git-config-id",
   "organizationId": null,
   "folderId": null,
   "type": 2,
   "reprompt": 0,
-  "name": "dotfiles-AWS-Config",
-  "notes": "[default]\nregion = us-east-1\noutput = json\n\n[profile dev]\nregion = us-west-2\noutput = json\n",
+  "name": "blackdot-Git-Config",
+  "notes": "[user]\n    name = Test User\n    email = test@example.com\n\n[core]\n    editor = vim\n    autocrlf = input\n\n[init]\n    defaultBranch = main\n\n[pull]\n    rebase = true\n",
   "favorite": false,
   "secureNote": {
     "type": 0
