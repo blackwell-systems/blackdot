@@ -51,7 +51,7 @@ func TestDefaultManagerWithEnv(t *testing.T) {
 	}()
 
 	os.Setenv("XDG_CONFIG_HOME", "/custom/config")
-	os.Setenv("BLACKDOT_DIR", "/custom/dotfiles")
+	os.Setenv("BLACKDOT_DIR", "/custom/blackdot")
 
 	m := DefaultManager()
 
@@ -60,9 +60,9 @@ func TestDefaultManagerWithEnv(t *testing.T) {
 		t.Errorf("expected configDir='%s', got '%s'", expectedConfig, m.configDir)
 	}
 
-	expectedDotfiles := filepath.FromSlash("/custom/dotfiles")
-	if m.dotfilesDir != expectedDotfiles {
-		t.Errorf("expected dotfilesDir='%s', got '%s'", expectedDotfiles, m.dotfilesDir)
+	expectedBlackdot := filepath.FromSlash("/custom/blackdot")
+	if m.dotfilesDir != expectedBlackdot {
+		t.Errorf("expected dotfilesDir='%s', got '%s'", expectedBlackdot, m.dotfilesDir)
 	}
 }
 
@@ -422,7 +422,7 @@ func TestVaultConfigFields(t *testing.T) {
 			Backend:   "bitwarden",
 			AutoSync:  true,
 			Location:  "/path/to/vault",
-			Namespace: "dotfiles",
+			Namespace: "blackdot",
 		},
 	}
 
@@ -435,7 +435,7 @@ func TestVaultConfigFields(t *testing.T) {
 	if cfg.Vault.Location != "/path/to/vault" {
 		t.Error("Location not set correctly")
 	}
-	if cfg.Vault.Namespace != "dotfiles" {
+	if cfg.Vault.Namespace != "blackdot" {
 		t.Error("Namespace not set correctly")
 	}
 }
