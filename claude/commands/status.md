@@ -1,4 +1,4 @@
-Run the dotfiles status dashboard and explain any issues:
+Run the blackdot status dashboard and explain any issues:
 
 ```bash
 source ~/workspace/blackdot/zsh/zsh.d/50-functions.zsh 2>/dev/null
