@@ -68,8 +68,8 @@ jobs:
           if [ "${{ matrix.goos }}" = "windows" ]; then
             SUFFIX=".exe"
           fi
-          go build -ldflags="-s -w" -o dotfiles-${{ matrix.goos }}-${{ matrix.goarch }}${SUFFIX} ./cmd/blackdot/
-          ls -la dotfiles-*
+          go build -ldflags="-s -w" -o blackdot-${{ matrix.goos }}-${{ matrix.goarch }}${SUFFIX} ./cmd/blackdot/
+          ls -la blackdot-*
 
   # Shell script validation (remaining scripts)
   shell-validation:
@@ -199,13 +199,13 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         include:
           - os: ubuntu-latest
-            binary: ./dotfiles
+            binary: ./blackdot
             shell_type: zsh
           - os: macos-latest
-            binary: ./dotfiles
+            binary: ./blackdot
             shell_type: zsh
           - os: windows-latest
-            binary: ./dotfiles.exe
+            binary: ./blackdot.exe
             shell_type: powershell
     runs-on: ${{ matrix.os }}
     env:
@@ -222,11 +222,11 @@ jobs:
 
       - name: Build binary (Unix)
         if: matrix.os != 'windows-latest'
-        run: go build -o dotfiles ./cmd/blackdot/
+        run: go build -o blackdot ./cmd/blackdot/
 
       - name: Build binary (Windows)
         if: matrix.os == 'windows-latest'
-        run: go build -o dotfiles.exe ./cmd/blackdot/
+        run: go build -o blackdot.exe ./cmd/blackdot/
 
       - name: Test version command
         run: ${{ matrix.binary }} version

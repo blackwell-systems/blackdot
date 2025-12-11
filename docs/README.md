@@ -10,11 +10,11 @@
 [![Secrets](https://img.shields.io/badge/Secrets-Multi--Vault-ff4081)](https://github.com/blackwell-systems/blackdot#vault--secrets)
 [![Version](https://img.shields.io/github/v/release/blackwell-systems/blackdot)](https://github.com/blackwell-systems/blackdot/releases)
 [![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)](https://github.com/blackwell-systems/blackdot)
-[![Test Status](https://github.com/blackwell-systems/blackdot/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/blackdot/actions)
+[![Test Status](https://github.com/blackwell-systems/blackdot/workflows/Test%20Blackdot/badge.svg)](https://github.com/blackwell-systems/blackdot/actions)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
 
-> A dotfiles management framework built on **Feature Registry**, **Configuration Layers**, and **Claude Code Integration**. Multi-vault secrets, portable sessions, machine-specific templates, and self-healing configuration.
+> Blackdot is a dotfiles management framework built on **Feature Registry**, **Configuration Layers**, and **Claude Code Integration**. Multi-vault secrets, portable sessions, machine-specific templates, and self-healing configuration.
 
 [Changelog](https://github.com/blackwell-systems/blackdot/blob/main/CHANGELOG.md) | [GitHub](https://github.com/blackwell-systems/blackdot)
 
@@ -217,12 +217,12 @@ blackdot status
 > Bootstrap creates `/workspace → ~/workspace` symlink to enable **Claude Code session portability** across machines.
 >
 > **The problem:** Claude Code uses absolute paths for session folders. Without the symlink:
-> - macOS: `/Users/you/workspace/dotfiles` → session `Users-you-workspace-dotfiles`
-> - Linux: `/home/you/workspace/dotfiles` → session `home-you-workspace-dotfiles`
+> - macOS: `/Users/you/workspace/blackdot` → session `Users-you-workspace-blackdot`
+> - Linux: `/home/you/workspace/blackdot` → session `home-you-workspace-blackdot`
 > - Different paths = different sessions = **lost conversation history** when switching machines
 >
 > **The solution:** `/workspace` is the same absolute path everywhere:
-> - All machines: `/workspace/dotfiles` → session `workspace-dotfiles` ✨
+> - All machines: `/workspace/blackdot` → session `workspace-blackdot` ✨
 > - Same session folder across macOS, Linux, WSL2 = **full history syncs**
 >
 > **Customization:** Target directory is configurable via `WORKSPACE_TARGET=~/code` or the setup wizard - the `/workspace` symlink name stays the same.
@@ -278,7 +278,7 @@ blackdot lint            # Validate syntax
 ## Project Structure
 
 ```
-dotfiles/
+blackdot/
 ├── bootstrap/           # Platform setup scripts
 ├── bin/                 # CLI tools (doctor, drift, backup, etc.)
 ├── vault/               # Multi-vault integration (Bitwarden, 1Password, pass)

@@ -12,7 +12,7 @@
 [![dotclaude](https://img.shields.io/badge/Integrates-dotclaude-8A2BE2?logo=anthropic)](https://github.com/blackwell-systems/dotclaude)
 [![Secrets](https://img.shields.io/badge/Secrets-Multi--Vault-ff4081)](https://github.com/blackwell-systems/blackdot#vault--secrets)
 
-[![Test Status](https://github.com/blackwell-systems/blackdot/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/blackdot/actions)
+[![Test Status](https://github.com/blackwell-systems/blackdot/workflows/Test%20Blackdot/badge.svg)](https://github.com/blackwell-systems/blackdot/actions)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
 
@@ -199,7 +199,7 @@ See [Docker Guide](docs/docker.md) for container options.
 
 ## Claude Code + dotclaude
 
-**These dotfiles integrate with [dotclaude](https://github.com/blackwell-systems/dotclaude)** - a profile manager for Claude Code that syncs your AI assistant configurations across machines.
+**Blackdot integrates with [dotclaude](https://github.com/blackwell-systems/dotclaude)** - a profile manager for Claude Code that syncs your AI assistant configurations across machines.
 
 **What dotclaude adds:**
 - **Profile sync** - Work/personal/client profiles follow you everywhere
@@ -405,7 +405,7 @@ git clone git@github.com:blackwell-systems/blackdot.git ~/workspace/blackdot
 cd ~/workspace/blackdot
 
 # Or use a custom workspace location
-WORKSPACE_TARGET=~/code git clone git@github.com:blackwell-systems/blackdot.git ~/code/dotfiles
+WORKSPACE_TARGET=~/code git clone git@github.com:blackwell-systems/blackdot.git ~/code/blackdot
 
 # 2. Run platform bootstrap
 ./bootstrap/bootstrap-mac.sh   # macOS
@@ -453,12 +453,12 @@ blackdot status
 > Bootstrap creates `/workspace → ~/workspace` symlink to enable **Claude Code session portability** across machines.
 >
 > **The problem:** Claude Code uses absolute paths for session folders. Without the symlink:
-> - macOS: `/Users/you/workspace/dotfiles` → session `Users-you-workspace-dotfiles`
-> - Linux: `/home/you/workspace/dotfiles` → session `home-you-workspace-dotfiles`
+> - macOS: `/Users/you/workspace/blackdot` → session `Users-you-workspace-blackdot`
+> - Linux: `/home/you/workspace/blackdot` → session `home-you-workspace-blackdot`
 > - Different paths = different sessions = **lost conversation history** when switching machines
 >
 > **The solution:** `/workspace` is the same absolute path everywhere:
-> - All machines: `/workspace/dotfiles` → session `workspace-dotfiles` ✨
+> - All machines: `/workspace/blackdot` → session `workspace-blackdot` ✨
 > - Same session folder across macOS, Linux, WSL2 = **full history syncs**
 >
 > **Customization:** The target directory is configurable via `WORKSPACE_TARGET=~/code` - the `/workspace` symlink name stays the same for portability.
@@ -508,7 +508,7 @@ See [Brewfile](Brewfile) (Unix) or [packages.json](powershell/packages.json) (Wi
 - **[dotclaude Integration](docs/DOTCLAUDE-INTEGRATION.md)** - Profile management
 - **[State Management](docs/state-management.md)** - Setup wizard internals
 
-**GitHub Pages:** [https://blackwell-systems.github.io/dotfiles/](https://blackwell-systems.github.io/dotfiles/)
+**GitHub Pages:** [https://blackwell-systems.github.io/blackdot/](https://blackwell-systems.github.io/blackdot/)
 
 ---
 
@@ -529,11 +529,11 @@ See [Brewfile](Brewfile) (Unix) or [packages.json](powershell/packages.json) (Wi
 ## How This Compares
 
 <details>
-<summary><b>Comparison vs chezmoi, thoughtbot, holman, and other dotfiles</b></summary>
+<summary><b>Comparison vs chezmoi, thoughtbot, holman, and other dotfiles managers</b></summary>
 
-### Quick Comparison: This Repo vs Typical Dotfiles
+### Quick Comparison: Blackdot vs Typical Dotfiles Managers
 
-| Capability           | This Repo                                      | Typical Dotfiles                 |
+| Capability           | Blackdot                                       | Typical Dotfiles                 |
 |----------------------|-----------------------------------------------|----------------------------------|
 | **Feature Registry** | Central control plane with presets              | None                             |
 | **Configuration Layers** | 5-layer priority (env/project/machine/user/defaults) | Single config file        |
@@ -548,12 +548,12 @@ See [Brewfile](Brewfile) (Unix) or [packages.json](powershell/packages.json) (Wi
 | **Optional components** | Feature Registry with presets                | All-or-nothing                   |
 | **Cross-platform**     | macOS, Linux, Windows, WSL2, Docker           | Usually single-platform          |
 
-### Why This Repo vs chezmoi?
+### Why Blackdot vs chezmoi?
 
 chezmoi is the most popular dotfiles manager. Here's how we compare:
 
-| Feature | This Repo | chezmoi |
-|---------|-----------|---------|
+| Feature | Blackdot | chezmoi |
+|---------|----------|---------|
 | **Feature Registry** | Central control plane with presets | None |
 | **Configuration Layers** | 5-layer priority system | `.chezmoi.toml` only |
 | **Claude Code Integration** | Portable sessions, dotclaude, git hooks | None |
@@ -566,9 +566,9 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 | **Cross-Platform** | 5 platforms + Docker | Excellent |
 | **Learning Curve** | Shell scripts | YAML + Go templates |
 
-### Detailed Comparison vs Popular Dotfiles
+### Detailed Comparison vs Popular Dotfiles Managers
 
-| Feature | This Repo | thoughtbot | holman | mathiasbynens | YADR |
+| Feature | Blackdot | thoughtbot | holman | mathiasbynens | YADR |
 |---------|-----------|------------|--------|---------------|------|
 | **Feature Registry** | Central control plane | No | No | No | No |
 | **Configuration Layers** | 5-layer priority | No | No | No | No |
@@ -587,17 +587,17 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 | **Documentation Site** | Docsify (searchable) | README only | README only | README only | Wiki |
 | **Active Maintenance** | 2025 | Sporadic | Archived | Sporadic | Minimal |
 
-### What Makes This Unique
+### What Makes Blackdot Unique
 
-1. **Only dotfiles built for Claude Code** - Portable sessions, dotclaude profiles, git safety hooks, multi-backend support
-2. **Only dotfiles with Feature Registry architecture** - Central control plane with presets and dependency resolution
-3. **Only dotfiles with Configuration Layers** - 5-layer priority system (env → project → machine → user → defaults)
-4. **Only dotfiles with multi-vault backend support** - Bitwarden, 1Password, or pass with unified API
-5. **Only dotfiles with comprehensive health checks** - Validator with auto-fix
-6. **Only dotfiles with drift detection** - Compare local vs vault state
-7. **Only dotfiles with schema validation** - Ensures SSH keys/configs are valid before restore
-8. **Only dotfiles with Docker bootstrap testing** - Reproducible CI/CD environments
-9. **Only dotfiles with machine-specific templates** - Auto-generate configs for work vs personal machines
+1. **Only dotfiles manager built for Claude Code** - Portable sessions, dotclaude profiles, git safety hooks, multi-backend support
+2. **Only dotfiles manager with Feature Registry architecture** - Central control plane with presets and dependency resolution
+3. **Only dotfiles manager with Configuration Layers** - 5-layer priority system (env → project → machine → user → defaults)
+4. **Only dotfiles manager with multi-vault backend support** - Bitwarden, 1Password, or pass with unified API
+5. **Only dotfiles manager with comprehensive health checks** - Validator with auto-fix
+6. **Only dotfiles manager with drift detection** - Compare local vs vault state
+7. **Only dotfiles manager with schema validation** - Ensures SSH keys/configs are valid before restore
+8. **Only dotfiles manager with Docker bootstrap testing** - Reproducible CI/CD environments
+9. **Only dotfiles manager with machine-specific templates** - Auto-generate configs for work vs personal machines
 
 </details>
 
@@ -605,7 +605,7 @@ chezmoi is the most popular dotfiles manager. Here's how we compare:
 
 ## Common Tasks
 
-### Update Dotfiles
+### Update Blackdot
 
 ```bash
 blackdot upgrade  # Pull latest, run bootstrap, check health
