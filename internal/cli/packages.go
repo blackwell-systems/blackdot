@@ -72,7 +72,7 @@ func runPackages(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("homebrew not installed")
 	}
 
-	// Determine dotfiles directory
+	// Determine blackdot directory
 	dotfilesDir := os.Getenv("BLACKDOT_DIR")
 	if dotfilesDir == "" {
 		home, _ := os.UserHomeDir()

@@ -1,5 +1,5 @@
 // Package blackdot provides a modular development framework for managing
-// dotfiles, secrets, and development environments across multiple machines.
+// shell configurations, secrets, and development environments across multiple machines.
 //
 // # Core Systems
 //

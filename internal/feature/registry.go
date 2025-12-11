@@ -1,4 +1,4 @@
-// Package feature implements the feature registry for dotfiles.
+// Package feature implements the feature registry for blackdot.
 //
 // The feature registry is the control plane for the entire system,
 // managing which features are enabled/disabled, resolving dependencies,

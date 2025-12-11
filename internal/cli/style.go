@@ -22,7 +22,7 @@ func customHelpFunc(cmd *cobra.Command, args []string) {
 	printCommandHelp(cmd)
 }
 
-// printRootHelp prints help matching the ZSH _dotfiles_help function exactly
+// printRootHelp prints help matching the ZSH _blackdot_help function exactly
 func printRootHelp() {
 	// Title
 	BoldCyan.Print("blackdot")

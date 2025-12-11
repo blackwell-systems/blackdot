@@ -56,7 +56,7 @@ Usage:
 }
 
 func outputPosixInit() error {
-	// Get the dotfiles binary path
+	// Get the blackdot binary path
 	dotfilesDir := DotfilesDir()
 	binaryPath := fmt.Sprintf("%s/bin/blackdot", dotfilesDir)
 

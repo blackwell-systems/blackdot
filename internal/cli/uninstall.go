@@ -133,9 +133,9 @@ func runUninstall(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// Handle dotfiles repository
+	// Handle blackdot repository
 	fmt.Println()
-	fmt.Println(blue("Dotfiles repository..."))
+	fmt.Println(blue("Blackdot repository..."))
 	if info, err := os.Stat(dotfilesDir); err == nil && info.IsDir() {
 		if dryRun {
 			fmt.Printf("  %s: %s (repository)\n", yellow("Would remove"), dotfilesDir)
