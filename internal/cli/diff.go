@@ -78,7 +78,7 @@ func runDiff(cmd *cobra.Command, args []string) error {
 	cyan := color.New(color.FgCyan).SprintFunc()
 
 	fmt.Println()
-	fmt.Println(bold(blue("Dotfiles Diff")))
+	fmt.Println(bold(blue("Blackdot Diff")))
 	fmt.Println()
 
 	// Get vault session

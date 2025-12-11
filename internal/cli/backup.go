@@ -129,7 +129,7 @@ func printBackupHelp() {
 	Dim.Println("  - Git configuration")
 	Dim.Println("  - AWS credentials (if present)")
 	Dim.Println("  - Zsh configuration")
-	Dim.Println("  - Dotfiles config.json")
+	Dim.Println("  - Blackdot config.json")
 	Dim.Println("  - Template variables")
 	fmt.Println()
 

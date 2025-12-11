@@ -132,7 +132,7 @@ func runSync(args []string, dryRun, forceLocal, forceVault, verbose, all bool) e
 
 	// Section header
 	fmt.Println()
-	fmt.Printf("%s%s── Dotfiles Sync ──%s\n", "\033[1m", "\033[36m", "\033[0m")
+	fmt.Printf("%s%s── Blackdot Sync ──%s\n", "\033[1m", "\033[36m", "\033[0m")
 
 	// Get vault session
 	session, err := getVaultSession(dotfilesDir)
