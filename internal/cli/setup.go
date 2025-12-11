@@ -376,18 +376,18 @@ func inferState(cfg *SetupConfig) {
 			// Check PowerShell profile
 			psProfile := filepath.Join(home, "Documents", "PowerShell", "profile.ps1")
 			if _, err := os.Stat(psProfile); err == nil {
-				// Check if it references our dotfiles
+				// Check if it references blackdot
 				if data, err := os.ReadFile(psProfile); err == nil {
-					if strings.Contains(string(data), "dotfiles") {
+					if strings.Contains(string(data), "blackdot") {
 						markPhaseComplete(cfg, "symlinks")
 					}
 				}
 			}
 		} else {
-			// Check ~/.zshrc points to our dotfiles
+			// Check ~/.zshrc points to blackdot
 			zshrcPath := filepath.Join(home, ".zshrc")
 			if target, err := os.Readlink(zshrcPath); err == nil {
-				if strings.Contains(target, "dotfiles/zsh/zshrc") {
+				if strings.Contains(target, "blackdot/zsh/zshrc") {
 					markPhaseComplete(cfg, "symlinks")
 				}
 			}
