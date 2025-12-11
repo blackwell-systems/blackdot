@@ -25,6 +25,7 @@ func customHelpFunc(cmd *cobra.Command, args []string) {
 // printRootHelp prints help matching the ZSH _blackdot_help function exactly
 func printRootHelp() {
 	// Title
+	fmt.Print("⚫ ")
 	BoldCyan.Print("blackdot")
 	fmt.Print(" - Manage your blackdot config\n")
 	fmt.Println()
@@ -152,6 +153,7 @@ func printCmdAlias(name, alias, desc string) {
 // printCommandHelp prints styled help for subcommands
 func printCommandHelp(cmd *cobra.Command) {
 	// Title
+	fmt.Print("⚫ ")
 	BoldCyan.Printf("blackdot %s", cmd.Name())
 	if cmd.Short != "" {
 		fmt.Print(" - ")

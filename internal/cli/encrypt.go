@@ -570,6 +570,7 @@ func runEncryptPushKey(cmd *cobra.Command, args []string) error {
 // printEncryptHelp prints styled help matching ZSH format
 func printEncryptHelp() {
 	// Title
+	fmt.Print("⚫ ")
 	BoldCyan.Print("blackdot encrypt")
 	fmt.Print(" - Age encryption management\n")
 	fmt.Println()

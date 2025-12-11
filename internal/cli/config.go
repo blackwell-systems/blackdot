@@ -57,6 +57,7 @@ func newConfigCmd() *cobra.Command {
 // printConfigHelp prints styled help matching ZSH style
 func printConfigHelp() {
 	// Title
+	fmt.Print("⚫ ")
 	BoldCyan.Print("blackdot config")
 	fmt.Print(" - Manage configuration with layered resolution\n")
 	fmt.Println()

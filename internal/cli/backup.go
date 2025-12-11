@@ -97,6 +97,7 @@ Examples:
 // printBackupHelp prints styled help matching ZSH style
 func printBackupHelp() {
 	// Title
+	fmt.Print("⚫ ")
 	BoldCyan.Print("blackdot backup")
 	fmt.Print(" - ")
 	Dim.Println("Manage blackdot backups")

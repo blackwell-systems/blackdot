@@ -62,6 +62,7 @@ func newDoctorCmd() *cobra.Command {
 // printDoctorHelp prints styled help matching ZSH doctor help
 func printDoctorHelp() {
 	// Title
+	fmt.Print("⚫ ")
 	BoldCyan.Print("blackdot doctor")
 	fmt.Print(" - ")
 	Dim.Println("Comprehensive blackdot health check")
@@ -148,7 +149,7 @@ func runDoctor(fixMode, quickMode bool) error {
  / /_/ / / /_/ / /__/ ,< / /_/ / /_/ / /_/_____/ /_/ / /_/ / /__/ /_/ /_/ / /
 /_____/_/\__,_/\___/_/|_|\__,_/\____/\__/     /_____/\____/\___/\__/\____/_/`))
 	fmt.Println()
-	fmt.Println(state.dim("Comprehensive blackdot health check"))
+	fmt.Println(state.dim("⚫ Comprehensive blackdot health check"))
 	fmt.Println()
 
 	// Section 1: Version & Updates

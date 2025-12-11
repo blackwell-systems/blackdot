@@ -87,6 +87,7 @@ Use --generate to create a settings.sh file from your current preferences.`,
 
 // printMacOSHelp prints styled help for macOS command
 func printMacOSHelp() {
+	fmt.Print("⚫ ")
 	BoldCyan.Print("blackdot macos")
 	fmt.Print(" - macOS system settings\n")
 	fmt.Println()

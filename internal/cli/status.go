@@ -164,7 +164,11 @@ func runStatus(cmd *cobra.Command, args []string) error {
 	}
 	items = append(items, profileItem)
 
-	// Print city skyline ASCII art
+	// Print city skyline ASCII art with blackdot branding
+	fmt.Println()
+	fmt.Print("  ⚫ ")
+	color.New(color.FgCyan, color.Bold).Print("blackdot status")
+	fmt.Println()
 	fmt.Println()
 	fmt.Println(dim("                            .|"))
 	fmt.Println(dim("                            | |              .-----"))
