@@ -296,7 +296,7 @@ render_templates() {
         echo "Rendering machine-specific templates..."
         "$dotfiles_bin" template render --force
     else
-        echo "dotfiles binary not found: $dotfiles_bin"
+        echo "blackdot binary not found: $dotfiles_bin"
     fi
 }
 

@@ -3,7 +3,7 @@
 # Example Hook: post_vault_pull/30-restore-age-key.sh
 # Restores age encryption key from vault after vault pull
 #
-# This hook runs after 'dotfiles vault pull' to restore your
+# This hook runs after 'blackdot vault pull' to restore your
 # encryption private key from vault if it's missing locally.
 #
 # Installation:
@@ -13,7 +13,7 @@
 #
 # Prerequisites:
 #   - Age key must be stored in vault as "Age-Private-Key" item
-#   - Push key first with: dotfiles encrypt push-key
+#   - Push key first with: blackdot encrypt push-key
 # ============================================================
 
 set -euo pipefail
