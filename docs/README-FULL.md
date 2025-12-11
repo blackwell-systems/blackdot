@@ -7,17 +7,17 @@
 [![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)](https://github.com/blackwell-systems/blackdot)
 
 [![Shell](https://img.shields.io/badge/Shell-Zsh-89e051?logo=zsh&logoColor=white)](https://www.zsh.org/)
-[![Test Status](https://github.com/blackwell-systems/blackdot/workflows/Test%20Dotfiles/badge.svg)](https://github.com/blackwell-systems/blackdot/actions)
+[![Test Status](https://github.com/blackwell-systems/blackdot/workflows/Test%20Blackdot/badge.svg)](https://github.com/blackwell-systems/blackdot/actions)
 [![Tests](https://img.shields.io/badge/Tests-334-brightgreen)](../test/)
 [![Version](https://img.shields.io/github/v/release/blackwell-systems/blackdot)](https://github.com/blackwell-systems/blackdot/releases)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Buy%20Me%20a%20Coffee-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/blackwellsystems)
 
-> A dotfiles management framework built on **Feature Registry**, **Configuration Layers**, and **CLI Feature Awareness**. Multi-vault secrets, portable Claude Code sessions, machine-specific templates, and self-healing configuration.
+> Blackdot is a dotfiles management framework built on **Feature Registry**, **Configuration Layers**, and **CLI Feature Awareness**. Multi-vault secrets, portable Claude Code sessions, machine-specific templates, and self-healing configuration.
 
 [Changelog](../CHANGELOG.md) | [Quick Start Guide](../README.md)
 
-This is the comprehensive reference for the dotfiles framework. It covers the core systems (Feature Registry, Configuration Layers, CLI Feature Awareness), along with configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code**, and **multi-vault secret management** (Bitwarden, 1Password, pass) across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
+This is the comprehensive reference for Blackdot. It covers the core systems (Feature Registry, Configuration Layers, CLI Feature Awareness), along with configurations for **Zsh**, **Powerlevel10k**, **Homebrew**, **Claude Code**, and **multi-vault secret management** (Bitwarden, 1Password, pass) across **macOS**, **Windows**, **WSL2**, **Lima**, and **Linux**.
 
 ---
 
@@ -33,7 +33,7 @@ This is the comprehensive reference for the dotfiles framework. It covers the co
   - [Interactive Mode](#interactive-mode)
 - [Bootstrapping macOS from Scratch](#bootstrapping-macos-from-scratch)
 - [Bootstrapping Lima / Linux Guest](#bootstrapping-lima--linux-guest)
-- [Dotfiles Bootstrap Details](#dotfiles-bootstrap-details)
+- [Blackdot Bootstrap Details](#blackdot-bootstrap-details)
 - [Homebrew & Brewfile](#homebrew--brewfile)
 - [Vault System Bootstrap](#vault-system-bootstrap)
 - [Restoring from Vault on Any Machine](#restoring-from-vault-on-any-machine)
@@ -45,7 +45,7 @@ This is the comprehensive reference for the dotfiles framework. It covers the co
 - [Syncing Local Changes to Vault](#syncing-local-changes-to-vault)
 - [Maintenance Checklists](#maintenance-checklists)
 - [Backup System](#backup-system)
-- [Using the Dotfiles Day-to-Day](#using-the-dotfiles-day-to-day)
+- [Using Blackdot Day-to-Day](#using-blackdot-day-to-day)
 - [Health Check](#health-check)
   - [The blackdot Command](#the-blackdot-command)
   - [Custom Doctor Checks (Hooks)](#custom-doctor-checks)
@@ -113,7 +113,7 @@ blackdot doctor
 After bootstrap, **always** use `/workspace` paths:
 
 ```bash
-cd /workspace/dotfiles  # ✅ Portable sessions
+cd /workspace/blackdot  # ✅ Portable sessions
 claude                  # Same session on ALL machines
 
 cd ~/workspace/blackdot # ❌ Non-portable (different paths per OS)
@@ -165,7 +165,7 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 │       └── shell.go                    # Shell-init generation
 │
 ├── bin/                                # Compiled binaries
-│   └── dotfiles-go                     # Go CLI binary (symlinked to ~/bin/blackdot)
+│   └── blackdot                        # Go CLI binary (symlinked to ~/bin/blackdot)
 │
 ├── lib/                                # Minimal shell helpers (3 files only)
 │   ├── _colors.sh                      # Color output functions
@@ -175,7 +175,7 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 ├── bootstrap/                          # Platform bootstrap scripts
 │   ├── bootstrap-mac.sh                # macOS-specific bootstrap
 │   ├── bootstrap-linux.sh              # Linux-specific bootstrap
-│   ├── bootstrap-dotfiles.sh           # Shared symlink bootstrap
+│   ├── bootstrap-blackdot.sh           # Shared symlink bootstrap
 │   └── _common.sh                      # Shared bootstrap functions
 │
 ├── powershell/                         # PowerShell module for Windows
@@ -262,12 +262,12 @@ Unix/Linux/macOS:
 ~/.config/ghostty/config → ~/workspace/blackdot/ghostty/config (symlink)
 ~/.config/zellij/        → ~/workspace/blackdot/zellij/ (symlink)
 ~/.claude/               → ~/workspace/.claude/ (symlink)
-~/bin/blackdot           → ~/workspace/blackdot/bin/dotfiles-go (symlink in PATH)
+~/bin/blackdot           → ~/workspace/blackdot/bin/blackdot (symlink in PATH)
 
 Windows (PowerShell):
 $PROFILE                 → Module auto-import (Import-Module Blackdot)
 ~/.claude/               → ~/workspace/.claude/ (junction/symlink)
-~/bin/blackdot.exe       → ~/workspace/blackdot/bin/dotfiles-go.exe (in PATH)
+~/bin/blackdot.exe       → ~/workspace/blackdot/bin/blackdot.exe (in PATH)
 ```
 
 </details>
@@ -293,7 +293,7 @@ Key pieces:
 
 ## Multi-Platform Architecture
 
-This dotfiles system is designed for extensibility across multiple platforms with **90% shared code**.
+Blackdot is designed for extensibility across multiple platforms with **90% shared code**.
 
 ### Currently Supported Platforms
 
@@ -383,8 +383,8 @@ sudo pacman -Syu --noconfirm git zsh curl base-devel
 # 3. SHARED: Use same Brewfile
 brew bundle --file="$BLACKDOT_DIR/Brewfile"
 
-# 4. SHARED: Use same dotfiles bootstrap
-"$BLACKDOT_DIR/bootstrap-dotfiles.sh"
+# 4. SHARED: Use same blackdot bootstrap
+"$BLACKDOT_DIR/bootstrap-blackdot.sh"
 
 # 5. Set shell to zsh
 chsh -s $(command -v zsh)
@@ -420,7 +420,7 @@ esac
 
 ### Why This Architecture Matters
 
-**Portability**: Use the same dotfiles across:
+**Portability**: Use the same configuration across:
 - Work and personal machines (macOS/Linux)
 - Development VMs (Lima/WSL)
 - CI/CD containers (Docker)
@@ -460,7 +460,7 @@ Lima mounts the macOS home directory into the VM. With `~/workspace` as the cano
 
 This enables:
 - Edit code on macOS, run tests in Lima
-- Same dotfiles repo accessible from both platforms
+- Same blackdot repo accessible from both platforms
 - Claude Code shares state via `~/.claude → ~/workspace/.claude`
 
 ### 3. Organizational Structure
@@ -477,7 +477,7 @@ graph LR
     end
 
     subgraph work["Work Files"]
-        dotfiles["dotfiles/"]
+        blackdot["blackdot/"]
         code["code/"]
         docs["whitepapers/"]
     end
@@ -489,13 +489,13 @@ graph LR
     style state fill:#2c5282,stroke:#4299e1,color:#e2e8f0
     style work fill:#1a365d,stroke:#2c5282,color:#e2e8f0
     style claude fill:#2f855a,stroke:#48bb78,color:#e2e8f0
-    style dotfiles fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style blackdot fill:#2c5282,stroke:#4299e1,color:#e2e8f0
 ```
 
 **Structure breakdown:**
 - **Shared State**: `.claude/` (Claude sessions), `.zsh_history` (shell history)
-- **Work Files**: `dotfiles/` (this repo), `code/` (projects), `whitepapers/` (docs)
-- **Navigation**: `cws` → workspace, `ccode` → code/, `blackdot` → dotfiles/
+- **Work Files**: `blackdot/` (this repo), `code/` (projects), `whitepapers/` (docs)
+- **Navigation**: `cws` → workspace, `ccode` → code/, `blackdot` → blackdot/
 
 **Shared shell history**: Command history is stored in `~/workspace/.zsh_history` and syncs between macOS and Lima sessions.
 
@@ -520,13 +520,13 @@ alias cws='cd "$WORKSPACE"'
 
 ### 5. Claude Code Session Portability (`/workspace`) 🌟
 
-**This is a key innovation that sets this dotfiles system apart.**
+**This is a key innovation that sets Blackdot apart.**
 
 #### The Challenge
 Claude Code stores sessions based on your working directory path:
-- macOS: `/Users/username/workspace/dotfiles` → session `-Users-username-workspace-dotfiles-`
-- Lima: `/home/username.linux/workspace/dotfiles` → session `-home-username.linux-workspace-dotfiles-`
-- WSL: `/home/username/workspace/dotfiles` → session `-home-username-workspace-dotfiles-`
+- macOS: `/Users/username/workspace/blackdot` → session `-Users-username-workspace-blackdot-`
+- Lima: `/home/username.linux/workspace/blackdot` → session `-home-username.linux-workspace-blackdot-`
+- WSL: `/home/username/workspace/blackdot` → session `-home-username-workspace-blackdot-`
 
 Even with the same files (via Lima mount or git sync), **different absolute paths = different session folders = lost conversation history** when switching machines.
 
@@ -542,23 +542,23 @@ Bootstrap creates a **platform-independent symlink**:
 The target directory is configurable - set `WORKSPACE_TARGET=~/code` before install, or configure via the setup wizard. The `/workspace` symlink name stays constant for portability.
 
 This symlink resolves to the correct home directory on each platform but provides a **canonical absolute path**:
-- macOS: `/workspace/dotfiles` (symlink resolves to `/Users/username/workspace/dotfiles`)
-- Lima: `/workspace/dotfiles` (symlink resolves to `/home/username.linux/workspace/dotfiles`)
-- WSL: `/workspace/dotfiles` (symlink resolves to `/home/username/workspace/dotfiles`)
+- macOS: `/workspace/blackdot` (symlink resolves to `/Users/username/workspace/blackdot`)
+- Lima: `/workspace/blackdot` (symlink resolves to `/home/username.linux/workspace/blackdot`)
+- WSL: `/workspace/blackdot` (symlink resolves to `/home/username/workspace/blackdot`)
 
 #### The Result
-Claude Code sees **the same path** (`/workspace/dotfiles`) on all platforms:
+Claude Code sees **the same path** (`/workspace/blackdot`) on all platforms:
 
 ```bash
 # On macOS
-cd /workspace/dotfiles
+cd /workspace/blackdot
 claude
-# Session stored in: ~/.claude/projects/-workspace-dotfiles-/
+# Session stored in: ~/.claude/projects/-workspace-blackdot-/
 
 # On Lima (same session!)
-cd /workspace/dotfiles
+cd /workspace/blackdot
 claude
-# Session stored in: ~/.claude/projects/-workspace-dotfiles-/
+# Session stored in: ~/.claude/projects/-workspace-blackdot-/
 # ✅ Conversation history continues from macOS!
 ```
 
@@ -570,11 +570,11 @@ claude
 
 # ✅ Start on macOS, continue on Lima
 # macOS:
-cd /workspace/dotfiles && claude
+cd /workspace/blackdot && claude
 # ... work, exit ...
 
 # Lima (same conversation):
-cd /workspace/dotfiles && claude
+cd /workspace/blackdot && claude
 # Your conversation history is preserved!
 
 # ❌ DON'T use ~/workspace (non-portable)
@@ -589,7 +589,7 @@ claude                    # New session every time
 For profile management, this system integrates with [dotclaude](https://github.com/blackwell-systems/dotclaude):
 
 - **dotclaude**: Manages Claude profiles (CLAUDE.md, agents, settings.json)
-- **dotfiles**: Manages secrets (SSH, AWS, Git), shell, and `/workspace` paths
+- **blackdot**: Manages secrets (SSH, AWS, Git), shell, and `/workspace` paths
 
 Both systems coordinate seamlessly:
 
@@ -606,7 +606,7 @@ cd /workspace/my-project && claude
 
 **Division of responsibilities:**
 - dotclaude handles Claude configuration per context (OSS, work, client)
-- dotfiles handles secrets and cross-platform consistency
+- blackdot handles secrets and cross-platform consistency
 - Both use `/workspace` paths for session portability
 
 See [DOTCLAUDE-INTEGRATION.md](DOTCLAUDE-INTEGRATION.md) for complete integration guide.
@@ -627,7 +627,7 @@ flowchart TB
 
     subgraph shared["Shared: ~/workspace/ Content"]
         direction LR
-        dotfiles["dotfiles/"]
+        blackdot["blackdot/"]
         code["code/"]
         claude[".claude/"]
     end
@@ -652,7 +652,7 @@ flowchart TB
 **Key concept:**
 - **Host & Guest** share `~/workspace/` (mounted/synced)
 - **Secrets** (.ssh, .aws, .gitconfig) are per-machine, synced via vault
-- **`/workspace` symlink** ensures identical paths: `cd /workspace/dotfiles` works everywhere
+- **`/workspace` symlink** ensures identical paths: `cd /workspace/blackdot` works everywhere
 - **Claude Code sessions** are portable across machines via shared `.claude/` state
 
 ### Why This Matters
@@ -712,11 +712,11 @@ Most tools are installed automatically via Homebrew after the basic bootstrap is
 
 There are two big pillars:
 
-1. **Dotfiles / Shell bootstrap**
+1. **Blackdot / Shell bootstrap**
 
    Handled by:
 
-   - `bootstrap-dotfiles.sh`
+   - `bootstrap-blackdot.sh`
    - `bootstrap-mac.sh`
    - `bootstrap-linux.sh`
 
@@ -880,7 +880,7 @@ flowchart LR
         profiles["Claude Profiles<br/>• CLAUDE.md<br/>• agents/<br/>• settings.json"]
     end
 
-    subgraph dotfiles["dotfiles System"]
+    subgraph blackdotsys["Blackdot System"]
         secrets["Secrets<br/>• SSH keys<br/>• AWS creds<br/>• Git config"]
         shell["Shell & Tools<br/>• Zsh<br/>• Brewfile"]
     end
@@ -896,14 +896,14 @@ flowchart LR
     claude_dir --> workspace
 
     style dotclaude fill:#8A2BE2,stroke:#9333EA,color:#e2e8f0
-    style dotfiles fill:#2c5282,stroke:#4299e1,color:#e2e8f0
+    style blackdot fill:#2c5282,stroke:#4299e1,color:#e2e8f0
     style shared fill:#22543d,stroke:#2f855a,color:#e2e8f0
     style workspace fill:#2f855a,stroke:#48bb78,color:#e2e8f0
 ```
 
 **How they work together:**
 - **dotclaude**: Manages Claude configuration per context (OSS, client, work)
-- **dotfiles**: Manages secrets and cross-platform consistency
+- **blackdot**: Manages secrets and cross-platform consistency
 - **Both**: Use `/workspace` for session portability across machines
 
 See [DOTCLAUDE-INTEGRATION.md](DOTCLAUDE-INTEGRATION.md) for complete integration guide.
@@ -919,7 +919,7 @@ mkdir -p ~/workspace
 cd ~/workspace
 ```
 
-2. **Clone dotfiles repo**
+2. **Clone blackdot repo**
 
 ```bash
 git clone git@github.com:blackwell-systems/blackdot.git
@@ -943,7 +943,7 @@ Typical responsibilities of `bootstrap-mac.sh`:
   brew bundle --file="$BLACKDOT_DIR/Brewfile"
   ```
 
-- Run `bootstrap-dotfiles.sh` to create symlinks:
+- Run `bootstrap-blackdot.sh` to create symlinks:
 
   - `~/.zshrc    → ~/workspace/blackdot/zsh/zshrc`  
   - `~/.p10k.zsh → ~/workspace/blackdot/zsh/p10k.zsh`  
@@ -984,7 +984,7 @@ Typical responsibilities of `bootstrap-linux.sh`:
 - Install **Linuxbrew** if missing.  
 - Ensure `brew` is on `PATH`.  
 - Run the **same Brewfile** used by macOS.  
-- Call `bootstrap-dotfiles.sh` to symlink everything, including:
+- Call `bootstrap-blackdot.sh` to symlink everything, including:
 
   - `~/.claude → ~/workspace/.claude`
   - shared Zsh files
@@ -994,16 +994,16 @@ Typical responsibilities of `bootstrap-linux.sh`:
 
 ---
 
-## Dotfiles Bootstrap Details
+## Blackdot Bootstrap Details
 
-### `bootstrap-dotfiles.sh`
+### `bootstrap-blackdot.sh`
 
 This file creates all unified symlinks:
 
-- `~/.zshrc    -> $BLACKDOT_DIR/zsh/zshrc`  
-- `~/.p10k.zsh -> $BLACKDOT_DIR/zsh/p10k.zsh`  
-- Ghostty config (macOS only)  
-- **Claude setup**: Creates `~/workspace/.claude`, symlinks `~/.claude` to it, and links config files from `dotfiles/claude/`
+- `~/.zshrc    -> $BLACKDOT_DIR/zsh/zshrc`
+- `~/.p10k.zsh -> $BLACKDOT_DIR/zsh/p10k.zsh`
+- Ghostty config (macOS only)
+- **Claude setup**: Creates `~/workspace/.claude`, symlinks `~/.claude` to it, and links config files from `blackdot/claude/`
 
 This ensures Claude CLI sees a *shared* workspace on both platforms.
 
@@ -1246,7 +1246,7 @@ See [Vault README](vault-README.md#configuration-file) for the full schema and c
 
 ## Restoring from Vault on Any Machine
 
-Once the dotfiles are in place and your vault CLI is installed:
+Once blackdot is in place and your vault CLI is installed:
 
 1. **Login to your vault**
 
@@ -1776,7 +1776,7 @@ blackdot vault push --all
 
 ### Security Maintenance
 
-Regular security maintenance schedule to keep your dotfiles and credentials secure:
+Regular security maintenance schedule to keep your Blackdot configuration and credentials secure:
 
 **Annual Tasks:**
 - [ ] **Rotate SSH keys** - Generate new SSH key pairs and update vault
@@ -1800,8 +1800,8 @@ Regular security maintenance schedule to keep your dotfiles and credentials secu
   - Verify all required items exist
 
 **Monthly Tasks:**
-- [ ] **Check for dotfiles updates** - Keep dotfiles current with latest improvements
-  - Run: `dotfiles-upgrade` or `git pull && ./bootstrap/bootstrap-*.sh`
+- [ ] **Check for blackdot updates** - Keep blackdot current with latest improvements
+  - Run: `blackdot upgrade` or `git pull && ./bootstrap/bootstrap-*.sh`
   - Review CHANGELOG.md for breaking changes
 - [ ] **Run health check with drift detection** - Ensure local files match vault
   - Run: `blackdot drift`
@@ -1826,7 +1826,7 @@ Complete checklist when adding a new SSH identity:
 - [ ] Update `~/.ssh/config` with Host entry
 - [ ] Sync SSH config: `blackdot vault push SSH-Config`
 - [ ] Update `zsh/zshrc` - add `_ssh_add_if_missing` line (optional, for ssh-agent)
-- [ ] Commit dotfiles changes
+- [ ] Commit blackdot changes
 
 ### Updating AWS Credentials
 
@@ -1857,7 +1857,7 @@ When AWS credentials or config change:
 
 Complete checklist for a fresh machine:
 
-1. [ ] Clone dotfiles: `git clone ... ~/workspace/blackdot`
+1. [ ] Clone blackdot: `git clone ... ~/workspace/blackdot`
 2. [ ] Run bootstrap: `./bootstrap/bootstrap-mac.sh` or `./bootstrap/bootstrap-linux.sh`
 3. [ ] Login to vault: `bw login` / `op signin` / (pass uses GPG)
 4. [ ] Validate vault items: `blackdot vault check`
@@ -1869,7 +1869,7 @@ Complete checklist for a fresh machine:
 
 ## Backup System
 
-The dotfiles system includes automatic backup and restore functionality to protect your configuration files.
+Blackdot includes automatic backup and restore functionality to protect your configuration files.
 
 ### Creating Backups
 
@@ -2035,7 +2035,7 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 - `blackdot backup` → Create timestamped backup of config files
 - `blackdot backup --list` → List available backups
 - `blackdot backup restore` → Restore from backup (interactive)
-- `blackdot upgrade` → Pull latest dotfiles and run bootstrap
+- `blackdot upgrade` → Pull latest blackdot and run bootstrap
 - `blackdot lint` → Validate shell config syntax
 - `blackdot lint --fix` → Auto-fix script permissions
 - `blackdot packages` → Check Brewfile package status
@@ -2044,7 +2044,7 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 - `blackdot template vars` → List template variables and values
 - `blackdot template render` → Generate configs from templates
 - `blackdot template link` → Symlink generated files to destinations
-- `blackdot cd` → Navigate to dotfiles directory
+- `blackdot cd` → Navigate to blackdot directory
 - `blackdot edit` → Open in editor
 - `status` → Quick dashboard showing symlinks, SSH, AWS, Lima status
 
@@ -2229,7 +2229,7 @@ source ~/.local/load-env.sh
 
 ### The `blackdot` Command
 
-The recommended way to manage and check your dotfiles:
+The recommended way to manage and check your Blackdot configuration:
 
 ```bash
 blackdot status          # Quick visual dashboard (color-coded)
@@ -2259,14 +2259,14 @@ blackdot encrypt list    # List encrypted/unencrypted sensitive files
 blackdot encrypt status  # Show encryption status and key info
 blackdot encrypt push-key # Backup private key to vault
 blackdot upgrade         # Pull latest, run bootstrap, verify
-blackdot cd              # Navigate to dotfiles directory
-blackdot edit            # Open dotfiles in $EDITOR
+blackdot cd              # Navigate to blackdot directory
+blackdot edit            # Open blackdot in $EDITOR
 blackdot help            # Show all commands
 ```
 
 ### File Encryption (Age)
 
-The dotfiles system includes file encryption using [age](https://github.com/FiloSottile/age) for securing sensitive configuration files that shouldn't be stored in plain text.
+Blackdot includes file encryption using [age](https://github.com/FiloSottile/age) for securing sensitive configuration files that shouldn't be stored in plain text.
 
 **Setup:**
 
@@ -2317,7 +2317,7 @@ blackdot encrypt list
 
 ### Health Check Details
 
-Run the health check to verify your dotfiles installation:
+Run the health check to verify your blackdot installation:
 
 ```bash
 blackdot doctor          # Recommended
@@ -2375,7 +2375,7 @@ This checks if your local `~/.ssh/config`, `~/.aws/config`, `~/.gitconfig`, etc.
 The shell automatically checks for drift when you open a new terminal. This uses a fast, local-only comparison (<50ms) that doesn't require vault authentication.
 
 **How it works:**
-1. After `blackdot vault pull`, file checksums are saved to `~/.cache/dotfiles/vault-state.json`
+1. After `blackdot vault pull`, file checksums are saved to `~/.cache/blackdot/vault-state.json`
 2. On every shell startup, local files are compared against cached checksums
 3. If differences are detected, you'll see a warning:
 
@@ -2487,7 +2487,7 @@ Use this after initial setup or when debugging issues.
 
 ## Metrics & Observability
 
-The dotfiles now include comprehensive metrics collection to track health over time.
+Blackdot includes comprehensive metrics collection to track health over time.
 
 ### Automatic Metrics Collection
 
@@ -2509,7 +2509,7 @@ Every time you run `blackdot doctor`, metrics are automatically recorded to `~/.
 
 ### Viewing Metrics
 
-Use the `show-metrics.sh` script to visualize your dotfiles health:
+Use the `show-metrics.sh` script to visualize your Blackdot health:
 
 ```bash
 # Summary view (default)
@@ -2568,7 +2568,7 @@ blackdot doctor --fix && show-metrics.sh
 
 ## Docker Test Environments
 
-Test dotfiles in isolated containers before installing on your system. Four container sizes are available depending on your testing needs:
+Test Blackdot in isolated containers before installing on your system. Four container sizes are available depending on your testing needs:
 
 | Container | Base | Size | Use Case |
 |-----------|------|------|----------|
@@ -2581,8 +2581,8 @@ Test dotfiles in isolated containers before installing on your system. Four cont
 
 ```bash
 # Build and run lite container
-docker build -f Dockerfile.lite -t dotfiles-lite .
-docker run -it --rm dotfiles-lite
+docker build -f Dockerfile.lite -t blackdot-lite .
+docker run -it --rm blackdot-lite
 
 # Inside container
 blackdot status
@@ -2607,7 +2607,7 @@ See [Docker Guide](docker.md) for complete container details and testing workflo
 
 ## CI/CD & Testing
 
-The dotfiles repository includes comprehensive automated testing via GitHub Actions.
+The Blackdot repository includes comprehensive automated testing via GitHub Actions.
 
 ### Continuous Integration
 
@@ -2627,7 +2627,7 @@ Every push and pull request triggers automated tests:
 Location: `.github/workflows/test.yml`
 
 ```yaml
-name: Test Dotfiles
+name: Test Blackdot
 on: [push, pull_request]
 
 jobs:
@@ -2636,7 +2636,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run shellcheck
-        run: shellcheck bootstrap-*.sh vault/*.sh dotfiles-*.sh
+        run: shellcheck bootstrap/*.sh lib/*.sh
   # ... more jobs
 ```
 
@@ -2669,7 +2669,7 @@ shellcheck bootstrap/*.sh lib/*.sh zsh/zsh.d/*.zsh
 Add to your forked README:
 
 ```markdown
-![Test Status](https://github.com/blackwell-systems/blackdot/workflows/Test%20Dotfiles/badge.svg)
+![Test Status](https://github.com/blackwell-systems/blackdot/workflows/Test%20Blackdot/badge.svg)
 ```
 
 ---
@@ -2688,7 +2688,7 @@ ls -ld ~/.claude
 If not, rerun:
 
 ```bash
-~/workspace/blackdot/bootstrap-dotfiles.sh
+~/workspace/blackdot/bootstrap/bootstrap-blackdot.sh
 ```
 
 ### Vault CLI issues
@@ -2826,7 +2826,7 @@ ls -la ~/.zshrc ~/.p10k.zsh
 
 # Remove and recreate
 rm ~/.zshrc ~/.p10k.zsh
-~/workspace/blackdot/bootstrap-dotfiles.sh
+~/workspace/blackdot/bootstrap/bootstrap-blackdot.sh
 ```
 
 ### Environment secrets not loading
@@ -2849,4 +2849,4 @@ blackdot vault pull
 
 This repository is licensed under the **Apache License 2.0**.
 
-By following this guide, you can fully restore your **dotfiles**, **SSH keys**, **AWS configuration**, **packages via Brewfile**, **Claude workspace**, and **environment secrets** across macOS, Windows, and Linux in a reproducible, vault-backed, fully unified way.
+By following this guide, you can fully restore your **Blackdot configuration**, **SSH keys**, **AWS configuration**, **packages via Brewfile**, **Claude workspace**, and **environment secrets** across macOS, Windows, and Linux in a reproducible, vault-backed, fully unified way.

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$comment": "Copy to ~/.config/dotfiles/vault-items.json and customize",
+  "$comment": "Copy to ~/.config/blackdot/vault-items.json and customize",
 
   "ssh_keys": {
     "SSH-GitHub": "~/.ssh/id_ed25519_github",
@@ -44,10 +44,10 @@
       "type": "file"
     },
     "Template-Variables": {
-      "path": "~/.config/dotfiles/template-variables.sh",
+      "path": "~/.config/blackdot/template-variables.sh",
       "required": false,
       "type": "file",
-      "description": "Machine-specific template variables for dotfiles template system"
+      "description": "Machine-specific template variables for blackdot template system"
     }
   },
 
@@ -58,7 +58,7 @@
     "Git-Config": "~/.gitconfig",
     "Environment-Secrets": "~/.local/env.secrets",
     "Claude-Profiles": "~/.claude/profiles.json",
-    "Template-Variables": "~/.config/dotfiles/template-variables.sh"
+    "Template-Variables": "~/.config/blackdot/template-variables.sh"
   },
 
   "aws_expected_profiles": [

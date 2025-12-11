@@ -98,7 +98,7 @@ jobs:
           CGO_ENABLED: 0
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          BINARY_NAME="dotfiles-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}"
+          BINARY_NAME="blackdot-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}"
 
           go build -ldflags="-s -w -X main.version=${VERSION} -X main.commit=${GITHUB_SHA::8} -X main.date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             -o "dist/${BINARY_NAME}" \
@@ -179,9 +179,9 @@ jobs:
           echo "" >> release_notes.md
           echo "## Documentation" >> release_notes.md
           echo "" >> release_notes.md
-          echo "- [Full Documentation](https://blackwell-systems.github.io/dotfiles/)" >> release_notes.md
-          echo "- [Architecture](https://blackwell-systems.github.io/dotfiles/#/architecture)" >> release_notes.md
-          echo "- [Troubleshooting](https://blackwell-systems.github.io/dotfiles/#/troubleshooting)" >> release_notes.md
+          echo "- [Full Documentation](https://blackwell-systems.github.io/blackdot/)" >> release_notes.md
+          echo "- [Architecture](https://blackwell-systems.github.io/blackdot/#/architecture)" >> release_notes.md
+          echo "- [Troubleshooting](https://blackwell-systems.github.io/blackdot/#/troubleshooting)" >> release_notes.md
 
           cat release_notes.md
 
@@ -191,20 +191,20 @@ jobs:
 
           # Create a clean archive excluding development files
           git archive --format=tar.gz \
-            --prefix=dotfiles-${VERSION#v}/ \
-            -o dotfiles-${VERSION#v}.tar.gz \
+            --prefix=blackdot-${VERSION#v}/ \
+            -o blackdot-${VERSION#v}.tar.gz \
             HEAD
 
           # Create zip as well
           git archive --format=zip \
-            --prefix=dotfiles-${VERSION#v}/ \
-            -o dotfiles-${VERSION#v}.zip \
+            --prefix=blackdot-${VERSION#v}/ \
+            -o blackdot-${VERSION#v}.zip \
             HEAD
 
           # Create combined checksums file
           echo "# Source Archives" > SHA256SUMS.txt
-          sha256sum dotfiles-${VERSION#v}.tar.gz >> SHA256SUMS.txt
-          sha256sum dotfiles-${VERSION#v}.zip >> SHA256SUMS.txt
+          sha256sum blackdot-${VERSION#v}.tar.gz >> SHA256SUMS.txt
+          sha256sum blackdot-${VERSION#v}.zip >> SHA256SUMS.txt
           echo "" >> SHA256SUMS.txt
           echo "# Go Binaries" >> SHA256SUMS.txt
           cat binaries/*.sha256 >> SHA256SUMS.txt
@@ -219,9 +219,9 @@ jobs:
           draft: false
           prerelease: ${{ contains(steps.version.outputs.version, '-') }}
           files: |
-            dotfiles-*.tar.gz
-            dotfiles-*.zip
-            binaries/dotfiles-*
+            blackdot-*.tar.gz
+            blackdot-*.zip
+            binaries/blackdot-*
             SHA256SUMS.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
