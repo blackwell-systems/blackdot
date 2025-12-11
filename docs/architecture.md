@@ -104,7 +104,7 @@ Priority (highest to lowest):
 ┌─────────────────────────────────────────────────┐
 │ 1. Environment Variables   (session-specific)   │
 ├─────────────────────────────────────────────────┤
-│ 2. Project Config          (.dotfiles.local)    │
+│ 2. Project Config          (.blackdot.local)    │
 ├─────────────────────────────────────────────────┤
 │ 3. Machine Config          (machine.json)       │
 ├─────────────────────────────────────────────────┤
@@ -549,7 +549,7 @@ Each vault item follows a consistent schema:
 
 ```json
 {
-  "name": "dotfiles-item-name",
+  "name": "blackdot-item-name",
   "type": 2,
   "notes": "item content here",
   "fields": [

@@ -318,7 +318,7 @@ Blackdot is designed for extensibility across multiple platforms with **90% shar
 flowchart TB
     platform["<b>Platform-Specific Bootstrap</b><br/>(10% of code)<br/>━━━━━━━━━━━━━━━━━━━━━<br/>• Package manager setup (apt/brew/winget)<br/>• System-specific configuration<br/>• GUI tool installation"]
 
-    shared["<b>Shared Dotfiles Layer</b><br/>(90% of code)<br/>━━━━━━━━━━━━━━━━━━━━━<br/>• Go CLI (blackdot commands)<br/>• Shell integration (Zsh/PowerShell)<br/>• Vault system (vaultmux)<br/>• Health checks & metrics<br/>• Feature Registry"]
+    shared["<b>Shared Blackdot Layer</b><br/>(90% of code)<br/>━━━━━━━━━━━━━━━━━━━━━<br/>• Go CLI (blackdot commands)<br/>• Shell integration (Zsh/PowerShell)<br/>• Vault system (vaultmux)<br/>• Health checks & metrics<br/>• Feature Registry"]
 
     platform --> shared
 
@@ -597,7 +597,7 @@ Both systems coordinate seamlessly:
 # Switch Claude context with dotclaude
 dotclaude activate client-work
 
-# Secrets managed by dotfiles
+# Secrets managed by blackdot
 blackdot vault pull client-*
 
 # Both respect /workspace for portable sessions
@@ -1932,7 +1932,7 @@ Configure in `~/.config/blackdot/config.json`:
 
 ---
 
-## Using the Dotfiles Day-to-Day
+## Using Blackdot Day-to-Day
 
 ### Aliases (defined in zshrc)
 
@@ -2026,7 +2026,7 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 - `blackdot vault validate` → Validate vault item schema
 - Supports Bitwarden (default), 1Password, and pass backends
 
-**Dotfiles Management:**
+**Blackdot Management:**
 
 - `blackdot status` → Visual dashboard
 - `blackdot sync` → Smart bidirectional vault sync (shortcut for `blackdot vault sync`)
@@ -2434,7 +2434,7 @@ blackdot sync --force-vault   # Pull vault changes, overwrite local
 **Example sync output:**
 
 ```
-=== Dotfiles Sync ===
+=== Blackdot Sync ===
 Syncing 6 items with Bitwarden
 
 --- Git-Config ---
@@ -2525,7 +2525,7 @@ Use the `show-metrics.sh` script to visualize your Blackdot health:
 Example output:
 
 ```
-=== Dotfiles Health Metrics Summary ===
+=== Blackdot Health Metrics Summary ===
 
 Total health checks: 47
 

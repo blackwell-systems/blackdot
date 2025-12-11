@@ -1,6 +1,6 @@
 # Claude Code Integration
 
-> **The first dotfiles designed for AI-assisted development.**
+> **The first configuration framework designed for AI-assisted development.**
 
 This repository includes native Claude Code integration for portable sessions across machines.
 
@@ -240,7 +240,7 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
 
 ```
 ┌─────────────────────────────────┐     ┌─────────────────────────────────┐
-│           dotfiles              │     │           dotclaude             │
+│           blackdot              │     │           dotclaude             │
 │  (shell config, secrets, etc)   │     │   (Claude profile management)   │
 ├─────────────────────────────────┤     ├─────────────────────────────────┤
 │                                 │     │                                 │

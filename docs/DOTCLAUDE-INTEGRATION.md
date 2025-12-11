@@ -421,7 +421,7 @@ git push
 # Safe: No secrets, only Claude configuration
 ```
 
-Dotfiles vault items stay private in your vault.
+Blackdot vault items stay private in your vault.
 
 ### Machine-Specific Secrets
 
