@@ -131,11 +131,11 @@ echo "Checking repository structure..."
 
 REQUIRED_FILES=(
     "README.md"
-    "Brewfile"
+    "brew/Brewfile"
     ".gitignore"
-    "bootstrap-mac.sh"
-    "bootstrap-linux.sh"
-    "bootstrap-dotfiles.sh"
+    "bootstrap/bootstrap-macos.sh"
+    "bootstrap/bootstrap-linux.sh"
+    "bootstrap/bootstrap-blackdot.sh"
 )
 
 MISSING_FILES=0
