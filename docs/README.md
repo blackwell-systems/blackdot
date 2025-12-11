@@ -29,7 +29,6 @@
 | [Developer Tools](developer-tools.md) | AWS, CDK, Rust, Go, NVM, SDKMAN integrations |
 | [Hook System](hooks.md) | Lifecycle hooks for custom behavior |
 | [CLI Reference](cli-reference.md) | All commands, flags & environment variables |
-| [Full Documentation](README-FULL.md) | Complete 1,900+ line guide |
 | [Template System](templates.md) | Machine-specific configuration |
 | [State Management](state-management.md) | Setup wizard state, resume & preferences |
 | [Vault System](vault-README.md) | Multi-backend secret management |
@@ -229,7 +228,7 @@ blackdot status
 >
 > **Skip if:** You only use one machine or don't use Claude Code (`SKIP_WORKSPACE_SYMLINK=true`)
 >
-> [Learn more](README-FULL.md#canonical-workspace-workspace)
+> [Learn more](architecture.md#workspace-architecture)
 
 **Don't use a vault?** The wizard lets you skip vault setup entirely.
 
@@ -297,13 +296,13 @@ blackdot/
 └── docs/                # This documentation site
 ```
 
-See [Full Documentation](README-FULL.md) for complete project structure and details.
+See [Architecture](architecture.md) for complete system design and platform support.
 
 ---
 
 ## Next Steps
 
-- **[Full Documentation](README-FULL.md)** – Complete guide with all details
+- **[Architecture](architecture.md)** – System design, platform support & workspace layout
 - **[Developer Tools](developer-tools.md)** – AWS, CDK, Rust, Go integrations & 70+ aliases
 - **[Claude Code + dotclaude](claude-code.md)** – Portable sessions, profiles & safety hooks
 - **[Template System](templates.md)** – Configure per-machine settings
@@ -319,4 +318,4 @@ See [Full Documentation](README-FULL.md) for complete project structure and deta
 
 ---
 
-**Questions?** [Open an issue](https://github.com/blackwell-systems/blackdot/issues) or check the [full documentation](README-FULL.md).
+**Questions?** [Open an issue](https://github.com/blackwell-systems/blackdot/issues) or check the [CLI reference](cli-reference.md).

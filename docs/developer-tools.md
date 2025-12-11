@@ -730,4 +730,4 @@ This file is sourced after the standard aliases, so you can override defaults.
 
 - [Feature Registry](features.md) - Enable/disable tool integrations
 - [CLI Reference](cli-reference.md) - All dotfiles commands
-- [Full Documentation](README-FULL.md) - Complete guide
+- [Architecture](architecture.md) - Complete guide

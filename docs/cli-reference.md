@@ -2287,7 +2287,7 @@ Notes stored in `~/workspace/.notes.md`.
 
 ## See Also
 
-- [Full Documentation](README-FULL.md) - Complete guide
+- [Architecture](architecture.md) - Complete guide
 - [Vault System](vault-README.md) - Multi-backend secret management
 - [Template System](templates.md) - Machine-specific configuration
 - [State Management](state-management.md) - Setup wizard state and resume
