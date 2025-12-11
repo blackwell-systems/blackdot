@@ -1,6 +1,6 @@
 # Roadmap & Future Improvements
 
-This document outlines planned improvements and future work for the dotfiles system.
+This document outlines planned improvements and future work for the blackdot system.
 
 ---
 
@@ -10,20 +10,20 @@ This document outlines planned improvements and future work for the dotfiles sys
 
 **Status:** Concept - Not Started
 
-Create an MCP (Model Context Protocol) server that allows Claude Code to directly interact with dotfiles operations.
+Create an MCP (Model Context Protocol) server that allows Claude Code to directly interact with blackdot operations.
 
-**Why:** Currently, Claude interacts with dotfiles via shell commands. An MCP server would provide:
-- **Native tool integration** - Claude sees `dotfiles_health_check`, `dotfiles_vault_sync` as first-class tools
+**Why:** Currently, Claude interacts with blackdot via shell commands. An MCP server would provide:
+- **Native tool integration** - Claude sees `blackdot_health_check`, `blackdot_vault_sync` as first-class tools
 - **Structured responses** - JSON responses instead of parsing shell output
 - **Proactive actions** - Claude could auto-fix issues during coding sessions
 
 **Proposed MCP Tools:**
 ```typescript
-dotfiles_health_check()     // Returns structured health report
-dotfiles_status()           // Quick status with issues count
-dotfiles_vault_restore()    // Restore secrets (with drift check)
-dotfiles_vault_sync(item?)  // Sync specific or all items
-dotfiles_doctor_fix()       // Auto-repair issues
+blackdot_health_check()     // Returns structured health report
+blackdot_status()           // Quick status with issues count
+blackdot_vault_restore()    // Restore secrets (with drift check)
+blackdot_vault_sync(item?)  // Sync specific or all items
+blackdot_doctor_fix()       // Auto-repair issues
 ```
 
 **Related:** [MCP Protocol](https://modelcontextprotocol.io/)
@@ -284,7 +284,7 @@ blackdot aliases search <term>    # Search aliases by name or expansion
 The system is designed around `~/workspace/blackdot` as the canonical location:
 
 1. **`/workspace` symlink** enables Claude Code session portability
-2. **Install script** clones to `$HOME/workspace/dotfiles`
+2. **Install script** clones to `$HOME/workspace/blackdot`
 3. **Documentation** assumes this path
 
 This is intentional, not a limitation. The `/workspace` symlink is core to the portable sessions feature.
@@ -314,7 +314,7 @@ Rebrand from "dotfiles" to **blackdot** - a searchable, memorable name that repr
 ### Runtime Indicators
 Both shells now report their runtime:
 ```bash
-blackdot version     # → "dotfiles dev (Go CLI)" or "dotfiles dev (ZSH shell)"
+blackdot version     # → "blackdot dev (Go CLI)" or "blackdot dev (ZSH shell)"
 blackdot help        # → Shows "Runtime: Go CLI (dev)" or "Runtime: ZSH shell"
 ```
 

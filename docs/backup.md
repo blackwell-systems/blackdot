@@ -60,7 +60,7 @@ The manifest contains metadata:
     "hostname": "macbook-pro",
     "files_count": 8,
     "compressed": true,
-    "dotfiles_version": "abc1234"
+    "blackdot_version": "abc1234"
 }
 ```
 
@@ -238,7 +238,7 @@ blackdot backup restore
 
 ### Before Upgrades
 
-Backup before running dotfiles upgrade:
+Backup before running blackdot upgrade:
 
 ```bash
 blackdot backup
@@ -273,7 +273,7 @@ scp ~/.blackdot-backups/backup-*.tar.gz newmachine:~/.blackdot-backups/
 
 On new machine:
 ```bash
-# Install dotfiles
+# Install blackdot
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 
 # Create backup directory
@@ -419,7 +419,7 @@ backup-20241205-143022/
 ├── .local/
 │   └── env.secrets
 └── .config/
-    └── dotfiles/
+    └── blackdot/
         └── template-variables.sh
 ```
 
