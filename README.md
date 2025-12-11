@@ -38,7 +38,7 @@ irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-wi
 
 **Options:**
 ```bash
-# Minimal: Just shell config (skip Homebrew, vault, Claude, /workspace)
+# Minimal: Just shell config (skip packages, vault, Claude, /workspace)
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash -s -- --minimal
 
 # Custom workspace: Install to ~/code instead of ~/workspace
@@ -176,14 +176,14 @@ Next steps based on your configuration:
 ```
 
 **What you get:**
-- **Fully modular** - Everything optional except shell config. Use `--minimal` for just ZSH, or pick exactly what you need
-- **Tiered packages** - Choose minimal (18), enhanced (43), or full (61) - or skip with `--minimal`
+- **Fully modular** - Everything optional except shell config. Use `--minimal` for just shell, or pick exactly what you need
+- **Tiered packages** - Choose minimal, enhanced, or full (Homebrew on Unix, winget on Windows)
 - **Smart credential onboarding** - Detects existing SSH/AWS/Git, offers to vault them
 - **Smart bidirectional sync** - `blackdot sync` auto-detects push/pull direction per file
 - **Claude Code + dotclaude integration** - Profile sync, git safety hooks, portable sessions. Built for AI-assisted development
 - **Resume support** - Interrupted? Just run `blackdot setup` again
 
-**5-minute setup. Works on macOS, Linux, WSL2, Docker.**
+**5-minute setup. Works on macOS, Linux, Windows, WSL2, Docker.**
 
 ### Alternative: Try Before Installing
 
@@ -225,32 +225,38 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/dotclaude/main/in
 
 | Component | What It Does | How to Skip | Still Works Without It? |
 |-----------|--------------|-------------|-------------------------|
-| **Shell Config** | ZSH + plugins, prompt, aliases | **Cannot skip** (core) | N/A (required) |
-| **Homebrew + Packages** | 18-61 CLI tools (tier selection in wizard) | `--minimal` flag or select tier in wizard | Yes - install tools manually |
+| **Shell Config** | Zsh (Unix) or PowerShell (Windows) + plugins, prompt, aliases | **Cannot skip** (core) | N/A (required) |
+| **Packages** | CLI tools via Homebrew (Unix) or winget (Windows) | `--minimal` flag or select tier in wizard | Yes - install tools manually |
 | **Vault System** | Multi-backend secrets (Bitwarden/1Password/pass) | Select "Skip" in wizard or `--minimal` | Yes - manage secrets manually |
 | **Portable Sessions** | `/workspace` symlink for Claude sync | `SKIP_WORKSPACE_SYMLINK=true` | Yes - use OS-specific paths |
 | **Workspace Target** | Directory `/workspace` points to | `WORKSPACE_TARGET=~/code` | N/A (uses ~/workspace by default) |
 | **Claude Integration** | dotclaude + hooks + settings | `SKIP_CLAUDE_SETUP=true` or `--minimal` | Yes - works without Claude |
 | **Template Engine** | Machine-specific configs | Don't run `blackdot template` | Yes - use static configs |
 
-#### Brewfile Tiers (Choose Your Package Level)
+#### Package Tiers (Choose Your Level)
 
 The `blackdot setup` wizard presents three package tiers **interactively** with real-time counts:
 
 | Tier | Packages | Time | What's Included |
 |------|----------|------|-----------------|
-| **Minimal** | 18 packages | ~2 min | Essentials only (git, zsh, jq, shell plugins) |
-| **Enhanced** | 43 packages | ~5 min | Modern CLI tools (fzf, ripgrep, bat, eza, etc.) **← RECOMMENDED** |
-| **Full** | 61 packages | ~10 min | Everything including Docker, Node, advanced tools |
+| **Minimal** | ~18 packages | ~2 min | Essentials only (git, shell, jq, shell plugins) |
+| **Enhanced** | ~43 packages | ~5 min | Modern CLI tools (fzf, ripgrep, bat, eza, etc.) **← RECOMMENDED** |
+| **Full** | ~61 packages | ~10 min | Everything including Docker, Node, advanced tools |
 
 **How it works:**
 - Setup wizard shows this menu with current package counts
 - Your selection is saved in `~/.config/blackdot/config.json`
 - Re-running setup reuses your saved preference
+- **Unix:** Uses `Brewfile` with Homebrew
+- **Windows:** Uses `packages.json` with winget
 
 **Advanced:** Bypass wizard with environment variable:
 ```bash
+# Unix (macOS/Linux)
 BREWFILE_TIER=enhanced ./bootstrap/bootstrap-mac.sh
+
+# Windows (PowerShell)
+$env:PACKAGE_TIER = 'enhanced'; .\Install-Packages.ps1
 ```
 
 ### Modular By Design
@@ -324,8 +330,8 @@ graph TB
     VM -->|unified API| Pass[pass]
     TM -->|renders| Configs[Machine-Specific Configs]
 
-    Shell --> ZSH[zsh.d/]
-    Shell --> PS[PowerShell]
+    Shell --> ZSH[Zsh - zsh.d/]
+    Shell --> PS[PowerShell - Blackdot.psm1]
 
     subgraph Portable[Portable Sessions]
         WS["/workspace → ~/workspace"]
@@ -372,7 +378,7 @@ blackdot doctor                # Health check + auto-fix
 
 **Perfect for:**
 
-- **Claude Code users** working across macOS, Linux, and WSL2 with session portability
+- **Claude Code users** working across macOS, Linux, Windows, and WSL2 with session portability
 - **Team onboarding** - New developer setup in < 5 minutes with vault-backed credentials
 - **Multi-cloud workflows** - AWS SSO, multiple profiles, automatic credential rotation
 - **Security-conscious developers** - Multi-vault backends, schema validation, drift detection
@@ -466,15 +472,14 @@ blackdot status
 ## What Gets Installed
 
 ### Shell & Prompt
-- Zsh with Powerlevel10k theme
-- Auto-suggestions and syntax highlighting
-- Modern CLI replacements (eza, bat, fd, ripgrep)
+- **Unix:** Zsh with Powerlevel10k theme, auto-suggestions, syntax highlighting
+- **Windows:** PowerShell with Blackdot module, hook system, aliases
+- **Both:** Modern CLI replacements (eza, bat, fd, ripgrep)
 
 ### Development Tools
-- Homebrew package manager
-- Git, GitHub CLI, Node.js
-- Docker, Lima (Linux VM)
-- AWS CLI, Vault CLI (Bitwarden/1Password/pass)
+- **Unix:** Homebrew package manager, Lima (Linux VM on macOS)
+- **Windows:** winget package manager
+- **Both:** Git, GitHub CLI, Node.js, Docker, AWS CLI, Vault CLI
 
 ### Configurations
 - SSH keys and config (from vault)
@@ -483,7 +488,7 @@ blackdot status
 - Environment secrets (from vault)
 - Claude Code settings (shared workspace)
 
-See [Brewfile](Brewfile) for complete package list.
+See [Brewfile](Brewfile) (Unix) or [packages.json](powershell/packages.json) (Windows) for complete package lists.
 
 ---
 
@@ -513,9 +518,9 @@ See [Brewfile](Brewfile) for complete package list.
 |----------|--------|-------|
 | macOS (Apple Silicon) | Fully tested | Primary development environment |
 | macOS (Intel) | Fully tested | Auto-detects architecture |
-| Lima (Ubuntu 24.04) | Fully tested | Recommended Linux VM for macOS |
+| Windows (PowerShell) | Fully tested | Native PowerShell module (85+ functions) |
 | WSL2 (Windows) | Auto-detected | Uses Linux bootstrap |
-| Windows (Git Bash/MSYS2) | Native support | Uses Windows bootstrap |
+| Lima (Ubuntu 24.04) | Fully tested | Recommended Linux VM for macOS |
 | Ubuntu/Debian | Compatible | Tested on Ubuntu 24.04 |
 | Arch/Fedora/BSD | Experimental | 15-30 min adaptation needed |
 
@@ -672,8 +677,12 @@ op signin
 
 **Tab completion not working:**
 ```bash
+# Zsh
 rm -f ~/.zcompdump*      # Clear completion cache
 exec zsh                 # Reload shell
+
+# PowerShell
+Remove-Module Blackdot; Import-Module Blackdot  # Reload module
 ```
 
 See **[Troubleshooting Guide](docs/troubleshooting.md)** for complete solutions.
