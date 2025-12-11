@@ -11,7 +11,7 @@ zsh --version
 echo ""
 
 echo "=== Blackdot ==="
-cd ~/workspace/dotfiles 2>/dev/null && git log -1 --oneline || echo "Not found"
+cd ~/workspace/blackdot 2>/dev/null && git log -1 --oneline || echo "Not found"
 echo ""
 
 echo "=== Health Check ==="

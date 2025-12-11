@@ -13,7 +13,7 @@ import (
 // Custom help template matching ZSH style
 func customHelpFunc(cmd *cobra.Command, args []string) {
 	// Root command gets special treatment
-	if cmd.Name() == "dotfiles" && cmd.Parent() == nil {
+	if cmd.Name() == "blackdot" && cmd.Parent() == nil {
 		printRootHelp()
 		return
 	}
@@ -25,11 +25,11 @@ func customHelpFunc(cmd *cobra.Command, args []string) {
 // printRootHelp prints help matching the ZSH _dotfiles_help function exactly
 func printRootHelp() {
 	// Title
-	BoldCyan.Print("dotfiles")
-	fmt.Print(" - Manage your dotfiles\n")
+	BoldCyan.Print("blackdot")
+	fmt.Print(" - Manage your blackdot config\n")
 	fmt.Println()
 	Bold.Print("Usage:")
-	fmt.Print(" dotfiles <command> [options]\n")
+	fmt.Print(" blackdot <command> [options]\n")
 	fmt.Println()
 
 	// Setup & Health (always visible)
@@ -122,7 +122,7 @@ func printRootHelp() {
 
 	// Other Commands
 	BoldCyan.Println("Other Commands:")
-	printCmd("uninstall", "Remove dotfiles configuration")
+	printCmd("uninstall", "Remove blackdot configuration")
 	printCmd("version", "Show version information")
 	printCmd("help", "Show this help")
 	fmt.Println()
@@ -152,7 +152,7 @@ func printCmdAlias(name, alias, desc string) {
 // printCommandHelp prints styled help for subcommands
 func printCommandHelp(cmd *cobra.Command) {
 	// Title
-	BoldCyan.Printf("dotfiles %s", cmd.Name())
+	BoldCyan.Printf("blackdot %s", cmd.Name())
 	if cmd.Short != "" {
 		fmt.Print(" - ")
 		Dim.Print(cmd.Short)

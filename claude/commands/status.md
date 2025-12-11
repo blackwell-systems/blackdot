@@ -1,7 +1,7 @@
 Run the dotfiles status dashboard and explain any issues:
 
 ```bash
-source ~/workspace/dotfiles/zsh/zsh.d/50-functions.zsh 2>/dev/null
+source ~/workspace/blackdot/zsh/zsh.d/50-functions.zsh 2>/dev/null
 status
 ```
 

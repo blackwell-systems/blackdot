@@ -209,12 +209,12 @@ func getDotfilesDir() string {
 	if dir := os.Getenv("BLACKDOT_DIR"); dir != "" {
 		return dir
 	}
-	if _, err := os.Stat("/workspace/dotfiles"); err == nil {
-		return "/workspace/dotfiles"
+	if _, err := os.Stat("/workspace/blackdot"); err == nil {
+		return "/workspace/blackdot"
 	}
 	home, _ := os.UserHomeDir()
-	if _, err := os.Stat(filepath.Join(home, "workspace/dotfiles")); err == nil {
-		return filepath.Join(home, "workspace/dotfiles")
+	if _, err := os.Stat(filepath.Join(home, "workspace/blackdot")); err == nil {
+		return filepath.Join(home, "workspace/blackdot")
 	}
 	return ""
 }

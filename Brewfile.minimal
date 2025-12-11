@@ -8,7 +8,7 @@
 # Core essentials
 brew "git"              # Version control (required)
 brew "zsh"              # Shell (required)
-brew "jq"               # JSON processing (used by dotfiles scripts)
+brew "jq"               # JSON processing (used by blackdot scripts)
 
 # Shell experience (optional - install powerlevel10k separately or use enhanced tier)
 brew "zsh-autosuggestions"          # Command suggestions
@@ -27,7 +27,7 @@ brew "ca-certificates"
 
 # Vault & Security
 brew "bitwarden-cli"    # Optional: comment out if not using vault
-brew "age"              # Modern file encryption (for dotfiles encrypt)
+brew "age"              # Modern file encryption (for blackdot encrypt)
 
 # ============================================================
 # Note: Powerlevel10k prompt theme moved to enhanced tier

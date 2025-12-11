@@ -75,8 +75,8 @@ After installation, run `blackdot setup` for interactive configuration.
 
 ```bash
 # 1. Clone repository
-git clone git@github.com:blackwell-systems/blackdot.git ~/workspace/dotfiles
-cd ~/workspace/dotfiles
+git clone git@github.com:blackwell-systems/blackdot.git ~/workspace/blackdot
+cd ~/workspace/blackdot
 
 # 2. Run platform bootstrap
 ./bootstrap/bootstrap-mac.sh   # macOS
@@ -116,7 +116,7 @@ After bootstrap, **always** use `/workspace` paths:
 cd /workspace/dotfiles  # ✅ Portable sessions
 claude                  # Same session on ALL machines
 
-cd ~/workspace/dotfiles # ❌ Non-portable (different paths per OS)
+cd ~/workspace/blackdot # ❌ Non-portable (different paths per OS)
 ```
 
 The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identical paths across macOS, Lima, and WSL, preserving your conversation history when switching machines.
@@ -129,7 +129,7 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 <summary><b>Click to expand full directory tree</b> (zoomable)</summary>
 
 ```
-~/workspace/dotfiles/
+~/workspace/blackdot/
 │
 ├── install.sh                          # One-line Unix/Linux installer (curl | bash)
 ├── install-windows.ps1                 # One-line Windows installer (PowerShell)
@@ -257,17 +257,17 @@ The `/workspace → ~/workspace` symlink ensures Claude Code sessions use identi
 Deployed files (after bootstrap):
 
 Unix/Linux/macOS:
-~/.zshrc                 → ~/workspace/dotfiles/zsh/zshrc (symlink)
-~/.p10k.zsh              → ~/workspace/dotfiles/zsh/p10k.zsh (symlink)
-~/.config/ghostty/config → ~/workspace/dotfiles/ghostty/config (symlink)
-~/.config/zellij/        → ~/workspace/dotfiles/zellij/ (symlink)
+~/.zshrc                 → ~/workspace/blackdot/zsh/zshrc (symlink)
+~/.p10k.zsh              → ~/workspace/blackdot/zsh/p10k.zsh (symlink)
+~/.config/ghostty/config → ~/workspace/blackdot/ghostty/config (symlink)
+~/.config/zellij/        → ~/workspace/blackdot/zellij/ (symlink)
 ~/.claude/               → ~/workspace/.claude/ (symlink)
-~/bin/blackdot           → ~/workspace/dotfiles/bin/dotfiles-go (symlink in PATH)
+~/bin/blackdot           → ~/workspace/blackdot/bin/dotfiles-go (symlink in PATH)
 
 Windows (PowerShell):
 $PROFILE                 → Module auto-import (Import-Module Blackdot)
 ~/.claude/               → ~/workspace/.claude/ (junction/symlink)
-~/bin/blackdot.exe       → ~/workspace/dotfiles/bin/dotfiles-go.exe (in PATH)
+~/bin/blackdot.exe       → ~/workspace/blackdot/bin/dotfiles-go.exe (in PATH)
 ```
 
 </details>
@@ -502,7 +502,7 @@ graph LR
 Navigation aliases make this seamless:
 - `cws` → `cd ~/workspace`
 - `ccode` → `cd ~/workspace/code`
-- `blackdot` → `cd ~/workspace/dotfiles`
+- `blackdot` → `cd ~/workspace/blackdot`
 
 ### 4. Decoupled from User Identity
 
@@ -578,7 +578,7 @@ cd /workspace/dotfiles && claude
 # Your conversation history is preserved!
 
 # ❌ DON'T use ~/workspace (non-portable)
-cd ~/workspace/dotfiles  # Different on each OS
+cd ~/workspace/blackdot  # Different on each OS
 claude                    # New session every time
 ```
 
@@ -923,7 +923,7 @@ cd ~/workspace
 
 ```bash
 git clone git@github.com:blackwell-systems/blackdot.git
-cd ~/workspace/dotfiles
+cd ~/workspace/blackdot
 ```
 
 3. **Run macOS bootstrap**
@@ -945,8 +945,8 @@ Typical responsibilities of `bootstrap-mac.sh`:
 
 - Run `bootstrap-dotfiles.sh` to create symlinks:
 
-  - `~/.zshrc    → ~/workspace/dotfiles/zsh/zshrc`  
-  - `~/.p10k.zsh → ~/workspace/dotfiles/zsh/p10k.zsh`  
+  - `~/.zshrc    → ~/workspace/blackdot/zsh/zshrc`  
+  - `~/.p10k.zsh → ~/workspace/blackdot/zsh/p10k.zsh`  
   - `~/.claude   → ~/workspace/.claude`  
   - Ghostty config symlink into:
 
@@ -967,14 +967,14 @@ Assuming your Lima VM shares `~/workspace` from macOS:
 1. **Start Lima**
 
 ```bash
-limactl start ~/workspace/dotfiles/lima/lima.yaml
+limactl start ~/workspace/blackdot/lima/lima.yaml
 limactl shell lima-dev-ubuntu
 ```
 
 2. **Run the Lima bootstrap**
 
 ```bash
-cd ~/workspace/dotfiles
+cd ~/workspace/blackdot
 ./bootstrap/bootstrap-linux.sh
 ```
 
@@ -1077,7 +1077,7 @@ and prune as needed.
 Lives under:
 
 ```
-~/workspace/dotfiles/macos
+~/workspace/blackdot/macos
 ```
 
 These scripts let you capture, track, and restore macOS system preferences (trackpad, keyboard, dock, finder, etc.) across machines.
@@ -1085,7 +1085,7 @@ These scripts let you capture, track, and restore macOS system preferences (trac
 ### Workflow: Discover Your Settings
 
 ```bash
-cd ~/workspace/dotfiles/macos
+cd ~/workspace/blackdot/macos
 
 # 1. Take a snapshot of current settings
 ./discover-settings.sh --snapshot
@@ -1102,7 +1102,7 @@ cd ~/workspace/dotfiles/macos
 ### Workflow: Apply Settings on New Machine
 
 ```bash
-cd ~/workspace/dotfiles/macos
+cd ~/workspace/blackdot/macos
 
 # Review settings first
 ./apply-settings.sh --dry-run
@@ -1166,7 +1166,7 @@ killall Dock
 Lives under:
 
 ```
-~/workspace/dotfiles/vault
+~/workspace/blackdot/vault
 ```
 
 Restores:
@@ -1408,7 +1408,7 @@ blackdot vault push AWS-Config
 
 **Or manually with Bitwarden CLI:**
 ```bash
-cd ~/workspace/dotfiles/vault
+cd ~/workspace/blackdot/vault
 
 CONFIG_JSON=$(jq -Rs --arg name "AWS-Config" \
   '{ type: 2, name: $name, secureNote: { type: 0 }, notes: . }' \
@@ -1857,7 +1857,7 @@ When AWS credentials or config change:
 
 Complete checklist for a fresh machine:
 
-1. [ ] Clone dotfiles: `git clone ... ~/workspace/dotfiles`
+1. [ ] Clone dotfiles: `git clone ... ~/workspace/blackdot`
 2. [ ] Run bootstrap: `./bootstrap/bootstrap-mac.sh` or `./bootstrap/bootstrap-linux.sh`
 3. [ ] Login to vault: `bw login` / `op signin` / (pass uses GPG)
 4. [ ] Validate vault items: `blackdot vault check`
@@ -1998,7 +1998,7 @@ yq eval-all 'select(.kind == "Service")' *.yaml  # filter multiple files
 **Smart directory jumping (zoxide):**
 
 - `z <partial>` → Jump to directory matching pattern (learns your habits)
-- `z dot` → Jumps to ~/workspace/dotfiles (after visiting once)
+- `z dot` → Jumps to ~/workspace/blackdot (after visiting once)
 - `z code` → Jumps to ~/workspace/code
 - `zi` → Interactive selection with fzf
 
@@ -2463,8 +2463,8 @@ Example output:
 
 ```
 === Symlinks ===
-[OK] ~/.zshrc -> ~/workspace/dotfiles/zsh/zshrc
-[OK] ~/.p10k.zsh -> ~/workspace/dotfiles/zsh/p10k.zsh
+[OK] ~/.zshrc -> ~/workspace/blackdot/zsh/zshrc
+[OK] ~/.p10k.zsh -> ~/workspace/blackdot/zsh/p10k.zsh
 
 === Required Commands ===
 [OK] brew (Homebrew 4.x.x)
@@ -2688,7 +2688,7 @@ ls -ld ~/.claude
 If not, rerun:
 
 ```bash
-~/workspace/dotfiles/bootstrap-dotfiles.sh
+~/workspace/blackdot/bootstrap-dotfiles.sh
 ```
 
 ### Vault CLI issues
@@ -2722,7 +2722,7 @@ bw list items --session "$BW_SESSION" | jq '.[].name'
 
 ```bash
 # Remove cached session and re-authenticate
-rm -f ~/workspace/dotfiles/vault/.vault-session
+rm -f ~/workspace/blackdot/vault/.vault-session
 # Then re-login to your vault provider
 ```
 
@@ -2797,7 +2797,7 @@ aws sso login --profile PROFILE-NAME
 ```bash
 limactl stop lima-dev-ubuntu
 limactl delete lima-dev-ubuntu
-limactl start ~/workspace/dotfiles/lima/lima.yaml
+limactl start ~/workspace/blackdot/lima/lima.yaml
 ```
 
 **Shared directory not mounted:**
@@ -2826,7 +2826,7 @@ ls -la ~/.zshrc ~/.p10k.zsh
 
 # Remove and recreate
 rm ~/.zshrc ~/.p10k.zsh
-~/workspace/dotfiles/bootstrap-dotfiles.sh
+~/workspace/blackdot/bootstrap-dotfiles.sh
 ```
 
 ### Environment secrets not loading

@@ -107,7 +107,7 @@ func runAWSWho() error {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		fmt.Printf("Not authenticated. Run: dotfiles tools aws login %s\n", profile)
+		fmt.Printf("Not authenticated. Run: blackdot tools aws login %s\n", profile)
 		return nil
 	}
 
@@ -167,7 +167,7 @@ Since Go cannot modify the parent shell's environment,
 this command prints the export command to execute.
 
 Usage:
-  eval "$(dotfiles tools aws switch myprofile)"
+  eval "$(blackdot tools aws switch myprofile)"
 
 Or copy and paste the output.`,
 		Args: cobra.ExactArgs(1),
@@ -209,7 +209,7 @@ func newAWSAssumeCmd() *cobra.Command {
 		Long: `Assume an IAM role and print export commands for temporary credentials.
 
 Usage:
-  eval "$(dotfiles tools aws assume arn:aws:iam::123456789:role/MyRole)"`,
+  eval "$(blackdot tools aws assume arn:aws:iam::123456789:role/MyRole)"`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runAWSAssume(args[0], sessionName)
@@ -261,7 +261,7 @@ func newAWSClearCmd() *cobra.Command {
 		Long: `Print unset commands to clear temporary AWS credentials.
 
 Usage:
-  eval "$(dotfiles tools aws clear)"`,
+  eval "$(blackdot tools aws clear)"`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			fmt.Println("unset AWS_ACCESS_KEY_ID")
 			fmt.Println("unset AWS_SECRET_ACCESS_KEY")

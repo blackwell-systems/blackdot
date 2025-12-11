@@ -1,4 +1,4 @@
-# Extra-lightweight dotfiles exploration container
+# Extra-lightweight blackdot exploration container
 # For quick CLI testing (no vault tools)
 #
 # Image size: ~50MB | Build time: ~10s
@@ -17,38 +17,38 @@ RUN apk add --no-cache \
 ENV HOME=/root
 ENV WORKSPACE=/root/workspace
 
-WORKDIR /root/workspace/dotfiles
+WORKDIR /root/workspace/blackdot
 
 # Copy core components
-COPY bin/ /root/workspace/dotfiles/bin/
-COPY lib/ /root/workspace/dotfiles/lib/
-COPY vault/ /root/workspace/dotfiles/vault/
-COPY zsh/ /root/workspace/dotfiles/zsh/
-COPY templates/ /root/workspace/dotfiles/templates/
-COPY bootstrap/ /root/workspace/dotfiles/bootstrap/
+COPY bin/ /root/workspace/blackdot/bin/
+COPY lib/ /root/workspace/blackdot/lib/
+COPY vault/ /root/workspace/blackdot/vault/
+COPY zsh/ /root/workspace/blackdot/zsh/
+COPY templates/ /root/workspace/blackdot/templates/
+COPY bootstrap/ /root/workspace/blackdot/bootstrap/
 
 # Make scripts executable
-RUN chmod +x /root/workspace/dotfiles/bin/* && \
-    chmod +x /root/workspace/dotfiles/vault/*.sh && \
-    chmod +x /root/workspace/dotfiles/bootstrap/*.sh
+RUN chmod +x /root/workspace/blackdot/bin/* && \
+    chmod +x /root/workspace/blackdot/vault/*.sh && \
+    chmod +x /root/workspace/blackdot/bootstrap/*.sh
 
-# Setup zsh with dotfiles functions
-RUN mkdir -p /root/.config/dotfiles /root/.ssh /root/.aws && \
+# Setup zsh with blackdot functions
+RUN mkdir -p /root/.config/blackdot /root/.ssh /root/.aws && \
     echo 'export WORKSPACE=/root/workspace' > /root/.zshrc && \
-    echo 'source /root/workspace/dotfiles/zsh/zsh.d/40-aliases.zsh' >> /root/.zshrc && \
-    echo 'source /root/workspace/dotfiles/zsh/zsh.d/50-functions.zsh' >> /root/.zshrc && \
+    echo 'source /root/workspace/blackdot/zsh/zsh.d/40-aliases.zsh' >> /root/.zshrc && \
+    echo 'source /root/workspace/blackdot/zsh/zsh.d/50-functions.zsh' >> /root/.zshrc && \
     echo '' >> /root/.zshrc && \
     echo '# Welcome message for container' >> /root/.zshrc && \
     echo 'if [[ -z "$_WELCOME_SHOWN" ]]; then' >> /root/.zshrc && \
     echo '    echo ""' >> /root/.zshrc && \
     echo '    echo "\\033[0;36m═══════════════════════════════════════════════════════════\\033[0m"' >> /root/.zshrc && \
-    echo '    echo "\\033[0;36m  Dotfiles Test Container (extralite)\\033[0m"' >> /root/.zshrc && \
+    echo '    echo "\\033[0;36m  Blackdot Test Container (extralite)\\033[0m"' >> /root/.zshrc && \
     echo '    echo "\\033[0;36m═══════════════════════════════════════════════════════════\\033[0m"' >> /root/.zshrc && \
     echo '    echo ""' >> /root/.zshrc && \
     echo '    echo "\\033[1mQuick Start:\\033[0m"' >> /root/.zshrc && \
-    echo '    echo "  dotfiles help          # Show available commands"' >> /root/.zshrc && \
-    echo '    echo "  dotfiles doctor        # Run health checks"' >> /root/.zshrc && \
-    echo '    echo "  dotfiles status        # Show dashboard"' >> /root/.zshrc && \
+    echo '    echo "  blackdot help          # Show available commands"' >> /root/.zshrc && \
+    echo '    echo "  blackdot doctor        # Run health checks"' >> /root/.zshrc && \
+    echo '    echo "  blackdot status        # Show dashboard"' >> /root/.zshrc && \
     echo '    echo ""' >> /root/.zshrc && \
     echo '    echo "\\033[2mNote: No vault CLIs in extralite. Use lite container for vault testing.\\033[0m"' >> /root/.zshrc && \
     echo '    echo ""' >> /root/.zshrc && \
@@ -62,14 +62,14 @@ CMD ["zsh"]
 
 # =============================================================================
 # Usage:
-#   docker build -f Dockerfile.extralite -t dotfiles-extralite .
-#   docker run -it --rm dotfiles-extralite
+#   docker build -f Dockerfile.extralite -t blackdot-extralite .
+#   docker run -it --rm blackdot-extralite
 #
 # This is the fastest container for quick exploration.
 # No vault CLIs - use Dockerfile.lite for vault testing.
 #
 # Explore:
-#   dotfiles help
-#   dotfiles status
-#   dotfiles doctor
+#   blackdot help
+#   blackdot status
+#   blackdot doctor
 # =============================================================================

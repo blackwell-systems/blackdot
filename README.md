@@ -401,8 +401,8 @@ See [One-Line Install](#one-line-install) above for the recommended installation
 
 ```bash
 # 1. Clone (to your workspace directory - defaults to ~/workspace)
-git clone git@github.com:blackwell-systems/blackdot.git ~/workspace/dotfiles
-cd ~/workspace/dotfiles
+git clone git@github.com:blackwell-systems/blackdot.git ~/workspace/blackdot
+cd ~/workspace/blackdot
 
 # Or use a custom workspace location
 WORKSPACE_TARGET=~/code git clone git@github.com:blackwell-systems/blackdot.git ~/code/dotfiles

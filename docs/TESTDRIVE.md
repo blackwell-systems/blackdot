@@ -239,8 +239,8 @@ Some features require a real system:
 curl -fsSL https://dotfiles.blackwell.systems/install | bash
 
 # Or manual
-git clone https://github.com/blackwell-systems/blackdot.git ~/workspace/dotfiles
-cd ~/workspace/dotfiles
+git clone https://github.com/blackwell-systems/blackdot.git ~/workspace/blackdot
+cd ~/workspace/blackdot
 ./bootstrap/bootstrap-mac.sh  # or ./bootstrap/bootstrap-linux.sh
 ```
 

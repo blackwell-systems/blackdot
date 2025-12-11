@@ -51,7 +51,7 @@ Fixes # (issue)
 
 - [ ] Tested on macOS
 - [ ] Tested on Linux/Lima
-- [ ] Ran `dotfiles doctor` successfully
+- [ ] Ran `blackdot doctor` successfully
 - [ ] Bootstrap script completes without errors
 - [ ] Scripts are idempotent (can run multiple times safely)
 - [ ] Pre-commit hooks pass

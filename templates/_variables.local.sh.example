@@ -4,7 +4,7 @@
 # Machine-specific template variable overrides
 #
 # This file is gitignored. Create it by running:
-#   dotfiles template init
+#   blackdot template init
 #
 # Or copy this example:
 #   cp templates/_variables.local.sh.example templates/_variables.local.sh

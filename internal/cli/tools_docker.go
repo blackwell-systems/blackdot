@@ -481,9 +481,9 @@ func newDockerInspectCmd() *cobra.Command {
 		Long: `Inspect a container and optionally filter with a JSON path.
 
 Examples:
-  dotfiles tools docker inspect myapp
-  dotfiles tools docker inspect myapp --path .NetworkSettings
-  dotfiles tools docker inspect myapp --path .Config.Env`,
+  blackdot tools docker inspect myapp
+  blackdot tools docker inspect myapp --path .NetworkSettings
+  blackdot tools docker inspect myapp --path .Config.Env`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return dockerInspect(args[0], path)

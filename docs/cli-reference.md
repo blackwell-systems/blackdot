@@ -1692,7 +1692,7 @@ Change to the dotfiles directory.
 blackdot cd
 ```
 
-Equivalent to: `cd ~/workspace/dotfiles`
+Equivalent to: `cd ~/workspace/blackdot`
 
 ---
 
@@ -1905,7 +1905,7 @@ Most commands follow these conventions:
 
 | File | Purpose |
 |------|---------|
-| `~/workspace/dotfiles/` | Dotfiles repository |
+| `~/workspace/blackdot/` | Dotfiles repository |
 | `~/.blackdot-backups/` | Backup storage |
 | `~/.blackdot-metrics.jsonl` | Health check metrics |
 | `~/workspace/.notes.md` | Quick notes |
@@ -1942,7 +1942,7 @@ All state and configuration in a single JSON file:
     "current_tier": "enhanced"
   },
   "paths": {
-    "dotfiles_dir": "~/workspace/dotfiles",
+    "dotfiles_dir": "~/workspace/blackdot",
     "config_dir": "~/.config/blackdot"
   }
 }

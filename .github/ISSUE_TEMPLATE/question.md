@@ -1,6 +1,6 @@
 ---
 name: Question
-about: Ask a question about using the dotfiles
+about: Ask a question about using blackdot
 title: '[QUESTION] '
 labels: question
 assignees: ''

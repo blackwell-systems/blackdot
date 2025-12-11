@@ -1,4 +1,4 @@
-# Lightweight dotfiles exploration container
+# Lightweight blackdot exploration container
 # For CLI testing with vault support (no Homebrew)
 #
 # Image size: ~250MB | Build time: ~90s
@@ -38,48 +38,48 @@ RUN curl -sSL "https://cache.agilebits.com/dist/1P/op2/pkg/v2.30.0/op_linux_amd6
 ENV HOME=/root
 ENV WORKSPACE=/root/workspace
 
-WORKDIR /root/workspace/dotfiles
+WORKDIR /root/workspace/blackdot
 
 # Copy core components
-COPY bin/ /root/workspace/dotfiles/bin/
-COPY lib/ /root/workspace/dotfiles/lib/
-COPY vault/ /root/workspace/dotfiles/vault/
-COPY zsh/ /root/workspace/dotfiles/zsh/
-COPY templates/ /root/workspace/dotfiles/templates/
-COPY bootstrap/ /root/workspace/dotfiles/bootstrap/
-COPY test/mocks/ /root/workspace/dotfiles/test/mocks/
+COPY bin/ /root/workspace/blackdot/bin/
+COPY lib/ /root/workspace/blackdot/lib/
+COPY vault/ /root/workspace/blackdot/vault/
+COPY zsh/ /root/workspace/blackdot/zsh/
+COPY templates/ /root/workspace/blackdot/templates/
+COPY bootstrap/ /root/workspace/blackdot/bootstrap/
+COPY test/mocks/ /root/workspace/blackdot/test/mocks/
 
 # Make scripts executable
-RUN chmod +x /root/workspace/dotfiles/bin/* && \
-    chmod +x /root/workspace/dotfiles/vault/*.sh && \
-    chmod +x /root/workspace/dotfiles/bootstrap/*.sh && \
-    chmod +x /root/workspace/dotfiles/test/mocks/*.sh
+RUN chmod +x /root/workspace/blackdot/bin/* && \
+    chmod +x /root/workspace/blackdot/vault/*.sh && \
+    chmod +x /root/workspace/blackdot/bootstrap/*.sh && \
+    chmod +x /root/workspace/blackdot/test/mocks/*.sh
 
-# Setup zsh with Powerlevel10k and dotfiles functions
-RUN mkdir -p /root/.config/dotfiles /root/.ssh /root/.aws && \
-    ln -sf /root/workspace/dotfiles/zsh/p10k.zsh /root/.p10k.zsh && \
+# Setup zsh with Powerlevel10k and blackdot functions
+RUN mkdir -p /root/.config/blackdot /root/.ssh /root/.aws && \
+    ln -sf /root/workspace/blackdot/zsh/p10k.zsh /root/.p10k.zsh && \
     echo 'export WORKSPACE=/root/workspace' > /root/.zshrc && \
     echo 'source /root/.powerlevel10k/powerlevel10k.zsh-theme' >> /root/.zshrc && \
     echo '[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh' >> /root/.zshrc && \
-    echo 'source /root/workspace/dotfiles/zsh/zsh.d/40-aliases.zsh' >> /root/.zshrc && \
-    echo 'source /root/workspace/dotfiles/zsh/zsh.d/50-functions.zsh' >> /root/.zshrc && \
+    echo 'source /root/workspace/blackdot/zsh/zsh.d/40-aliases.zsh' >> /root/.zshrc && \
+    echo 'source /root/workspace/blackdot/zsh/zsh.d/50-functions.zsh' >> /root/.zshrc && \
     echo '' >> /root/.zshrc && \
     echo '# Welcome message for container' >> /root/.zshrc && \
     echo 'if [[ -z "$_WELCOME_SHOWN" ]]; then' >> /root/.zshrc && \
     echo '    echo ""' >> /root/.zshrc && \
     echo '    echo "\\033[0;36m═══════════════════════════════════════════════════════════\\033[0m"' >> /root/.zshrc && \
-    echo '    echo "\\033[0;36m  Dotfiles Test Container (lite)\\033[0m"' >> /root/.zshrc && \
+    echo '    echo "\\033[0;36m  Blackdot Test Container (lite)\\033[0m"' >> /root/.zshrc && \
     echo '    echo "\\033[0;36m═══════════════════════════════════════════════════════════\\033[0m"' >> /root/.zshrc && \
     echo '    echo ""' >> /root/.zshrc && \
     echo '    echo "\\033[1mQuick Start:\\033[0m"' >> /root/.zshrc && \
-    echo '    echo "  dotfiles help          # Show available commands"' >> /root/.zshrc && \
-    echo '    echo "  dotfiles doctor        # Run health checks"' >> /root/.zshrc && \
-    echo '    echo "  dotfiles status        # Show dashboard"' >> /root/.zshrc && \
+    echo '    echo "  blackdot help          # Show available commands"' >> /root/.zshrc && \
+    echo '    echo "  blackdot doctor        # Run health checks"' >> /root/.zshrc && \
+    echo '    echo "  blackdot status        # Show dashboard"' >> /root/.zshrc && \
     echo '    echo ""' >> /root/.zshrc && \
     echo '    echo "\\033[1mTest Vault with Mock Credentials (pass backend):\\033[0m"' >> /root/.zshrc && \
     echo '    echo "  ./test/mocks/setup-mock-vault.sh --no-pass  # Creates fake GPG key + pass store"' >> /root/.zshrc && \
     echo '    echo "  export BLACKDOT_VAULT_BACKEND=pass          # Switch to pass backend"' >> /root/.zshrc && \
-    echo '    echo "  dotfiles vault check                        # Test vault commands"' >> /root/.zshrc && \
+    echo '    echo "  blackdot vault check                        # Test vault commands"' >> /root/.zshrc && \
     echo '    echo ""' >> /root/.zshrc && \
     echo '    export _WELCOME_SHOWN=1' >> /root/.zshrc && \
     echo 'fi' >> /root/.zshrc
@@ -91,29 +91,29 @@ CMD ["zsh"]
 
 # =============================================================================
 # Usage:
-#   docker build -f Dockerfile.lite -t dotfiles-lite .
-#   docker run -it --rm dotfiles-lite
+#   docker build -f Dockerfile.lite -t blackdot-lite .
+#   docker run -it --rm blackdot-lite
 #
 # With Bitwarden:
-#   docker run -it --rm -e BW_SESSION="$BW_SESSION" dotfiles-lite
+#   docker run -it --rm -e BW_SESSION="$BW_SESSION" blackdot-lite
 #
 # With 1Password:
-#   docker run -it --rm dotfiles-lite
+#   docker run -it --rm blackdot-lite
 #   # Then: eval $(op signin)
 #
 # With pass (mount GPG keys):
-#   docker run -it --rm -v ~/.gnupg:/root/.gnupg:ro dotfiles-lite
+#   docker run -it --rm -v ~/.gnupg:/root/.gnupg:ro blackdot-lite
 #
 # With Mock Vault (for testing):
-#   docker run -it --rm dotfiles-lite
+#   docker run -it --rm blackdot-lite
 #   # Then inside container:
 #   ./test/mocks/setup-mock-vault.sh --no-pass
 #   export BLACKDOT_VAULT_BACKEND=pass
-#   dotfiles vault check
+#   blackdot vault check
 #
 # Explore:
-#   dotfiles help
-#   dotfiles doctor
-#   dotfiles vault check
-#   dotfiles status
+#   blackdot help
+#   blackdot doctor
+#   blackdot vault check
+#   blackdot status
 # =============================================================================
