@@ -354,7 +354,7 @@ func newVaultInitCmd() *cobra.Command {
 		Use:     "init",
 		Aliases: []string{"setup"},
 		Short:   "Initialize vault setup",
-		Long:    `Interactive vault setup wizard.
+		Long: `Interactive vault setup wizard.
 
 Steps:
   1. Select vault backend (bitwarden, 1password, pass)
@@ -1698,12 +1698,12 @@ func vaultScan() error {
 	// Scan other common secrets
 	Info("Checking for other secrets...")
 	otherSecrets := map[string]string{
-		"Claude-Profiles":       filepath.Join(homeDir, ".claude", "profiles.json"),
-		"NPM-Config":            filepath.Join(homeDir, ".npmrc"),
-		"PyPI-Config":           filepath.Join(homeDir, ".pypirc"),
-		"Docker-Config":         filepath.Join(homeDir, ".docker", "config.json"),
-		"Environment-Secrets":   filepath.Join(homeDir, ".local", "env.secrets"),
-		"Template-Variables":    filepath.Join(homeDir, ".config", "blackdot", "template-variables.sh"),
+		"Claude-Profiles":     filepath.Join(homeDir, ".claude", "profiles.json"),
+		"NPM-Config":          filepath.Join(homeDir, ".npmrc"),
+		"PyPI-Config":         filepath.Join(homeDir, ".pypirc"),
+		"Docker-Config":       filepath.Join(homeDir, ".docker", "config.json"),
+		"Environment-Secrets": filepath.Join(homeDir, ".local", "env.secrets"),
+		"Template-Variables":  filepath.Join(homeDir, ".config", "blackdot", "template-variables.sh"),
 	}
 	for name, path := range otherSecrets {
 		if _, err := os.Stat(path); err == nil {

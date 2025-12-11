@@ -20,9 +20,9 @@ import (
 
 // Engine handles template rendering
 type Engine struct {
-	vars       map[string]string
-	arrays     map[string][]string
-	filters    map[string]FilterFunc
+	vars        map[string]string
+	arrays      map[string][]string
+	filters     map[string]FilterFunc
 	templateDir string
 }
 
@@ -32,9 +32,9 @@ type FilterFunc func(value string) string
 // NewEngine creates a new template engine
 func NewEngine(templateDir string) *Engine {
 	e := &Engine{
-		vars:       make(map[string]string),
-		arrays:     make(map[string][]string),
-		filters:    make(map[string]FilterFunc),
+		vars:        make(map[string]string),
+		arrays:      make(map[string][]string),
+		filters:     make(map[string]FilterFunc),
 		templateDir: templateDir,
 	}
 

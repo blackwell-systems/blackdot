@@ -17,27 +17,27 @@ import (
 // ============================================================
 var (
 	// Semantic colors
-	ClrPrimary   = color.New(color.FgCyan)              // Main accent, highlights
-	ClrSecondary = color.New(color.FgYellow)            // Secondary accent
-	ClrSuccess   = color.New(color.FgGreen)             // Success, enabled, OK
-	ClrError     = color.New(color.FgRed)               // Errors, failures, disabled
-	ClrWarning   = color.New(color.FgYellow)            // Warnings, caution
-	ClrInfo      = color.New(color.FgBlue)              // Informational
-	ClrMuted     = color.New(color.Faint)               // Dim - secondary text
-	ClrBold      = color.New(color.Bold)                // Emphasis
-	ClrHeader    = color.New(color.Bold, color.FgCyan)  // Bold cyan for headers
-	ClrBox       = color.New(color.Faint)               // Box borders
+	ClrPrimary   = color.New(color.FgCyan)             // Main accent, highlights
+	ClrSecondary = color.New(color.FgYellow)           // Secondary accent
+	ClrSuccess   = color.New(color.FgGreen)            // Success, enabled, OK
+	ClrError     = color.New(color.FgRed)              // Errors, failures, disabled
+	ClrWarning   = color.New(color.FgYellow)           // Warnings, caution
+	ClrInfo      = color.New(color.FgBlue)             // Informational
+	ClrMuted     = color.New(color.Faint)              // Dim - secondary text
+	ClrBold      = color.New(color.Bold)               // Emphasis
+	ClrHeader    = color.New(color.Bold, color.FgCyan) // Bold cyan for headers
+	ClrBox       = color.New(color.Faint)              // Box borders
 
 	// Tool-specific brand colors (match official brand colors)
-	ClrRust   = color.New(color.FgYellow)            // Orange (Rust's brand color)
-	ClrGo     = color.New(color.FgCyan)              // Cyan/Teal (Go's gopher blue)
-	ClrPython = color.New(color.FgBlue)              // Blue (Python's blue)
-	ClrAWS    = color.New(color.FgYellow)            // Orange (AWS's orange)
-	ClrCDK    = color.New(color.FgGreen)             // Green (CDK/CloudFormation green)
-	ClrNode   = color.New(color.FgGreen)             // Green (Node.js green)
-	ClrJava   = color.New(color.FgRed)               // Red (Java red)
-	ClrSSH    = color.New(color.FgMagenta)           // Magenta (SSH/security purple)
-	ClrDocker = color.New(color.FgCyan)              // Cyan (Docker's blue/teal)
+	ClrRust   = color.New(color.FgYellow)  // Orange (Rust's brand color)
+	ClrGo     = color.New(color.FgCyan)    // Cyan/Teal (Go's gopher blue)
+	ClrPython = color.New(color.FgBlue)    // Blue (Python's blue)
+	ClrAWS    = color.New(color.FgYellow)  // Orange (AWS's orange)
+	ClrCDK    = color.New(color.FgGreen)   // Green (CDK/CloudFormation green)
+	ClrNode   = color.New(color.FgGreen)   // Green (Node.js green)
+	ClrJava   = color.New(color.FgRed)     // Red (Java red)
+	ClrSSH    = color.New(color.FgMagenta) // Magenta (SSH/security purple)
+	ClrDocker = color.New(color.FgCyan)    // Cyan (Docker's blue/teal)
 )
 
 // ============================================================
