@@ -1,6 +1,6 @@
 # Claude Code Integration
 
-> **The first dotfiles designed for AI-assisted development.**
+> **The first configuration framework designed for AI-assisted development.**
 
 This repository includes native Claude Code integration for portable sessions across machines.
 
@@ -240,16 +240,16 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
 
 ```
 ┌─────────────────────────────────┐     ┌─────────────────────────────────┐
-│           dotfiles              │     │           dotclaude             │
+│           blackdot              │     │           dotclaude             │
 │  (shell config, secrets, etc)   │     │   (Claude profile management)   │
 ├─────────────────────────────────┤     ├─────────────────────────────────┤
 │                                 │     │                                 │
-│  dotfiles status    ───────────────────► shows Claude profile status   │
-│  dotfiles doctor    ───────────────────► checks Claude health          │
+│  blackdot status    ───────────────────► shows Claude profile status   │
+│  blackdot doctor    ───────────────────► checks Claude health          │
 │  blackdot drift     ───────────────────► detects profile changes       │
 │  blackdot vault pull ───────────────► restores profiles.json        │
-│  dotfiles packages  ───────────────────► suggests dotclaude install    │
-│  dotfiles setup     ───────────────────► offers dotclaude setup        │
+│  blackdot packages  ───────────────────► suggests dotclaude install    │
+│  blackdot setup     ───────────────────► offers dotclaude setup        │
 │                                 │     │                                 │
 └─────────────────────────────────┘     └─────────────────────────────────┘
                                               ▲
@@ -260,7 +260,7 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
                                         dotclaude create personal
 ```
 
-**Key principle:** dotclaude is NOT wrapped or hidden. Users run it directly for all profile management. dotfiles just "knows about" dotclaude to enhance existing commands.
+**Key principle:** dotclaude is NOT wrapped or hidden. Users run it directly for all profile management. blackdot just "knows about" dotclaude to enhance existing commands.
 
 ### What's Integrated
 
@@ -277,7 +277,7 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
 
 1. **dotclaude** manages profiles in `~/code/dotclaude/profiles/`
 2. **dotclaude** auto-generates `~/.claude/profiles.json` on activate/create
-3. **dotfiles vault** syncs `profiles.json` to your password manager
+3. **blackdot vault** syncs `profiles.json` to your password manager
 4. **blackdot vault pull** restores it on new machines
 
 The `profiles.json` format:
@@ -334,7 +334,7 @@ If you use Claude Code without dotclaude:
 - `blackdot status` shows a gentle hint: `try: dotclaude`
 - `blackdot doctor` suggests installation with instructions
 - `blackdot packages` mentions dotclaude availability
-- No impact on other dotfiles functionality - completely optional
+- No impact on other blackdot functionality - completely optional
 
 ---
 
@@ -343,9 +343,9 @@ If you use Claude Code without dotclaude:
 We're exploring deeper Claude integration via [Model Context Protocol (MCP)](https://modelcontextprotocol.io/). See [Roadmap](ROADMAP.md#mcp-server-concept) for details.
 
 Potential capabilities:
-- `dotfiles://status` - Health dashboard
-- `dotfiles://secrets/restore` - Trigger vault restore
-- `dotfiles://doctor` - Run health checks
+- `blackdot://status` - Health dashboard
+- `blackdot://secrets/restore` - Trigger vault restore
+- `blackdot://doctor` - Run health checks
 - Native tool integration without shell commands
 
 ---

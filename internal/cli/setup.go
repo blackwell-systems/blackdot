@@ -376,18 +376,18 @@ func inferState(cfg *SetupConfig) {
 			// Check PowerShell profile
 			psProfile := filepath.Join(home, "Documents", "PowerShell", "profile.ps1")
 			if _, err := os.Stat(psProfile); err == nil {
-				// Check if it references our dotfiles
+				// Check if it references our blackdot
 				if data, err := os.ReadFile(psProfile); err == nil {
-					if strings.Contains(string(data), "dotfiles") {
+					if strings.Contains(string(data), "blackdot") {
 						markPhaseComplete(cfg, "symlinks")
 					}
 				}
 			}
 		} else {
-			// Check ~/.zshrc points to our dotfiles
+			// Check ~/.zshrc points to our blackdot
 			zshrcPath := filepath.Join(home, ".zshrc")
 			if target, err := os.Readlink(zshrcPath); err == nil {
-				if strings.Contains(target, "dotfiles/zsh/zshrc") {
+				if strings.Contains(target, "blackdot/zsh/zshrc") {
 					markPhaseComplete(cfg, "symlinks")
 				}
 			}
@@ -542,7 +542,7 @@ func phaseWorkspace(cfg *SetupConfig) error {
 	}
 
 	symlinkPath := workspaceSymlinkPath()
-	fmt.Println("The workspace directory is where dotfiles and projects are stored.")
+	fmt.Println("The workspace directory is where blackdot and projects are stored.")
 	fmt.Printf("The %s symlink will point to this directory for Claude Code portability.\n", symlinkPath)
 	fmt.Println()
 	fmt.Printf("Current target: %s\n", defaultTarget)
@@ -692,9 +692,9 @@ func phaseSymlinks(cfg *SetupConfig) error {
 		}
 	} else {
 		// Unix: Run bootstrap script
-		bootstrapScript := filepath.Join(dotfilesDir, "bootstrap", "bootstrap-dotfiles.sh")
+		bootstrapScript := filepath.Join(dotfilesDir, "bootstrap", "bootstrap-blackdot.sh")
 		if _, err := os.Stat(bootstrapScript); err != nil {
-			return fmt.Errorf("bootstrap-dotfiles.sh not found")
+			return fmt.Errorf("bootstrap-blackdot.sh not found")
 		}
 
 		cmd := exec.Command("bash", bootstrapScript)
@@ -915,7 +915,7 @@ func phasePackagesWindows(cfg *SetupConfig, dotfilesDir string, green, yellow, b
 	// Check for winget export file
 	wingetFile := filepath.Join(dotfilesDir, "winget.json")
 	if _, err := os.Stat(wingetFile); os.IsNotExist(err) {
-		fmt.Printf("%s No winget.json found in dotfiles\n", yellow("!"))
+		fmt.Printf("%s No winget.json found in blackdot\n", yellow("!"))
 		fmt.Println("Create one with: winget export -o winget.json")
 		fmt.Println()
 		fmt.Println("Alternatively, install packages manually:")
@@ -1244,7 +1244,7 @@ func phaseTemplate(cfg *SetupConfig) error {
 		fmt.Println("Initializing template system...")
 		fmt.Println()
 
-		templateCmd := filepath.Join(DotfilesDir(), "bin", "dotfiles-template")
+		templateCmd := filepath.Join(DotfilesDir(), "bin", "blackdot-template")
 		if _, err := os.Stat(templateCmd); err == nil {
 			cmd := exec.Command("bash", templateCmd, "init")
 			cmd.Stdin = os.Stdin

@@ -31,7 +31,7 @@ var hookCategories = []struct {
 			{"post_install", "After install.sh completes"},
 			{"pre_bootstrap", "Before bootstrap script"},
 			{"post_bootstrap", "After bootstrap completes"},
-			{"pre_upgrade", "Before dotfiles upgrade"},
+			{"pre_upgrade", "Before blackdot upgrade"},
 			{"post_upgrade", "After upgrade completes"},
 		},
 	},
@@ -202,12 +202,12 @@ func newHookCmd() *cobra.Command {
 
 func getHooksDir() string {
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".config", "dotfiles", "hooks")
+	return filepath.Join(home, ".config", "blackdot", "hooks")
 }
 
 func getHooksConfigPath() string {
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".config", "dotfiles", "hooks.json")
+	return filepath.Join(home, ".config", "blackdot", "hooks.json")
 }
 
 func isValidHookPoint(point string) bool {
@@ -390,7 +390,7 @@ func runHookList(args []string) error {
 func runHookRun(args []string, verbose bool) error {
 	if len(args) == 0 {
 		fmt.Println(color.RedString("[FAIL]") + " Hook point required")
-		fmt.Println("Usage: dotfiles hook run [--verbose] <point> [args...]")
+		fmt.Println("Usage: blackdot hook run [--verbose] <point> [args...]")
 		return fmt.Errorf("hook point required")
 	}
 
@@ -518,7 +518,7 @@ func runHookRun(args []string, verbose bool) error {
 func runHookAdd(args []string) error {
 	if len(args) < 2 {
 		fmt.Println(color.RedString("[FAIL]") + " Both hook point and script path required")
-		fmt.Println("Usage: dotfiles hook add <point> <script>")
+		fmt.Println("Usage: blackdot hook add <point> <script>")
 		return fmt.Errorf("missing arguments")
 	}
 
@@ -576,7 +576,7 @@ func runHookAdd(args []string) error {
 func runHookRemove(args []string) error {
 	if len(args) < 2 {
 		fmt.Println(color.RedString("[FAIL]") + " Both hook point and hook name required")
-		fmt.Println("Usage: dotfiles hook remove <point> <name>")
+		fmt.Println("Usage: blackdot hook remove <point> <name>")
 		return fmt.Errorf("missing arguments")
 	}
 
@@ -636,7 +636,7 @@ func runHookPoints() error {
 func runHookTest(args []string) error {
 	if len(args) == 0 {
 		fmt.Println(color.RedString("[FAIL]") + " Hook point required")
-		fmt.Println("Usage: dotfiles hook test <point>")
+		fmt.Println("Usage: blackdot hook test <point>")
 		return fmt.Errorf("hook point required")
 	}
 
@@ -677,11 +677,11 @@ func runHookTest(args []string) error {
 // printHookHelp prints styled help matching ZSH format
 func printHookHelp() {
 	// Title
-	BoldCyan.Print("dotfiles hook")
+	BoldCyan.Print("blackdot hook")
 	fmt.Print(" - Hook system management\n")
 	fmt.Println()
 	Bold.Print("Usage:")
-	fmt.Print(" dotfiles hook <command> [options]\n")
+	fmt.Print(" blackdot hook <command> [options]\n")
 	fmt.Println()
 
 	// Commands
@@ -725,16 +725,16 @@ func printHookHelp() {
 	// Examples
 	BoldCyan.Println("Examples:")
 	Dim.Println("  # List all hooks")
-	fmt.Println("  dotfiles hook list")
+	fmt.Println("  blackdot hook list")
 	fmt.Println()
 	Dim.Println("  # List hooks for specific point")
-	fmt.Println("  dotfiles hook list post_vault_pull")
+	fmt.Println("  blackdot hook list post_vault_pull")
 	fmt.Println()
 	Dim.Println("  # Run hooks manually")
-	fmt.Println("  dotfiles hook run shell_init --verbose")
+	fmt.Println("  blackdot hook run shell_init --verbose")
 	fmt.Println()
 	Dim.Println("  # Add a hook script")
-	fmt.Println("  dotfiles hook add post_vault_pull ~/scripts/ssh-add-keys.sh")
+	fmt.Println("  blackdot hook add post_vault_pull ~/scripts/ssh-add-keys.sh")
 	fmt.Println()
 
 	// Environment Variables
