@@ -365,13 +365,13 @@ func runClaudeInit(force bool) error {
 	yellow := color.New(color.FgYellow).SprintFunc()
 
 	// Find blackdot directory
-	dotfilesDir := os.Getenv("BLACKDOT_DIR")
-	if dotfilesDir == "" {
+	blackdotDir := os.Getenv("BLACKDOT_DIR")
+	if blackdotDir == "" {
 		home, _ := os.UserHomeDir()
-		dotfilesDir = filepath.Join(home, "workspace", "blackdot")
+		blackdotDir = filepath.Join(home, ".blackdot")
 	}
 
-	srcDir := filepath.Join(dotfilesDir, "claude")
+	srcDir := filepath.Join(blackdotDir, "claude")
 	if _, err := os.Stat(srcDir); os.IsNotExist(err) {
 		return fmt.Errorf("source directory not found: %s", srcDir)
 	}

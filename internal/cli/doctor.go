@@ -213,8 +213,8 @@ func getDotfilesDir() string {
 		return "/workspace/blackdot"
 	}
 	home, _ := os.UserHomeDir()
-	if _, err := os.Stat(filepath.Join(home, "workspace/blackdot")); err == nil {
-		return filepath.Join(home, "workspace/blackdot")
+	if _, err := os.Stat(filepath.Join(home, ".blackdot")); err == nil {
+		return filepath.Join(home, ".blackdot")
 	}
 	return ""
 }

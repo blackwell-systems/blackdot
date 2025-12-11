@@ -141,10 +141,10 @@ func TestGetVaultBackend(t *testing.T) {
 func TestGetSessionFile(t *testing.T) {
 	// Save original envs
 	originalSession := os.Getenv("VAULT_SESSION_FILE")
-	originalDotfiles := os.Getenv("BLACKDOT_DIR")
+	originalBlackdot := os.Getenv("BLACKDOT_DIR")
 	defer func() {
 		os.Setenv("VAULT_SESSION_FILE", originalSession)
-		os.Setenv("BLACKDOT_DIR", originalDotfiles)
+		os.Setenv("BLACKDOT_DIR", originalBlackdot)
 	}()
 
 	// Test with env var set
@@ -156,7 +156,7 @@ func TestGetSessionFile(t *testing.T) {
 
 	// Test with env var unset
 	os.Unsetenv("VAULT_SESSION_FILE")
-	os.Setenv("BLACKDOT_DIR", "/test/dotfiles")
+	os.Setenv("BLACKDOT_DIR", "/test/blackdot")
 	initConfig() // Re-init to pick up BLACKDOT_DIR
 	path = getSessionFile()
 	expected := filepath.Join(DotfilesDir(), "vault", ".vault-session")
@@ -300,13 +300,13 @@ func TestVaultCommandAliasesWork(t *testing.T) {
 func TestVaultItemsPath(t *testing.T) {
 	// Save and set BLACKDOT_DIR
 	original := os.Getenv("BLACKDOT_DIR")
-	os.Setenv("BLACKDOT_DIR", "/test/dotfiles")
+	os.Setenv("BLACKDOT_DIR", "/test/blackdot")
 	defer os.Setenv("BLACKDOT_DIR", original)
 
 	initConfig()
 
 	// Vault items should be in vault/ subdirectory
-	expected := filepath.FromSlash("/test/dotfiles/vault")
+	expected := filepath.FromSlash("/test/blackdot/vault")
 	vaultDir := filepath.Join(DotfilesDir(), "vault")
 	if vaultDir != expected {
 		t.Errorf("expected vault dir '%s', got '%s'", expected, vaultDir)
