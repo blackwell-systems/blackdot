@@ -20,9 +20,9 @@ import (
 type ShellType string
 
 const (
-	ShellZsh  ShellType = "zsh"
-	ShellBash ShellType = "bash"
-	ShellFish ShellType = "fish"
+	ShellZsh     ShellType = "zsh"
+	ShellBash    ShellType = "bash"
+	ShellFish    ShellType = "fish"
 	ShellUnknown ShellType = "unknown"
 )
 
@@ -82,7 +82,7 @@ func SourceCommand(path string) string {
 type Integration struct {
 	Name        string
 	Description string
-	Condition   func() bool          // Return true if integration should be enabled
+	Condition   func() bool            // Return true if integration should be enabled
 	Setup       func() (string, error) // Return shell code to eval
 }
 

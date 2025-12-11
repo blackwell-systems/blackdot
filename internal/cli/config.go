@@ -557,7 +557,7 @@ func configInitProject() error {
 
 	// Create initial config
 	initialConfig := map[string]interface{}{
-		"$schema": "https://json-schema.org/draft/2020-12/schema",
+		"$schema":  "https://json-schema.org/draft/2020-12/schema",
 		"$comment": "Project-specific blackdot configuration",
 	}
 

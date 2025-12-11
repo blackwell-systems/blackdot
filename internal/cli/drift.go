@@ -16,13 +16,13 @@ import (
 
 // Drift items to track (matches bash implementation)
 var driftTrackedFiles = map[string]string{
-	"SSH-Config":           ".ssh/config",
-	"AWS-Config":           ".aws/config",
-	"AWS-Credentials":      ".aws/credentials",
-	"Git-Config":           ".gitconfig",
-	"Environment-Secrets":  ".local/env.secrets",
-	"Template-Variables":   ".config/blackdot/template-variables.sh",
-	"Claude-Profiles":      ".claude/profiles.json",
+	"SSH-Config":          ".ssh/config",
+	"AWS-Config":          ".aws/config",
+	"AWS-Credentials":     ".aws/credentials",
+	"Git-Config":          ".gitconfig",
+	"Environment-Secrets": ".local/env.secrets",
+	"Template-Variables":  ".config/blackdot/template-variables.sh",
+	"Claude-Profiles":     ".claude/profiles.json",
 }
 
 // DriftState represents the cached vault state

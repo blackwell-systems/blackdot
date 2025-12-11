@@ -438,10 +438,10 @@ func TestFeatureDefaults(t *testing.T) {
 		feature  string
 		expected bool
 	}{
-		{"shell", true},            // core
-		{"vault", false},           // DefaultFalse
-		{"git_hooks", true},        // DefaultTrue
-		{"modern_cli", true},       // DefaultTrue
+		{"shell", true},              // core
+		{"vault", false},             // DefaultFalse
+		{"git_hooks", true},          // DefaultTrue
+		{"modern_cli", true},         // DefaultTrue
 		{"workspace_symlink", false}, // DefaultEnv (no env set)
 	}
 

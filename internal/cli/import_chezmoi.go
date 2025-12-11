@@ -16,21 +16,21 @@ import (
 
 // chezmoiImporter handles importing from chezmoi repositories
 type chezmoiImporter struct {
-	sourceDir    string
-	configFile   string
-	targetDir    string
-	dryRun       bool
-	verbose      bool
-	stats        importStats
-	configData   map[string]interface{}
+	sourceDir  string
+	configFile string
+	targetDir  string
+	dryRun     bool
+	verbose    bool
+	stats      importStats
+	configData map[string]interface{}
 }
 
 type importStats struct {
-	files      int
-	templates  int
-	dirs       int
-	skipped    int
-	errors     int
+	files     int
+	templates int
+	dirs      int
+	skipped   int
+	errors    int
 }
 
 // chezmoiFileInfo holds parsed information about a chezmoi source file
