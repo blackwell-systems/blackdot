@@ -1,6 +1,6 @@
 {
   "$schema": "https://aka.ms/winget-packages.schema.2.0.json",
-  "description": "Dotfiles Windows packages - equivalent to Brewfile",
+  "description": "Blackdot Windows packages - equivalent to Brewfile",
   "creationDate": "2025-12-08",
   "sources": [
     {
