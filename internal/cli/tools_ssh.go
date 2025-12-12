@@ -778,12 +778,10 @@ func runSSHStatusLocal() error {
 
 	// Choose color
 	var logoColor *color.Color
-	if agentRunning && keysLoaded > 0 {
-		logoColor = color.New(color.FgGreen)
-	} else if agentRunning {
-		logoColor = color.New(color.FgYellow)
+	if agentRunning {
+		logoColor = color.New(color.FgMagenta) // Purple when agent active
 	} else {
-		logoColor = color.New(color.FgRed)
+		logoColor = color.New(color.FgRed) // Red when not
 	}
 
 	// Print banner

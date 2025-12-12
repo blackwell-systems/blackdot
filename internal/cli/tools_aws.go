@@ -297,9 +297,9 @@ func runAWSStatus() error {
 	// Choose color
 	var logoColor *color.Color
 	if isAuthenticated {
-		logoColor = color.New(color.FgYellow) // AWS Orange-ish
+		logoColor = color.New(color.FgGreen) // Green when authenticated
 	} else {
-		logoColor = color.New(color.FgRed)
+		logoColor = color.New(color.FgRed) // Red when not
 	}
 
 	// Print banner
