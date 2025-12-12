@@ -233,14 +233,12 @@ func runCDKStatus() error {
 		inProject = true
 	}
 
-	// Choose color based on status
+	// Choose color based on status (follows AWS pattern)
 	var logoColor *color.Color
-	if hasCDK && inProject {
-		logoColor = color.New(color.FgHiYellow) // Orange-ish for CDK
-	} else if hasCDK {
-		logoColor = color.New(color.FgCyan)
+	if inProject {
+		logoColor = color.New(color.FgGreen) // Green when in CDK project
 	} else {
-		logoColor = color.New(color.FgRed)
+		logoColor = color.New(color.FgRed) // Red when not
 	}
 
 	// Print banner

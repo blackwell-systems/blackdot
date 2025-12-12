@@ -329,12 +329,18 @@ func runRustStatus() error {
 		}
 	}
 
+	// Check if in Rust project
+	_, err := os.Stat("Cargo.toml")
+	inProject := err == nil
+
 	// Choose color based on status
 	var logoColor string
-	if rustInstalled {
-		logoColor = "\033[38;5;208m" // Orange (Rust color)
+	if inProject {
+		logoColor = "\033[32m" // Green when in project
+	} else if rustInstalled {
+		logoColor = "\033[38;5;208m" // Orange when Rust installed but not in project
 	} else {
-		logoColor = "\033[31m" // Red
+		logoColor = "\033[31m" // Red when not installed
 	}
 	reset := "\033[0m"
 	dim := "\033[2m"

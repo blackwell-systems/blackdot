@@ -375,12 +375,18 @@ func runPythonStatus() error {
 		}
 	}
 
+	// Check if in Python project
+	_, err := os.Stat("pyproject.toml")
+	inProject := err == nil
+
 	// Choose color based on status
 	var logoColor string
-	if pythonInstalled {
-		logoColor = "\033[33m" // Yellow (Python color)
+	if inProject {
+		logoColor = "\033[32m" // Green when in project
+	} else if pythonInstalled {
+		logoColor = "\033[33m" // Yellow when Python installed but not in project
 	} else {
-		logoColor = "\033[31m" // Red
+		logoColor = "\033[31m" // Red when not installed
 	}
 	reset := "\033[0m"
 	dim := "\033[2m"
