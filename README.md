@@ -18,7 +18,7 @@
 
 > **Modular dotfiles framework** • Built for Claude Code • Multi-vault secrets • Cross-platform • Made with Go
 
-[Changelog](CHANGELOG.md) | [Full Documentation](docs/README-FULL.md)
+[Changelog](CHANGELOG.md) | [Documentation](https://blackwell-systems.github.io/blackdot/)
 
 ---
 
@@ -724,14 +724,10 @@ See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community guidelines.
 Blackwell Systems™ and the Blackwell Systems logo are trademarks of Dayna Blackwell.
 You may use the name "Blackwell Systems" to refer to this project, but you may not
 use the name or logo in a way that suggests endorsement or official affiliation
-without prior written permission. See [BRAND.md](BRAND.md) for usage guidelines.
+without prior written permission. See [BRAND.md](docs/BRAND.md) for usage guidelines.
 
 ---
 
 ## License
 
 Apache License 2.0 - see [LICENSE](LICENSE) for details.
-
----
-
-**Questions?** Open an [issue](https://github.com/blackwell-systems/blackdot/issues) or check the [full documentation](docs/README-FULL.md).
