@@ -227,29 +227,29 @@ Next steps:
 
 ## Implementation Plan
 
-### Phase 1: Core CLI Command
+### Phase 1: Core CLI Command ✅
 **Effort:** 1 day
 
-- [ ] Create `internal/cli/devcontainer.go`
-- [ ] Implement `blackdot devcontainer init` command
-- [ ] Hardcoded list of common base images
-- [ ] Template for devcontainer.json generation
-- [ ] Interactive prompts for image and preset selection
-- [ ] Flag support for non-interactive usage
+- [x] Create `internal/cli/devcontainer.go`
+- [x] Implement `blackdot devcontainer init` command
+- [x] Hardcoded list of common base images
+- [x] Template for devcontainer.json generation
+- [x] Interactive prompts for image and preset selection
+- [x] Flag support for non-interactive usage
 
 **Files:**
 ```
-internal/cli/devcontainer.go     (~300 lines)
-internal/cli/devcontainer_test.go (~200 lines)
+internal/cli/devcontainer.go     (~380 lines)
+internal/cli/devcontainer_test.go (~330 lines)
 ```
 
-### Phase 2: Devcontainer Feature
+### Phase 2: Devcontainer Feature ✅
 **Effort:** 0.5 days
 
-- [ ] Create feature definition in `devcontainer-feature/`
-- [ ] Write install.sh script
-- [ ] Create devcontainer-feature.json manifest
-- [ ] Test locally with devcontainer CLI
+- [x] Create feature definition in `devcontainer-feature/`
+- [x] Write install.sh script
+- [x] Create devcontainer-feature.json manifest
+- [x] Test locally with devcontainer CLI
 
 **Files:**
 ```
@@ -259,12 +259,12 @@ devcontainer-feature/
 └── README.md
 ```
 
-### Phase 3: CI/CD & Publishing
+### Phase 3: CI/CD & Publishing ✅
 **Effort:** 0.5 days
 
-- [ ] Add GitHub Action to publish feature to ghcr.io
-- [ ] Version tagging (match blackdot releases)
-- [ ] Documentation updates
+- [x] Add GitHub Action to publish feature to ghcr.io
+- [x] Version tagging (match blackdot releases)
+- [x] Documentation updates
 
 **Files:**
 ```
