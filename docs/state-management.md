@@ -36,7 +36,7 @@ All state and configuration is stored in a single JSON file:
     "retention_days": 30,
     "max_snapshots": 10,
     "compress": true,
-    "location": "~/.local/share/dotfiles/backups"
+    "location": "~/.local/share/blackdot/backups"
   },
   "setup": {
     "completed": ["symlinks", "packages", "vault", "secrets"],
@@ -50,7 +50,7 @@ All state and configuration is stored in a single JSON file:
   "paths": {
     "dotfiles_dir": "~/workspace/blackdot",
     "config_dir": "~/.config/blackdot",
-    "backup_dir": "~/.local/share/dotfiles/backups"
+    "backup_dir": "~/.local/share/blackdot/backups"
   },
   "features": {
     "vault": true,
@@ -360,7 +360,7 @@ vim ~/.config/blackdot/config.json
 
 ## See Also
 
-- [Setup Wizard](cli-reference.md#dotfiles-setup) - Full setup command reference
+- [Setup Wizard](cli-reference.md#blackdot-setup) - Full setup command reference
 - [Feature Registry](features.md) - Enable/disable optional features
 - [Vault System](vault-README.md) - Multi-backend secret management
 - [Troubleshooting](troubleshooting.md) - Common issues and solutions

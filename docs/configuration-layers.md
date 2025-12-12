@@ -349,7 +349,7 @@ Pattern: `config.key.name` → `BLACKDOT_CONFIG_KEY_NAME`
 
 ## State vs Configuration
 
-The dotfiles system distinguishes between **state** (what happened) and **configuration** (what should happen):
+The blackdot system distinguishes between **state** (what happened) and **configuration** (what should happen):
 
 | Data Type | Example | Layer-Aware | Why |
 |-----------|---------|-------------|-----|
@@ -445,6 +445,5 @@ blackdot config init machine $(hostname -s)
 
 - [Feature Registry](features.md) - Feature enable/disable system
 - [State Management](state-management.md) - Setup wizard state tracking
-- [CLI Reference](cli-reference.md) - All dotfiles commands
-- [Design Document](design/IMPL-configuration-layers.md) - Technical implementation details
+- [CLI Reference](cli-reference.md) - All blackdot commands
 
