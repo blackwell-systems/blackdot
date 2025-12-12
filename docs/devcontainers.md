@@ -72,9 +72,20 @@ blackdot devcontainer init [OPTIONS]
 | `--image` | | Base image (go, rust, python, node, java, ubuntu, alpine) |
 | `--preset` | | Blackdot preset (minimal, developer, claude, full) |
 | `--services` | | Comma-separated list of services (postgres, redis, mysql, etc.) |
+| `--stack` | | Predefined service stack (web, api, aws, full, mongo) |
 | `--output` | `-o` | Output directory (default: .devcontainer) |
 | `--force` | `-f` | Overwrite existing configuration |
 | `--no-extensions` | | Don't include VS Code extensions |
+
+**Predefined Stacks:**
+
+| Stack | Services | Description |
+|-------|----------|-------------|
+| `web` | postgres, redis | Common web application |
+| `api` | postgres, redis | API backend |
+| `aws` | localstack, minio | AWS development |
+| `full` | postgres, redis, minio | Full-featured |
+| `mongo` | mongo, redis | MongoDB stack |
 
 **Examples:**
 
@@ -88,8 +99,11 @@ blackdot devcontainer init --image python --preset claude
 # Minimal Rust container
 blackdot devcontainer init --image rust --preset minimal
 
-# Go with PostgreSQL and Redis (generates docker-compose.yml)
-blackdot devcontainer init --image go --preset developer --services postgres,redis
+# Go with PostgreSQL and Redis using stack preset
+blackdot devcontainer init --image go --preset developer --stack web
+
+# Custom service selection
+blackdot devcontainer init --image go --preset developer --services postgres,redis,minio
 ```
 
 ### `blackdot devcontainer images`
@@ -137,6 +151,12 @@ This generates:
 - `docker-compose.yml` with all services configured
 - `.env.example` with connection strings
 - `devcontainer.json` configured for docker-compose
+
+**Features:**
+- Health checks for all services (app waits for healthy dependencies)
+- Proper `depends_on` with `condition: service_healthy`
+- Volume persistence for data
+- SSH agent forwarding in compose environments
 
 ### Available Services
 
