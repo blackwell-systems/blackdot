@@ -45,7 +45,7 @@ fi
 |---------|-------------|
 | `shell` | ZSH shell, prompt, and core aliases |
 
-Core features cannot be disabled—they're essential for the dotfiles system to function.
+Core features cannot be disabled—they're essential for the blackdot system to function.
 
 ### Optional Features
 

@@ -244,11 +244,11 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
 │  (shell config, secrets, etc)   │     │   (Claude profile management)   │
 ├─────────────────────────────────┤     ├─────────────────────────────────┤
 │                                 │     │                                 │
-│  dotfiles status    ───────────────────► shows Claude profile status   │
+│  blackdot status    ───────────────────► shows Claude profile status   │
 │  blackdot doctor    ───────────────────► checks Claude health          │
 │  blackdot drift     ───────────────────► detects profile changes       │
 │  blackdot vault pull ───────────────► restores profiles.json        │
-│  dotfiles packages  ───────────────────► suggests dotclaude install    │
+│  blackdot packages  ───────────────────► suggests dotclaude install    │
 │  blackdot setup     ───────────────────► offers dotclaude setup        │
 │                                 │     │                                 │
 └─────────────────────────────────┘     └─────────────────────────────────┘
@@ -260,7 +260,7 @@ This repo integrates with [dotclaude](https://github.com/blackwell-systems/dotcl
                                         dotclaude create personal
 ```
 
-**Key principle:** dotclaude is NOT wrapped or hidden. Users run it directly for all profile management. dotfiles just "knows about" dotclaude to enhance existing commands.
+**Key principle:** dotclaude is NOT wrapped or hidden. Users run it directly for all profile management. blackdot just "knows about" dotclaude to enhance existing commands.
 
 ### What's Integrated
 
@@ -334,7 +334,7 @@ If you use Claude Code without dotclaude:
 - `blackdot status` shows a gentle hint: `try: dotclaude`
 - `blackdot doctor` suggests installation with instructions
 - `blackdot packages` mentions dotclaude availability
-- No impact on other dotfiles functionality - completely optional
+- No impact on other blackdot functionality - completely optional
 
 ---
 
@@ -343,9 +343,9 @@ If you use Claude Code without dotclaude:
 We're exploring deeper Claude integration via [Model Context Protocol (MCP)](https://modelcontextprotocol.io/). See [Roadmap](ROADMAP.md#mcp-server-concept) for details.
 
 Potential capabilities:
-- `dotfiles://status` - Health dashboard
-- `dotfiles://secrets/restore` - Trigger vault restore
-- `dotfiles://doctor` - Run health checks
+- `blackdot://status` - Health dashboard
+- `blackdot://secrets/restore` - Trigger vault restore
+- `blackdot://doctor` - Run health checks
 - Native tool integration without shell commands
 
 ---

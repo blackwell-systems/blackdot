@@ -1,6 +1,6 @@
 # Unit Tests
 
-This directory contains unit tests for the dotfiles repository, using [bats-core](https://github.com/bats-core/bats-core) (Bash Automated Testing System).
+This directory contains unit tests for the blackdot repository, using [bats-core](https://github.com/bats-core/bats-core) (Bash Automated Testing System).
 
 ## Prerequisites
 
