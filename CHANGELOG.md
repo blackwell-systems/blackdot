@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New `blackdot devcontainer` command for generating devcontainer configurations
   - `blackdot devcontainer init` - generate devcontainer.json with blackdot feature
   - `blackdot devcontainer images` - list available base images
+  - `blackdot devcontainer services` - list available services for docker-compose
+  - `--services` flag for init command to generate docker-compose.yml
+  - Docker Compose support with postgres, redis, mysql, mongo, sqlite, localstack, minio
+  - Automatic environment variable injection for service connections
   - Support for Go 1.23, Python 3.13, Node 22, Rust, Java 21, Ubuntu, Alpine, Debian
   - Four presets: minimal, developer, claude, full
   - SSH agent socket forwarding for git operations in containers
