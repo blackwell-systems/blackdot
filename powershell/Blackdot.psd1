@@ -87,6 +87,9 @@
         # Zoxide integration
         'Initialize-Zoxide',
 
+        # Starship prompt
+        'Initialize-Starship',
+
         # Core commands
         'blackdot-status', 'blackdot-doctor', 'blackdot-setup',
         'blackdot-features', 'blackdot-vault', 'blackdot-hook',
