@@ -236,9 +236,9 @@ func TestGetLayeredEnv(t *testing.T) {
 	m.Set("vault.backend", "bitwarden")
 
 	// Set env var (should take precedence)
-	orig := os.Getenv("DOTFILES_VAULT_BACKEND")
-	os.Setenv("DOTFILES_VAULT_BACKEND", "1password")
-	defer os.Setenv("DOTFILES_VAULT_BACKEND", orig)
+	orig := os.Getenv("BLACKDOT_VAULT_BACKEND")
+	os.Setenv("BLACKDOT_VAULT_BACKEND", "1password")
+	defer os.Setenv("BLACKDOT_VAULT_BACKEND", orig)
 
 	result, err := m.GetLayered("vault.backend")
 	if err != nil {
@@ -268,9 +268,9 @@ func TestGetLayeredUser(t *testing.T) {
 	m.Set("vault.backend", "bitwarden")
 
 	// Clear any env var
-	orig := os.Getenv("DOTFILES_VAULT_BACKEND")
-	os.Unsetenv("DOTFILES_VAULT_BACKEND")
-	defer os.Setenv("DOTFILES_VAULT_BACKEND", orig)
+	orig := os.Getenv("BLACKDOT_VAULT_BACKEND")
+	os.Unsetenv("BLACKDOT_VAULT_BACKEND")
+	defer os.Setenv("BLACKDOT_VAULT_BACKEND", orig)
 
 	result, err := m.GetLayered("vault.backend")
 	if err != nil {
@@ -297,9 +297,9 @@ func TestGetLayeredDefault(t *testing.T) {
 	m := NewManager(tmpDir, tmpDir)
 
 	// Clear env var
-	orig := os.Getenv("DOTFILES_VAULT_BACKEND")
-	os.Unsetenv("DOTFILES_VAULT_BACKEND")
-	defer os.Setenv("DOTFILES_VAULT_BACKEND", orig)
+	orig := os.Getenv("BLACKDOT_VAULT_BACKEND")
+	os.Unsetenv("BLACKDOT_VAULT_BACKEND")
+	defer os.Setenv("BLACKDOT_VAULT_BACKEND", orig)
 
 	result, err := m.GetLayered("vault.backend")
 	if err != nil {
