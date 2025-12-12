@@ -46,6 +46,7 @@ The unified command for managing your blackdot configuration. All subcommands ar
 | `metrics` | - | Visualize health check metrics over time |
 | `setup` | - | Interactive setup wizard |
 | `macos` | - | macOS system settings (macOS only) |
+| `devcontainer` | `dc` | Generate devcontainer configurations |
 | `upgrade` | `update` | Pull latest and run bootstrap |
 | `uninstall` | - | Remove blackdot configuration |
 | `cd` | - | Change to blackdot directory |
@@ -1700,6 +1701,111 @@ blackdot macos discover --generate   # Generate settings.sh
 # Inspect specific domain
 blackdot macos discover --domain com.apple.dock
 ```
+
+---
+
+## Devcontainer Commands
+
+### `blackdot devcontainer`
+
+Generate devcontainer configurations for VS Code, GitHub Codespaces, and DevPod.
+
+```bash
+blackdot devcontainer <command> [OPTIONS]
+blackdot dc <command>    # Alias
+```
+
+**Subcommands:**
+
+| Command | Description |
+|---------|-------------|
+| `init` | Generate a devcontainer.json for your project |
+| `images` | List available base images |
+| `help` | Show help |
+
+---
+
+### `blackdot devcontainer init`
+
+Generate a devcontainer.json configuration file.
+
+```bash
+blackdot devcontainer init [OPTIONS]
+```
+
+**Options:**
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--image` | | Base image to use (e.g., go, rust, python, node) |
+| `--preset` | | Blackdot preset (minimal, developer, claude, full) |
+| `--output` | `-o` | Output directory (default: .devcontainer) |
+| `--force` | `-f` | Overwrite existing devcontainer.json |
+| `--no-extensions` | | Don't include VS Code extensions |
+
+**Available Images:**
+
+| Name | Image | Extensions |
+|------|-------|------------|
+| Go | `mcr.microsoft.com/devcontainers/go:1.22` | golang.go |
+| Rust | `mcr.microsoft.com/devcontainers/rust:latest` | rust-analyzer |
+| Python | `mcr.microsoft.com/devcontainers/python:3.12` | ms-python.python |
+| Node | `mcr.microsoft.com/devcontainers/typescript-node:20` | dbaeumer.vscode-eslint |
+| Ubuntu | `mcr.microsoft.com/devcontainers/base:ubuntu` | - |
+| Alpine | `mcr.microsoft.com/devcontainers/base:alpine` | - |
+
+**Available Presets:**
+
+| Preset | Description |
+|--------|-------------|
+| `minimal` | Shell configuration only |
+| `developer` | Full development tools |
+| `claude` | Claude Code integration with portable sessions |
+| `full` | All features enabled |
+
+**Examples:**
+
+```bash
+# Generate Go devcontainer with developer preset
+blackdot devcontainer init --image go --preset developer
+
+# Generate Python container for Claude Code
+blackdot devcontainer init --image python --preset claude
+
+# Overwrite existing configuration
+blackdot devcontainer init --image rust --force
+
+# Custom output directory
+blackdot devcontainer init --image node -o ./my-container
+```
+
+**Generated Configuration:**
+
+The generated `devcontainer.json` includes:
+
+- Base image from Microsoft's devcontainer registry
+- Blackdot feature from ghcr.io/blackwell-systems/blackdot
+- SSH agent socket forwarding for git operations
+- VS Code extensions for the selected language
+- postStartCommand to run `blackdot setup`
+
+**SSH Agent Forwarding:**
+
+The generated configuration mounts your host's SSH agent socket into the container, enabling git operations with your SSH keys without copying private keys into the container.
+
+---
+
+### `blackdot devcontainer images`
+
+List all available devcontainer base images.
+
+```bash
+blackdot devcontainer images
+```
+
+**Output:**
+
+Shows all supported images with their descriptions and included VS Code extensions.
 
 ---
 

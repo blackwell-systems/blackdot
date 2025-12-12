@@ -80,6 +80,7 @@ Core features cannot be disabled—they're essential for the blackdot system to 
 | `nvm_integration` | Lazy-loaded NVM for Node.js version management | - |
 | `sdkman_integration` | Lazy-loaded SDKMAN for Java/Gradle/Kotlin | - |
 | `dotclaude` | dotclaude profile management for Claude Code | `claude_integration` |
+| `devcontainer` | Devcontainer support for VS Code, Codespaces, DevPod | - |
 
 ---
 
