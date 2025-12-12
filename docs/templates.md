@@ -113,7 +113,7 @@ export AWS_PROFILE="personal"
 ### File Locations
 
 ```
-dotfiles/
+blackdot/
 ├── templates/
 │   ├── _variables.sh           # Default variable definitions
 │   ├── _variables.local.sh     # Your machine-specific overrides (gitignored)
@@ -126,14 +126,11 @@ dotfiles/
 │       ├── ssh-config.tmpl     # → ~/.ssh/config
 │       └── claude.local.tmpl   # → ~/.claude.local
 │
-├── generated/                  # Rendered output (gitignored)
-│   ├── gitconfig
-│   ├── 99-local.zsh
-│   ├── ssh-config
-│   └── claude.local
-│
-└── lib/
-    └── _templates.sh           # Template engine
+└── generated/                  # Rendered output (gitignored)
+    ├── gitconfig
+    ├── 99-local.zsh
+    ├── ssh-config
+    └── claude.local
 ```
 
 ---
@@ -963,11 +960,11 @@ Template variables are stored like any other syncable item:
 With template variables in vault, setting up a new machine becomes:
 
 ```bash
-# 1. Clone dotfiles
-git clone https://github.com/you/dotfiles ~/dotfiles
+# 1. Clone blackdot
+git clone https://github.com/you/blackdot ~/.blackdot
 
 # 2. Bootstrap (installs dependencies, sets up vault)
-cd ~/dotfiles && ./install.sh
+cd ~/.blackdot && ./install.sh
 
 # 3. Pull SSH keys, AWS config, etc from vault
 blackdot vault pull
