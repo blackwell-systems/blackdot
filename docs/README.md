@@ -280,11 +280,13 @@ blackdot lint            # Validate syntax
 blackdot/
 ├── cmd/blackdot/        # Go CLI entry point
 ├── internal/            # Go implementation
-│   ├── cli/             # Cobra commands (20+ files)
+│   ├── cli/             # Cobra commands (30+ files)
 │   ├── feature/         # Feature Registry system
 │   ├── config/          # JSON configuration management
 │   └── template/        # Template rendering engine
 ├── bootstrap/           # Platform setup scripts
+├── brew/                # Homebrew Brewfiles (minimal/enhanced/full)
+├── docker/              # Docker configurations
 ├── zsh/zsh.d/           # Modular shell config (16 modules)
 ├── powershell/          # Windows PowerShell module
 ├── vault/               # Multi-vault integration (Bitwarden, 1Password, pass)

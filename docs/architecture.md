@@ -324,7 +324,7 @@ blackdot/
 │   └── main.go                   # Binary entry point
 │
 ├── internal/                     # Go implementation
-│   ├── cli/                      # Cobra commands (20+ files)
+│   ├── cli/                      # Cobra commands (30+ files)
 │   │   ├── root.go               # Root command
 │   │   ├── features.go           # Feature management
 │   │   ├── vault.go              # Vault operations (vaultmux)
@@ -351,6 +351,16 @@ blackdot/
 │
 ├── bin/                          # Compiled Go binary
 │   └── blackdot                  # The CLI (or blackdot.exe on Windows)
+│
+├── brew/                         # Homebrew Brewfiles
+│   ├── Brewfile                  # Full install (~80 packages)
+│   ├── Brewfile.enhanced         # Modern tools (~40 packages)
+│   └── Brewfile.minimal          # Essentials only (~15 packages)
+│
+├── docker/                       # Docker configurations
+│   ├── Dockerfile.minimal        # Base with Go binary only
+│   ├── Dockerfile.medium         # With Homebrew
+│   └── Dockerfile.full           # Complete environment
 │
 ├── lib/                          # Minimal shell helpers
 │   ├── _colors.sh                # Color output functions
