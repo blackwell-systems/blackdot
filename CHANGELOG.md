@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Renamed primary alias from `d` to `b` for blackdot branding consistency
   - Removed README-FULL.md, moved unique content to subdocs
   - Updated directory structure documentation to reflect Go-based architecture
+  - Improved docsify coverpage with separate platform-specific install blocks
+  - Updated dotclaude integration docs for Go migration (removed shell script references)
+  - Streamlined README (removed use cases section, fixed broken links)
+  - Fixed BRAND.md link path (moved to docs/)
 
 ### Fixed
 
