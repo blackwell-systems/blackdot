@@ -94,7 +94,7 @@ All settings are now stored in the same `config.json` file:
 - `backup.location` - Backup directory path
 
 **Paths (`paths.*`):**
-- `paths.dotfiles_dir` - Custom dotfiles installation directory
+- `paths.dotfiles_dir` - Custom blackdot installation directory
 - `paths.config_dir` - Configuration directory (default: `~/.config/blackdot`)
 - `paths.backup_dir` - Backup storage location
 
