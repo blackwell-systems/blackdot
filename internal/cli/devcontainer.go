@@ -663,7 +663,7 @@ func generateDevcontainerConfig(image DevcontainerImage, preset string, noVSExt 
 				"version": "latest",
 			},
 		},
-		PostStartCommand: fmt.Sprintf("blackdot setup --preset %s && echo '⚫💨📦 blackdot credentials loaded'", preset),
+		PostStartCommand: fmt.Sprintf("blackdot setup --preset %s && echo '[blackdot] ⚫💨📦 credentials loaded'", preset),
 		RemoteUser:       "vscode",
 		// SSH agent forwarding - mount host socket into container
 		Mounts: []string{
@@ -708,7 +708,7 @@ func generateDevcontainerConfigWithCompose(image DevcontainerImage, preset strin
 				"version": "latest",
 			},
 		},
-		PostStartCommand: fmt.Sprintf("blackdot setup --preset %s && echo '⚫💨📦 blackdot credentials loaded'", preset),
+		PostStartCommand: fmt.Sprintf("blackdot setup --preset %s && echo '[blackdot] ⚫💨📦 credentials loaded'", preset),
 		RemoteUser:       "vscode",
 		ContainerEnv:     envVars,
 	}
