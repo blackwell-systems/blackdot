@@ -23,8 +23,8 @@ type DevcontainerImage struct {
 // Common devcontainer base images from Microsoft
 var devcontainerImages = []DevcontainerImage{
 	{
-		Name:        "Go 1.22",
-		Image:       "mcr.microsoft.com/devcontainers/go:1.22",
+		Name:        "Go 1.23",
+		Image:       "mcr.microsoft.com/devcontainers/go:1.23",
 		Description: "Go development with tools",
 		Extensions:  []string{"golang.go"},
 	},
@@ -35,21 +35,21 @@ var devcontainerImages = []DevcontainerImage{
 		Extensions:  []string{"rust-lang.rust-analyzer"},
 	},
 	{
-		Name:        "Python 3.12",
-		Image:       "mcr.microsoft.com/devcontainers/python:3.12",
+		Name:        "Python 3.13",
+		Image:       "mcr.microsoft.com/devcontainers/python:3.13",
 		Description: "Python development",
 		Extensions:  []string{"ms-python.python"},
 	},
 	{
-		Name:        "Node 20 (TypeScript)",
-		Image:       "mcr.microsoft.com/devcontainers/typescript-node:20",
-		Description: "Node.js with TypeScript",
+		Name:        "Node 22 (TypeScript)",
+		Image:       "mcr.microsoft.com/devcontainers/typescript-node:22",
+		Description: "Node.js LTS with TypeScript",
 		Extensions:  []string{"dbaeumer.vscode-eslint"},
 	},
 	{
 		Name:        "Java 21",
 		Image:       "mcr.microsoft.com/devcontainers/java:21",
-		Description: "Java development",
+		Description: "Java development (LTS)",
 		Extensions:  []string{"vscjava.vscode-java-pack"},
 	},
 	{

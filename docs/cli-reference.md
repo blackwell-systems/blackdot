@@ -1747,10 +1747,11 @@ blackdot devcontainer init [OPTIONS]
 
 | Name | Image | Extensions |
 |------|-------|------------|
-| Go | `mcr.microsoft.com/devcontainers/go:1.22` | golang.go |
+| Go | `mcr.microsoft.com/devcontainers/go:1.23` | golang.go |
 | Rust | `mcr.microsoft.com/devcontainers/rust:latest` | rust-analyzer |
-| Python | `mcr.microsoft.com/devcontainers/python:3.12` | ms-python.python |
-| Node | `mcr.microsoft.com/devcontainers/typescript-node:20` | dbaeumer.vscode-eslint |
+| Python | `mcr.microsoft.com/devcontainers/python:3.13` | ms-python.python |
+| Node | `mcr.microsoft.com/devcontainers/typescript-node:22` | dbaeumer.vscode-eslint |
+| Java | `mcr.microsoft.com/devcontainers/java:21` | vscjava.vscode-java-pack |
 | Ubuntu | `mcr.microsoft.com/devcontainers/base:ubuntu` | - |
 | Alpine | `mcr.microsoft.com/devcontainers/base:alpine` | - |
 

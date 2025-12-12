@@ -137,8 +137,8 @@ func TestDevcontainerPresets(t *testing.T) {
 // TestGenerateDevcontainerConfig verifies config generation
 func TestGenerateDevcontainerConfig(t *testing.T) {
 	image := DevcontainerImage{
-		Name:        "Go 1.22",
-		Image:       "mcr.microsoft.com/devcontainers/go:1.22",
+		Name:        "Go 1.23",
+		Image:       "mcr.microsoft.com/devcontainers/go:1.23",
 		Description: "Go development",
 		Extensions:  []string{"golang.go"},
 	}
@@ -192,8 +192,8 @@ func TestGenerateDevcontainerConfig(t *testing.T) {
 // TestGenerateDevcontainerConfigNoExtensions verifies --no-extensions flag
 func TestGenerateDevcontainerConfigNoExtensions(t *testing.T) {
 	image := DevcontainerImage{
-		Name:       "Go 1.22",
-		Image:      "mcr.microsoft.com/devcontainers/go:1.22",
+		Name:       "Go 1.23",
+		Image:      "mcr.microsoft.com/devcontainers/go:1.23",
 		Extensions: []string{"golang.go"},
 	}
 
@@ -273,7 +273,7 @@ func TestRunDevcontainerInit(t *testing.T) {
 		t.Fatalf("failed to parse devcontainer.json: %v", err)
 	}
 
-	if config.Image != "mcr.microsoft.com/devcontainers/go:1.22" {
+	if config.Image != "mcr.microsoft.com/devcontainers/go:1.23" {
 		t.Errorf("unexpected image: %s", config.Image)
 	}
 }
