@@ -117,6 +117,8 @@ func init() {
 		newImportCmd(),
 		// Shell initialization (outputs feature check functions)
 		newShellInitCmd(),
+		// Devcontainer support
+		newDevcontainerCmd(),
 		// Note: migrate command dropped - one-time v2→v3 migration handled by bash
 	)
 }
