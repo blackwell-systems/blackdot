@@ -510,12 +510,18 @@ func runGoStatus() error {
 		}
 	}
 
+	// Check if in Go project
+	_, err := os.Stat("go.mod")
+	inProject := err == nil
+
 	// Choose color based on status
 	var logoColor string
-	if goInstalled {
-		logoColor = "\033[36m" // Cyan (Go blue)
+	if inProject {
+		logoColor = "\033[32m" // Green when in project
+	} else if goInstalled {
+		logoColor = "\033[36m" // Cyan when Go installed but not in project
 	} else {
-		logoColor = "\033[31m" // Red
+		logoColor = "\033[31m" // Red when not installed
 	}
 	reset := "\033[0m"
 	dim := "\033[2m"
