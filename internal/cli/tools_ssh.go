@@ -39,6 +39,9 @@ Commands:
   copy     - Copy public key to remote host
   tunnel   - Create SSH port forward tunnel
   socks    - Create SOCKS5 proxy through SSH host`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runSSHStatusLocal()
+		},
 	}
 
 	// Add SSH subcommands

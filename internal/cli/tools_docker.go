@@ -20,6 +20,9 @@ func newDockerToolsCmd() *cobra.Command {
 
 Cross-platform Docker tools that work on Linux, macOS, and Windows.
 Feature-gated: requires 'docker_tools' feature to be enabled.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return dockerStatus()
+		},
 	}
 
 	cmd.AddCommand(newDockerPsCmd())

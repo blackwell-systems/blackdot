@@ -28,6 +28,9 @@ Commands:
   outputs    - Show CloudFormation stack outputs
   context    - Show or clear CDK context
   status     - Show CDK status with banner`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runCDKStatus()
+		},
 	}
 
 	cmd.AddCommand(
