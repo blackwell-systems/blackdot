@@ -37,6 +37,22 @@ Feature-gated: requires 'docker_tools' feature to be enabled.`,
 	cmd.AddCommand(newDockerPruneCmd())
 	cmd.AddCommand(newDockerInspectCmd())
 	cmd.AddCommand(newDockerStatusCmd())
+	// Container lifecycle
+	cmd.AddCommand(newDockerLogsCmd())
+	cmd.AddCommand(newDockerExecCmd())
+	cmd.AddCommand(newDockerShellCmd())
+	cmd.AddCommand(newDockerStopCmd())
+	cmd.AddCommand(newDockerStartCmd())
+	cmd.AddCommand(newDockerRestartCmd())
+	cmd.AddCommand(newDockerRmCmd())
+	cmd.AddCommand(newDockerRmiCmd())
+	// Build commands
+	cmd.AddCommand(newDockerBuildCmd())
+	cmd.AddCommand(newDockerPullCmd())
+	cmd.AddCommand(newDockerPushCmd())
+	cmd.AddCommand(newDockerTagCmd())
+	// Compose commands
+	cmd.AddCommand(newDockerComposeCmd())
 
 	return cmd
 }
@@ -707,6 +723,657 @@ func countNonEmpty(slice []string) int {
 		}
 	}
 	return count
+}
+
+// =============================================================================
+// Container Lifecycle Commands
+// =============================================================================
+
+// newDockerLogsCmd shows container logs
+func newDockerLogsCmd() *cobra.Command {
+	var follow bool
+	var tail string
+
+	cmd := &cobra.Command{
+		Use:   "logs <container>",
+		Short: "Show container logs",
+		Long:  `Display logs from a container.`,
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return dockerLogs(args[0], follow, tail)
+		},
+	}
+
+	cmd.Flags().BoolVarP(&follow, "follow", "f", false, "Follow log output")
+	cmd.Flags().StringVarP(&tail, "tail", "n", "", "Number of lines to show from end")
+
+	return cmd
+}
+
+func dockerLogs(container string, follow bool, tail string) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	args := []string{"logs"}
+	if follow {
+		args = append(args, "-f")
+	}
+	if tail != "" {
+		args = append(args, "--tail", tail)
+	}
+	args = append(args, container)
+
+	cmd := exec.Command("docker", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// newDockerExecCmd executes command in container
+func newDockerExecCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "exec <container> <command> [args...]",
+		Short: "Execute command in container",
+		Long:  `Execute a command inside a running container.`,
+		Args:  cobra.MinimumNArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return dockerExec(args[0], args[1:])
+		},
+	}
+}
+
+func dockerExec(container string, command []string) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	args := []string{"exec", "-it", container}
+	args = append(args, command...)
+
+	cmd := exec.Command("docker", args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// newDockerShellCmd opens shell in container
+func newDockerShellCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "shell <container>",
+		Short: "Open shell in container",
+		Long:  `Open an interactive shell in a container (tries bash, falls back to sh).`,
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return dockerShell(args[0])
+		},
+	}
+}
+
+func dockerShell(container string) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	// Try bash first
+	cmd := exec.Command("docker", "exec", "-it", container, "bash")
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err == nil {
+		return nil
+	}
+
+	// Fall back to sh
+	cmd = exec.Command("docker", "exec", "-it", container, "sh")
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// newDockerStopCmd stops containers
+func newDockerStopCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "stop <container> [containers...]",
+		Short: "Stop containers",
+		Long:  `Stop one or more running containers.`,
+		Args:  cobra.MinimumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return dockerStop(args)
+		},
+	}
+}
+
+func dockerStop(containers []string) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	args := append([]string{"stop"}, containers...)
+	cmd := exec.Command("docker", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// newDockerStartCmd starts containers
+func newDockerStartCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "start <container> [containers...]",
+		Short: "Start containers",
+		Long:  `Start one or more stopped containers.`,
+		Args:  cobra.MinimumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return dockerStart(args)
+		},
+	}
+}
+
+func dockerStart(containers []string) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	args := append([]string{"start"}, containers...)
+	cmd := exec.Command("docker", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// newDockerRestartCmd restarts containers
+func newDockerRestartCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "restart <container> [containers...]",
+		Short: "Restart containers",
+		Long:  `Restart one or more containers.`,
+		Args:  cobra.MinimumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return dockerRestart(args)
+		},
+	}
+}
+
+func dockerRestart(containers []string) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	args := append([]string{"restart"}, containers...)
+	cmd := exec.Command("docker", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// newDockerRmCmd removes containers
+func newDockerRmCmd() *cobra.Command {
+	var force bool
+
+	cmd := &cobra.Command{
+		Use:   "rm <container> [containers...]",
+		Short: "Remove containers",
+		Long:  `Remove one or more containers.`,
+		Args:  cobra.MinimumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return dockerRm(args, force)
+		},
+	}
+
+	cmd.Flags().BoolVarP(&force, "force", "f", false, "Force remove running containers")
+
+	return cmd
+}
+
+func dockerRm(containers []string, force bool) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	args := []string{"rm"}
+	if force {
+		args = append(args, "-f")
+	}
+	args = append(args, containers...)
+
+	cmd := exec.Command("docker", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// newDockerRmiCmd removes images
+func newDockerRmiCmd() *cobra.Command {
+	var force bool
+
+	cmd := &cobra.Command{
+		Use:   "rmi <image> [images...]",
+		Short: "Remove images",
+		Long:  `Remove one or more images.`,
+		Args:  cobra.MinimumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return dockerRmi(args, force)
+		},
+	}
+
+	cmd.Flags().BoolVarP(&force, "force", "f", false, "Force remove images")
+
+	return cmd
+}
+
+func dockerRmi(images []string, force bool) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	args := []string{"rmi"}
+	if force {
+		args = append(args, "-f")
+	}
+	args = append(args, images...)
+
+	cmd := exec.Command("docker", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// =============================================================================
+// Build Commands
+// =============================================================================
+
+// newDockerBuildCmd builds Docker images
+func newDockerBuildCmd() *cobra.Command {
+	var tag string
+	var noCache bool
+	var here bool
+	var file string
+
+	cmd := &cobra.Command{
+		Use:   "build [path]",
+		Short: "Build Docker image",
+		Long: `Build a Docker image from a Dockerfile.
+
+Examples:
+  blackdot tools docker build                    # Build in current dir
+  blackdot tools docker build --here             # Build with dir name as tag
+  blackdot tools docker build -t myapp .         # Build with custom tag
+  blackdot tools docker build --no-cache .       # Build without cache`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			path := "."
+			if len(args) > 0 {
+				path = args[0]
+			}
+			if here {
+				return buildHere(noCache)
+			}
+			return dockerBuild(path, tag, file, noCache)
+		},
+	}
+
+	cmd.Flags().StringVarP(&tag, "tag", "t", "", "Image tag (name:tag)")
+	cmd.Flags().BoolVar(&noCache, "no-cache", false, "Build without cache")
+	cmd.Flags().BoolVar(&here, "here", false, "Use current directory name as tag")
+	cmd.Flags().StringVarP(&file, "file", "f", "", "Dockerfile path")
+
+	return cmd
+}
+
+func dockerBuild(path, tag, file string, noCache bool) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	args := []string{"build"}
+	if tag != "" {
+		args = append(args, "-t", tag)
+	}
+	if file != "" {
+		args = append(args, "-f", file)
+	}
+	if noCache {
+		args = append(args, "--no-cache")
+	}
+	args = append(args, path)
+
+	cmd := exec.Command("docker", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// newDockerPullCmd pulls images
+func newDockerPullCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "pull <image>",
+		Short: "Pull an image",
+		Long:  `Pull an image from a registry.`,
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return dockerPull(args[0])
+		},
+	}
+}
+
+func dockerPull(image string) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	cmd := exec.Command("docker", "pull", image)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// newDockerPushCmd pushes images
+func newDockerPushCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "push <image>",
+		Short: "Push an image",
+		Long:  `Push an image to a registry.`,
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return dockerPush(args[0])
+		},
+	}
+}
+
+func dockerPush(image string) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	cmd := exec.Command("docker", "push", image)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// newDockerTagCmd tags images
+func newDockerTagCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "tag <source> <target>",
+		Short: "Tag an image",
+		Long:  `Create a tag that refers to a source image.`,
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return dockerTag(args[0], args[1])
+		},
+	}
+}
+
+func dockerTag(source, target string) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	cmd := exec.Command("docker", "tag", source, target)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// =============================================================================
+// Compose Commands
+// =============================================================================
+
+// newDockerComposeCmd provides compose subcommands
+func newDockerComposeCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "compose",
+		Short: "Docker Compose commands",
+		Long:  `Docker Compose management commands.`,
+	}
+
+	cmd.AddCommand(newComposeUpCmd())
+	cmd.AddCommand(newComposeDownCmd())
+	cmd.AddCommand(newComposeLogsCmd())
+	cmd.AddCommand(newComposePsCmd())
+	cmd.AddCommand(newComposeBuildCmd())
+	cmd.AddCommand(newComposeRestartCmd())
+	cmd.AddCommand(newComposeExecCmd())
+	cmd.AddCommand(newComposePullCmd())
+
+	return cmd
+}
+
+func newComposeUpCmd() *cobra.Command {
+	var detach bool
+	var build bool
+
+	cmd := &cobra.Command{
+		Use:   "up [services...]",
+		Short: "Start compose services",
+		Long:  `Create and start containers.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return composeUp(args, detach, build)
+		},
+	}
+
+	cmd.Flags().BoolVarP(&detach, "detach", "d", false, "Run in background")
+	cmd.Flags().BoolVar(&build, "build", false, "Build images before starting")
+
+	return cmd
+}
+
+func composeUp(services []string, detach, build bool) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	args := []string{"compose", "up"}
+	if detach {
+		args = append(args, "-d")
+	}
+	if build {
+		args = append(args, "--build")
+	}
+	args = append(args, services...)
+
+	cmd := exec.Command("docker", args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func newComposeDownCmd() *cobra.Command {
+	var volumes bool
+
+	cmd := &cobra.Command{
+		Use:   "down",
+		Short: "Stop compose services",
+		Long:  `Stop and remove containers, networks.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return composeDown(volumes)
+		},
+	}
+
+	cmd.Flags().BoolVarP(&volumes, "volumes", "v", false, "Remove volumes too")
+
+	return cmd
+}
+
+func composeDown(volumes bool) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	args := []string{"compose", "down"}
+	if volumes {
+		args = append(args, "-v")
+	}
+
+	cmd := exec.Command("docker", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func newComposeLogsCmd() *cobra.Command {
+	var follow bool
+
+	cmd := &cobra.Command{
+		Use:   "logs [services...]",
+		Short: "View compose logs",
+		Long:  `View output from containers.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return composeLogs(args, follow)
+		},
+	}
+
+	cmd.Flags().BoolVarP(&follow, "follow", "f", false, "Follow log output")
+
+	return cmd
+}
+
+func composeLogs(services []string, follow bool) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	args := []string{"compose", "logs"}
+	if follow {
+		args = append(args, "-f")
+	}
+	args = append(args, services...)
+
+	cmd := exec.Command("docker", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func newComposePsCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "ps",
+		Short: "List compose containers",
+		Long:  `List containers for compose project.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return composePs()
+		},
+	}
+}
+
+func composePs() error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	cmd := exec.Command("docker", "compose", "ps")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func newComposeBuildCmd() *cobra.Command {
+	var noCache bool
+
+	cmd := &cobra.Command{
+		Use:   "build [services...]",
+		Short: "Build compose images",
+		Long:  `Build or rebuild services.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return composeBuild(args, noCache)
+		},
+	}
+
+	cmd.Flags().BoolVar(&noCache, "no-cache", false, "Build without cache")
+
+	return cmd
+}
+
+func composeBuild(services []string, noCache bool) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	args := []string{"compose", "build"}
+	if noCache {
+		args = append(args, "--no-cache")
+	}
+	args = append(args, services...)
+
+	cmd := exec.Command("docker", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func newComposeRestartCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "restart [services...]",
+		Short: "Restart compose services",
+		Long:  `Restart service containers.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return composeRestart(args)
+		},
+	}
+}
+
+func composeRestart(services []string) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	args := append([]string{"compose", "restart"}, services...)
+	cmd := exec.Command("docker", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func newComposeExecCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "exec <service> <command> [args...]",
+		Short: "Execute in compose service",
+		Long:  `Execute a command in a running service container.`,
+		Args:  cobra.MinimumNArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return composeExec(args[0], args[1:])
+		},
+	}
+}
+
+func composeExec(service string, command []string) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	args := []string{"compose", "exec", service}
+	args = append(args, command...)
+
+	cmd := exec.Command("docker", args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func newComposePullCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "pull [services...]",
+		Short: "Pull compose images",
+		Long:  `Pull service images.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return composePull(args)
+		},
+	}
+}
+
+func composePull(services []string) error {
+	if err := checkDockerRunning(); err != nil {
+		return err
+	}
+
+	args := append([]string{"compose", "pull"}, services...)
+	cmd := exec.Command("docker", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
 
 // buildHere builds Docker image with current directory name as tag

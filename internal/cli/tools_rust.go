@@ -43,6 +43,7 @@ Commands:
 		newRustOutdatedCmd(),
 		newRustExpandCmd(),
 		newRustInfoCmd(),
+		newRustToolsInstallCmd(),
 	)
 
 	return cmd
@@ -396,5 +397,62 @@ func runRustStatus() error {
 	}
 
 	fmt.Println()
+	return nil
+}
+
+// newRustToolsInstallCmd installs common Rust tools
+func newRustToolsInstallCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "tools-install",
+		Short: "Install common Rust development tools",
+		Long: `Install common Rust development tools:
+  - clippy (linter)
+  - rustfmt (formatter)
+  - cargo-watch (file watcher)
+  - cargo-edit (add/remove dependencies)
+  - cargo-audit (security audit)
+  - cargo-outdated (check for updates)
+  - cargo-expand (macro expansion)`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return rustToolsInstall()
+		},
+	}
+}
+
+func rustToolsInstall() error {
+	fmt.Println("Installing common Rust development tools...")
+	fmt.Println()
+
+	// Install rustup components
+	fmt.Println("Installing rustup components (clippy, rustfmt)...")
+	componentsCmd := exec.Command("rustup", "component", "add", "clippy", "rustfmt")
+	componentsCmd.Stdout = os.Stdout
+	componentsCmd.Stderr = os.Stderr
+	if err := componentsCmd.Run(); err != nil {
+		fmt.Printf("Warning: failed to add rustup components: %v\n", err)
+	}
+	fmt.Println()
+
+	// Install cargo extensions
+	tools := []string{
+		"cargo-watch",
+		"cargo-edit",
+		"cargo-audit",
+		"cargo-outdated",
+		"cargo-expand",
+	}
+
+	for _, tool := range tools {
+		fmt.Printf("Installing %s...\n", tool)
+		installCmd := exec.Command("cargo", "install", tool)
+		installCmd.Stdout = os.Stdout
+		installCmd.Stderr = os.Stderr
+		if err := installCmd.Run(); err != nil {
+			fmt.Printf("Warning: failed to install %s: %v\n", tool, err)
+		}
+	}
+
+	fmt.Println()
+	fmt.Println("Done! Run 'blackdot tools rust' to see available commands.")
 	return nil
 }

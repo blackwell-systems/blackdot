@@ -40,6 +40,15 @@ Commands:
 		newCDKOutputsCmd(),
 		newCDKContextCmd(),
 		newCDKStatusCmd(),
+		newCDKDeployCmd(),
+		newCDKDeployAllCmd(),
+		newCDKDiffCmd(),
+		newCDKCheckCmd(),
+		newCDKHotswapCmd(),
+		newCDKSynthCmd(),
+		newCDKListCmd(),
+		newCDKDestroyCmd(),
+		newCDKBootstrapCmd(),
 	)
 
 	return cmd
@@ -292,6 +301,273 @@ func runCDKStatus() error {
 
 	fmt.Println()
 	return nil
+}
+
+// =============================================================================
+// CDK Command Wrappers
+// =============================================================================
+
+// newCDKDeployCmd deploys CDK stacks
+func newCDKDeployCmd() *cobra.Command {
+	var requireApproval string
+	var all bool
+
+	cmd := &cobra.Command{
+		Use:   "deploy [stacks...]",
+		Short: "Deploy CDK stacks",
+		Long:  `Deploy one or more CDK stacks to AWS.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cdkDeploy(args, requireApproval, all)
+		},
+	}
+
+	cmd.Flags().StringVar(&requireApproval, "require-approval", "broadening", "Approval level (never, any-change, broadening)")
+	cmd.Flags().BoolVar(&all, "all", false, "Deploy all stacks")
+
+	return cmd
+}
+
+func cdkDeploy(stacks []string, requireApproval string, all bool) error {
+	args := []string{"deploy"}
+	if all {
+		args = append(args, "--all")
+	} else {
+		args = append(args, stacks...)
+	}
+	if requireApproval != "" {
+		args = append(args, "--require-approval", requireApproval)
+	}
+
+	cmd := exec.Command("cdk", args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// newCDKDeployAllCmd deploys all stacks
+func newCDKDeployAllCmd() *cobra.Command {
+	var requireApproval string
+
+	cmd := &cobra.Command{
+		Use:   "deploy-all",
+		Short: "Deploy all CDK stacks",
+		Long:  `Deploy all CDK stacks with optional approval level.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cdkDeploy(nil, requireApproval, true)
+		},
+	}
+
+	cmd.Flags().StringVar(&requireApproval, "require-approval", "broadening", "Approval level")
+
+	return cmd
+}
+
+// newCDKDiffCmd shows CDK diff
+func newCDKDiffCmd() *cobra.Command {
+	var all bool
+
+	cmd := &cobra.Command{
+		Use:   "diff [stacks...]",
+		Short: "Show CDK diff",
+		Long:  `Compare deployed stacks with local changes.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cdkDiff(args, all)
+		},
+	}
+
+	cmd.Flags().BoolVar(&all, "all", false, "Diff all stacks")
+
+	return cmd
+}
+
+func cdkDiff(stacks []string, all bool) error {
+	args := []string{"diff"}
+	if all {
+		args = append(args, "--all")
+	} else {
+		args = append(args, stacks...)
+	}
+
+	cmd := exec.Command("cdk", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// newCDKCheckCmd does diff then prompts to deploy
+func newCDKCheckCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "check [stack]",
+		Short: "Diff then prompt to deploy",
+		Long:  `Run cdk diff, then prompt to deploy if there are changes.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cdkCheck(args)
+		},
+	}
+}
+
+func cdkCheck(stacks []string) error {
+	fmt.Println("Running diff...")
+
+	// Run diff
+	diffArgs := []string{"diff"}
+	if len(stacks) > 0 {
+		diffArgs = append(diffArgs, stacks...)
+	} else {
+		diffArgs = append(diffArgs, "--all")
+	}
+
+	diffCmd := exec.Command("cdk", diffArgs...)
+	diffCmd.Stdout = os.Stdout
+	diffCmd.Stderr = os.Stderr
+	diffCmd.Run() // Don't fail on diff
+
+	// Prompt for deploy
+	fmt.Print("\nDeploy these changes? [y/N] ")
+	reader := bufio.NewReader(os.Stdin)
+	response, _ := reader.ReadString('\n')
+	response = strings.TrimSpace(strings.ToLower(response))
+
+	if response == "y" || response == "yes" {
+		deployArgs := []string{"deploy"}
+		if len(stacks) > 0 {
+			deployArgs = append(deployArgs, stacks...)
+		} else {
+			deployArgs = append(deployArgs, "--all")
+		}
+
+		deployCmd := exec.Command("cdk", deployArgs...)
+		deployCmd.Stdin = os.Stdin
+		deployCmd.Stdout = os.Stdout
+		deployCmd.Stderr = os.Stderr
+		return deployCmd.Run()
+	}
+
+	fmt.Println("Deployment cancelled")
+	return nil
+}
+
+// newCDKHotswapCmd does hotswap deploy
+func newCDKHotswapCmd() *cobra.Command {
+	var fallback bool
+	var all bool
+
+	cmd := &cobra.Command{
+		Use:   "hotswap [stacks...]",
+		Short: "Hotswap deploy (fast Lambda/ECS updates)",
+		Long:  `Deploy with hotswap for faster Lambda and ECS updates.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cdkHotswap(args, fallback, all)
+		},
+	}
+
+	cmd.Flags().BoolVar(&fallback, "fallback", false, "Fall back to normal deploy if hotswap not possible")
+	cmd.Flags().BoolVar(&all, "all", false, "Hotswap all stacks")
+
+	return cmd
+}
+
+func cdkHotswap(stacks []string, fallback, all bool) error {
+	args := []string{"deploy"}
+	if fallback {
+		args = append(args, "--hotswap-fallback")
+	} else {
+		args = append(args, "--hotswap")
+	}
+	if all {
+		args = append(args, "--all")
+	} else {
+		args = append(args, stacks...)
+	}
+
+	cmd := exec.Command("cdk", args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// newCDKSynthCmd synthesizes CDK templates
+func newCDKSynthCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "synth [stacks...]",
+		Short: "Synthesize CloudFormation templates",
+		Long:  `Synthesize CloudFormation templates from CDK code.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cdkArgs := append([]string{"synth"}, args...)
+			execCmd := exec.Command("cdk", cdkArgs...)
+			execCmd.Stdout = os.Stdout
+			execCmd.Stderr = os.Stderr
+			return execCmd.Run()
+		},
+	}
+}
+
+// newCDKListCmd lists CDK stacks
+func newCDKListCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "list",
+		Short: "List CDK stacks",
+		Long:  `List all stacks in the CDK app.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			execCmd := exec.Command("cdk", "list")
+			execCmd.Stdout = os.Stdout
+			execCmd.Stderr = os.Stderr
+			return execCmd.Run()
+		},
+	}
+}
+
+// newCDKDestroyCmd destroys CDK stacks
+func newCDKDestroyCmd() *cobra.Command {
+	var force bool
+	var all bool
+
+	cmd := &cobra.Command{
+		Use:   "destroy [stacks...]",
+		Short: "Destroy CDK stacks",
+		Long:  `Destroy one or more CDK stacks.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cdkArgs := []string{"destroy"}
+			if all {
+				cdkArgs = append(cdkArgs, "--all")
+			} else {
+				cdkArgs = append(cdkArgs, args...)
+			}
+			if force {
+				cdkArgs = append(cdkArgs, "--force")
+			}
+
+			execCmd := exec.Command("cdk", cdkArgs...)
+			execCmd.Stdin = os.Stdin
+			execCmd.Stdout = os.Stdout
+			execCmd.Stderr = os.Stderr
+			return execCmd.Run()
+		},
+	}
+
+	cmd.Flags().BoolVarP(&force, "force", "f", false, "Skip confirmation prompt")
+	cmd.Flags().BoolVar(&all, "all", false, "Destroy all stacks")
+
+	return cmd
+}
+
+// newCDKBootstrapCmd bootstraps CDK
+func newCDKBootstrapCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "bootstrap [environments...]",
+		Short: "Bootstrap CDK in AWS account",
+		Long:  `Deploy the CDK toolkit stack to an AWS environment.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cdkArgs := append([]string{"bootstrap"}, args...)
+			execCmd := exec.Command("cdk", cdkArgs...)
+			execCmd.Stdin = os.Stdin
+			execCmd.Stdout = os.Stdout
+			execCmd.Stderr = os.Stderr
+			return execCmd.Run()
+		},
+	}
 }
 
 // Status commands for other tools - add these to their respective files
