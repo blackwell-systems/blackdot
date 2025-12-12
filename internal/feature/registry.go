@@ -95,6 +95,7 @@ func NewRegistry() *Registry {
 	r.register("nvm_integration", CategoryIntegration, "Lazy-loaded NVM for Node.js version management", nil, DefaultTrue)
 	r.register("sdkman_integration", CategoryIntegration, "Lazy-loaded SDKMAN for Java/Gradle/Kotlin", nil, DefaultTrue)
 	r.register("dotclaude", CategoryIntegration, "dotclaude profile management for Claude Code", []string{"claude_integration"}, DefaultFalse)
+	r.register("devcontainer", CategoryIntegration, "Devcontainer support for VS Code, Codespaces, DevPod", nil, DefaultTrue)
 
 	// Environment variable mappings for backward compatibility
 	// Maps SKIP_* vars to feature names (inverted logic: SKIP_X=true means feature=false)

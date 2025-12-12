@@ -9,15 +9,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.0.0-rc6] - TBD
 
-**Release Candidate 6 - Documentation Refinement**
+**Release Candidate 6 - Devcontainer Support & Documentation Refinement**
 
 ### Added
+
+- **Devcontainer Integration**
+  - New `blackdot devcontainer` command for generating devcontainer configurations
+  - `blackdot devcontainer init` - generate devcontainer.json with blackdot feature
+  - `blackdot devcontainer images` - list available base images
+  - `blackdot devcontainer services` - list available services for docker-compose
+  - `--services` flag for init command to generate docker-compose.yml
+  - Docker Compose support with postgres, redis, mysql, mongo, sqlite, localstack, minio
+  - Automatic environment variable injection for service connections
+  - Support for Go 1.23, Python 3.13, Node 22, Rust, Java 21, Ubuntu, Alpine, Debian
+  - Four presets: minimal, developer, claude, full
+  - SSH agent socket forwarding for git operations in containers
+  - VS Code extension recommendations per language
+
+- **Devcontainer Feature for ghcr.io**
+  - Publishable devcontainer feature at `ghcr.io/blackwell-systems/blackdot`
+  - Install script for container builds
+  - Shell integration for bash/zsh
+  - Configurable presets and versions
+
+- **CI/CD**
+  - GitHub Actions workflow to publish devcontainer feature to ghcr.io
+  - Automatic version tagging matching blackdot releases
 
 - **CLI Enhancements**
   - Shell completion command (`blackdot completion`) for bash, zsh, fish, and powershell
   - `--dry-run` flag for `backup restore` - preview files before restoring
   - `--dry-run` flag for `rollback` - preview rollback without making changes
   - `--dry-run` flag for `features enable/disable/preset` - preview feature changes
+
+- **Documentation**
+  - New `docs/devcontainers.md` user guide
+  - Devcontainer section in CLI reference
+  - Added to feature registry as `devcontainer` integration
+
+- **Test Coverage**
+  - Comprehensive tests for `internal/cli/cli_test.go`
+  - Tests for `internal/shell/shell_test.go` (77.4% coverage)
+  - Tests for `internal/template/engine_test.go` (71.4% coverage)
+  - 16 tests for devcontainer command
 
 ### Changed
 
@@ -34,6 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Architecture diagram contrast and readability
+- PowerShell module manifest missing `Initialize-Starship` export
+- PASS_PREFIX in vault docs updated from `dotfiles` to `blackdot`
 
 ## [4.0.0-rc5] - 2025-12-11
 

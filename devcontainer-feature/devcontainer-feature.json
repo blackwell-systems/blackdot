@@ -1,0 +1,44 @@
+{
+  "id": "blackdot",
+  "version": "1.0.0",
+  "name": "Blackdot",
+  "description": "Vault-backed configuration management for development environments",
+  "documentationURL": "https://github.com/blackwell-systems/blackdot",
+  "licenseURL": "https://github.com/blackwell-systems/blackdot/blob/main/LICENSE",
+  "keywords": [
+    "dotfiles",
+    "configuration",
+    "vault",
+    "secrets",
+    "shell"
+  ],
+  "options": {
+    "preset": {
+      "type": "string",
+      "enum": [
+        "minimal",
+        "developer",
+        "claude",
+        "full"
+      ],
+      "default": "developer",
+      "description": "Blackdot preset to apply (minimal, developer, claude, full)"
+    },
+    "version": {
+      "type": "string",
+      "default": "latest",
+      "description": "Blackdot version to install (e.g., 'latest', 'v3.0.0')"
+    },
+    "shellIntegration": {
+      "type": "boolean",
+      "default": true,
+      "description": "Add blackdot shell integration to bash/zsh profiles"
+    }
+  },
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/common-utils"
+  ],
+  "containerEnv": {
+    "BLACKDOT_CONTAINER": "true"
+  }
+}

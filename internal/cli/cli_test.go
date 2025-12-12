@@ -50,6 +50,7 @@ func TestSubcommandExists(t *testing.T) {
 		"uninstall",
 		"tools",
 		"import",
+		"devcontainer",
 	}
 
 	commands := make(map[string]bool)

@@ -14,6 +14,7 @@
 - **Features**
   - [Feature Registry](features.md)
   - [Developer Tools](developer-tools.md)
+  - [Devcontainers](devcontainers.md)
   - [Hook System](hooks.md)
   - [Configuration Layers](configuration-layers.md)
   - [Claude Code + dotclaude](claude-code.md)
@@ -35,6 +36,7 @@
   - [Hook System](design/IMPL-hook-system.md)
   - [Configuration Layers](design/IMPL-configuration-layers.md)
   - [CLI Feature Awareness](design/IMPL-cli-feature-awareness.md)
+  - [Devcontainers](design/IMPL-devcontainers.md)
 
 - **Contributing**
   - [Contributing Guide](CONTRIBUTING.md)
