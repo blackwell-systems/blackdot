@@ -94,6 +94,8 @@ type DevcontainerService struct {
 	Environment map[string]string // Environment variables
 	Volumes     []string          // Volume mounts
 	EnvVars     map[string]string // Environment variables to set in app container
+	Healthcheck string            // Healthcheck command
+	ConflictsWith []string        // Services this conflicts with (share same env vars)
 }
 
 // Available services for docker-compose
@@ -117,6 +119,8 @@ var devcontainerServices = []DevcontainerService{
 			"DB_PASSWORD":  "dev",
 			"DB_NAME":      "app",
 		},
+		Healthcheck:   "pg_isready -U dev -d app",
+		ConflictsWith: []string{"mysql", "sqlite"},
 	},
 	{
 		Name:        "redis",
@@ -130,6 +134,7 @@ var devcontainerServices = []DevcontainerService{
 			"REDIS_HOST": "redis",
 			"REDIS_PORT": "6379",
 		},
+		Healthcheck: "redis-cli ping | grep PONG",
 	},
 	{
 		Name:        "mysql",
@@ -151,6 +156,8 @@ var devcontainerServices = []DevcontainerService{
 			"DB_PASSWORD":  "dev",
 			"DB_NAME":      "app",
 		},
+		Healthcheck:   "mysqladmin ping -h localhost -u dev -pdev",
+		ConflictsWith: []string{"postgres", "sqlite"},
 	},
 	{
 		Name:        "mongo",
@@ -167,6 +174,7 @@ var devcontainerServices = []DevcontainerService{
 			"MONGO_HOST": "mongo",
 			"MONGO_PORT": "27017",
 		},
+		Healthcheck: "mongosh --eval 'db.runCommand(\"ping\").ok' --quiet",
 	},
 	{
 		Name:        "sqlite",
@@ -179,6 +187,7 @@ var devcontainerServices = []DevcontainerService{
 			"DATABASE_URL": "sqlite:///workspace/data/app.db",
 			"SQLITE_PATH":  "/workspace/data/app.db",
 		},
+		ConflictsWith: []string{"postgres", "mysql"},
 	},
 	{
 		Name:        "localstack",
@@ -186,12 +195,8 @@ var devcontainerServices = []DevcontainerService{
 		Description: "LocalStack AWS services emulator",
 		Ports:       []string{"4566:4566"},
 		Environment: map[string]string{
-			"SERVICES":              "s3,sqs,sns,dynamodb,lambda,secretsmanager",
-			"DEFAULT_REGION":        "us-east-1",
-			"DOCKER_HOST":           "unix:///var/run/docker.sock",
-			"LAMBDA_EXECUTOR":       "docker",
-			"LAMBDA_REMOTE_DOCKER":  "false",
-			"LAMBDA_DOCKER_NETWORK": "host",
+			"SERVICES":       "s3,sqs,sns,dynamodb,lambda,secretsmanager",
+			"DEFAULT_REGION": "us-east-1",
 		},
 		Volumes: []string{
 			"localstack-data:/var/lib/localstack",
@@ -203,6 +208,7 @@ var devcontainerServices = []DevcontainerService{
 			"AWS_SECRET_ACCESS_KEY": "test",
 			"AWS_DEFAULT_REGION":    "us-east-1",
 		},
+		Healthcheck: "curl -f http://localhost:4566/_localstack/health || exit 1",
 	},
 	{
 		Name:        "minio",
@@ -215,12 +221,22 @@ var devcontainerServices = []DevcontainerService{
 		},
 		Volumes: []string{"minio-data:/data"},
 		EnvVars: map[string]string{
-			"MINIO_ENDPOINT":          "http://minio:9000",
-			"MINIO_CONSOLE":           "http://minio:9001",
-			"MINIO_ACCESS_KEY":        "minioadmin",
-			"MINIO_SECRET_KEY":        "minioadmin",
+			"MINIO_ENDPOINT":   "http://minio:9000",
+			"MINIO_CONSOLE":    "http://minio:9001",
+			"MINIO_ACCESS_KEY": "minioadmin",
+			"MINIO_SECRET_KEY": "minioadmin",
 		},
+		Healthcheck: "mc ready local || exit 1",
 	},
+}
+
+// Common service stacks for quick setup
+var serviceStacks = map[string][]string{
+	"web":   {"postgres", "redis"},           // Common web app stack
+	"api":   {"postgres", "redis"},           // API backend stack
+	"aws":   {"localstack", "minio"},         // AWS development stack
+	"full":  {"postgres", "redis", "minio"},  // Full-featured stack
+	"mongo": {"mongo", "redis"},              // MongoDB stack
 }
 
 // DevcontainerConfig represents the generated devcontainer.json
@@ -276,6 +292,7 @@ func newDevcontainerInitCmd() *cobra.Command {
 		force    bool
 		noVSExt  bool
 		services []string
+		stack    string
 	)
 
 	cmd := &cobra.Command{
@@ -289,13 +306,32 @@ This command creates a devcontainer configuration that includes:
   - VS Code extension recommendations
   - Optional supporting services (postgres, redis, etc.)
 
+Available stacks (predefined service combinations):
+  web    - postgres, redis (common web app)
+  api    - postgres, redis (API backend)
+  aws    - localstack, minio (AWS development)
+  full   - postgres, redis, minio (full-featured)
+  mongo  - mongo, redis (MongoDB stack)
+
 Examples:
-  blackdot devcontainer init                    # Interactive mode
+  blackdot devcontainer init                              # Interactive mode
   blackdot devcontainer init --image go --preset developer
-  blackdot devcontainer init --image python --preset claude --force
+  blackdot devcontainer init --image go --stack web       # Use predefined stack
   blackdot devcontainer init --image go --services postgres,redis
   blackdot devcontainer init --image node --services postgres,redis,localstack`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// Expand stack to services if specified
+			if stack != "" {
+				stackServices, ok := serviceStacks[stack]
+				if !ok {
+					var validStacks []string
+					for k := range serviceStacks {
+						validStacks = append(validStacks, k)
+					}
+					return fmt.Errorf("unknown stack: %s (valid: %s)", stack, strings.Join(validStacks, ", "))
+				}
+				services = append(services, stackServices...)
+			}
 			return runDevcontainerInit(image, preset, output, force, noVSExt, services)
 		},
 	}
@@ -306,6 +342,7 @@ Examples:
 	cmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite existing configuration")
 	cmd.Flags().BoolVar(&noVSExt, "no-extensions", false, "Skip VS Code extension recommendations")
 	cmd.Flags().StringSliceVar(&services, "services", nil, "Supporting services (postgres, redis, mysql, mongo, sqlite, localstack, minio)")
+	cmd.Flags().StringVar(&stack, "stack", "", "Predefined service stack (web, api, aws, full, mongo)")
 
 	return cmd
 }
@@ -353,8 +390,23 @@ func newDevcontainerServicesCmd() *cobra.Command {
 					Dim.Printf("              Image: %s\n", svc.Image)
 				}
 			}
+
 			fmt.Println()
-			fmt.Println("Usage: blackdot devcontainer init --services postgres,redis")
+			BoldCyan.Println("Predefined Stacks")
+			fmt.Println(strings.Repeat("─", 50))
+			fmt.Println()
+
+			for name, svcs := range serviceStacks {
+				fmt.Print("  ")
+				Bold.Print(name)
+				fmt.Print(strings.Repeat(" ", 10-len(name)))
+				Dim.Printf("- %s\n", strings.Join(svcs, ", "))
+			}
+
+			fmt.Println()
+			fmt.Println("Usage:")
+			fmt.Println("  blackdot devcontainer init --services postgres,redis")
+			fmt.Println("  blackdot devcontainer init --stack web")
 			fmt.Println()
 		},
 	}
@@ -417,18 +469,45 @@ func runDevcontainerInit(imageFlag, presetFlag, outputDir string, force, noVSExt
 
 	// Validate and resolve services
 	var selectedServices []DevcontainerService
+	selectedServiceNames := make(map[string]bool)
 	if len(servicesFlag) > 0 {
 		for _, svcName := range servicesFlag {
+			// Skip duplicates
+			if selectedServiceNames[strings.ToLower(svcName)] {
+				continue
+			}
 			found := false
 			for _, svc := range devcontainerServices {
 				if strings.ToLower(svcName) == svc.Name {
 					selectedServices = append(selectedServices, svc)
+					selectedServiceNames[svc.Name] = true
 					found = true
 					break
 				}
 			}
 			if !found {
 				return fmt.Errorf("unknown service: %s (use 'blackdot devcontainer services' to list available services)", svcName)
+			}
+		}
+
+		// Check for conflicting services (only warn once per pair)
+		warnedPairs := make(map[string]bool)
+		for _, svc := range selectedServices {
+			for _, conflict := range svc.ConflictsWith {
+				if selectedServiceNames[conflict] {
+					// Create a normalized pair key to avoid duplicate warnings
+					pair := svc.Name + ":" + conflict
+					if svc.Name > conflict {
+						pair = conflict + ":" + svc.Name
+					}
+					if !warnedPairs[pair] {
+						warnedPairs[pair] = true
+						Yellow.Printf("[WARN] ")
+						fmt.Printf("Services '%s' and '%s' both set DATABASE_URL\n", svc.Name, conflict)
+						fmt.Printf("       The last service's DATABASE_URL will be used.\n")
+						fmt.Println()
+					}
+				}
 			}
 		}
 	}
@@ -671,17 +750,22 @@ func generateDockerCompose(image DevcontainerImage, services []DevcontainerServi
 
 	sb.WriteString("    command: sleep infinity\n")
 
-	// Add depends_on for services that have images (not sqlite)
-	var deps []string
+	// Add depends_on with health check conditions for services that have images (not sqlite)
+	var deps []DevcontainerService
 	for _, svc := range services {
 		if svc.Image != "" {
-			deps = append(deps, svc.Name)
+			deps = append(deps, svc)
 		}
 	}
 	if len(deps) > 0 {
 		sb.WriteString("    depends_on:\n")
 		for _, dep := range deps {
-			sb.WriteString(fmt.Sprintf("      - %s\n", dep))
+			sb.WriteString(fmt.Sprintf("      %s:\n", dep.Name))
+			if dep.Healthcheck != "" {
+				sb.WriteString("        condition: service_healthy\n")
+			} else {
+				sb.WriteString("        condition: service_started\n")
+			}
 		}
 	}
 	sb.WriteString("\n")
@@ -719,6 +803,16 @@ func generateDockerCompose(image DevcontainerImage, services []DevcontainerServi
 		// Special handling for minio - add command
 		if svc.Name == "minio" {
 			sb.WriteString("    command: server /data --console-address \":9001\"\n")
+		}
+
+		// Add health check if defined
+		if svc.Healthcheck != "" {
+			sb.WriteString("    healthcheck:\n")
+			sb.WriteString(fmt.Sprintf("      test: [\"/bin/sh\", \"-c\", \"%s\"]\n", svc.Healthcheck))
+			sb.WriteString("      interval: 10s\n")
+			sb.WriteString("      timeout: 5s\n")
+			sb.WriteString("      retries: 5\n")
+			sb.WriteString("      start_period: 30s\n")
 		}
 
 		sb.WriteString("\n")
