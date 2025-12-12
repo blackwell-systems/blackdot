@@ -517,9 +517,9 @@ func runGoStatus() error {
 	// Choose color based on status
 	var logoColor string
 	if inProject {
-		logoColor = "\033[32m" // Green when in project
+		logoColor = "\033[36m" // Cyan when in project (Go color)
 	} else if goInstalled {
-		logoColor = "\033[36m" // Cyan when Go installed but not in project
+		logoColor = "\033[32m" // Green when Go installed but not in project
 	} else {
 		logoColor = "\033[31m" // Red when not installed
 	}

@@ -379,14 +379,14 @@ func runPythonStatus() error {
 	_, err := os.Stat("pyproject.toml")
 	inProject := err == nil
 
-	// Choose color based on status
+	// Choose color based on status (uv is the key tool)
 	var logoColor string
-	if inProject {
-		logoColor = "\033[32m" // Green when in project
-	} else if pythonInstalled {
-		logoColor = "\033[33m" // Yellow when Python installed but not in project
+	if uvInstalled && inProject {
+		logoColor = "\033[32m" // Green when uv installed and in project
+	} else if uvInstalled {
+		logoColor = "\033[34m" // Blue when uv installed but not in project
 	} else {
-		logoColor = "\033[31m" // Red when not installed
+		logoColor = "\033[31m" // Red when uv not installed
 	}
 	reset := "\033[0m"
 	dim := "\033[2m"
