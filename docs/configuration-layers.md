@@ -202,7 +202,7 @@ Machine-specific settings that don't travel between computers:
 
   "paths": {
     "workspace": "~/Code",
-    "dotfiles_dir": "~/Code/blackdot"
+    "blackdot_dir": "~/Code/blackdot"
   },
 
   "features": {

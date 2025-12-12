@@ -48,7 +48,7 @@ All state and configuration is stored in a single JSON file:
     "parallel_install": false
   },
   "paths": {
-    "dotfiles_dir": "~/workspace/blackdot",
+    "blackdot_dir": "~/workspace/blackdot",
     "config_dir": "~/.config/blackdot",
     "backup_dir": "~/.local/share/blackdot/backups"
   },
@@ -94,7 +94,7 @@ All settings are now stored in the same `config.json` file:
 - `backup.location` - Backup directory path
 
 **Paths (`paths.*`):**
-- `paths.dotfiles_dir` - Custom blackdot installation directory
+- `paths.blackdot_dir` - Custom blackdot installation directory
 - `paths.config_dir` - Configuration directory (default: `~/.config/blackdot`)
 - `paths.backup_dir` - Backup storage location
 
