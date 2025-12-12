@@ -668,7 +668,7 @@ All tool commands have tab completion:
 # AWS
 awsswitch <TAB>              # Shows profile names
 
-# dotfiles
+# blackdot
 blackdot <TAB>               # Shows subcommands
 blackdot features <TAB>      # Shows: enable disable list preset status
 blackdot features enable <TAB>  # Shows: vault aws_helpers rust_tools ...
@@ -729,5 +729,5 @@ This file is sourced after the standard aliases, so you can override defaults.
 ## Related Documentation
 
 - [Feature Registry](features.md) - Enable/disable tool integrations
-- [CLI Reference](cli-reference.md) - All dotfiles commands
+- [CLI Reference](cli-reference.md) - All blackdot commands
 - [Architecture](architecture.md) - Complete guide

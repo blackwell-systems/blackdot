@@ -292,7 +292,7 @@ blackdot vault list
 ### New Machine Setup
 
 ```bash
-# 1. Clone dotfiles
+# 1. Clone blackdot
 git clone git@github.com:blackwell-systems/blackdot.git ~/workspace/blackdot
 cd ~/workspace/blackdot
 

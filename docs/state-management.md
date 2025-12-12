@@ -180,7 +180,7 @@ When state files don't exist (fresh install or after reset), `blackdot setup` in
 | Phase | Detection Method |
 |-------|------------------|
 | Workspace | Checks if `/workspace` symlink exists |
-| Symlinks | Checks if `~/.zshrc` is a symlink pointing to dotfiles |
+| Symlinks | Checks if `~/.zshrc` is a symlink pointing to blackdot |
 | Packages | Checks if Homebrew (`brew`) is installed |
 | Vault | Checks for vault CLI (`bw`/`op`/`pass`) and valid session |
 | Secrets | Checks for `~/.ssh/config`, `~/.gitconfig`, `~/.aws/config` |
