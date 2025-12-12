@@ -19,12 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `blackdot devcontainer images` - list available base images
   - `blackdot devcontainer services` - list available services for docker-compose
   - `--services` flag for init command to generate docker-compose.yml
+  - `--stack` flag for init command to apply service presets (web, aws, full, mongo)
   - Docker Compose support with postgres, redis, mysql, mongo, sqlite, localstack, minio
+  - Health checks for all services with automatic readiness detection
+  - Conflict detection for incompatible service combinations
   - Automatic environment variable injection for service connections
   - Support for Go 1.23, Python 3.13, Node 22, Rust, Java 21, Ubuntu, Alpine, Debian
   - Four presets: minimal, developer, claude, full
   - SSH agent socket forwarding for git operations in containers
   - VS Code extension recommendations per language
+  - Startup banner displaying "[blackdot] ⚫💨📦 credentials loaded" after setup completes
 
 - **Devcontainer Feature for ghcr.io**
   - Publishable devcontainer feature at `ghcr.io/blackwell-systems/blackdot`
