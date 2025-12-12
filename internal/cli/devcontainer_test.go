@@ -169,8 +169,9 @@ func TestGenerateDevcontainerConfig(t *testing.T) {
 		t.Errorf("expected preset='developer', got '%s'", blackdotFeature["preset"])
 	}
 
-	// Check postStartCommand
-	if config.PostStartCommand != "blackdot setup --preset developer" {
+	// Check postStartCommand (includes startup banner with fallback text)
+	expectedPostStart := "blackdot setup --preset developer && echo '[blackdot] ⚫💨📦 credentials loaded'"
+	if config.PostStartCommand != expectedPostStart {
 		t.Errorf("unexpected PostStartCommand: %s", config.PostStartCommand)
 	}
 
