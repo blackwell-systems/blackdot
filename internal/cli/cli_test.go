@@ -389,6 +389,7 @@ func TestSSHSubcommands(t *testing.T) {
 
 	expectedCommands := []string{
 		"keys", "gen", "list", "agent", "fp", "copy", "tunnel", "socks", "status",
+		"load", "unload", "clear", "tunnels", "add-host",
 	}
 
 	commands := make(map[string]bool)
