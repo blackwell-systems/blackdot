@@ -374,25 +374,6 @@ blackdot doctor                # Health check + auto-fix
 
 ---
 
-## Use Cases
-
-**Perfect for:**
-
-- **Claude Code users** working across macOS, Linux, Windows, and WSL2 with session portability
-- **Team onboarding** - New developer setup in < 5 minutes with vault-backed credentials
-- **Multi-cloud workflows** - AWS SSO, multiple profiles, automatic credential rotation
-- **Security-conscious developers** - Multi-vault backends, schema validation, drift detection
-- **CI/CD environments** - Docker containers, offline mode, state management
-
-**Also great for:**
-
-- Developers tired of manually copying SSH keys between machines
-- Teams that need consistent tooling across heterogeneous environments
-- Anyone managing multiple AWS accounts with SSO
-- DevOps engineers who need reproducible, testable configurations
-
----
-
 ## Quick Start
 
 See [One-Line Install](#one-line-install) above for the recommended installation. Use `--minimal` for shell config only.
