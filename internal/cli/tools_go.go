@@ -32,6 +32,9 @@ Commands:
   build-all - Cross-compile for all platforms
   bench     - Run benchmarks
   info      - Show Go environment info`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runGoStatus()
+		},
 	}
 
 	cmd.AddCommand(
@@ -492,4 +495,77 @@ func newGoInfoCmd() *cobra.Command {
 			return nil
 		},
 	}
+}
+
+func runGoStatus() error {
+	// Check if Go is installed
+	goInstalled := false
+	goVersion := ""
+	goCmd := exec.Command("go", "version")
+	if out, err := goCmd.Output(); err == nil {
+		goInstalled = true
+		parts := strings.Fields(string(out))
+		if len(parts) >= 3 {
+			goVersion = parts[2]
+		}
+	}
+
+	// Choose color based on status
+	var logoColor string
+	if goInstalled {
+		logoColor = "\033[36m" // Cyan (Go blue)
+	} else {
+		logoColor = "\033[31m" // Red
+	}
+	reset := "\033[0m"
+	dim := "\033[2m"
+	bold := "\033[1m"
+	green := "\033[32m"
+	red := "\033[31m"
+	cyan := "\033[36m"
+
+	fmt.Println()
+	fmt.Printf("%s   ██████╗  ██████╗     ████████╗ ██████╗  ██████╗ ██╗     ███████╗%s\n", logoColor, reset)
+	fmt.Printf("%s  ██╔════╝ ██╔═══██╗    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝%s\n", logoColor, reset)
+	fmt.Printf("%s  ██║  ███╗██║   ██║       ██║   ██║   ██║██║   ██║██║     ███████╗%s\n", logoColor, reset)
+	fmt.Printf("%s  ██║   ██║██║   ██║       ██║   ██║   ██║██║   ██║██║     ╚════██║%s\n", logoColor, reset)
+	fmt.Printf("%s  ╚██████╔╝╚██████╔╝       ██║   ╚██████╔╝╚██████╔╝███████╗███████║%s\n", logoColor, reset)
+	fmt.Printf("%s   ╚═════╝  ╚═════╝        ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝%s\n", logoColor, reset)
+	fmt.Println()
+
+	fmt.Printf("  %sCurrent Status%s\n", bold, reset)
+	fmt.Printf("  %s───────────────────────────────────────%s\n", dim, reset)
+
+	// Go version
+	if goInstalled {
+		fmt.Printf("    %sGo%s         %s%s%s\n", dim, reset, cyan, goVersion, reset)
+	} else {
+		fmt.Printf("    %sGo%s         %snot installed%s\n", dim, reset, red, reset)
+	}
+
+	// OS/Arch
+	fmt.Printf("    %sOS/Arch%s    %s%s/%s%s\n", dim, reset, cyan, runtime.GOOS, runtime.GOARCH, reset)
+
+	// GOPATH
+	goPath := os.Getenv("GOPATH")
+	if goPath == "" {
+		home, _ := os.UserHomeDir()
+		goPath = filepath.Join(home, "go")
+	}
+	fmt.Printf("    %sGOPATH%s     %s%s%s\n", dim, reset, dim, goPath, reset)
+
+	// Check for go.mod
+	if _, err := os.Stat("go.mod"); err == nil {
+		fmt.Printf("    %sProject%s    %s✓ go.mod found%s\n", dim, reset, green, reset)
+	} else {
+		fmt.Printf("    %sProject%s    %snot in Go project%s\n", dim, reset, dim, reset)
+	}
+
+	// Check for golangci-lint
+	if _, err := exec.LookPath("golangci-lint"); err == nil {
+		fmt.Printf("    %sLinter%s     %s✓ golangci-lint%s\n", dim, reset, green, reset)
+	}
+
+	fmt.Println()
+	return nil
 }
