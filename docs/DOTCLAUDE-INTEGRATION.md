@@ -246,10 +246,11 @@ Located in `~/workspace/blackdot/`:
 
 ```bash
 ~/workspace/blackdot/
-├── vault/
-│   ├── restore-ssh.sh       # SSH key restoration
-│   ├── restore-aws.sh       # AWS credential restoration
-│   └── restore-git.sh       # Git config restoration
+├── cmd/blackdot/            # Go CLI entry point
+├── internal/
+│   ├── cli/                 # Cobra commands (Go)
+│   ├── feature/             # Feature registry
+│   └── config/              # Configuration management
 ├── zsh/
 │   └── zshrc                # Shell config for Unix/Linux/macOS
 ├── powershell/
@@ -355,14 +356,14 @@ Add to your dotclaude profile's `settings.json`:
     "PostActivate": [
       {
         "type": "command",
-        "command": "bash -c 'cd ~/workspace/blackdot && ./vault/restore-ssh.sh $DOTCLAUDE_PROFILE'"
+        "command": "blackdot vault restore"
       }
     ]
   }
 }
 ```
 
-This auto-restores secrets when activating a profile.
+This auto-restores secrets when activating a profile using the blackdot Go CLI.
 
 ### Environment Variables
 
