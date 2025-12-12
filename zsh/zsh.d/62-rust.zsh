@@ -165,10 +165,20 @@ rust-expand() {
 }
 
 # =========================
-# Rust Tools Help
+# CLI Aliases (call Go binary)
 # =========================
 
-rusttools() {
+# Main help command - shows banner and status via CLI
+alias rusttools='blackdot tools rust'
+
+# CLI-backed commands
+alias rust-info='blackdot tools rust info'
+
+# =========================
+# Rust Tools Help (legacy shell function)
+# =========================
+
+_rusttools_shell() {
     require_feature "rust_tools" || return 1
     # Source theme colors
     source "${BLACKDOT_DIR:-$HOME/workspace/blackdot}/lib/_colors.sh"

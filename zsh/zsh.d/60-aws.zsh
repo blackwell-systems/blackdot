@@ -121,8 +121,22 @@ awsclear() {
   echo "Cleared temporary credentials"
 }
 
-# Show all AWS commands with banner
-awstools() {
+# =========================
+# CLI Aliases (call Go binary)
+# =========================
+
+# Main help command - shows banner and status via CLI
+alias awstools='blackdot tools aws'
+
+# CLI-backed commands
+alias aws-status='blackdot tools aws status'
+alias aws-who='blackdot tools aws who'
+
+# =========================
+# AWS Tools Help (legacy shell function)
+# =========================
+
+_awstools_shell() {
   require_feature "aws_helpers" || return 1
   # Source theme colors
   source "${BLACKDOT_DIR:-$HOME/workspace/blackdot}/lib/_colors.sh"

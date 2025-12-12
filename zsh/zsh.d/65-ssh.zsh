@@ -380,10 +380,24 @@ sshtunnels() {
 }
 
 # =========================
-# SSH Tools Help
+# CLI Aliases (call Go binary)
+# =========================
+# These aliases call the blackdot CLI for operations that benefit from the Go implementation
+
+# Main help command - shows banner and status via CLI
+alias sshtools='blackdot tools ssh'
+
+# CLI-backed commands (these have better implementations in Go)
+alias ssh-status='blackdot tools ssh status'
+alias ssh-keygen='blackdot tools ssh gen'
+alias ssh-keylist='blackdot tools ssh keys'
+alias ssh-fingerprint='blackdot tools ssh fp'
+
+# =========================
+# SSH Tools Help (legacy shell function)
 # =========================
 
-sshtools() {
+_sshtools_shell() {
     require_feature "ssh_tools" || return 1
     # Source theme colors
     source "${BLACKDOT_DIR:-$HOME/workspace/blackdot}/lib/_colors.sh"
