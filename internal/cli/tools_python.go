@@ -28,6 +28,9 @@ Commands:
   test      - Run pytest
   cover     - Run pytest with coverage
   info      - Show Python environment info`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runPythonStatus()
+		},
 	}
 
 	cmd.AddCommand(
@@ -345,4 +348,104 @@ func newPythonInfoCmd() *cobra.Command {
 			return nil
 		},
 	}
+}
+
+func runPythonStatus() error {
+	// Check if uv is installed
+	uvInstalled := false
+	uvVersion := ""
+	uvCmd := exec.Command("uv", "--version")
+	if out, err := uvCmd.Output(); err == nil {
+		uvInstalled = true
+		parts := strings.Fields(string(out))
+		if len(parts) >= 2 {
+			uvVersion = parts[1]
+		}
+	}
+
+	// Check Python version
+	pythonInstalled := false
+	pythonVersion := ""
+	pyCmd := exec.Command("python3", "--version")
+	if out, err := pyCmd.Output(); err == nil {
+		pythonInstalled = true
+		parts := strings.Fields(string(out))
+		if len(parts) >= 2 {
+			pythonVersion = parts[1]
+		}
+	}
+
+	// Choose color based on status
+	var logoColor string
+	if pythonInstalled {
+		logoColor = "\033[33m" // Yellow (Python color)
+	} else {
+		logoColor = "\033[31m" // Red
+	}
+	reset := "\033[0m"
+	dim := "\033[2m"
+	bold := "\033[1m"
+	green := "\033[32m"
+	red := "\033[31m"
+	yellow := "\033[33m"
+	blue := "\033[34m"
+
+	fmt.Println()
+	fmt.Printf("%s  ██████╗ ██╗   ██╗████████╗██╗  ██╗ ██████╗ ███╗   ██╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗%s\n", logoColor, reset)
+	fmt.Printf("%s  ██╔══██╗╚██╗ ██╔╝╚══██╔══╝██║  ██║██╔═══██╗████╗  ██║    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝%s\n", logoColor, reset)
+	fmt.Printf("%s  ██████╔╝ ╚████╔╝    ██║   ███████║██║   ██║██╔██╗ ██║       ██║   ██║   ██║██║   ██║██║     ███████╗%s\n", logoColor, reset)
+	fmt.Printf("%s  ██╔═══╝   ╚██╔╝     ██║   ██╔══██║██║   ██║██║╚██╗██║       ██║   ██║   ██║██║   ██║██║     ╚════██║%s\n", logoColor, reset)
+	fmt.Printf("%s  ██║        ██║      ██║   ██║  ██║╚██████╔╝██║ ╚████║       ██║   ╚██████╔╝╚██████╔╝███████╗███████║%s\n", logoColor, reset)
+	fmt.Printf("%s  ╚═╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝       ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝%s\n", logoColor, reset)
+	fmt.Println()
+
+	fmt.Printf("  %sCurrent Status%s\n", bold, reset)
+	fmt.Printf("  %s───────────────────────────────────────%s\n", dim, reset)
+
+	// Python version
+	if pythonInstalled {
+		fmt.Printf("    %sPython%s     %s%s%s\n", dim, reset, yellow, pythonVersion, reset)
+	} else {
+		fmt.Printf("    %sPython%s     %snot installed%s\n", dim, reset, red, reset)
+	}
+
+	// uv version
+	if uvInstalled {
+		fmt.Printf("    %suv%s         %s%s%s\n", dim, reset, blue, uvVersion, reset)
+	} else {
+		fmt.Printf("    %suv%s         %snot installed%s\n", dim, reset, dim, reset)
+	}
+
+	// Virtual environment
+	venv := os.Getenv("VIRTUAL_ENV")
+	if venv != "" {
+		fmt.Printf("    %sVenv%s       %s✓ active%s\n", dim, reset, green, reset)
+	} else {
+		fmt.Printf("    %sVenv%s       %snone active%s\n", dim, reset, dim, reset)
+	}
+
+	// Check for pyproject.toml
+	if _, err := os.Stat("pyproject.toml"); err == nil {
+		fmt.Printf("    %sProject%s    %s✓ pyproject.toml found%s\n", dim, reset, green, reset)
+
+		// Get package name
+		file, _ := os.Open("pyproject.toml")
+		if file != nil {
+			defer file.Close()
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+				line := scanner.Text()
+				if strings.HasPrefix(line, "name = ") {
+					name := strings.Trim(strings.TrimPrefix(line, "name = "), "\"")
+					fmt.Printf("    %sPackage%s    %s%s%s\n", dim, reset, yellow, name, reset)
+					break
+				}
+			}
+		}
+	} else {
+		fmt.Printf("    %sProject%s    %snot in Python project%s\n", dim, reset, dim, reset)
+	}
+
+	fmt.Println()
+	return nil
 }

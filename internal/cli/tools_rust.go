@@ -29,6 +29,9 @@ Commands:
   outdated  - Show outdated dependencies
   expand    - Expand macros (for debugging)
   info      - Show Rust environment info`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runRustStatus()
+		},
 	}
 
 	cmd.AddCommand(
@@ -299,4 +302,93 @@ func newRustInfoCmd() *cobra.Command {
 			return nil
 		},
 	}
+}
+
+func runRustStatus() error {
+	// Check if Rust is installed
+	rustInstalled := false
+	rustVersion := ""
+	rustCmd := exec.Command("rustc", "--version")
+	if out, err := rustCmd.Output(); err == nil {
+		rustInstalled = true
+		parts := strings.Fields(string(out))
+		if len(parts) >= 2 {
+			rustVersion = parts[1]
+		}
+	}
+
+	// Get toolchain
+	toolchain := ""
+	if rustInstalled {
+		tcCmd := exec.Command("rustup", "show", "active-toolchain")
+		if out, err := tcCmd.Output(); err == nil {
+			parts := strings.Fields(string(out))
+			if len(parts) > 0 {
+				toolchain = parts[0]
+			}
+		}
+	}
+
+	// Choose color based on status
+	var logoColor string
+	if rustInstalled {
+		logoColor = "\033[38;5;208m" // Orange (Rust color)
+	} else {
+		logoColor = "\033[31m" // Red
+	}
+	reset := "\033[0m"
+	dim := "\033[2m"
+	bold := "\033[1m"
+	green := "\033[32m"
+	red := "\033[31m"
+	orange := "\033[38;5;208m"
+
+	fmt.Println()
+	fmt.Printf("%s  ██████╗ ██╗   ██╗███████╗████████╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗%s\n", logoColor, reset)
+	fmt.Printf("%s  ██╔══██╗██║   ██║██╔════╝╚══██╔══╝    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝%s\n", logoColor, reset)
+	fmt.Printf("%s  ██████╔╝██║   ██║███████╗   ██║          ██║   ██║   ██║██║   ██║██║     ███████╗%s\n", logoColor, reset)
+	fmt.Printf("%s  ██╔══██╗██║   ██║╚════██║   ██║          ██║   ██║   ██║██║   ██║██║     ╚════██║%s\n", logoColor, reset)
+	fmt.Printf("%s  ██║  ██║╚██████╔╝███████║   ██║          ██║   ╚██████╔╝╚██████╔╝███████╗███████║%s\n", logoColor, reset)
+	fmt.Printf("%s  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝          ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝%s\n", logoColor, reset)
+	fmt.Println()
+
+	fmt.Printf("  %sCurrent Status%s\n", bold, reset)
+	fmt.Printf("  %s───────────────────────────────────────%s\n", dim, reset)
+
+	// Rust version
+	if rustInstalled {
+		fmt.Printf("    %sRust%s       %s%s%s\n", dim, reset, orange, rustVersion, reset)
+	} else {
+		fmt.Printf("    %sRust%s       %snot installed%s\n", dim, reset, red, reset)
+	}
+
+	// Toolchain
+	if toolchain != "" {
+		fmt.Printf("    %sToolchain%s  %s%s%s\n", dim, reset, orange, toolchain, reset)
+	}
+
+	// Check for Cargo.toml
+	if _, err := os.Stat("Cargo.toml"); err == nil {
+		fmt.Printf("    %sProject%s    %s✓ Cargo.toml found%s\n", dim, reset, green, reset)
+
+		// Get package name
+		file, _ := os.Open("Cargo.toml")
+		if file != nil {
+			defer file.Close()
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+				line := scanner.Text()
+				if strings.HasPrefix(line, "name = ") {
+					name := strings.Trim(strings.TrimPrefix(line, "name = "), "\"")
+					fmt.Printf("    %sPackage%s    %s%s%s\n", dim, reset, orange, name, reset)
+					break
+				}
+			}
+		}
+	} else {
+		fmt.Printf("    %sProject%s    %snot in Rust project%s\n", dim, reset, dim, reset)
+	}
+
+	fmt.Println()
+	return nil
 }
