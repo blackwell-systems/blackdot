@@ -5,10 +5,10 @@
 > Modular configuration framework for the AI-assisted development era
 
 ```bash
-# macOS / Linux / WSL
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
+```
 
-# Windows (PowerShell)
+```powershell
 irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
 ```
 
