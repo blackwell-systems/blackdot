@@ -148,7 +148,7 @@ This generates:
 | `mongo` | mongo:7 | 27017 | `MONGO_URL`, `MONGO_HOST`, etc. |
 | `sqlite` | (none - file-based) | - | `DATABASE_URL`, `SQLITE_PATH` |
 | `localstack` | localstack/localstack | 4566 | `AWS_ENDPOINT_URL`, `AWS_REGION`, etc. |
-| `minio` | minio/minio | 9000, 9001 | `MINIO_ENDPOINT`, `AWS_ACCESS_KEY_ID`, etc. |
+| `minio` | minio/minio | 9000, 9001 | `MINIO_ENDPOINT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY` |
 
 ### Example: Full-Stack Go Application
 

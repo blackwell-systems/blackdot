@@ -215,9 +215,10 @@ var devcontainerServices = []DevcontainerService{
 		},
 		Volumes: []string{"minio-data:/data"},
 		EnvVars: map[string]string{
-			"S3_ENDPOINT":         "http://minio:9000",
-			"AWS_ACCESS_KEY_ID":     "minioadmin",
-			"AWS_SECRET_ACCESS_KEY": "minioadmin",
+			"MINIO_ENDPOINT":          "http://minio:9000",
+			"MINIO_CONSOLE":           "http://minio:9001",
+			"MINIO_ACCESS_KEY":        "minioadmin",
+			"MINIO_SECRET_KEY":        "minioadmin",
 		},
 	},
 }
