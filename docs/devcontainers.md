@@ -71,6 +71,7 @@ blackdot devcontainer init [OPTIONS]
 |--------|-------|-------------|
 | `--image` | | Base image (go, rust, python, node, java, ubuntu, alpine) |
 | `--preset` | | Blackdot preset (minimal, developer, claude, full) |
+| `--services` | | Comma-separated list of services (postgres, redis, mysql, etc.) |
 | `--output` | `-o` | Output directory (default: .devcontainer) |
 | `--force` | `-f` | Overwrite existing configuration |
 | `--no-extensions` | | Don't include VS Code extensions |
@@ -86,6 +87,9 @@ blackdot devcontainer init --image python --preset claude
 
 # Minimal Rust container
 blackdot devcontainer init --image rust --preset minimal
+
+# Go with PostgreSQL and Redis (generates docker-compose.yml)
+blackdot devcontainer init --image go --preset developer --services postgres,redis
 ```
 
 ### `blackdot devcontainer images`
@@ -94,6 +98,14 @@ List available base images.
 
 ```bash
 blackdot devcontainer images
+```
+
+### `blackdot devcontainer services`
+
+List available services for docker-compose integration.
+
+```bash
+blackdot devcontainer services
 ```
 
 ---
@@ -110,6 +122,47 @@ blackdot devcontainer images
 | Ubuntu | `mcr.microsoft.com/devcontainers/base:ubuntu` | - |
 | Alpine | `mcr.microsoft.com/devcontainers/base:alpine` | - |
 | Debian | `mcr.microsoft.com/devcontainers/base:debian` | - |
+
+---
+
+## Docker Compose Integration
+
+For projects requiring databases, caches, or other services, use the `--services` flag to generate a complete docker-compose setup:
+
+```bash
+blackdot devcontainer init --image go --services postgres,redis
+```
+
+This generates:
+- `docker-compose.yml` with all services configured
+- `.env.example` with connection strings
+- `devcontainer.json` configured for docker-compose
+
+### Available Services
+
+| Service | Image | Default Ports | Environment Variables |
+|---------|-------|---------------|----------------------|
+| `postgres` | postgres:16-alpine | 5432 | `DATABASE_URL`, `DB_HOST`, `DB_USER`, etc. |
+| `redis` | redis:7-alpine | 6379 | `REDIS_URL`, `REDIS_HOST`, `REDIS_PORT` |
+| `mysql` | mysql:8 | 3306 | `DATABASE_URL`, `MYSQL_HOST`, etc. |
+| `mongo` | mongo:7 | 27017 | `MONGO_URL`, `MONGO_HOST`, etc. |
+| `sqlite` | (none - file-based) | - | `DATABASE_URL`, `SQLITE_PATH` |
+| `localstack` | localstack/localstack | 4566 | `AWS_ENDPOINT_URL`, `AWS_REGION`, etc. |
+| `minio` | minio/minio | 9000, 9001 | `MINIO_ENDPOINT`, `AWS_ACCESS_KEY_ID`, etc. |
+
+### Example: Full-Stack Go Application
+
+```bash
+blackdot devcontainer init --image go --preset developer --services postgres,redis,minio
+```
+
+This creates a development environment with:
+- Go 1.23 development container
+- PostgreSQL 16 for database
+- Redis 7 for caching/queues
+- MinIO for S3-compatible object storage
+- All services networked together
+- Environment variables pre-configured
 
 ---
 

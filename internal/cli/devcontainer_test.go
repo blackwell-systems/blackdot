@@ -28,7 +28,7 @@ func TestDevcontainerCommand(t *testing.T) {
 func TestDevcontainerSubcommands(t *testing.T) {
 	cmd := newDevcontainerCmd()
 
-	expectedSubcommands := []string{"init", "images"}
+	expectedSubcommands := []string{"init", "images", "services"}
 	subcommands := make(map[string]bool)
 	for _, sub := range cmd.Commands() {
 		subcommands[sub.Name()] = true
@@ -54,6 +54,7 @@ func TestDevcontainerInitFlags(t *testing.T) {
 		{"output", "o"},
 		{"force", "f"},
 		{"no-extensions", ""},
+		{"services", ""},
 	}
 
 	for _, f := range flags {
@@ -251,7 +252,7 @@ func TestRunDevcontainerInit(t *testing.T) {
 	tmpDir := t.TempDir()
 	outputDir := filepath.Join(tmpDir, ".devcontainer")
 
-	err := runDevcontainerInit("go", "developer", outputDir, false, false)
+	err := runDevcontainerInit("go", "developer", outputDir, false, false, nil)
 	if err != nil {
 		t.Fatalf("runDevcontainerInit failed: %v", err)
 	}
@@ -284,19 +285,19 @@ func TestRunDevcontainerInitOverwrite(t *testing.T) {
 	outputDir := filepath.Join(tmpDir, ".devcontainer")
 
 	// Create first config
-	err := runDevcontainerInit("go", "developer", outputDir, false, false)
+	err := runDevcontainerInit("go", "developer", outputDir, false, false, nil)
 	if err != nil {
 		t.Fatalf("first runDevcontainerInit failed: %v", err)
 	}
 
 	// Try without force - should fail
-	err = runDevcontainerInit("rust", "claude", outputDir, false, false)
+	err = runDevcontainerInit("rust", "claude", outputDir, false, false, nil)
 	if err == nil {
 		t.Error("expected error when overwriting without --force")
 	}
 
 	// Try with force - should succeed
-	err = runDevcontainerInit("rust", "claude", outputDir, true, false)
+	err = runDevcontainerInit("rust", "claude", outputDir, true, false, nil)
 	if err != nil {
 		t.Fatalf("runDevcontainerInit with force failed: %v", err)
 	}
@@ -315,7 +316,7 @@ func TestRunDevcontainerInitInvalidImage(t *testing.T) {
 	tmpDir := t.TempDir()
 	outputDir := filepath.Join(tmpDir, ".devcontainer")
 
-	err := runDevcontainerInit("invalid-image", "developer", outputDir, false, false)
+	err := runDevcontainerInit("invalid-image", "developer", outputDir, false, false, nil)
 	if err == nil {
 		t.Error("expected error for invalid image")
 	}
@@ -326,8 +327,89 @@ func TestRunDevcontainerInitInvalidPreset(t *testing.T) {
 	tmpDir := t.TempDir()
 	outputDir := filepath.Join(tmpDir, ".devcontainer")
 
-	err := runDevcontainerInit("go", "invalid-preset", outputDir, false, false)
+	err := runDevcontainerInit("go", "invalid-preset", outputDir, false, false, nil)
 	if err == nil {
 		t.Error("expected error for invalid preset")
+	}
+}
+
+// TestRunDevcontainerInitWithServices verifies services support
+func TestRunDevcontainerInitWithServices(t *testing.T) {
+	tmpDir := t.TempDir()
+	outputDir := filepath.Join(tmpDir, ".devcontainer")
+
+	err := runDevcontainerInit("go", "developer", outputDir, false, false, []string{"postgres", "redis"})
+	if err != nil {
+		t.Fatalf("runDevcontainerInit with services failed: %v", err)
+	}
+
+	// Check docker-compose.yml exists
+	composePath := filepath.Join(outputDir, "docker-compose.yml")
+	if _, err := os.Stat(composePath); os.IsNotExist(err) {
+		t.Error("docker-compose.yml was not created")
+	}
+
+	// Check .env.example exists
+	envPath := filepath.Join(outputDir, ".env.example")
+	if _, err := os.Stat(envPath); os.IsNotExist(err) {
+		t.Error(".env.example was not created")
+	}
+
+	// Check devcontainer.json references compose
+	configPath := filepath.Join(outputDir, "devcontainer.json")
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatalf("failed to read devcontainer.json: %v", err)
+	}
+
+	var config DevcontainerConfig
+	if err := json.Unmarshal(data, &config); err != nil {
+		t.Fatalf("failed to parse devcontainer.json: %v", err)
+	}
+
+	if config.DockerComposeFile != "docker-compose.yml" {
+		t.Errorf("expected dockerComposeFile='docker-compose.yml', got '%s'", config.DockerComposeFile)
+	}
+	if config.Service != "app" {
+		t.Errorf("expected service='app', got '%s'", config.Service)
+	}
+	if config.Image != "" {
+		t.Error("image should be empty when using docker-compose")
+	}
+}
+
+// TestDevcontainerServices verifies services list
+func TestDevcontainerServices(t *testing.T) {
+	if len(devcontainerServices) == 0 {
+		t.Fatal("devcontainerServices should not be empty")
+	}
+
+	expectedServices := []string{"postgres", "redis", "mysql", "mongo", "sqlite", "localstack", "minio"}
+	serviceNames := make(map[string]bool)
+	for _, svc := range devcontainerServices {
+		serviceNames[svc.Name] = true
+	}
+
+	for _, expected := range expectedServices {
+		if !serviceNames[expected] {
+			t.Errorf("expected service '%s' not found", expected)
+		}
+	}
+}
+
+// TestDevcontainerServicesSubcommand verifies services subcommand exists
+func TestDevcontainerServicesSubcommand(t *testing.T) {
+	cmd := newDevcontainerCmd()
+
+	found := false
+	for _, sub := range cmd.Commands() {
+		if sub.Name() == "services" {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		t.Error("expected subcommand 'services' not found")
 	}
 }
