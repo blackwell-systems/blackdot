@@ -31,7 +31,7 @@ export BLACKDOT_VAULT_BACKEND=pass
 export ONEPASSWORD_VAULT=Personal  # default
 
 # For pass, optionally set prefix
-export PASS_PREFIX=dotfiles  # default, items stored as dotfiles/Git-Config
+export PASS_PREFIX=blackdot  # default, items stored as blackdot/Git-Config
 ```
 
 **Switching backends:**
@@ -148,8 +148,8 @@ pass init "your-gpg-id@email.com"
 # Set backend
 export BLACKDOT_VAULT_BACKEND=pass
 
-# Items will be stored under dotfiles/ prefix
-# e.g., dotfiles/Git-Config, dotfiles/SSH-Config
+# Items will be stored under blackdot/ prefix
+# e.g., blackdot/Git-Config, blackdot/SSH-Config
 ```
 
 ---
@@ -160,9 +160,9 @@ The setup wizard uses location-based organization - you specify where your secre
 
 | Backend | Location Type | Example |
 |---------|---------------|---------|
-| Bitwarden | folder | `"dotfiles"` |
+| Bitwarden | folder | `"blackdot"` |
 | 1Password | vault/tag | `"Personal"` |
-| pass | directory | `"dotfiles"` |
+| pass | directory | `"blackdot"` |
 
 The wizard (`blackdot vault setup`) offers three modes:
 - **Existing Items** - Import from existing vault location
@@ -172,7 +172,7 @@ The wizard (`blackdot vault setup`) offers three modes:
 Location is stored in `vault-items.json`:
 ```json
 {
-  "vault_location": { "type": "folder", "value": "dotfiles" }
+  "vault_location": { "type": "folder", "value": "blackdot" }
 }
 ```
 

@@ -29,7 +29,7 @@ export BLACKDOT_VAULT_BACKEND=pass
 export ONEPASSWORD_VAULT=Personal  # default
 
 # For pass, optionally set prefix
-export PASS_PREFIX=dotfiles  # default, items stored as dotfiles/Git-Config
+export PASS_PREFIX=blackdot  # default, items stored as blackdot/Git-Config
 ```
 
 All `blackdot vault` commands work identically regardless of backend.
@@ -104,8 +104,8 @@ pass init "your-gpg-id@email.com"
 # Set backend
 export BLACKDOT_VAULT_BACKEND=pass
 
-# Items will be stored under dotfiles/ prefix
-# e.g., dotfiles/Git-Config, dotfiles/SSH-Config
+# Items will be stored under blackdot/ prefix
+# e.g., blackdot/Git-Config, blackdot/SSH-Config
 ```
 
 ---
@@ -120,7 +120,7 @@ User configuration for vault items. Located at `~/.config/blackdot/vault-items.j
 {
   "vault_location": {
     "type": "folder",
-    "value": "dotfiles"
+    "value": "blackdot"
   },
   "vault_items": {
     "SSH-GitHub": {
