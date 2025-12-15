@@ -94,6 +94,7 @@ func printRootHelp() {
 
 	// Developer Tools
 	BoldCyan.Println("Developer Tools:")
+	printCmd("devcontainer", "Generate devcontainer configuration")
 	printCmd("tools", "Cross-platform developer tool wrappers")
 	printCmd("tools ssh", "SSH key and agent management")
 	printCmd("tools aws", "AWS CLI helpers (profiles, SSO)")
