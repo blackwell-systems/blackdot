@@ -1810,6 +1810,231 @@ Shows all supported images with their descriptions and included VS Code extensio
 
 ---
 
+## Developer Tools
+
+### `blackdot tools`
+
+Cross-platform developer tools accessible via the Go CLI. These provide consistent behavior across ZSH, PowerShell, and any shell.
+
+```bash
+blackdot tools <category> [command] [OPTIONS]
+```
+
+**Categories:**
+
+| Category | Description | Shell Alias |
+|----------|-------------|-------------|
+| `ssh` | SSH key and connection management | `sshtools` |
+| `aws` | AWS profile and authentication | `awstools` |
+| `cdk` | AWS CDK development helpers | `cdktools` |
+| `go` | Go development helpers | `gotools` |
+| `rust` | Rust/Cargo development helpers | `rusttools` |
+| `python` | Python/uv development helpers | `pythontools` |
+| `docker` | Docker container management | `dockertools` |
+| `claude` | Claude Code configuration | `claudetools` |
+
+**Examples:**
+
+```bash
+blackdot tools ssh status      # Show SSH status banner
+blackdot tools docker ps       # List containers
+blackdot tools aws who         # Show AWS identity
+sshtools keys                  # List SSH keys (via alias)
+dockertools clean              # Clean Docker (via alias)
+```
+
+---
+
+### SSH Tools
+
+```bash
+blackdot tools ssh [command]
+sshtools [command]             # Alias
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `keys` | List all SSH keys with fingerprints |
+| `gen` | Generate new ED25519 key pair |
+| `list` | List configured SSH hosts |
+| `agent` | Show SSH agent status and loaded keys |
+| `fp` | Show fingerprint(s) in multiple formats |
+| `copy` | Copy public key to remote host |
+| `tunnel` | Create SSH port forward tunnel |
+| `socks` | Create SOCKS5 proxy through SSH host |
+| `status` | Show SSH status with banner |
+| `load [key]` | Add key to SSH agent |
+| `unload <key>` | Remove key from SSH agent |
+| `clear` | Remove all keys from agent |
+| `tunnels` | List active SSH connections |
+| `add-host <name>` | Add new host to SSH config interactively |
+
+**Examples:**
+
+```bash
+sshtools                       # Show status banner
+sshtools keys                  # List keys with fingerprints
+sshtools gen work              # Generate ~/.ssh/id_ed25519_work
+sshtools load github           # Add github key to agent
+sshtools tunnel myserver 8080  # Forward local:8080 to server:8080
+sshtools add-host prod         # Interactive host configuration
+```
+
+---
+
+### Docker Tools
+
+```bash
+blackdot tools docker [command]
+dockertools [command]          # Alias
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `ps` | List containers |
+| `images` | List Docker images |
+| `logs <container>` | Show container logs |
+| `exec <container> <cmd>` | Execute command in container |
+| `shell <container>` | Open shell in container |
+| `stop <container>` | Stop containers |
+| `start <container>` | Start containers |
+| `restart <container>` | Restart containers |
+| `rm <container>` | Remove containers |
+| `rmi <image>` | Remove images |
+| `build` | Build Docker image |
+| `pull <image>` | Pull an image |
+| `push <image>` | Push an image |
+| `tag <src> <dst>` | Tag an image |
+| `clean` | Remove stopped containers and dangling images |
+| `prune` | System prune (clean all unused resources) |
+| `stats` | Show container resource usage |
+| `ip <container>` | Get container IP address |
+| `env <container>` | Show container environment variables |
+| `ports` | Show all container ports |
+| `vols` | List Docker volumes |
+| `nets` | List Docker networks |
+| `inspect <container>` | Inspect container |
+| `status` | Show Docker status banner |
+
+**Compose Subcommands:**
+
+```bash
+dockertools compose up         # Start services
+dockertools compose down       # Stop services
+dockertools compose logs       # Show logs
+dockertools compose ps         # List services
+dockertools compose build      # Build services
+dockertools compose restart    # Restart services
+dockertools compose exec       # Execute in service
+dockertools compose pull       # Pull service images
+```
+
+---
+
+### CDK Tools
+
+```bash
+blackdot tools cdk [command]
+cdktools [command]             # Alias
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `init` | Initialize new CDK project |
+| `env` | Set CDK_DEFAULT_ACCOUNT/REGION from AWS profile |
+| `env-clear` | Clear CDK environment variables |
+| `outputs` | Show CloudFormation stack outputs |
+| `context` | Show or clear CDK context |
+| `status` | Show CDK status banner |
+| `deploy [stacks]` | Deploy CDK stacks |
+| `deploy-all` | Deploy all CDK stacks |
+| `diff [stacks]` | Show CDK diff |
+| `check [stacks]` | Diff then prompt to deploy |
+| `hotswap [stacks]` | Hotswap deploy (fast Lambda/ECS updates) |
+| `synth` | Synthesize CloudFormation templates |
+| `list` | List CDK stacks |
+| `destroy [stacks]` | Destroy CDK stacks |
+| `bootstrap` | Bootstrap CDK in AWS account |
+
+---
+
+### Go Tools
+
+```bash
+blackdot tools go [command]
+gotools [command]              # Alias
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `new <name>` | Create new Go project |
+| `init` | Initialize go.mod in current directory |
+| `test` | Run tests with coverage |
+| `cover` | Run tests and open coverage report |
+| `lint` | Run golangci-lint |
+| `outdated` | Check for outdated dependencies |
+| `update` | Update all dependencies |
+| `build-all` | Build for all platforms |
+| `bench [pattern]` | Run benchmarks |
+| `info` | Show Go environment info |
+| `status` | Show Go status banner |
+
+---
+
+### Rust Tools
+
+```bash
+blackdot tools rust [command]
+rusttools [command]            # Alias
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `new <name>` | Create new Rust project |
+| `update` | Update Rust toolchain |
+| `switch <channel>` | Switch toolchain (stable/nightly) |
+| `lint` | Run clippy |
+| `fix` | Auto-fix clippy warnings |
+| `outdated` | Check for outdated dependencies |
+| `expand` | Expand macros |
+| `info` | Show Rust environment info |
+| `status` | Show Rust status banner |
+| `tools-install` | Install common Rust dev tools |
+
+---
+
+### Python Tools
+
+```bash
+blackdot tools python [command]
+pythontools [command]          # Alias
+pytools [command]              # Alias
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `new <name>` | Create new Python project with uv |
+| `clean` | Remove __pycache__ and .pyc files |
+| `venv` | Create/activate virtual environment |
+| `test` | Run pytest |
+| `cover` | Run tests with coverage |
+| `info` | Show Python environment info |
+| `status` | Show Python status banner |
+
+---
+
 ## Navigation Commands
 
 ### `blackdot cd`
