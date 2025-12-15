@@ -2066,6 +2066,252 @@ export CLAUDE_BEDROCK_FAST_MODEL="us.anthropic.claude-3-5-haiku-20241022-v1:0"
 
 ---
 
+## Developer Tools
+
+The `blackdot tools` command provides cross-platform developer utilities for SSH, Docker, AWS, CDK, Go, Rust, Python, and Claude. Each tool category has a dedicated subcommand with a visual banner.
+
+### Shell Aliases
+
+For convenience, shell aliases are available in both ZSH and PowerShell:
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `sshtools` | `blackdot tools ssh` | SSH key and connection management |
+| `awstools` | `blackdot tools aws` | AWS profile and SSO helpers |
+| `dockertools` | `blackdot tools docker` | Container and image management |
+| `cdktools` | `blackdot tools cdk` | AWS CDK development helpers |
+| `gotools` | `blackdot tools go` | Go development utilities |
+| `rusttools` | `blackdot tools rust` | Rust development utilities |
+| `pytools` | `blackdot tools python` | Python development utilities |
+| `pythontools` | `blackdot tools python` | Alias for pytools |
+| `claudetools` | `blackdot tools claude` | Claude Code utilities |
+
+---
+
+### SSH Tools
+
+SSH key and connection management. Run `sshtools` or `blackdot tools ssh` to see the banner and available commands.
+
+```bash
+blackdot tools ssh [command]
+sshtools [command]           # Alias
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `keys` | List all SSH keys with fingerprints |
+| `gen <name>` | Generate new ED25519 key pair |
+| `list` | List configured SSH hosts |
+| `agent` | Show SSH agent status and loaded keys |
+| `fp [key]` | Show fingerprint(s) in SHA256/MD5 formats |
+| `copy <host>` | Copy public key to remote host |
+| `tunnel <host> <local> [remote]` | Create SSH port forward tunnel |
+| `socks <host>` | Create SOCKS5 proxy through SSH host |
+| `status` | Show SSH status with visual banner |
+| `load [key]` | Add key to SSH agent |
+| `unload <key>` | Remove key from SSH agent |
+| `clear` | Remove all keys from agent |
+| `tunnels` | List active SSH connections |
+| `add-host <alias>` | Add new host to SSH config |
+
+**Examples:**
+
+```bash
+# Key management
+sshtools keys                    # List all keys
+sshtools gen github              # Generate key for GitHub
+sshtools fp github               # Show fingerprints
+
+# Agent management
+sshtools agent                   # Show agent status
+sshtools load github             # Add key to agent
+sshtools load --lifetime 3600    # Key expires in 1 hour
+sshtools unload github           # Remove key from agent
+sshtools clear                   # Clear all keys
+
+# Connection management
+sshtools list                    # List configured hosts
+sshtools copy myserver           # Copy key to server
+sshtools tunnel myserver 8080    # Forward port 8080
+sshtools socks myserver          # SOCKS5 proxy on :1080
+
+# Configuration
+sshtools add-host prod --hostname 10.0.0.1 --user deploy --port 2222
+```
+
+---
+
+### Docker Tools
+
+Container and image management utilities. Run `dockertools` or `blackdot tools docker`.
+
+```bash
+blackdot tools docker [command]
+dockertools [command]            # Alias
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `ps` | List running containers |
+| `psa` | List all containers (including stopped) |
+| `imgs` | List images |
+| `stop` | Stop containers (interactive select or all) |
+| `rm` | Remove containers (interactive select or all) |
+| `rmi` | Remove images (interactive select or all) |
+| `logs <container>` | Follow container logs |
+| `exec <container>` | Interactive shell in container |
+| `prune` | Remove all unused resources |
+| `stats` | Show container resource usage |
+| `inspect <container>` | Inspect container details |
+| `top <container>` | Show running processes |
+| `pull <image>` | Pull an image |
+| `build` | Build from Dockerfile |
+| `run` | Run a new container |
+| `start` | Start stopped containers |
+| `restart` | Restart containers |
+| `pause` / `unpause` | Pause/unpause containers |
+| `kill` | Kill containers |
+| `cp` | Copy files to/from container |
+| `diff` | Inspect filesystem changes |
+| `export` | Export container to tarball |
+| `import` | Import tarball as image |
+| `save` | Save image to tarball |
+| `load` | Load image from tarball |
+| `tag` | Tag an image |
+| `push` | Push image to registry |
+| `status` | Show Docker status with banner |
+
+**Examples:**
+
+```bash
+dockertools ps                   # List running containers
+dockertools stop                 # Interactive select to stop
+dockertools stop --all           # Stop all containers
+dockertools prune                # Clean up unused resources
+dockertools exec myapp           # Shell into container
+dockertools logs myapp           # Follow logs
+```
+
+---
+
+### CDK Tools
+
+AWS CDK development helpers. Run `cdktools` or `blackdot tools cdk`.
+
+```bash
+blackdot tools cdk [command]
+cdktools [command]               # Alias
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `init` | Initialize new CDK project |
+| `synth` | Synthesize CloudFormation template |
+| `diff` | Compare stack with deployed |
+| `deploy` | Deploy stack |
+| `destroy` | Destroy stack |
+| `list` | List stacks |
+| `bootstrap` | Bootstrap CDK toolkit |
+| `watch` | Watch for changes and deploy |
+| `doctor` | Check CDK setup |
+| `context` | Manage context values |
+| `docs` | Open CDK documentation |
+| `metadata` | Show stack metadata |
+| `acknowledge` | Acknowledge security notices |
+| `notices` | Show security notices |
+| `status` | Show CDK status with banner |
+
+**Examples:**
+
+```bash
+cdktools init --language typescript
+cdktools synth
+cdktools diff
+cdktools deploy --require-approval never
+cdktools watch
+```
+
+---
+
+### Go Tools
+
+Go development utilities. Run `gotools` or `blackdot tools go`.
+
+```bash
+blackdot tools go [command]
+gotools [command]                # Alias
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `status` | Show Go environment status |
+| (more) | Coming soon |
+
+---
+
+### Rust Tools
+
+Rust development utilities. Run `rusttools` or `blackdot tools rust`.
+
+```bash
+blackdot tools rust [command]
+rusttools [command]              # Alias
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `status` | Show Rust toolchain status |
+| (more) | Coming soon |
+
+---
+
+### Python Tools
+
+Python development utilities. Run `pytools` or `blackdot tools python`.
+
+```bash
+blackdot tools python [command]
+pytools [command]                # Alias
+pythontools [command]            # Also works
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `status` | Show Python environment status |
+| (more) | Coming soon |
+
+---
+
+### Claude Tools
+
+Claude Code utilities. Run `claudetools` or `blackdot tools claude`.
+
+```bash
+blackdot tools claude [command]
+claudetools [command]            # Alias
+```
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `status` | Show Claude Code status |
+| (more) | Coming soon |
+
+---
+
 ## AWS Commands
 
 AWS profile management, SSO authentication, and role assumption helpers.

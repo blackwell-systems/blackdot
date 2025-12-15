@@ -31,14 +31,20 @@ Cross-platform SSH utilities for managing keys, agents, and connections.
 Works on Linux, macOS, and Windows.
 
 Commands:
-  keys     - List all SSH keys with fingerprints
-  gen      - Generate new ED25519 key pair
-  list     - List configured SSH hosts
-  agent    - Show SSH agent status and loaded keys
-  fp       - Show fingerprint(s) in multiple formats
-  copy     - Copy public key to remote host
-  tunnel   - Create SSH port forward tunnel
-  socks    - Create SOCKS5 proxy through SSH host`,
+  keys      - List all SSH keys with fingerprints
+  gen       - Generate new ED25519 key pair
+  list      - List configured SSH hosts
+  agent     - Show SSH agent status and loaded keys
+  fp        - Show fingerprint(s) in multiple formats
+  copy      - Copy public key to remote host
+  tunnel    - Create SSH port forward tunnel
+  socks     - Create SOCKS5 proxy through SSH host
+  status    - Show SSH status with banner
+  load      - Add key to SSH agent
+  unload    - Remove key from SSH agent
+  clear     - Remove all keys from agent
+  tunnels   - List active SSH connections
+  add-host  - Add new host to SSH config`,
 	}
 
 	// Add SSH subcommands
