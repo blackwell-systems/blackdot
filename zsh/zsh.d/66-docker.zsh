@@ -270,10 +270,22 @@ dbuild-fresh() {
 }
 
 # =========================
-# Docker Tools Help
+# CLI Aliases (call Go binary)
 # =========================
 
-dockertools() {
+# Main help command - shows banner and status via CLI
+alias dockertools='blackdot tools docker'
+
+# CLI-backed commands
+alias docker-status='blackdot tools docker status'
+alias docker-clean='blackdot tools docker clean'
+alias docker-prune='blackdot tools docker prune'
+
+# =========================
+# Docker Tools Help (legacy shell function)
+# =========================
+
+_dockertools_shell() {
     require_feature "docker_tools" || return 1
     # Source theme colors
     source "${BLACKDOT_DIR:-$HOME/workspace/blackdot}/lib/_colors.sh"

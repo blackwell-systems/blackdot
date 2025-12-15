@@ -807,6 +807,11 @@ function ssh-tunnel { blackdot tools ssh tunnel @args }
 function ssh-socks { blackdot tools ssh socks @args }
 function ssh-status { blackdot tools ssh status @args }
 function ssh-copy { blackdot tools ssh copy @args }
+function ssh-load { blackdot tools ssh load @args }
+function ssh-unload { blackdot tools ssh unload @args }
+function ssh-clear { blackdot tools ssh clear @args }
+function ssh-tunnels { blackdot tools ssh tunnels @args }
+function ssh-add-host { blackdot tools ssh add-host @args }
 
 # AWS Tools
 function aws-profiles { blackdot tools aws profiles @args }
@@ -1022,6 +1027,7 @@ function cdktools    { blackdot tools cdk @args }
 function gotools     { blackdot tools go @args }
 function rusttools   { blackdot tools rust @args }
 function pytools     { blackdot tools python @args }
+function pythontools { blackdot tools python @args }
 function dockertools { blackdot tools docker @args }
 function claudetools { blackdot tools claude @args }
 
@@ -1307,6 +1313,7 @@ Export-ModuleMember -Function @(
     # SSH aliases
     'ssh-keys', 'ssh-gen', 'ssh-list', 'ssh-agent-status',
     'ssh-fp', 'ssh-tunnel', 'ssh-socks', 'ssh-status', 'ssh-copy',
+    'ssh-load', 'ssh-unload', 'ssh-clear', 'ssh-tunnels', 'ssh-add-host',
 
     # AWS aliases
     'aws-profiles', 'aws-who', 'aws-login', 'aws-switch',
@@ -1347,7 +1354,7 @@ Export-ModuleMember -Function @(
 
     # Tool group aliases (expose full tool category)
     'sshtools', 'awstools', 'cdktools', 'gotools',
-    'rusttools', 'pytools', 'dockertools', 'claudetools',
+    'rusttools', 'pytools', 'pythontools', 'dockertools', 'claudetools',
 
     # Main wrapper (handles feature auto-reload)
     'Invoke-Blackdot'

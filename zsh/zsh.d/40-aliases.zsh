@@ -405,9 +405,20 @@ alias b=blackdot
 # Tool Group Aliases
 # =========================
 # These delegate to the Go binary for cross-platform consistency.
-# Usage: sshtools keys, awstools profiles, cdktools status, etc.
+# Usage: sshtools, awstools, cdktools, gotools, etc.
+# Each tool also supports subcommands: sshtools keys, awstools profiles, etc.
 
-# Determine Go binary path
+alias sshtools='blackdot tools ssh'
+alias awstools='blackdot tools aws'
+alias cdktools='blackdot tools cdk'
+alias gotools='blackdot tools go'
+alias rusttools='blackdot tools rust'
+alias pytools='blackdot tools python'
+alias pythontools='blackdot tools python'
+alias dockertools='blackdot tools docker'
+alias claudetools='blackdot tools claude'
+
+# Legacy function for backward compatibility (returns binary path)
 _blackdot_go_bin() {
     if [[ -x "$BLACKDOT_DIR/bin/blackdot" ]]; then
         echo "$BLACKDOT_DIR/bin/blackdot"
@@ -418,78 +429,8 @@ _blackdot_go_bin() {
     fi
 }
 
-# Tool group functions - delegate to Go binary
-sshtools() {
-    local bin=$(_blackdot_go_bin)
-    if [[ -z "$bin" ]]; then
-        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
-        return 1
-    fi
-    "$bin" tools ssh "$@"
-}
-
-awstools() {
-    local bin=$(_blackdot_go_bin)
-    if [[ -z "$bin" ]]; then
-        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
-        return 1
-    fi
-    "$bin" tools aws "$@"
-}
-
-cdktools() {
-    local bin=$(_blackdot_go_bin)
-    if [[ -z "$bin" ]]; then
-        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
-        return 1
-    fi
-    "$bin" tools cdk "$@"
-}
-
-gotools() {
-    local bin=$(_blackdot_go_bin)
-    if [[ -z "$bin" ]]; then
-        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
-        return 1
-    fi
-    "$bin" tools go "$@"
-}
-
-rusttools() {
-    local bin=$(_blackdot_go_bin)
-    if [[ -z "$bin" ]]; then
-        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
-        return 1
-    fi
-    "$bin" tools rust "$@"
-}
-
-pytools() {
-    local bin=$(_blackdot_go_bin)
-    if [[ -z "$bin" ]]; then
-        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
-        return 1
-    fi
-    "$bin" tools python "$@"
-}
-
-dockertools() {
-    local bin=$(_blackdot_go_bin)
-    if [[ -z "$bin" ]]; then
-        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
-        return 1
-    fi
-    "$bin" tools docker "$@"
-}
-
-claudetools() {
-    local bin=$(_blackdot_go_bin)
-    if [[ -z "$bin" ]]; then
-        echo "${RED}[ERROR]${NC} Go binary not found. Run: make build" >&2
-        return 1
-    fi
-    "$bin" tools claude "$@"
-}
+# Note: Tool-specific files (60-aws.zsh, 61-cdk.zsh, etc.) contain
+# the actual shell functions and additional aliases for each tool.
 
 # =========================
 # Individual Tool Aliases (Go Binary)

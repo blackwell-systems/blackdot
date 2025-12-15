@@ -179,10 +179,20 @@ cdkctx-clear() {
 }
 
 # =========================
-# CDK Tools Help
+# CLI Aliases (call Go binary)
 # =========================
 
-cdktools() {
+# Main help command - shows banner and status via CLI
+alias cdktools='blackdot tools cdk'
+
+# CLI-backed commands
+alias cdk-status='blackdot tools cdk status'
+
+# =========================
+# CDK Tools Help (legacy shell function)
+# =========================
+
+_cdktools_shell() {
     require_feature "cdk_tools" || return 1
     # Source theme colors
     source "${BLACKDOT_DIR:-$HOME/workspace/blackdot}/lib/_colors.sh"
