@@ -195,3 +195,211 @@ func TestVersionCommand(t *testing.T) {
 		t.Errorf("expected versionStr='1.0.0-test', got '%s'", versionStr)
 	}
 }
+
+// TestToolsSubcommands verifies all tool categories are registered
+func TestToolsSubcommands(t *testing.T) {
+	// Find the tools command
+	toolsCmd, _, err := rootCmd.Find([]string{"tools"})
+	if err != nil {
+		t.Fatalf("tools command not found: %v", err)
+	}
+
+	expectedTools := []string{
+		"ssh",
+		"aws",
+		"cdk",
+		"go",
+		"rust",
+		"python",
+		"docker",
+		"claude",
+	}
+
+	commands := make(map[string]bool)
+	for _, cmd := range toolsCmd.Commands() {
+		commands[cmd.Name()] = true
+	}
+
+	for _, expected := range expectedTools {
+		if !commands[expected] {
+			t.Errorf("expected tool '%s' not found in tools subcommands", expected)
+		}
+	}
+}
+
+// TestDockerSubcommands verifies Docker tool commands are registered
+func TestDockerSubcommands(t *testing.T) {
+	toolsCmd, _, _ := rootCmd.Find([]string{"tools"})
+	dockerCmd, _, err := toolsCmd.Find([]string{"docker"})
+	if err != nil {
+		t.Fatalf("docker command not found: %v", err)
+	}
+
+	expectedCommands := []string{
+		"ps", "images", "logs", "exec", "shell",
+		"stop", "start", "restart", "rm", "rmi",
+		"build", "pull", "push", "tag",
+		"compose", "clean", "prune", "stats",
+		"ip", "env", "ports", "vols", "nets", "inspect",
+	}
+
+	commands := make(map[string]bool)
+	for _, cmd := range dockerCmd.Commands() {
+		commands[cmd.Name()] = true
+	}
+
+	for _, expected := range expectedCommands {
+		if !commands[expected] {
+			t.Errorf("expected docker command '%s' not found", expected)
+		}
+	}
+}
+
+// TestCDKSubcommands verifies CDK tool commands are registered
+func TestCDKSubcommands(t *testing.T) {
+	toolsCmd, _, _ := rootCmd.Find([]string{"tools"})
+	cdkCmd, _, err := toolsCmd.Find([]string{"cdk"})
+	if err != nil {
+		t.Fatalf("cdk command not found: %v", err)
+	}
+
+	expectedCommands := []string{
+		"init", "env", "env-clear", "outputs", "context", "status",
+		"deploy", "deploy-all", "diff", "check", "hotswap",
+		"synth", "list", "destroy", "bootstrap",
+	}
+
+	commands := make(map[string]bool)
+	for _, cmd := range cdkCmd.Commands() {
+		commands[cmd.Name()] = true
+	}
+
+	for _, expected := range expectedCommands {
+		if !commands[expected] {
+			t.Errorf("expected cdk command '%s' not found", expected)
+		}
+	}
+}
+
+// TestRustSubcommands verifies Rust tool commands are registered
+func TestRustSubcommands(t *testing.T) {
+	toolsCmd, _, _ := rootCmd.Find([]string{"tools"})
+	rustCmd, _, err := toolsCmd.Find([]string{"rust"})
+	if err != nil {
+		t.Fatalf("rust command not found: %v", err)
+	}
+
+	expectedCommands := []string{
+		"new", "update", "switch", "lint", "fix",
+		"outdated", "expand", "info", "tools-install",
+	}
+
+	commands := make(map[string]bool)
+	for _, cmd := range rustCmd.Commands() {
+		commands[cmd.Name()] = true
+	}
+
+	for _, expected := range expectedCommands {
+		if !commands[expected] {
+			t.Errorf("expected rust command '%s' not found", expected)
+		}
+	}
+}
+
+// TestGoSubcommands verifies Go tool commands are registered
+func TestGoSubcommands(t *testing.T) {
+	toolsCmd, _, _ := rootCmd.Find([]string{"tools"})
+	goCmd, _, err := toolsCmd.Find([]string{"go"})
+	if err != nil {
+		t.Fatalf("go command not found: %v", err)
+	}
+
+	expectedCommands := []string{
+		"new", "init", "test", "cover", "lint",
+		"outdated", "update", "build-all", "bench", "info",
+	}
+
+	commands := make(map[string]bool)
+	for _, cmd := range goCmd.Commands() {
+		commands[cmd.Name()] = true
+	}
+
+	for _, expected := range expectedCommands {
+		if !commands[expected] {
+			t.Errorf("expected go command '%s' not found", expected)
+		}
+	}
+}
+
+// TestPythonSubcommands verifies Python tool commands are registered
+func TestPythonSubcommands(t *testing.T) {
+	toolsCmd, _, _ := rootCmd.Find([]string{"tools"})
+	pyCmd, _, err := toolsCmd.Find([]string{"python"})
+	if err != nil {
+		t.Fatalf("python command not found: %v", err)
+	}
+
+	expectedCommands := []string{
+		"new", "clean", "venv", "test", "cover", "info",
+	}
+
+	commands := make(map[string]bool)
+	for _, cmd := range pyCmd.Commands() {
+		commands[cmd.Name()] = true
+	}
+
+	for _, expected := range expectedCommands {
+		if !commands[expected] {
+			t.Errorf("expected python command '%s' not found", expected)
+		}
+	}
+}
+
+// TestAWSSubcommands verifies AWS tool commands are registered
+func TestAWSSubcommands(t *testing.T) {
+	toolsCmd, _, _ := rootCmd.Find([]string{"tools"})
+	awsCmd, _, err := toolsCmd.Find([]string{"aws"})
+	if err != nil {
+		t.Fatalf("aws command not found: %v", err)
+	}
+
+	expectedCommands := []string{
+		"profiles", "who", "login", "switch", "assume", "clear", "status",
+	}
+
+	commands := make(map[string]bool)
+	for _, cmd := range awsCmd.Commands() {
+		commands[cmd.Name()] = true
+	}
+
+	for _, expected := range expectedCommands {
+		if !commands[expected] {
+			t.Errorf("expected aws command '%s' not found", expected)
+		}
+	}
+}
+
+// TestSSHSubcommands verifies SSH tool commands are registered
+func TestSSHSubcommands(t *testing.T) {
+	toolsCmd, _, _ := rootCmd.Find([]string{"tools"})
+	sshCmd, _, err := toolsCmd.Find([]string{"ssh"})
+	if err != nil {
+		t.Fatalf("ssh command not found: %v", err)
+	}
+
+	expectedCommands := []string{
+		"keys", "gen", "list", "agent", "fp", "copy", "tunnel", "socks", "status",
+		"load", "unload", "clear", "tunnels", "add-host",
+	}
+
+	commands := make(map[string]bool)
+	for _, cmd := range sshCmd.Commands() {
+		commands[cmd.Name()] = true
+	}
+
+	for _, expected := range expectedCommands {
+		if !commands[expected] {
+			t.Errorf("expected ssh command '%s' not found", expected)
+		}
+	}
+}

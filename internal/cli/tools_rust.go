@@ -29,6 +29,9 @@ Commands:
   outdated  - Show outdated dependencies
   expand    - Expand macros (for debugging)
   info      - Show Rust environment info`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runRustStatus()
+		},
 	}
 
 	cmd.AddCommand(
@@ -40,6 +43,7 @@ Commands:
 		newRustOutdatedCmd(),
 		newRustExpandCmd(),
 		newRustInfoCmd(),
+		newRustToolsInstallCmd(),
 	)
 
 	return cmd
@@ -299,4 +303,156 @@ func newRustInfoCmd() *cobra.Command {
 			return nil
 		},
 	}
+}
+
+func runRustStatus() error {
+	// Check if Rust is installed
+	rustInstalled := false
+	rustVersion := ""
+	rustCmd := exec.Command("rustc", "--version")
+	if out, err := rustCmd.Output(); err == nil {
+		rustInstalled = true
+		parts := strings.Fields(string(out))
+		if len(parts) >= 2 {
+			rustVersion = parts[1]
+		}
+	}
+
+	// Get toolchain
+	toolchain := ""
+	if rustInstalled {
+		tcCmd := exec.Command("rustup", "show", "active-toolchain")
+		if out, err := tcCmd.Output(); err == nil {
+			parts := strings.Fields(string(out))
+			if len(parts) > 0 {
+				toolchain = parts[0]
+			}
+		}
+	}
+
+	// Check if in Rust project
+	_, err := os.Stat("Cargo.toml")
+	inProject := err == nil
+
+	// Choose color based on status
+	var logoColor string
+	if inProject {
+		logoColor = "\033[32m" // Green when in project
+	} else if rustInstalled {
+		logoColor = "\033[38;5;208m" // Orange when Rust installed but not in project
+	} else {
+		logoColor = "\033[31m" // Red when not installed
+	}
+	reset := "\033[0m"
+	dim := "\033[2m"
+	bold := "\033[1m"
+	green := "\033[32m"
+	red := "\033[31m"
+	orange := "\033[38;5;208m"
+
+	fmt.Println()
+	fmt.Printf("%s  ██████╗ ██╗   ██╗███████╗████████╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗%s\n", logoColor, reset)
+	fmt.Printf("%s  ██╔══██╗██║   ██║██╔════╝╚══██╔══╝    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝%s\n", logoColor, reset)
+	fmt.Printf("%s  ██████╔╝██║   ██║███████╗   ██║          ██║   ██║   ██║██║   ██║██║     ███████╗%s\n", logoColor, reset)
+	fmt.Printf("%s  ██╔══██╗██║   ██║╚════██║   ██║          ██║   ██║   ██║██║   ██║██║     ╚════██║%s\n", logoColor, reset)
+	fmt.Printf("%s  ██║  ██║╚██████╔╝███████║   ██║          ██║   ╚██████╔╝╚██████╔╝███████╗███████║%s\n", logoColor, reset)
+	fmt.Printf("%s  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝          ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝%s\n", logoColor, reset)
+	fmt.Println()
+
+	fmt.Printf("  %sCurrent Status%s\n", bold, reset)
+	fmt.Printf("  %s───────────────────────────────────────%s\n", dim, reset)
+
+	// Rust version
+	if rustInstalled {
+		fmt.Printf("    %sRust%s       %s%s%s\n", dim, reset, orange, rustVersion, reset)
+	} else {
+		fmt.Printf("    %sRust%s       %snot installed%s\n", dim, reset, red, reset)
+	}
+
+	// Toolchain
+	if toolchain != "" {
+		fmt.Printf("    %sToolchain%s  %s%s%s\n", dim, reset, orange, toolchain, reset)
+	}
+
+	// Check for Cargo.toml
+	if _, err := os.Stat("Cargo.toml"); err == nil {
+		fmt.Printf("    %sProject%s    %s✓ Cargo.toml found%s\n", dim, reset, green, reset)
+
+		// Get package name
+		file, _ := os.Open("Cargo.toml")
+		if file != nil {
+			defer file.Close()
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+				line := scanner.Text()
+				if strings.HasPrefix(line, "name = ") {
+					name := strings.Trim(strings.TrimPrefix(line, "name = "), "\"")
+					fmt.Printf("    %sPackage%s    %s%s%s\n", dim, reset, orange, name, reset)
+					break
+				}
+			}
+		}
+	} else {
+		fmt.Printf("    %sProject%s    %snot in Rust project%s\n", dim, reset, dim, reset)
+	}
+
+	fmt.Println()
+	return nil
+}
+
+// newRustToolsInstallCmd installs common Rust tools
+func newRustToolsInstallCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "tools-install",
+		Short: "Install common Rust development tools",
+		Long: `Install common Rust development tools:
+  - clippy (linter)
+  - rustfmt (formatter)
+  - cargo-watch (file watcher)
+  - cargo-edit (add/remove dependencies)
+  - cargo-audit (security audit)
+  - cargo-outdated (check for updates)
+  - cargo-expand (macro expansion)`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return rustToolsInstall()
+		},
+	}
+}
+
+func rustToolsInstall() error {
+	fmt.Println("Installing common Rust development tools...")
+	fmt.Println()
+
+	// Install rustup components
+	fmt.Println("Installing rustup components (clippy, rustfmt)...")
+	componentsCmd := exec.Command("rustup", "component", "add", "clippy", "rustfmt")
+	componentsCmd.Stdout = os.Stdout
+	componentsCmd.Stderr = os.Stderr
+	if err := componentsCmd.Run(); err != nil {
+		fmt.Printf("Warning: failed to add rustup components: %v\n", err)
+	}
+	fmt.Println()
+
+	// Install cargo extensions
+	tools := []string{
+		"cargo-watch",
+		"cargo-edit",
+		"cargo-audit",
+		"cargo-outdated",
+		"cargo-expand",
+	}
+
+	for _, tool := range tools {
+		fmt.Printf("Installing %s...\n", tool)
+		installCmd := exec.Command("cargo", "install", tool)
+		installCmd.Stdout = os.Stdout
+		installCmd.Stderr = os.Stderr
+		if err := installCmd.Run(); err != nil {
+			fmt.Printf("Warning: failed to install %s: %v\n", tool, err)
+		}
+	}
+
+	fmt.Println()
+	fmt.Println("Done! Run 'blackdot tools rust' to see available commands.")
+	return nil
 }

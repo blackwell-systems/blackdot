@@ -220,10 +220,20 @@ go-build-all() {
 }
 
 # =========================
-# Go Tools Help
+# CLI Aliases (call Go binary)
 # =========================
 
-gotools() {
+# Main help command - shows banner and status via CLI
+alias gotools='blackdot tools go'
+
+# CLI-backed commands
+alias go-info='blackdot tools go info'
+
+# =========================
+# Go Tools Help (legacy shell function)
+# =========================
+
+_gotools_shell() {
     require_feature "go_tools" || return 1
     # Source theme colors
     source "${BLACKDOT_DIR:-$HOME/workspace/blackdot}/lib/_colors.sh"

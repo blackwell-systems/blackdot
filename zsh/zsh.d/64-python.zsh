@@ -314,10 +314,20 @@ uv-python-setup() {
 }
 
 # =========================
-# Python Tools Help
+# CLI Aliases (call Go binary)
 # =========================
 
-pythontools() {
+# Main help command - shows banner and status via CLI
+alias pythontools='blackdot tools python'
+
+# CLI-backed commands
+alias python-info='blackdot tools python info'
+
+# =========================
+# Python Tools Help (legacy shell function)
+# =========================
+
+_pythontools_shell() {
     require_feature "python_tools" || return 1
     # Source theme colors
     source "${BLACKDOT_DIR:-$HOME/workspace/blackdot}/lib/_colors.sh"

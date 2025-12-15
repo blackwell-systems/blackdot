@@ -57,6 +57,9 @@ Commands:
   switch    - Interactive backend switcher
   init      - Initialize Claude Code hooks and commands
   env       - Show environment variables for Claude Code`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runClaudeStatus()
+		},
 	}
 
 	cmd.AddCommand(

@@ -30,6 +30,10 @@ Commands:
   switch    - Set AWS_PROFILE environment variable (prints export command)
   assume    - Assume IAM role for cross-account access
   clear     - Clear temporary credentials`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// Show status banner when called without subcommand
+			return runAWSStatus()
+		},
 	}
 
 	cmd.AddCommand(
@@ -293,9 +297,9 @@ func runAWSStatus() error {
 	// Choose color
 	var logoColor *color.Color
 	if isAuthenticated {
-		logoColor = color.New(color.FgYellow) // AWS Orange-ish
+		logoColor = color.New(color.FgGreen) // Green when authenticated
 	} else {
-		logoColor = color.New(color.FgRed)
+		logoColor = color.New(color.FgRed) // Red when not
 	}
 
 	// Print banner
