@@ -47,7 +47,7 @@ _blackdot_init_features() {
     if [[ -z "$_blackdot_bin" || ! -x "$_blackdot_bin" ]]; then
         export BLACKDOT_FEATURE_MODE="degraded"
         # Capture searched paths as a literal for the error message
-        local _searched="$_blackdot_dir/bin/blackdot, ~/.local/bin/blackdot, \$PATH"
+        local _searched="$_blackdot_dir/bin/blackdot, ~/.local/bin/blackdot, PATH"
         # Provide minimal fallback functions
         feature_enabled() { return 1; }  # Features disabled when binary missing
         eval "require_feature() {
