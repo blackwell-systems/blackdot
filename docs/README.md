@@ -38,7 +38,7 @@
 | [macOS Settings](macos-settings.md) | 137+ system preferences |
 | [Windows Setup](windows-setup.md) | PowerShell module & winget packages |
 
-For detailed feature comparisons vs chezmoi, thoughtbot, holman, and other popular dotfiles, see the [main README on GitHub](https://github.com/blackwell-systems/blackdot#how-this-compares).
+For comparisons vs chezmoi, thoughtbot, holman, and other dotfiles managers, see the [main README on GitHub](https://github.com/blackwell-systems/blackdot#how-blackdot-compares).
 
 ---
 

@@ -2,6 +2,7 @@
 
 [![Go](https://img.shields.io/badge/Go-1.24%2B-00ADD8?logo=go&logoColor=white)](https://go.dev/)
 [![Platform](https://img.shields.io/badge/macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20WSL2%20%7C%20Docker-blue)](https://github.com/blackwell-systems/blackdot)
+[![Claude Code](https://img.shields.io/badge/Built_for-Claude_Code-8A2BE2?logo=anthropic)](https://claude.ai/claude-code)
 [![Test Status](https://github.com/blackwell-systems/blackdot/workflows/Test%20Blackdot/badge.svg)](https://github.com/blackwell-systems/blackdot/actions)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
@@ -17,7 +18,7 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/ins
 irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
 ```
 
-The installer runs an interactive setup wizard. You choose what to install — everything is optional except base shell config. [Install options](#install-options) | [Docker test drive](docs/docker.md)
+The installer runs an [interactive setup wizard](#setup-wizard) — you choose what to install. Everything is optional except base shell config. [More install options](#install-options) | [Try in Docker first](docs/docker.md)
 
 ---
 
@@ -27,11 +28,11 @@ The installer runs an interactive setup wizard. You choose what to install — e
 
 **Secrets** — Unified API across Bitwarden, 1Password, and pass. Bidirectional sync, drift detection, schema validation. Your SSH keys, AWS creds, and git config restore on any new machine in seconds.
 
-**Developer tools** — AWS, Docker, Go, Rust, Python, SSH, NVM, SDKMAN integrations. Three package tiers (minimal/enhanced/full) via Homebrew or winget.
+**Developer tools** — AWS, Docker, Go, Rust, Python, SSH, NVM, SDKMAN integrations with deep shell support — not just aliases, but completions, helpers, and workflow automation. Three package tiers (minimal/enhanced/full) via Homebrew or winget. [Full tool guide](docs/developer-tools.md)
 
-**Claude Code** — Portable sessions via `/workspace` symlink, [dotclaude](https://github.com/blackwell-systems/dotclaude) profile sync, git safety hooks that prevent destructive commands.
+**Claude Code + [dotclaude](https://github.com/blackwell-systems/dotclaude)** — Portable sessions via `/workspace` symlink so conversations persist across machines. Profile sync for work/personal/client contexts. Git safety hooks that block `push --force` and `reset --hard` before they run. [Full Claude Code guide](docs/claude-code.md)
 
-**Feature registry** — Central control plane. Enable/disable any capability. Four presets (minimal, developer, claude, full) with dependency resolution.
+**Feature registry** — Central control plane. Enable/disable any capability at runtime. Four presets (minimal, developer, claude, full) with dependency resolution. [Feature docs](docs/features.md)
 
 **Self-healing** — `blackdot doctor --fix` validates your setup and auto-repairs common issues. Drift detection compares local state against your vault.
 
@@ -42,6 +43,30 @@ blackdot vault pull            # Restore secrets from vault
 blackdot doctor                # Health check + auto-fix
 blackdot status                # Visual dashboard
 ```
+
+---
+
+## Setup Wizard
+
+The installer walks you through seven steps. Progress is saved — exit anytime and resume with `blackdot setup`.
+
+```
+╔═══════════════════════════════════════════════════════════════╗
+║ Step 3 of 7: Packages
+╠═══════════════════════════════════════════════════════════════╣
+║ ████████░░░░░░░░░░░░ 43%
+╚═══════════════════════════════════════════════════════════════╝
+
+Which package tier would you like?
+
+  1) minimal    18 packages (~2 min)   # Essentials only
+  2) enhanced   43 packages (~5 min)   # Modern tools ← RECOMMENDED
+  3) full       61 packages (~10 min)  # Everything (Docker, etc.)
+```
+
+Steps: **Workspace** > **Symlinks** > **Packages** > **Vault** > **Secrets** > **Claude Code** > **Templates**
+
+Every step is skippable. Start with `--minimal` and add capabilities later, or go full from the start.
 
 ---
 
@@ -63,7 +88,7 @@ blackdot status                # Visual dashboard
 
 The Go binary (`blackdot`) is the core. Shell modules in `zsh.d/` call back into it for feature checks. Config resolves through 5 layers: environment > project > machine > user > defaults.
 
-[Architecture docs](docs/architecture.md) | [CLI reference](docs/cli-reference.md)
+[Architecture](docs/architecture.md) | [CLI reference](docs/cli-reference.md) | [Configuration layers](docs/configuration-layers.md)
 
 ---
 
@@ -78,7 +103,7 @@ Everything is optional except shell config. Start minimal, add what you need.
 | **Vault** | Multi-backend secrets management | Select "Skip" in wizard |
 | **Claude Code** | Portable sessions + dotclaude profiles | `SKIP_CLAUDE_SETUP=true` |
 | **Templates** | Machine-specific configs (work vs personal) | Don't run `blackdot template` |
-| **Workspace symlink** | `/workspace` for cross-machine path consistency | `SKIP_WORKSPACE_SYMLINK=true` |
+| **Workspace symlink** | [`/workspace`](docs/claude-code.md#why-workspace) for cross-machine path consistency | `SKIP_WORKSPACE_SYMLINK=true` |
 
 **Presets** for quick setup:
 
@@ -146,8 +171,10 @@ blackdot backup create                 # Snapshot current state
 
 ---
 
+## How Blackdot Compares
+
 <details>
-<summary><b>How Blackdot compares to other dotfiles managers</b></summary>
+<summary><b>vs chezmoi, holman, thoughtbot, and other dotfiles managers</b></summary>
 
 ### vs chezmoi
 
@@ -163,7 +190,7 @@ chezmoi is the most popular dotfiles manager and excellent at file-based config 
 | **AI integration** | Claude Code sessions + dotclaude | None |
 | **Learning curve** | CLI commands | YAML + Go templates |
 
-### vs traditional dotfiles repos (holman, thoughtbot, mathiasbynens)
+### vs traditional dotfiles repos
 
 Traditional repos are collections of config files with a bootstrap script. Blackdot adds structure on top: a feature registry, vault-backed secrets, health checks, drift detection, and a CLI that ties it all together. The tradeoff is complexity — if you just want to symlink some rc files, a simple repo is fine.
 
@@ -180,28 +207,21 @@ Traditional repos are collections of config files with a bootstrap script. Black
 
 ## Documentation
 
+**Full docs site: [blackwell-systems.github.io/blackdot](https://blackwell-systems.github.io/blackdot/)** — searchable, with sidebar navigation.
+
 | Guide | Description |
 |-------|-------------|
 | [CLI Reference](docs/cli-reference.md) | All commands and flags |
 | [Feature Registry](docs/features.md) | Enable/disable capabilities |
 | [Vault System](docs/vault-README.md) | Multi-backend secrets |
 | [Developer Tools](docs/developer-tools.md) | AWS, Docker, Go, Rust, Python, SSH |
-| [Claude Code](docs/claude-code.md) | Portable sessions + dotclaude |
+| [Claude Code + dotclaude](docs/claude-code.md) | Portable sessions, profiles, git safety hooks |
 | [Hook System](docs/hooks.md) | 19 lifecycle hooks |
 | [Templates](docs/templates.md) | Machine-specific configs |
 | [Architecture](docs/architecture.md) | System design |
-| [Configuration Layers](docs/configuration-layers.md) | 5-layer priority |
 | [Troubleshooting](docs/troubleshooting.md) | Common issues + fixes |
 
-**Full docs site:** [blackwell-systems.github.io/blackdot](https://blackwell-systems.github.io/blackdot/)
-
----
-
-## Contributing
-
-Contributions welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for workflow, testing, and commit conventions.
-
-Report security issues via [GitHub Security Advisories](https://github.com/blackwell-systems/blackdot/security/advisories).
+[Changelog](CHANGELOG.md) | [Contributing](CONTRIBUTING.md) | [Security](SECURITY.md)
 
 ---
 
