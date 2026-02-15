@@ -226,8 +226,7 @@ go-build-all() {
 # Main help command - shows banner and status via CLI
 alias gotools='blackdot tools go'
 
-# CLI-backed commands
-alias go-info='blackdot tools go info'
+# CLI-backed commands (defined as functions in 40-aliases.zsh)
 
 # =========================
 # Go Tools Help (legacy shell function)

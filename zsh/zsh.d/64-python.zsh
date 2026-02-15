@@ -320,8 +320,7 @@ uv-python-setup() {
 # Main help command - shows banner and status via CLI
 alias pythontools='blackdot tools python'
 
-# CLI-backed commands
-alias python-info='blackdot tools python info'
+# CLI-backed commands (defined as functions in 40-aliases.zsh)
 
 # =========================
 # Python Tools Help (legacy shell function)
