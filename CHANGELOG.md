@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Binary path resolution** — Shell init now searches `$BLACKDOT_DIR/bin/blackdot`, `~/.local/bin/blackdot`, and `$PATH` instead of a single hardcoded location. Fixes "Feature system unavailable (Go binary not found at )" error on macOS when the binary was installed via the installer to `~/.local/bin/` but the shell only checked the repo's `bin/` directory.
+- **Shell init `_BLACKDOT_BIN` path** — `blackdot shell-init` now uses `os.Executable()` to emit the actual running binary's path instead of guessing from `$BLACKDOT_DIR/bin/blackdot`. Works correctly across all shells (zsh, bash, fish, PowerShell).
+- **Degraded mode error message** — Error now shows all searched paths and a rebuild command instead of a blank path (the variable was unset before the fallback function ran).
+- **Alias/function collisions in zsh** — Removed 11 duplicate aliases across tool modules (60-aws, 61-cdk, 62-rust, 63-go, 64-python, 65-ssh, 66-docker) that collided with function definitions in 40-aliases.zsh, causing `parse error near '()'` on shell load. The functions in 40-aliases.zsh are the canonical definitions.
+
+### Added
+
+- **AUTO_CD** — `setopt AUTO_CD` enabled in 20-env.zsh so typing `..` or any directory path navigates without the `cd` prefix.
+
+### Changed
+
+- **README rewrite** — 734 → 232 lines. Value proposition up front, setup wizard excerpt, inline links to docsify site pages, single honest comparison section in a collapsible. Detailed content preserved in existing docs/ pages.
+- Fixed broken `#how-this-compares` anchor in `docs/README.md` → `#how-blackdot-compares`.
+
 ## [4.0.0-rc6] - TBD
 
 **Release Candidate 6 - Devcontainer Support & Documentation Refinement**
