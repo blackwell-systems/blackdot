@@ -19,8 +19,20 @@ OS="$(uname -s)"
 # =========================
 # Determine BLACKDOT_DIR if not set (this file is in zsh/zsh.d/)
 _blackdot_dir="${BLACKDOT_DIR:-${${(%):-%x}:A:h:h:h}}"
-_blackdot_bin="$_blackdot_dir/bin/blackdot"
 _blackdot_cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/blackdot"
+
+# Resolve the Go binary by checking multiple candidate locations
+_blackdot_resolve_bin() {
+    # 1. Repo bin directory (standard location)
+    [[ -x "$_blackdot_dir/bin/blackdot" ]] && { echo "$_blackdot_dir/bin/blackdot"; return 0; }
+    # 2. Installer default location
+    [[ -x "$HOME/.local/bin/blackdot" ]] && { echo "$HOME/.local/bin/blackdot"; return 0; }
+    # 3. Anywhere in PATH
+    command -v blackdot 2>/dev/null && return 0
+    return 1
+}
+
+_blackdot_bin="$(_blackdot_resolve_bin)"
 
 # Initialize feature functions from Go binary (with caching for faster startup)
 # This provides: feature_enabled, require_feature, feature_exists, feature_status
@@ -32,14 +44,17 @@ _blackdot_init_features() {
     [[ -d "$_blackdot_cache_dir" ]] || mkdir -p "$_blackdot_cache_dir"
 
     # Check if binary exists
-    if [[ ! -x "$_blackdot_bin" ]]; then
+    if [[ -z "$_blackdot_bin" || ! -x "$_blackdot_bin" ]]; then
         export BLACKDOT_FEATURE_MODE="degraded"
+        # Capture searched paths as a literal for the error message
+        local _searched="$_blackdot_dir/bin/blackdot, ~/.local/bin/blackdot, \$PATH"
         # Provide minimal fallback functions
         feature_enabled() { return 1; }  # Features disabled when binary missing
-        require_feature() {
-            echo "Feature system unavailable (Go binary not found at $_blackdot_bin)" >&2
+        eval "require_feature() {
+            echo \"Feature system unavailable (Go binary not found; searched: ${_searched})\" >&2
+            echo \"  Rebuild with: cd ${_blackdot_dir} && mkdir -p bin && go build -o bin/blackdot ./cmd/blackdot/\" >&2
             return 1
-        }
+        }"
         return 1
     fi
 
@@ -78,7 +93,7 @@ _blackdot_init_features() {
 
 _blackdot_init_features
 unset _blackdot_dir _blackdot_bin _blackdot_cache_dir
-unset -f _blackdot_init_features
+unset -f _blackdot_init_features _blackdot_resolve_bin
 
 # =========================
 # OS-SPECIFIC SETUP
