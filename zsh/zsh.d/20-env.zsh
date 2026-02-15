@@ -23,6 +23,7 @@ export WORKSPACE="$HOME/workspace"
 HISTFILE="$HOME/workspace/.zsh_history"
 HISTSIZE=50000
 SAVEHIST=50000
+setopt AUTO_CD                # Type a directory name to cd into it (e.g. .. or ~/workspace)
 setopt SHARE_HISTORY          # Share history between sessions
 setopt HIST_IGNORE_DUPS       # Don't record duplicates
 setopt HIST_IGNORE_SPACE      # Don't record commands starting with space
