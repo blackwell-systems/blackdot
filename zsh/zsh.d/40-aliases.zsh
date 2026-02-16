@@ -440,6 +440,21 @@ _blackdot_go_bin() {
 # The unhyphenated versions (sshkeys, awsprofiles) remain as shell functions
 # in the tool-specific modules (60-aws.zsh, 65-ssh.zsh, etc.)
 
+# Guard: unalias any names claimed by plugins/completions to avoid
+# "defining function based on alias" parse errors (e.g. ssh-status).
+for _fn in \
+  ssh-keys ssh-gen ssh-list ssh-fp ssh-copy ssh-tunnel ssh-socks ssh-status ssh-agent-status \
+  aws-profiles aws-who aws-login aws-status aws-switch aws-assume aws-clear \
+  cdk-init cdk-outputs cdk-context cdk-status cdk-env cdk-env-clear \
+  go-new go-init go-test go-cover go-lint go-outdated go-update go-build-all go-bench go-info \
+  rust-new rust-update rust-switch rust-lint rust-fix rust-outdated rust-expand rust-info \
+  py-new py-clean py-venv py-test py-cover py-info \
+  docker-ps docker-images docker-ip docker-env docker-ports docker-stats docker-vols docker-nets docker-inspect docker-clean docker-prune docker-status \
+  claude-status claude-env claude-init; do
+  (( ${+aliases[$_fn]} )) && unalias "$_fn"
+done
+unset _fn
+
 # SSH Tools (via Go binary)
 ssh-keys()   { "$(_blackdot_go_bin)" tools ssh keys "$@"; }
 ssh-gen()    { "$(_blackdot_go_bin)" tools ssh gen "$@"; }
