@@ -17,6 +17,7 @@ vault/.bw-session
 
 # Machine-specific local overrides (not tracked)
 *.local
+zsh/zsh.d/99-local.zsh
 
 # Update check cache
 .blackdot-update-check

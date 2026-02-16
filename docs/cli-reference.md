@@ -164,9 +164,9 @@ blackdot feat               # Alias
 
 | Preset | Features |
 |--------|----------|
-| `minimal` | `shell` |
-| `developer` | `shell`, `vault`, `aws_helpers`, `git_hooks`, `modern_cli` |
-| `claude` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `git_hooks`, `modern_cli` |
+| `minimal` | `shell`, `config_layers` |
+| `developer` | `shell`, `vault`, `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `ssh_tools`, `docker_tools`, `nvm_integration`, `sdkman_integration`, `git_hooks`, `modern_cli`, `config_layers` |
+| `claude` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `git_hooks`, `modern_cli`, `config_layers` |
 | `full` | All features |
 
 **Examples:**

@@ -25,6 +25,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **README rewrite** — 734 → 232 lines. Value proposition up front, setup wizard excerpt, inline links to docsify site pages, single honest comparison section in a collapsible. Detailed content preserved in existing docs/ pages.
 - Fixed broken `#how-this-compares` anchor in `docs/README.md` → `#how-blackdot-compares`.
 
+### Docs
+
+- **architecture.md** — Fixed ZSH module table (listed fictional modules like `10-environment.zsh`, `20-history.zsh` instead of actual `10-plugins.zsh`, `20-env.zsh`, etc.). Fixed feature category table (`aws_helpers` listed as Optional instead of Integration, 8 integration features missing). Fixed preset tables to match registry. Updated CLI command count from 20+ to 30+.
+- **_sidebar.md** — Removed 4 links to non-existent design docs (`IMPL-plugin-system`, `IMPL-hook-system`, `IMPL-configuration-layers`, `IMPL-cli-feature-awareness`). Added orphaned pages `TESTDRIVE.md` and `DOTCLAUDE-INTEGRATION.md`.
+- **cli-reference.md** — Fixed preset table (developer preset showed 5 features, actual is 14).
+- **troubleshooting.md** — Added `$0` vs `${(%):-%x}` as the primary cause of "ZSH modules not loading" (the bug fixed in this release).
+- **docs/README.md** — Standardized alias count from "70+" to "90+" to match GitHub README.
+- **developer-tools.md** — Removed "Coming Soon" section for unimplemented `blackdot aliases` command.
+- **.gitignore** — Added `zsh/zsh.d/99-local.zsh` (the example file told users it was gitignored, but the pattern was missing).
+
 ## [4.0.0-rc6] - TBD
 
 **Release Candidate 6 - Devcontainer Support & Documentation Refinement**

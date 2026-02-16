@@ -94,7 +94,7 @@ The setup wizard also prompts for workspace directory (Step 1 of 7).
 **Capabilities:**
 - **Multi-vault secret management** – SSH keys, AWS credentials, Git config synced with Bitwarden, 1Password, or pass
 - **Age encryption** – Encrypt non-vault secrets for git (template variables, local configs)
-- **Deep developer tool integrations** – AWS, CDK, Rust, Go, NVM, SDKMAN with 70+ aliases, helpers, and shell completions
+- **Deep developer tool integrations** – AWS, CDK, Rust, Go, NVM, SDKMAN with 90+ aliases, helpers, and shell completions
 - **Portable Claude sessions** – `/workspace` symlink for consistent paths across machines
 - **Machine-specific templates** – Generate configs tailored to each machine
 - **Self-healing configuration** – Health checker with auto-fix, drift detection
@@ -305,7 +305,7 @@ See [Architecture](architecture.md) for complete system design and platform supp
 ## Next Steps
 
 - **[Architecture](architecture.md)** – System design, platform support & workspace layout
-- **[Developer Tools](developer-tools.md)** – AWS, CDK, Rust, Go integrations & 70+ aliases
+- **[Developer Tools](developer-tools.md)** – AWS, CDK, Rust, Go integrations & 90+ aliases
 - **[Claude Code + dotclaude](claude-code.md)** – Portable sessions, profiles & safety hooks
 - **[Template System](templates.md)** – Configure per-machine settings
 - **[Troubleshooting](troubleshooting.md)** – Solutions to common issues
