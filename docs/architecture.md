@@ -7,7 +7,7 @@ This page describes the architecture of blackdot—the systems that control how 
 Blackdot is a **Go-first** framework with shell integration:
 
 1. **Feature Registry** (`internal/feature/registry.go`) - Modular control plane implemented in Go
-2. **Go CLI** (`internal/cli/*.go`) - 20+ Cobra commands for all operations
+2. **Go CLI** (`internal/cli/*.go`) - 30+ Cobra commands for all operations
 3. **Vaultmux Library** - External Go library for multi-vault support (Bitwarden/1Password/pass)
 4. **Shell Layer** (`zsh/`, `powershell/`) - Aliases and integrations that call the Go binary
 
@@ -81,16 +81,16 @@ blackdot features preset developer --persist
 | Category | Features |
 |----------|----------|
 | **Core** | `shell` (always enabled) |
-| **Optional** | `workspace_symlink`, `claude_integration`, `vault`, `encryption`, `hooks`, `templates`, `aws_helpers`, `git_hooks`, `drift_check`, `backup_auto`, `health_metrics`, `macos_settings` |
-| **Integration** | `modern_cli`, `nvm_integration`, `sdkman_integration`, `dotclaude` |
+| **Optional** | `workspace_symlink`, `claude_integration`, `vault`, `encryption`, `templates`, `hooks`, `git_hooks`, `drift_check`, `backup_auto`, `health_metrics`, `macos_settings`, `config_layers`, `cli_feature_filter` |
+| **Integration** | `modern_cli`, `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `ssh_tools`, `docker_tools`, `nvm_integration`, `sdkman_integration`, `dotclaude`, `devcontainer` |
 
 **Presets:**
 
 | Preset | Features Enabled |
 |--------|------------------|
-| `minimal` | `shell` |
-| `developer` | `shell`, `vault`, `aws_helpers`, `git_hooks`, `modern_cli` |
-| `claude` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `git_hooks`, `modern_cli` |
+| `minimal` | `shell`, `config_layers` |
+| `developer` | `shell`, `vault`, `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `ssh_tools`, `docker_tools`, `nvm_integration`, `sdkman_integration`, `git_hooks`, `modern_cli`, `config_layers` |
+| `claude` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `git_hooks`, `modern_cli`, `config_layers` |
 | `full` | All features |
 
 See [Feature Registry](features.md) for complete documentation.
@@ -428,29 +428,32 @@ The modular ZSH configuration loads files in numbered order:
 
 ```mermaid
 flowchart LR
-    A[00-init] --> B[10-environment]
-    B --> C[20-history]
-    C --> D[30-prompt]
+    A[00-init] --> B[10-plugins]
+    B --> C[20-env]
+    C --> D[30-tools]
     D --> E[40-aliases]
     E --> F[50-functions]
-    F --> G[60-completions]
-    G --> H[70-plugins]
-    H --> I[80-tools]
-    I --> J[90-local]
+    F --> G[60-aws]
+    G --> H[62‑66 tools]
+    H --> I[70-claude]
+    I --> J[80-git]
+    J --> K[90-integrations]
 ```
 
 | Module | Purpose |
 |--------|---------|
-| `00-init.zsh` | Strict mode, basic setup |
-| `10-environment.zsh` | PATH, environment variables |
-| `20-history.zsh` | History configuration |
-| `30-prompt.zsh` | Powerlevel10k prompt |
-| `40-aliases.zsh` | Shell aliases, `blackdot` command |
-| `50-functions.zsh` | Shell functions, `status` |
-| `60-completions.zsh` | Tab completion setup |
-| `70-plugins.zsh` | ZSH plugins |
-| `80-tools.zsh` | Tool integrations (nvm, etc.) |
-| `90-local.zsh` | Machine-specific overrides |
+| `00-init.zsh` | Powerlevel10k instant prompt, OS detection, Homebrew PATH, binary resolution |
+| `10-plugins.zsh` | Completions, plugin loading, prompt configuration |
+| `20-env.zsh` | Environment variables, workspace paths, history settings |
+| `30-tools.zsh` | Modern CLI tools (eza, fzf, dust, yazi, etc.) |
+| `40-aliases.zsh` | Navigation, blackdot, and utility aliases |
+| `50-functions.zsh` | Shell functions (status, j, notes, blackdot-upgrade, ssh) |
+| `60-aws.zsh` | AWS profile management and SSO helpers |
+| `62-rust.zsh` … `66-docker.zsh` | Language/tool integrations (Rust, Go, Python, SSH, Docker) |
+| `70-claude.zsh` | Claude Code wrapper and routing logic |
+| `80-git.zsh` | Git shortcuts and clipboard utilities |
+| `90-integrations.zsh` | Tool integrations (SDKMAN, NVM, zoxide, syntax highlighting) |
+| `99-local.zsh` | Machine-specific overrides (user-created, gitignored) |
 
 ## PowerShell Module (Windows)
 

@@ -148,13 +148,29 @@ Get-ArgumentCompleter -Native | Where-Object { $_.CommandName -eq 'blackdot' }
 
 ### ZSH modules not loading
 
-**Symptom:** Aliases or functions missing.
+**Symptom:** Aliases or functions missing. New tmux/terminal panes start with a bare zsh prompt (no Powerlevel10k, no aliases, no `blackdot` command), but `source ~/.zshrc` fixes it.
+
+**Most common cause:** The `zshrc` loader uses `${(%):-%x}` to find the `zsh.d/` module directory. If this was changed to `$0`, modules silently fail to load because `$0` is `zsh`/`-zsh` during automatic startup (not the file path). The `(N)` glob qualifier swallows the error.
 
 **Solution:**
-```bash
-# Check which modules loaded
-ls -la ~/workspace/blackdot/zsh/zsh.d/
 
+1. Check the loader line in `zsh/zshrc`:
+```bash
+grep ZSHRC_DIR ~/workspace/blackdot/zsh/zshrc
+# Should be: ZSHRC_DIR="${${(%):-%x}:A:h}"
+# NOT:       ZSHRC_DIR="${0:A:h}"
+```
+
+2. If the line uses `$0`, fix it:
+```bash
+# In zsh/zshrc, replace:
+#   ZSHRC_DIR="${0:A:h}"
+# with:
+#   ZSHRC_DIR="${${(%):-%x}:A:h}"
+```
+
+3. General checks:
+```bash
 # Verify symlink
 ls -la ~/.zshrc
 

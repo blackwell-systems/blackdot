@@ -2,6 +2,7 @@
 
 - **Getting Started**
   - [Blackdot](/)
+  - [Test Drive (Docker)](TESTDRIVE.md)
   - [Docker Containers](docker.md)
   - [Windows Setup](windows-setup.md)
   - [One-Line Install](/#one-line-install)
@@ -18,6 +19,7 @@
   - [Hook System](hooks.md)
   - [Configuration Layers](configuration-layers.md)
   - [Claude Code + dotclaude](claude-code.md)
+  - [dotclaude Integration](DOTCLAUDE-INTEGRATION.md)
   - [Template System](templates.md)
   - [Vault System](vault-README.md)
   - [Backup System](backup.md)
@@ -32,10 +34,6 @@
   - [Roadmap](ROADMAP.md)
 
 - **Design Documents**
-  - [Plugin System](design/IMPL-plugin-system.md)
-  - [Hook System](design/IMPL-hook-system.md)
-  - [Configuration Layers](design/IMPL-configuration-layers.md)
-  - [CLI Feature Awareness](design/IMPL-cli-feature-awareness.md)
   - [Devcontainers](design/IMPL-devcontainers.md)
 
 - **Contributing**

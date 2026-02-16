@@ -700,16 +700,6 @@ $ go test ./...
 
 Over time, this trains muscle memory for the shortcuts.
 
-### Aliases Command (Coming Soon)
-
-A dedicated command to list and search aliases:
-
-```bash
-blackdot aliases             # List all by category
-blackdot aliases rust        # Show Rust aliases
-blackdot aliases search test # Find aliases containing "test"
-```
-
 ---
 
 ## Adding Custom Aliases
