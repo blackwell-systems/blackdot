@@ -15,6 +15,27 @@ fi
 OS="$(uname -s)"
 
 # =========================
+# Early PATH setup (must run before binary resolution)
+# =========================
+# Homebrew PATH is normally set in .zprofile, but non-login shells (tmux
+# panes, split terminals) skip .zprofile.  Bootstrap it here so the blackdot
+# binary can be found regardless of shell type.
+case "$OS" in
+  Darwin)
+    if [[ -x /opt/homebrew/bin/brew ]]; then
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -x /usr/local/bin/brew ]]; then
+      eval "$(/usr/local/bin/brew shellenv)"
+    fi
+    ;;
+  Linux)
+    if [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    fi
+    ;;
+esac
+
+# =========================
 # Core Libraries (must load early for runtime feature guards)
 # =========================
 # Determine BLACKDOT_DIR if not set (this file is in zsh/zsh.d/)
@@ -101,12 +122,7 @@ unset -f _blackdot_init_features _blackdot_resolve_bin
 case "$OS" in
   Darwin)
     # ---------- macOS ----------
-    # Homebrew shell environment (Apple Silicon or Intel)
-    if [ -x /opt/homebrew/bin/brew ]; then
-      eval "$(/opt/homebrew/bin/brew shellenv)"
-    elif [ -x /usr/local/bin/brew ]; then
-      eval "$(/usr/local/bin/brew shellenv)"
-    fi
+    # Homebrew shellenv already loaded in Early PATH setup above
 
     # Lima VM management (if lima is installed)
     if command -v limactl >/dev/null 2>&1; then
@@ -126,10 +142,7 @@ case "$OS" in
     PATH="$PATH:/usr/sbin:/sbin"
     export PATH
 
-    # Homebrew (linuxbrew) bootstrap
-    if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
-      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-    fi
+    # Homebrew shellenv already loaded in Early PATH setup above
 
     # Enable ls colors on Linux
     if command -v dircolors >/dev/null 2>&1; then
