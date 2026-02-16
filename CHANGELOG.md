@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Zsh modules not loading in new tmux panes** — `zsh/zshrc` used `${0:A:h}` to locate the `zsh.d/` module directory, but `$0` is set to `zsh`/`-zsh` (the shell name) during automatic startup — only the file path when explicitly `source`d. This caused `ZSHRC_DIR` to resolve to the wrong directory (e.g. `/bin`), the `(N)` glob matched nothing, and zero modules loaded: no aliases, no prompt, no blackdot. Switched to `${(%):-%x}` which always gives the current source file path.
 - **Binary path resolution** — Shell init now searches `$BLACKDOT_DIR/bin/blackdot`, `~/.local/bin/blackdot`, and `$PATH` instead of a single hardcoded location. Fixes "Feature system unavailable (Go binary not found at )" error on macOS when the binary was installed via the installer to `~/.local/bin/` but the shell only checked the repo's `bin/` directory.
 - **Shell init `_BLACKDOT_BIN` path** — `blackdot shell-init` now uses `os.Executable()` to emit the actual running binary's path instead of guessing from `$BLACKDOT_DIR/bin/blackdot`. Works correctly across all shells (zsh, bash, fish, PowerShell).
 - **Degraded mode error message** — Error now shows all searched paths and a rebuild command instead of a blank path (the variable was unset before the fallback function ran).
