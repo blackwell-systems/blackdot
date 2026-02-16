@@ -276,10 +276,7 @@ dbuild-fresh() {
 # Main help command - shows banner and status via CLI
 alias dockertools='blackdot tools docker'
 
-# CLI-backed commands
-alias docker-status='blackdot tools docker status'
-alias docker-clean='blackdot tools docker clean'
-alias docker-prune='blackdot tools docker prune'
+# CLI-backed commands (defined as functions in 40-aliases.zsh)
 
 # =========================
 # Docker Tools Help (legacy shell function)

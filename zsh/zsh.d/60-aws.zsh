@@ -128,9 +128,7 @@ awsclear() {
 # Main help command - shows banner and status via CLI
 alias awstools='blackdot tools aws'
 
-# CLI-backed commands
-alias aws-status='blackdot tools aws status'
-alias aws-who='blackdot tools aws who'
+# CLI-backed commands (defined as functions in 40-aliases.zsh)
 
 # =========================
 # AWS Tools Help (legacy shell function)

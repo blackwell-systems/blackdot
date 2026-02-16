@@ -387,11 +387,7 @@ sshtunnels() {
 # Main help command - shows banner and status via CLI
 alias sshtools='blackdot tools ssh'
 
-# CLI-backed commands (these have better implementations in Go)
-alias ssh-status='blackdot tools ssh status'
-alias ssh-keygen='blackdot tools ssh gen'
-alias ssh-keylist='blackdot tools ssh keys'
-alias ssh-fingerprint='blackdot tools ssh fp'
+# CLI-backed commands (defined as functions in 40-aliases.zsh)
 
 # =========================
 # SSH Tools Help (legacy shell function)

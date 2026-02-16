@@ -171,8 +171,7 @@ rust-expand() {
 # Main help command - shows banner and status via CLI
 alias rusttools='blackdot tools rust'
 
-# CLI-backed commands
-alias rust-info='blackdot tools rust info'
+# CLI-backed commands (defined as functions in 40-aliases.zsh)
 
 # =========================
 # Rust Tools Help (legacy shell function)

@@ -19,8 +19,10 @@
 # For machine-specific overrides: Create 99-local.zsh (see 99-local.zsh.example)
 
 # Load all configuration modules in order
-# Use ${0:A:h} to get the real directory of this file (following symlinks)
-ZSHRC_DIR="${0:A:h}"
+# Use %x (current source file path) instead of $0, because $0 is "zsh"/"-zsh"
+# during automatic startup sourcing — only set to the file path when explicitly
+# `source`d.  %x works in both cases.
+ZSHRC_DIR="${${(%):-%x}:A:h}"
 for config_file in "$ZSHRC_DIR"/zsh.d/*.zsh(N); do
   source "$config_file"
 done

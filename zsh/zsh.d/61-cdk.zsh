@@ -185,8 +185,7 @@ cdkctx-clear() {
 # Main help command - shows banner and status via CLI
 alias cdktools='blackdot tools cdk'
 
-# CLI-backed commands
-alias cdk-status='blackdot tools cdk status'
+# CLI-backed commands (defined as functions in 40-aliases.zsh)
 
 # =========================
 # CDK Tools Help (legacy shell function)
