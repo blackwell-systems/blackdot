@@ -78,7 +78,7 @@ _claude_bedrock_configured() {
 # Helper: ensure AWS SSO session is valid
 _ensure_aws_sso() {
   if ! _claude_bedrock_configured; then
-    echo "Error: Bedrock not configured. Set CLAUDE_BEDROCK_PROFILE in ~/.claude.local" >&2
+    echo "Error: Bedrock not configured. Set CLAUDE_BEDROCK_PROFILE in zsh/zsh.d/99-local.zsh (see 99-local.zsh.example)" >&2
     return 1
   fi
   if ! aws sts get-caller-identity --profile "$_CLAUDE_BEDROCK_PROFILE" >/dev/null 2>&1; then
