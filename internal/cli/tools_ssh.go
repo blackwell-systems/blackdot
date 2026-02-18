@@ -554,44 +554,188 @@ func runSSHList() error {
 	}
 	defer file.Close()
 
-	fmt.Println("SSH Hosts:")
-	fmt.Println("──────────────────────────────────────")
+	type hostRow struct {
+		name     string
+		hostname string
+		user     string
+		port     string
+		identity string
+	}
 
 	hostRegex := regexp.MustCompile(`(?i)^Host\s+(.+)$`)
-	var hosts []string
+	kvRegex := regexp.MustCompile(`(?i)^\s+(HostName|User|Port|IdentityFile)\s+(.+)$`)
+
+	var rows []hostRow
+	var current *hostRow
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
+		line := scanner.Text()
+
 		if matches := hostRegex.FindStringSubmatch(line); matches != nil {
-			// Split on whitespace to handle multiple hosts on one line
+			// Save previous host
+			if current != nil {
+				rows = append(rows, *current)
+			}
 			hostnames := strings.Fields(matches[1])
+			// Skip wildcard-only entries
+			name := ""
 			for _, h := range hostnames {
-				// Skip wildcards
 				if !strings.Contains(h, "*") && !strings.Contains(h, "?") {
-					hosts = append(hosts, h)
+					name = h
+					break
+				}
+			}
+			if name == "" {
+				current = nil
+				continue
+			}
+			current = &hostRow{name: name}
+		} else if current != nil {
+			if kv := kvRegex.FindStringSubmatch(line); kv != nil {
+				switch strings.ToLower(kv[1]) {
+				case "hostname":
+					current.hostname = kv[2]
+				case "user":
+					current.user = kv[2]
+				case "port":
+					current.port = kv[2]
+				case "identityfile":
+					current.identity = kv[2]
 				}
 			}
 		}
+	}
+	// Don't forget the last host
+	if current != nil {
+		rows = append(rows, *current)
 	}
 
 	if err := scanner.Err(); err != nil {
 		return fmt.Errorf("error reading SSH config: %w", err)
 	}
 
-	// Sort and deduplicate
-	sort.Strings(hosts)
+	// Deduplicate by name, keep first occurrence
 	seen := make(map[string]bool)
-	for _, h := range hosts {
-		if !seen[h] {
-			seen[h] = true
-			fmt.Printf("  %s\n", h)
+	var deduped []hostRow
+	for _, r := range rows {
+		if !seen[r.name] {
+			seen[r.name] = true
+			deduped = append(deduped, r)
+		}
+	}
+	rows = deduped
+
+	// Sort by name
+	sort.Slice(rows, func(i, j int) bool { return rows[i].name < rows[j].name })
+
+	// Fill in defaults for display
+	for i := range rows {
+		if rows[i].hostname == "" {
+			rows[i].hostname = "-"
+		}
+		if rows[i].user == "" {
+			rows[i].user = "-"
+		}
+		if rows[i].port == "" {
+			rows[i].port = "22"
+		}
+		if rows[i].identity == "" {
+			rows[i].identity = "-"
+		} else {
+			// Shorten home dir paths for display
+			rows[i].identity = strings.Replace(rows[i].identity, home, "~", 1)
 		}
 	}
 
-	fmt.Println()
-	fmt.Printf("Total: %d hosts\n", len(seen))
+	box := sshLogoColor()
+	dim := color.New(color.Faint)
+	bold := color.New(color.Bold)
 
+	const (
+		hHost     = "Host"
+		hHostname = "HostName"
+		hUser     = "User"
+		hPort     = "Port"
+		hIdentity = "IdentityFile"
+	)
+
+	// Column widths — at least as wide as the header
+	wHost, wHostname, wUser, wPort, wIdentity := len(hHost), len(hHostname), len(hUser), len(hPort), len(hIdentity)
+	for _, r := range rows {
+		if n := len(r.name); n > wHost {
+			wHost = n
+		}
+		if n := len(r.hostname); n > wHostname {
+			wHostname = n
+		}
+		if n := len(r.user); n > wUser {
+			wUser = n
+		}
+		if n := len(r.port); n > wPort {
+			wPort = n
+		}
+		if n := len(r.identity); n > wIdentity {
+			wIdentity = n
+		}
+	}
+
+	// Padded cell helpers
+	lpad := func(s string, w int) string { return fmt.Sprintf(" %-*s ", w, s) }
+	rpad := func(s string, w int) string { return fmt.Sprintf(" %*s ", w, s) }
+
+	// Horizontal rule builder
+	seg := func(w int) string { return strings.Repeat("─", w+2) }
+	hLine := func(l, m, r string) string {
+		return l + seg(wHost) + m + seg(wHostname) + m + seg(wUser) + m + seg(wPort) + m + seg(wIdentity) + r
+	}
+
+	pipe := box.Sprint("│")
+
+	fmt.Println()
+	box.Printf("  %s\n", hLine("╭", "┬", "╮"))
+
+	// Header row
+	fmt.Printf("  %s%s%s%s%s%s%s%s%s%s%s\n",
+		pipe,
+		bold.Sprint(lpad(hHost, wHost)),
+		pipe,
+		bold.Sprint(lpad(hHostname, wHostname)),
+		pipe,
+		bold.Sprint(lpad(hUser, wUser)),
+		pipe,
+		bold.Sprint(rpad(hPort, wPort)),
+		pipe,
+		bold.Sprint(lpad(hIdentity, wIdentity)),
+		pipe,
+	)
+
+	box.Printf("  %s\n", hLine("├", "┼", "┤"))
+
+	if len(rows) == 0 {
+		innerTotal := wHost + wHostname + wUser + wPort + wIdentity + 14
+		fmt.Printf("  %s%s%s\n", pipe, dim.Sprint(fmt.Sprintf(" %-*s", innerTotal-1, "No SSH hosts configured")), pipe)
+	} else {
+		for _, r := range rows {
+			fmt.Printf("  %s%s%s%s%s%s%s%s%s%s%s\n",
+				pipe,
+				lpad(r.name, wHost),
+				pipe,
+				dim.Sprint(lpad(r.hostname, wHostname)),
+				pipe,
+				lpad(r.user, wUser),
+				pipe,
+				dim.Sprint(rpad(r.port, wPort)),
+				pipe,
+				dim.Sprint(lpad(r.identity, wIdentity)),
+				pipe,
+			)
+		}
+	}
+
+	box.Printf("  %s\n", hLine("╰", "┴", "╯"))
+	fmt.Println()
+	fmt.Printf("  %s\n\n", dim.Sprintf("%d host(s) in %s", len(rows), configPath))
 	return nil
 }
 
