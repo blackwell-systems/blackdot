@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **SSH `hosts` alias** — `blackdot tools ssh hosts` now works as an alias for `ssh list`, which is more intuitive for displaying configured SSH hosts.
+- **SSH `remove-host` command** — `blackdot tools ssh remove-host <name>` removes a host block and all its directives from `~/.ssh/config`. Inverse of `add-host`.
+
+### Changed
+
+- **SSH `list`/`hosts` output** — Now displays a styled colored table with Host, HostName, User, Port, and IdentityFile columns (matching the `ssh keys` table style) instead of a plain text list.
+- **SSH `agent` output** — Now displays loaded keys in a styled colored table with Comment, Bits, Type, and Fingerprint columns instead of raw `ssh-add -l` output.
+
 ### Fixed
 
 - **Zsh modules not loading in new tmux panes** — `zsh/zshrc` used `${0:A:h}` to locate the `zsh.d/` module directory, but `$0` is set to `zsh`/`-zsh` (the shell name) during automatic startup — only the file path when explicitly `source`d. This caused `ZSHRC_DIR` to resolve to the wrong directory (e.g. `/bin`), the `(N)` glob matched nothing, and zero modules loaded: no aliases, no prompt, no blackdot. Switched to `${(%):-%x}` which always gives the current source file path.

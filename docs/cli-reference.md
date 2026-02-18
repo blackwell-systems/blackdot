@@ -1858,8 +1858,8 @@ sshtools [command]             # Alias
 |---------|-------------|
 | `keys` | List all SSH keys with fingerprints |
 | `gen` | Generate new ED25519 key pair |
-| `list` | List configured SSH hosts |
-| `agent` | Show SSH agent status and loaded keys |
+| `list` / `hosts` | List configured SSH hosts (styled table) |
+| `agent` | Show SSH agent status and loaded keys (styled table) |
 | `fp` | Show fingerprint(s) in multiple formats |
 | `copy` | Copy public key to remote host |
 | `tunnel` | Create SSH port forward tunnel |
@@ -1869,17 +1869,21 @@ sshtools [command]             # Alias
 | `unload <key>` | Remove key from SSH agent |
 | `clear` | Remove all keys from agent |
 | `tunnels` | List active SSH connections |
-| `add-host <name>` | Add new host to SSH config interactively |
+| `add-host <name>` | Add new host to SSH config |
+| `remove-host <name>` | Remove host from SSH config |
 
 **Examples:**
 
 ```bash
 sshtools                       # Show status banner
 sshtools keys                  # List keys with fingerprints
+sshtools hosts                 # List configured hosts in table
+sshtools agent                 # Show agent status with loaded keys
 sshtools gen work              # Generate ~/.ssh/id_ed25519_work
 sshtools load github           # Add github key to agent
 sshtools tunnel myserver 8080  # Forward local:8080 to server:8080
-sshtools add-host prod         # Interactive host configuration
+sshtools add-host prod         # Add host to config
+sshtools remove-host staging   # Remove host from config
 ```
 
 ---
