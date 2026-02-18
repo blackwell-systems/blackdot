@@ -43,8 +43,9 @@ Commands:
   load      - Add key to SSH agent
   unload    - Remove key from SSH agent
   clear     - Remove all keys from agent
-  tunnels   - List active SSH connections
-  add-host  - Add new host to SSH config`,
+  tunnels     - List active SSH connections
+  add-host    - Add new host to SSH config
+  remove-host - Remove host from SSH config`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runSSHStatusLocal()
 		},
@@ -66,6 +67,7 @@ Commands:
 		newSSHClearCmd(),
 		newSSHTunnelsCmd(),
 		newSSHAddHostCmd(),
+		newSSHRemoveHostCmd(),
 	)
 
 	return cmd
@@ -756,53 +758,145 @@ Displays agent PID, socket path, and lists all loaded keys.`,
 }
 
 func runSSHAgent() error {
-	fmt.Println("SSH Agent Status:")
-	fmt.Println("──────────────────────────────────────")
+	box := sshLogoColor()
+	dim := color.New(color.Faint)
+	bold := color.New(color.Bold)
+	green := color.New(color.FgGreen)
+	red := color.New(color.FgRed)
 
 	// Check SSH_AUTH_SOCK
 	authSock := os.Getenv("SSH_AUTH_SOCK")
 	if authSock == "" {
-		fmt.Println("  Status: ○ not running")
-		fmt.Println("  Socket: not set")
 		fmt.Println()
-		fmt.Println("Start the agent with:")
+		fmt.Printf("  %s  %s\n", bold.Sprint("SSH Agent"), red.Sprint("○ not running"))
+		fmt.Printf("  %s  %s\n", dim.Sprint("Socket"), dim.Sprint("not set"))
+		fmt.Println()
+		fmt.Printf("  Start the agent with:\n")
 		if runtime.GOOS == "windows" {
-			fmt.Println("  Start-Service ssh-agent")
+			fmt.Println("    Start-Service ssh-agent")
 		} else {
-			fmt.Println("  eval \"$(ssh-agent -s)\"")
+			fmt.Println("    eval \"$(ssh-agent -s)\"")
 		}
+		fmt.Println()
 		return nil
 	}
 
-	// Try to list keys
-	cmd := exec.Command("ssh-add", "-l")
-	output, err := cmd.Output()
-
 	_, agentLabel := resolveSSHAgentPID()
 
-	fmt.Printf("  PID:    %s\n", agentLabel)
-	fmt.Printf("  Socket: %s\n", authSock)
 	fmt.Println()
-	fmt.Println("Loaded keys:")
+	fmt.Printf("  %s  %s  %s\n", bold.Sprint("SSH Agent"), green.Sprint("● running"), dim.Sprintf("PID: %s", agentLabel))
+	fmt.Printf("  %s  %s\n", dim.Sprint("Socket"), dim.Sprint(authSock))
+	fmt.Println()
+
+	// Try to list keys
+	agentCmd := exec.Command("ssh-add", "-l")
+	output, err := agentCmd.Output()
+
+	type agentKeyRow struct {
+		bits    string
+		fp      string
+		comment string
+		ktype   string
+	}
+
+	var rows []agentKeyRow
 
 	if err != nil {
-		// Check if it's "no identities" message
-		if strings.Contains(string(output), "no identities") || cmd.ProcessState.ExitCode() == 1 {
-			fmt.Println("  (no keys loaded)")
+		if strings.Contains(string(output), "no identities") || agentCmd.ProcessState.ExitCode() == 1 {
+			// No keys — will show empty table
 		} else {
-			fmt.Printf("  (error listing keys: %v)\n", err)
+			return fmt.Errorf("error listing keys: %w", err)
 		}
 	} else {
-		// Parse and display keys
-		lines := strings.Split(strings.TrimSpace(string(output)), "\n")
-		for _, line := range lines {
-			if line != "" {
-				fmt.Printf("  %s\n", line)
+		// Parse ssh-add -l output: "256 SHA256:xxxxx comment (TYPE)"
+		for _, line := range strings.Split(strings.TrimSpace(string(output)), "\n") {
+			if line == "" {
+				continue
 			}
+			fields := strings.Fields(line)
+			if len(fields) < 4 {
+				continue
+			}
+			bits := fields[0]
+			fp := fields[1]
+			// Last field is (TYPE), everything between is the comment
+			ktype := strings.Trim(fields[len(fields)-1], "()")
+			comment := strings.Join(fields[2:len(fields)-1], " ")
+			rows = append(rows, agentKeyRow{bits: bits, fp: fp, comment: comment, ktype: ktype})
 		}
 	}
 
+	const (
+		hComment = "Comment"
+		hBits    = "Bits"
+		hType    = "Type"
+		hFP      = "Fingerprint (SHA256)"
+	)
+
+	wComment, wBits, wType, wFP := len(hComment), len(hBits), len(hType), len(hFP)
+	for _, r := range rows {
+		if n := len(r.comment); n > wComment {
+			wComment = n
+		}
+		if n := len(r.bits); n > wBits {
+			wBits = n
+		}
+		if n := len(r.ktype); n > wType {
+			wType = n
+		}
+		if n := len(r.fp); n > wFP {
+			wFP = n
+		}
+	}
+
+	lpad := func(s string, w int) string { return fmt.Sprintf(" %-*s ", w, s) }
+	rpad := func(s string, w int) string { return fmt.Sprintf(" %*s ", w, s) }
+
+	seg := func(w int) string { return strings.Repeat("─", w+2) }
+	hLine := func(l, m, r string) string {
+		return l + seg(wComment) + m + seg(wBits) + m + seg(wType) + m + seg(wFP) + r
+	}
+
+	pipe := box.Sprint("│")
+
+	box.Printf("  %s\n", hLine("╭", "┬", "╮"))
+
+	fmt.Printf("  %s%s%s%s%s%s%s%s%s\n",
+		pipe,
+		bold.Sprint(lpad(hComment, wComment)),
+		pipe,
+		bold.Sprint(rpad(hBits, wBits)),
+		pipe,
+		bold.Sprint(lpad(hType, wType)),
+		pipe,
+		bold.Sprint(lpad(hFP, wFP)),
+		pipe,
+	)
+
+	box.Printf("  %s\n", hLine("├", "┼", "┤"))
+
+	if len(rows) == 0 {
+		innerTotal := wComment + wBits + wType + wFP + 11
+		fmt.Printf("  %s%s%s\n", pipe, dim.Sprint(fmt.Sprintf(" %-*s", innerTotal-1, "No keys loaded")), pipe)
+	} else {
+		for _, r := range rows {
+			fmt.Printf("  %s%s%s%s%s%s%s%s%s\n",
+				pipe,
+				lpad(r.comment, wComment),
+				pipe,
+				dim.Sprint(rpad(r.bits, wBits)),
+				pipe,
+				lpad(r.ktype, wType),
+				pipe,
+				dim.Sprint(lpad(r.fp, wFP)),
+				pipe,
+			)
+		}
+	}
+
+	box.Printf("  %s\n", hLine("╰", "┴", "╯"))
 	fmt.Println()
+	fmt.Printf("  %s\n\n", dim.Sprintf("%d key(s) loaded in agent", len(rows)))
 	return nil
 }
 
@@ -1426,5 +1520,97 @@ func sshAddHost(name, hostname, user, port, identity string) error {
 
 	fmt.Printf("Added host '%s' to %s\n", name, configPath)
 	fmt.Printf("Connect with: ssh %s\n", name)
+	return nil
+}
+
+// newSSHRemoveHostCmd removes a host from SSH config
+func newSSHRemoveHostCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "remove-host <name>",
+		Short: "Remove host from SSH config",
+		Long: `Remove a host entry from ~/.ssh/config.
+
+Removes the Host block and all its directives (HostName, User, Port, etc.).
+
+Example:
+  blackdot tools ssh remove-host myserver`,
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return sshRemoveHost(args[0])
+		},
+	}
+}
+
+func sshRemoveHost(name string) error {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("cannot determine home directory: %w", err)
+	}
+
+	configPath := filepath.Join(home, ".ssh", "config")
+
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return fmt.Errorf("cannot read SSH config: %w", err)
+	}
+
+	lines := strings.Split(string(data), "\n")
+	hostRegex := regexp.MustCompile(`(?i)^Host\s+(.+)$`)
+
+	var result []string
+	skipping := false
+	found := false
+
+	for _, line := range lines {
+		if matches := hostRegex.FindStringSubmatch(line); matches != nil {
+			// Check if this Host line contains our target
+			hostnames := strings.Fields(matches[1])
+			isTarget := false
+			for _, h := range hostnames {
+				if h == name {
+					isTarget = true
+					break
+				}
+			}
+			if isTarget {
+				skipping = true
+				found = true
+				// Remove any preceding blank line we already added
+				for len(result) > 0 && strings.TrimSpace(result[len(result)-1]) == "" {
+					result = result[:len(result)-1]
+				}
+				continue
+			}
+			skipping = false
+		} else if skipping {
+			// Skip indented lines (directives) belonging to the removed host
+			trimmed := strings.TrimSpace(line)
+			if trimmed == "" || strings.HasPrefix(line, " ") || strings.HasPrefix(line, "\t") {
+				continue
+			}
+			// Non-indented, non-empty, non-Host line — stop skipping
+			skipping = false
+		}
+
+		if !skipping {
+			result = append(result, line)
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("host '%s' not found in %s", name, configPath)
+	}
+
+	// Clean up trailing blank lines
+	for len(result) > 0 && strings.TrimSpace(result[len(result)-1]) == "" {
+		result = result[:len(result)-1]
+	}
+	output := strings.Join(result, "\n") + "\n"
+
+	if err := os.WriteFile(configPath, []byte(output), 0600); err != nil {
+		return fmt.Errorf("failed to write SSH config: %w", err)
+	}
+
+	fmt.Printf("Removed host '%s' from %s\n", name, configPath)
 	return nil
 }
