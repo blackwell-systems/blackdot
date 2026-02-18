@@ -45,6 +45,23 @@ _blackdot_cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/blackdot"
 # Resolve the Go binary by checking multiple candidate locations.
 # Prefers a platform-specific binary (e.g. blackdot-linux-amd64) so that
 # shared filesystems (Lima, NFS) don't pick up a binary built for the host OS.
+_blackdot_can_exec() {
+    # Verify a binary is executable AND built for this OS.
+    # -x alone passes for a macOS Mach-O binary on Linux (permission bit is set)
+    # but executing it produces "exec format error".
+    [[ -x "$1" ]] || return 1
+    # Use `file` to sniff the binary format when available
+    if command -v file >/dev/null 2>&1; then
+        case "$(uname -s)" in
+            Linux)  file -b "$1" 2>/dev/null | grep -qi 'ELF' ;;
+            Darwin) file -b "$1" 2>/dev/null | grep -qi 'Mach-O' ;;
+            *)      return 0 ;;  # no format check on unknown OSes
+        esac
+        return $?
+    fi
+    return 0
+}
+
 _blackdot_resolve_bin() {
     local _os _arch _platform_bin
     _os="$(uname -s | tr '[:upper:]' '[:lower:]')"   # darwin, linux, …
@@ -57,14 +74,14 @@ _blackdot_resolve_bin() {
     _platform_bin="blackdot-${_os}-${_arch}"
 
     # 1. Platform-specific binary in repo bin directory
-    [[ -x "$_blackdot_dir/bin/$_platform_bin" ]] && { echo "$_blackdot_dir/bin/$_platform_bin"; return 0; }
+    _blackdot_can_exec "$_blackdot_dir/bin/$_platform_bin" && { echo "$_blackdot_dir/bin/$_platform_bin"; return 0; }
     # 2. Platform-specific binary in installer location
-    [[ -x "$HOME/.local/bin/$_platform_bin" ]] && { echo "$HOME/.local/bin/$_platform_bin"; return 0; }
+    _blackdot_can_exec "$HOME/.local/bin/$_platform_bin" && { echo "$HOME/.local/bin/$_platform_bin"; return 0; }
     # 3. Generic binary in repo bin directory
-    [[ -x "$_blackdot_dir/bin/blackdot" ]] && { echo "$_blackdot_dir/bin/blackdot"; return 0; }
+    _blackdot_can_exec "$_blackdot_dir/bin/blackdot" && { echo "$_blackdot_dir/bin/blackdot"; return 0; }
     # 4. Generic binary in installer location
-    [[ -x "$HOME/.local/bin/blackdot" ]] && { echo "$HOME/.local/bin/blackdot"; return 0; }
-    # 5. Anywhere in PATH
+    _blackdot_can_exec "$HOME/.local/bin/blackdot" && { echo "$HOME/.local/bin/blackdot"; return 0; }
+    # 5. Anywhere in PATH (trust that PATH entries are native)
     command -v blackdot 2>/dev/null && return 0
     return 1
 }
@@ -135,7 +152,7 @@ _blackdot_init_features() {
 
 _blackdot_init_features
 unset _blackdot_dir _blackdot_bin _blackdot_cache_dir
-unset -f _blackdot_init_features _blackdot_resolve_bin
+unset -f _blackdot_init_features _blackdot_resolve_bin _blackdot_can_exec
 
 # =========================
 # OS-SPECIFIC SETUP
