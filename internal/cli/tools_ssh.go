@@ -101,60 +101,137 @@ Default directory is ~/.ssh`,
 }
 
 func runSSHKeys(keyDir string) error {
-	fmt.Printf("SSH Keys in %s:\n", keyDir)
-	fmt.Println("──────────────────────────────────────")
+	type keyRow struct {
+		name  string
+		bits  int
+		ktype string
+		fp    string
+	}
 
-	// Find all .pub files
+	// Collect all .pub files
 	pattern := filepath.Join(keyDir, "*.pub")
 	matches, err := filepath.Glob(pattern)
 	if err != nil {
 		return fmt.Errorf("error searching for keys: %w", err)
 	}
-
-	if len(matches) == 0 {
-		fmt.Println("  No SSH keys found")
-		fmt.Println()
-		return nil
-	}
-
-	// Sort by name
 	sort.Strings(matches)
 
+	var rows []keyRow
 	for _, pubPath := range matches {
 		name := strings.TrimSuffix(filepath.Base(pubPath), ".pub")
-
-		// Read public key
 		pubData, err := os.ReadFile(pubPath)
 		if err != nil {
-			fmt.Printf("  %-20s (error reading: %v)\n", name, err)
+			rows = append(rows, keyRow{name: name, ktype: "error", fp: err.Error()})
 			continue
 		}
-
-		// Parse public key
-		pubKey, comment, _, _, err := ssh.ParseAuthorizedKey(pubData)
+		pubKey, _, _, _, err := ssh.ParseAuthorizedKey(pubData)
 		if err != nil {
-			fmt.Printf("  %-20s (error parsing: %v)\n", name, err)
+			rows = append(rows, keyRow{name: name, ktype: "parse error", fp: err.Error()})
 			continue
 		}
-
-		// Get fingerprint
-		fp := ssh.FingerprintSHA256(pubKey)
-
-		// Get key type and size
-		keyType := pubKey.Type()
-		bits := getKeyBits(pubKey)
-
-		// Use comment if available, otherwise use filename
-		displayName := name
-		if comment != "" && comment != name {
-			displayName = name
-		}
-
-		fmt.Printf("  %-20s %4d %s (%s)\n", displayName, bits, keyType, fp)
+		rows = append(rows, keyRow{
+			name:  name,
+			bits:  getKeyBits(pubKey),
+			ktype: pubKey.Type(),
+			fp:    ssh.FingerprintSHA256(pubKey),
+		})
 	}
 
+	box  := sshLogoColor()
+	dim  := color.New(color.Faint)
+	bold := color.New(color.Bold)
+
+	const (
+		hName = "Name"
+		hBits = "Bits"
+		hType = "Type"
+		hFP   = "Fingerprint (SHA256)"
+	)
+
+	// Column widths — at least as wide as the header
+	wName, wBits, wType, wFP := len(hName), len(hBits), len(hType), len(hFP)
+	for _, r := range rows {
+		if n := len(r.name); n > wName {
+			wName = n
+		}
+		if n := len(fmt.Sprintf("%d", r.bits)); n > wBits {
+			wBits = n
+		}
+		if n := len(r.ktype); n > wType {
+			wType = n
+		}
+		if n := len(r.fp); n > wFP {
+			wFP = n
+		}
+	}
+
+	// Padded cell strings — width is set before coloring so ANSI codes
+	// do not break column alignment.
+	lpad := func(s string, w int) string { return fmt.Sprintf(" %-*s ", w, s) }
+	rpad := func(s string, w int) string { return fmt.Sprintf(" %*s ", w, s) }
+
+	// Horizontal rule builder
+	seg  := func(w int) string { return strings.Repeat("─", w+2) }
+	hLine := func(l, m, r string) string {
+		return l + seg(wName) + m + seg(wBits) + m + seg(wType) + m + seg(wFP) + r
+	}
+
+	pipe := box.Sprint("│")
+
 	fmt.Println()
+	box.Printf("  %s\n", hLine("╭", "┬", "╮"))
+
+	// Header row
+	fmt.Printf("  %s%s%s%s%s%s%s%s%s\n",
+		pipe,
+		bold.Sprint(lpad(hName, wName)),
+		pipe,
+		bold.Sprint(rpad(hBits, wBits)),
+		pipe,
+		bold.Sprint(lpad(hType, wType)),
+		pipe,
+		bold.Sprint(lpad(hFP, wFP)),
+		pipe,
+	)
+
+	box.Printf("  %s\n", hLine("├", "┼", "┤"))
+
+	if len(rows) == 0 {
+		// Single spanning row: inner width = 4 cols of padding + 3 interior separators
+		innerTotal := wName + wBits + wType + wFP + 11
+		fmt.Printf("  %s%s%s\n", pipe, dim.Sprint(fmt.Sprintf(" %-*s", innerTotal-1, "No SSH keys found")), pipe)
+	} else {
+		for _, r := range rows {
+			bStr := fmt.Sprintf("%d", r.bits)
+			fmt.Printf("  %s%s%s%s%s%s%s%s%s\n",
+				pipe,
+				lpad(r.name, wName),
+				pipe,
+				dim.Sprint(rpad(bStr, wBits)),
+				pipe,
+				lpad(r.ktype, wType),
+				pipe,
+				dim.Sprint(lpad(r.fp, wFP)),
+				pipe,
+			)
+		}
+	}
+
+	box.Printf("  %s\n", hLine("╰", "┴", "╯"))
+	fmt.Println()
+	fmt.Printf("  %s\n\n", dim.Sprintf("%d key(s) in %s", len(rows), keyDir))
 	return nil
+}
+
+// sshLogoColor returns the accent color used for SSH tool banners and grids.
+// Matches the logo color logic in runSSHStatusLocal:
+//   - Magenta: SSH agent is running (SSH_AUTH_SOCK set)
+//   - Red:     no agent
+func sshLogoColor() *color.Color {
+	if os.Getenv("SSH_AUTH_SOCK") != "" {
+		return color.New(color.FgMagenta)
+	}
+	return color.New(color.FgRed)
 }
 
 // getKeyBits returns the bit size for a public key
@@ -787,13 +864,8 @@ func runSSHStatusLocal() error {
 		}
 	}
 
-	// Choose color
-	var logoColor *color.Color
-	if agentRunning {
-		logoColor = color.New(color.FgMagenta) // Purple when agent active
-	} else {
-		logoColor = color.New(color.FgRed) // Red when not
-	}
+	// Color matches sshLogoColor() — magenta when agent active, red otherwise
+	logoColor := sshLogoColor()
 
 	// Print banner
 	fmt.Println()
