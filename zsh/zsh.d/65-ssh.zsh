@@ -233,7 +233,19 @@ sshagent() {
 
     echo "SSH Agent Status:"
     echo "──────────────────────────────────────"
-    echo "  PID: ${SSH_AGENT_PID:-unknown}"
+    local _agent_pid="${SSH_AGENT_PID:-}"
+    if [[ -z "$_agent_pid" ]]; then
+        # macOS launchd never sets SSH_AGENT_PID; resolve via pgrep
+        _agent_pid=$(pgrep -x ssh-agent 2>/dev/null | head -1)
+        if [[ -n "$_agent_pid" && "$SSH_AUTH_SOCK" == *com.apple.launchd* ]]; then
+            _agent_pid="$_agent_pid (launchd)"
+        elif [[ -z "$_agent_pid" && "$SSH_AUTH_SOCK" == *com.apple.launchd* ]]; then
+            _agent_pid="launchd"
+        elif [[ -z "$_agent_pid" ]]; then
+            _agent_pid="unknown"
+        fi
+    fi
+    echo "  PID: $_agent_pid"
     echo "  Socket: ${SSH_AUTH_SOCK:-not set}"
     echo ""
     echo "Loaded keys:"
@@ -459,7 +471,18 @@ _sshtools_shell() {
     echo -e "  ${CLR_MUTED}───────────────────────────────────────${CLR_NC}"
 
     if [[ "$agent_running" == "true" ]]; then
-        echo -e "    ${CLR_MUTED}Agent${CLR_NC}     ${CLR_SUCCESS}● running${CLR_NC} ${CLR_MUTED}(PID: ${SSH_AGENT_PID:-?})${CLR_NC}"
+        local _agent_pid="${SSH_AGENT_PID:-}"
+        if [[ -z "$_agent_pid" ]]; then
+            _agent_pid=$(pgrep -x ssh-agent 2>/dev/null | head -1)
+            if [[ -n "$_agent_pid" && "$SSH_AUTH_SOCK" == *com.apple.launchd* ]]; then
+                _agent_pid="$_agent_pid (launchd)"
+            elif [[ -z "$_agent_pid" && "$SSH_AUTH_SOCK" == *com.apple.launchd* ]]; then
+                _agent_pid="launchd"
+            elif [[ -z "$_agent_pid" ]]; then
+                _agent_pid="?"
+            fi
+        fi
+        echo -e "    ${CLR_MUTED}Agent${CLR_NC}     ${CLR_SUCCESS}● running${CLR_NC} ${CLR_MUTED}(PID: $_agent_pid)${CLR_NC}"
         if [[ "$keys_loaded" -gt 0 ]]; then
             echo -e "    ${CLR_MUTED}Keys${CLR_NC}      ${CLR_SUCCESS}$keys_loaded loaded${CLR_NC}"
         else

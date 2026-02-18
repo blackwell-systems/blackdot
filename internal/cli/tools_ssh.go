@@ -223,6 +223,74 @@ func runSSHKeys(keyDir string) error {
 	return nil
 }
 
+// resolveSSHAgentPID returns the SSH agent PID and a display label.
+// Handles platform-specific agent management:
+//   - macOS: launchd manages the agent, never sets SSH_AGENT_PID
+//   - Linux: ssh-agent -s or systemd user service
+//   - Windows: OpenSSH service (ssh-agent), no pgrep
+func resolveSSHAgentPID() (pid string, label string) {
+	// 1. Check the standard env var (set by `eval $(ssh-agent -s)`)
+	if envPID := os.Getenv("SSH_AGENT_PID"); envPID != "" {
+		return envPID, envPID
+	}
+
+	authSock := os.Getenv("SSH_AUTH_SOCK")
+
+	// 2. Platform-specific detection
+	switch runtime.GOOS {
+	case "darwin":
+		isLaunchd := strings.Contains(authSock, "com.apple.launchd")
+		if p := pgrepSSHAgent(); p != "" {
+			if isLaunchd {
+				return p, p + " (launchd)"
+			}
+			return p, p
+		}
+		if isLaunchd {
+			return "", "launchd"
+		}
+
+	case "windows":
+		// Windows OpenSSH agent runs as a service; query via sc/tasklist
+		if out, err := exec.Command("tasklist", "/FI", "IMAGENAME eq ssh-agent.exe", "/FO", "CSV", "/NH").Output(); err == nil {
+			line := strings.TrimSpace(string(out))
+			// CSV format: "ssh-agent.exe","PID","Session","Session#","Mem Usage"
+			if strings.Contains(line, "ssh-agent") {
+				fields := strings.Split(line, ",")
+				if len(fields) >= 2 {
+					p := strings.Trim(fields[1], "\"")
+					return p, p + " (service)"
+				}
+			}
+		}
+		// Named pipe socket means the Windows service is managing it
+		if strings.Contains(authSock, "pipe") || strings.Contains(authSock, "openssh") {
+			return "", "service"
+		}
+
+	default: // linux, freebsd, etc.
+		if p := pgrepSSHAgent(); p != "" {
+			return p, p
+		}
+	}
+
+	return "", "unknown"
+}
+
+// pgrepSSHAgent tries to find the ssh-agent PID via pgrep (Unix only).
+// Returns the first PID found, or empty string.
+func pgrepSSHAgent() string {
+	out, err := exec.Command("pgrep", "-x", "ssh-agent").Output()
+	if err != nil {
+		return ""
+	}
+	pids := strings.Fields(strings.TrimSpace(string(out)))
+	if len(pids) > 0 {
+		return pids[0]
+	}
+	return ""
+}
+
 // sshLogoColor returns the accent color used for SSH tool banners and grids.
 // Matches the logo color logic in runSSHStatusLocal:
 //   - Magenta: SSH agent is running (SSH_AUTH_SOCK set)
@@ -565,12 +633,9 @@ func runSSHAgent() error {
 	cmd := exec.Command("ssh-add", "-l")
 	output, err := cmd.Output()
 
-	agentPID := os.Getenv("SSH_AGENT_PID")
-	if agentPID == "" {
-		agentPID = "unknown"
-	}
+	_, agentLabel := resolveSSHAgentPID()
 
-	fmt.Printf("  PID:    %s\n", agentPID)
+	fmt.Printf("  PID:    %s\n", agentLabel)
 	fmt.Printf("  Socket: %s\n", authSock)
 	fmt.Println()
 	fmt.Println("Loaded keys:")
@@ -888,11 +953,8 @@ func runSSHStatusLocal() error {
 	dim.Println("  ───────────────────────────────────────")
 
 	if agentRunning {
-		agentPID := os.Getenv("SSH_AGENT_PID")
-		if agentPID == "" {
-			agentPID = "?"
-		}
-		fmt.Printf("    %s     %s %s\n", dim.Sprint("Agent"), green.Sprint("● running"), dim.Sprintf("(PID: %s)", agentPID))
+		_, agentLabel := resolveSSHAgentPID()
+		fmt.Printf("    %s     %s %s\n", dim.Sprint("Agent"), green.Sprint("● running"), dim.Sprintf("(PID: %s)", agentLabel))
 
 		if keysLoaded > 0 {
 			fmt.Printf("    %s      %s\n", dim.Sprint("Keys"), green.Sprintf("%d loaded", keysLoaded))
