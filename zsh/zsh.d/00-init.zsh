@@ -42,13 +42,29 @@ esac
 _blackdot_dir="${BLACKDOT_DIR:-${${(%):-%x}:A:h:h:h}}"
 _blackdot_cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/blackdot"
 
-# Resolve the Go binary by checking multiple candidate locations
+# Resolve the Go binary by checking multiple candidate locations.
+# Prefers a platform-specific binary (e.g. blackdot-linux-amd64) so that
+# shared filesystems (Lima, NFS) don't pick up a binary built for the host OS.
 _blackdot_resolve_bin() {
-    # 1. Repo bin directory (standard location)
+    local _os _arch _platform_bin
+    _os="$(uname -s | tr '[:upper:]' '[:lower:]')"   # darwin, linux, …
+    _arch="$(uname -m)"
+    # Normalise architecture names to match Go conventions
+    case "$_arch" in
+        x86_64)  _arch="amd64" ;;
+        aarch64) _arch="arm64" ;;
+    esac
+    _platform_bin="blackdot-${_os}-${_arch}"
+
+    # 1. Platform-specific binary in repo bin directory
+    [[ -x "$_blackdot_dir/bin/$_platform_bin" ]] && { echo "$_blackdot_dir/bin/$_platform_bin"; return 0; }
+    # 2. Platform-specific binary in installer location
+    [[ -x "$HOME/.local/bin/$_platform_bin" ]] && { echo "$HOME/.local/bin/$_platform_bin"; return 0; }
+    # 3. Generic binary in repo bin directory
     [[ -x "$_blackdot_dir/bin/blackdot" ]] && { echo "$_blackdot_dir/bin/blackdot"; return 0; }
-    # 2. Installer default location
+    # 4. Generic binary in installer location
     [[ -x "$HOME/.local/bin/blackdot" ]] && { echo "$HOME/.local/bin/blackdot"; return 0; }
-    # 3. Anywhere in PATH
+    # 5. Anywhere in PATH
     command -v blackdot 2>/dev/null && return 0
     return 1
 }
@@ -67,13 +83,18 @@ _blackdot_init_features() {
     # Check if binary exists
     if [[ -z "$_blackdot_bin" || ! -x "$_blackdot_bin" ]]; then
         export BLACKDOT_FEATURE_MODE="degraded"
-        # Capture searched paths as a literal for the error message
-        local _searched="$_blackdot_dir/bin/blackdot, ~/.local/bin/blackdot, PATH"
+        # Derive platform-specific binary name for the hint
+        local _p_os _p_arch _p_bin
+        _p_os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+        _p_arch="$(uname -m)"
+        case "$_p_arch" in x86_64) _p_arch="amd64";; aarch64) _p_arch="arm64";; esac
+        _p_bin="blackdot-${_p_os}-${_p_arch}"
+        local _searched="$_blackdot_dir/bin/$_p_bin, $_blackdot_dir/bin/blackdot, ~/.local/bin/blackdot, PATH"
         # Provide minimal fallback functions
         feature_enabled() { return 1; }  # Features disabled when binary missing
         eval "require_feature() {
             echo \"Feature system unavailable (Go binary not found; searched: ${_searched})\" >&2
-            echo \"  Rebuild with: cd ${_blackdot_dir} && mkdir -p bin && go build -o bin/blackdot ./cmd/blackdot/\" >&2
+            echo \"  Rebuild with: cd ${_blackdot_dir} && mkdir -p bin && GOOS=${_p_os} GOARCH=${_p_arch} go build -o bin/${_p_bin} ./cmd/blackdot/\" >&2
             return 1
         }"
         return 1

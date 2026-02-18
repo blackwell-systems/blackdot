@@ -375,7 +375,11 @@ blackdot() {
     # Get Go binary path
     local go_bin=$(_blackdot_go_bin)
     if [[ -z "$go_bin" ]]; then
-        echo "${RED}[ERROR]${NC} blackdot binary not found. Run: go build -o bin/blackdot ./cmd/blackdot" >&2
+        local _os _arch
+        _os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+        _arch="$(uname -m)"
+        case "$_arch" in x86_64) _arch="amd64";; aarch64) _arch="arm64";; esac
+        echo "${RED}[ERROR]${NC} blackdot binary not found. Run: GOOS=$_os GOARCH=$_arch go build -o bin/blackdot-${_os}-${_arch} ./cmd/blackdot" >&2
         return 1
     fi
 
@@ -420,7 +424,15 @@ alias claudetools='blackdot tools claude'
 
 # Legacy function for backward compatibility (returns binary path)
 _blackdot_go_bin() {
-    if [[ -x "$BLACKDOT_DIR/bin/blackdot" ]]; then
+    local _os _arch _pbin
+    _os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+    _arch="$(uname -m)"
+    case "$_arch" in x86_64) _arch="amd64";; aarch64) _arch="arm64";; esac
+    _pbin="blackdot-${_os}-${_arch}"
+
+    if [[ -x "$BLACKDOT_DIR/bin/$_pbin" ]]; then
+        echo "$BLACKDOT_DIR/bin/$_pbin"
+    elif [[ -x "$BLACKDOT_DIR/bin/blackdot" ]]; then
         echo "$BLACKDOT_DIR/bin/blackdot"
     elif command -v blackdot &>/dev/null; then
         echo "blackdot"
