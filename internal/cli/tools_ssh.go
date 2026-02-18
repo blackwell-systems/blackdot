@@ -521,8 +521,9 @@ func appendUint32(b []byte, v uint32) []byte {
 // newSSHListCmd lists configured SSH hosts
 func newSSHListCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List configured SSH hosts",
+		Use:     "list",
+		Aliases: []string{"hosts"},
+		Short:   "List configured SSH hosts",
 		Long: `List all hosts configured in ~/.ssh/config.
 
 Shows host aliases that can be used with ssh command.`,
