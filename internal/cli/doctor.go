@@ -211,6 +211,10 @@ func getBlackdotDir() string {
 		return dir
 	}
 	if _, err := os.Stat("/workspace/blackdot"); err == nil {
+		// Resolve symlinks so comparisons work (e.g. /workspace -> /Users/.../workspace)
+		if resolved, err := filepath.EvalSymlinks("/workspace/blackdot"); err == nil {
+			return resolved
+		}
 		return "/workspace/blackdot"
 	}
 	home, _ := os.UserHomeDir()
@@ -314,7 +318,16 @@ func checkCoreComponents(state *doctorState, home, blackdotDir string) {
 			expectedTarget := target
 			expectedFullPath := filepath.Join(blackdotDir, target)
 
-			if actualTarget == expectedTarget || actualTarget == expectedFullPath {
+			matches := actualTarget == expectedTarget || actualTarget == expectedFullPath
+			if !matches {
+				// Resolve intermediate symlinks for comparison (e.g. /workspace -> /Users/.../workspace)
+				if resolvedActual, err := filepath.EvalSymlinks(actualTarget); err == nil {
+					if resolvedExpected, err := filepath.EvalSymlinks(expectedFullPath); err == nil {
+						matches = resolvedActual == resolvedExpected
+					}
+				}
+			}
+			if matches {
 				state.pass(fmt.Sprintf("%s symlink OK", name))
 			} else {
 				state.fail(fmt.Sprintf("%s points to wrong target: %s", name, actualTarget),

@@ -426,13 +426,24 @@ alias claudetools='blackdot tools claude'
 # Prefers _BLACKDOT_BIN (set by shell-init with format validation),
 # then falls back to platform-specific binary search with ELF/Mach-O checks.
 _blackdot_go_bin() {
+    # Guard against unexpected recursion (FUNCNEST)
+    if (( _BLACKDOT_GO_BIN_DEPTH > 0 )); then
+        echo ""
+        return 1
+    fi
+    local -i _BLACKDOT_GO_BIN_DEPTH=1
+
     # Best: use the path already resolved and validated by 00-init.zsh
-    if [[ -n "$_BLACKDOT_BIN" && -x "$_BLACKDOT_BIN" ]]; then
+    # Also verify it's a native binary (not the wrapper script) to prevent
+    # recursion if _BLACKDOT_BIN was set to bin/blackdot during init.
+    if [[ -n "$_BLACKDOT_BIN" && -x "$_BLACKDOT_BIN" ]] && _blackdot_go_bin_can_exec "$_BLACKDOT_BIN"; then
         echo "$_BLACKDOT_BIN"
         return 0
     fi
 
-    # Fallback: platform-specific search with format validation
+    # Fallback: platform-specific binary search (native binaries only,
+    # NOT the bin/blackdot wrapper script — returning the wrapper can
+    # cause infinite recursion via the blackdot shell function).
     local _os _arch _pbin
     _os="$(uname -s | tr '[:upper:]' '[:lower:]')"
     _arch="$(uname -m)"
@@ -442,9 +453,7 @@ _blackdot_go_bin() {
     local _candidate
     for _candidate in \
         "$BLACKDOT_DIR/bin/$_pbin" \
-        "$HOME/.local/bin/$_pbin" \
-        "$BLACKDOT_DIR/bin/blackdot" \
-        "$HOME/.local/bin/blackdot"; do
+        "$HOME/.local/bin/$_pbin"; do
         if [[ -x "$_candidate" ]] && _blackdot_go_bin_can_exec "$_candidate"; then
             echo "$_candidate"
             return 0
@@ -458,10 +467,13 @@ _blackdot_go_bin() {
 # from 00-init.zsh is unset after init completes)
 _blackdot_go_bin_can_exec() {
     [[ -x "$1" ]] || return 1
+    # Only accept native compiled binaries — reject shell scripts and wrappers
+    # to prevent the blackdot function from calling the bin/blackdot dispatcher
+    # (which could recurse back into the shell function).
     if command -v file >/dev/null 2>&1; then
         case "$(uname -s)" in
-            Linux)  file -b "$1" 2>/dev/null | grep -qiE 'ELF|shell script|text' ;;
-            Darwin) file -b "$1" 2>/dev/null | grep -qiE 'Mach-O|shell script|text' ;;
+            Linux)  file -b "$1" 2>/dev/null | grep -qiE '^ELF' ;;
+            Darwin) file -b "$1" 2>/dev/null | grep -qiE 'Mach-O' ;;
             *)      return 0 ;;
         esac
         return $?
