@@ -35,6 +35,7 @@ generated/
 
 # Go binaries (built from cmd/)
 bin/blackdot
+bin/blackdot-*
 
 # Legacy binary names (no longer used)
 bin/dotfiles
