@@ -20,6 +20,8 @@ brew "bat"              # Better cat with syntax highlighting
 brew "glow"             # Render markdown beautifully in terminal
 brew "dust"             # Intuitive disk usage (du replacement)
 brew "btop"             # Beautiful system monitor (htop replacement)
+brew "yazi"             # Blazing fast terminal file manager
+brew "colordiff"        # Colorized diff output
 
 # Essential dev tools
 brew "gh"               # GitHub CLI
