@@ -91,7 +91,13 @@ _blackdot_bin="$(_blackdot_resolve_bin)"
 # Initialize feature functions from Go binary (with caching for faster startup)
 # This provides: feature_enabled, require_feature, feature_exists, feature_status
 _blackdot_init_features() {
-    local cache_file="$_blackdot_cache_dir/shell-init.zsh"
+    # Platform-specific cache so shared filesystems (Lima, NFS) don't
+    # cross-contaminate between macOS and Linux.
+    local _ci_os _ci_arch
+    _ci_os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+    _ci_arch="$(uname -m)"
+    case "$_ci_arch" in x86_64) _ci_arch="amd64";; aarch64) _ci_arch="arm64";; esac
+    local cache_file="$_blackdot_cache_dir/shell-init-${_ci_os}-${_ci_arch}.zsh"
     local binary_mtime cache_mtime
 
     # Create cache directory if needed

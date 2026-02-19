@@ -148,6 +148,13 @@ feature_status() {
         echo "unknown"
     fi
 }
+
+# Wrapper so "blackdot" always invokes the resolved binary.
+# Without this, PATH may find a binary built for a different OS on shared
+# filesystems (Lima, NFS, Docker bind mounts).
+blackdot() {
+    "$_BLACKDOT_BIN" "$@"
+}
 `, binaryPath)
 
 	fmt.Print(script)
@@ -199,6 +206,10 @@ function feature_exists --description "Check if a feature exists"
     end
 
     return 1
+end
+
+function blackdot --description "Run blackdot via the resolved binary"
+    $_BLACKDOT_BIN $argv
 end
 `, binaryPath)
 
@@ -255,10 +266,16 @@ function Test-FeatureExists {
     return $false
 }
 
+# Wrapper so "blackdot" always invokes the resolved binary
+function Invoke-Blackdot {
+    & $_BLACKDOT_BIN @args
+}
+
 # Aliases for compatibility
 Set-Alias -Name feature_enabled -Value Test-FeatureEnabled
 Set-Alias -Name require_feature -Value Assert-FeatureEnabled
 Set-Alias -Name feature_exists -Value Test-FeatureExists
+Set-Alias -Name blackdot -Value Invoke-Blackdot
 `
 
 	fmt.Print(script)

@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **SSH `list`/`hosts` output** — Now displays a styled colored table with Host, HostName, User, Port, and IdentityFile columns (matching the `ssh keys` table style) instead of a plain text list.
 - **SSH `agent` output** — Now displays loaded keys in a styled colored table with Comment, Bits, Type, and Fingerprint columns instead of raw `ssh-add -l` output.
+- **`blackdot` command uses resolved binary** — `shell-init` now emits a `blackdot()` wrapper function so typing `blackdot` always invokes the platform-correct binary (`$_BLACKDOT_BIN`), not whatever PATH finds first. Prevents `exec format error` when `bin/blackdot` in the repo is built for a different OS.
+- **Shell-init cache is platform-specific** — Cache file is now `shell-init-${os}-${arch}.zsh` (e.g. `shell-init-linux-amd64.zsh`) so macOS and Linux don't overwrite each other's cached shell functions on shared filesystems.
 
 ### Fixed
 
