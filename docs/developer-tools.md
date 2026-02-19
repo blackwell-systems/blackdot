@@ -412,10 +412,11 @@ pt-cov               # Coverage with HTML report
 
 | Command | Description |
 |---------|-------------|
-| `sshlist` | List all hosts from `~/.ssh/config` |
+| `sshlist` / `sshtools hosts` | List all hosts from `~/.ssh/config` (styled table) |
 | `sshgo <host>` | Quick connect with completion |
 | `sshedit` | Open SSH config in `$EDITOR` |
 | `sshadd-host <name>` | Interactive wizard to add new host |
+| `sshtools remove-host <name>` | Remove host from SSH config |
 
 ### SSH Key Management
 
@@ -446,20 +447,17 @@ pt-cov               # Coverage with HTML report
 ### Features
 
 - **Agent detection:** Logo color indicates agent status (green=running, yellow=no keys, red=stopped)
+- **Styled tables:** `keys`, `hosts`, and `agent` commands display output in colored box-drawing tables
 - **Tab completions:** `sshgo <TAB>` completes from configured hosts
 - **Key name resolution:** Commands find keys by name (`sshload github` finds `id_ed25519_github`)
 - **Interactive host setup:** `sshadd-host` guides through adding new SSH hosts
+- **Host removal:** `sshtools remove-host <name>` cleanly removes a host block from config
 
 ### Example Workflow
 
 ```bash
-# Start of day: check agent status
-sshagent
-# SSH Agent Status:
-#   PID: 12345
-#   Socket: /tmp/ssh-xxx/agent.12345
-# Loaded keys:
-#   (no keys loaded)
+# Start of day: check agent status (styled table output)
+sshtools agent
 
 # Load your work keys
 sshload github
@@ -471,17 +469,15 @@ sshgo prod-server
 # Create a tunnel for database access
 sshtunnel db-server 5432
 
-# List what's configured
-sshlist
-# SSH Hosts:
-#   github
-#   work-server
-#   prod-server
-#   db-server
-# Total: 4 hosts
+# List what's configured (styled table with HostName, User, Port, IdentityFile)
+sshtools hosts
 
 # Generate a new key for a project
 sshgen client-project "Client Project Deploy Key"
+
+# Manage hosts
+sshtools add-host staging --hostname 10.0.0.5 --user deploy
+sshtools remove-host old-server
 ```
 
 ---

@@ -7,8 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Makefile for local development builds** — `make build` compiles for the host architecture, `make build-linux` / `make build-darwin` cross-compile for both amd64 and arm64, and `make build-all` builds everything. Embeds version, commit, and date via ldflags. This is for contributors building from source — end users continue to install via `install.sh`.
+- **Architecture-dispatch wrapper script** — `scripts/blackdot-wrapper.sh` auto-detects OS and architecture and execs the correct platform-specific binary (e.g. `blackdot-linux-arm64`). Installed as `bin/blackdot` by `make build-linux` so a single path works on mixed-arch shared filesystems and bind-mounted container volumes.
+- **SSH `hosts` alias** — `blackdot tools ssh hosts` now works as an alias for `ssh list`, which is more intuitive for displaying configured SSH hosts.
+- **SSH `remove-host` command** — `blackdot tools ssh remove-host <name>` removes a host block and all its directives from `~/.ssh/config`. Inverse of `add-host`.
+- **Auto-install prompt on missing binary** — When shell init detects no compatible binary (e.g. first time in a Lima VM or Docker container), it prompts `Install now? [y/N]` in interactive shells. Answering `y` downloads the correct platform binary automatically. Answering `n` explains degraded mode and how to install later.
+
+### Changed
+
+- **SSH `list`/`hosts` output** — Now displays a styled colored table with Host, HostName, User, Port, and IdentityFile columns (matching the `ssh keys` table style) instead of a plain text list.
+- **SSH `agent` output** — Now displays loaded keys in a styled colored table with Comment, Bits, Type, and Fingerprint columns instead of raw `ssh-add -l` output.
+- **`blackdot` command uses resolved binary** — `shell-init` now emits a `blackdot()` wrapper function so typing `blackdot` always invokes the platform-correct binary (`$_BLACKDOT_BIN`), not whatever PATH finds first. Prevents `exec format error` when `bin/blackdot` in the repo is built for a different OS.
+- **Shell-init cache is platform-specific** — Cache file is now `shell-init-${os}-${arch}.zsh` (e.g. `shell-init-linux-amd64.zsh`) so macOS and Linux don't overwrite each other's cached shell functions on shared filesystems.
+
 ### Fixed
 
+- **Docker daemon hints are platform-aware** — `blackdot tools docker status` and `checkDockerRunning()` error messages now show `open -a Docker` on macOS and `Start-Service docker` on Windows instead of always showing the Linux-only `sudo systemctl start docker`.
+- **Cross-platform binary resolution for shared filesystems** — Shell init (`_blackdot_resolve_bin`) now prefers platform-specific binaries (e.g. `blackdot-linux-amd64`, `blackdot-darwin-arm64`) before falling back to the generic `bin/blackdot`. A new `_blackdot_can_exec` helper validates the binary format (ELF on Linux, Mach-O on macOS) using `file`, so a macOS binary with `+x` permission is no longer mistaken for a runnable binary on Linux. Fixes `exec format error` when a macOS host shares its dotfiles directory with a Lima or NFS-mounted Linux VM. The `_blackdot_go_bin()` helper and `blackdot-upgrade` also use the same platform-aware resolution.
+- **Installer saves platform-specific binary names** — `install.sh` now saves the downloaded binary as `blackdot-${os}-${arch}` (e.g. `blackdot-linux-amd64`) with a `blackdot` symlink for convenience. Multiple platforms can coexist in the same `~/.local/bin/` directory on shared filesystems without overwriting each other.
 - **Zsh modules not loading in new tmux panes** — `zsh/zshrc` used `${0:A:h}` to locate the `zsh.d/` module directory, but `$0` is set to `zsh`/`-zsh` (the shell name) during automatic startup — only the file path when explicitly `source`d. This caused `ZSHRC_DIR` to resolve to the wrong directory (e.g. `/bin`), the `(N)` glob matched nothing, and zero modules loaded: no aliases, no prompt, no blackdot. Switched to `${(%):-%x}` which always gives the current source file path.
 - **Binary path resolution** — Shell init now searches `$BLACKDOT_DIR/bin/blackdot`, `~/.local/bin/blackdot`, and `$PATH` instead of a single hardcoded location. Fixes "Feature system unavailable (Go binary not found at )" error on macOS when the binary was installed via the installer to `~/.local/bin/` but the shell only checked the repo's `bin/` directory.
 - **Shell init `_BLACKDOT_BIN` path** — `blackdot shell-init` now uses `os.Executable()` to emit the actual running binary's path instead of guessing from `$BLACKDOT_DIR/bin/blackdot`. Works correctly across all shells (zsh, bash, fish, PowerShell).

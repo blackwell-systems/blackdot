@@ -42,13 +42,46 @@ esac
 _blackdot_dir="${BLACKDOT_DIR:-${${(%):-%x}:A:h:h:h}}"
 _blackdot_cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/blackdot"
 
-# Resolve the Go binary by checking multiple candidate locations
+# Resolve the Go binary by checking multiple candidate locations.
+# Prefers a platform-specific binary (e.g. blackdot-linux-amd64) so that
+# shared filesystems (Lima, NFS) don't pick up a binary built for the host OS.
+_blackdot_can_exec() {
+    # Verify a binary is executable AND built for this OS.
+    # -x alone passes for a macOS Mach-O binary on Linux (permission bit is set)
+    # but executing it produces "exec format error".
+    [[ -x "$1" ]] || return 1
+    # Use `file` to sniff the binary format when available
+    if command -v file >/dev/null 2>&1; then
+        case "$(uname -s)" in
+            Linux)  file -b "$1" 2>/dev/null | grep -qi 'ELF' ;;
+            Darwin) file -b "$1" 2>/dev/null | grep -qi 'Mach-O' ;;
+            *)      return 0 ;;  # no format check on unknown OSes
+        esac
+        return $?
+    fi
+    return 0
+}
+
 _blackdot_resolve_bin() {
-    # 1. Repo bin directory (standard location)
-    [[ -x "$_blackdot_dir/bin/blackdot" ]] && { echo "$_blackdot_dir/bin/blackdot"; return 0; }
-    # 2. Installer default location
-    [[ -x "$HOME/.local/bin/blackdot" ]] && { echo "$HOME/.local/bin/blackdot"; return 0; }
-    # 3. Anywhere in PATH
+    local _os _arch _platform_bin
+    _os="$(uname -s | tr '[:upper:]' '[:lower:]')"   # darwin, linux, …
+    _arch="$(uname -m)"
+    # Normalise architecture names to match Go conventions
+    case "$_arch" in
+        x86_64)  _arch="amd64" ;;
+        aarch64) _arch="arm64" ;;
+    esac
+    _platform_bin="blackdot-${_os}-${_arch}"
+
+    # 1. Platform-specific binary in repo bin directory
+    _blackdot_can_exec "$_blackdot_dir/bin/$_platform_bin" && { echo "$_blackdot_dir/bin/$_platform_bin"; return 0; }
+    # 2. Platform-specific binary in installer location
+    _blackdot_can_exec "$HOME/.local/bin/$_platform_bin" && { echo "$HOME/.local/bin/$_platform_bin"; return 0; }
+    # 3. Generic binary in repo bin directory
+    _blackdot_can_exec "$_blackdot_dir/bin/blackdot" && { echo "$_blackdot_dir/bin/blackdot"; return 0; }
+    # 4. Generic binary in installer location
+    _blackdot_can_exec "$HOME/.local/bin/blackdot" && { echo "$HOME/.local/bin/blackdot"; return 0; }
+    # 5. Anywhere in PATH (trust that PATH entries are native)
     command -v blackdot 2>/dev/null && return 0
     return 1
 }
@@ -58,7 +91,13 @@ _blackdot_bin="$(_blackdot_resolve_bin)"
 # Initialize feature functions from Go binary (with caching for faster startup)
 # This provides: feature_enabled, require_feature, feature_exists, feature_status
 _blackdot_init_features() {
-    local cache_file="$_blackdot_cache_dir/shell-init.zsh"
+    # Platform-specific cache so shared filesystems (Lima, NFS) don't
+    # cross-contaminate between macOS and Linux.
+    local _ci_os _ci_arch
+    _ci_os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+    _ci_arch="$(uname -m)"
+    case "$_ci_arch" in x86_64) _ci_arch="amd64";; aarch64) _ci_arch="arm64";; esac
+    local cache_file="$_blackdot_cache_dir/shell-init-${_ci_os}-${_ci_arch}.zsh"
     local binary_mtime cache_mtime
 
     # Create cache directory if needed
@@ -66,17 +105,69 @@ _blackdot_init_features() {
 
     # Check if binary exists
     if [[ -z "$_blackdot_bin" || ! -x "$_blackdot_bin" ]]; then
-        export BLACKDOT_FEATURE_MODE="degraded"
-        # Capture searched paths as a literal for the error message
-        local _searched="$_blackdot_dir/bin/blackdot, ~/.local/bin/blackdot, PATH"
-        # Provide minimal fallback functions
-        feature_enabled() { return 1; }  # Features disabled when binary missing
-        eval "require_feature() {
-            echo \"Feature system unavailable (Go binary not found; searched: ${_searched})\" >&2
-            echo \"  Rebuild with: cd ${_blackdot_dir} && mkdir -p bin && go build -o bin/blackdot ./cmd/blackdot/\" >&2
+        local _p_os _p_arch _p_bin
+        _p_os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+        _p_arch="$(uname -m)"
+        case "$_p_arch" in x86_64) _p_arch="amd64";; aarch64) _p_arch="arm64";; esac
+        _p_bin="blackdot-${_p_os}-${_p_arch}"
+
+        # In interactive shells, offer to install automatically
+        if [[ -o interactive ]]; then
+            echo ""
+            echo "[blackdot] No compatible binary found for ${_p_os}-${_p_arch}."
+            echo -n "           Install now? [y/N] "
+            local _answer=""
+            read -r _answer
+            if [[ "$_answer" =~ ^[Yy]$ ]]; then
+                echo "[blackdot] Installing ${_p_bin}..."
+                local _install_script="$_blackdot_dir/install.sh"
+                if [[ -x "$_install_script" ]]; then
+                    # Use --binary-only to just download the binary without re-cloning
+                    bash "$_install_script" --binary-only && {
+                        # Re-resolve now that the binary is installed
+                        _blackdot_bin="$(_blackdot_resolve_bin)"
+                        if [[ -n "$_blackdot_bin" && -x "$_blackdot_bin" ]]; then
+                            echo "[blackdot] Installed. Continuing..."
+                            echo ""
+                            # Fall through to normal init below
+                        fi
+                    } || {
+                        echo "[blackdot] Installation failed." >&2
+                    }
+                else
+                    # Fallback: download directly from GitHub releases
+                    local _bin_dir="$HOME/.local/bin"
+                    local _url="https://github.com/blackwell-systems/blackdot/releases/latest/download/${_p_bin}"
+                    mkdir -p "$_bin_dir"
+                    if command -v curl >/dev/null 2>&1; then
+                        curl -fsSL "$_url" -o "$_bin_dir/$_p_bin" && chmod +x "$_bin_dir/$_p_bin" && ln -sf "$_p_bin" "$_bin_dir/blackdot"
+                    elif command -v wget >/dev/null 2>&1; then
+                        wget -q "$_url" -O "$_bin_dir/$_p_bin" && chmod +x "$_bin_dir/$_p_bin" && ln -sf "$_p_bin" "$_bin_dir/blackdot"
+                    fi
+                    _blackdot_bin="$(_blackdot_resolve_bin)"
+                    if [[ -n "$_blackdot_bin" && -x "$_blackdot_bin" ]]; then
+                        echo "[blackdot] Installed. Continuing..."
+                        echo ""
+                    fi
+                fi
+            else
+                echo "[blackdot] Skipping. Running in degraded mode (no features, no vault, aliases only)."
+                echo "           Run 'install.sh --binary-only' to install later."
+                echo ""
+            fi
+        fi
+
+        # If still no binary after possible install attempt, enter degraded mode
+        if [[ -z "$_blackdot_bin" || ! -x "$_blackdot_bin" ]]; then
+            export BLACKDOT_FEATURE_MODE="degraded"
+            feature_enabled() { return 1; }
+            require_feature() {
+                echo "Feature system unavailable (no compatible binary for ${_p_os}-${_p_arch})" >&2
+                echo "  Run: install.sh --binary-only" >&2
+                return 1
+            }
             return 1
-        }"
-        return 1
+        fi
     fi
 
     # Use cache if it exists and is newer than binary
@@ -114,7 +205,7 @@ _blackdot_init_features() {
 
 _blackdot_init_features
 unset _blackdot_dir _blackdot_bin _blackdot_cache_dir
-unset -f _blackdot_init_features _blackdot_resolve_bin
+unset -f _blackdot_init_features _blackdot_resolve_bin _blackdot_can_exec
 
 # =========================
 # OS-SPECIFIC SETUP

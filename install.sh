@@ -96,16 +96,19 @@ install_go_binary() {
     # Create install directory
     mkdir -p "$install_dir"
 
-    # Download binary
+    # Download binary — save with platform-specific name so multiple OSes
+    # can coexist on shared filesystems (Lima, NFS, Docker bind mounts).
+    # A generic "blackdot" symlink is created for convenience.
+    local platform_target="${install_dir}/${binary_name}"
     local target="${install_dir}/blackdot${suffix}"
     if command -v curl >/dev/null 2>&1; then
-        curl -fsSL "$download_url" -o "$target" || {
+        curl -fsSL "$download_url" -o "$platform_target" || {
             fail "Failed to download binary. Release may not exist yet."
             fail "Try without --binary flag, or check: ${base_url}"
             return 1
         }
     elif command -v wget >/dev/null 2>&1; then
-        wget -q "$download_url" -O "$target" || {
+        wget -q "$download_url" -O "$platform_target" || {
             fail "Failed to download binary"
             return 1
         }
@@ -136,9 +139,9 @@ install_go_binary() {
                 # Calculate actual checksum
                 local actual_checksum=""
                 if command -v sha256sum >/dev/null 2>&1; then
-                    actual_checksum=$(sha256sum "$target" | awk '{print $1}')
+                    actual_checksum=$(sha256sum "$platform_target" | awk '{print $1}')
                 elif command -v shasum >/dev/null 2>&1; then
-                    actual_checksum=$(shasum -a 256 "$target" | awk '{print $1}')
+                    actual_checksum=$(shasum -a 256 "$platform_target" | awk '{print $1}')
                 else
                     warn "No sha256sum or shasum found, skipping checksum verification"
                 fi
@@ -150,7 +153,7 @@ install_go_binary() {
                         fail "Checksum mismatch!"
                         fail "Expected: $expected_checksum"
                         fail "Actual:   $actual_checksum"
-                        rm -f "$target"
+                        rm -f "$platform_target"
                         return 1
                     fi
                 fi
@@ -163,12 +166,14 @@ install_go_binary() {
     fi
 
     # Make executable
-    chmod +x "$target"
+    chmod +x "$platform_target"
 
     # Verify it works
     local verify_output
-    if verify_output=$("$target" version 2>&1); then
-        pass "Installed blackdot binary to: $target"
+    if verify_output=$("$platform_target" version 2>&1); then
+        # Create convenience symlink: blackdot -> blackdot-linux-amd64 (etc.)
+        ln -sf "$binary_name" "$target"
+        pass "Installed $binary_name to: $install_dir/"
         info "Version: $verify_output"
 
         # Add to PATH hint if needed
@@ -184,7 +189,7 @@ install_go_binary() {
         # Check architecture mismatch
         local file_info
         if command -v file >/dev/null 2>&1; then
-            file_info=$(file "$target" 2>/dev/null)
+            file_info=$(file "$platform_target" 2>/dev/null)
             echo "  Binary type: $file_info"
             case "$(uname -m)" in
                 x86_64|amd64)
@@ -201,7 +206,7 @@ install_go_binary() {
         fi
 
         # Check if it's actually an HTML error page
-        if head -c 100 "$target" 2>/dev/null | grep -qi "<!DOCTYPE\|<html"; then
+        if head -c 100 "$platform_target" 2>/dev/null | grep -qi "<!DOCTYPE\|<html"; then
             echo "  → Downloaded file appears to be HTML (release may not exist)"
         fi
 
@@ -214,7 +219,7 @@ install_go_binary() {
         echo "Try downloading manually from:"
         echo "  https://github.com/blackwell-systems/blackdot/releases"
 
-        rm -f "$target"
+        rm -f "$platform_target"
         return 1
     fi
 }

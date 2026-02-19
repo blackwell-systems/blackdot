@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -664,7 +665,7 @@ func dockerStatus() error {
 		}
 	} else {
 		fmt.Println("    Daemon      \033[31m○ not running\033[0m")
-		fmt.Println("                \033[90mStart with: sudo systemctl start docker\033[0m")
+		fmt.Printf("                \033[90mStart with: %s\033[0m\n", dockerStartHint())
 	}
 
 	fmt.Println()
@@ -703,13 +704,25 @@ func printDockerCommands() {
 	fmt.Printf("  %s╰─────────────────────────────────────────────────────────────────╯%s\n", box, reset)
 }
 
+// dockerStartHint returns a platform-appropriate hint for starting Docker.
+func dockerStartHint() string {
+	switch runtime.GOOS {
+	case "darwin":
+		return "open -a Docker"
+	case "windows":
+		return "Start-Service docker"
+	default:
+		return "sudo systemctl start docker"
+	}
+}
+
 // checkDockerRunning verifies Docker daemon is available
 func checkDockerRunning() error {
 	cmd := exec.Command("docker", "info")
 	cmd.Stdout = nil
 	cmd.Stderr = nil
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("Docker daemon is not running. Start with: sudo systemctl start docker")
+		return fmt.Errorf("Docker daemon is not running. Start with: %s", dockerStartHint())
 	}
 	return nil
 }

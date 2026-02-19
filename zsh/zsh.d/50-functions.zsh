@@ -222,7 +222,7 @@ blackdot-upgrade() {
 
     # Run health check with auto-fix
     echo "   Running health check..."
-    "$BLACKDOT_DIR/bin/blackdot" doctor --fix
+    "$(_blackdot_go_bin)" doctor --fix
 
     echo "✅ Upgrade complete! Restart shell to apply all changes."
     echo "   Or run: source ~/.zshrc"
