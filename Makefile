@@ -51,4 +51,6 @@ clean:
 test:
 	go test ./...
 
-.PHONY: build build-linux build-darwin build-all clean test
+.PHONY: build build-linux build-darwin build-all clean test \
+       bin/blackdot-linux-amd64 bin/blackdot-linux-arm64 \
+       bin/blackdot-darwin-amd64 bin/blackdot-darwin-arm64
