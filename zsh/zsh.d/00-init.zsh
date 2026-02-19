@@ -177,6 +177,10 @@ _blackdot_init_features() {
 
         if [[ -n "$cache_mtime" && -n "$binary_mtime" && "$cache_mtime" -ge "$binary_mtime" ]]; then
             source "$cache_file" 2>/dev/null && {
+                # Override _BLACKDOT_BIN with locally resolved path — the cached
+                # value comes from os.Executable() on the machine that generated
+                # the cache, which may be a different OS on shared filesystems.
+                _BLACKDOT_BIN="$_blackdot_bin"
                 export BLACKDOT_FEATURE_MODE="cached"
                 return 0
             }
@@ -188,6 +192,8 @@ _blackdot_init_features() {
     if init_code=$("$_blackdot_bin" shell-init zsh 2>&1); then
         echo "$init_code" > "$cache_file"
         eval "$init_code"
+        # Override _BLACKDOT_BIN with locally resolved path (same reason as above)
+        _BLACKDOT_BIN="$_blackdot_bin"
         export BLACKDOT_FEATURE_MODE="live"
         return 0
     else
