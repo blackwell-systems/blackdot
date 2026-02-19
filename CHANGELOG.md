@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Makefile for local development builds** — `make build` compiles for the host architecture, `make build-linux` / `make build-darwin` cross-compile for both amd64 and arm64, and `make build-all` builds everything. Embeds version, commit, and date via ldflags. This is for contributors building from source — end users continue to install via `install.sh`.
+- **Architecture-dispatch wrapper script** — `scripts/blackdot-wrapper.sh` auto-detects OS and architecture and execs the correct platform-specific binary (e.g. `blackdot-linux-arm64`). Installed as `bin/blackdot` by `make build-linux` so a single path works on mixed-arch shared filesystems and bind-mounted container volumes.
 - **SSH `hosts` alias** — `blackdot tools ssh hosts` now works as an alias for `ssh list`, which is more intuitive for displaying configured SSH hosts.
 - **SSH `remove-host` command** — `blackdot tools ssh remove-host <name>` removes a host block and all its directives from `~/.ssh/config`. Inverse of `add-host`.
 - **Auto-install prompt on missing binary** — When shell init detects no compatible binary (e.g. first time in a Lima VM or Docker container), it prompts `Install now? [y/N]` in interactive shells. Answering `y` downloads the correct platform binary automatically. Answering `n` explains degraded mode and how to install later.
