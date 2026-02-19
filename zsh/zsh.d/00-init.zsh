@@ -50,11 +50,12 @@ _blackdot_can_exec() {
     # -x alone passes for a macOS Mach-O binary on Linux (permission bit is set)
     # but executing it produces "exec format error".
     [[ -x "$1" ]] || return 1
-    # Use `file` to sniff the binary format when available
+    # Use `file` to sniff the binary format when available.
+    # Accept both native binaries AND shell scripts (the wrapper is a script).
     if command -v file >/dev/null 2>&1; then
         case "$(uname -s)" in
-            Linux)  file -b "$1" 2>/dev/null | grep -qi 'ELF' ;;
-            Darwin) file -b "$1" 2>/dev/null | grep -qi 'Mach-O' ;;
+            Linux)  file -b "$1" 2>/dev/null | grep -qiE 'ELF|shell script|text' ;;
+            Darwin) file -b "$1" 2>/dev/null | grep -qiE 'Mach-O|shell script|text' ;;
             *)      return 0 ;;  # no format check on unknown OSes
         esac
         return $?

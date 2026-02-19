@@ -422,23 +422,51 @@ alias pythontools='blackdot tools python'
 alias dockertools='blackdot tools docker'
 alias claudetools='blackdot tools claude'
 
-# Legacy function for backward compatibility (returns binary path)
+# Resolve Go binary path (platform-aware).
+# Prefers _BLACKDOT_BIN (set by shell-init with format validation),
+# then falls back to platform-specific binary search with ELF/Mach-O checks.
 _blackdot_go_bin() {
+    # Best: use the path already resolved and validated by 00-init.zsh
+    if [[ -n "$_BLACKDOT_BIN" && -x "$_BLACKDOT_BIN" ]]; then
+        echo "$_BLACKDOT_BIN"
+        return 0
+    fi
+
+    # Fallback: platform-specific search with format validation
     local _os _arch _pbin
     _os="$(uname -s | tr '[:upper:]' '[:lower:]')"
     _arch="$(uname -m)"
     case "$_arch" in x86_64) _arch="amd64";; aarch64) _arch="arm64";; esac
     _pbin="blackdot-${_os}-${_arch}"
 
-    if [[ -x "$BLACKDOT_DIR/bin/$_pbin" ]]; then
-        echo "$BLACKDOT_DIR/bin/$_pbin"
-    elif [[ -x "$BLACKDOT_DIR/bin/blackdot" ]]; then
-        echo "$BLACKDOT_DIR/bin/blackdot"
-    elif command -v blackdot &>/dev/null; then
-        echo "blackdot"
-    else
-        echo ""
+    local _candidate
+    for _candidate in \
+        "$BLACKDOT_DIR/bin/$_pbin" \
+        "$HOME/.local/bin/$_pbin" \
+        "$BLACKDOT_DIR/bin/blackdot" \
+        "$HOME/.local/bin/blackdot"; do
+        if [[ -x "$_candidate" ]] && _blackdot_go_bin_can_exec "$_candidate"; then
+            echo "$_candidate"
+            return 0
+        fi
+    done
+
+    echo ""
+}
+
+# Validate binary format matches current OS (inline, since _blackdot_can_exec
+# from 00-init.zsh is unset after init completes)
+_blackdot_go_bin_can_exec() {
+    [[ -x "$1" ]] || return 1
+    if command -v file >/dev/null 2>&1; then
+        case "$(uname -s)" in
+            Linux)  file -b "$1" 2>/dev/null | grep -qiE 'ELF|shell script|text' ;;
+            Darwin) file -b "$1" 2>/dev/null | grep -qiE 'Mach-O|shell script|text' ;;
+            *)      return 0 ;;
+        esac
+        return $?
     fi
+    return 0
 }
 
 # Note: Tool-specific files (60-aws.zsh, 61-cdk.zsh, etc.) contain
