@@ -31,7 +31,7 @@ Cross-platform SSH utilities for managing keys, agents, and connections.
 Works on Linux, macOS, and Windows.
 
 Commands:
-  keys      - List all SSH keys with fingerprints
+  keys      - Manage SSH keys (list, load, unload, clear)
   gen       - Generate new ED25519 key pair
   list      - List configured SSH hosts
   agent     - Show SSH agent status and loaded keys
@@ -73,12 +73,54 @@ Commands:
 	return cmd
 }
 
-// newSSHKeysCmd lists SSH keys with fingerprints
+// newSSHKeysCmd is the parent command for key operations.
+// Called without a subcommand it lists keys (same as "keys list").
 func newSSHKeysCmd() *cobra.Command {
 	var keyDir string
 
 	cmd := &cobra.Command{
 		Use:   "keys",
+		Short: "Manage SSH keys",
+		Long: `Manage SSH keys — list, load into the agent, or unload.
+
+Called without a subcommand it lists all keys in ~/.ssh.
+
+Subcommands:
+  list    - List SSH keys with fingerprints (default)
+  load    - Add key to SSH agent
+  unload  - Remove key from SSH agent
+  clear   - Remove all keys from agent`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if keyDir == "" {
+				home, err := os.UserHomeDir()
+				if err != nil {
+					return fmt.Errorf("cannot determine home directory: %w", err)
+				}
+				keyDir = filepath.Join(home, ".ssh")
+			}
+
+			return runSSHKeys(keyDir)
+		},
+	}
+
+	cmd.Flags().StringVarP(&keyDir, "dir", "d", "", "SSH key directory (default: ~/.ssh)")
+
+	// Subcommands — these mirror the top-level ssh load/unload/clear
+	// so that both "ssh keys unload <k>" and "ssh unload <k>" work.
+	cmd.AddCommand(newSSHKeysListCmd())
+	cmd.AddCommand(newSSHLoadCmd())
+	cmd.AddCommand(newSSHUnloadCmd())
+	cmd.AddCommand(newSSHClearCmd())
+
+	return cmd
+}
+
+// newSSHKeysListCmd is the explicit "keys list" subcommand.
+func newSSHKeysListCmd() *cobra.Command {
+	var keyDir string
+
+	cmd := &cobra.Command{
+		Use:   "list",
 		Short: "List SSH keys with fingerprints",
 		Long: `List all SSH keys in the specified directory with their fingerprints.
 
