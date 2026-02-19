@@ -13,15 +13,16 @@
 
 # eza - modern ls replacement (cross-platform)
 # Note: Using 'function' keyword to override existing aliases at parse time
+# When modern_cli is disabled, falls back to coreutils equivalents
 if command -v eza >/dev/null 2>&1; then
   unalias ls ll la lt l lm lr 2>/dev/null
-  function ls  { require_feature "modern_cli" || return 1; eza --color=auto --group-directories-first "$@"; }
-  function ll  { require_feature "modern_cli" || return 1; eza -la --icons --group-directories-first --git "$@"; }
-  function la  { require_feature "modern_cli" || return 1; eza -a --icons --group-directories-first "$@"; }
-  function lt  { require_feature "modern_cli" || return 1; eza -la --icons --tree --level=2 "$@"; }
-  function l   { require_feature "modern_cli" || return 1; eza -1 "$@"; }
-  function lm  { require_feature "modern_cli" || return 1; eza -la --icons --sort=modified "$@"; }
-  function lr  { require_feature "modern_cli" || return 1; eza -la --icons --sort=size --reverse "$@"; }
+  function ls  { if feature_enabled "modern_cli"; then eza --color=auto --group-directories-first "$@"; else command ls --color=auto "$@"; fi; }
+  function ll  { if feature_enabled "modern_cli"; then eza -la --icons --group-directories-first --git "$@"; else command ls -lash --color=auto "$@"; fi; }
+  function la  { if feature_enabled "modern_cli"; then eza -a --icons --group-directories-first "$@"; else command ls -Ah --color=auto "$@"; fi; }
+  function lt  { if feature_enabled "modern_cli"; then eza -la --icons --tree --level=2 "$@"; else command ls -laR --color=auto "$@"; fi; }
+  function l   { if feature_enabled "modern_cli"; then eza -1 "$@"; else command ls -CF --color=auto "$@"; fi; }
+  function lm  { if feature_enabled "modern_cli"; then eza -la --icons --sort=modified "$@"; else command ls -lat --color=auto "$@"; fi; }
+  function lr  { if feature_enabled "modern_cli"; then eza -la --icons --sort=size --reverse "$@"; else command ls -laS --color=auto "$@"; fi; }
 fi
 
 # fzf - fuzzy finder
@@ -46,11 +47,12 @@ if command -v fzf >/dev/null 2>&1; then
 fi
 
 # dust - intuitive disk usage (du replacement)
+# When modern_cli is disabled, falls back to coreutils du
 if command -v dust >/dev/null 2>&1; then
   unalias du dus dud 2>/dev/null
-  function du  { require_feature "modern_cli" || return 1; dust "$@"; }
-  function dus { require_feature "modern_cli" || return 1; dust -s "$@"; }
-  function dud { require_feature "modern_cli" || return 1; dust -d 1 "$@"; }
+  function du  { if feature_enabled "modern_cli"; then dust "$@"; else command du -h "$@"; fi; }
+  function dus { if feature_enabled "modern_cli"; then dust -s "$@"; else command du -sh "$@"; fi; }
+  function dud { if feature_enabled "modern_cli"; then dust -d 1 "$@"; else command du -h --max-depth=1 "$@"; fi; }
 fi
 
 # yazi - terminal file manager (cd to directory on exit)
@@ -61,10 +63,10 @@ if command -v yazi >/dev/null 2>&1; then
     require_feature "modern_cli" || return 1
     local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
     yazi "$@" --cwd-file="$tmp"
-    if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+    if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
       cd -- "$cwd"
     fi
-    rm -f -- "$tmp"
+    command rm -f -- "$tmp"
   }
   function fm { require_feature "modern_cli" || return 1; y "$@"; }
 fi
