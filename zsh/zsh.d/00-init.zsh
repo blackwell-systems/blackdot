@@ -50,11 +50,12 @@ _blackdot_can_exec() {
     # -x alone passes for a macOS Mach-O binary on Linux (permission bit is set)
     # but executing it produces "exec format error".
     [[ -x "$1" ]] || return 1
-    # Use `file` to sniff the binary format when available
+    # Use `file` to sniff the binary format when available.
+    # Accept both native binaries AND shell scripts (the wrapper is a script).
     if command -v file >/dev/null 2>&1; then
         case "$(uname -s)" in
-            Linux)  file -b "$1" 2>/dev/null | grep -qi 'ELF' ;;
-            Darwin) file -b "$1" 2>/dev/null | grep -qi 'Mach-O' ;;
+            Linux)  file -b "$1" 2>/dev/null | grep -qiE 'ELF|shell script|text' ;;
+            Darwin) file -b "$1" 2>/dev/null | grep -qiE 'Mach-O|shell script|text' ;;
             *)      return 0 ;;  # no format check on unknown OSes
         esac
         return $?
@@ -177,6 +178,10 @@ _blackdot_init_features() {
 
         if [[ -n "$cache_mtime" && -n "$binary_mtime" && "$cache_mtime" -ge "$binary_mtime" ]]; then
             source "$cache_file" 2>/dev/null && {
+                # Override _BLACKDOT_BIN with locally resolved path — the cached
+                # value comes from os.Executable() on the machine that generated
+                # the cache, which may be a different OS on shared filesystems.
+                _BLACKDOT_BIN="$_blackdot_bin"
                 export BLACKDOT_FEATURE_MODE="cached"
                 return 0
             }
@@ -188,6 +193,8 @@ _blackdot_init_features() {
     if init_code=$("$_blackdot_bin" shell-init zsh 2>&1); then
         echo "$init_code" > "$cache_file"
         eval "$init_code"
+        # Override _BLACKDOT_BIN with locally resolved path (same reason as above)
+        _BLACKDOT_BIN="$_blackdot_bin"
         export BLACKDOT_FEATURE_MODE="live"
         return 0
     else
@@ -247,6 +254,15 @@ case "$OS" in
     # Snap (if present on Linux)
     if [ -d /snap/bin ]; then
       export PATH="/snap/bin:$PATH"
+    fi
+
+    # Notify on container/VM entry when blackdot is not fully available
+    if [[ -o interactive ]] && [[ "$BLACKDOT_FEATURE_MODE" == "degraded" || "$BLACKDOT_FEATURE_MODE" == "error" ]]; then
+      echo ""
+      echo "  \033[33m⚠  blackdot is not installed in this environment\033[0m"
+      echo "     Features, vault, and CLI commands are unavailable."
+      echo "     Run: \033[1m./install.sh --binary-only\033[0m"
+      echo ""
     fi
     ;;
 
