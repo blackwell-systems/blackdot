@@ -99,22 +99,69 @@ _blackdot_init_features() {
 
     # Check if binary exists
     if [[ -z "$_blackdot_bin" || ! -x "$_blackdot_bin" ]]; then
-        export BLACKDOT_FEATURE_MODE="degraded"
-        # Derive platform-specific binary name for the hint
         local _p_os _p_arch _p_bin
         _p_os="$(uname -s | tr '[:upper:]' '[:lower:]')"
         _p_arch="$(uname -m)"
         case "$_p_arch" in x86_64) _p_arch="amd64";; aarch64) _p_arch="arm64";; esac
         _p_bin="blackdot-${_p_os}-${_p_arch}"
-        local _searched="$_blackdot_dir/bin/$_p_bin, $_blackdot_dir/bin/blackdot, ~/.local/bin/blackdot, PATH"
-        # Provide minimal fallback functions
-        feature_enabled() { return 1; }  # Features disabled when binary missing
-        eval "require_feature() {
-            echo \"Feature system unavailable (Go binary not found; searched: ${_searched})\" >&2
-            echo \"  Rebuild with: cd ${_blackdot_dir} && mkdir -p bin && GOOS=${_p_os} GOARCH=${_p_arch} go build -o bin/${_p_bin} ./cmd/blackdot/\" >&2
+
+        # In interactive shells, offer to install automatically
+        if [[ -o interactive ]]; then
+            echo ""
+            echo "[blackdot] No compatible binary found for ${_p_os}-${_p_arch}."
+            echo -n "           Install now? [y/N] "
+            local _answer=""
+            read -r _answer
+            if [[ "$_answer" =~ ^[Yy]$ ]]; then
+                echo "[blackdot] Installing ${_p_bin}..."
+                local _install_script="$_blackdot_dir/install.sh"
+                if [[ -x "$_install_script" ]]; then
+                    # Use --binary-only to just download the binary without re-cloning
+                    bash "$_install_script" --binary-only && {
+                        # Re-resolve now that the binary is installed
+                        _blackdot_bin="$(_blackdot_resolve_bin)"
+                        if [[ -n "$_blackdot_bin" && -x "$_blackdot_bin" ]]; then
+                            echo "[blackdot] Installed. Continuing..."
+                            echo ""
+                            # Fall through to normal init below
+                        fi
+                    } || {
+                        echo "[blackdot] Installation failed." >&2
+                    }
+                else
+                    # Fallback: download directly from GitHub releases
+                    local _bin_dir="$HOME/.local/bin"
+                    local _url="https://github.com/blackwell-systems/blackdot/releases/latest/download/${_p_bin}"
+                    mkdir -p "$_bin_dir"
+                    if command -v curl >/dev/null 2>&1; then
+                        curl -fsSL "$_url" -o "$_bin_dir/$_p_bin" && chmod +x "$_bin_dir/$_p_bin" && ln -sf "$_p_bin" "$_bin_dir/blackdot"
+                    elif command -v wget >/dev/null 2>&1; then
+                        wget -q "$_url" -O "$_bin_dir/$_p_bin" && chmod +x "$_bin_dir/$_p_bin" && ln -sf "$_p_bin" "$_bin_dir/blackdot"
+                    fi
+                    _blackdot_bin="$(_blackdot_resolve_bin)"
+                    if [[ -n "$_blackdot_bin" && -x "$_blackdot_bin" ]]; then
+                        echo "[blackdot] Installed. Continuing..."
+                        echo ""
+                    fi
+                fi
+            else
+                echo "[blackdot] Skipping. Running in degraded mode (no features, no vault, aliases only)."
+                echo "           Run 'install.sh --binary-only' to install later."
+                echo ""
+            fi
+        fi
+
+        # If still no binary after possible install attempt, enter degraded mode
+        if [[ -z "$_blackdot_bin" || ! -x "$_blackdot_bin" ]]; then
+            export BLACKDOT_FEATURE_MODE="degraded"
+            feature_enabled() { return 1; }
+            require_feature() {
+                echo "Feature system unavailable (no compatible binary for ${_p_os}-${_p_arch})" >&2
+                echo "  Run: install.sh --binary-only" >&2
+                return 1
+            }
             return 1
-        }"
-        return 1
+        fi
     fi
 
     # Use cache if it exists and is newer than binary
