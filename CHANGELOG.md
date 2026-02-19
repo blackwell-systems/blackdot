@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **SSH `hosts` alias** — `blackdot tools ssh hosts` now works as an alias for `ssh list`, which is more intuitive for displaying configured SSH hosts.
 - **SSH `remove-host` command** — `blackdot tools ssh remove-host <name>` removes a host block and all its directives from `~/.ssh/config`. Inverse of `add-host`.
 - **Auto-install prompt on missing binary** — When shell init detects no compatible binary (e.g. first time in a Lima VM or Docker container), it prompts `Install now? [y/N]` in interactive shells. Answering `y` downloads the correct platform binary automatically. Answering `n` explains degraded mode and how to install later.
+- **Degraded-mode banner on Linux/container entry** — When entering a Lima VM or container where the blackdot binary is not installed, a visible warning is displayed explaining that features, vault, and CLI commands are unavailable, with the install command to fix it.
 
 ### Changed
 
@@ -34,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Degraded mode error message** — Error now shows all searched paths and a rebuild command instead of a blank path (the variable was unset before the fallback function ran).
 - **Alias/function collisions in zsh** — Removed 11 duplicate aliases across tool modules (60-aws, 61-cdk, 62-rust, 63-go, 64-python, 65-ssh, 66-docker) that collided with function definitions in 40-aliases.zsh, causing `parse error near '()'` on shell load. The functions in 40-aliases.zsh are the canonical definitions.
 - **Homebrew PATH not available in tmux panes** — Moved Homebrew `shellenv` to early PATH setup in `00-init.zsh`, before binary resolution. Previously Homebrew was only set up in `.zprofile` (login shells) and late in the OS-specific block (after the binary search). Non-login shells like tmux panes would fail to find the `blackdot` binary and enter degraded mode silently.
+- **Modern CLI tools block shell when feature disabled** — `ls`, `ll`, `la`, `lt`, `l`, `lm`, `lr`, `du`, `dus`, `dud` would print "Feature 'modern_cli' is disabled" and do nothing when `eza`/`dust` was installed but the feature was off. They now fall back to coreutils equivalents (`command ls`, `command du`) instead of failing.
 
 ### Added
 

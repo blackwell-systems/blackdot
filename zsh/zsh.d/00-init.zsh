@@ -248,6 +248,15 @@ case "$OS" in
     if [ -d /snap/bin ]; then
       export PATH="/snap/bin:$PATH"
     fi
+
+    # Notify on container/VM entry when blackdot is not fully available
+    if [[ -o interactive ]] && [[ "$BLACKDOT_FEATURE_MODE" == "degraded" || "$BLACKDOT_FEATURE_MODE" == "error" ]]; then
+      echo ""
+      echo "  \033[33m⚠  blackdot is not installed in this environment\033[0m"
+      echo "     Features, vault, and CLI commands are unavailable."
+      echo "     Run: \033[1m./install.sh --binary-only\033[0m"
+      echo ""
+    fi
     ;;
 
   MINGW*|MSYS*|CYGWIN*)
