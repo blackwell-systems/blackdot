@@ -22,7 +22,6 @@ brew "gh"
 brew "bat"
 brew "tmux"
 brew "tree"
-brew "zellij"
 brew "node"
 brew "colordiff"
 

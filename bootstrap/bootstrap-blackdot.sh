@@ -77,14 +77,6 @@ if [ "$OS" = "Darwin" ]; then
   fi
 fi
 
-# Zellij config (cross-platform)
-ZELLIJ_DIR="$HOME/.config/zellij"
-mkdir -p "$ZELLIJ_DIR"
-if [ -f "$BLACKDOT_DIR/zellij/config.kdl" ]; then
-  safe_symlink "$BLACKDOT_DIR/zellij/config.kdl" "$ZELLIJ_DIR/config.kdl"
-  echo "Zellij config linked: ~/.config/zellij/config.kdl"
-fi
-
 # ============================================================
 # Claude Code setup
 # ============================================================
@@ -142,7 +134,6 @@ ls -l "$HOME/.zshrc" 2>/dev/null || true
 if [ "$OS" = "Darwin" ]; then
   ls -l "$HOME/Library/Application Support/com.mitchellh.ghostty/config" 2>/dev/null || true
 fi
-ls -l "$HOME/.config/zellij/config.kdl" 2>/dev/null || true
 ls -l "$HOME/.claude" 2>/dev/null || true
 
 echo ""
