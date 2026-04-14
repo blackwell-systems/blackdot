@@ -591,8 +591,7 @@ func checkFeature(name string) error {
 	}
 
 	Info("Feature '%s' is disabled", name)
-	os.Exit(1)
-	return nil
+	return fmt.Errorf("feature '%s' is disabled", name)
 }
 
 func showFeature(name string) error {

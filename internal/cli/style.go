@@ -216,10 +216,6 @@ func printCommandHelp(cmd *cobra.Command) {
 	Dim.Printf("Run 'blackdot %s <command> --help' for subcommand details.\n", cmd.Name())
 }
 
-// RunCommand executes the root command (used by main)
-func RunCommand() error {
-	return rootCmd.Execute()
-}
 
 // checkTerminal returns true if stdout is a terminal
 func checkTerminal() bool {

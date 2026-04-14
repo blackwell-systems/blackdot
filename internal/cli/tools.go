@@ -3,7 +3,6 @@ package cli
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -44,19 +43,20 @@ func wrapWithFeatureCheck(toolName string, cmd *cobra.Command) *cobra.Command {
 	if originalRunE != nil {
 		cmd.RunE = func(c *cobra.Command, args []string) error {
 			if err := checkToolFeature(toolName); err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
+				return err
 			}
 			return originalRunE(c, args)
 		}
 	} else if originalRun != nil {
-		cmd.Run = func(c *cobra.Command, args []string) {
+		// Convert Run to RunE to properly propagate errors
+		cmd.RunE = func(c *cobra.Command, args []string) error {
 			if err := checkToolFeature(toolName); err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
+				return err
 			}
 			originalRun(c, args)
+			return nil
 		}
+		cmd.Run = nil // Clear Run since we're using RunE now
 	}
 
 	// Also wrap all subcommands
