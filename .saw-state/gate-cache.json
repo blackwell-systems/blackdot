@@ -1,0 +1,40 @@
+{
+  "entries": {
+    "23e19cc06fece9cd48d9ce237abb2031": {
+      "lint": {
+        "gate_type": "lint",
+        "command": "go vet ./...",
+        "passed": false,
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "go: reading go.work: open /Users/dayna.blackwell/workspace/code/scout-and-wave-go/go.work: no such file or directory\n",
+        "from_cache": true,
+        "cached_at": "2026-04-14T01:23:29.367776-07:00"
+      }
+    },
+    "66da27185a58188f82e87f255a5fda43": {
+      "test": {
+        "gate_type": "test",
+        "command": "go test -v -race ./...",
+        "passed": false,
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "go: reading go.work: open /Users/dayna.blackwell/workspace/code/scout-and-wave-go/go.work: no such file or directory\n",
+        "from_cache": true,
+        "cached_at": "2026-04-14T01:23:29.243186-07:00"
+      }
+    },
+    "adfb61bb8430f43ecc931095bf35fa52": {
+      "build": {
+        "gate_type": "build",
+        "command": "go build ./cmd/blackdot/",
+        "passed": false,
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "go: reading go.work: open /Users/dayna.blackwell/workspace/code/scout-and-wave-go/go.work: no such file or directory\n",
+        "from_cache": true,
+        "cached_at": "2026-04-14T01:23:29.144023-07:00"
+      }
+    }
+  }
+}
