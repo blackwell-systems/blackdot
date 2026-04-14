@@ -1,0 +1,40 @@
+{
+  "wave": 1,
+  "merges": [
+    {
+      "agent": "A",
+      "merge_sha": "5f4b1279c1b1aed6a26ec577e65580c0c8d452ae",
+      "timestamp": "2026-04-14T01:30:51.332955-07:00"
+    },
+    {
+      "agent": "B",
+      "merge_sha": "1be17711fa7318755e4a1b4cea9486a8001df321",
+      "timestamp": "2026-04-14T01:30:51.494275-07:00"
+    },
+    {
+      "agent": "C",
+      "merge_sha": "97be1336a76d1bd6d05703579bab6d1b943c9acb",
+      "timestamp": "2026-04-14T01:30:51.673912-07:00"
+    },
+    {
+      "agent": "D",
+      "merge_sha": "b64c64f843aa2bc7277efef794038efc50aacbad",
+      "timestamp": "2026-04-14T01:30:51.839009-07:00"
+    },
+    {
+      "agent": "E",
+      "merge_sha": "c2acc0147c67260f648bbed73790ce07d32ea1f8",
+      "timestamp": "2026-04-14T01:30:52.016222-07:00"
+    },
+    {
+      "agent": "F",
+      "merge_sha": "b5698dc5f5cdd5cf6acbcd2d6f60b31c9dedb0b6",
+      "timestamp": "2026-04-14T01:30:52.177599-07:00"
+    },
+    {
+      "agent": "G",
+      "merge_sha": "0d34e84e4cbbf68b709a938ae664dbf385ecfce5",
+      "timestamp": "2026-04-14T01:30:52.347367-07:00"
+    }
+  ]
+}

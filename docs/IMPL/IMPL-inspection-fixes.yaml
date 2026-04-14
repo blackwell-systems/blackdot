@@ -113,6 +113,7 @@ waves:
             Add error context wrapping to tools_claude.go. Same pattern as Agent A.
           files:
             - internal/cli/tools_claude.go
+      base_commit: 4e4e3855b3f40aa328516a0ac098a82554812176
     - number: 2
       agents:
         - id: H
@@ -134,6 +135,61 @@ quality_gates:
         - type: lint
           command: go vet ./...
           required: true
+completion_reports:
+    A:
+        status: complete
+        branch: saw/inspection-fixes/wave1-agent-A
+        commit: df72ab461dc39c61af17e5e79c028fb04ed91fa1
+        files_changed:
+            - internal/cli/tools_docker.go
+        verification: PASS
+        notes: 'Added error context wrapping to all bare return err statements in tools_docker.go. Format follows ''<operation>: %w'' pattern (e.g., ''docker daemon check: %w'', ''list containers: %w''). Skipped already-wrapped errors (dockerIP, dockerInspect already had proper context). All verification gates passed: build, tests, and lint.'
+    B:
+        status: complete
+        branch: saw/inspection-fixes/wave1-agent-B
+        commit: 5bcd0b4
+        files_changed:
+            - internal/cli/tools_rust.go
+        verification: PASS
+        notes: Added error context wrapping to all command execution points in tools_rust.go. Wrapped 7 command execution sites with descriptive error messages. All verification gates passed (build, test, lint).
+    C:
+        status: complete
+        branch: saw/inspection-fixes/wave1-agent-C
+        commit: 71a280a6d1ffa088bf567abea945de2dafd6acd6
+        files_changed:
+            - internal/cli/tools_cdk.go
+        verification: PASS
+        notes: 'Added error context wrapping to all 12 error return sites in tools_cdk.go. Wrapped errors include: CDK init failures, file operations (remove/read cdk.context.json), CloudFormation stack describe, and all CDK command executions (deploy, diff, check, hotswap, synth, list, destroy, bootstrap). All verification gates pass: build ✓, tests ✓, lint ✓.'
+    D:
+        status: complete
+        branch: saw/inspection-fixes/wave1-agent-D
+        commit: 94836dd
+        files_changed:
+            - internal/cli/tools_python.go
+        verification: PASS
+    E:
+        status: complete
+        branch: saw/inspection-fixes/wave1-agent-E
+        commit: a2e3105
+        files_changed:
+            - internal/cli/tools_ssh.go
+        verification: PASS
+    F:
+        status: complete
+        branch: saw/inspection-fixes/wave1-agent-F
+        commit: f798cb7
+        files_changed:
+            - internal/cli/tools_go.go
+        verification: PASS
+        notes: Added error context wrapping to 8 bare error returns in tools_go.go. All tests pass. Build and lint clean.
+    G:
+        status: complete
+        branch: saw/inspection-fixes/wave1-agent-G
+        commit: 06fbd92
+        files_changed:
+            - internal/cli/tools_claude.go
+        verification: PASS
+        notes: Wrapped all 7 bare 'return err' statements with contextual error messages using fmt.Errorf pattern. Build, test, and lint gates all passed.
 pre_mortem:
     overall_risk: low
     rows:
@@ -179,5 +235,5 @@ critic_report:
     summary: Verified all 8 agent briefs against codebase. Wave 1 agents (A-G) correctly reference fmt.Errorf for error wrapping, and bare 'return err' statements exist in all target files. Wave 2 agent (H) correctly identifies init() side effect in sync.go line 39 where os.UserHomeDir() error is silently ignored. All referenced functions (getSyncableItemNames, runSync) and packages (fmt, sync) exist. No I1 violations, complexity balanced (1 file per agent). No interface contracts to verify.
     reviewed_at: "2026-04-14T08:22:59Z"
     issue_count: 0
-state: "REVIEWED"
+state: REVIEWED
 original_branch: main
