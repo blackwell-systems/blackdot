@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"bufio"
 	"encoding/json"
 	"fmt"
@@ -1152,13 +1153,13 @@ func phaseSecrets(cfg *SetupConfig) error {
 	case "2":
 		// Push to vault using Go implementation
 		fmt.Println("Pushing secrets to vault...")
-		if err := vaultPush(nil, false, false, true); err != nil {
+		if err := vaultPush(context.Background(), nil, false, false, true); err != nil {
 			fmt.Printf("%s Push failed: %v\n", yellow("!"), err)
 		}
 	case "3":
 		// Pull from vault using Go implementation
 		fmt.Println("Restoring secrets from vault...")
-		if err := vaultRestore(true, false); err != nil {
+		if err := vaultRestore(context.Background(), true, false); err != nil {
 			fmt.Printf("%s Restore failed: %v\n", yellow("!"), err)
 		}
 	default:

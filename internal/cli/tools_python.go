@@ -311,7 +311,10 @@ func newPythonInfoCmd() *cobra.Command {
 
 				// Python location
 				which := exec.Command("which", "python3")
-				out, _ = which.Output()
+				out, err = which.Output()
+				if err != nil {
+					Debug("Failed to locate python3: %v", err)
+				}
 				fmt.Printf("Location:  %s", string(out))
 			}
 

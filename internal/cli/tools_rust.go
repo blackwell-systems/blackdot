@@ -272,7 +272,10 @@ func newRustInfoCmd() *cobra.Command {
 
 			// Toolchain
 			toolchain := exec.Command("rustup", "show", "active-toolchain")
-			out, _ = toolchain.Output()
+			out, err = toolchain.Output()
+				if err != nil {
+					Debug("Failed to get rustup toolchain: %v", err)
+				}
 			tc := strings.Fields(string(out))
 			if len(tc) > 0 {
 				fmt.Printf("Toolchain: %s\n", tc[0])

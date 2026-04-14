@@ -122,7 +122,7 @@ func newVaultStatusCmd() *cobra.Command {
 		Short: "Show vault status",
 		Long:  `Show vault connection status, authentication state, and session info.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return vaultStatus()
+			return vaultStatus(cmd.Context())
 		},
 	}
 }
@@ -133,7 +133,7 @@ func newVaultUnlockCmd() *cobra.Command {
 		Short: "Unlock vault and cache session",
 		Long:  `Authenticate with the vault backend and cache the session token.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return vaultUnlock()
+			return vaultUnlock(cmd.Context())
 		},
 	}
 }
@@ -144,7 +144,7 @@ func newVaultLockCmd() *cobra.Command {
 		Short: "Lock vault (clear cached session)",
 		Long:  `Clear the cached session token, requiring re-authentication.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return vaultLock()
+			return vaultLock(cmd.Context())
 		},
 	}
 }
@@ -158,7 +158,7 @@ func newVaultListCmd() *cobra.Command {
 		Short: "List vault items",
 		Long:  `List all items in the vault or in a specific location/folder.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return vaultList(jsonOutput, location)
+			return vaultList(cmd.Context(), jsonOutput, location)
 		},
 	}
 
@@ -195,7 +195,7 @@ func newVaultSyncCmd() *cobra.Command {
 		Short: "Sync vault with remote",
 		Long:  `Pull latest changes from the vault remote server.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return vaultSync()
+			return vaultSync(cmd.Context())
 		},
 	}
 }
@@ -209,7 +209,7 @@ func newVaultGetCmd() *cobra.Command {
 		Long:  `Retrieve an item from the vault by name.`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return vaultGet(args[0], outputNotes)
+			return vaultGet(cmd.Context(), args[0], outputNotes)
 		},
 	}
 
@@ -224,7 +224,7 @@ func newVaultHealthCmd() *cobra.Command {
 		Short: "Run vault health check",
 		Long:  `Check vault backend availability and authentication status.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return vaultHealth()
+			return vaultHealth(cmd.Context())
 		},
 	}
 }
@@ -238,7 +238,7 @@ func newVaultQuickCmd() *cobra.Command {
 This is faster than 'vault status' as it skips drift detection
 and other detailed checks.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return vaultQuick()
+			return vaultQuick(cmd.Context())
 		},
 	}
 }
@@ -263,7 +263,7 @@ Options:
   --force, -f    Skip drift check and overwrite local changes
   --dry-run, -n  Show what would be restored without making changes`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return vaultRestore(force, dryRun)
+			return vaultRestore(cmd.Context(), force, dryRun)
 		},
 	}
 
@@ -291,7 +291,7 @@ Options:
   --dry-run, -n  Show what would be pushed without making changes
   --all, -a      Push all items`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return vaultPush(args, force, dryRun, all)
+			return vaultPush(cmd.Context(), args, force, dryRun, all)
 		},
 	}
 
@@ -327,7 +327,7 @@ func newVaultCheckCmd() *cobra.Command {
 
 Verifies items defined in vault-items.json exist in the vault.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return vaultCheck()
+			return vaultCheck(cmd.Context())
 		},
 	}
 }
@@ -420,7 +420,7 @@ Examples:
 				}
 			}
 
-			return vaultCreate(name, content, dryRun, force)
+			return vaultCreate(cmd.Context(), name, content, dryRun, force)
 		},
 	}
 
@@ -455,7 +455,7 @@ Examples:
   blackdot vault delete --force TEMP-1 TEMP-2 TEMP-3`,
 		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return vaultDelete(args, dryRun, force)
+			return vaultDelete(cmd.Context(), args, dryRun, force)
 		},
 	}
 
@@ -541,7 +541,7 @@ func printVaultHelp() {
 // Implementation Functions
 // ============================================================
 
-func vaultStatus() error {
+func vaultStatus(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -798,8 +798,8 @@ func formatTimeAgo(timestamp string) string {
 	}
 }
 
-func vaultUnlock() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+func vaultUnlock(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
 	backend, err := newVaultBackend()
@@ -852,7 +852,7 @@ func vaultUnlock() error {
 	return nil
 }
 
-func vaultLock() error {
+func vaultLock(ctx context.Context) error {
 	// Clear the session file
 	sessionFile := getSessionFile()
 
@@ -870,8 +870,8 @@ func vaultLock() error {
 	return nil
 }
 
-func vaultList(jsonOutput bool, location string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+func vaultList(ctx context.Context, jsonOutput bool, location string) error {
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	backend, err := newVaultBackend()
@@ -967,8 +967,8 @@ func setBackend(name string) error {
 	return nil
 }
 
-func vaultSync() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+func vaultSync(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
 	backend, err := newVaultBackend()
@@ -1000,8 +1000,8 @@ func vaultSync() error {
 	return nil
 }
 
-func vaultGet(name string, notesOnly bool) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+func vaultGet(ctx context.Context, name string, notesOnly bool) error {
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	backend, err := newVaultBackend()
@@ -1051,7 +1051,7 @@ func vaultGet(name string, notesOnly bool) error {
 	return nil
 }
 
-func vaultHealth() error {
+func vaultHealth(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -1095,8 +1095,8 @@ func vaultHealth() error {
 }
 
 // vaultQuick provides a quick status check (login/unlock only)
-func vaultQuick() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+func vaultQuick(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
 	backendType := getVaultBackend()
@@ -1150,8 +1150,8 @@ func vaultQuick() error {
 }
 
 // vaultRestore restores secrets from vault to local machine
-func vaultRestore(force, dryRun bool) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+func vaultRestore(ctx context.Context, force, dryRun bool) error {
+	ctx, cancel := context.WithTimeout(ctx, 120*time.Second)
 	defer cancel()
 
 	PrintHeader("Vault Restore")
@@ -1418,8 +1418,8 @@ func vaultRestore(force, dryRun bool) error {
 }
 
 // vaultPush pushes local secrets to vault
-func vaultPush(items []string, force, dryRun, all bool) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+func vaultPush(ctx context.Context, items []string, force, dryRun, all bool) error {
+	ctx, cancel := context.WithTimeout(ctx, 120*time.Second)
 	defer cancel()
 
 	PrintHeader("Push to Vault")
@@ -1901,7 +1901,7 @@ func vaultScan() error {
 }
 
 // vaultCheck checks required vault items exist
-func vaultCheck() error {
+func vaultCheck(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -2607,7 +2607,7 @@ func normalizeSSHKeyName(filename string) string {
 }
 
 // vaultCreate creates a new vault item
-func vaultCreate(name, content string, dryRun, force bool) error {
+func vaultCreate(ctx context.Context, name, content string, dryRun, force bool) error {
 	PrintHeader("Create Vault Item")
 
 	// Handle dry-run without connecting to backend
@@ -2705,7 +2705,7 @@ func isProtectedItem(name string) bool {
 }
 
 // vaultDelete deletes vault items
-func vaultDelete(names []string, dryRun, force bool) error {
+func vaultDelete(ctx context.Context, names []string, dryRun, force bool) error {
 	PrintHeader("Delete from Vault")
 
 	// Handle dry-run without connecting to backend

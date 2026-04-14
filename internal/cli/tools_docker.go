@@ -377,7 +377,10 @@ func dockerClean(dryRun bool) error {
 
 	// Count stopped containers
 	cmd := exec.Command("docker", "ps", "-aq", "-f", "status=exited")
-	output, _ := cmd.Output()
+	output, err := cmd.Output()
+	if err != nil {
+		Debug("Failed to list stopped containers: %v", err)
+	}
 	stoppedContainers := strings.Split(strings.TrimSpace(string(output)), "\n")
 	stoppedCount := 0
 	for _, c := range stoppedContainers {

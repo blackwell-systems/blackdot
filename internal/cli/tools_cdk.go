@@ -122,7 +122,10 @@ Usage:
 
 			// Get region
 			regionCmd := exec.Command("aws", "configure", "get", "region", "--profile", profile)
-			out, _ = regionCmd.Output()
+			out, err = regionCmd.Output()
+				if err != nil {
+					Debug("Failed to get AWS region: %v", err)
+				}
 			region := strings.TrimSpace(string(out))
 			if region == "" {
 				region = "us-east-1"
