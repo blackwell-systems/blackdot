@@ -71,7 +71,7 @@ func newRustNewCmd() *cobra.Command {
 			cargo.Stdout = os.Stdout
 			cargo.Stderr = os.Stderr
 			if err := cargo.Run(); err != nil {
-				return err
+				return fmt.Errorf("failed to create Rust project '%s': %w", name, err)
 			}
 
 			projectType := "bin"
@@ -102,13 +102,16 @@ func newRustUpdateCmd() *cobra.Command {
 			rustup.Stdout = os.Stdout
 			rustup.Stderr = os.Stderr
 			if err := rustup.Run(); err != nil {
-				return err
+				return fmt.Errorf("failed to update Rust toolchain: %w", err)
 			}
 
 			fmt.Println("\nCurrent toolchain:")
 			show := exec.Command("rustup", "show", "active-toolchain")
 			show.Stdout = os.Stdout
-			return show.Run()
+			if err := show.Run(); err != nil {
+				return fmt.Errorf("failed to show active toolchain: %w", err)
+			}
+			return nil
 		},
 	}
 }
@@ -128,7 +131,10 @@ Common toolchains: stable, beta, nightly`,
 				list := exec.Command("rustup", "toolchain", "list")
 				list.Stdout = os.Stdout
 				list.Stderr = os.Stderr
-				return list.Run()
+				if err := list.Run(); err != nil {
+					return fmt.Errorf("failed to list toolchains: %w", err)
+				}
+				return nil
 			}
 
 			toolchain := args[0]
@@ -136,13 +142,16 @@ Common toolchains: stable, beta, nightly`,
 			rustup.Stdout = os.Stdout
 			rustup.Stderr = os.Stderr
 			if err := rustup.Run(); err != nil {
-				return err
+				return fmt.Errorf("failed to switch to toolchain '%s': %w", toolchain, err)
 			}
 
 			fmt.Printf("\nSwitched to: ")
 			show := exec.Command("rustup", "show", "active-toolchain")
 			show.Stdout = os.Stdout
-			return show.Run()
+			if err := show.Run(); err != nil {
+				return fmt.Errorf("failed to show active toolchain: %w", err)
+			}
+			return nil
 		},
 	}
 }
@@ -158,14 +167,17 @@ func newRustLintCmd() *cobra.Command {
 			check.Stdout = os.Stdout
 			check.Stderr = os.Stderr
 			if err := check.Run(); err != nil {
-				return err
+				return fmt.Errorf("cargo check failed: %w", err)
 			}
 
 			fmt.Println("\nRunning clippy...")
 			clippy := exec.Command("cargo", "clippy", "--", "-D", "warnings")
 			clippy.Stdout = os.Stdout
 			clippy.Stderr = os.Stderr
-			return clippy.Run()
+			if err := clippy.Run(); err != nil {
+				return fmt.Errorf("clippy failed: %w", err)
+			}
+			return nil
 		},
 	}
 }
@@ -181,14 +193,17 @@ func newRustFixCmd() *cobra.Command {
 			cargoFmt.Stdout = os.Stdout
 			cargoFmt.Stderr = os.Stderr
 			if err := cargoFmt.Run(); err != nil {
-				return err
+				return fmt.Errorf("cargo fmt failed: %w", err)
 			}
 
 			fmt.Println("\nRunning clippy with auto-fix...")
 			clippy := exec.Command("cargo", "clippy", "--fix", "--allow-dirty", "--allow-staged")
 			clippy.Stdout = os.Stdout
 			clippy.Stderr = os.Stderr
-			return clippy.Run()
+			if err := clippy.Run(); err != nil {
+				return fmt.Errorf("clippy --fix failed: %w", err)
+			}
+			return nil
 		},
 	}
 }
@@ -213,7 +228,10 @@ func newRustOutdatedCmd() *cobra.Command {
 			outdated := exec.Command("cargo", "outdated")
 			outdated.Stdout = os.Stdout
 			outdated.Stderr = os.Stderr
-			return outdated.Run()
+			if err := outdated.Run(); err != nil {
+				return fmt.Errorf("cargo outdated failed: %w", err)
+			}
+			return nil
 		},
 	}
 }
@@ -243,7 +261,10 @@ func newRustExpandCmd() *cobra.Command {
 			expand := exec.Command("cargo", expandArgs...)
 			expand.Stdout = os.Stdout
 			expand.Stderr = os.Stderr
-			return expand.Run()
+			if err := expand.Run(); err != nil {
+				return fmt.Errorf("cargo expand failed: %w", err)
+			}
+			return nil
 		},
 	}
 }
