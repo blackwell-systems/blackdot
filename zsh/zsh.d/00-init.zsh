@@ -35,6 +35,12 @@ case "$OS" in
     ;;
 esac
 
+# brewprune shims must be first on PATH so shimmed commands are intercepted.
+# This runs after brew shellenv to ensure priority over /opt/homebrew/bin.
+if [[ -d "$HOME/.brewprune/bin" ]]; then
+  export PATH="$HOME/.brewprune/bin:$PATH"
+fi
+
 # =========================
 # Core Libraries (must load early for runtime feature guards)
 # =========================
