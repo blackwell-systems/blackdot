@@ -542,7 +542,7 @@ func printVaultHelp() {
 // ============================================================
 
 func vaultStatus(ctx context.Context) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
 	fmt.Println()
@@ -1052,7 +1052,7 @@ func vaultGet(ctx context.Context, name string, notesOnly bool) error {
 }
 
 func vaultHealth(ctx context.Context) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	PrintHeader("Vault Health Check")
@@ -1902,7 +1902,7 @@ func vaultScan() error {
 
 // vaultCheck checks required vault items exist
 func vaultCheck(ctx context.Context) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
 	PrintHeader("Check Vault Items")

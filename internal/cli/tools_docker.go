@@ -556,7 +556,10 @@ func dockerInspect(container, jsonPath string) error {
 		return fmt.Errorf("path '%s' not found", jsonPath)
 	}
 
-	output, _ = json.MarshalIndent(result, "", "  ")
+	output, err = json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal result: %w", err)
+	}
 	fmt.Println(string(output))
 
 	return nil
@@ -642,22 +645,34 @@ func dockerStatus() error {
 
 		// Get counts
 		cmd := exec.Command("docker", "ps", "-aq")
-		output, _ := cmd.Output()
+		output, err := cmd.Output()
+		if err != nil {
+			Debug("Failed to list containers: %v", err)
+		}
 		totalContainers := countNonEmpty(strings.Split(strings.TrimSpace(string(output)), "\n"))
 		fmt.Printf("    Containers  \033[36m%d running\033[0m / %d total\n", containersRunning, totalContainers)
 
 		cmd = exec.Command("docker", "images", "-q")
-		output, _ = cmd.Output()
+		output, err = cmd.Output()
+		if err != nil {
+			Debug("Failed to list images: %v", err)
+		}
 		images := countNonEmpty(strings.Split(strings.TrimSpace(string(output)), "\n"))
 		fmt.Printf("    Images      \033[36m%d\033[0m\n", images)
 
 		cmd = exec.Command("docker", "volume", "ls", "-q")
-		output, _ = cmd.Output()
+		output, err = cmd.Output()
+		if err != nil {
+			Debug("Failed to list volumes: %v", err)
+		}
 		volumes := countNonEmpty(strings.Split(strings.TrimSpace(string(output)), "\n"))
 		fmt.Printf("    Volumes     \033[36m%d\033[0m\n", volumes)
 
 		cmd = exec.Command("docker", "network", "ls", "-q")
-		output, _ = cmd.Output()
+		output, err = cmd.Output()
+		if err != nil {
+			Debug("Failed to list networks: %v", err)
+		}
 		networks := countNonEmpty(strings.Split(strings.TrimSpace(string(output)), "\n"))
 		fmt.Printf("    Networks    \033[36m%d\033[0m\n", networks)
 
