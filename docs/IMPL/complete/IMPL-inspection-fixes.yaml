@@ -1,3 +1,4 @@
+completion_date: "2026-04-14"
 title: 'Inspection Report Fixes: Init Side Effect + Error Context (Color Consolidation Deferred)'
 feature_slug: inspection-fixes
 verdict: SUITABLE_WITH_CAVEATS
@@ -123,6 +124,7 @@ waves:
             Call initSyncableItems() in getSyncableItemNames() and runSync() before use.
           files:
             - internal/cli/sync.go
+      base_commit: a00127b167c2b8232c149a91d914175ff47a9069
 quality_gates:
     level: standard
     gates:
@@ -190,6 +192,14 @@ completion_reports:
             - internal/cli/tools_claude.go
         verification: PASS
         notes: Wrapped all 7 bare 'return err' statements with contextual error messages using fmt.Errorf pattern. Build, test, and lint gates all passed.
+    H:
+        status: complete
+        branch: saw/inspection-fixes/wave2-agent-H
+        commit: fc2128a
+        files_changed:
+            - internal/cli/sync.go
+        verification: PASS
+        notes: Replaced init() with lazy evaluation using sync.Once. Added initSyncableItems() that properly checks os.UserHomeDir() error. All verification gates pass (build, test with -race, vet).
 pre_mortem:
     overall_risk: low
     rows:
@@ -235,5 +245,4 @@ critic_report:
     summary: Verified all 8 agent briefs against codebase. Wave 1 agents (A-G) correctly reference fmt.Errorf for error wrapping, and bare 'return err' statements exist in all target files. Wave 2 agent (H) correctly identifies init() side effect in sync.go line 39 where os.UserHomeDir() error is silently ignored. All referenced functions (getSyncableItemNames, runSync) and packages (fmt, sync) exist. No I1 violations, complexity balanced (1 file per agent). No interface contracts to verify.
     reviewed_at: "2026-04-14T08:22:59Z"
     issue_count: 0
-state: REVIEWED
-original_branch: main
+state: COMPLETE
