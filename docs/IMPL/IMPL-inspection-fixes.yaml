@@ -1,0 +1,182 @@
+title: 'Inspection Report Fixes: Init Side Effect + Error Context (Color Consolidation Deferred)'
+feature_slug: inspection-fixes
+verdict: SUITABLE_WITH_CAVEATS
+suitability_assessment: |
+    Analysis of three medium-priority inspection issues from 2026-04-14T07-23-03 report.
+
+    **Proceeding with Issues #6 and #8 only. Deferring Issue #7 (color consolidation) to
+    sequential implementation outside SAW framework due to scope and LOC budget constraints.**
+
+    **Issue #6: Init Side Effect in sync.go** — SUITABLE
+      - Location: internal/cli/sync.go:37
+      - Problem: Silently ignores os.UserHomeDir() error in init()
+      - Fix: Move to lazy evaluation with sync.Once (~10 lines changed)
+      - Parallelization value: None (1 file), but benefits from structured review
+
+    **Issue #8: Missing Error Context** — SUITABLE
+      - Location: 62 instances in tools_*.go files (7 files, ~6,169 lines total)
+      - Problem: Bare "return err" without wrapping loses context
+      - Fix: Wrap errors with fmt.Errorf("context: %w", err)
+      - Parallelization value: HIGH (7 agents × ~880 lines each, fully independent)
+
+    **Issue #7: Duplicate Color Exports** — NOT SUITABLE FOR SAW (DEFERRED)
+      - Location: internal/cli/output.go + 34 consumer files
+      - Total LOC: 15,970 lines across 35 files
+      - V048 LOC budget: 2000 lines per agent → requires 8+ agents in sequential waves
+      - Parallelization value: NONE (sequential waves, no time savings)
+      - Recommendation: Implement sequentially using automated refactoring tools (sed, gofmt -r)
+
+    **VERDICT: SUITABLE_WITH_CAVEATS**
+
+    Time-to-value estimate (Issues #6 + #8 only):
+      - Scout phase: ~10 min
+      - Wave 1 (7 agents, parallel): ~7-10 min
+      - Wave 2 (1 agent): ~2-3 min
+      - Merge & verification: ~2-3 min
+      Total SAW time: ~21-26 min
+
+      Sequential baseline: ~40-50 min
+      Time savings: ~15-25 min (40-60% faster)
+test_command: go test -v -race ./...
+lint_command: go vet ./...
+file_ownership:
+    - file: internal/cli/tools_docker.go
+      agent: A
+      wave: 1
+      action: modify
+    - file: internal/cli/tools_rust.go
+      agent: B
+      wave: 1
+      action: modify
+    - file: internal/cli/tools_cdk.go
+      agent: C
+      wave: 1
+      action: modify
+    - file: internal/cli/tools_python.go
+      agent: D
+      wave: 1
+      action: modify
+    - file: internal/cli/tools_ssh.go
+      agent: E
+      wave: 1
+      action: modify
+    - file: internal/cli/tools_go.go
+      agent: F
+      wave: 1
+      action: modify
+    - file: internal/cli/tools_claude.go
+      agent: G
+      wave: 1
+      action: modify
+    - file: internal/cli/sync.go
+      agent: H
+      wave: 2
+      action: modify
+interface_contracts: []
+waves:
+    - number: 1
+      agents:
+        - id: A
+          task: |
+            Add error context wrapping to tools_docker.go. Wrap all bare "return err" with
+            fmt.Errorf("context: %w", err). Context format: "<operation>: %w" (e.g.,
+            "docker daemon check: %w", "list images: %w"). Skip already-wrapped errors.
+          files:
+            - internal/cli/tools_docker.go
+        - id: B
+          task: |
+            Add error context wrapping to tools_rust.go. Same pattern as Agent A.
+          files:
+            - internal/cli/tools_rust.go
+        - id: C
+          task: |
+            Add error context wrapping to tools_cdk.go. Same pattern as Agent A.
+          files:
+            - internal/cli/tools_cdk.go
+        - id: D
+          task: |
+            Add error context wrapping to tools_python.go. Same pattern as Agent A.
+          files:
+            - internal/cli/tools_python.go
+        - id: E
+          task: |
+            Add error context wrapping to tools_ssh.go. Same pattern as Agent A.
+          files:
+            - internal/cli/tools_ssh.go
+        - id: F
+          task: |
+            Add error context wrapping to tools_go.go. Same pattern as Agent A.
+          files:
+            - internal/cli/tools_go.go
+        - id: G
+          task: |
+            Add error context wrapping to tools_claude.go. Same pattern as Agent A.
+          files:
+            - internal/cli/tools_claude.go
+    - number: 2
+      agents:
+        - id: H
+          task: |
+            Fix init side effect in sync.go. Replace init() with lazy evaluation using sync.Once.
+            Add initSyncableItems() function that checks os.UserHomeDir() error and returns it.
+            Call initSyncableItems() in getSyncableItemNames() and runSync() before use.
+          files:
+            - internal/cli/sync.go
+quality_gates:
+    level: standard
+    gates:
+        - type: build
+          command: go build ./cmd/blackdot/
+          required: true
+        - type: test
+          command: go test -v -race ./...
+          required: true
+        - type: lint
+          command: go vet ./...
+          required: true
+pre_mortem:
+    overall_risk: low
+    rows:
+        - scenario: Wave 1 agents double-wrap already-wrapped errors
+          likelihood: medium
+          impact: low
+          mitigation: Briefs include "skip already-wrapped errors" constraint
+        - scenario: Agents miss non-exec.Command errors (os.ReadFile, json.Unmarshal)
+          likelihood: medium
+          impact: low
+          mitigation: Verification gates check exec.Command patterns; manual review catches rest
+        - scenario: Issue
+          likelihood: medium
+          impact: medium
+          mitigation: Document deferral in inspection report; recommend automated refactoring tools
+critic_report:
+    verdict: PASS
+    agent_reviews:
+        A:
+            agent_id: A
+            verdict: PASS
+        B:
+            agent_id: B
+            verdict: PASS
+        C:
+            agent_id: C
+            verdict: PASS
+        D:
+            agent_id: D
+            verdict: PASS
+        E:
+            agent_id: E
+            verdict: PASS
+        F:
+            agent_id: F
+            verdict: PASS
+        G:
+            agent_id: G
+            verdict: PASS
+        H:
+            agent_id: H
+            verdict: PASS
+    summary: Verified all 8 agent briefs against codebase. Wave 1 agents (A-G) correctly reference fmt.Errorf for error wrapping, and bare 'return err' statements exist in all target files. Wave 2 agent (H) correctly identifies init() side effect in sync.go line 39 where os.UserHomeDir() error is silently ignored. All referenced functions (getSyncableItemNames, runSync) and packages (fmt, sync) exist. No I1 violations, complexity balanced (1 file per agent). No interface contracts to verify.
+    reviewed_at: "2026-04-14T08:22:59Z"
+    issue_count: 0
+state: SCOUT_PENDING
