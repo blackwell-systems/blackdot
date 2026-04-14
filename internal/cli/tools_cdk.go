@@ -75,7 +75,7 @@ Languages: typescript (default), python, java, go, csharp, fsharp`,
 			cdk.Stderr = os.Stderr
 			cdk.Stdin = os.Stdin
 			if err := cdk.Run(); err != nil {
-				return err
+				return fmt.Errorf("failed to initialize CDK project: %w", err)
 			}
 
 			if lang == "typescript" {
@@ -173,7 +173,10 @@ func newCDKOutputsCmd() *cobra.Command {
 				"--output", "table")
 			awsCmd.Stdout = os.Stdout
 			awsCmd.Stderr = os.Stderr
-			return awsCmd.Run()
+			if err := awsCmd.Run(); err != nil {
+				return fmt.Errorf("failed to describe CloudFormation stack '%s': %w", stack, err)
+			}
+			return nil
 		},
 	}
 }
@@ -192,7 +195,7 @@ func newCDKContextCmd() *cobra.Command {
 						fmt.Println("No cdk.context.json to clear")
 						return nil
 					}
-					return err
+					return fmt.Errorf("failed to remove cdk.context.json: %w", err)
 				}
 				fmt.Println("Cleared cdk.context.json")
 				return nil
@@ -205,7 +208,7 @@ func newCDKContextCmd() *cobra.Command {
 					fmt.Println("No cdk.context.json found in current directory")
 					return nil
 				}
-				return err
+				return fmt.Errorf("failed to read cdk.context.json: %w", err)
 			}
 
 			fmt.Println("CDK Context (cdk.context.json):")
@@ -345,7 +348,10 @@ func cdkDeploy(stacks []string, requireApproval string, all bool) error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to deploy CDK stacks: %w", err)
+	}
+	return nil
 }
 
 // newCDKDeployAllCmd deploys all stacks
@@ -395,7 +401,10 @@ func cdkDiff(stacks []string, all bool) error {
 	cmd := exec.Command("cdk", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to run CDK diff: %w", err)
+	}
+	return nil
 }
 
 // newCDKCheckCmd does diff then prompts to deploy
@@ -444,7 +453,10 @@ func cdkCheck(stacks []string) error {
 		deployCmd.Stdin = os.Stdin
 		deployCmd.Stdout = os.Stdout
 		deployCmd.Stderr = os.Stderr
-		return deployCmd.Run()
+		if err := deployCmd.Run(); err != nil {
+			return fmt.Errorf("failed to deploy CDK stacks: %w", err)
+		}
+		return nil
 	}
 
 	fmt.Println("Deployment cancelled")
@@ -488,7 +500,10 @@ func cdkHotswap(stacks []string, fallback, all bool) error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to hotswap deploy CDK stacks: %w", err)
+	}
+	return nil
 }
 
 // newCDKSynthCmd synthesizes CDK templates
@@ -502,7 +517,10 @@ func newCDKSynthCmd() *cobra.Command {
 			execCmd := exec.Command("cdk", cdkArgs...)
 			execCmd.Stdout = os.Stdout
 			execCmd.Stderr = os.Stderr
-			return execCmd.Run()
+			if err := execCmd.Run(); err != nil {
+				return fmt.Errorf("failed to synthesize CDK templates: %w", err)
+			}
+			return nil
 		},
 	}
 }
@@ -517,7 +535,10 @@ func newCDKListCmd() *cobra.Command {
 			execCmd := exec.Command("cdk", "list")
 			execCmd.Stdout = os.Stdout
 			execCmd.Stderr = os.Stderr
-			return execCmd.Run()
+			if err := execCmd.Run(); err != nil {
+				return fmt.Errorf("failed to list CDK stacks: %w", err)
+			}
+			return nil
 		},
 	}
 }
@@ -546,7 +567,10 @@ func newCDKDestroyCmd() *cobra.Command {
 			execCmd.Stdin = os.Stdin
 			execCmd.Stdout = os.Stdout
 			execCmd.Stderr = os.Stderr
-			return execCmd.Run()
+			if err := execCmd.Run(); err != nil {
+				return fmt.Errorf("failed to destroy CDK stacks: %w", err)
+			}
+			return nil
 		},
 	}
 
@@ -568,7 +592,10 @@ func newCDKBootstrapCmd() *cobra.Command {
 			execCmd.Stdin = os.Stdin
 			execCmd.Stdout = os.Stdout
 			execCmd.Stderr = os.Stderr
-			return execCmd.Run()
+			if err := execCmd.Run(); err != nil {
+				return fmt.Errorf("failed to bootstrap CDK: %w", err)
+			}
+			return nil
 		},
 	}
 }
