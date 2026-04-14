@@ -78,7 +78,7 @@ func newDockerPsCmd() *cobra.Command {
 
 func dockerPs(all bool) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := []string{"ps", "--format", "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"}
@@ -89,7 +89,10 @@ func dockerPs(all bool) error {
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("list containers: %w", err)
+	}
+	return nil
 }
 
 // newDockerImagesCmd lists images
@@ -106,13 +109,16 @@ func newDockerImagesCmd() *cobra.Command {
 
 func dockerImages() error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	cmd := exec.Command("docker", "images", "--format", "table {{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedSince}}")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("list images: %w", err)
+	}
+	return nil
 }
 
 // newDockerIPCmd gets container IP address
@@ -130,7 +136,7 @@ func newDockerIPCmd() *cobra.Command {
 
 func dockerIP(container string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	cmd := exec.Command("docker", "inspect", "-f", "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}", container)
@@ -163,7 +169,7 @@ func newDockerEnvCmd() *cobra.Command {
 
 func dockerEnv(container string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	// Try exec env first (works for running containers)
@@ -178,7 +184,10 @@ func dockerEnv(container string) error {
 	cmd = exec.Command("docker", "inspect", "-f", "{{range .Config.Env}}{{println .}}{{end}}", container)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("show container environment: %w", err)
+	}
+	return nil
 }
 
 // newDockerPortsCmd shows exposed ports
@@ -195,7 +204,7 @@ func newDockerPortsCmd() *cobra.Command {
 
 func dockerPorts() error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	PrintHeader("Container Ports")
@@ -203,7 +212,7 @@ func dockerPorts() error {
 	cmd := exec.Command("docker", "ps", "--format", "{{.Names}}\t{{.Ports}}")
 	output, err := cmd.Output()
 	if err != nil {
-		return err
+		return fmt.Errorf("list container ports: %w", err)
 	}
 
 	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
@@ -241,7 +250,7 @@ func newDockerStatsCmd() *cobra.Command {
 
 func dockerStats(follow bool) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := []string{"stats", "--format", "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}"}
@@ -252,7 +261,10 @@ func dockerStats(follow bool) error {
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("show container stats: %w", err)
+	}
+	return nil
 }
 
 // newDockerVolsCmd lists volumes
@@ -269,7 +281,7 @@ func newDockerVolsCmd() *cobra.Command {
 
 func dockerVols() error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	PrintHeader("Docker Volumes")
@@ -277,7 +289,7 @@ func dockerVols() error {
 	cmd := exec.Command("docker", "volume", "ls", "--format", "{{.Name}}\t{{.Driver}}")
 	output, err := cmd.Output()
 	if err != nil {
-		return err
+		return fmt.Errorf("list volumes: %w", err)
 	}
 
 	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
@@ -315,7 +327,7 @@ func newDockerNetsCmd() *cobra.Command {
 
 func dockerNets() error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	PrintHeader("Docker Networks")
@@ -323,12 +335,15 @@ func dockerNets() error {
 	cmd := exec.Command("docker", "network", "ls", "--format", "table {{.Name}}\t{{.Driver}}\t{{.Scope}}")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("list networks: %w", err)
+	}
+	return nil
 }
 
 func dockerNetInspect(network string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	fmt.Printf("Containers on network '%s':\n", network)
@@ -337,7 +352,10 @@ func dockerNetInspect(network string) error {
 	cmd := exec.Command("docker", "network", "inspect", network, "-f", "{{range .Containers}}{{.Name}} ({{.IPv4Address}})\n{{end}}")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("inspect network: %w", err)
+	}
+	return nil
 }
 
 // newDockerCleanCmd removes stopped containers and dangling images
@@ -365,7 +383,7 @@ or images that are in use.`,
 
 func dockerClean(dryRun bool) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	PrintHeader("Docker Cleanup")
@@ -464,7 +482,7 @@ With --all: Also removes ALL unused images (not just dangling).`,
 
 func dockerPrune(all, force bool) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	fmt.Println("This will remove:")
@@ -491,7 +509,10 @@ func dockerPrune(all, force bool) error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("system prune: %w", err)
+	}
+	return nil
 }
 
 // newDockerInspectCmd inspects containers with optional jq filtering
@@ -520,7 +541,7 @@ Examples:
 
 func dockerInspect(container, jsonPath string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	cmd := exec.Command("docker", "inspect", container)
@@ -783,7 +804,7 @@ func newDockerLogsCmd() *cobra.Command {
 
 func dockerLogs(container string, follow bool, tail string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := []string{"logs"}
@@ -798,7 +819,10 @@ func dockerLogs(container string, follow bool, tail string) error {
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("show logs: %w", err)
+	}
+	return nil
 }
 
 // newDockerExecCmd executes command in container
@@ -816,7 +840,7 @@ func newDockerExecCmd() *cobra.Command {
 
 func dockerExec(container string, command []string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := []string{"exec", "-it", container}
@@ -826,7 +850,10 @@ func dockerExec(container string, command []string) error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("execute command: %w", err)
+	}
+	return nil
 }
 
 // newDockerShellCmd opens shell in container
@@ -844,7 +871,7 @@ func newDockerShellCmd() *cobra.Command {
 
 func dockerShell(container string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	// Try bash first
@@ -861,7 +888,10 @@ func dockerShell(container string) error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("open shell: %w", err)
+	}
+	return nil
 }
 
 // newDockerStopCmd stops containers
@@ -879,14 +909,17 @@ func newDockerStopCmd() *cobra.Command {
 
 func dockerStop(containers []string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := append([]string{"stop"}, containers...)
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("stop containers: %w", err)
+	}
+	return nil
 }
 
 // newDockerStartCmd starts containers
@@ -904,14 +937,17 @@ func newDockerStartCmd() *cobra.Command {
 
 func dockerStart(containers []string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := append([]string{"start"}, containers...)
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("start containers: %w", err)
+	}
+	return nil
 }
 
 // newDockerRestartCmd restarts containers
@@ -929,14 +965,17 @@ func newDockerRestartCmd() *cobra.Command {
 
 func dockerRestart(containers []string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := append([]string{"restart"}, containers...)
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("restart containers: %w", err)
+	}
+	return nil
 }
 
 // newDockerRmCmd removes containers
@@ -960,7 +999,7 @@ func newDockerRmCmd() *cobra.Command {
 
 func dockerRm(containers []string, force bool) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := []string{"rm"}
@@ -972,7 +1011,10 @@ func dockerRm(containers []string, force bool) error {
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("remove containers: %w", err)
+	}
+	return nil
 }
 
 // newDockerRmiCmd removes images
@@ -996,7 +1038,7 @@ func newDockerRmiCmd() *cobra.Command {
 
 func dockerRmi(images []string, force bool) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := []string{"rmi"}
@@ -1008,7 +1050,10 @@ func dockerRmi(images []string, force bool) error {
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("remove images: %w", err)
+	}
+	return nil
 }
 
 // =============================================================================
@@ -1054,7 +1099,7 @@ Examples:
 
 func dockerBuild(path, tag, file string, noCache bool) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := []string{"build"}
@@ -1072,7 +1117,10 @@ func dockerBuild(path, tag, file string, noCache bool) error {
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("build image: %w", err)
+	}
+	return nil
 }
 
 // newDockerPullCmd pulls images
@@ -1090,13 +1138,16 @@ func newDockerPullCmd() *cobra.Command {
 
 func dockerPull(image string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	cmd := exec.Command("docker", "pull", image)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("pull image: %w", err)
+	}
+	return nil
 }
 
 // newDockerPushCmd pushes images
@@ -1114,13 +1165,16 @@ func newDockerPushCmd() *cobra.Command {
 
 func dockerPush(image string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	cmd := exec.Command("docker", "push", image)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("push image: %w", err)
+	}
+	return nil
 }
 
 // newDockerTagCmd tags images
@@ -1138,13 +1192,16 @@ func newDockerTagCmd() *cobra.Command {
 
 func dockerTag(source, target string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	cmd := exec.Command("docker", "tag", source, target)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("tag image: %w", err)
+	}
+	return nil
 }
 
 // =============================================================================
@@ -1192,7 +1249,7 @@ func newComposeUpCmd() *cobra.Command {
 
 func composeUp(services []string, detach, build bool) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := []string{"compose", "up"}
@@ -1208,7 +1265,10 @@ func composeUp(services []string, detach, build bool) error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("start compose services: %w", err)
+	}
+	return nil
 }
 
 func newComposeDownCmd() *cobra.Command {
@@ -1230,7 +1290,7 @@ func newComposeDownCmd() *cobra.Command {
 
 func composeDown(volumes bool) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := []string{"compose", "down"}
@@ -1241,7 +1301,10 @@ func composeDown(volumes bool) error {
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("stop compose services: %w", err)
+	}
+	return nil
 }
 
 func newComposeLogsCmd() *cobra.Command {
@@ -1263,7 +1326,7 @@ func newComposeLogsCmd() *cobra.Command {
 
 func composeLogs(services []string, follow bool) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := []string{"compose", "logs"}
@@ -1275,7 +1338,10 @@ func composeLogs(services []string, follow bool) error {
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("view compose logs: %w", err)
+	}
+	return nil
 }
 
 func newComposePsCmd() *cobra.Command {
@@ -1291,13 +1357,16 @@ func newComposePsCmd() *cobra.Command {
 
 func composePs() error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	cmd := exec.Command("docker", "compose", "ps")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("list compose containers: %w", err)
+	}
+	return nil
 }
 
 func newComposeBuildCmd() *cobra.Command {
@@ -1319,7 +1388,7 @@ func newComposeBuildCmd() *cobra.Command {
 
 func composeBuild(services []string, noCache bool) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := []string{"compose", "build"}
@@ -1331,7 +1400,10 @@ func composeBuild(services []string, noCache bool) error {
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("build compose images: %w", err)
+	}
+	return nil
 }
 
 func newComposeRestartCmd() *cobra.Command {
@@ -1347,14 +1419,17 @@ func newComposeRestartCmd() *cobra.Command {
 
 func composeRestart(services []string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := append([]string{"compose", "restart"}, services...)
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("restart compose services: %w", err)
+	}
+	return nil
 }
 
 func newComposeExecCmd() *cobra.Command {
@@ -1371,7 +1446,7 @@ func newComposeExecCmd() *cobra.Command {
 
 func composeExec(service string, command []string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := []string{"compose", "exec", service}
@@ -1381,7 +1456,10 @@ func composeExec(service string, command []string) error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("execute in service: %w", err)
+	}
+	return nil
 }
 
 func newComposePullCmd() *cobra.Command {
@@ -1397,25 +1475,28 @@ func newComposePullCmd() *cobra.Command {
 
 func composePull(services []string) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	args := append([]string{"compose", "pull"}, services...)
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("pull compose images: %w", err)
+	}
+	return nil
 }
 
 // buildHere builds Docker image with current directory name as tag
 func buildHere(noCache bool) error {
 	if err := checkDockerRunning(); err != nil {
-		return err
+		return fmt.Errorf("docker daemon check: %w", err)
 	}
 
 	cwd, err := os.Getwd()
 	if err != nil {
-		return err
+		return fmt.Errorf("get working directory: %w", err)
 	}
 
 	tag := filepath.Base(cwd)
@@ -1429,5 +1510,8 @@ func buildHere(noCache bool) error {
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("build image here: %w", err)
+	}
+	return nil
 }
