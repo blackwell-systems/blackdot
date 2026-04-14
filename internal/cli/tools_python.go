@@ -77,12 +77,12 @@ func runPythonNew(name, template string) error {
 		uv.Stdout = os.Stdout
 		uv.Stderr = os.Stderr
 		if err := uv.Run(); err != nil {
-			return err
+			return fmt.Errorf("failed to create lib project: %w", err)
 		}
 	case "script":
 		// Create script with inline dependencies
 		if err := os.MkdirAll(name, 0755); err != nil {
-			return err
+			return fmt.Errorf("failed to create script directory: %w", err)
 		}
 
 		script := `# /// script
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     main()
 `
 		if err := os.WriteFile(filepath.Join(name, "main.py"), []byte(script), 0644); err != nil {
-			return err
+			return fmt.Errorf("failed to write main.py: %w", err)
 		}
 		fmt.Printf("Created script project: %s\n", name)
 		fmt.Printf("Run with: cd %s && uv run main.py\n", name)
@@ -111,7 +111,7 @@ if __name__ == "__main__":
 		uv.Stdout = os.Stdout
 		uv.Stderr = os.Stderr
 		if err := uv.Run(); err != nil {
-			return err
+			return fmt.Errorf("failed to create app project: %w", err)
 		}
 	}
 
@@ -192,7 +192,7 @@ func newPythonVenvCmd() *cobra.Command {
 			uv.Stdout = os.Stdout
 			uv.Stderr = os.Stderr
 			if err := uv.Run(); err != nil {
-				return err
+				return fmt.Errorf("failed to create virtual environment: %w", err)
 			}
 
 			fmt.Printf("\nCreated virtual environment: %s\n", venvPath)
@@ -227,7 +227,10 @@ func newPythonTestCmd() *cobra.Command {
 			uv.Stdout = os.Stdout
 			uv.Stderr = os.Stderr
 			uv.Stdin = os.Stdin
-			return uv.Run()
+			if err := uv.Run(); err != nil {
+				return fmt.Errorf("pytest failed: %w", err)
+			}
+			return nil
 		},
 	}
 
@@ -260,7 +263,7 @@ func newPythonCoverCmd() *cobra.Command {
 			uv.Stderr = os.Stderr
 			uv.Stdin = os.Stdin
 			if err := uv.Run(); err != nil {
-				return err
+				return fmt.Errorf("pytest with coverage failed: %w", err)
 			}
 
 			if html {
