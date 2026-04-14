@@ -77,6 +77,22 @@ if [ "$OS" = "Darwin" ]; then
   fi
 fi
 
+# Tmux config (cross-platform)
+TMUX_DIR="$HOME/.config/tmux"
+mkdir -p "$TMUX_DIR"
+
+# Install TPM (Tmux Plugin Manager)
+if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
+  echo "Installing TPM (Tmux Plugin Manager)..."
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+fi
+
+# Link tmux config (XDG standard location)
+if [ -f "$BLACKDOT_DIR/tmux/tmux.conf" ]; then
+  safe_symlink "$BLACKDOT_DIR/tmux/tmux.conf" "$TMUX_DIR/tmux.conf"
+  echo "Tmux config linked: ~/.config/tmux/tmux.conf"
+fi
+
 # ============================================================
 # Claude Code setup
 # ============================================================
@@ -134,6 +150,7 @@ ls -l "$HOME/.zshrc" 2>/dev/null || true
 if [ "$OS" = "Darwin" ]; then
   ls -l "$HOME/Library/Application Support/com.mitchellh.ghostty/config" 2>/dev/null || true
 fi
+ls -l "$HOME/.config/tmux/tmux.conf" 2>/dev/null || true
 ls -l "$HOME/.claude" 2>/dev/null || true
 
 echo ""
