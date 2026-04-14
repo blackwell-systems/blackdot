@@ -435,16 +435,19 @@ func runClaudeInit(force bool) error {
 func copyFile(src, dest string) error {
 	data, err := os.ReadFile(src)
 	if err != nil {
-		return err
+		return fmt.Errorf("reading file %s: %w", src, err)
 	}
 
 	// Get source file permissions
 	info, err := os.Stat(src)
 	if err != nil {
-		return err
+		return fmt.Errorf("getting file info %s: %w", src, err)
 	}
 
-	return os.WriteFile(dest, data, info.Mode())
+	if err := os.WriteFile(dest, data, info.Mode()); err != nil {
+		return fmt.Errorf("writing file %s: %w", dest, err)
+	}
+	return nil
 }
 
 // copyDir copies a directory recursively
@@ -455,15 +458,15 @@ func copyDir(src, dest string) error {
 	// Create destination directory
 	srcInfo, err := os.Stat(src)
 	if err != nil {
-		return err
+		return fmt.Errorf("getting directory info %s: %w", src, err)
 	}
 	if err := os.MkdirAll(dest, srcInfo.Mode()); err != nil {
-		return err
+		return fmt.Errorf("creating directory %s: %w", dest, err)
 	}
 
 	entries, err := os.ReadDir(src)
 	if err != nil {
-		return err
+		return fmt.Errorf("reading directory %s: %w", src, err)
 	}
 
 	for _, entry := range entries {
@@ -472,11 +475,11 @@ func copyDir(src, dest string) error {
 
 		if entry.IsDir() {
 			if err := copyDir(srcPath, destPath); err != nil {
-				return err
+				return fmt.Errorf("copying directory %s: %w", srcPath, err)
 			}
 		} else {
 			if err := copyFile(srcPath, destPath); err != nil {
-				return err
+				return fmt.Errorf("copying file %s: %w", srcPath, err)
 			}
 		}
 	}
