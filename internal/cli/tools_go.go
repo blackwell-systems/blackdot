@@ -177,7 +177,10 @@ func newGoTestCmd() *cobra.Command {
 			goTest := exec.Command("go", testArgs...)
 			goTest.Stdout = os.Stdout
 			goTest.Stderr = os.Stderr
-			return goTest.Run()
+			if err := goTest.Run(); err != nil {
+				return fmt.Errorf("run tests: %w", err)
+			}
+			return nil
 		},
 	}
 
@@ -209,7 +212,7 @@ func newGoCoverCmd() *cobra.Command {
 			goTest.Stdout = os.Stdout
 			goTest.Stderr = os.Stderr
 			if err := goTest.Run(); err != nil {
-				return err
+				return fmt.Errorf("run tests with coverage: %w", err)
 			}
 
 			fmt.Println("\nCoverage summary:")
@@ -244,7 +247,7 @@ func newGoLintCmd() *cobra.Command {
 			goVet.Stdout = os.Stdout
 			goVet.Stderr = os.Stderr
 			if err := goVet.Run(); err != nil {
-				return err
+				return fmt.Errorf("run go vet: %w", err)
 			}
 
 			fmt.Println()
@@ -255,7 +258,10 @@ func newGoLintCmd() *cobra.Command {
 				lint := exec.Command("golangci-lint", "run")
 				lint.Stdout = os.Stdout
 				lint.Stderr = os.Stderr
-				return lint.Run()
+				if err := lint.Run(); err != nil {
+					return fmt.Errorf("run golangci-lint: %w", err)
+				}
+				return nil
 			}
 
 			// Check for staticcheck
@@ -264,7 +270,10 @@ func newGoLintCmd() *cobra.Command {
 				staticcheck := exec.Command("staticcheck", "./...")
 				staticcheck.Stdout = os.Stdout
 				staticcheck.Stderr = os.Stderr
-				return staticcheck.Run()
+				if err := staticcheck.Run(); err != nil {
+					return fmt.Errorf("run staticcheck: %w", err)
+				}
+				return nil
 			}
 
 			fmt.Println("No linter found. Install golangci-lint:")
@@ -324,14 +333,14 @@ func newGoUpdateCmd() *cobra.Command {
 			goGet.Stdout = os.Stdout
 			goGet.Stderr = os.Stderr
 			if err := goGet.Run(); err != nil {
-				return err
+				return fmt.Errorf("update dependencies: %w", err)
 			}
 
 			goMod := exec.Command("go", "mod", "tidy")
 			goMod.Stdout = os.Stdout
 			goMod.Stderr = os.Stderr
 			if err := goMod.Run(); err != nil {
-				return err
+				return fmt.Errorf("run go mod tidy: %w", err)
 			}
 
 			fmt.Println("\nDependencies updated")
@@ -427,7 +436,10 @@ func newGoBenchCmd() *cobra.Command {
 				"./...")
 			goBench.Stdout = os.Stdout
 			goBench.Stderr = os.Stderr
-			return goBench.Run()
+			if err := goBench.Run(); err != nil {
+				return fmt.Errorf("run benchmarks: %w", err)
+			}
+			return nil
 		},
 	}
 
