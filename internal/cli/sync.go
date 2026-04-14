@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/fatih/color"
@@ -24,6 +25,12 @@ var syncableItems = map[string]string{
 	"Environment-Secrets": "",
 }
 
+var (
+	initOnce       sync.Once
+	initError      error
+	syncItemsReady bool
+)
+
 // SyncDirection represents the direction of sync
 type SyncDirection string
 
@@ -34,14 +41,23 @@ const (
 	SyncConflict SyncDirection = "conflict"
 )
 
-func init() {
-	// Initialize paths based on home directory
-	home, _ := os.UserHomeDir()
-	syncableItems["SSH-Config"] = filepath.Join(home, ".ssh/config")
-	syncableItems["AWS-Config"] = filepath.Join(home, ".aws/config")
-	syncableItems["AWS-Credentials"] = filepath.Join(home, ".aws/credentials")
-	syncableItems["Git-Config"] = filepath.Join(home, ".gitconfig")
-	syncableItems["Environment-Secrets"] = filepath.Join(home, ".local/env.secrets")
+// initSyncableItems initializes paths based on home directory.
+// Returns error if home directory cannot be determined.
+func initSyncableItems() error {
+	initOnce.Do(func() {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			initError = fmt.Errorf("failed to get home directory: %w", err)
+			return
+		}
+		syncableItems["SSH-Config"] = filepath.Join(home, ".ssh/config")
+		syncableItems["AWS-Config"] = filepath.Join(home, ".aws/config")
+		syncableItems["AWS-Credentials"] = filepath.Join(home, ".aws/credentials")
+		syncableItems["Git-Config"] = filepath.Join(home, ".gitconfig")
+		syncableItems["Environment-Secrets"] = filepath.Join(home, ".local/env.secrets")
+		syncItemsReady = true
+	})
+	return initError
 }
 
 func newSyncCmd() *cobra.Command {
@@ -86,6 +102,11 @@ Examples:
 }
 
 func runSync(args []string, dryRun, forceLocal, forceVault, verbose, all bool) error {
+	// Initialize syncable items
+	if err := initSyncableItems(); err != nil {
+		return fmt.Errorf("failed to initialize sync items: %w", err)
+	}
+
 	// Colors
 	red := color.New(color.FgRed).SprintFunc()
 	green := color.New(color.FgGreen).SprintFunc()
@@ -279,6 +300,10 @@ func runSync(args []string, dryRun, forceLocal, forceVault, verbose, all bool) e
 }
 
 func getSyncableItemNames() []string {
+	// Ensure items are initialized
+	if err := initSyncableItems(); err != nil {
+		return []string{}
+	}
 	names := make([]string, 0, len(syncableItems))
 	for name := range syncableItems {
 		names = append(names, name)
