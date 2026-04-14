@@ -485,7 +485,7 @@ func writeED25519PrivateKey(path string, privKey ed25519.PrivateKey, comment str
 
 	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open key file '%s': %w", path, err)
 	}
 	defer file.Close()
 
@@ -1097,7 +1097,10 @@ func runSSHCopy(host, keyPath string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to copy SSH key to '%s': %w", host, err)
+	}
+	return nil
 }
 
 // newSSHTunnelCmd creates port forward tunnel
@@ -1138,7 +1141,10 @@ func runSSHTunnel(host, localPort, remotePort string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to create SSH tunnel to '%s': %w", host, err)
+	}
+	return nil
 }
 
 // newSSHSocksCmd creates SOCKS5 proxy
@@ -1176,7 +1182,10 @@ func runSSHSocks(host, port string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to create SOCKS5 proxy through '%s': %w", host, err)
+	}
+	return nil
 }
 
 // newSSHStatusCmdLocal creates SSH status command with banner
@@ -1309,7 +1318,10 @@ func sshLoadDefault() error {
 	listCmd := exec.Command("ssh-add", "-l")
 	listCmd.Stdout = os.Stdout
 	listCmd.Stderr = os.Stderr
-	return listCmd.Run()
+	if err := listCmd.Run(); err != nil {
+		return fmt.Errorf("failed to list loaded keys: %w", err)
+	}
+	return nil
 }
 
 func sshLoadKey(key string) error {
@@ -1346,7 +1358,10 @@ func sshLoadKey(key string) error {
 	listCmd := exec.Command("ssh-add", "-l")
 	listCmd.Stdout = os.Stdout
 	listCmd.Stderr = os.Stderr
-	return listCmd.Run()
+	if err := listCmd.Run(); err != nil {
+		return fmt.Errorf("failed to list loaded keys: %w", err)
+	}
+	return nil
 }
 
 func listAvailableKeys(sshDir string) string {
