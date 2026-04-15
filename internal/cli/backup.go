@@ -254,9 +254,10 @@ func runBackupCreate(cmd *cobra.Command, args []string) error {
 				ModTime: info.ModTime(),
 			}
 			if err := tw.WriteHeader(header); err == nil {
-				tw.Write(data)
-				fmt.Printf("  %s %s\n", green("✓"), "templates/_variables.local.sh")
-				backedUp++
+				if _, err := tw.Write(data); err == nil {
+					fmt.Printf("  %s %s\n", green("✓"), "templates/_variables.local.sh")
+					backedUp++
+				}
 			}
 		}
 	}

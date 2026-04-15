@@ -206,7 +206,7 @@ func (r *Registry) Enabled(name string) bool {
 // Returns "true", "false", or "" (not set)
 func (r *Registry) checkEnvOverride(name string) string {
 	// Check direct BLACKDOT_FEATURE_<NAME> env var first
-	directVar := "BLACKDOT_FEATURE_" + strings.ToUpper(strings.ReplaceAll(name, "_", "_"))
+	directVar := "BLACKDOT_FEATURE_" + strings.ToUpper(strings.ReplaceAll(name, ".", "_"))
 	if val := os.Getenv(directVar); val != "" {
 		if val == "true" || val == "1" {
 			return "true"

@@ -655,7 +655,9 @@ func setInJSONFile(path, key, value string) error {
 	var obj map[string]interface{}
 
 	if data, err := os.ReadFile(path); err == nil {
-		json.Unmarshal(data, &obj)
+		if err := json.Unmarshal(data, &obj); err != nil {
+			return fmt.Errorf("parsing %s: %w", path, err)
+		}
 	}
 	if obj == nil {
 		obj = make(map[string]interface{})

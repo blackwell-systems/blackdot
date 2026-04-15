@@ -468,7 +468,7 @@ func runTemplateCheck(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("loading variables: %w", err)
 	}
 
-	errors := 0
+	errCount := 0
 	checked := 0
 
 	for _, entry := range entries {
@@ -483,16 +483,16 @@ func runTemplateCheck(cmd *cobra.Command, args []string) error {
 		_, err := engine.RenderFile(tmplPath)
 		if err != nil {
 			Fail("%s: %v", entry.Name(), err)
-			errors++
+			errCount++
 		} else {
 			Pass("%s", entry.Name())
 		}
 	}
 
 	fmt.Println()
-	if errors > 0 {
-		Fail("Checked %d templates, %d errors", checked, errors)
-		return fmt.Errorf("%d templates have syntax errors", errors)
+	if errCount > 0 {
+		Fail("Checked %d templates, %d errors", checked, errCount)
+		return fmt.Errorf("%d templates have syntax errors", errCount)
 	}
 
 	Pass("All %d templates valid", checked)

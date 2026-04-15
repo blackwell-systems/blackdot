@@ -138,7 +138,7 @@ func runDoctor(fixMode, quickMode bool) error {
 	}
 
 	home, _ := os.UserHomeDir()
-	blackdotDir := getBlackdotDir()
+	blackdotDir := BlackdotDir()
 
 	// Banner
 	fmt.Println()
@@ -206,23 +206,6 @@ func runDoctor(fixMode, quickMode bool) error {
 	return nil
 }
 
-func getBlackdotDir() string {
-	if dir := os.Getenv("BLACKDOT_DIR"); dir != "" {
-		return dir
-	}
-	if _, err := os.Stat("/workspace/blackdot"); err == nil {
-		// Resolve symlinks so comparisons work (e.g. /workspace -> /Users/.../workspace)
-		if resolved, err := filepath.EvalSymlinks("/workspace/blackdot"); err == nil {
-			return resolved
-		}
-		return "/workspace/blackdot"
-	}
-	home, _ := os.UserHomeDir()
-	if _, err := os.Stat(filepath.Join(home, ".blackdot")); err == nil {
-		return filepath.Join(home, ".blackdot")
-	}
-	return ""
-}
 
 func (s *doctorState) section(name string) {
 	fmt.Println()
@@ -666,8 +649,6 @@ func printSummary(state *doctorState, fixMode bool) {
 	fmt.Printf("%s═══════════════════════════════════════════════════════════%s\n", "\033[1m", "\033[0m")
 	fmt.Println()
 
-	total := state.checksPassed + state.checksFailed + state.checksWarned
-
 	// Calculate health score
 	var healthScore int
 	var scoreStatus, scoreIcon string
@@ -813,8 +794,6 @@ func printSummary(state *doctorState, fixMode bool) {
 	fmt.Printf("%s═══════════════════════════════════════════════════════════%s\n", "\033[1m", "\033[0m")
 	fmt.Println()
 
-	// Print total for reference
-	_ = total
 }
 
 func saveMetrics(state *doctorState, blackdotDir, home string) {

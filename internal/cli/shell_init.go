@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/blackwell-systems/blackdot/internal/shell"
 	"github.com/spf13/cobra"
 )
 
@@ -35,12 +36,22 @@ Usage:
   Invoke-Expression (blackdot shell-init powershell)`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			shell := "zsh" // default
+			var shellName string
 			if len(args) > 0 {
-				shell = args[0]
+				shellName = args[0]
+			} else {
+				// Auto-detect from $SHELL environment variable
+				switch shell.Detect() {
+				case shell.ShellBash:
+					shellName = "bash"
+				case shell.ShellFish:
+					shellName = "fish"
+				default:
+					shellName = "zsh"
+				}
 			}
 
-			switch shell {
+			switch shellName {
 			case "zsh", "bash":
 				return outputPosixInit()
 			case "fish":
@@ -48,7 +59,7 @@ Usage:
 			case "powershell", "pwsh":
 				return outputPowerShellInit()
 			default:
-				return fmt.Errorf("unsupported shell: %s (supported: zsh, bash, fish, powershell)", shell)
+				return fmt.Errorf("unsupported shell: %s (supported: zsh, bash, fish, powershell)", shellName)
 			}
 		},
 	}

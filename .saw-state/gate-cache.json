@@ -12,6 +12,30 @@
         "cached_at": "2026-04-14T01:34:26.941698-07:00"
       }
     },
+    "1a8f32fd471c01b9b14cce4543e3e973": {
+      "build": {
+        "gate_type": "build",
+        "command": "go build ./...",
+        "passed": true,
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "",
+        "from_cache": true,
+        "cached_at": "2026-04-14T21:44:44.28994-07:00"
+      }
+    },
+    "2091716f27417b4ecd2483ec9ee76dac": {
+      "lint": {
+        "gate_type": "lint",
+        "command": "go vet ./...",
+        "passed": true,
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "",
+        "from_cache": true,
+        "cached_at": "2026-04-14T21:41:01.605806-07:00"
+      }
+    },
     "23e19cc06fece9cd48d9ce237abb2031": {
       "lint": {
         "gate_type": "lint",
@@ -36,6 +60,18 @@
         "cached_at": "2026-04-14T01:30:50.661031-07:00"
       }
     },
+    "2860142dac590ab96dc90f89eec20849": {
+      "build": {
+        "gate_type": "build",
+        "command": "go build ./...",
+        "passed": true,
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "",
+        "from_cache": true,
+        "cached_at": "2026-04-14T21:41:01.265414-07:00"
+      }
+    },
     "2b5e01cc8379a5455fa1d2905d08bcfd": {
       "build": {
         "gate_type": "build",
@@ -58,6 +94,18 @@
         "stderr": "",
         "from_cache": true,
         "cached_at": "2026-04-14T01:30:50.34494-07:00"
+      }
+    },
+    "5bfa58b258ca1575679d4eb5cbea4db1": {
+      "test": {
+        "gate_type": "test",
+        "command": "go test ./...",
+        "passed": true,
+        "exit_code": 0,
+        "stdout": "?   \tgithub.com/blackwell-systems/blackdot\t[no test files]\n?   \tgithub.com/blackwell-systems/blackdot/cmd/blackdot\t[no test files]\nok  \tgithub.com/blackwell-systems/blackdot/internal/cli\t0.507s\nok  \tgithub.com/blackwell-systems/blackdot/internal/config\t(cached)\nok  \tgithub.com/blackwell-systems/blackdot/internal/feature\t(cached)\nok  \tgithub.com/blackwell-systems/blackdot/internal/shell\t(cached)\nok  \tgithub.com/blackwell-systems/blackdot/internal/template\t(cached)\n",
+        "stderr": "",
+        "from_cache": true,
+        "cached_at": "2026-04-14T21:41:03.101523-07:00"
       }
     },
     "62a75863fe68357eaacab6f2ec21b4dd": {
@@ -120,6 +168,18 @@
         "cached_at": "2026-04-14T01:23:29.144023-07:00"
       }
     },
+    "bec26522b05f22b5de6737a633570d3c": {
+      "test": {
+        "gate_type": "test",
+        "command": "go test ./...",
+        "passed": true,
+        "exit_code": 0,
+        "stdout": "?   \tgithub.com/blackwell-systems/blackdot\t[no test files]\n?   \tgithub.com/blackwell-systems/blackdot/cmd/blackdot\t[no test files]\nok  \tgithub.com/blackwell-systems/blackdot/internal/cli\t(cached)\nok  \tgithub.com/blackwell-systems/blackdot/internal/config\t(cached)\nok  \tgithub.com/blackwell-systems/blackdot/internal/feature\t(cached)\nok  \tgithub.com/blackwell-systems/blackdot/internal/shell\t(cached)\nok  \tgithub.com/blackwell-systems/blackdot/internal/template\t(cached)\n",
+        "stderr": "",
+        "from_cache": true,
+        "cached_at": "2026-04-14T21:44:44.925786-07:00"
+      }
+    },
     "ce144278bdcad688f0724ded970e9bb0": {
       "test": {
         "gate_type": "test",
@@ -166,6 +226,18 @@
         "stderr": "",
         "from_cache": true,
         "cached_at": "2026-04-14T01:31:25.175985-07:00"
+      }
+    },
+    "f05a9149a7ee8720ed39b972f6ab76b6": {
+      "lint": {
+        "gate_type": "lint",
+        "command": "go vet ./...",
+        "passed": true,
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "",
+        "from_cache": true,
+        "cached_at": "2026-04-14T21:44:44.619723-07:00"
       }
     },
     "fe01108c5d59b72ec6c12e3e770a43e8": {
