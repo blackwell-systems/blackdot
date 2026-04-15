@@ -138,10 +138,10 @@ jobs:
           EOF
           cat test-project/.devcontainer/devcontainer.json
 
-      - name: Build test container
+      - name: Start test container
         run: |
           cd test-project
-          devcontainer build --workspace-folder .
+          devcontainer up --workspace-folder .
 
       - name: Verify blackdot installation
         run: |
