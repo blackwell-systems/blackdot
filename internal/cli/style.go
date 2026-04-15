@@ -3,7 +3,6 @@ package cli
 
 import (
 	"fmt"
-	"os"
 	"runtime"
 
 	"github.com/spf13/cobra"
@@ -214,11 +213,4 @@ func printCommandHelp(cmd *cobra.Command) {
 	}
 
 	Dim.Printf("Run 'blackdot %s <command> --help' for subcommand details.\n", cmd.Name())
-}
-
-
-// checkTerminal returns true if stdout is a terminal
-func checkTerminal() bool {
-	fileInfo, _ := os.Stdout.Stat()
-	return (fileInfo.Mode() & os.ModeCharDevice) != 0
 }
