@@ -7,8 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0-rc6] - 2026-04-15
+
+**Release Candidate 6 - Distribution, Code Quality & Platform Fixes**
+
 ### Added
 
+- **GoReleaser-based release workflow** — Replaced manual binary build workflow with GoReleaser. Homebrew tap (`blackwell-systems/homebrew-tap`), Scoop bucket (`blackwell-systems/scoop-bucket`), and winget (`BlackwellSystems.blackdot`) are now automatically updated on every tag push. No more manual SHA256 updates.
+- **`go install` support** — Updated module path to `github.com/blackwell-systems/blackdot/v4` (Go major version convention). Installable via `go install github.com/blackwell-systems/blackdot/v4/cmd/blackdot@latest`.
+- **Homebrew tap formula** — `brew install blackwell-systems/tap/blackdot` now works.
+- **Scoop bucket** — `scoop install blackdot` now works via `blackwell-systems/scoop-bucket`.
+- **Devcontainer feature (ghcr.io)** — Fixed publish workflow broken since Dec 2025. Feature now publishes to `ghcr.io/blackwell-systems/blackdot` on every release.
 - **Tmux integration with session persistence** — Added `tmux` to `Brewfile.minimal` as a core tool. Bootstrap now installs TPM (Tmux Plugin Manager) and symlinks `blackdot/tmux/tmux.conf` to `~/.config/tmux/tmux.conf`. Default config includes `tmux-resurrect` for session save/restore (`Ctrl-A + Ctrl-s` to save, `Ctrl-A + Ctrl-r` to restore). Uses XDG standard path (`tmux.conf` not `.tmux.conf`).
 - **Makefile for local development builds** — `make build` compiles for the host architecture, `make build-linux` / `make build-darwin` cross-compile for both amd64 and arm64, and `make build-all` builds everything. Embeds version, commit, and date via ldflags. This is for contributors building from source — end users continue to install via `install.sh`.
 - **Architecture-dispatch wrapper script** — `scripts/blackdot-wrapper.sh` auto-detects OS and architecture and execs the correct platform-specific binary (e.g. `blackdot-linux-arm64`). Installed as `bin/blackdot` by `make build-linux` so a single path works on mixed-arch shared filesystems and bind-mounted container volumes.
@@ -17,66 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **SSH `remove-host` command** — `blackdot tools ssh remove-host <name>` removes a host block and all its directives from `~/.ssh/config`. Inverse of `add-host`.
 - **Auto-install prompt on missing binary** — When shell init detects no compatible binary (e.g. first time in a Lima VM or Docker container), it prompts `Install now? [y/N]` in interactive shells. Answering `y` downloads the correct platform binary automatically. Answering `n` explains degraded mode and how to install later.
 - **Degraded-mode banner on Linux/container entry** — When entering a Lima VM or container where the blackdot binary is not installed, a visible warning is displayed explaining that features, vault, and CLI commands are unavailable, with the install command to fix it.
-
-### Changed
-
-- **SSH `list`/`hosts` output** — Now displays a styled colored table with Host, HostName, User, Port, and IdentityFile columns (matching the `ssh keys` table style) instead of a plain text list.
-- **SSH `agent` output** — Now displays loaded keys in a styled colored table with Comment, Bits, Type, and Fingerprint columns instead of raw `ssh-add -l` output.
-- **`blackdot` command uses resolved binary** — `shell-init` now emits a `blackdot()` wrapper function so typing `blackdot` always invokes the platform-correct binary (`$_BLACKDOT_BIN`), not whatever PATH finds first. Prevents `exec format error` when `bin/blackdot` in the repo is built for a different OS.
-- **Shell-init cache is platform-specific** — Cache file is now `shell-init-${os}-${arch}.zsh` (e.g. `shell-init-linux-amd64.zsh`) so macOS and Linux don't overwrite each other's cached shell functions on shared filesystems.
-
-### Fixed
-
-- **Docker daemon hints are platform-aware** — `blackdot tools docker status` and `checkDockerRunning()` error messages now show `open -a Docker` on macOS and `Start-Service docker` on Windows instead of always showing the Linux-only `sudo systemctl start docker`.
-- **Cross-platform binary resolution for shared filesystems** — Shell init (`_blackdot_resolve_bin`) now prefers platform-specific binaries (e.g. `blackdot-linux-amd64`, `blackdot-darwin-arm64`) before falling back to the generic `bin/blackdot`. A new `_blackdot_can_exec` helper validates the binary format (ELF on Linux, Mach-O on macOS) using `file`, so a macOS binary with `+x` permission is no longer mistaken for a runnable binary on Linux. Fixes `exec format error` when a macOS host shares its dotfiles directory with a Lima or NFS-mounted Linux VM. The `_blackdot_go_bin()` helper and `blackdot-upgrade` also use the same platform-aware resolution.
-- **Installer saves platform-specific binary names** — `install.sh` now saves the downloaded binary as `blackdot-${os}-${arch}` (e.g. `blackdot-linux-amd64`) with a `blackdot` symlink for convenience. Multiple platforms can coexist in the same `~/.local/bin/` directory on shared filesystems without overwriting each other.
-- **Zsh modules not loading in new tmux panes** — `zsh/zshrc` used `${0:A:h}` to locate the `zsh.d/` module directory, but `$0` is set to `zsh`/`-zsh` (the shell name) during automatic startup — only the file path when explicitly `source`d. This caused `ZSHRC_DIR` to resolve to the wrong directory (e.g. `/bin`), the `(N)` glob matched nothing, and zero modules loaded: no aliases, no prompt, no blackdot. Switched to `${(%):-%x}` which always gives the current source file path.
-- **Binary path resolution** — Shell init now searches `$BLACKDOT_DIR/bin/blackdot`, `~/.local/bin/blackdot`, and `$PATH` instead of a single hardcoded location. Fixes "Feature system unavailable (Go binary not found at )" error on macOS when the binary was installed via the installer to `~/.local/bin/` but the shell only checked the repo's `bin/` directory.
-- **Shell init `_BLACKDOT_BIN` path** — `blackdot shell-init` now uses `os.Executable()` to emit the actual running binary's path instead of guessing from `$BLACKDOT_DIR/bin/blackdot`. Works correctly across all shells (zsh, bash, fish, PowerShell).
-- **Degraded mode error message** — Error now shows all searched paths and a rebuild command instead of a blank path (the variable was unset before the fallback function ran).
-- **Alias/function collisions in zsh** — Removed 11 duplicate aliases across tool modules (60-aws, 61-cdk, 62-rust, 63-go, 64-python, 65-ssh, 66-docker) that collided with function definitions in 40-aliases.zsh, causing `parse error near '()'` on shell load. The functions in 40-aliases.zsh are the canonical definitions.
-- **Homebrew PATH not available in tmux panes** — Moved Homebrew `shellenv` to early PATH setup in `00-init.zsh`, before binary resolution. Previously Homebrew was only set up in `.zprofile` (login shells) and late in the OS-specific block (after the binary search). Non-login shells like tmux panes would fail to find the `blackdot` binary and enter degraded mode silently.
-- **Modern CLI tools block shell when feature disabled** — `ls`, `ll`, `la`, `lt`, `l`, `lm`, `lr`, `du`, `dus`, `dud` would print "Feature 'modern_cli' is disabled" and do nothing when `eza`/`dust` was installed but the feature was off. They now fall back to coreutils equivalents (`command ls`, `command du`) instead of failing.
-- **Cached `_BLACKDOT_BIN` points to wrong OS binary** — Shell-init cache embeds `_BLACKDOT_BIN` from `os.Executable()` at generation time. On shared filesystems (Lima, NFS), the cache could be generated by a macOS binary and then sourced on Linux, causing `exec format error` when running `blackdot`. Now overrides `_BLACKDOT_BIN` with the locally resolved platform-correct path after sourcing cache or eval'ing fresh init.
-- **`blackdot` command exec format error in Lima VM** — `40-aliases.zsh` defined its own `blackdot()` function that used `_blackdot_go_bin()` for binary resolution. This helper fell back to `$BLACKDOT_DIR/bin/blackdot` with only a `-x` check (no binary format validation), picking up the macOS Mach-O binary on shared filesystems. Rewrote `_blackdot_go_bin()` to prefer `$_BLACKDOT_BIN` (already platform-validated by `00-init.zsh`) and added `_blackdot_go_bin_can_exec()` with ELF/Mach-O/script validation for the fallback path.
-- **`_blackdot_can_exec` rejects wrapper scripts** — The binary format check only accepted ELF (Linux) or Mach-O (Darwin), rejecting the `bin/blackdot` shell wrapper script. Now also accepts shell scripts and text files, which are platform-agnostic.
-- **Critical issues from code inspection** — Fixed three critical issues identified in inspection report (docs/inspections/2026-04-14T07-23-03.md):
-  1. **os.Exit() breaking testability** — Replaced 3 `os.Exit(1)` calls with proper error returns in `internal/cli/tools.go` (lines 48, 56) and `internal/cli/features.go` (line 594). Converted `Run` handlers to `RunE` so errors propagate through Cobra's error handling framework instead of killing the process.
-  2. **Dead export RunCommand()** — Removed unused `RunCommand()` function from `internal/cli/style.go:220`. Comment claimed "used by main" but `cmd/blackdot/main.go` actually calls `cli.Execute()`. Zero references found via LSP analysis.
-  3. **Zero test coverage for internal/shell** — Added `internal/shell/shell_test.go` with 722 lines and 16 test functions covering all 12 exported functions (Detect, ExportVar, EvalOutput, SourceCommand, CommonIntegrations, GenerateFeatureCheck). Test coverage increased from 0% to 94.3%. Tests verify cross-shell compatibility (zsh, bash, fish) and edge cases (empty values, special characters, paths with spaces).
-- **High-priority issues from code inspection** — Fixed two high-priority issues identified in inspection report (docs/inspections/2026-04-14T07-23-03.md):
-  1. **Silent error ignoring (8 instances)** — Added proper error handling for ignored errors in tools commands. Changed `_, _ = cmd.Output()` to log with `Debug()` when command failures are expected (e.g., tool not installed) or return errors when they indicate real problems. Fixed in `internal/cli/tools_python.go`, `tools_cdk.go`, `tools_rust.go`, and `tools_docker.go` (5 docker stat queries + 1 JSON marshaling). Users no longer see stale/empty data without knowing queries failed.
-  2. **Context propagation (14 vault functions)** — Added `context.Context` parameter to all vault operation functions. Cobra commands now pass `cmd.Context()` to vault functions, enabling proper cancellation with Ctrl+C. Changed context creation from `context.Background()` to chained `context.WithTimeout(ctx, ...)` in all functions. Long-running vault operations (Bitwarden CLI calls) are now properly cancellable. Updated functions: vaultStatus, vaultUnlock, vaultLock, vaultList, vaultSync, vaultGet, vaultHealth, vaultQuick, vaultRestore, vaultPush, vaultCheck, vaultCreate, vaultDelete.
-
-### Removed
-
-- **Zellij** — Removed zellij terminal multiplexer from blackdot (config, Brewfile entry, bootstrap symlink setup). Was never actively used, tmux with resurrect provides equivalent session management with simpler integration.
-
-### Added
-
 - **AUTO_CD** — `setopt AUTO_CD` enabled in 20-env.zsh so typing `..` or any directory path navigates without the `cd` prefix.
-
-### Changed
-
-- **README rewrite** — 734 → 232 lines. Value proposition up front, setup wizard excerpt, inline links to docsify site pages, single honest comparison section in a collapsible. Detailed content preserved in existing docs/ pages.
-- Fixed broken `#how-this-compares` anchor in `docs/README.md` → `#how-blackdot-compares`.
-
-### Docs
-
-- **architecture.md** — Fixed ZSH module table (listed fictional modules like `10-environment.zsh`, `20-history.zsh` instead of actual `10-plugins.zsh`, `20-env.zsh`, etc.). Fixed feature category table (`aws_helpers` listed as Optional instead of Integration, 8 integration features missing). Fixed preset tables to match registry. Updated CLI command count from 20+ to 30+.
-- **_sidebar.md** — Removed 4 links to non-existent design docs (`IMPL-plugin-system`, `IMPL-hook-system`, `IMPL-configuration-layers`, `IMPL-cli-feature-awareness`). Added orphaned pages `TESTDRIVE.md` and `DOTCLAUDE-INTEGRATION.md`.
-- **cli-reference.md** — Fixed preset table (developer preset showed 5 features, actual is 14).
-- **troubleshooting.md** — Added `$0` vs `${(%):-%x}` as the primary cause of "ZSH modules not loading" (the bug fixed in this release).
-- **docs/README.md** — Standardized alias count from "70+" to "90+" to match GitHub README.
-- **developer-tools.md** — Removed "Coming Soon" section for unimplemented `blackdot aliases` command.
-- **.gitignore** — Added `zsh/zsh.d/99-local.zsh` (the example file told users it was gitignored, but the pattern was missing).
-
-## [4.0.0-rc6] - TBD
-
-**Release Candidate 6 - Devcontainer Support & Documentation Refinement**
-
-### Added
-
 - **Devcontainer Integration**
   - New `blackdot devcontainer` command for generating devcontainer configurations
   - `blackdot devcontainer init` - generate devcontainer.json with blackdot feature
@@ -123,6 +73,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **SSH `list`/`hosts` output** — Now displays a styled colored table with Host, HostName, User, Port, and IdentityFile columns instead of a plain text list.
+- **SSH `agent` output** — Now displays loaded keys in a styled colored table instead of raw `ssh-add -l` output.
+- **`blackdot` command uses resolved binary** — `shell-init` emits a `blackdot()` wrapper function that always invokes the platform-correct binary. Prevents `exec format error` on shared filesystems.
+- **Shell-init cache is platform-specific** — Cache file is now `shell-init-${os}-${arch}.zsh` so macOS and Linux don't overwrite each other on shared filesystems.
+- **README rewrite** — 734 → 232 lines. Value proposition up front, inline links to docsify site pages.
 - **Documentation Improvements**
   - Updated architecture diagram to night mode for better visibility
   - Renamed primary alias from `d` to `b` for blackdot branding consistency
@@ -135,9 +90,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Code quality fixes from inspection** — Resolved 7 findings from automated inspection:
+  - `registry.go`: `strings.ReplaceAll("_","_")` no-op → `(".", "_")` — feature names with dots were not normalizing to correct env var format
+  - `doctor.go`: Removed dead `total` variable; replaced duplicate `getBlackdotDir()` with canonical `BlackdotDir()`
+  - `template.go`: Renamed `errors` variable that was shadowing the stdlib `errors` package
+  - `config.go`: Silent `json.Unmarshal` discard now returns error on malformed JSON — prevents silent config corruption
+  - `backup.go`: `tw.Write()` return value was ignored; now checked
+  - `shell_init.go`: Wired `internal/shell` package for auto-detection; was previously unused in production
+- **Cross-platform binary resolution** — Shell init prefers platform-specific binaries with ELF/Mach-O format validation. Fixes `exec format error` when a macOS host shares dotfiles with a Lima/NFS-mounted Linux VM.
+- **Installer saves platform-specific binary names** — Saved as `blackdot-${os}-${arch}` with a symlink; multiple platforms can coexist on shared filesystems.
+- **Zsh modules not loading in new tmux panes** — Switched `zshrc` from `${0:A:h}` to `${(%):-%x}`. `$0` resolves to the shell name during automatic startup, causing zero modules to load in tmux panes.
+- **Homebrew PATH not available in tmux panes** — Moved Homebrew `shellenv` to early PATH setup in `00-init.zsh`, before binary resolution.
+- **Modern CLI tools block shell when feature disabled** — `ls`, `ll`, `la` etc. now fall back to coreutils equivalents instead of printing "Feature disabled".
+- **Alias/function collisions in zsh** — Removed 11 duplicate aliases causing `parse error near '()'` on shell load.
+- **`os.Exit()` breaking testability** — Replaced 3 `os.Exit(1)` calls with proper error returns; converted `Run` handlers to `RunE`.
+- **Silent error ignoring** — Added proper error handling in `tools_python.go`, `tools_cdk.go`, `tools_rust.go`, `tools_docker.go`.
+- **Context propagation in vault functions** — Added `context.Context` to all 14 vault operations; Bitwarden CLI calls are now cancellable with Ctrl+C.
 - Architecture diagram contrast and readability
 - PowerShell module manifest missing `Initialize-Starship` export
 - PASS_PREFIX in vault docs updated from `dotfiles` to `blackdot`
+
+### Removed
+
+- **Zellij** — Removed from Brewfile, config, and bootstrap. Tmux with resurrect covers the same use case.
 
 ## [4.0.0-rc5] - 2025-12-11
 
