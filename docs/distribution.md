@@ -50,10 +50,7 @@ brew install blackdot
 brew install blackwell-systems/tap/blackdot
 ```
 
-**Current version:** v4.0.0-rc5 (pinned, needs update on each release)
-
-**TODO — Auto-update on release:**  
-The formula SHA256 hashes must be updated manually right now. Add a step to `release.yml` to automatically update the formula after binaries are built. The `homebrew-formula-updater` tool (at `workspace/code/homebrew-formula-updater`) may handle this.
+Formula is updated automatically on each release via goreleaser.
 
 **Future:** Consider submitting to homebrew-core once stable (removes tap requirement).
 

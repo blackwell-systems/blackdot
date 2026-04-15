@@ -131,12 +131,13 @@ blackdot feat               # Alias
 
 | Command | Description |
 |---------|-------------|
-| `list` | List all features and their status (default) |
-| `status [feature]` | Show status for one or all features |
+| `list [category]` | List all features and their status (default) |
+| `show <feature>` | Show detailed feature info (alias: `status`) |
 | `enable <feature>` | Enable a feature |
 | `disable <feature>` | Disable a feature |
 | `preset <name>` | Enable a preset (group of features) |
 | `check <feature>` | Check if feature is enabled (for scripts) |
+| `validate` | Validate registry for circular dependencies |
 | `help` | Show help |
 
 **List Options:**
@@ -145,7 +146,6 @@ blackdot feat               # Alias
 |--------|-------|-------------|
 | `--all` | `-a` | Show dependencies |
 | `--json` | `-j` | Output as JSON |
-| `--category` | `-c` | Filter by category (core, optional, integration) |
 
 **Enable/Disable Options:**
 
@@ -561,23 +561,25 @@ Create timestamped backups of configuration files or restore from previous backu
 blackdot backup [COMMAND] [OPTIONS]
 ```
 
-**Commands:**
+**Subcommands:**
 
 | Command | Description |
 |---------|-------------|
-| (none) | Create new backup |
-| `--list`, `-l`, `list` | List available backups |
+| (none) / `create` | Create new backup |
+| `list` | List available backups |
 | `restore [ID]` | Restore from backup (latest if no ID) |
-| `--help`, `-h`, `help` | Show help |
+| `clean` | Remove old backups (keeps newest 10) |
+| `--help`, `-h` | Show help |
 
 **Examples:**
 
 ```bash
 blackdot backup              # Create new backup
-blackdot backup --list       # List available backups
+blackdot backup create       # Create new backup (explicit)
+blackdot backup list         # List available backups
 blackdot backup restore      # Restore from latest backup
 blackdot backup restore --dry-run     # Preview restore without making changes
-blackdot backup restore backup-20240115-143022  # Restore specific
+blackdot backup restore 20231207_120000  # Restore specific
 ```
 
 **Files backed up:**
@@ -589,6 +591,7 @@ blackdot backup restore backup-20240115-143022  # Restore specific
 - `~/.local/env.secrets`
 - `~/.zshrc`
 - `~/.p10k.zsh`
+- `~/.config/blackdot/config.json`
 
 **Storage:**
 - Backups stored in `~/.blackdot-backups/`

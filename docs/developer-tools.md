@@ -20,7 +20,7 @@ Blackdot provides deep integrations with modern developer tools. Each tool suite
 | [NVM](#nvm-nodejs) | `nvm_integration` | Lazy-loaded Node.js version manager |
 | [SDKMAN](#sdkman-java) | `sdkman_integration` | Lazy-loaded Java/Gradle/Kotlin manager |
 
-**Total:** 120+ aliases across all toolchains, with shell completions and helpers.
+**Total:** 90+ aliases across all toolchains, with shell completions and helpers.
 
 ### Cross-Platform Support
 
