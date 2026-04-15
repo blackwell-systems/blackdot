@@ -253,7 +253,7 @@ func TestGetLayeredEnv(t *testing.T) {
 		t.Errorf("expected Value='1password', got '%s'", result.Value)
 	}
 
-	if result.Source != LayerEnv {
+	if result.Source != layerEnv {
 		t.Errorf("expected Source=env, got '%s'", result.Source)
 	}
 }
@@ -285,7 +285,7 @@ func TestGetLayeredUser(t *testing.T) {
 		t.Errorf("expected Value='bitwarden', got '%s'", result.Value)
 	}
 
-	if result.Source != LayerUser {
+	if result.Source != layerUser {
 		t.Errorf("expected Source=user, got '%s'", result.Source)
 	}
 }
@@ -310,7 +310,7 @@ func TestGetLayeredDefault(t *testing.T) {
 		t.Fatalf("GetLayered failed: %v", err)
 	}
 
-	if result.Source != LayerDefault {
+	if result.Source != layerDefault {
 		t.Errorf("expected Source=default, got '%s'", result.Source)
 	}
 }
@@ -349,33 +349,33 @@ func TestSetUnknownVaultKey(t *testing.T) {
 
 // TestLayerConstants verifies layer constants
 func TestLayerConstants(t *testing.T) {
-	if LayerEnv != "env" {
-		t.Error("LayerEnv should be 'env'")
+	if layerEnv != "env" {
+		t.Error("layerEnv should be 'env'")
 	}
-	if LayerProject != "project" {
-		t.Error("LayerProject should be 'project'")
+	if layerProject != "project" {
+		t.Error("layerProject should be 'project'")
 	}
-	if LayerMachine != "machine" {
-		t.Error("LayerMachine should be 'machine'")
+	if layerMachine != "machine" {
+		t.Error("layerMachine should be 'machine'")
 	}
-	if LayerUser != "user" {
-		t.Error("LayerUser should be 'user'")
+	if layerUser != "user" {
+		t.Error("layerUser should be 'user'")
 	}
-	if LayerDefault != "default" {
-		t.Error("LayerDefault should be 'default'")
+	if layerDefault != "default" {
+		t.Error("layerDefault should be 'default'")
 	}
 }
 
 // TestConfigFileConstants verifies file name constants
 func TestConfigFileConstants(t *testing.T) {
-	if ProjectConfigFile != ".blackdot.json" {
-		t.Error("ProjectConfigFile should be '.blackdot.json'")
+	if projectConfigFile != ".blackdot.json" {
+		t.Error("projectConfigFile should be '.blackdot.json'")
 	}
-	if MachineConfigFile != "machine.json" {
-		t.Error("MachineConfigFile should be 'machine.json'")
+	if machineConfigFile != "machine.json" {
+		t.Error("machineConfigFile should be 'machine.json'")
 	}
-	if UserConfigFile != "config.json" {
-		t.Error("UserConfigFile should be 'config.json'")
+	if userConfigFile != "config.json" {
+		t.Error("userConfigFile should be 'config.json'")
 	}
 }
 
@@ -462,7 +462,7 @@ func TestLayerResultFields(t *testing.T) {
 	result := &LayerResult{
 		Key:    "vault.backend",
 		Value:  "bitwarden",
-		Source: LayerUser,
+		Source: layerUser,
 		File:   "/path/to/config.json",
 	}
 
@@ -472,7 +472,7 @@ func TestLayerResultFields(t *testing.T) {
 	if result.Value != "bitwarden" {
 		t.Error("Value not set correctly")
 	}
-	if result.Source != LayerUser {
+	if result.Source != layerUser {
 		t.Error("Source not set correctly")
 	}
 	if result.File != "/path/to/config.json" {
