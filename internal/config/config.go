@@ -11,25 +11,26 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
-// Layer represents a configuration layer
-type Layer string
+// layer represents a configuration layer
+type layer string
 
 const (
-	LayerEnv     Layer = "env"
-	LayerProject Layer = "project"
-	LayerMachine Layer = "machine"
-	LayerUser    Layer = "user"
-	LayerDefault Layer = "default"
+	layerEnv     layer = "env"
+	layerProject layer = "project"
+	layerMachine layer = "machine"
+	layerUser    layer = "user"
+	layerDefault layer = "default"
 )
 
 // Config file names
 const (
-	ProjectConfigFile = ".blackdot.json"
-	MachineConfigFile = "machine.json"
-	UserConfigFile    = "config.json"
+	projectConfigFile = ".blackdot.json"
+	machineConfigFile = "machine.json"
+	userConfigFile    = "config.json"
 )
 
 // Config represents the blackdot configuration
@@ -59,7 +60,7 @@ type SetupState struct {
 type LayerResult struct {
 	Key    string `json:"key"`
 	Value  string `json:"value"`
-	Source Layer  `json:"source"`
+	Source layer  `json:"source"`
 	File   string `json:"file,omitempty"`
 }
 
@@ -103,12 +104,12 @@ func DefaultManager() *Manager {
 
 // UserConfigPath returns the path to user config
 func (m *Manager) UserConfigPath() string {
-	return filepath.Join(m.configDir, UserConfigFile)
+	return filepath.Join(m.configDir, userConfigFile)
 }
 
 // MachineConfigPath returns the path to machine config
 func (m *Manager) MachineConfigPath() string {
-	return filepath.Join(m.configDir, MachineConfigFile)
+	return filepath.Join(m.configDir, machineConfigFile)
 }
 
 // ProjectConfigPath finds .blackdot.json by walking up from cwd
@@ -119,7 +120,7 @@ func (m *Manager) ProjectConfigPath() string {
 	}
 
 	for {
-		path := filepath.Join(dir, ProjectConfigFile)
+		path := filepath.Join(dir, projectConfigFile)
 		if _, err := os.Stat(path); err == nil {
 			return path
 		}
@@ -190,7 +191,7 @@ func (m *Manager) GetLayered(key string) (*LayerResult, error) {
 	envKey := "BLACKDOT_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
 	if val := os.Getenv(envKey); val != "" {
 		result.Value = val
-		result.Source = LayerEnv
+		result.Source = layerEnv
 		result.File = envKey
 		return result, nil
 	}
@@ -200,7 +201,7 @@ func (m *Manager) GetLayered(key string) (*LayerResult, error) {
 		if cfg, err := m.loadFile(path); err == nil {
 			if val, err := getNestedValue(cfg, key); err == nil && val != "" {
 				result.Value = val
-				result.Source = LayerProject
+				result.Source = layerProject
 				result.File = path
 				return result, nil
 			}
@@ -211,7 +212,7 @@ func (m *Manager) GetLayered(key string) (*LayerResult, error) {
 	if cfg, err := m.loadFile(m.MachineConfigPath()); err == nil {
 		if val, err := getNestedValue(cfg, key); err == nil && val != "" {
 			result.Value = val
-			result.Source = LayerMachine
+			result.Source = layerMachine
 			result.File = m.MachineConfigPath()
 			return result, nil
 		}
@@ -221,14 +222,14 @@ func (m *Manager) GetLayered(key string) (*LayerResult, error) {
 	if cfg, err := m.loadFile(m.UserConfigPath()); err == nil {
 		if val, err := getNestedValue(cfg, key); err == nil && val != "" {
 			result.Value = val
-			result.Source = LayerUser
+			result.Source = layerUser
 			result.File = m.UserConfigPath()
 			return result, nil
 		}
 	}
 
 	// Layer 5: Default
-	result.Source = LayerDefault
+	result.Source = layerDefault
 	return result, nil
 }
 
@@ -255,7 +256,7 @@ func getNestedValue(cfg *Config, key string) (string, error) {
 
 	switch parts[0] {
 	case "version":
-		return string(rune(cfg.Version + '0')), nil
+		return strconv.Itoa(cfg.Version), nil
 	case "vault":
 		if len(parts) < 2 {
 			return "", errors.New("incomplete vault key")
