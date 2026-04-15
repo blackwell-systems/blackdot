@@ -32,6 +32,7 @@
 
 - **Planning**
   - [Roadmap](ROADMAP.md)
+  - [Distribution](distribution.md)
 
 - **Design Documents**
   - [Devcontainers](design/IMPL-devcontainers.md)
