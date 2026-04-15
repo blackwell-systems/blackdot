@@ -41,4 +41,4 @@ bin/blackdot-*
 bin/dotfiles
 /dotfiles-go
 bin/dotfiles-go
-blackdot
+bin/blackdot
