@@ -585,7 +585,9 @@ func updateSyncTimestamps(timestamp string, pushed, pulled bool) {
 	if err != nil {
 		return
 	}
-	os.WriteFile(configFile, updatedData, 0644)
+	if err := os.WriteFile(configFile, updatedData, 0644); err != nil {
+		Warn("failed to persist sync timestamps: %v", err)
+	}
 }
 
 func saveDriftState(items []string, session, driftStateFile string) {
@@ -631,5 +633,7 @@ func saveDriftState(items []string, session, driftStateFile string) {
 	if err != nil {
 		return
 	}
-	os.WriteFile(driftStateFile, data, 0644)
+	if err := os.WriteFile(driftStateFile, data, 0644); err != nil {
+		Warn("failed to save drift state: %v", err)
+	}
 }
