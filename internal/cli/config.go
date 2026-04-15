@@ -8,20 +8,15 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/blackwell-systems/blackdot/internal/config"
 	"github.com/spf13/cobra"
 )
 
-// Config layer paths
-var (
-	configLayerUser    = filepath.Join(os.Getenv("HOME"), ".config", "blackdot", "config.json")
-	configLayerMachine = filepath.Join(os.Getenv("HOME"), ".config", "blackdot", "machine.json")
-)
-
-func init() {
-	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" {
-		configLayerUser = filepath.Join(xdg, "blackdot", "config.json")
-		configLayerMachine = filepath.Join(xdg, "blackdot", "machine.json")
-	}
+// configPaths returns the resolved user and machine config paths.
+// Environment variables are read at call time (lazy evaluation).
+func configPaths() (userPath, machinePath string) {
+	mgr := config.DefaultManager()
+	return mgr.UserConfigPath(), mgr.MachineConfigPath()
 }
 
 func newConfigCmd() *cobra.Command {
@@ -254,34 +249,14 @@ Layers: user (default), machine, project`,
 // ============================================================
 
 func configGet(key, defaultVal string) error {
-	// Check environment first
-	envKey := "BLACKDOT_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
-	if val := os.Getenv(envKey); val != "" {
-		fmt.Println(val)
+	result, err := config.DefaultManager().GetLayered(key)
+	if err != nil {
+		return fmt.Errorf("config get %s: %w", key, err)
+	}
+	if result.Value != "" {
+		fmt.Println(result.Value)
 		return nil
 	}
-
-	// Check project config
-	if projectConfig := findProjectConfig(); projectConfig != "" {
-		if val := getFromJSONFile(projectConfig, key); val != "" {
-			fmt.Println(val)
-			return nil
-		}
-	}
-
-	// Check machine config
-	if val := getFromJSONFile(configLayerMachine, key); val != "" {
-		fmt.Println(val)
-		return nil
-	}
-
-	// Check user config
-	if val := getFromJSONFile(configLayerUser, key); val != "" {
-		fmt.Println(val)
-		return nil
-	}
-
-	// Return default
 	if defaultVal != "" {
 		fmt.Println(defaultVal)
 	}
@@ -289,13 +264,14 @@ func configGet(key, defaultVal string) error {
 }
 
 func configSet(layer, key, value string) error {
+	userPath, machinePath := configPaths()
 	var configFile string
 
 	switch layer {
 	case "user":
-		configFile = configLayerUser
+		configFile = userPath
 	case "machine":
-		configFile = configLayerMachine
+		configFile = machinePath
 	case "project":
 		configFile = findProjectConfig()
 		if configFile == "" {
@@ -320,60 +296,50 @@ func configSet(layer, key, value string) error {
 
 func configShow(key string) error {
 	PrintHeader("Config: " + key)
+	mgr := config.DefaultManager()
 
-	// Environment
-	envKey := "BLACKDOT_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
-	if val := os.Getenv(envKey); val != "" {
-		fmt.Printf("  env:      %s  %s\n", val, Green.Sprint("← active"))
-		return nil
+	layers := []struct {
+		label string
+		fetch func() string
+	}{
+		{"env", func() string {
+			envKey := "BLACKDOT_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
+			return os.Getenv(envKey)
+		}},
+		{"project", func() string {
+			if path := mgr.ProjectConfigPath(); path != "" {
+				return getFromJSONFile(path, key)
+			}
+			return ""
+		}},
+		{"machine", func() string {
+			return getFromJSONFile(mgr.MachineConfigPath(), key)
+		}},
+		{"user", func() string {
+			return getFromJSONFile(mgr.UserConfigPath(), key)
+		}},
 	}
-	fmt.Printf("  env:      %s\n", Dim.Sprint("(not set)"))
 
-	// Project
 	active := false
-	projectConfig := findProjectConfig()
-	if projectConfig != "" {
-		if val := getFromJSONFile(projectConfig, key); val != "" {
+	for _, l := range layers {
+		val := l.fetch()
+		if val != "" {
 			if !active {
-				fmt.Printf("  project:  %s  %s\n", val, Green.Sprint("← active"))
+				fmt.Printf("  %-9s %s  %s\n", l.label+":", val, Green.Sprint("<- active"))
 				active = true
 			} else {
-				fmt.Printf("  project:  %s\n", val)
+				fmt.Printf("  %-9s %s\n", l.label+":", val)
 			}
 		} else {
-			fmt.Printf("  project:  %s\n", Dim.Sprint("(not set)"))
+			fmt.Printf("  %-9s %s\n", l.label+":", Dim.Sprint("(not set)"))
 		}
-	} else {
-		fmt.Printf("  project:  %s\n", Dim.Sprint("(no config)"))
 	}
-
-	// Machine
-	if val := getFromJSONFile(configLayerMachine, key); val != "" {
-		if !active {
-			fmt.Printf("  machine:  %s  %s\n", val, Green.Sprint("← active"))
-			active = true
-		} else {
-			fmt.Printf("  machine:  %s\n", val)
-		}
-	} else {
-		fmt.Printf("  machine:  %s\n", Dim.Sprint("(not set)"))
-	}
-
-	// User
-	if val := getFromJSONFile(configLayerUser, key); val != "" {
-		if !active {
-			fmt.Printf("  user:     %s  %s\n", val, Green.Sprint("← active"))
-		} else {
-			fmt.Printf("  user:     %s\n", val)
-		}
-	} else {
-		fmt.Printf("  user:     %s\n", Dim.Sprint("(not set)"))
-	}
-
 	return nil
 }
 
 func configSource(key, defaultVal string) error {
+	userPath, machinePath := configPaths()
+
 	type sourceResult struct {
 		Value string `json:"value"`
 		Layer string `json:"layer"`
@@ -402,16 +368,16 @@ func configSource(key, defaultVal string) error {
 	}
 
 	// Check machine config
-	if val := getFromJSONFile(configLayerMachine, key); val != "" {
-		result = sourceResult{Value: val, Layer: "machine", Path: configLayerMachine}
+	if val := getFromJSONFile(machinePath, key); val != "" {
+		result = sourceResult{Value: val, Layer: "machine", Path: machinePath}
 		data, _ := json.Marshal(result)
 		fmt.Println(string(data))
 		return nil
 	}
 
 	// Check user config
-	if val := getFromJSONFile(configLayerUser, key); val != "" {
-		result = sourceResult{Value: val, Layer: "user", Path: configLayerUser}
+	if val := getFromJSONFile(userPath, key); val != "" {
+		result = sourceResult{Value: val, Layer: "user", Path: userPath}
 		data, _ := json.Marshal(result)
 		fmt.Println(string(data))
 		return nil
@@ -429,6 +395,8 @@ func configSource(key, defaultVal string) error {
 }
 
 func configList() error {
+	userPath, machinePath := configPaths()
+
 	PrintHeader("Configuration Layers")
 	fmt.Println()
 	fmt.Println("Layer Locations:")
@@ -446,17 +414,17 @@ func configList() error {
 	}
 
 	// Machine
-	if _, err := os.Stat(configLayerMachine); err == nil {
-		fmt.Printf("  machine:   %s %s\n", configLayerMachine, Green.Sprint("✓"))
+	if _, err := os.Stat(machinePath); err == nil {
+		fmt.Printf("  machine:   %s %s\n", machinePath, Green.Sprint("✓"))
 	} else {
-		fmt.Printf("  machine:   %s\n", Dim.Sprint(configLayerMachine+" (not found)"))
+		fmt.Printf("  machine:   %s\n", Dim.Sprint(machinePath+" (not found)"))
 	}
 
 	// User
-	if _, err := os.Stat(configLayerUser); err == nil {
-		fmt.Printf("  user:      %s %s\n", configLayerUser, Green.Sprint("✓"))
+	if _, err := os.Stat(userPath); err == nil {
+		fmt.Printf("  user:      %s %s\n", userPath, Green.Sprint("✓"))
 	} else {
-		fmt.Printf("  user:      %s\n", Dim.Sprint(configLayerUser+" (not found)"))
+		fmt.Printf("  user:      %s\n", Dim.Sprint(userPath+" (not found)"))
 	}
 
 	fmt.Println()
@@ -467,15 +435,17 @@ func configList() error {
 }
 
 func configMerged() error {
+	userPath, machinePath := configPaths()
+
 	PrintHeader("Merged Configuration")
 
 	merged := make(map[string]interface{})
 
 	// Load user config (lowest priority)
-	loadJSONInto(configLayerUser, merged)
+	loadJSONInto(userPath, merged)
 
 	// Load machine config
-	loadJSONInto(configLayerMachine, merged)
+	loadJSONInto(machinePath, merged)
 
 	// Load project config
 	if projectConfig := findProjectConfig(); projectConfig != "" {
@@ -508,20 +478,22 @@ func configInit(layer, identifier string) error {
 }
 
 func configInitMachine(identifier string) error {
+	_, machinePath := configPaths()
+
 	if identifier == "" {
 		hostname, _ := os.Hostname()
 		identifier = hostname
 	}
 
 	// Check if already exists
-	if _, err := os.Stat(configLayerMachine); err == nil {
-		Warn("Machine config already exists: %s", configLayerMachine)
+	if _, err := os.Stat(machinePath); err == nil {
+		Warn("Machine config already exists: %s", machinePath)
 		fmt.Println("Edit it with: blackdot config edit machine")
 		return nil
 	}
 
 	// Create directory
-	os.MkdirAll(filepath.Dir(configLayerMachine), 0755)
+	os.MkdirAll(filepath.Dir(machinePath), 0755)
 
 	// Create initial config
 	initialConfig := map[string]interface{}{
@@ -532,12 +504,12 @@ func configInitMachine(identifier string) error {
 	}
 
 	data, _ := json.MarshalIndent(initialConfig, "", "  ")
-	if err := os.WriteFile(configLayerMachine, data, 0644); err != nil {
+	if err := os.WriteFile(machinePath, data, 0644); err != nil {
 		Fail("Failed to create machine config: %v", err)
 		return err
 	}
 
-	Pass("Created machine config: %s", configLayerMachine)
+	Pass("Created machine config: %s", machinePath)
 	fmt.Printf("  Identifier: %s\n", identifier)
 	fmt.Println()
 	fmt.Println("Edit with: blackdot config edit machine")
@@ -574,6 +546,8 @@ func configInitProject() error {
 }
 
 func configEdit(layer string) error {
+	userPath, machinePath := configPaths()
+
 	editor := os.Getenv("EDITOR")
 	if editor == "" {
 		editor = "vim"
@@ -582,9 +556,9 @@ func configEdit(layer string) error {
 	var configFile string
 	switch layer {
 	case "user":
-		configFile = configLayerUser
+		configFile = userPath
 	case "machine":
-		configFile = configLayerMachine
+		configFile = machinePath
 	case "project":
 		configFile = findProjectConfig()
 		if configFile == "" {
