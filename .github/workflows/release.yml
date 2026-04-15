@@ -4,240 +4,46 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release (e.g., v1.0.0)'
-        required: true
-        type: string
 
 permissions:
   contents: write
 
 jobs:
-  validate:
-    name: Validate Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.23'
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y zsh
-
-      - name: Run Go tests
-        run: |
-          echo "Running Go test suite..."
-          go test -v ./...
-
-      - name: Validate remaining shell scripts
-        run: |
-          echo "Validating vault and bootstrap scripts..."
-          for script in vault/*.sh bootstrap/*.sh; do
-            if [[ -f "$script" ]]; then
-              zsh -n "$script" || exit 1
-            fi
-          done
-          echo "All scripts valid!"
-
-  build-binaries:
-    name: Build Go Binaries
-    needs: validate
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - goos: linux
-            goarch: amd64
-            suffix: ""
-          - goos: linux
-            goarch: arm64
-            suffix: ""
-          - goos: darwin
-            goarch: amd64
-            suffix: ""
-          - goos: darwin
-            goarch: arm64
-            suffix: ""
-          - goos: windows
-            goarch: amd64
-            suffix: ".exe"
-          - goos: windows
-            goarch: arm64
-            suffix: ".exe"
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.23'
-
-      - name: Get version
-        id: version
-        run: |
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            VERSION="${{ github.event.inputs.version }}"
-          else
-            VERSION="${GITHUB_REF#refs/tags/}"
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Build binary
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: 0
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          BINARY_NAME="blackdot-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}"
-
-          go build -ldflags="-s -w -X main.version=${VERSION} -X main.commit=${GITHUB_SHA::8} -X main.date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            -o "dist/${BINARY_NAME}" \
-            ./cmd/blackdot/
-
-          # Create checksum for this binary
-          cd dist && sha256sum "${BINARY_NAME}" > "${BINARY_NAME}.sha256"
-
-      - name: Upload binary artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: binary-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: dist/
-          retention-days: 1
-
   release:
-    name: Create Release
-    needs: build-binaries
+    name: Release
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    - name: Check out code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-      - name: Download all binary artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: binaries
-          pattern: binary-*
-          merge-multiple: true
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23'
 
-      - name: Get version
-        id: version
-        run: |
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            VERSION="${{ github.event.inputs.version }}"
-          else
-            VERSION="${GITHUB_REF#refs/tags/}"
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Release version: $VERSION"
+    - name: Run tests
+      run: go test ./...
 
-      - name: Generate changelog
-        id: changelog
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
+    - name: Run GoReleaser
+      uses: goreleaser/goreleaser-action@v6
+      with:
+        distribution: goreleaser
+        version: latest
+        args: release --clean
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
 
-          # Get previous tag
-          PREV_TAG=$(git tag --sort=-v:refname | grep -v "^$VERSION$" | head -1)
-
-          echo "## What's Changed" > release_notes.md
-          echo "" >> release_notes.md
-
-          if [ -n "$PREV_TAG" ]; then
-            echo "Changes since $PREV_TAG:" >> release_notes.md
-            echo "" >> release_notes.md
-            git log --pretty=format:"- %s" "$PREV_TAG"..HEAD >> release_notes.md
-          else
-            echo "Initial release" >> release_notes.md
-          fi
-
-          echo "" >> release_notes.md
-          echo "## Installation" >> release_notes.md
-          echo "" >> release_notes.md
-          echo '```bash' >> release_notes.md
-          echo '# One-line installer (recommended)' >> release_notes.md
-          echo 'curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash' >> release_notes.md
-          echo '' >> release_notes.md
-          echo '# Or download binary directly' >> release_notes.md
-          echo '# Linux (amd64): blackdot-linux-amd64' >> release_notes.md
-          echo '# Linux (arm64): blackdot-linux-arm64' >> release_notes.md
-          echo '# macOS (Intel): blackdot-darwin-amd64' >> release_notes.md
-          echo '# macOS (Apple Silicon): blackdot-darwin-arm64' >> release_notes.md
-          echo '# Windows (amd64): blackdot-windows-amd64.exe' >> release_notes.md
-          echo '# Windows (arm64): blackdot-windows-arm64.exe' >> release_notes.md
-          echo '```' >> release_notes.md
-          echo "" >> release_notes.md
-          echo "## Documentation" >> release_notes.md
-          echo "" >> release_notes.md
-          echo "- [Full Documentation](https://blackwell-systems.github.io/blackdot/)" >> release_notes.md
-          echo "- [Architecture](https://blackwell-systems.github.io/blackdot/#/architecture)" >> release_notes.md
-          echo "- [Troubleshooting](https://blackwell-systems.github.io/blackdot/#/troubleshooting)" >> release_notes.md
-
-          cat release_notes.md
-
-      - name: Create release archive
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-
-          # Create a clean archive excluding development files
-          git archive --format=tar.gz \
-            --prefix=blackdot-${VERSION#v}/ \
-            -o blackdot-${VERSION#v}.tar.gz \
-            HEAD
-
-          # Create zip as well
-          git archive --format=zip \
-            --prefix=blackdot-${VERSION#v}/ \
-            -o blackdot-${VERSION#v}.zip \
-            HEAD
-
-          # Create combined checksums file
-          echo "# Source Archives" > SHA256SUMS.txt
-          sha256sum blackdot-${VERSION#v}.tar.gz >> SHA256SUMS.txt
-          sha256sum blackdot-${VERSION#v}.zip >> SHA256SUMS.txt
-          echo "" >> SHA256SUMS.txt
-          echo "# Go Binaries" >> SHA256SUMS.txt
-          cat binaries/*.sha256 >> SHA256SUMS.txt
-          cat SHA256SUMS.txt
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.version.outputs.version }}
-          name: ${{ steps.version.outputs.version }}
-          body_path: release_notes.md
-          draft: false
-          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
-          files: |
-            blackdot-*.tar.gz
-            blackdot-*.zip
-            binaries/blackdot-*
-            SHA256SUMS.txt
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  notify:
-    name: Post-Release
+  winget:
+    name: Publish to winget
+    runs-on: ubuntu-latest
     needs: release
-    runs-on: ubuntu-latest
     steps:
-      - name: Summary
-        run: |
-          echo "## Release Complete" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Version: ${{ github.event.inputs.version || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Install with:" >> $GITHUB_STEP_SUMMARY
-          echo '```bash' >> $GITHUB_STEP_SUMMARY
-          echo 'curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash' >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+    - uses: vedantmgoyal9/winget-releaser@v2
+      with:
+        identifier: BlackwellSystems.blackdot
+        max-versions-to-keep: 5
+        fork-user: blackwell-systems
+        token: ${{ secrets.HOMEBREW_TAP_TOKEN }}

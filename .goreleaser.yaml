@@ -1,0 +1,114 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - main: ./cmd/blackdot
+    binary: blackdot
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.ShortCommit}} -X main.date={{.Date}}
+
+archives:
+  - format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+      - docs/*
+
+checksum:
+  name_template: 'checksums.txt'
+
+brews:
+  - repository:
+      owner: blackwell-systems
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    homepage: https://github.com/blackwell-systems/blackdot
+    description: "Developer dotfiles and environment management CLI"
+    license: MIT
+
+scoops:
+  - repository:
+      owner: blackwell-systems
+      name: scoop-bucket
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: bucket
+    homepage: https://github.com/blackwell-systems/blackdot
+    description: "Developer dotfiles and environment management CLI"
+    license: MIT
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - '^chore:'
+      - 'typo'
+
+release:
+  github:
+    owner: blackwell-systems
+    name: blackdot
+  draft: false
+  prerelease: auto
+  mode: replace
+  header: |
+    ## blackdot {{ .Tag }}
+
+    Developer dotfiles and environment management CLI.
+
+    ### Installation
+
+    **Homebrew (macOS/Linux)**:
+    ```bash
+    brew install blackwell-systems/tap/blackdot
+    ```
+
+    **Install script (Linux/macOS)**:
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
+    ```
+
+    **Scoop (Windows)**:
+    ```powershell
+    scoop bucket add blackwell-systems https://github.com/blackwell-systems/scoop-bucket
+    scoop install blackdot
+    ```
+
+    **winget (Windows)**:
+    ```powershell
+    winget install BlackwellSystems.blackdot
+    ```
+
+    **Download binary**:
+    Download the appropriate binary for your platform below.
+
+  footer: |
+    ---
+
+    **Full changelog**: See [CHANGELOG.md](https://github.com/blackwell-systems/blackdot/blob/{{ .Tag }}/CHANGELOG.md) for complete details.
