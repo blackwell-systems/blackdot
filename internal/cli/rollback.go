@@ -311,5 +311,5 @@ func rollbackRestore(specificBackup string, skipConfirm bool, dryRun bool) error
 	fmt.Println()
 
 	// Use the backup restore logic
-	return runBackupRestore(nil, []string{backupID})
+	return runBackupRestoreImpl(nil, []string{backupID}, false)
 }

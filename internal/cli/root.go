@@ -141,7 +141,11 @@ func initConfig() {
 	blackdotDir = filepath.Join(home, ".blackdot")
 }
 
-// BlackdotDir returns the resolved blackdot directory path
+// BlackdotDir returns the resolved blackdot directory path.
+// NOTE: Returns "" if called before Cobra initialization completes.
+// blackdotDir is populated by initConfig(), which is registered via
+// cobra.OnInitialize and runs before any command's RunE function.
+// Do not call BlackdotDir() from package init() or during import.
 func BlackdotDir() string {
 	return blackdotDir
 }
