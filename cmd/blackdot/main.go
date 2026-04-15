@@ -9,7 +9,7 @@ package main
 import (
 	"os"
 
-	"github.com/blackwell-systems/blackdot/internal/cli"
+	"github.com/blackwell-systems/blackdot/v4/internal/cli"
 )
 
 // Version information set by build flags

@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/blackwell-systems/blackdot/internal/config"
+	"github.com/blackwell-systems/blackdot/v4/internal/config"
 	"github.com/blackwell-systems/vaultmux"
 	_ "github.com/blackwell-systems/vaultmux/backends/bitwarden"
 	_ "github.com/blackwell-systems/vaultmux/backends/onepassword"

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/blackwell-systems/blackdot/internal/template"
+	"github.com/blackwell-systems/blackdot/v4/internal/template"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )

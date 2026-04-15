@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/blackwell-systems/blackdot/internal/config"
+	"github.com/blackwell-systems/blackdot/v4/internal/config"
 	"github.com/spf13/cobra"
 )
 

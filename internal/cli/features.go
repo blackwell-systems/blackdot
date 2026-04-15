@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/blackwell-systems/blackdot/internal/config"
-	"github.com/blackwell-systems/blackdot/internal/feature"
+	"github.com/blackwell-systems/blackdot/v4/internal/config"
+	"github.com/blackwell-systems/blackdot/v4/internal/feature"
 	"github.com/spf13/cobra"
 )
 

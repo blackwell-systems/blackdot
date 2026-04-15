@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/blackwell-systems/blackdot/internal/shell"
+	"github.com/blackwell-systems/blackdot/v4/internal/shell"
 	"github.com/spf13/cobra"
 )
 
