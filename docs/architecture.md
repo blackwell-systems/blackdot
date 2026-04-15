@@ -197,9 +197,9 @@ All optional components can be controlled via environment variables:
 | Variable | Effect | Use Case |
 |----------|--------|----------|
 | `--minimal` | Skip Homebrew, vault, Claude, /workspace | Minimal shell-only install |
-| `BREWFILE_TIER=minimal` | Install only essentials (18 packages, ~2 min) | CI/CD, servers, containers |
-| `BREWFILE_TIER=enhanced` | Modern tools without containers (43 packages, ~5 min) | Developer workstations **← RECOMMENDED** |
-| `BREWFILE_TIER=full` | Everything including Docker/Node (61 packages, ~10 min) | Full-stack development |
+| `BREWFILE_TIER=minimal` | Install only essentials (17 packages, ~2 min) | CI/CD, servers, containers |
+| `BREWFILE_TIER=enhanced` | Modern tools without containers (42 packages, ~5 min) | Developer workstations **← RECOMMENDED** |
+| `BREWFILE_TIER=full` | Everything including Docker/Node (50 packages, ~10 min) | Full-stack development |
 | `SKIP_WORKSPACE_SYMLINK=true` | Skip `/workspace` symlink | Single-machine setups |
 | `SKIP_CLAUDE_SETUP=true` | Skip Claude Code integration | Non-Claude workflows |
 | `BLACKDOT_OFFLINE=1` | Skip all vault operations | Air-gapped/offline environments |
@@ -353,9 +353,9 @@ blackdot/
 │   └── blackdot                  # The CLI (or blackdot.exe on Windows)
 │
 ├── brew/                         # Homebrew Brewfiles
-│   ├── Brewfile                  # Full install (~80 packages)
-│   ├── Brewfile.enhanced         # Modern tools (~40 packages)
-│   └── Brewfile.minimal          # Essentials only (~15 packages)
+│   ├── Brewfile                  # Full install (~50 packages)
+│   ├── Brewfile.enhanced         # Modern tools (~42 packages)
+│   └── Brewfile.minimal          # Essentials only (~17 packages)
 │
 ├── docker/                       # Docker configurations
 │   ├── Dockerfile.minimal        # Base with Go binary only
@@ -372,14 +372,15 @@ blackdot/
 │   ├── .p10k.zsh                 # Powerlevel10k theme
 │   ├── completions/              # Tab completions
 │   │   └── _blackdot             # CLI completions
-│   └── zsh.d/                    # Modular config (18 files)
+│   └── zsh.d/                    # Modular config (17 files)
 │       ├── 00-init.zsh           # Shell initialization, feature_enabled()
 │       ├── 10-plugins.zsh        # ZSH plugins
 │       ├── 20-env.zsh            # Environment variables
 │       ├── 30-tools.zsh          # Tool PATH setup
 │       ├── 40-aliases.zsh        # Aliases, blackdot command
 │       ├── 50-functions.zsh      # Shell functions
-│       ├── 60-aws.zsh            # AWS/CDK integrations
+│       ├── 60-aws.zsh            # AWS helpers
+│       ├── 61-cdk.zsh            # AWS CDK tools
 │       ├── 62-rust.zsh           # Rust tools
 │       ├── 63-go.zsh             # Go tools
 │       ├── 64-python.zsh         # Python/uv tools
@@ -434,7 +435,8 @@ flowchart LR
     D --> E[40-aliases]
     E --> F[50-functions]
     F --> G[60-aws]
-    G --> H[62‑66 tools]
+    G --> GA[61-cdk]
+    GA --> H[62‑66 tools]
     H --> I[70-claude]
     I --> J[80-git]
     J --> K[90-integrations]
@@ -449,6 +451,7 @@ flowchart LR
 | `40-aliases.zsh` | Navigation, blackdot, and utility aliases |
 | `50-functions.zsh` | Shell functions (status, j, notes, blackdot-upgrade, ssh) |
 | `60-aws.zsh` | AWS profile management and SSO helpers |
+| `61-cdk.zsh` | AWS CDK deploy, diff, and environment helpers |
 | `62-rust.zsh` … `66-docker.zsh` | Language/tool integrations (Rust, Go, Python, SSH, Docker) |
 | `70-claude.zsh` | Claude Code wrapper and routing logic |
 | `80-git.zsh` | Git shortcuts and clipboard utilities |

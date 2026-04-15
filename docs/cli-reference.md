@@ -37,6 +37,7 @@ The unified command for managing your blackdot configuration. All subcommands ar
 | `sync` | - | Bidirectional vault sync (smart push/pull) |
 | `diff` | - | Preview changes before sync/restore |
 | `backup` | - | Backup and restore configuration |
+| `rollback` | - | Instant rollback to last backup (shortcut for backup restore) |
 | `vault` | - | Secret vault operations |
 | `template` | `tmpl` | Machine-specific config templates |
 | `encrypt` | - | **Age Encryption** - encrypt sensitive files |
@@ -152,6 +153,7 @@ blackdot feat               # Alias
 | Option | Short | Description |
 |--------|-------|-------------|
 | `--persist` | `-p` | Save to config file (survives shell restart) |
+| `--dry-run` | `-n` | Preview what would change without making changes |
 
 **Preset Options:**
 
@@ -159,6 +161,7 @@ blackdot feat               # Alias
 |--------|-------|-------------|
 | `--list` | `-l` | List available presets |
 | `--persist` | `-p` | Save all preset features to config file |
+| `--dry-run` | `-n` | Preview what would change without making changes |
 
 **Available Presets:**
 
@@ -566,6 +569,7 @@ blackdot backup [COMMAND] [OPTIONS]
 blackdot backup              # Create new backup
 blackdot backup --list       # List available backups
 blackdot backup restore      # Restore from latest backup
+blackdot backup restore --dry-run     # Preview restore without making changes
 blackdot backup restore backup-20240115-143022  # Restore specific
 ```
 
@@ -583,6 +587,37 @@ blackdot backup restore backup-20240115-143022  # Restore specific
 - Backups stored in `~/.blackdot-backups/`
 - Maximum 10 backups retained (oldest auto-deleted)
 - Each backup includes a manifest with metadata
+
+---
+
+### `blackdot rollback`
+
+Instant rollback to the most recent backup. Convenience shortcut for `blackdot backup restore`.
+
+```bash
+blackdot rollback [OPTIONS]
+```
+
+**Options:**
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--to <ID>` | | Rollback to specific backup ID |
+| `--list` | `-l` | List available backups |
+| `--yes` | `-y` | Skip confirmation prompt |
+| `--dry-run` | `-n` | Preview what would be rolled back without making changes |
+
+**Examples:**
+
+```bash
+blackdot rollback              # Rollback to latest backup (with confirmation)
+blackdot rollback --dry-run    # Preview rollback without making changes
+blackdot rollback --yes        # Rollback without confirmation
+blackdot rollback --list       # List available backups
+blackdot rollback --to backup-20240115-143022  # Rollback to specific backup
+```
+
+**Note:** Requires `backup_auto` feature to be enabled. Use `blackdot features enable backup_auto` to enable it.
 
 ---
 
@@ -1721,6 +1756,7 @@ blackdot dc <command>    # Alias
 |---------|-------------|
 | `init` | Generate a devcontainer.json for your project |
 | `images` | List available base images |
+| `services` | List available services for docker-compose |
 | `help` | Show help |
 
 ---
@@ -1742,6 +1778,8 @@ blackdot devcontainer init [OPTIONS]
 | `--output` | `-o` | Output directory (default: .devcontainer) |
 | `--force` | `-f` | Overwrite existing devcontainer.json |
 | `--no-extensions` | | Don't include VS Code extensions |
+| `--services` | | Supporting services (postgres, redis, mysql, mongo, sqlite, localstack, minio) |
+| `--stack` | | Predefined service stack (web, api, aws, full, mongo) |
 
 **Available Images:**
 
@@ -1807,6 +1845,31 @@ blackdot devcontainer images
 **Output:**
 
 Shows all supported images with their descriptions and included VS Code extensions.
+
+---
+
+### `blackdot devcontainer services`
+
+List all available services for docker-compose integration.
+
+```bash
+blackdot devcontainer services
+```
+
+**Output:**
+
+Shows all supported services (postgres, redis, mysql, mongo, sqlite, localstack, minio) with their descriptions and environment variables.
+
+**Example:**
+
+```bash
+# List available services
+blackdot devcontainer services
+
+# Generate devcontainer with services
+blackdot devcontainer init --image go --services postgres,redis
+blackdot devcontainer init --image node --stack web
+```
 
 ---
 
@@ -2110,9 +2173,9 @@ curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/ins
 |----------|--------|-------------|
 | `SKIP_WORKSPACE_SYMLINK` | `true` | Skip `/workspace` symlink creation |
 | `SKIP_CLAUDE_SETUP` | `true` | Skip Claude Code configuration |
-| `BREWFILE_TIER` | `minimal` | Install only essentials (18 packages, ~2 min) |
-| `BREWFILE_TIER` | `enhanced` | Modern CLI tools without containers (43 packages, ~5 min) **← RECOMMENDED** |
-| `BREWFILE_TIER` | `full` | Everything including Docker/Node (61 packages, ~10 min) [default] |
+| `BREWFILE_TIER` | `minimal` | Install only essentials (17 packages, ~2 min) |
+| `BREWFILE_TIER` | `enhanced` | Modern CLI tools without containers (42 packages, ~5 min) **← RECOMMENDED** |
+| `BREWFILE_TIER` | `full` | Everything including Docker/Node (50 packages, ~10 min) [default] |
 
 **Note:** The `blackdot setup` wizard now presents tier selection interactively. These environment variables are for advanced/automated setups.
 

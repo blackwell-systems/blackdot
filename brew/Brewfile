@@ -5,9 +5,9 @@
 # Install: brew bundle (uses this file by default)
 #
 # OTHER TIERS:
-#   Brewfile.minimal  - Essentials only (~15 packages)
-#   Brewfile.enhanced - Modern tools without containers (~40 packages)
-#   Brewfile          - Everything including Docker/Node (~80 packages)
+#   Brewfile.minimal  - Essentials only (~17 packages)
+#   Brewfile.enhanced - Modern tools without containers (~42 packages)
+#   Brewfile          - Everything including Docker/Node (~50 packages)
 #
 # Choose a tier:
 #   brew bundle --file=Brewfile.minimal

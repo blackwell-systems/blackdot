@@ -31,7 +31,7 @@
 //	blackdot features enable vault
 //
 //	# Manage secrets
-//	blackdot vault restore
+//	blackdot vault pull
 //	blackdot vault push
 //
 //	# Health checks

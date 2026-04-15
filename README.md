@@ -61,9 +61,9 @@ The installer walks you through seven steps. Progress is saved — exit anytime 
 
 Which package tier would you like?
 
-  1) minimal    18 packages (~2 min)   # Essentials only
-  2) enhanced   43 packages (~5 min)   # Modern tools ← RECOMMENDED
-  3) full       61 packages (~10 min)  # Everything (Docker, etc.)
+  1) minimal    17 packages (~2 min)   # Essentials only
+  2) enhanced   42 packages (~5 min)   # Modern tools ← RECOMMENDED
+  3) full       50 packages (~10 min)  # Everything (Docker, etc.)
 ```
 
 Steps: **Workspace** > **Symlinks** > **Packages** > **Vault** > **Secrets** > **Claude Code** > **Templates**
@@ -101,7 +101,7 @@ Everything is optional except shell config. Start minimal, add what you need.
 | Component | What It Does | How to Skip |
 |-----------|-------------|-------------|
 | **Shell config** | Zsh/PowerShell + prompt, plugins, aliases | Cannot skip (core) |
-| **Packages** | CLI tools via Homebrew/winget (18/43/61 packages) | `--minimal` flag |
+| **Packages** | CLI tools via Homebrew/winget (17/42/50 packages) | `--minimal` flag |
 | **Vault** | Multi-backend secrets management | Select "Skip" in wizard |
 | **Claude Code** | Portable sessions + dotclaude profiles | `SKIP_CLAUDE_SETUP=true` |
 | **Templates** | Machine-specific configs (work vs personal) | Don't run `blackdot template` |
