@@ -40,7 +40,7 @@ The installer runs an [interactive setup wizard](#setup-wizard) — you choose w
 
 ```bash
 blackdot features              # See what's enabled
-blackdot features preset dev   # Enable developer tools
+blackdot features preset developer   # Enable developer tools
 blackdot vault pull            # Restore secrets from vault
 blackdot doctor                # Health check + auto-fix
 blackdot status                # Visual dashboard
@@ -121,7 +121,17 @@ blackdot features preset full       # Everything
 ## Install Options
 
 ```bash
-# Minimal: just shell config, no packages/vault/Claude
+# Homebrew (macOS/Linux)
+brew install blackwell-systems/tap/blackdot
+
+# go install
+go install github.com/blackwell-systems/blackdot/v4/cmd/blackdot@latest
+
+# Scoop (Windows)
+scoop bucket add blackwell-systems https://github.com/blackwell-systems/scoop-bucket
+scoop install blackdot
+
+# Minimal curl install: just shell config, no packages/vault/Claude
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash -s -- --minimal
 
 # Custom workspace directory (default: ~/workspace)

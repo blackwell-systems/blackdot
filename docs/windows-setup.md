@@ -67,7 +67,7 @@ blackdot setup
 
 ### Optional (for full functionality)
 
-- **Go 1.21+** - For building the CLI from source: `winget install GoLang.Go`
+- **Go 1.24+** - For building the CLI from source: `winget install GoLang.Go`
 - **Bitwarden CLI** - For vault sync: `winget install Bitwarden.CLI`
 - **1Password CLI** - Alternative vault: `winget install AgileBits.1Password.CLI`
 - **Docker Desktop** - For Docker tools: `winget install Docker.DockerDesktop`
@@ -121,17 +121,20 @@ cd powershell
 blackdot setup
 ```
 
-### Option 3: Download Pre-built Binary
+### Option 3: Package Manager
 
-If Go isn't installed, download a pre-built binary:
+Install via Scoop (recommended for developers) or winget:
 
 ```powershell
-# Check releases page for latest
-# https://github.com/blackwell-systems/blackdot/releases
+# Scoop
+scoop bucket add blackwell-systems https://github.com/blackwell-systems/scoop-bucket
+scoop install blackdot
 
-# Download and extract to PATH
-# Then run: blackdot setup
+# winget (PR pending — not yet available)
+# winget install BlackwellSystems.blackdot
 ```
+
+Or download a pre-built binary directly from the [releases page](https://github.com/blackwell-systems/blackdot/releases) and place it in your PATH.
 
 ---
 

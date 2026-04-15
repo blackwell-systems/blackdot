@@ -54,7 +54,7 @@ Core features cannot be disabled—they're essential for the blackdot system to 
 | `workspace_symlink` | `/workspace` symlink for portable Claude sessions | - |
 | `claude_integration` | Claude Code integration and hooks | `workspace_symlink` |
 | `vault` | Multi-vault secret management (Bitwarden/1Password/pass) | - |
-| `encryption` | Age encryption for non-vault secrets (template vars, local configs) | - |
+| `encryption` | Age encryption for sensitive files (templates, secrets) | - |
 | `templates` | Machine-specific configuration templates | - |
 | `hooks` | Lifecycle hooks for custom behavior at key events | - |
 | `git_hooks` | Git safety hooks (pre-commit, pre-push) | - |
@@ -139,7 +139,7 @@ blackdot features preset developer --persist
 | `minimal` | `shell`, `config_layers` |
 | `developer` | `shell`, `vault`, `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `ssh_tools`, `docker_tools`, `nvm_integration`, `sdkman_integration`, `git_hooks`, `modern_cli`, `config_layers` |
 | `claude` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `git_hooks`, `modern_cli`, `config_layers` |
-| `full` | All features |
+| `full` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `templates`, `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `ssh_tools`, `docker_tools`, `git_hooks`, `drift_check`, `backup_auto`, `health_metrics`, `config_layers`, `modern_cli`, `nvm_integration`, `sdkman_integration` |
 
 ### Check Feature Status
 
@@ -205,7 +205,7 @@ Use `blackdot features enable <name> --persist` to update this file automaticall
 
 When checking if a feature is enabled, the Go CLI checks in this order (highest priority first):
 
-1. **Runtime state** - `feature_enable`/`feature_disable` in current session
+1. **Runtime state** - `blackdot features enable`/`blackdot features disable` in current session
 2. **Environment variables** - `BLACKDOT_FEATURE_*` or `SKIP_*` vars
 3. **Config file** - `~/.config/blackdot/config.json`
 4. **Registry defaults** - Built-in defaults in `internal/feature/registry.go`

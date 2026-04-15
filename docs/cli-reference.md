@@ -42,7 +42,6 @@ The unified command for managing your blackdot configuration. All subcommands ar
 | `template` | `tmpl` | Machine-specific config templates |
 | `encrypt` | - | **Age Encryption** - encrypt sensitive files |
 | `lint` | - | Comprehensive linter (shell, Go, JSON, YAML, PowerShell) |
-| `migrate` | - | Migrate legacy config formats (INI→JSON) |
 | `packages` | `pkg` | Check/install Brewfile packages |
 | `metrics` | - | Visualize health check metrics over time |
 | `setup` | - | Interactive setup wizard |
@@ -170,7 +169,7 @@ blackdot feat               # Alias
 | `minimal` | `shell`, `config_layers` |
 | `developer` | `shell`, `vault`, `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `ssh_tools`, `docker_tools`, `nvm_integration`, `sdkman_integration`, `git_hooks`, `modern_cli`, `config_layers` |
 | `claude` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `git_hooks`, `modern_cli`, `config_layers` |
-| `full` | All features |
+| `full` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `templates`, `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `ssh_tools`, `docker_tools`, `git_hooks`, `drift_check`, `backup_auto`, `health_metrics`, `config_layers`, `modern_cli`, `nvm_integration`, `sdkman_integration` |
 
 **Examples:**
 
@@ -339,16 +338,24 @@ blackdot cfg                # Alias
 
 | Command | Description |
 |---------|-------------|
-| `layers` | Show effective config with source layer for each setting |
-| `get <key>` | Get a specific config value |
-| `set <key> <value>` | Set a config value in user layer |
+| `list` | Show configuration layer status |
+| `get <key>` | Get config value with layer resolution |
+| `show <key>` | Show value from all layers |
+| `set <layer> <key> <value>` | Set config value in specific layer |
+| `source <key>` | Get value with source information (JSON) |
+| `merged` | Show merged config from all layers |
+| `init` | Initialize config files |
+| `edit` | Open config in editor |
 | `help` | Show help |
 
 **Examples:**
 
 ```bash
-# Show all config with sources
-blackdot config layers
+# Show configuration layer status
+blackdot config list
+
+# Show a value from all layers
+blackdot config show vault.backend
 
 # Output:
 # vault.backend = bitwarden (user)
@@ -358,8 +365,8 @@ blackdot config layers
 # Get specific value
 blackdot config get vault.backend
 
-# Set value in user config
-blackdot config set vault.auto_backup true
+# Set value in user config layer
+blackdot config set user vault.auto_backup true
 ```
 
 **Layer Priority (highest to lowest):**
@@ -618,40 +625,6 @@ blackdot rollback --to backup-20240115-143022  # Rollback to specific backup
 ```
 
 **Note:** Requires `backup_auto` feature to be enabled. Use `blackdot features enable backup_auto` to enable it.
-
----
-
-### `blackdot migrate`
-
-**Configuration Migration** - Migrate legacy configuration formats to JSON.
-
-```bash
-blackdot migrate [OPTIONS]
-```
-
-**What it migrates:**
-- Config format: `config.ini` → `config.json`
-- Vault schema: Legacy format → current `secrets[]` array format
-- Preserves vault backend settings and setup state
-
-**Options:**
-
-| Option | Description |
-|--------|-------------|
-| `-y`, `--yes` | Skip confirmation prompt |
-| `-h`, `--help` | Show help |
-
-**Examples:**
-
-```bash
-blackdot migrate              # Interactive migration with confirmation
-blackdot migrate --yes        # Skip confirmation, migrate immediately
-```
-
-**Safety:**
-- Creates timestamped backups before migration
-- Idempotent - safe to run multiple times
-- Automatically detects if migration is needed
 
 ---
 
@@ -1786,12 +1759,13 @@ blackdot devcontainer init [OPTIONS]
 | Name | Image | Extensions |
 |------|-------|------------|
 | Go | `mcr.microsoft.com/devcontainers/go:1.23` | golang.go |
-| Rust | `mcr.microsoft.com/devcontainers/rust:latest` | rust-analyzer |
+| Rust | `mcr.microsoft.com/devcontainers/rust:latest` | rust-lang.rust-analyzer |
 | Python | `mcr.microsoft.com/devcontainers/python:3.13` | ms-python.python |
-| Node | `mcr.microsoft.com/devcontainers/typescript-node:22` | dbaeumer.vscode-eslint |
+| Node 22 (TypeScript) | `mcr.microsoft.com/devcontainers/typescript-node:22` | dbaeumer.vscode-eslint |
 | Java | `mcr.microsoft.com/devcontainers/java:21` | vscjava.vscode-java-pack |
 | Ubuntu | `mcr.microsoft.com/devcontainers/base:ubuntu` | - |
 | Alpine | `mcr.microsoft.com/devcontainers/base:alpine` | - |
+| Debian | `mcr.microsoft.com/devcontainers/base:debian` | - |
 
 **Available Presets:**
 
@@ -2128,11 +2102,28 @@ Uses `$EDITOR` (defaults to vim).
 
 ---
 
-## Installer Script
+## Installation
+
+### Package Managers
+
+```bash
+# Homebrew (macOS/Linux)
+brew install blackwell-systems/tap/blackdot
+
+# go install
+go install github.com/blackwell-systems/blackdot/v4/cmd/blackdot@latest
+
+# Scoop (Windows)
+scoop bucket add blackwell-systems https://github.com/blackwell-systems/scoop-bucket
+scoop install blackdot
+
+# Winget (Windows — PR pending)
+winget install BlackwellSystems.blackdot
+```
 
 ### `install.sh`
 
-One-line installer for blackdot.
+One-line curl installer for blackdot.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash

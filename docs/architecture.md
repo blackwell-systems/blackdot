@@ -91,7 +91,7 @@ blackdot features preset developer --persist
 | `minimal` | `shell`, `config_layers` |
 | `developer` | `shell`, `vault`, `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `ssh_tools`, `docker_tools`, `nvm_integration`, `sdkman_integration`, `git_hooks`, `modern_cli`, `config_layers` |
 | `claude` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `git_hooks`, `modern_cli`, `config_layers` |
-| `full` | All features |
+| `full` | `shell`, `workspace_symlink`, `claude_integration`, `vault`, `templates`, `aws_helpers`, `cdk_tools`, `rust_tools`, `go_tools`, `python_tools`, `ssh_tools`, `docker_tools`, `git_hooks`, `drift_check`, `backup_auto`, `health_metrics`, `config_layers`, `modern_cli`, `nvm_integration`, `sdkman_integration` |
 
 See [Feature Registry](features.md) for complete documentation.
 

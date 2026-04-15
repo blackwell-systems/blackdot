@@ -2,7 +2,7 @@
 
 [![Blackwell Systems™](https://raw.githubusercontent.com/blackwell-systems/blackwell-docs-theme/main/badge-trademark.svg)](https://github.com/blackwell-systems)
 [![Shell](https://img.shields.io/badge/Shell-Zsh-89e051?logo=zsh&logoColor=white)](https://www.zsh.org/)
-[![Go Reference](https://pkg.go.dev/badge/github.com/blackwell-systems/blackdot.svg)](https://pkg.go.dev/github.com/blackwell-systems/blackdot)
+[![Go Reference](https://pkg.go.dev/badge/github.com/blackwell-systems/blackdot/v4.svg)](https://pkg.go.dev/github.com/blackwell-systems/blackdot/v4)
 [![Go Version](https://img.shields.io/badge/Go-1.24%2B-00ADD8?logo=go&logoColor=white)](https://go.dev/)
 [![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-5391FE?logo=powershell&logoColor=white)](https://docs.microsoft.com/powershell/)
 [![Claude Code](https://img.shields.io/badge/Built_for-Claude_Code-8A2BE2?logo=anthropic)](https://claude.ai/claude-code)
@@ -44,12 +44,28 @@ For comparisons vs chezmoi, thoughtbot, holman, and other dotfiles managers, see
 
 ## One-Line Install
 
-**macOS / Linux / WSL:**
+**Homebrew (macOS/Linux):**
+```bash
+brew install blackwell-systems/tap/blackdot
+```
+
+**curl installer (macOS / Linux / WSL):**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install.sh | bash
 ```
 
-**Windows (PowerShell):**
+**go install:**
+```bash
+go install github.com/blackwell-systems/blackdot/v4/cmd/blackdot@latest
+```
+
+**Scoop (Windows):**
+```powershell
+scoop bucket add blackwell-systems https://github.com/blackwell-systems/scoop-bucket
+scoop install blackdot
+```
+
+**Windows PowerShell installer:**
 ```powershell
 irm https://raw.githubusercontent.com/blackwell-systems/blackdot/main/install-windows.ps1 | iex
 ```
@@ -287,7 +303,7 @@ blackdot/
 ├── bootstrap/           # Platform setup scripts
 ├── brew/                # Homebrew Brewfiles (minimal/enhanced/full)
 ├── docker/              # Docker configurations
-├── zsh/zsh.d/           # Modular shell config (16 modules)
+├── zsh/zsh.d/           # Modular shell config (17 modules)
 ├── powershell/          # Windows PowerShell module
 ├── vault/               # Multi-vault integration (Bitwarden, 1Password, pass)
 ├── templates/           # Machine-specific config templates

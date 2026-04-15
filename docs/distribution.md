@@ -11,12 +11,13 @@ This document tracks blackdot's distribution channels — what's live, what's pl
 | GitHub Releases (binaries) | ✅ Live | Download from [releases page](https://github.com/blackwell-systems/blackdot/releases) |
 | curl installer (Unix) | ✅ Live | `curl -fsSL .../install.sh \| bash` |
 | PowerShell installer (Windows) | ✅ Live | `irm .../install-windows.ps1 \| iex` |
-| Homebrew tap | ✅ Formula added | `brew install blackwell-systems/tap/blackdot` |
-| Docker (demo/bootstrap) | ✅ In repo | `docker/Dockerfile` — not published |
-| Devcontainer feature (ghcr.io) | ⚠️ Broken | Last publish failed Dec 2025 |
-| Winget | ❌ Missing | — |
-| Scoop | ❌ Missing | — |
-| AUR | ❌ Missing | — |
+| Homebrew tap | ✅ Live | `brew install blackwell-systems/tap/blackdot` |
+| Scoop | ✅ Live | `scoop bucket add blackwell-systems https://github.com/blackwell-systems/scoop-bucket && scoop install blackdot` |
+| go install | ✅ Live | `go install github.com/blackwell-systems/blackdot/v4/cmd/blackdot@latest` |
+| Devcontainer feature (ghcr.io) | ✅ Live | `ghcr.io/blackwell-systems/blackdot:1` |
+| Winget | ⏳ PR pending | `winget install BlackwellSystems.blackdot` (pending review) |
+| Docker (demo/bootstrap) | ✅ In repo | `docker/Dockerfile` — not published to registry |
+| AUR | ❌ Not started | — |
 
 ### What ships in a release
 
@@ -58,93 +59,54 @@ The formula SHA256 hashes must be updated manually right now. Add a step to `rel
 
 ---
 
-### 2. Winget — High Priority
+### 2. Winget — ⏳ PR Pending
 
-**Impact:** Windows users with winget (default in Windows 11). Already done for shelfctl — same process.
+**Impact:** Windows users with winget (default in Windows 11).
 
-**What to build:**
-- PR to `microsoft/winget-pkgs`
-- Manifest at `manifests/b/BlackwellSystems/blackdot/<version>/`
-
-**Install command (target):**
+**Install command:**
 ```powershell
 winget install BlackwellSystems.blackdot
 ```
 
-**Implementation:**
-1. Create the three manifest files:
-   - `BlackwellSystems.blackdot.yaml` (version manifest)
-   - `BlackwellSystems.blackdot.installer.yaml` (installer manifest — references the `.exe`)
-   - `BlackwellSystems.blackdot.locale.en-US.yaml` (locale manifest)
-2. Submit PR to `microsoft/winget-pkgs` (same as shelfctl PR #358438)
-3. Add step to `release.yml` to auto-submit winget update PRs on release
+PR submitted to `microsoft/winget-pkgs`. Pending review.
 
-**Auto-update option:** Use `wingetcreate` CLI in the release workflow to auto-generate and submit PRs.
+**TODO — Auto-update on release:**
+Add step to `release.yml` to auto-submit winget update PRs using `wingetcreate` CLI.
 
 ---
 
-### 3. Scoop — Medium Priority
+### 3. Scoop — ✅ Done
 
-**Impact:** Popular with Windows developers who prefer lightweight package managers. Simpler than winget for dev tools.
+**Bucket:** `blackwell-systems/scoop-bucket`
 
-**What to build:**
-- New repo: `blackwell-systems/scoop-bucket` (or add to existing if one exists)
-- Manifest: `blackdot.json`
-
-**Install command (target):**
+**Install command:**
 ```powershell
 scoop bucket add blackwell-systems https://github.com/blackwell-systems/scoop-bucket
 scoop install blackdot
 ```
 
-**Implementation:**
+Managed via goreleaser (`scoops:` block in `.goreleaser.yaml`). Auto-updated on release.
+
+---
+
+### 4. Devcontainer Feature — ✅ Live
+
+**Registry:** `ghcr.io/blackwell-systems/blackdot:1`
+
+The devcontainer feature is published to GitHub Container Registry and available for use in devcontainer.json configurations.
+
+**Usage:**
 ```json
 {
-  "version": "4.0.0",
-  "description": "Developer dotfiles and environment management CLI",
-  "homepage": "https://github.com/blackwell-systems/blackdot",
-  "license": "MIT",
-  "architecture": {
-    "64bit": {
-      "url": "https://github.com/blackwell-systems/blackdot/releases/download/v4.0.0/blackdot-windows-amd64.exe",
-      "hash": "<sha256>",
-      "bin": [["blackdot-windows-amd64.exe", "blackdot"]]
-    },
-    "arm64": {
-      "url": "https://github.com/blackwell-systems/blackdot/releases/download/v4.0.0/blackdot-windows-arm64.exe",
-      "hash": "<sha256>",
-      "bin": [["blackdot-windows-arm64.exe", "blackdot"]]
-    }
-  },
-  "checkver": {
-    "github": "https://github.com/blackwell-systems/blackdot"
-  },
-  "autoupdate": {
-    "architecture": {
-      "64bit": {
-        "url": "https://github.com/blackwell-systems/blackdot/releases/download/v$version/blackdot-windows-amd64.exe"
-      },
-      "arm64": {
-        "url": "https://github.com/blackwell-systems/blackdot/releases/download/v$version/blackdot-windows-arm64.exe"
-      }
+  "features": {
+    "ghcr.io/blackwell-systems/blackdot:1": {
+      "preset": "developer"
     }
   }
 }
 ```
 
----
-
-### 4. Fix Devcontainer Feature — Medium Priority
-
-**Impact:** `ghcr.io/blackwell-systems/blackdot:1` is used in devcontainer.json files. Currently stale (Dec 2025).
-
-**Problem:** The `devcontainer-feature.yml` workflow last ran December 12, 2025 and failed. The feature has not been republished since.
-
-**Fix:**
-1. Investigate the failure (`gh run view 20179626405`)
-2. Fix the workflow
-3. Add trigger on `release.yml` completion to republish the devcontainer feature
-4. Verify `ghcr.io/blackwell-systems/blackdot:1` resolves correctly after fix
+See [Devcontainer Support](devcontainers.md) for full documentation.
 
 ---
 
@@ -169,15 +131,10 @@ paru -S blackdot-bin
 
 ## Release Workflow Improvements
 
-The current `release.yml` builds binaries but doesn't update any package managers. Once package managers are set up, add these steps:
+goreleaser handles Homebrew tap and Scoop bucket updates automatically on release. The remaining TODO items:
 
 ```yaml
-# After binaries are uploaded to GitHub Release:
-- name: Update Homebrew formula
-  run: |
-    # Update SHA256 hashes in blackwell-systems/homebrew-tap
-    # Trigger via repository_dispatch or direct push
-
+# TODO: Add to release.yml after binaries are uploaded:
 - name: Submit Winget update
   run: |
     # Use wingetcreate to auto-generate and submit PR
@@ -185,10 +142,6 @@ The current `release.yml` builds binaries but doesn't update any package manager
       --version $VERSION \
       --urls "https://github.com/.../blackdot-windows-amd64.exe" \
       --submit
-
-- name: Update Scoop manifest
-  run: |
-    # Push updated blackdot.json to scoop bucket repo
 ```
 
 ---
@@ -222,9 +175,10 @@ The current `install.sh` works but could be extended:
 
 | Channel | Owner | Status | Notes |
 |---------|-------|--------|-------|
-| Homebrew tap | — | Not started | Create `blackwell-systems/homebrew-tap` |
-| Winget | — | Not started | Mirror shelfctl PR process |
-| Scoop | — | Not started | Create `blackwell-systems/scoop-bucket` |
-| Devcontainer (ghcr.io) | — | Broken | Fix workflow, re-publish |
-| AUR | — | Not started | Low priority |
-| Docker image | — | Not started | Publish from existing Dockerfiles |
+| Homebrew tap | — | ✅ Live | `blackwell-systems/homebrew-tap`, Formula/blackdot.rb |
+| Scoop | — | ✅ Live | `blackwell-systems/scoop-bucket`, blackdot.json |
+| go install | — | ✅ Live | `github.com/blackwell-systems/blackdot/v4/cmd/blackdot@latest` |
+| Devcontainer (ghcr.io) | — | ✅ Live | `ghcr.io/blackwell-systems/blackdot:1` |
+| Winget | — | ⏳ PR pending | PR to `microsoft/winget-pkgs` |
+| AUR | — | ❌ Not started | Low priority |
+| Docker image | — | ❌ Not started | Publish from existing Dockerfiles |

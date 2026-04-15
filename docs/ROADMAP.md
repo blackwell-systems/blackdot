@@ -296,34 +296,18 @@ This is intentional, not a limitation. The `/workspace` symlink is core to the p
 
 ---
 
-## Upcoming: Blackdot Branding
+## Blackdot Branding
 
-**Status:** Planning
+**Status:** ✅ Complete
 
-Rebrand from "dotfiles" to **blackdot** - a searchable, memorable name that represents:
-- **Black** from Blackwell Systems
-- **Dot** from the literal `.` in `.bashrc`, `.zshrc`, etc.
+Rebranded from "dotfiles" to **blackdot**.
 
-### Branding Changes
+### Completed Changes
 - **Project name:** blackdot
-- **Command:** `blackdot` (unchanged for compatibility)
-- **Binary:** `blackdot` (new) with `blackdot` alias
+- **Command:** `blackdot`
 - **Repo:** `blackwell-systems/blackdot`
-- **Domain:** blackdot.dev or blackdot.sh
-
-### Runtime Indicators
-Both shells now report their runtime:
-```bash
-blackdot version     # → "blackdot dev (Go CLI)" or "blackdot dev (ZSH shell)"
-blackdot help        # → Shows "Runtime: Go CLI (dev)" or "Runtime: ZSH shell"
-```
-
-### Migration Path
-1. Rename Go module to `github.com/blackwell-systems/blackdot`
-2. Update help strings to reference "blackdot"
-3. Add `blackdot` command as primary, `blackdot` as alias
-4. Update documentation and website
-5. Publish to Homebrew as `blackdot`
+- **Go module:** `github.com/blackwell-systems/blackdot/v4`
+- **Homebrew:** `brew install blackwell-systems/tap/blackdot`
 
 ---
 
