@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-04-15
+
+**Stable Release - Full Go CLI, Multi-Platform Distribution, Code Quality**
+
+This is the first stable v4 release. The codebase has been fully rewritten in Go,
+all distribution channels are automated, and the code quality bar has been raised
+through multiple inspection cycles.
+
+See rc1–rc6 release notes below for the full history of changes since v3.
+
 ## [4.0.0-rc6] - 2026-04-15
 
 **Release Candidate 6 - Distribution, Code Quality & Platform Fixes**
