@@ -41,6 +41,7 @@ jobs:
     name: Publish to winget
     runs-on: ubuntu-latest
     needs: release
+    continue-on-error: true
     steps:
     - uses: vedantmgoyal9/winget-releaser@v2
       with:
