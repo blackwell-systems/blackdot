@@ -343,10 +343,6 @@ func runBackupRestoreWithDryRun(cmd *cobra.Command, args []string, dryRun bool) 
 	return runBackupRestoreImpl(cmd, args, dryRun)
 }
 
-func runBackupRestore(cmd *cobra.Command, args []string) error {
-	return runBackupRestoreImpl(cmd, args, false)
-}
-
 func runBackupRestoreImpl(cmd *cobra.Command, args []string, dryRun bool) error {
 	cfg := getBackupConfig()
 	home, _ := os.UserHomeDir()
