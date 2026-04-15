@@ -1,6 +1,10 @@
 # Bitwarden session cache (contains sensitive session token)
 vault/.bw-session
 
+# SAW wave execution state (transient per-agent files; active-impl and gate-cache.json are tracked)
+.saw-state/wave*/
+.claude/worktrees/
+
 # OS generated files
 .DS_Store
 .DS_Store?
