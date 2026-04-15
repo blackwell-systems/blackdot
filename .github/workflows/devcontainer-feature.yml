@@ -4,12 +4,10 @@ on:
   push:
     tags:
       - 'v*'
-    paths:
-      - 'devcontainer-feature/**'
   workflow_dispatch:
     inputs:
       version:
-        description: 'Feature version (e.g., 1.0.0)'
+        description: 'Feature version (e.g., 1.0.0). Defaults to tag version.'
         required: false
         type: string
 
@@ -45,7 +43,7 @@ jobs:
           elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             VERSION="${GITHUB_REF#refs/tags/v}"
           else
-            VERSION="0.0.0-dev"
+            VERSION="0.0.0-dev.${GITHUB_SHA::7}"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Feature version: $VERSION"
@@ -53,12 +51,9 @@ jobs:
       - name: Update feature version
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          cd devcontainer-feature
-
-          # Update version in devcontainer-feature.json
+          cd devcontainer-feature/src/blackdot
           jq --arg v "$VERSION" '.version = $v' devcontainer-feature.json > tmp.json
           mv tmp.json devcontainer-feature.json
-
           echo "Updated devcontainer-feature.json:"
           cat devcontainer-feature.json
 
@@ -74,11 +69,10 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           NAMESPACE="${{ github.repository_owner }}"
 
-          # Publish feature using devcontainer CLI
           devcontainer features publish \
             --registry ${{ env.REGISTRY }} \
             --namespace "${NAMESPACE}" \
-            devcontainer-feature
+            devcontainer-feature/src/blackdot
 
           echo "## Feature Published" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -126,7 +120,6 @@ jobs:
             }
           }
           EOF
-          cat test-project/.devcontainer/devcontainer.json
 
       - name: Build test container
         run: |
