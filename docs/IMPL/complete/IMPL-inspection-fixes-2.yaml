@@ -1,3 +1,4 @@
+completion_date: "2026-04-15"
 title: Inspection Fixes 2 — 2026-04-15 Quality Report
 feature_slug: inspection-fixes-2
 verdict: SUITABLE
@@ -951,6 +952,7 @@ waves:
             - internal/cli/backup.go
             - internal/cli/rollback.go
             - internal/cli/root.go
+      base_commit: cb2098418f9f7d37fd5a911100fb5456a8a7cbf8
 quality_gates:
     level: standard
     gates:
@@ -963,6 +965,65 @@ quality_gates:
         - type: test
           command: go test ./...
           required: true
+completion_reports:
+    A:
+        status: complete
+        branch: saw/inspection-fixes-2/wave1-agent-A
+        commit: 3bc0d6c
+        files_changed:
+            - internal/cli/style.go
+        verification: PASS
+        notes: Deleted dead checkTerminal() function and removed unused os import. Build, vet, and all tests pass.
+    B:
+        status: complete
+        branch: saw/inspection-fixes-2/wave1-agent-B
+        commit: e74cd5e
+        files_changed:
+            - internal/cli/sync.go
+        verification: PASS
+        notes: Both os.WriteFile calls in sync.go are now guarded with Warn() on error. Build, vet, and tests all pass.
+    C:
+        status: complete
+        branch: saw/inspection-fixes-2/wave1-agent-C
+        commit: 9d934e8
+        files_changed:
+            - internal/cli/config.go
+        verification: PASS
+        notes: 'M-2: Removed package-level vars and init() side effects; replaced with lazy configPaths() helper. M-4: Replaced configGet() and configShow() bodies to delegate to config.DefaultManager().GetLayered(). Updated all 8 reference sites (configSet, configSource, configList, configMerged, configInitMachine, configEdit) to call configPaths() locally. All helper functions (getFromJSONFile, findProjectConfig, setInJSONFile, loadJSONInto) preserved. Build, vet, and tests all pass.'
+    D:
+        status: complete
+        branch: saw/inspection-fixes-2/wave1-agent-D
+        commit: f153de3
+        files_changed:
+            - internal/cli/output.go
+        verification: PASS
+        notes: Deleted 19 Clr* vars, BoldGreen, BoldRed, Section(), Separator(), NoColor(), ForceColor(), IsColorEnabled(). Legacy vars now use direct color.New() calls. Build, vet, and all tests pass.
+    E:
+        status: complete
+        branch: saw/inspection-fixes-2/wave1-agent-E
+        commit: f30db7f
+        files_changed:
+            - internal/config/config.go
+            - internal/config/config_test.go
+        tests_added:
+            - TestLayerConstants
+            - TestConfigFileConstants
+            - TestLayerResultFields
+            - TestGetLayeredEnv
+            - TestGetLayeredUser
+            - TestGetLayeredDefault
+        verification: PASS
+        notes: 'M-3 fixed: strconv.Itoa replaces ASCII arithmetic. L-3 fixed: layer/layerEnv/etc now unexported (zero external callers confirmed). M-5 fixed: engine.go deleted (274 lines removed). All tests pass including full go test ./...'
+    F:
+        status: complete
+        branch: saw/inspection-fixes-2/wave1-agent-F
+        commit: 819b2c5
+        files_changed:
+            - internal/cli/rollback.go
+            - internal/cli/backup.go
+            - internal/cli/root.go
+        verification: PASS
+        notes: 'L-4: Fixed nil cmd pass-through in rollback.go by calling runBackupRestoreImpl directly. runBackupRestore wrapper deleted (zero callers after fix). L-1: Added NOTE comment to BlackdotDir() documenting the Cobra OnInitialize invariant. Build, vet, and tests all pass.'
 pre_mortem:
     overall_risk: medium
     rows:
@@ -1064,5 +1125,4 @@ critic_report:
     summary: 'All 6 agents verified against codebase. All owned files exist with action:modify. Line numbers and exact code snippets in briefs match the actual source. Symbol references (checkTerminal, Warn, GetLayered, UserConfigPath, MachineConfigPath, ProjectConfigPath, runBackupRestore, BlackdotDir) all confirmed accurate. Agent E''s config_test.go is correctly listed in file_ownership and the brief correctly instructs updating all exported Layer/file constant references. One advisory: Agent D''s brief describes ''3 dead combined-style vars'' but names only 2 (BoldGreen, BoldRed); this is a cosmetic count error in prose, not a code accuracy issue. No i1 disjoint ownership conflicts — each file appears in only one agent''s ownership for wave 1.'
     reviewed_at: "2026-04-15T04:40:26Z"
     issue_count: 1
-state: "REVIEWED"
-original_branch: main
+state: COMPLETE
